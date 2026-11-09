@@ -62,6 +62,15 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     changed();
   }
 
+  function removeSelected() {
+    if (selectedId === null) return;
+    editor.removeNode(selectedId);
+    selectedId = null;
+    connectFrom = null;
+    selectedEdge = null;
+    changed();
+  }
+
   function onNodeActivate(id) {
     if (connectFrom !== null && connectFrom !== id) return tryConnect(connectFrom, id);
     if (connectFrom === id) {
@@ -301,6 +310,11 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         draw();
       });
       const box = h(doc, "div", { class: "dnode", "data-node-id": node.id, "data-selected": String(selectedId === node.id), "data-connecting": String(connectFrom === node.id) }, body, port);
+      if (selectedId === node.id) {
+        const cross = h(doc, "button", { type: "button", class: "dnode-remove", "data-focus-key": `delete-${node.id}`, "aria-label": t("editor.removeNamed", { name: nodeLabel(node) }), title: t("editor.remove") }, "×");
+        cross.addEventListener("click", () => removeSelected());
+        box.append(cross);
+      }
       box.style.left = `${pos.get(node.id).x}px`;
       box.style.top = `${pos.get(node.id).y}px`;
       box.style.width = `${BOX_W}px`;
@@ -442,6 +456,12 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
   }
 
   const onKeydown = (event) => {
+    const inField = ["INPUT", "TEXTAREA", "SELECT"].includes(event.target?.tagName);
+    if ((event.key === "Delete" || event.key === "Backspace") && !inField && selectedId !== null) {
+      event.preventDefault();
+      removeSelected();
+      return;
+    }
     if (event.key === "Escape" && connectFrom !== null) {
       connectFrom = null;
       draw();
