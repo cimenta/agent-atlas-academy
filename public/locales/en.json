@@ -308,5 +308,14 @@
   "player.tabOutput": "Agent output",
   "player.noOutput": "No agent has answered yet.",
   "player.allAgents": "All agents, click an agent to filter",
-  "player.stepsOf": "Steps of {agent}, click the agent again for all"
+  "player.stepsOf": "Steps of {agent}, click the agent again for all",
+  "player.tabMessages": "Messages",
+  "player.messagesOf": "What {agent} sees and says",
+  "player.noMessages": "No messages yet.",
+  "msg.system": "System",
+  "msg.user": "Task",
+  "msg.handoff": "Handoff",
+  "msg.tool": "Tool call",
+  "msg.result": "Tool result",
+  "msg.assistant": "Answer"
 }

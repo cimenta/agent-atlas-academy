@@ -308,5 +308,14 @@
   "player.tabOutput": "Výstup agenta",
   "player.noOutput": "Zatím neodpověděl žádný agent.",
   "player.allAgents": "Všichni agenti, kliknutím na agenta filtrujete",
-  "player.stepsOf": "Kroky agenta {agent}, dalším kliknutím zobrazíte všechny"
+  "player.stepsOf": "Kroky agenta {agent}, dalším kliknutím zobrazíte všechny",
+  "player.tabMessages": "Zprávy",
+  "player.messagesOf": "Co agent {agent} vidí a říká",
+  "player.noMessages": "Zatím žádné zprávy.",
+  "msg.system": "Systém",
+  "msg.user": "Zadání",
+  "msg.handoff": "Předání",
+  "msg.tool": "Volání nástroje",
+  "msg.result": "Výsledek nástroje",
+  "msg.assistant": "Odpověď"
 }

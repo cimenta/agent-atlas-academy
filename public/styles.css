@@ -349,3 +349,8 @@ button.node[aria-pressed="true"] { border: 2px solid var(--accent-line); padding
 .output-card .message { margin: 6px 0 0; padding: 0; background: none; }
 .replay .explanation:not(:empty) { margin: 8px 0; }
 @media (max-width: 719px) { .message-panel.open { background: var(--surface); } }
+.tg[data-role="system"] { background: var(--surface); color: var(--muted); }
+.tg[data-role="user"], .tg[data-role="result"] { background: var(--done-bg); color: var(--done); }
+.tg[data-role="assistant"], .tg[data-role="tool"] { background: var(--accent-bg); color: var(--accent); }
+.tg[data-role="handoff"] { background: var(--working-bg); color: var(--working); }
+.output-card .tg { margin-bottom: 2px; display: inline-block; }

@@ -51,7 +51,8 @@ export function mountLiveReplay(container, { title, recordedWith, t, doc = docum
 function mountView(container, { events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop }) {
   const player = createPlayer({ events, clock, timeScale, live });
   let selection = null; // { index, cursor }
-  let tab = "steps"; // "steps" | "output"
+  let tab = "steps"; // "steps" | "messages" | "output"
+  let reached = 0; // furthest cursor seen: steps already played stay listed when the user clicks back
   let filterAgent = null;
 
   const graph = h(doc, "div", { class: "graph", role: "list", "aria-label": t("player.agents") });
@@ -77,9 +78,10 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
   const explanation = h(doc, "div", { class: "explanation" });
   const timeline = h(doc, "ol", { class: "timeline" });
   const outputList = h(doc, "div", { class: "output-list" });
+  const messageList = h(doc, "div", { class: "output-list" });
   const stepsHead = h(doc, "p", { class: "lb" });
-  const tabButtons = ["steps", "output"].map((name) => {
-    const b = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-tab": name }, t(name === "steps" ? "player.tabSteps" : "player.tabOutput"));
+  const tabButtons = ["steps", "messages", "output"].map((name) => {
+    const b = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-tab": name }, t({ steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput" }[name]));
     b.addEventListener("click", () => {
       tab = name;
       render();
@@ -104,7 +106,7 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
     status,
     explanation,
     tabs,
-    h(doc, "div", { class: "replay-columns" }, h(doc, "div", { class: "steps-col" }, stepsHead, timeline, outputList), panel),
+    h(doc, "div", { class: "replay-columns" }, h(doc, "div", { class: "steps-col" }, stepsHead, timeline, messageList, outputList), panel),
   );
   container.replaceChildren(root);
 
@@ -141,7 +143,7 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
 
   function renderOutput(state) {
     const blocks = [];
-    events.slice(0, player.cursor).forEach((event) => {
+    events.slice(0, reached).forEach((event) => {
       if (event.type !== "agent_output" || typeof event.text !== "string") return;
       if (filterAgent && event.agent !== filterAgent) return;
       blocks.push(h(doc, "div", { class: "output-card" }, h(doc, "strong", {}, event.agent ?? ""), h(doc, "pre", { class: "message" }, event.text)));
@@ -152,8 +154,8 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
 
   function renderTimeline() {
     const focusedIndex = timeline.contains(doc.activeElement) ? doc.activeElement.getAttribute("data-index") : null;
-    const model = buildTimelineModel(events, player.cursor, explanations);
-    const state = deriveState(events, player.cursor);
+    const model = buildTimelineModel(events, reached, explanations);
+    const state = deriveState(events, reached);
     const current = effectiveIndex();
     const shown = model.items.filter((item) => !filterAgent || item.agent === filterAgent);
     stepsHead.textContent = filterAgent ? t("player.stepsOf", { agent: filterAgent }) : t("player.allAgents");
@@ -193,7 +195,29 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
     messageBody.textContent = stepMessage(events[index]) || t("player.selectStep");
   }
 
+  // The conversation one agent sees: its role, what was handed to it, its tool calls and results, its answer.
+  function renderMessages() {
+    const seen = events.slice(0, reached);
+    const agent = filterAgent ?? [...seen].reverse().find((e) => typeof e.agent === "string")?.agent ?? null;
+    const card = (role, text) =>
+      h(doc, "div", { class: "output-card" }, h(doc, "span", { class: "tg", "data-role": role }, t(`msg.${role}`)), h(doc, "pre", { class: "message" }, text));
+    const cards = [];
+    for (const e of seen) {
+      if (e.type === "run_start" && seen.find((x) => x.agent)?.agent === agent && typeof e.task === "string") cards.push(card("user", e.task));
+      else if (e.type === "agent_start" && e.agent === agent && typeof e.role === "string") cards.push(card("system", e.role));
+      else if (e.type === "handoff" && e.to === agent) cards.push(card("handoff", typeof e.note === "string" ? e.note : `${e.from} → ${e.to}`));
+      else if (e.type === "tool_call" && e.agent === agent) cards.push(card("tool", stepMessage(e)));
+      else if (e.type === "tool_result" && e.agent === agent) cards.push(card("result", stepMessage(e)));
+      else if (e.type === "agent_output" && e.agent === agent && typeof e.text === "string") cards.push(card("assistant", e.text));
+    }
+    messageList.replaceChildren(
+      h(doc, "p", { class: "lb" }, agent ? t("player.messagesOf", { agent }) : ""),
+      ...(cards.length ? cards : [h(doc, "p", { class: "hint" }, t("player.noMessages"))]),
+    );
+  }
+
   function render() {
+    reached = Math.max(reached, player.cursor);
     const state = deriveState(events, player.cursor);
     renderGraph(state);
     playButton.textContent = player.playing ? t("player.pause") : t("player.play");
@@ -220,13 +244,18 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
     for (const b of tabButtons) b.setAttribute("aria-selected", String(b.getAttribute("data-tab") === tab));
     timeline.hidden = tab !== "steps";
     outputList.hidden = tab !== "output";
+    messageList.hidden = tab !== "messages";
     renderTimeline();
+    renderMessages();
     renderOutput(state);
     renderPanel(state);
   }
 
   playButton.addEventListener("click", () => (player.playing ? player.pause() : player.play()));
-  restartButton.addEventListener("click", () => player.restart());
+  restartButton.addEventListener("click", () => {
+    reached = 0;
+    player.restart();
+  });
   stopButton.addEventListener("click", () => onStop?.());
   previousButton.addEventListener("click", () => player.prev());
   nextButton.addEventListener("click", () => player.next());
