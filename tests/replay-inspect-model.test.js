@@ -64,11 +64,42 @@ test("steps keep the index of the event they came from", () => {
   assert.deepEqual(steps.map((s) => s.eventIndex), [6, 7, 8]);
 });
 
+const old = events.filter((e) => e.type !== "round").map((e) => (e.type === "agent_start" ? { ...e, tools: undefined, model: undefined, system: undefined } : e));
+
 test("a run without round events still yields tool and handoff steps", () => {
-  const old = events.filter((e) => e.type !== "round");
   const s = deriveInspector(old);
-  assert.equal(s.agents.planner.rounds.length, 0);
   assert.equal(s.agents.researcher.steps.filter((x) => x.kind === "tool").length, 2);
+  assert.equal(s.agents.planner.steps.at(-1).kind, "handoff");
+});
+
+test("a run without round events gets one reconstructed model step and round per started agent", () => {
+  const s = deriveInspector(old);
+  for (const id of ["planner", "researcher"]) {
+    const a = s.agents[id];
+    assert.equal(a.steps[0].kind, "model");
+    assert.equal(a.rounds.length, 1);
+    assert.equal(a.rounds[0].reconstructed, true);
+    assert.equal(a.rounds[0].stop, "end_turn");
+  }
+  assert.equal(s.agents.planner.steps[0].ms, 2);
+});
+
+test("a reconstructed round takes its input from the task or the handoff and carries the tool calls and the answer", () => {
+  const s = deriveInspector(old);
+  assert.deepEqual(s.agents.planner.rounds[0].messages, [{ role: "user", content: "Why is the sky blue?" }]);
+  assert.deepEqual(s.agents.researcher.rounds[0].messages, [{ role: "user", content: "a plan" }]);
+  const types = s.agents.researcher.rounds[0].response.map((b) => b.type);
+  assert.deepEqual(types, ["server_tool_use", "web_search_tool_result", "server_tool_use", "web_search_tool_result", "text"]);
+});
+
+test("tool names come from the tool calls when the run did not record them", () => {
+  assert.deepEqual(deriveInspector(old).agents.researcher.tools, ["web_search"]);
+});
+
+test("an agent that has not started is left alone", () => {
+  const s = deriveInspector(old, 3);
+  assert.deepEqual(s.agents.researcher.steps, []);
+  assert.deepEqual(s.agents.researcher.rounds, []);
 });
 
 test("tokens add up and an error marks the working agent", () => {

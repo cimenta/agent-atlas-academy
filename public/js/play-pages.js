@@ -1,7 +1,7 @@
 // The Play section: sub-tabs Re-play, Create and Result.
 import { h } from "./dom.js";
 import { mountReplay } from "./replay/view.js";
-import { getJson, loadExplanations, renderLanding, renderNotFound, setTitle } from "./pages.js";
+import { getJson, landingParts, loadExplanations, renderNotFound, setTitle } from "./pages.js";
 import { buildReplayList, buildResultModel } from "./play-model.js";
 import { renderCreate } from "./create/create-page.js";
 
@@ -84,8 +84,8 @@ export async function renderReplayTab(ctx, requestedId) {
   setTitle(ctx, "");
   const host = h(doc, "div", { class: "replay-host" });
   const lists = h(doc, "div", { class: "run-lists" });
-  const landing = h(doc, "div", { class: "landing" });
-  ctx.main.replaceChildren(host, lists, landing);
+  const parts = landingParts(ctx);
+  ctx.main.replaceChildren(...parts.head, host, lists, parts.body);
 
   let gallery = [];
   try {
@@ -157,8 +157,6 @@ export async function renderReplayTab(ctx, requestedId) {
     );
   };
   await draw();
-  if (ctx.isStale()) return;
-  await renderLanding({ ...ctx, main: landing });
 }
 
 async function loadAnyRun(ctx, id) {

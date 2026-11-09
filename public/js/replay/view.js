@@ -210,9 +210,7 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
 
   function renderMessages(agent) {
     const system = h(doc, "div", { class: "mc sysbox" }, h(doc, "span", { class: "lb" }, t("insp.sysPrompt")), h(doc, "div", { class: "pre" }, agent.system || "—"));
-    if (agent.rounds.length === 0) {
-      return h(doc, "div", {}, agent.system ? system : "", h(doc, "p", { class: "doc" }, agent.steps.length ? t("insp.noRounds") : t("insp.noCalls")));
-    }
+    if (agent.rounds.length === 0) return h(doc, "div", {}, agent.system ? system : "", h(doc, "p", { class: "doc" }, t("insp.noCalls")));
     const index = ui.round === null ? agent.rounds.length - 1 : Math.min(ui.round, agent.rounds.length - 1);
     const round = agent.rounds[index];
     const firstTag = agent.from ? t("insp.handoffFrom", { name: state.agents[agent.from]?.label ?? agent.from }) : t("insp.userInput");
@@ -231,7 +229,8 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
       doc,
       "div",
       {},
-      system,
+      agent.system ? system : "",
+      round.reconstructed ? h(doc, "p", { class: "hint" }, t("insp.reconstructed")) : "",
       h(doc, "div", { class: "rounds" }, ...buttons, h(doc, "span", { class: "lb" }, `${t("insp.roundNote")}${round.ms != null ? ` · ${fmt(round.ms)}` : ""}`)),
       h(
         doc,

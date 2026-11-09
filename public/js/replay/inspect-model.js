@@ -46,7 +46,8 @@ export function deriveInspector(events, cursor = events.length) {
       case "agent_start":
         if (!agent) break;
         agent.status = "working";
-        agent.startT = event.t ?? null;
+        agent.startT = event.t ?? 0;
+        agent.firstIndex = index;
         if (typeof event.role === "string" && event.role) agent.label = event.role;
         if (typeof event.model === "string") agent.model = event.model;
         if (Array.isArray(event.tools)) agent.tools = event.tools;
@@ -112,7 +113,10 @@ export function deriveInspector(events, cursor = events.length) {
             eventIndex: index,
           });
         }
-        if (agents[event.to]) agents[event.to].from = event.from;
+        if (agents[event.to]) {
+          agents[event.to].from = event.from;
+          agents[event.to].inputText = typeof event.note === "string" && event.note ? event.note : (from?.output ?? "");
+        }
         break;
       }
       case "title":
@@ -141,5 +145,42 @@ export function deriveInspector(events, cursor = events.length) {
         break;
     }
   });
+  for (const agent of Object.values(state.agents)) reconstruct(agent, state.task);
   return state;
+}
+
+// Runs recorded before model rounds were kept have no rounds. Rebuild one from what is there:
+// the input the agent got, its tool calls and its answer, so every started agent can be inspected.
+function reconstruct(agent, task) {
+  if (agent.startT === null) return;
+  if (agent.tools.length === 0) agent.tools = [...new Set(agent.steps.filter((s) => s.kind === "tool").map((s) => s.tool))];
+  if (agent.rounds.length > 0) return;
+  const input = agent.from ? (agent.inputText ?? "") : task;
+  const used = [];
+  for (const step of agent.steps.filter((x) => x.kind === "tool")) {
+    used.push({ type: "server_tool_use", name: step.tool, input: step.input });
+    if (step.output !== null) used.push({ type: "web_search_tool_result", content: step.output });
+  }
+  const response = [...used, ...(agent.output ? [{ type: "text", text: agent.output }] : [])];
+  agent.rounds.push({
+    n: 1,
+    messages: input ? [{ role: "user", content: input }] : [],
+    before: 0,
+    response,
+    stop: agent.output === null ? undefined : "end_turn",
+    usage: agent.usage ? { input: agent.usage.input, output: agent.usage.output } : null,
+    ms: agent.ms,
+    reconstructed: true,
+  });
+  const summary = replySummary(response.filter((b) => b.type === "text"), agent.output === null ? undefined : "end_turn");
+  agent.steps.unshift({
+    kind: "model",
+    tool: "model",
+    title: { key: "insp.modelCall", params: { n: 1 } },
+    ms: agent.ms,
+    input: { key: "insp.msgsCount", params: { n: input ? 1 : 0 } },
+    output: agent.output === null ? null : summary.text,
+    outCut: summary.cut,
+    eventIndex: agent.firstIndex ?? 0,
+  });
 }

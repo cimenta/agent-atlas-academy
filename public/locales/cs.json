@@ -299,7 +299,6 @@
   "insp.waiting": "Čekám na prvního agenta…",
   "insp.sysPrompt": "systémový prompt",
   "insp.noCalls": "Zatím žádné volání API.",
-  "insp.noRounds": "Tento běh byl nahrán dřív, než se ukládaly přesné zprávy, proto jsou vidět jen kroky.",
   "insp.round": "Kolo",
   "insp.roundNote": "jedno kolo = jedno volání API",
   "insp.sent": "Odesláno: pole messages",
@@ -320,5 +319,6 @@
   "insp.doc.model": "Jedno volání Messages API: posílá se systémový prompt, celá historie zpráv a definice nástrojů. Model buď odpoví, nebo požádá o nástroj (stop_reason tool_use).",
   "insp.doc.web_search": "Hledání na webu provádí Anthropic uvnitř volání API. Model dostane titulky, adresy a úryvky. Počet hledání je omezený.",
   "insp.doc.handoff": "Výstup jednoho agenta je přesně to, co dostane další agent jako první zprávu.",
-  "kind.tool": "Nástroj"
+  "kind.tool": "Nástroj",
+  "insp.reconstructed": "Zrekonstruováno ze zaznamenaných kroků: tento běh byl uložen dřív, než se ukládaly přesné zprávy."
 }

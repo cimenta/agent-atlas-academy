@@ -41,17 +41,21 @@ export function renderNotFound(ctx) {
   );
 }
 
+// The landing texts without the player: the heading and intro, and the longer body.
+export function landingParts(ctx) {
+  const { doc, t } = ctx;
+  return {
+    head: [h(doc, "h1", {}, t("landing.title")), h(doc, "p", {}, t("landing.intro"))],
+    body: h(doc, "div", { class: "landing-body" }, markdown(ctx, t("landing.body"))),
+  };
+}
+
 export async function renderLanding(ctx) {
   const { doc, t } = ctx;
   setTitle(ctx, "");
   const host = h(doc, "div", { class: "replay-host" });
-  show(
-    ctx,
-    h(doc, "h1", {}, t("landing.title")),
-    h(doc, "p", {}, t("landing.intro")),
-    host,
-    h(doc, "div", { class: "landing-body" }, markdown(ctx, t("landing.body"))),
-  );
+  const parts = landingParts(ctx);
+  show(ctx, ...parts.head, host, parts.body);
   try {
     const index = await getJson(ctx, "/runs/index.json");
     const first = index.runs[0];

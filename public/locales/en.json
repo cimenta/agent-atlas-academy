@@ -299,7 +299,6 @@
   "insp.waiting": "Waiting for the first agent…",
   "insp.sysPrompt": "system prompt",
   "insp.noCalls": "No API calls yet.",
-  "insp.noRounds": "This run was recorded before the exact messages were kept, so only the steps are shown.",
   "insp.round": "Round",
   "insp.roundNote": "one round = one API call",
   "insp.sent": "Sent: messages array",
@@ -320,5 +319,6 @@
   "insp.doc.model": "One Messages API call: the system prompt, the whole message history and the tool definitions are sent. The model either answers or asks for a tool (stop_reason tool_use).",
   "insp.doc.web_search": "Web search is run by Anthropic inside the API call. The model receives titles, URLs and snippets. The number of searches is capped.",
   "insp.doc.handoff": "The output of one agent is exactly what the next agent receives as its first message.",
-  "kind.tool": "Tool"
+  "kind.tool": "Tool",
+  "insp.reconstructed": "Reconstructed from the recorded steps: this run was saved before the exact messages were kept."
 }
