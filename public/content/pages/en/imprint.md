@@ -4,18 +4,18 @@ title: Imprint
 
 ## Provider of this website
 
-[[OWNER: full name or company name]]
+Radek Šimčík
 
-[[OWNER: postal address]]
+A postal address is available on request by e-mail.
 
 ## Contact
 
-E-mail: [[OWNER: contact e-mail]]
+E-mail: agent-atlas-academy@radeksimcik.cz
 
 ## Registration
 
-[[OWNER: company registration or tax number, if any, or "not applicable"]]
+Company ID (IČO): 06018025
 
 ## Content responsibility
 
-[[OWNER: person responsible for content]]
+Radek Šimčík

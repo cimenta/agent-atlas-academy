@@ -22,8 +22,8 @@ Používejte web v souladu se zákonem a nepokoušejte se jej narušovat.
 
 ## Rozhodné právo
 
-[[OWNER: formulace rozhodného práva a místa soudní příslušnosti]]
+Tyto podmínky se řídí právem České republiky. Spory řeší příslušné soudy České republiky.
 
 ## Kontakt
 
-[[OWNER: kontaktní e-mail]]
+agent-atlas-academy@radeksimcik.cz

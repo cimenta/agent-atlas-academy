@@ -22,8 +22,8 @@ Use the site lawfully and do not try to disrupt it.
 
 ## Governing law
 
-[[OWNER: governing law and place of jurisdiction wording]]
+These terms are governed by the law of the Czech Republic. Disputes are resolved by the competent courts of the Czech Republic.
 
 ## Contact
 
-[[OWNER: contact e-mail]]
+agent-atlas-academy@radeksimcik.cz

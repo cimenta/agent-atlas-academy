@@ -8,7 +8,7 @@ Agent Atlas je vzdělávací web. Používá **žádné cookies**, žádné sled
 
 ## Kdo za web odpovídá
 
-[[OWNER: celé jméno nebo název správce]], [[OWNER: poštovní adresa]]. Kontakt pro žádosti o ochranu osobních údajů: [[OWNER: e-mail pro ochranu osobních údajů]].
+Radek Šimčík (IČO 06018025). Kontakt pro žádosti o ochranu osobních údajů: agent-atlas-academy@radeksimcik.cz.
 
 ## Co se ukládá ve vašem prohlížeči
 
@@ -16,15 +16,15 @@ Web ukládá jedině jazyk, který si zvolíte, a to v místním úložišti va�
 
 ## Logy hostingu
 
-Web hostuje [[OWNER: údaje o poskytovateli hostingu]] (Vercel, společnost ze Spojených států). Jako každý hostingový poskytovatel uchovává serverové logy včetně IP adres z důvodu bezpečnosti a provozu. Nemáme přístup k žádnému vašemu profilu a tyto logy s ničím nespojujeme. Doba uložení: [[OWNER: doba uchování logů hostingu]]. Právní základ: [[OWNER: formulace právního základu, například oprávněný zájem podle čl. 6 odst. 1 písm. f) GDPR]].
+Web hostuje Vercel Inc., společnost ze Spojených států. Jako každý hostingový poskytovatel uchovává serverové logy včetně IP adres z důvodu bezpečnosti a provozu. Nemáme přístup k žádnému vašemu profilu a tyto logy s ničím nespojujeme. Doba uložení: podle vlastních zásad poskytovatele hostingu. Právní základ: oprávněný zájem podle čl. 6 odst. 1 písm. f) GDPR, tedy zajištění bezpečnosti a provozu webu.
 
 ## Vaše práva
 
-Podle GDPR máte právo na přístup k osobním údajům, jejich opravu nebo výmaz, na omezení zpracování nebo vznesení námitky a na podání stížnosti u dozorového úřadu: [[OWNER: odkaz na dozorový úřad]]. Protože sami žádné osobní údaje neuchováváme, týká se většina žádostí logů hostingu; obraťte se na výše uvedený kontakt.
+Podle GDPR máte právo na přístup k osobním údajům, jejich opravu nebo výmaz, na omezení zpracování nebo vznesení námitky a na podání stížnosti u dozorového úřadu: Úřad pro ochranu osobních údajů (https://www.uoou.gov.cz). Protože sami žádné osobní údaje neuchováváme, týká se většina žádostí logů hostingu; obraťte se na výše uvedený kontakt.
 
 ## Otevřený zdrojový kód
 
-Kód je otevřený ve veřejném repozitáři: [[OWNER: adresa veřejného repozitáře]]. Co web dělá, si můžete ověřit sami.
+Kód je otevřený ve veřejném repozitáři: https://github.com/cimenta/agent-atlas-academy. Co web dělá, si můžete ověřit sami.
 
 ## Změny
 

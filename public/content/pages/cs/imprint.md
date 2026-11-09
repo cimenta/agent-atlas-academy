@@ -4,18 +4,18 @@ title: Provozovatel
 
 ## Provozovatel tohoto webu
 
-[[OWNER: celé jméno nebo název společnosti]]
+Radek Šimčík
 
-[[OWNER: poštovní adresa]]
+Poštovní adresa je na požádání k dispozici e-mailem.
 
 ## Kontakt
 
-E-mail: [[OWNER: kontaktní e-mail]]
+E-mail: agent-atlas-academy@radeksimcik.cz
 
 ## Registrace
 
-[[OWNER: IČO nebo daňové číslo, pokud existuje, jinak "neuvádí se"]]
+IČO: 06018025
 
 ## Odpovědnost za obsah
 
-[[OWNER: osoba odpovědná za obsah]]
+Radek Šimčík
