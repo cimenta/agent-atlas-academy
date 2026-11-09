@@ -25,6 +25,7 @@ export function createPlayer({ events, clock, maxGapMs = 2000, speeds = SPEEDS, 
   }
 
   function gapBefore(index) {
+    if (index <= 0) return 0;
     const gap = events[index].t - events[index - 1].t;
     return Number.isFinite(gap) && gap > 0 ? gap : 0;
   }

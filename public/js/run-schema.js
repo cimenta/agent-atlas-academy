@@ -17,7 +17,7 @@ export const EVENT_TYPES = [
 const isText = (value) => typeof value === "string" && value.length > 0;
 const isObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 
-function checkEvent(event, index, previousT, errors) {
+function checkEvent(event, index, previousT, errors, agents) {
   const at = `events[${index}]`;
   if (!isObject(event)) {
     errors.push(`${at} must be an object`);
@@ -37,9 +37,23 @@ function checkEvent(event, index, previousT, errors) {
   if (["agent_start", "agent_output", "tool_call", "tool_result"].includes(event.type) && !isText(event.agent)) {
     errors.push(`${at}.agent must be a non-empty string`);
   }
+  if (isText(event.agent) && !agents.has(event.agent)) {
+    errors.push(`${at}.agent "${event.agent}" never starts (no agent_start event)`);
+  }
   if (event.type === "handoff") {
-    if (!isText(event.from)) errors.push(`${at}.from must be a non-empty string`);
-    if (!isText(event.to)) errors.push(`${at}.to must be a non-empty string`);
+    for (const key of ["from", "to"]) {
+      if (!isText(event[key])) errors.push(`${at}.${key} must be a non-empty string`);
+      else if (!agents.has(event[key])) errors.push(`${at}.${key} "${event[key]}" never starts (no agent_start event)`);
+    }
+  }
+  if (event.tokens !== undefined) {
+    const usage = event.tokens;
+    for (const key of ["input", "output"]) {
+      const value = isObject(usage) ? usage[key] : undefined;
+      if (value !== undefined && (typeof value !== "number" || !Number.isFinite(value) || value < 0)) {
+        errors.push(`${at}.tokens.${key} must be a non-negative number`);
+      }
+    }
   }
   if (event.type === "agent_output" && typeof event.text !== "string") {
     errors.push(`${at}.text must be a string`);
@@ -65,9 +79,12 @@ export function validateRun(run) {
   if (!Array.isArray(run.events) || run.events.length === 0) {
     errors.push("events must be a non-empty list");
   } else {
+    const agents = new Set(
+      run.events.filter((e) => isObject(e) && e.type === "agent_start" && isText(e.agent)).map((e) => e.agent),
+    );
     let previousT = null;
     run.events.forEach((event, index) => {
-      previousT = checkEvent(event, index, previousT, errors);
+      previousT = checkEvent(event, index, previousT, errors, agents);
     });
   }
   return { ok: errors.length === 0, errors };

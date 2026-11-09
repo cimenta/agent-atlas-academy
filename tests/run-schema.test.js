@@ -71,3 +71,21 @@ test("rejects events that are not objects", () => {
   const result = mutated((r) => (r.events[1] = "oops"));
   assert.equal(result.ok, false);
 });
+
+test("rejects events that mention an agent that never starts", () => {
+  const run = sample();
+  run.events.push({ t: run.events[run.events.length - 1].t, type: "agent_output", agent: "ghost", text: "boo" });
+  run.events.push({ t: run.events[run.events.length - 1].t, type: "handoff", from: "ghost", to: "nobody" });
+  const result = validateRun(run);
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((e) => e.includes("ghost")));
+  assert.ok(result.errors.some((e) => e.includes("nobody")));
+});
+
+test("rejects negative or non-finite token counts", () => {
+  const run = sample();
+  const event = run.events.find((e) => e.tokens);
+  if (!event) return;
+  event.tokens = { input: -5, output: 1 };
+  assert.equal(validateRun(run).ok, false);
+});

@@ -31,3 +31,9 @@ test("returns [] for a clean folder", () => {
   const dir = makeDir({ "public/a.md": "fine", "README.md": "fine", "SECURITY.md": "fine" });
   assert.deepEqual(findPlaceholders(dir), []);
 });
+
+test("the app's own README.md holds no owner placeholder that would block a release", () => {
+  const root = new URL("..", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1");
+  const readmeHits = findPlaceholders(root).filter((hit) => /README\.md$/.test(hit.file));
+  assert.deepEqual(readmeHits, []);
+});

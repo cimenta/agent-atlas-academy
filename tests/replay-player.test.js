@@ -168,3 +168,15 @@ test("subscribers hear about changes until they unsubscribe", () => {
   p.next();
   assert.equal(calls, 2);
 });
+
+test("seeking to the start while playing does not throw and keeps playing", () => {
+  const clock = fakeClock();
+  const p = createPlayer({ events: ev(0, 1000, 2000), clock });
+  p.play();
+  p.seek(0);
+  assert.equal(p.cursor, 0);
+  assert.equal(p.playing, true);
+  assert.equal(clock.pendingCount(), 1);
+  clock.tick();
+  assert.equal(p.cursor, 1);
+});
