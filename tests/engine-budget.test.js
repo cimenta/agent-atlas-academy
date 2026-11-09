@@ -62,3 +62,12 @@ test("check keeps reporting a limit that was already exceeded", () => {
   assert.throws(() => budget.chargeUsage({ input: 200, output: 0 }));
   assert.throws(() => budget.check(), (e) => e.reason === "tokens");
 });
+
+test("remainingTokens counts down and never goes negative", () => {
+  const budget = createBudget(limitsOf({ maxTokens: 1000 }));
+  assert.equal(budget.remainingTokens(), 1000);
+  budget.chargeUsage({ input: 300, output: 200 });
+  assert.equal(budget.remainingTokens(), 500);
+  assert.throws(() => budget.chargeUsage({ input: 900, output: 0 }));
+  assert.equal(budget.remainingTokens(), 0);
+});

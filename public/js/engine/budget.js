@@ -42,6 +42,7 @@ export function createBudget(limits, { now = Date.now, timeLimitMs = TIME_LIMIT_
       used.searches += amount(searches);
       check();
     },
+    remainingTokens: () => Math.max(0, max.maxTokens - used.input - used.output),
     remainingSearches: () => Math.max(0, max.maxSearches - used.searches),
     remainingMs: () => Math.max(0, timeLimitMs - elapsed()),
     usage: () => ({ ...used }),
