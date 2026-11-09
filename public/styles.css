@@ -234,3 +234,27 @@ button.danger { border-color: var(--working); color: var(--working); }
 .result-table { border-collapse: collapse; margin: 8px 0 16px; }
 .result-table th, .result-table td { padding: 6px 12px; border: 1px solid var(--border); text-align: left; }
 .final-text { padding: 12px; background: var(--surface); border-radius: var(--radius); }
+
+.editor { display: grid; gap: 12px; }
+.hint { color: var(--muted); font-size: 0.9rem; margin: 4px 0; }
+.palette-list { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.palette-item { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 12px; text-align: left; height: auto; }
+.palette-item[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
+.palette-help { font-size: 0.8rem; color: var(--muted); }
+.diagram-wrap { overflow: auto; max-width: 100%; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.diagram { position: relative; min-width: 160px; min-height: 96px; }
+.diagram-arrows { position: absolute; inset: 0 auto auto 0; color: var(--muted); pointer-events: none; }
+.dnode { position: absolute; display: flex; align-items: stretch; border: 2px solid var(--border); border-radius: var(--radius); background: var(--bg); overflow: hidden; }
+.dnode[data-selected="true"] { border-color: var(--accent); }
+.dnode[data-connecting="true"] { border-color: var(--working); border-style: dashed; }
+.dnode-body { flex: 1; min-width: 0; padding: 4px 6px; border: 0; border-radius: 0; background: transparent; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; overflow: hidden; }
+.dnode-body strong, .dnode-body small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dnode-connect { min-width: var(--touch); padding: 0; border: 0; border-left: 1px solid var(--border); border-radius: 0; }
+.dnode-connect[aria-pressed="true"] { background: var(--working); color: var(--accent-text); }
+.dnode-handle { position: absolute; right: -2px; top: -2px; width: 18px; height: 18px; font-size: 0.7rem; line-height: 18px; text-align: center; color: var(--accent); cursor: crosshair; touch-action: none; }
+.connection-list { list-style: none; margin: 0; padding: 0; }
+.connection-list li { display: flex; align-items: center; gap: 12px; justify-content: space-between; max-width: 28rem; padding: 2px 0; }
+.editor-settings { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); }
+.editor-settings h4 { margin: 0 0 8px; }
+.notice.ok { border-color: var(--done); }
+.field textarea { padding: 8px 12px; min-height: 6rem; }
