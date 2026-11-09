@@ -4,7 +4,7 @@ title: Zásady ochrany osobních údajů
 
 ## Shrnutí
 
-Agent Atlas je vzdělávací web. Používá **žádné cookies**, žádné sledovací nástroje ani analytiku a nenačítá žádné skripty, styly ani písma třetích stran. Neprovádí žádná volání AI a sám nezpracovává žádné osobní údaje.
+Agent Atlas je vzdělávací web. Používá **žádné cookies**, žádné sledovací nástroje ani analytiku a nenačítá žádné skripty, styly ani písma třetích stran. Nemá uživatelské účty. Pokud se rozhodnete spustit vlastní pokus, váš úkol a váš klíč Anthropic projdou naším serverem, aby se dostaly k Anthropic (viz níže); na naší straně se nic neukládá.
 
 ## Kdo za web odpovídá
 
@@ -12,7 +12,18 @@ Radek Šimčík (IČO 06018025). Kontakt pro žádosti o ochranu osobních údaj
 
 ## Co se ukládá ve vašem prohlížeči
 
-Web ukládá jedině jazyk, který si zvolíte, a to v místním úložišti vašeho prohlížeče pod klíčem `aa.lang`. Nikdy neopouští vaše zařízení a nikomu se neposílá. Kdykoli ho smažete vymazáním dat webu v prohlížeči.
+Agent Atlas si věci pamatuje jen lokálně, ve vašem vlastním prohlížeči. Nic, co si pamatuje, se nám neposílá ani neukládá na našich serverech. Pamatuje si:
+
+- jazyk, který zvolíte (místní úložiště, klíč `aa.lang`);
+- vaše nastavení, například výchozí limity běhů (místní úložiště, klíč `aa.settings`);
+- každý běh, který spustíte: úkol, agenty, jejich zprávy a výsledek (databáze prohlížeče IndexedDB, databáze `aa`);
+- jen pokud zvolíte „Zapamatovat v tomto zařízení“, váš klíč Anthropic API zašifrovaný heslem, které si nastavíte (místní úložiště, klíč `aa.vault`). Heslo se nikam neukládá, takže ho nelze obnovit. Pokud ho zapomenete, zadáte klíč znovu.
+
+Ve výchozím stavu zůstává váš klíč API jen v paměti otevřené karty a po jejím zavření nebo obnovení zmizí. Vše můžete kdykoli odstranit v Nastavení (smazat všechny běhy, zapomenout klíč) nebo vymazáním dat webu v prohlížeči. Můžete také exportovat zálohu do souboru a později ji importovat; soubor patří vám a nikam se neposílá.
+
+## Když spustíte vlastní pokus
+
+Když stisknete Spustit, váš úkol, pokyny a zprávy agentů a váš klíč API se odešlou na náš server jen proto, aby se požadavek mohl předat společnosti Anthropic. Server je neukládá a nezapisuje do protokolů. Anthropic je pak zpracuje podle vlastních podmínek a zásad ochrany osobních údajů. Cenu běhu účtuje Anthropic na váš vlastní účet. Je-li zapnuté vyhledávání na webu, dotazy při hledání zpracovává rovněž Anthropic. Nezadávejte do úkolu osobní ani důvěrné údaje.
 
 ## Logy hostingu
 

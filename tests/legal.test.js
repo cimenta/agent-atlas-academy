@@ -42,3 +42,32 @@ test("the About text uses the agreed wording in both languages", () => {
   assert.ok(en.startsWith("Agent Atlas is an educational project that helps to understand how AI agents work, communicate and are orchestrated."));
   assert.equal(JSON.parse(read("locales/en.json"))["site.tagline"], "Agents Educational Sandbox: not for real work.");
 });
+
+const WORDS = {
+  en: { password: "password", unrecoverable: "cannot be recovered", fee: "fee" },
+  cs: { password: "heslo", unrecoverable: "nelze obnovit", fee: "poplat" },
+};
+
+for (const lang of ["en", "cs"]) {
+  test(`${lang}/privacy explains local storage, the password, and that runs pass through to Anthropic`, () => {
+    const text = read(`content/pages/${lang}/privacy.md`).toLowerCase();
+    assert.ok(text.includes(WORDS[lang].password));
+    assert.ok(text.includes(WORDS[lang].unrecoverable));
+    assert.ok(text.includes("anthropic"));
+    assert.ok(text.includes("aa.lang"));
+    assert.ok(text.includes("aa.vault"));
+    assert.ok(text.includes("indexeddb"));
+    assert.ok(!text.includes("no ai calls") && !text.includes("neprovádí žádná volání ai"));
+  });
+
+  test(`${lang}/terms mentions the provider fee for runs`, () => {
+    const text = read(`content/pages/${lang}/terms.md`).toLowerCase();
+    assert.ok(text.includes(WORDS[lang].fee));
+    assert.ok(text.includes("anthropic"));
+  });
+
+  test(`${lang} help no longer claims nothing is stored except the language`, () => {
+    const help = JSON.parse(read(`locales/${lang}.json`))["help.body"].toLowerCase();
+    assert.ok(!help.includes("stores nothing about you except") && !help.includes("neukládá nic kromě"));
+  });
+}

@@ -36,3 +36,12 @@ test("the app folder holds no project management files", () => {
     assert.equal(existsSync(join(appDir, name)), false, `${name} must not be in app/`);
   }
 });
+
+test("the temporary stream-check spike is gone", () => {
+  for (const file of ["api/stream-check.js", "lib/stream-check.js", "tests/stream-check.test.js"]) {
+    assert.equal(existsSync(join(appDir, file)), false, `${file} must be removed`);
+  }
+  const config = JSON.parse(readFileSync(join(appDir, "vercel.json"), "utf8"));
+  assert.equal(config.functions["api/stream-check.js"], undefined);
+  assert.ok(config.functions["api/run.js"]);
+});
