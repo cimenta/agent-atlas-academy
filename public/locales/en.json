@@ -177,7 +177,7 @@
   "agent.judge.help": "Reads the debate and gives a verdict.",
   "agent.free.label": "Free agent",
   "agent.free.help": "You write its name and instructions.",
-  "editor.hint": "Add agents from the list, then connect them. On a phone: tap an agent to add it, tap the arrow button on an agent, then tap the agent it should send to.",
+  "editor.hint": "Add agents from the list. Drag an agent to move it. To connect, drag from the arrow button on an agent onto another agent, or tap the arrow and then tap the other agent. Tap a line to select it, then tap the cross to remove it.",
   "editor.palette": "Agents",
   "editor.paletteHelp": "Tap an agent to add it. On a computer you can also drag it onto the diagram. The same agent can be added more than once, except those marked as single.",
   "editor.taken": "This agent can be used only once, and it is already in the diagram.",
@@ -187,7 +187,6 @@
   "editor.selectNode": "Select {name}",
   "editor.connectFrom": "Connect {name} to another agent",
   "editor.connecting": "Now tap the agent that {name} should send its result to. Press Escape or the arrow again to cancel.",
-  "editor.dragHandle": "Drag from here onto another agent to connect {name}",
   "editor.connections": "Connections",
   "editor.noConnections": "No connections yet.",
   "editor.removeConnection": "Remove the connection from {from} to {to}",
@@ -289,5 +288,7 @@
   "settings.importChoose": "The file is valid. Add its runs to the ones you have, or replace everything here with it?",
   "settings.importMerge": "Add to my runs",
   "settings.importReplace": "Replace everything",
-  "settings.imported": "Imported {added} runs, skipped {skipped} that you already had, {failed} could not be saved."
+  "settings.imported": "Imported {added} runs, skipped {skipped} that you already had, {failed} could not be saved.",
+  "editor.portHelp": "Drag onto another agent to connect, or tap and then tap the other agent",
+  "editor.tidy": "Tidy up the diagram"
 }

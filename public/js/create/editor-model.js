@@ -12,6 +12,7 @@ export function createEditor(initialPattern) {
   let nodes = [];
   let edges = [];
   let rounds = DEFAULT_ROUNDS;
+  let positions = {};
 
   const find = (id) => nodes.find((n) => n.id === id);
   const hasEdge = (from, to) => edges.some((e) => e.from === from && e.to === to);
@@ -60,6 +61,7 @@ export function createEditor(initialPattern) {
     removeNode(id) {
       nodes = nodes.filter((n) => n.id !== id);
       edges = edges.filter((e) => e.from !== id && e.to !== id);
+      delete positions[id];
     },
 
     setNode(id, patch) {
@@ -68,7 +70,7 @@ export function createEditor(initialPattern) {
       for (const key of EDITABLE) if (key in patch) node[key] = patch[key];
     },
 
-    connect(from, to) {
+    canConnect(from, to) {
       const a = find(from);
       const b = find(to);
       if (!a || !b) return { ok: false, code: "edge.unknownNode" };
@@ -85,9 +87,26 @@ export function createEditor(initialPattern) {
       } else if (!(a.agent === "debater" && b.agent === "judge")) {
         code = "deb.edges";
       }
-      if (code) return { ok: false, code };
-      edges.push({ from, to });
-      return { ok: true };
+      return code ? { ok: false, code } : { ok: true };
+    },
+
+    connect(from, to) {
+      const verdict = this.canConnect(from, to);
+      if (verdict.ok) edges.push({ from, to });
+      return verdict;
+    },
+
+    setPosition(id, x, y) {
+      if (!find(id)) return;
+      positions[id] = { x: Math.max(0, Math.round(x)), y: Math.max(0, Math.round(y)) };
+    },
+
+    positions() {
+      return structuredClone(positions);
+    },
+
+    clearPositions() {
+      positions = {};
     },
 
     disconnect(from, to) {
@@ -115,6 +134,7 @@ export function createEditor(initialPattern) {
       nodes = [];
       edges = [];
       rounds = DEFAULT_ROUNDS;
+      positions = {};
     },
   };
 }

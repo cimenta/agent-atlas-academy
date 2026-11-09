@@ -177,7 +177,7 @@
   "agent.judge.help": "Přečte debatu a vynese verdikt.",
   "agent.free.label": "Volný agent",
   "agent.free.help": "Jméno a pokyny napíšete vy.",
-  "editor.hint": "Přidejte agenty ze seznamu a propojte je. Na telefonu: klepnutím agenta přidáte, klepněte na tlačítko se šipkou u agenta a pak na agenta, kterému má výsledek předat.",
+  "editor.hint": "Přidejte agenty ze seznamu. Agenta přesunete tažením. Spojíte je tažením od tlačítka se šipkou na jiného agenta, nebo klepnutím na šipku a pak na druhého agenta. Čáru vyberete klepnutím a odeberete ji klepnutím na křížek.",
   "editor.palette": "Agenti",
   "editor.paletteHelp": "Klepnutím agenta přidáte. Na počítači ho můžete také přetáhnout do diagramu. Stejného agenta lze přidat víckrát, kromě těch, kteří smějí být jen jednou.",
   "editor.taken": "Tohoto agenta lze použít jen jednou a už je v diagramu.",
@@ -187,7 +187,6 @@
   "editor.selectNode": "Vybrat: {name}",
   "editor.connectFrom": "Propojit {name} s dalším agentem",
   "editor.connecting": "Teď klepněte na agenta, kterému má {name} předat výsledek. Zrušíte to klávesou Escape nebo dalším klepnutím na šipku.",
-  "editor.dragHandle": "Přetáhněte odsud na jiného agenta a propojíte {name}",
   "editor.connections": "Spojení",
   "editor.noConnections": "Zatím žádná spojení.",
   "editor.removeConnection": "Odebrat spojení z {from} do {to}",
@@ -289,5 +288,7 @@
   "settings.importChoose": "Soubor je v pořádku. Přidat jeho běhy k těm, které máte, nebo tady všechno nahradit jeho obsahem?",
   "settings.importMerge": "Přidat k mým během",
   "settings.importReplace": "Nahradit vše",
-  "settings.imported": "Naimportováno běhů: {added}, přeskočeno těch, které už máte: {skipped}, neuložilo se: {failed}."
+  "settings.imported": "Naimportováno běhů: {added}, přeskočeno těch, které už máte: {skipped}, neuložilo se: {failed}.",
+  "editor.portHelp": "Přetáhněte na jiného agenta, nebo klepněte a pak klepněte na druhého agenta",
+  "editor.tidy": "Uspořádat diagram"
 }

@@ -9,13 +9,16 @@ const CELL_W = 160;
 const CELL_H = 96;
 const BOX_W = 132;
 const BOX_H = 60;
+const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 export function mountEditor(container, { editor, t, doc = document, onChange = () => {} }) {
   let selectedId = null;
   let connectFrom = null;
   let notice = "";
-  let dragFrom = null;
+  let selectedEdge = null;
+  let suppressClick = false;
+  let pendingDrop = null;
 
   const nodeLabel = (node) => {
     if (node.name) return node.name;
@@ -39,6 +42,11 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     if (!result.ok) return refuse(result.code), draw();
     notice = "";
     selectedId = result.id;
+    if (pendingDrop) {
+      for (const [id, pt] of Object.entries(editor.positions())) editor.setPosition(id, pt.x, pt.y);
+      editor.setPosition(result.id, pendingDrop.x, pendingDrop.y);
+      pendingDrop = null;
+    }
     changed();
   }
 
@@ -93,20 +101,31 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
 
   function diagramBlock(design) {
     const orientation = design.pattern === "sequential" ? "vertical" : "horizontal";
-    const layout = layoutDesign(design, { orientation });
-    const width = Math.max(1, layout.width) * CELL_W;
-    const height = Math.max(1, layout.height) * CELL_H;
+    const auto = layoutDesign(design, { orientation });
+    const stored = editor.positions();
+    const pos = new Map(); // id -> { x, y } top-left in px, updated live while dragging
+    for (const node of design.nodes) {
+      const a = auto.nodes.find((n) => n.id === node.id);
+      pos.set(node.id, stored[node.id] ?? { x: a.x * CELL_W + (CELL_W - BOX_W) / 2, y: a.y * CELL_H + (CELL_H - BOX_H) / 2 });
+    }
+    const extent = () => {
+      const xs = [...pos.values()].map((p) => p.x + BOX_W + 24);
+      const ys = [...pos.values()].map((p) => p.y + BOX_H + 24);
+      return { width: Math.max(CELL_W, ...xs), height: Math.max(CELL_H * 2, ...ys) };
+    };
     const area = h(doc, "div", { class: "diagram", role: "group", "aria-label": t("editor.diagram") });
-    area.style.width = `${width}px`;
-    area.style.height = `${height}px`;
     const wrap = h(doc, "div", { class: "diagram-wrap" }, area);
-
-    const center = new Map();
     const svg = doc.createElementNS(SVG_NS, "svg");
     svg.setAttribute("class", "diagram-arrows");
-    svg.setAttribute("width", String(width));
-    svg.setAttribute("height", String(height));
     svg.setAttribute("aria-hidden", "true");
+    const size = () => {
+      const { width, height } = extent();
+      area.style.width = `${width}px`;
+      area.style.height = `${height}px`;
+      svg.setAttribute("width", String(width));
+      svg.setAttribute("height", String(height));
+    };
+
     const defs = doc.createElementNS(SVG_NS, "defs");
     const marker = doc.createElementNS(SVG_NS, "marker");
     for (const [k, v] of Object.entries({ id: "arrowhead", viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "8", markerHeight: "8", orient: "auto-start-reverse" })) marker.setAttribute(k, v);
@@ -118,11 +137,149 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     svg.append(defs);
     area.append(svg);
 
-    for (const spot of layout.nodes) {
-      const node = design.nodes.find((n) => n.id === spot.id);
-      const left = spot.x * CELL_W + (CELL_W - BOX_W) / 2;
-      const top = spot.y * CELL_H + (CELL_H - BOX_H) / 2;
-      center.set(node.id, { x: left + BOX_W / 2, y: top + BOX_H / 2 });
+    const centerOf = (id) => ({ x: pos.get(id).x + BOX_W / 2, y: pos.get(id).y + BOX_H / 2 });
+    const clip = (from, to) => {
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const scale = Math.min(dx === 0 ? Infinity : BOX_W / 2 / Math.abs(dx), dy === 0 ? Infinity : BOX_H / 2 / Math.abs(dy));
+      return { x: to.x - dx * scale, y: to.y - dy * scale };
+    };
+    const setLine = (line, a, b) => {
+      for (const [k, v] of Object.entries({ x1: a.x, y1: a.y, x2: b.x, y2: b.y })) line.setAttribute(k, String(v));
+    };
+    const label = (id) => nodeLabel(design.nodes.find((n) => n.id === id));
+
+    const nodeEls = new Map();
+    let edgeParts = [];
+    const rubber = doc.createElementNS(SVG_NS, "line");
+    for (const [k, v] of Object.entries({ "stroke-width": "2", stroke: "currentColor", "stroke-dasharray": "6 4", "marker-end": "url(#arrowhead)", visibility: "hidden" })) rubber.setAttribute(k, v);
+    svg.append(rubber);
+
+    function drawEdges() {
+      for (const part of edgeParts) part.remove();
+      edgeParts = [];
+      for (const edge of design.edges) {
+        const a = centerOf(edge.from);
+        const b = centerOf(edge.to);
+        const start = clip(b, a);
+        const end = clip(a, b);
+        const key = `${edge.from}>${edge.to}`;
+        const selected = selectedEdge === key;
+        const line = doc.createElementNS(SVG_NS, "line");
+        for (const [k, v] of Object.entries({ "marker-end": "url(#arrowhead)", "stroke-width": selected ? "4" : "2", stroke: selected ? "var(--accent)" : "currentColor" })) line.setAttribute(k, v);
+        setLine(line, start, end);
+        const hit = doc.createElementNS(SVG_NS, "line");
+        for (const [k, v] of Object.entries({ stroke: "transparent", "stroke-width": "22", class: "edge-hit" })) hit.setAttribute(k, v);
+        setLine(hit, start, end);
+        hit.addEventListener("click", () => {
+          selectedEdge = selectedEdge === key ? null : key;
+          selectedId = null;
+          draw();
+        });
+        svg.insertBefore(line, rubber);
+        svg.insertBefore(hit, rubber);
+        edgeParts.push(line, hit);
+        if (selected) {
+          const mid = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
+          const remove = h(doc, "button", { type: "button", class: "edge-remove", "data-focus-key": `edge-x-${key}`, "aria-label": t("editor.removeConnection", { from: label(edge.from), to: label(edge.to) }) }, "×");
+          remove.style.left = `${mid.x - 18}px`;
+          remove.style.top = `${mid.y - 18}px`;
+          remove.addEventListener("click", () => {
+            editor.disconnect(edge.from, edge.to);
+            selectedEdge = null;
+            changed();
+          });
+          area.append(remove);
+          edgeParts.push(remove);
+        }
+      }
+    }
+
+    const freeze = () => {
+      for (const [otherId, other] of pos) editor.setPosition(otherId, other.x, other.y); // once the visitor arranges things, the layout stays put
+    };
+
+    // Dragging a node moves it; a click without movement selects it.
+    function wireMove(body, box, id) {
+      let start = null;
+      body.addEventListener("pointerdown", (event) => {
+        if (event.button !== undefined && event.button > 0) return;
+        start = { px: event.clientX, py: event.clientY, x: pos.get(id).x, y: pos.get(id).y, moved: false };
+        body.setPointerCapture?.(event.pointerId);
+      });
+      body.addEventListener("pointermove", (event) => {
+        if (!start) return;
+        const dx = event.clientX - start.px;
+        const dy = event.clientY - start.py;
+        if (!start.moved && Math.hypot(dx, dy) < MOVE_THRESHOLD) return;
+        start.moved = true;
+        pos.set(id, { x: Math.max(0, start.x + dx), y: Math.max(0, start.y + dy) });
+        box.style.left = `${pos.get(id).x}px`;
+        box.style.top = `${pos.get(id).y}px`;
+        size();
+        drawEdges();
+      });
+      body.addEventListener("pointerup", () => {
+        if (!start) return;
+        const moved = start.moved;
+        start = null;
+        if (!moved) return;
+        freeze();
+        suppressClick = true;
+        setTimeout(() => (suppressClick = false), 0);
+        onChange();
+        draw();
+      });
+      body.addEventListener("keydown", (event) => {
+        const step = { ArrowLeft: [-10, 0], ArrowRight: [10, 0], ArrowUp: [0, -10], ArrowDown: [0, 10] }[event.key];
+        if (!step) return;
+        event.preventDefault();
+        freeze();
+        const p = pos.get(id);
+        editor.setPosition(id, p.x + step[0], p.y + step[1]);
+        draw();
+      });
+    }
+
+    // Dragging from a node's port draws a line to the pointer; drop it on another node to connect.
+    function wirePort(port, id) {
+      let drag = null;
+      const areaPoint = (event) => {
+        const r = area.getBoundingClientRect();
+        return { x: event.clientX - r.left, y: event.clientY - r.top };
+      };
+      const targetAt = (event) => doc.elementFromPoint(event.clientX, event.clientY)?.closest?.("[data-node-id]")?.getAttribute("data-node-id") ?? null;
+      const clearMarks = () => nodeEls.forEach((el) => el.removeAttribute("data-target"));
+      port.addEventListener("pointerdown", (event) => {
+        if (event.button !== undefined && event.button > 0) return;
+        drag = { px: event.clientX, py: event.clientY, moved: false };
+        port.setPointerCapture?.(event.pointerId);
+      });
+      port.addEventListener("pointermove", (event) => {
+        if (!drag) return;
+        if (!drag.moved && Math.hypot(event.clientX - drag.px, event.clientY - drag.py) < MOVE_THRESHOLD) return;
+        drag.moved = true;
+        setLine(rubber, centerOf(id), areaPoint(event));
+        rubber.setAttribute("visibility", "visible");
+        clearMarks();
+        const over = targetAt(event);
+        if (over && over !== id) nodeEls.get(over)?.setAttribute("data-target", editor.canConnect(id, over).ok ? "ok" : "no");
+      });
+      port.addEventListener("pointerup", (event) => {
+        if (!drag) return;
+        const moved = drag.moved;
+        drag = null;
+        rubber.setAttribute("visibility", "hidden");
+        clearMarks();
+        if (!moved) return; // a plain tap: the click handler starts tap-to-connect
+        suppressClick = true;
+        setTimeout(() => (suppressClick = false), 0);
+        const over = targetAt(event);
+        if (over && over !== id) tryConnect(id, over);
+      });
+    }
+
+    for (const node of design.nodes) {
       const body = h(
         doc,
         "button",
@@ -130,63 +287,52 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         h(doc, "strong", {}, nodeLabel(node)),
         h(doc, "small", {}, MODELS.find((m) => m.key === node.model)?.label ?? ""),
       );
-      body.addEventListener("click", () => onNodeActivate(node.id));
-      const connect = h(doc, "button", { type: "button", class: "dnode-connect", "data-focus-key": `connect-${node.id}`, "aria-pressed": String(connectFrom === node.id), "aria-label": t("editor.connectFrom", { name: nodeLabel(node) }) }, "→");
-      connect.addEventListener("click", () => {
+      body.addEventListener("click", () => {
+        if (suppressClick) return;
+        selectedEdge = null;
+        onNodeActivate(node.id);
+      });
+      const port = h(doc, "button", { type: "button", class: "dnode-port", "data-focus-key": `connect-${node.id}`, "aria-pressed": String(connectFrom === node.id), "aria-label": t("editor.connectFrom", { name: nodeLabel(node) }), title: t("editor.portHelp") }, "→");
+      port.addEventListener("click", () => {
+        if (suppressClick) return;
         connectFrom = connectFrom === node.id ? null : node.id;
         selectedId = node.id;
+        selectedEdge = null;
         draw();
       });
-      const handle = h(doc, "span", { class: "dnode-handle", "aria-hidden": "true", title: t("editor.dragHandle", { name: nodeLabel(node) }) }, "●");
-      handle.addEventListener("pointerdown", (event) => {
-        event.preventDefault();
-        dragFrom = node.id;
-        handle.setPointerCapture?.(event.pointerId);
-      });
-      handle.addEventListener("pointerup", (event) => {
-        const from = dragFrom;
-        dragFrom = null;
-        const target = doc.elementFromPoint(event.clientX, event.clientY)?.closest?.("[data-node-id]");
-        const to = target?.getAttribute("data-node-id");
-        if (from && to && to !== from) tryConnect(from, to);
-      });
-      const box = h(doc, "div", { class: "dnode", "data-node-id": node.id, "data-selected": String(selectedId === node.id), "data-connecting": String(connectFrom === node.id) }, body, connect, handle);
-      box.style.left = `${left}px`;
-      box.style.top = `${top}px`;
+      const box = h(doc, "div", { class: "dnode", "data-node-id": node.id, "data-selected": String(selectedId === node.id), "data-connecting": String(connectFrom === node.id) }, body, port);
+      box.style.left = `${pos.get(node.id).x}px`;
+      box.style.top = `${pos.get(node.id).y}px`;
       box.style.width = `${BOX_W}px`;
       box.style.height = `${BOX_H}px`;
+      nodeEls.set(node.id, box);
       area.append(box);
+      wireMove(body, box, node.id);
+      wirePort(port, node.id);
     }
-
-    for (const edge of design.edges) {
-      const a = center.get(edge.from);
-      const b = center.get(edge.to);
-      if (!a || !b) continue;
-      const clip = (from, to) => {
-        const dx = to.x - from.x;
-        const dy = to.y - from.y;
-        const scale = Math.min(dx === 0 ? Infinity : BOX_W / 2 / Math.abs(dx), dy === 0 ? Infinity : BOX_H / 2 / Math.abs(dy));
-        return { x: to.x - dx * scale, y: to.y - dy * scale };
-      };
-      const start = clip(b, a);
-      const end = clip(a, b);
-      const line = doc.createElementNS(SVG_NS, "line");
-      for (const [k, v] of Object.entries({ x1: start.x, y1: start.y, x2: end.x, y2: end.y, "marker-end": "url(#arrowhead)", "stroke-width": "2", stroke: "currentColor" })) line.setAttribute(k, String(v));
-      svg.append(line);
-    }
+    size();
+    drawEdges();
 
     area.addEventListener("dragover", (event) => event.preventDefault());
     area.addEventListener("drop", (event) => {
       event.preventDefault();
       const data = event.dataTransfer?.getData("text/plain") ?? "";
-      if (data.startsWith("agent:")) addAgent(data.slice(6));
+      if (!data.startsWith("agent:")) return;
+      const r = area.getBoundingClientRect();
+      pendingDrop = { x: event.clientX - r.left - BOX_W / 2, y: event.clientY - r.top - BOX_H / 2 };
+      addAgent(data.slice(6));
     });
 
     const empty = design.nodes.length === 0 ? h(doc, "p", { class: "hint" }, t("editor.empty")) : "";
     const connecting = connectFrom
       ? h(doc, "p", { class: "notice", role: "status" }, t("editor.connecting", { name: nodeLabel(design.nodes.find((n) => n.id === connectFrom)) }))
       : "";
-    return h(doc, "section", { class: "editor-diagram", "aria-label": t("editor.diagram") }, h(doc, "h3", {}, t("editor.diagram")), empty, connecting, wrap);
+    const tidy = h(doc, "button", { type: "button", "data-focus-key": "tidy" }, t("editor.tidy"));
+    tidy.addEventListener("click", () => {
+      editor.clearPositions();
+      changed();
+    });
+    return h(doc, "section", { class: "editor-diagram", "aria-label": t("editor.diagram") }, h(doc, "h3", {}, t("editor.diagram")), empty, connecting, wrap, design.nodes.length ? tidy : "");
   }
 
   function connectionsBlock(design) {

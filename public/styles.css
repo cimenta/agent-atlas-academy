@@ -249,9 +249,8 @@ button.danger { border-color: var(--working); color: var(--working); }
 .dnode[data-connecting="true"] { border-color: var(--working); border-style: dashed; }
 .dnode-body { flex: 1; min-width: 0; padding: 4px 6px; border: 0; border-radius: 0; background: transparent; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; overflow: hidden; }
 .dnode-body strong, .dnode-body small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dnode-connect { min-width: var(--touch); padding: 0; border: 0; border-left: 1px solid var(--border); border-radius: 0; }
-.dnode-connect[aria-pressed="true"] { background: var(--working); color: var(--accent-text); }
-.dnode-handle { position: absolute; right: -2px; top: -2px; width: 18px; height: 18px; font-size: 0.7rem; line-height: 18px; text-align: center; color: var(--accent); cursor: crosshair; touch-action: none; }
+.dnode-port { min-width: var(--touch); padding: 0; border: 0; border-left: 1px solid var(--border); border-radius: 0; }
+.dnode-port[aria-pressed="true"] { background: var(--working); color: var(--accent-text); }
 .connection-list { list-style: none; margin: 0; padding: 0; }
 .connection-list li { display: flex; align-items: center; gap: 12px; justify-content: space-between; max-width: 28rem; padding: 2px 0; }
 .editor-settings { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); }
@@ -271,3 +270,12 @@ button.danger { border-color: var(--working); color: var(--working); }
 .run-button { margin-top: 8px; min-width: 140px; }
 .run-button:disabled { opacity: 0.5; cursor: not-allowed; }
 .run-after { margin-top: 12px; }
+.dnode-body { cursor: grab; touch-action: none; }
+.dnode-body:active { cursor: grabbing; }
+.dnode-port { cursor: crosshair; touch-action: none; }
+.dnode { user-select: none; z-index: 1; }
+.dnode[data-target="ok"] { border-color: var(--done); box-shadow: 0 0 0 3px var(--done); }
+.dnode[data-target="no"] { border-color: var(--working); box-shadow: 0 0 0 3px var(--working); }
+.edge-hit { pointer-events: stroke; cursor: pointer; }
+.diagram-arrows { z-index: 0; }
+.edge-remove { position: absolute; z-index: 2; width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; border-radius: 50%; border-color: var(--accent); }

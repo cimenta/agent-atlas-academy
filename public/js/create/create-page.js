@@ -43,7 +43,7 @@ function patternIcon(doc, pattern) {
   const shapes = {
     sequential: () => [line(12, 20, 32, 20), line(32, 20, 52, 20), dot(12, 20), dot(32, 20), dot(52, 20)],
     parallel: () => [line(12, 10, 52, 20), line(12, 30, 52, 20), dot(12, 10), dot(12, 30), dot(52, 20)],
-    supervisor: () => [line(12, 20, 52, 10), line(12, 20, 52, 30), dot(12, 20), dot(52, 10), dot(52, 30)],
+    supervisor: () => [line(12, 20, 52, 6), line(12, 20, 52, 16), line(12, 20, 52, 26), line(12, 20, 52, 36), dot(12, 20), dot(52, 6), dot(52, 16), dot(52, 26), dot(52, 36)],
     debate: () => [line(12, 10, 52, 20), line(12, 30, 52, 20), line(12, 10, 12, 30), dot(12, 10), dot(12, 30), dot(52, 20)],
   };
   shapes[pattern]();

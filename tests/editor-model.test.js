@@ -280,3 +280,40 @@ test("hub patterns place the hub after (par, debate) or before (supervisor) the 
   assert.ok(y(s, "boss") < y(s, "w1"));
   assert.equal(y(s, "w1"), y(s, "w2"));
 });
+
+test("canConnect says what connect would say, without changing anything", () => {
+  const editor = createEditor("sequential");
+  const a = add(editor, "planner");
+  const b = add(editor, "writer");
+  const c = add(editor, "critic");
+  assert.deepEqual(editor.canConnect(a, b), { ok: true });
+  assert.equal(editor.design().edges.length, 0);
+  editor.connect(a, b);
+  assert.deepEqual(editor.canConnect(a, c), { ok: false, code: "seq.notChain" });
+  assert.deepEqual(editor.canConnect(a, a), { ok: false, code: "edge.self" });
+});
+
+test("nodes can be moved, positions are copied out, and tidy clears them", () => {
+  const editor = createEditor("sequential");
+  const a = add(editor, "planner");
+  editor.setPosition(a, 120.4, -5);
+  assert.deepEqual(editor.positions(), { [a]: { x: 120, y: 0 } });
+  editor.positions()[a].x = 999;
+  assert.equal(editor.positions()[a].x, 120);
+  editor.removeNode(a);
+  assert.deepEqual(editor.positions(), {});
+  const b = add(editor, "writer");
+  editor.setPosition(b, 10, 10);
+  editor.clearPositions();
+  assert.deepEqual(editor.positions(), {});
+  editor.setPosition(b, 10, 10);
+  editor.reset("parallel");
+  assert.deepEqual(editor.positions(), {});
+});
+
+test("positions never leak into the design that is sent to the server", () => {
+  const editor = createEditor("sequential");
+  const a = add(editor, "planner");
+  editor.setPosition(a, 50, 50);
+  assert.ok(!JSON.stringify(editor.design()).includes("50"));
+});
