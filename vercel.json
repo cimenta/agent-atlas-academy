@@ -29,6 +29,9 @@
     }
   ],
   "functions": {
+    "api/run.js": {
+      "maxDuration": 300
+    },
     "api/stream-check.js": {
       "maxDuration": 300
     }

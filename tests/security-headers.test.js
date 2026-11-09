@@ -41,6 +41,10 @@ test("transport, sniffing, referrer and permission headers are set", () => {
   }
 });
 
+test("the run function may stream for five minutes", () => {
+  assert.equal(config.functions["api/run.js"].maxDuration, 300);
+});
+
 test("build settings point at the static output", () => {
   assert.equal(config.buildCommand, "npm run build");
   assert.equal(config.outputDirectory, "public");
