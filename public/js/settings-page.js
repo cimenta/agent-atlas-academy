@@ -1,0 +1,179 @@
+// The settings page: API key handling, default limits and local data.
+import { h } from "./dom.js";
+import { LIMIT_MAX } from "./engine/catalog.js";
+import { VaultError } from "./storage/key-vault.js";
+
+const LIMIT_FIELDS = [
+  ["maxSteps", "settings.limitSteps"],
+  ["maxTokens", "settings.limitTokens"],
+  ["maxSearches", "settings.limitSearches"],
+];
+
+export function renderSettings(ctx) {
+  const { doc, t, vault, settings, runStore } = ctx;
+  ctx.doc.title = `${t("settings.title")} · ${t("site.name")}`;
+
+  const field = (id, label, input) => h(doc, "div", { class: "field" }, h(doc, "label", { for: id }, label), input);
+  const message = h(doc, "p", { class: "notice", role: "status", "aria-live": "polite", hidden: true });
+  const say = (text, isError = false) => {
+    message.textContent = text;
+    message.hidden = text === "";
+    message.setAttribute("role", isError ? "alert" : "status");
+  };
+  const errorText = (error) => t(`settings.error.${error instanceof VaultError ? error.code : "storage"}`);
+
+  const status = h(doc, "p", { class: "key-status" });
+  const refreshStatus = () => {
+    const available = vault.getSessionKey() !== null;
+    status.textContent = available
+      ? t("settings.keyAvailable")
+      : vault.hasStoredKey()
+        ? t("settings.keyLocked")
+        : t("settings.keyNone");
+    unlockForm.hidden = available || !vault.hasStoredKey();
+    forgetButton.hidden = !vault.hasStoredKey();
+    changeForm.hidden = !vault.hasStoredKey();
+  };
+
+  // Save the key for this tab (and optionally remember it encrypted).
+  const keyInput = h(doc, "input", { id: "set-key", type: "password", autocomplete: "off", spellcheck: "false" });
+  const rememberBox = h(doc, "input", { id: "set-remember", type: "checkbox" });
+  const passInput = h(doc, "input", { id: "set-pass", type: "password", autocomplete: "new-password" });
+  const passBlock = h(
+    doc,
+    "div",
+    { class: "pass-block", hidden: true },
+    field("set-pass", t("settings.passphraseLabel"), passInput),
+    h(doc, "p", { class: "notice" }, t("settings.passphraseWarning")),
+  );
+  const saveButton = h(doc, "button", { type: "button", class: "primary" }, t("settings.keySave"));
+  rememberBox.addEventListener("change", () => {
+    passBlock.hidden = !rememberBox.checked;
+  });
+  saveButton.addEventListener("click", async () => {
+    const key = keyInput.value.trim();
+    if (key === "") return say(t("settings.error.emptyKey"), true);
+    try {
+      if (rememberBox.checked) await vault.remember(key, passInput.value);
+      else vault.setSessionKey(key);
+      keyInput.value = "";
+      passInput.value = "";
+      say(t(rememberBox.checked ? "settings.keyRemembered" : "settings.keySaved"));
+    } catch (error) {
+      vault.setSessionKey(key);
+      say(errorText(error), true);
+    }
+    refreshStatus();
+  });
+
+  // Unlock a remembered key.
+  const unlockInput = h(doc, "input", { id: "set-unlock", type: "password", autocomplete: "current-password" });
+  const unlockButton = h(doc, "button", { type: "button", class: "primary" }, t("settings.unlock"));
+  const unlockForm = h(doc, "div", { class: "unlock-form", hidden: true }, field("set-unlock", t("settings.unlockLabel"), unlockInput), unlockButton);
+  unlockButton.addEventListener("click", async () => {
+    try {
+      await vault.unlock(unlockInput.value);
+      unlockInput.value = "";
+      say(t("settings.unlocked"));
+    } catch (error) {
+      say(errorText(error), true);
+    }
+    refreshStatus();
+  });
+
+  // Forget the remembered key and the key in memory.
+  const forgetButton = h(doc, "button", { type: "button" }, t("settings.forget"));
+  forgetButton.addEventListener("click", () => {
+    vault.forget();
+    vault.clearSessionKey();
+    say(t("settings.forgotten"));
+    refreshStatus();
+  });
+
+  // Change the passphrase.
+  const oldPass = h(doc, "input", { id: "set-old", type: "password", autocomplete: "current-password" });
+  const newPass = h(doc, "input", { id: "set-new", type: "password", autocomplete: "new-password" });
+  const changeButton = h(doc, "button", { type: "button" }, t("settings.changePassphrase"));
+  const changeForm = h(doc, "div", { class: "change-form", hidden: true }, field("set-old", t("settings.oldPassphrase"), oldPass), field("set-new", t("settings.newPassphrase"), newPass), changeButton);
+  changeButton.addEventListener("click", async () => {
+    try {
+      await vault.changePassphrase(oldPass.value, newPass.value);
+      oldPass.value = "";
+      newPass.value = "";
+      say(t("settings.passphraseChanged"));
+    } catch (error) {
+      say(errorText(error), true);
+    }
+  });
+
+  // Default limits.
+  const current = settings.get().limits;
+  const limitInputs = LIMIT_FIELDS.map(([key, labelKey]) => {
+    const input = h(doc, "input", { id: `set-${key}`, type: "number", min: key === "maxSearches" ? 0 : 1, max: LIMIT_MAX[key], step: 1, value: current[key] });
+    input.addEventListener("change", () => {
+      settings.setLimits(Object.fromEntries(LIMIT_FIELDS.map(([k], i) => [k, Number(limitInputs[i].value)])));
+      const clamped = settings.get().limits;
+      limitInputs.forEach((el, i) => {
+        el.value = String(clamped[LIMIT_FIELDS[i][0]]);
+      });
+      say(t("settings.limitsSaved"));
+    });
+    return { key, labelKey, input };
+  }).map(({ key, labelKey, input }) => {
+    input.dataset.key = key;
+    input.labelKey = labelKey;
+    return input;
+  });
+
+  // Local data.
+  const deleteButton = h(doc, "button", { type: "button" }, t("settings.deleteRuns"));
+  const confirmBox = h(doc, "div", { class: "confirm", hidden: true });
+  const confirmYes = h(doc, "button", { type: "button", class: "danger" }, t("settings.deleteConfirmYes"));
+  const confirmNo = h(doc, "button", { type: "button" }, t("settings.deleteConfirmNo"));
+  confirmBox.append(h(doc, "p", {}, t("settings.deleteConfirm")), confirmYes, confirmNo);
+  deleteButton.addEventListener("click", () => {
+    confirmBox.hidden = false;
+  });
+  confirmNo.addEventListener("click", () => {
+    confirmBox.hidden = true;
+  });
+  confirmYes.addEventListener("click", async () => {
+    try {
+      await runStore.clear();
+      say(t("settings.runsDeleted"));
+    } catch {
+      say(t("settings.error.storage"), true);
+    }
+    confirmBox.hidden = true;
+  });
+
+  ctx.main.replaceChildren(
+    h(doc, "h1", {}, t("settings.title")),
+    message,
+    h(
+      doc,
+      "section",
+      { class: "settings-section" },
+      h(doc, "h2", {}, t("settings.keyHeading")),
+      h(doc, "p", {}, t("settings.keyIntro")),
+      status,
+      field("set-key", t("settings.keyLabel"), keyInput),
+      h(doc, "div", { class: "field checkbox" }, rememberBox, h(doc, "label", { for: "set-remember" }, t("settings.rememberLabel"))),
+      passBlock,
+      saveButton,
+      unlockForm,
+      changeForm,
+      forgetButton,
+    ),
+    h(
+      doc,
+      "section",
+      { class: "settings-section" },
+      h(doc, "h2", {}, t("settings.limitsHeading")),
+      h(doc, "p", {}, t("settings.limitsIntro")),
+      ...limitInputs.map((input) => field(input.id, t(input.labelKey), input)),
+    ),
+    h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.dataHeading")), h(doc, "p", {}, t("settings.dataIntro")), deleteButton, confirmBox),
+  );
+  refreshStatus();
+}

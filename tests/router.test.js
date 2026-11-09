@@ -2,10 +2,28 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseRoute } from "../public/js/router.js";
 
-test("empty hashes and #/play open the replay", () => {
+test("empty hashes and #/play open the replay view of Play", () => {
   for (const hash of ["", "#", "#/", "#/play"]) {
-    assert.deepEqual(parseRoute(hash), { name: "play", params: {} }, hash);
+    assert.deepEqual(parseRoute(hash), { name: "play", params: { view: "replay" } }, hash);
   }
+});
+
+test("the Play sub-tabs have their own routes", () => {
+  assert.deepEqual(parseRoute("#/play/create"), { name: "play", params: { view: "create" } });
+  assert.deepEqual(parseRoute("#/play/result"), { name: "play", params: { view: "result" } });
+  assert.deepEqual(parseRoute("#/play/result/local-abc-12"), { name: "play", params: { view: "result", id: "local-abc-12" } });
+  assert.deepEqual(parseRoute("#/play/run/local-abc-12"), { name: "play", params: { view: "run", id: "local-abc-12" } });
+});
+
+test("run ids must be lowercase slugs and sub-routes cannot nest further", () => {
+  for (const hash of ["#/play/run/UPPER", "#/play/run/a/b", "#/play/run", "#/play/result/a/b", "#/play/create/x", "#/play/run/a_b"]) {
+    assert.equal(parseRoute(hash).name, "notfound", hash);
+  }
+});
+
+test("the settings page has a route", () => {
+  assert.deepEqual(parseRoute("#/settings"), { name: "settings", params: {} });
+  assert.equal(parseRoute("#/settings/x").name, "notfound");
 });
 
 test("the simple pages are recognised", () => {
@@ -34,6 +52,7 @@ test("anything unexpected is not found", () => {
     "#/learn/../etc",
     "#/learn/Bad_Slug",
     "#/learn/a/b",
+    "#/learn/a/b/c",
     "#/play/x",
     "#/help/x",
     "#/page",

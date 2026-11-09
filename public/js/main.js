@@ -1,6 +1,10 @@
 import { h } from "./dom.js";
 import { parseRoute } from "./router.js";
 import { loadVersion } from "./version.js";
+import { createVault } from "./storage/key-vault.js";
+import { createSettingsStore } from "./storage/settings.js";
+import { createIndexedDbBackend, createMemoryBackend, createRunStore } from "./storage/runs-store.js";
+import { renderSettings } from "./settings-page.js";
 import {
   SUPPORTED_LANGUAGES,
   createLanguageStore,
@@ -29,7 +33,20 @@ function safeStorage() {
   }
 }
 
+function memoryStorage() {
+  const map = new Map();
+  return {
+    getItem: (k) => (map.has(k) ? map.get(k) : null),
+    setItem: (k, v) => void map.set(k, String(v)),
+    removeItem: (k) => void map.delete(k),
+  };
+}
+
+const storage = safeStorage() ?? memoryStorage();
 const store = createLanguageStore(safeStorage());
+const vault = createVault({ storage });
+const settings = createSettingsStore(storage);
+const runStore = createRunStore(typeof indexedDB === "undefined" ? createMemoryBackend() : createIndexedDbBackend());
 const menu = doc.getElementById("menu");
 const menuToggle = doc.getElementById("menu-toggle");
 const switcher = doc.getElementById("language-switcher");
@@ -55,6 +72,7 @@ const MENU = [
   { route: "learn", href: "#/learn", key: "menu.learn" },
   { route: "help", href: "#/help", key: "menu.help" },
   { route: "about", href: "#/about", key: "menu.about" },
+  { route: "settings", href: "#/settings", key: "menu.settings", icon: "⚙" },
 ];
 
 function menuRouteFor(route) {
@@ -67,7 +85,18 @@ function renderChrome(route) {
   menu.setAttribute("aria-label", t("menu.label"));
   menu.replaceChildren(
     ...MENU.map((item) =>
-      h(doc, "a", { href: item.href, "aria-current": item.route === active ? "page" : undefined }, t(item.key)),
+      h(
+        doc,
+        "a",
+        {
+          href: item.href,
+          class: item.icon ? "menu-icon" : undefined,
+          "aria-label": item.icon ? t(item.key) : undefined,
+          title: item.icon ? t(item.key) : undefined,
+          "aria-current": item.route === active ? "page" : undefined,
+        },
+        item.icon ?? t(item.key),
+      ),
     ),
   );
   menuToggle.textContent = t("menu.toggle");
@@ -121,6 +150,9 @@ async function renderRoute(isNavigation) {
     lang,
     version,
     fetchFn,
+    vault,
+    settings,
+    runStore,
     autoStart: !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches),
     isStale: () => mine !== token,
     onLeave: (fn) => cleanups.push(fn),
@@ -128,7 +160,10 @@ async function renderRoute(isNavigation) {
   try {
     switch (route.name) {
       case "play":
-        await renderPlay(ctx);
+        await renderPlay(ctx, route.params);
+        break;
+      case "settings":
+        renderSettings(ctx);
         break;
       case "learn":
         await renderLearn(ctx);
