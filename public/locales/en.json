@@ -47,7 +47,7 @@
   "landing.intro": "Watch a real recorded run, step by step. Use the slow-down and step buttons to follow every message.",
   "landing.body": "## What you just watched\n\nAn **agent** is a language model with a role, a goal and tools. It works in a loop: it reads what it knows, decides what to do next, uses a tool if it needs one, and repeats until it is done.\n\n**Orchestration** decides who works when, what each agent sees, and when to stop. In this run the agents work one after another, a *sequential chain*: each agent passes its result to the next.\n\nClick any step to read the exact message that was sent. Every number comes from the original run, and watching costs nothing.\n\n## Where to go next\n\n- Read the [Learn](#/learn) articles on each concept.\n- See [Help](#/help) for how the player works.\n- Read more [about the project](#/about).",
   "learn.title": "Learn",
-  "learn.intro": "Short articles on every concept in Agent Atlas.",
+  "learn.intro": "Short articles on every concept in Agent Atlas. Some articles mention features, such as running your own experiments with your own API key, that arrive in a later version.",
   "learn.section.basics": "Basics",
   "learn.section.orchestration": "Orchestration patterns",
   "learn.section.memory": "Memory",

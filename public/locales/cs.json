@@ -47,7 +47,7 @@
   "landing.intro": "Sledujte skutečný nahraný běh krok za krokem. Tlačítky zpomalení a kroků můžete sledovat každou zprávu.",
   "landing.body": "## Co jste právě viděli\n\n**Agent** je jazykový model s rolí, cílem a nástroji. Pracuje ve smyčce: přečte si, co ví, rozhodne se, co udělá dál, podle potřeby použije nástroj a opakuje to, dokud není hotovo.\n\n**Orchestrace** určuje, kdo kdy pracuje, co který agent vidí a kdy se skončí. V tomto běhu pracují agenti jeden po druhém, jde o *sekvenční řetězec*: každý agent předá svůj výsledek dalšímu.\n\nKlikněte na libovolný krok a přečtěte si přesnou zprávu, která byla odeslána. Všechna čísla pocházejí z původního běhu a sledování nic nestojí.\n\n## Kam dál\n\n- Přečtěte si články v sekci [Učení](#/learn) o jednotlivých pojmech.\n- V [nápovědě](#/help) najdete, jak přehrávač funguje.\n- Přečtěte si více [o projektu](#/about).",
   "learn.title": "Učení",
-  "learn.intro": "Krátké články o každém pojmu v Agent Atlas.",
+  "learn.intro": "Krátké články o každém pojmu v Agent Atlas. Některé články zmiňují funkce, například vlastní pokusy s vlastním API klíčem, které přijdou v pozdější verzi.",
   "learn.section.basics": "Základy",
   "learn.section.orchestration": "Vzory orchestrace",
   "learn.section.memory": "Paměť",
