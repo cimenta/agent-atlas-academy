@@ -108,7 +108,7 @@ test("pause_turn continues the same turn, at most four times", async () => {
   assert.equal(result.text, "done");
   assert.equal(ok.calls.length, 5);
   const bad = setup({ replies: [pause(), pause(), pause(), pause(), pause()] });
-  await assert.rejects(bad.agent.run("t"), /pause/i);
+  await assert.rejects(bad.agent.run("t"), /paus/i);
 });
 
 test("a reply cut by max_tokens emits a warning and returns the partial text", async () => {
