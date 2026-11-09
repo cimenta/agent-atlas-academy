@@ -1,0 +1,53 @@
+// The only place that talks to Anthropic. Uses fetch and standard APIs only.
+
+export class AnthropicError extends Error {
+  constructor(message, { status = 0, retryable = false } = {}) {
+    super(message);
+    this.name = "AnthropicError";
+    this.status = status;
+    this.retryable = retryable;
+  }
+}
+
+const API_URL = "https://api.anthropic.com/v1/messages";
+const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 529]);
+
+// Removes the key, and anything shaped like an Anthropic key, from text that may be shown or logged.
+export function redact(text, apiKey) {
+  let out = String(text ?? "");
+  if (typeof apiKey === "string" && apiKey.length >= 8) out = out.split(apiKey).join("[redacted]");
+  return out.replace(/sk-ant-[A-Za-z0-9_-]+/g, "[redacted]");
+}
+
+export async function callAnthropic(body, { apiKey, fetchImpl = fetch, signal, timeoutMs = 60000 } = {}) {
+  if (typeof apiKey !== "string" || apiKey.length === 0) throw new AnthropicError("No API key was given");
+  if (signal?.aborted) throw new AnthropicError("The request was cancelled");
+  const timeout = AbortSignal.timeout(timeoutMs);
+  const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
+
+  let response;
+  try {
+    response = await fetchImpl(API_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify(body),
+      signal: combined,
+    });
+  } catch (error) {
+    if (signal?.aborted) throw new AnthropicError("The request was cancelled");
+    if (timeout.aborted) throw new AnthropicError(`The request timed out after ${timeoutMs} ms`);
+    throw new AnthropicError(redact(error?.message, apiKey) || "Network error", { retryable: true });
+  }
+
+  let data = {};
+  try {
+    data = await response.json();
+  } catch {
+    data = {};
+  }
+  if (!response.ok) {
+    const message = redact(data?.error?.message, apiKey) || `Anthropic answered with status ${response.status}`;
+    throw new AnthropicError(message, { status: response.status, retryable: RETRYABLE_STATUS.has(response.status) });
+  }
+  return data;
+}
