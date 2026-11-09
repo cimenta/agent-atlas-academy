@@ -198,11 +198,16 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
   // The conversation one agent sees: its role, what was handed to it, its tool calls and results, its answer.
   function renderMessages() {
     const seen = events.slice(0, reached);
-    const agent = filterAgent ?? [...seen].reverse().find((e) => typeof e.agent === "string")?.agent ?? null;
+    const current = effectiveIndex();
+    const picked = events[current];
+    const pickedAgent = picked ? (picked.type === "handoff" ? picked.to : picked.agent) : null;
+    const agent = filterAgent ?? pickedAgent ?? [...seen].reverse().find((e) => typeof e.agent === "string")?.agent ?? null;
+    let at = 0;
     const card = (role, text) =>
-      h(doc, "div", { class: "output-card" }, h(doc, "span", { class: "tg", "data-role": role }, t(`msg.${role}`)), h(doc, "pre", { class: "message" }, text));
+      h(doc, "div", { class: "output-card", "aria-current": at === current ? "step" : undefined }, h(doc, "span", { class: "tg", "data-role": role }, t(`msg.${role}`)), h(doc, "pre", { class: "message" }, text));
     const cards = [];
-    for (const e of seen) {
+    for (const [i, e] of seen.entries()) {
+      at = i;
       if (e.type === "run_start" && seen.find((x) => x.agent)?.agent === agent && typeof e.task === "string") cards.push(card("user", e.task));
       else if (e.type === "agent_start" && e.agent === agent && typeof e.role === "string") cards.push(card("system", e.role));
       else if (e.type === "handoff" && e.to === agent) cards.push(card("handoff", typeof e.note === "string" ? e.note : `${e.from} → ${e.to}`));

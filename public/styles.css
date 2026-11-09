@@ -354,3 +354,4 @@ button.node[aria-pressed="true"] { border: 2px solid var(--accent-line); padding
 .tg[data-role="assistant"], .tg[data-role="tool"] { background: var(--accent-bg); color: var(--accent); }
 .tg[data-role="handoff"] { background: var(--working-bg); color: var(--working); }
 .output-card .tg { margin-bottom: 2px; display: inline-block; }
+.output-card[aria-current="step"] { border: 2px solid var(--accent-line); background: var(--accent-bg); padding: 7px 11px; }
