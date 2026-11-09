@@ -2,6 +2,7 @@
 import { h } from "./dom.js";
 import { LIMIT_MAX } from "./engine/catalog.js";
 import { VaultError } from "./storage/key-vault.js";
+import { exportBackup, parseBackup, applyBackup } from "./storage/backup.js";
 
 const LIMIT_FIELDS = [
   ["maxSteps", "settings.limitSteps"],
@@ -147,6 +148,71 @@ export function renderSettings(ctx) {
     confirmBox.hidden = true;
   });
 
+  // Backup: export and import.
+  const includeKey = h(doc, "input", { id: "set-include-key", type: "checkbox" });
+  const exportButton = h(doc, "button", { type: "button" }, t("settings.export"));
+  exportButton.addEventListener("click", async () => {
+    try {
+      const items = await runStore.list();
+      const runs = [];
+      for (const item of items) runs.push(await runStore.get(item.id));
+      const backup = exportBackup({
+        runs: runs.filter(Boolean),
+        settings: settings.get(),
+        vaultRecord: vault.exportRecord(),
+        includeKey: includeKey.checked,
+        appVersion: ctx.version,
+      });
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = h(doc, "a", { href: url, download: "agent-atlas-backup.json" });
+      doc.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      say(t("settings.exported", { n: runs.length }));
+    } catch {
+      say(t("settings.error.storage"), true);
+    }
+  });
+  const importFile = h(doc, "input", { id: "set-import", type: "file", accept: "application/json,.json" });
+  const importChoice = h(doc, "div", { class: "confirm", hidden: true });
+  const importProblems = h(doc, "ul", { class: "reasons", hidden: true });
+  let pending = null;
+  importFile.addEventListener("change", async () => {
+    importChoice.hidden = true;
+    importProblems.hidden = true;
+    pending = null;
+    const file = importFile.files?.[0];
+    if (!file) return;
+    const parsed = parseBackup(await file.text());
+    if (!parsed.ok) {
+      importProblems.replaceChildren(h(doc, "li", {}, t("settings.importRejected")), ...parsed.errors.slice(0, 20).map((e) => h(doc, "li", {}, e)));
+      importProblems.hidden = false;
+      return;
+    }
+    pending = parsed.backup;
+    importChoice.hidden = false;
+  });
+  const runImport = async (mode) => {
+    if (!pending) return;
+    try {
+      const result = await applyBackup(pending, { runStore, settingsStore: settings, vault, mode });
+      say(t("settings.imported", result));
+    } catch {
+      say(t("settings.error.storage"), true);
+    }
+    pending = null;
+    importChoice.hidden = true;
+    importFile.value = "";
+    refreshStatus();
+  };
+  const mergeButton = h(doc, "button", { type: "button", class: "primary" }, t("settings.importMerge"));
+  const replaceButton = h(doc, "button", { type: "button", class: "danger" }, t("settings.importReplace"));
+  mergeButton.addEventListener("click", () => runImport("merge"));
+  replaceButton.addEventListener("click", () => runImport("replace"));
+  importChoice.append(h(doc, "p", {}, t("settings.importChoose")), mergeButton, replaceButton);
+
   ctx.main.replaceChildren(
     h(doc, "h1", {}, t("settings.title")),
     message,
@@ -173,7 +239,7 @@ export function renderSettings(ctx) {
       h(doc, "p", {}, t("settings.limitsIntro")),
       ...limitInputs.map((input) => field(input.id, t(input.labelKey), input)),
     ),
-    h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.dataHeading")), h(doc, "p", {}, t("settings.dataIntro")), deleteButton, confirmBox),
+    h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.dataHeading")), h(doc, "p", {}, t("settings.dataIntro")), deleteButton, confirmBox, h(doc, "h3", {}, t("settings.backupHeading")), h(doc, "p", {}, t("settings.backupIntro")), h(doc, "div", { class: "field checkbox" }, includeKey, h(doc, "label", { for: "set-include-key" }, t("settings.includeKey"))), exportButton, field("set-import", t("settings.importLabel"), importFile), importProblems, importChoice),
   );
   refreshStatus();
 }

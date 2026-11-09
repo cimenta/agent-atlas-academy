@@ -125,3 +125,16 @@ test("the session key is null at first and after clearSessionKey", () => {
   v.clearSessionKey();
   assert.equal(v.getSessionKey(), null);
 });
+
+test("exportRecord returns the encrypted record and importRecord stores one", async () => {
+  const a = memoryStorage();
+  const v = vault(a);
+  assert.equal(v.exportRecord(), null);
+  await v.remember(KEY, PASS);
+  const record = v.exportRecord();
+  assert.ok(!JSON.stringify(record).includes("VAULTTESTKEY"));
+  const b = memoryStorage();
+  const other = vault(b);
+  other.importRecord(record);
+  assert.equal(await other.unlock(PASS), KEY);
+});

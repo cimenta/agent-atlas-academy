@@ -278,5 +278,16 @@
   "run.error.method": "The request was not allowed.",
   "run.error.rate_limit": "Too many runs from your network in the last hour. Try again later.",
   "run.error.network": "Could not reach the server. Check your connection and try again.",
-  "run.error.server": "The server had a problem. Try again in a moment."
+  "run.error.server": "The server had a problem. Try again in a moment.",
+  "settings.backupHeading": "Backup",
+  "settings.backupIntro": "Save your runs and settings to a file, or load them from one. Backups are a way to move to another browser or keep a copy.",
+  "settings.includeKey": "Include my saved key, still protected by its password",
+  "settings.export": "Export backup",
+  "settings.exported": "Backup saved with {n} runs.",
+  "settings.importLabel": "Import a backup file",
+  "settings.importRejected": "This file cannot be imported. Nothing was changed. Problems:",
+  "settings.importChoose": "The file is valid. Add its runs to the ones you have, or replace everything here with it?",
+  "settings.importMerge": "Add to my runs",
+  "settings.importReplace": "Replace everything",
+  "settings.imported": "Imported {added} runs, skipped {skipped} that you already had, {failed} could not be saved."
 }

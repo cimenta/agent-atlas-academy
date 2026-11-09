@@ -109,6 +109,22 @@ export function createVault({ storage, cryptoImpl = globalThis.crypto, iteration
       sessionKey = key;
       return key;
     },
+    // The stored record is already encrypted. It is what a backup may carry, never the key itself.
+    exportRecord() {
+      try {
+        const raw = storage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    },
+    importRecord(record) {
+      try {
+        storage.setItem(STORAGE_KEY, JSON.stringify(record));
+      } catch {
+        throw new VaultError("storage");
+      }
+    },
     forget() {
       try {
         storage.removeItem(STORAGE_KEY);

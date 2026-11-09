@@ -278,5 +278,16 @@
   "run.error.method": "Požadavek nebyl povolen.",
   "run.error.rate_limit": "Z vaší sítě přišlo za poslední hodinu příliš mnoho běhů. Zkuste to později.",
   "run.error.network": "Server se nepodařilo zastihnout. Zkontrolujte připojení a zkuste to znovu.",
-  "run.error.server": "Server má potíže. Zkuste to za chvíli znovu."
+  "run.error.server": "Server má potíže. Zkuste to za chvíli znovu.",
+  "settings.backupHeading": "Záloha",
+  "settings.backupIntro": "Uložte své běhy a nastavení do souboru nebo je z něj načtěte. Záloha se hodí k přenosu do jiného prohlížeče nebo jako kopie.",
+  "settings.includeKey": "Přidat můj uložený klíč, stále chráněný jeho heslem",
+  "settings.export": "Exportovat zálohu",
+  "settings.exported": "Záloha uložena, běhů: {n}.",
+  "settings.importLabel": "Importovat soubor se zálohou",
+  "settings.importRejected": "Tento soubor nelze importovat. Nic se nezměnilo. Problémy:",
+  "settings.importChoose": "Soubor je v pořádku. Přidat jeho běhy k těm, které máte, nebo tady všechno nahradit jeho obsahem?",
+  "settings.importMerge": "Přidat k mým během",
+  "settings.importReplace": "Nahradit vše",
+  "settings.imported": "Naimportováno běhů: {added}, přeskočeno těch, které už máte: {skipped}, neuložilo se: {failed}."
 }
