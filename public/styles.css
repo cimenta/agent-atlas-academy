@@ -81,7 +81,7 @@ button[aria-pressed="true"], button.primary {
   padding: 8px var(--gutter);
   border-bottom: 1px solid var(--border);
 }
-.brand { font-weight: 700; font-size: 1.15rem; text-decoration: none; color: var(--text); margin-right: auto; }
+.brand { display: inline-flex; align-items: center; min-height: var(--touch); font-weight: 700; font-size: 1.15rem; text-decoration: none; color: var(--text); margin-right: auto; }
 .menu { display: none; width: 100%; flex-direction: column; gap: 4px; }
 .menu.open { display: flex; }
 .menu a {
