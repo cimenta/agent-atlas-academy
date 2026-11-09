@@ -6,10 +6,14 @@ import { createAgent } from "./agent.js";
 import { redact } from "./anthropic.js";
 import * as sequential from "./runners/sequential.js";
 import * as parallel from "./runners/parallel.js";
+import * as supervisor from "./runners/supervisor.js";
+import * as debate from "./runners/debate.js";
 
 export const RUNNERS = {
   sequential: sequential.run,
   parallel: parallel.run,
+  supervisor: supervisor.run,
+  debate: debate.run,
 };
 
 export async function runDesign({ design, task, limits, language = "en", call, emit, signal, now = Date.now }) {
