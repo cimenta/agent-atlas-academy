@@ -15,6 +15,6 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Needs attention before launch
 
-- The legal texts contain `[[OWNER: ...]]` markers for the owner's details and need the owner's and a lawyer's review.
+- The legal texts carry the owner's details but still need a lawyer's review before launch.
 - The Czech text is machine-drafted and needs a native-speaker read.
 - The included sample run is a hand-made placeholder, to be replaced by a real recording.
