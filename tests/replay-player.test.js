@@ -180,3 +180,20 @@ test("seeking to the start while playing does not throw and keeps playing", () =
   clock.tick();
   assert.equal(p.cursor, 1);
 });
+
+test("timeScale 2 halves the delays while the selected speed stays 1", () => {
+  const clock = fakeClock();
+  const p = createPlayer({ events: ev(0, 1000, 5000), clock, maxGapMs: 2000, timeScale: 2 });
+  p.play();
+  assert.deepEqual(clock.delays, [500]);
+  clock.tick();
+  assert.deepEqual(clock.delays, [500, 1000]);
+  assert.equal(p.speed, 1);
+});
+
+test("an invalid timeScale falls back to 1", () => {
+  const clock = fakeClock();
+  const p = createPlayer({ events: ev(0, 1000), clock, timeScale: 0 });
+  p.play();
+  assert.deepEqual(clock.delays, [1000]);
+});

@@ -1,4 +1,4 @@
-const SEMVER = /^\d+\.\d+\.\d+$/;
+const SEMVER = /^\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?$/;
 
 export async function loadVersion(fetchFn) {
   try {

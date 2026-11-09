@@ -28,7 +28,7 @@ Writes `public/version.json` and the article indexes (generated, not committed).
 
 ## Releases
 
-The version lives in `package.json` and is shown in the footer. The project owner uses one script, `release.bat`: without an argument it shows the current version; `release.bat patch|minor|major` commits everything with a message, bumps the version, tags it, pushes and creates a GitHub release. A release is refused while any owner placeholder marker is left in the legal texts, `README.md` or `SECURITY.md` (`npm run check:release`).
+The version lives in `package.json` and is shown in the footer. The project owner uses two scripts. `test.bat` commits the changes on main and raises the dev number (for example 0.2.1-dev.3, shown in the site header) and pushes to the `dev` branch, where Vercel builds a preview to test. `release.bat`: without an argument it shows the current version; `release.bat patch|minor|major` commits everything with a message, bumps the version, tags it, pushes and creates a GitHub release. A release is refused while any owner placeholder marker is left in the legal texts, `README.md` or `SECURITY.md` (`npm run check:release`).
 
 ## Contributing a language
 

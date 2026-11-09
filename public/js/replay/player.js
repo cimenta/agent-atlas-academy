@@ -2,7 +2,8 @@ export const SPEEDS = [0.25, 0.5, 1, 2];
 
 const validSpeed = (x) => typeof x === "number" && Number.isFinite(x) && x > 0;
 
-export function createPlayer({ events, clock, maxGapMs = 2000, speeds = SPEEDS, speed = 1 }) {
+export function createPlayer({ events, clock, maxGapMs = 2000, speeds = SPEEDS, speed = 1, timeScale = 1 }) {
+  const scale = validSpeed(timeScale) ? timeScale : 1;
   let cursor = 0;
   let playing = false;
   let currentSpeed = validSpeed(speed) ? speed : 1;
@@ -37,7 +38,7 @@ export function createPlayer({ events, clock, maxGapMs = 2000, speeds = SPEEDS, 
       playing = false;
       return;
     }
-    timer = clock.setTimeout(step, Math.min(gapBefore(cursor), maxGapMs) / currentSpeed);
+    timer = clock.setTimeout(step, Math.min(gapBefore(cursor), maxGapMs) / (currentSpeed * scale));
   }
 
   function step() {

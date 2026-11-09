@@ -30,12 +30,12 @@ function mountError(container, doc, t, errors) {
   return { destroy: () => container.replaceChildren() };
 }
 
-export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true }) {
+export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1 }) {
   const validation = validateRun(run);
   if (!validation.ok) return mountError(container, doc, t, validation.errors);
 
   const events = run.events;
-  const player = createPlayer({ events, clock });
+  const player = createPlayer({ events, clock, timeScale });
   let selection = null; // { index, cursor }
 
   const graph = h(doc, "div", { class: "graph", role: "list", "aria-label": t("player.agents") });

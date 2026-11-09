@@ -32,7 +32,7 @@ test("LICENSE is the MIT licence", () => {
 });
 
 test("the app folder holds no project management files", () => {
-  for (const name of [".superpowers", "docs", "push.bat", "release.bat", "tmp-solution"]) {
+  for (const name of [".superpowers", "docs", "push.bat", "release.bat", "test.bat", "tmp-solution"]) {
     assert.equal(existsSync(join(appDir, name)), false, `${name} must not be in app/`);
   }
 });

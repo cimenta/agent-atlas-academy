@@ -59,7 +59,7 @@ export async function renderPlay(ctx) {
     const run = await getJson(ctx, `/runs/${first.id}.json`);
     const explanations = await loadExplanations(ctx, first.id);
     if (ctx.isStale()) return;
-    const handle = mountReplay(host, { run, explanations, t, doc, autoStart: ctx.autoStart });
+    const handle = mountReplay(host, { run, explanations, t, doc, autoStart: ctx.autoStart, timeScale: first.timeScale });
     ctx.onLeave(handle.destroy);
   } catch {
     if (!ctx.isStale()) host.replaceChildren(h(doc, "p", { class: "notice", role: "alert" }, t("error.loadFailed")));
@@ -117,11 +117,10 @@ export async function renderArticle(ctx, slug) {
   show(ctx, ...nodes);
 }
 
-export function renderTextPage(ctx, titleKey, bodyKey, withVersion = false) {
+export function renderTextPage(ctx, titleKey, bodyKey) {
   const { doc, t } = ctx;
   setTitle(ctx, t(titleKey));
   const nodes = [h(doc, "h1", {}, t(titleKey)), markdown(ctx, t(bodyKey))];
-  if (withVersion) nodes.push(h(doc, "p", { class: "notice" }, t("footer.version", { version: ctx.version })));
   show(ctx, ...nodes);
 }
 

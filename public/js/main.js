@@ -35,6 +35,8 @@ const menuToggle = doc.getElementById("menu-toggle");
 const switcher = doc.getElementById("language-switcher");
 const main = doc.getElementById("main");
 const footer = doc.getElementById("footer");
+const versionLabel = doc.getElementById("version");
+const tagline = doc.getElementById("tagline");
 
 let lang = resolveLocale({
   stored: store.get(),
@@ -94,10 +96,11 @@ function renderChrome(route) {
     ].map(([name, key]) => h(doc, "li", {}, h(doc, "a", { href: `#/page/${name}` }, t(key)))),
   );
   footer.replaceChildren(
-    h(doc, "p", {}, t("footer.educational")),
     links,
-    h(doc, "p", {}, `${t("footer.version", { version })} · ${t("footer.license")}`),
+    h(doc, "p", {}, t("footer.license")),
   );
+  versionLabel.textContent = version !== "unknown" ? `v${version}` : "";
+  tagline.textContent = t("site.tagline");
   doc.querySelector(".skip-link").textContent = t("a11y.skip");
   doc.documentElement.lang = lang;
 }
@@ -137,7 +140,7 @@ async function renderRoute(isNavigation) {
         renderTextPage(ctx, "help.title", "help.body");
         break;
       case "about":
-        renderTextPage(ctx, "about.title", "about.body", true);
+        renderTextPage(ctx, "about.title", "about.body");
         break;
       case "page":
         await renderLegalPage(ctx, route.params.name);

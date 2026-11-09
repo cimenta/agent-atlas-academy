@@ -81,7 +81,11 @@ button[aria-pressed="true"], button.primary {
   padding: 8px var(--gutter);
   border-bottom: 1px solid var(--border);
 }
-.brand { display: inline-flex; align-items: center; min-height: var(--touch); font-weight: 700; font-size: 1.15rem; text-decoration: none; color: var(--text); margin-right: auto; }
+.brand-block { margin-right: auto; }
+.brand-row { display: flex; align-items: baseline; gap: 8px; }
+.brand { display: inline-flex; align-items: center; min-height: 32px; font-weight: 700; font-size: 1.15rem; text-decoration: none; color: var(--text); }
+.version { color: var(--muted); font-size: 0.85rem; }
+.tagline { margin: 0; color: var(--muted); font-size: 0.85rem; }
 .menu { display: none; width: 100%; flex-direction: column; gap: 4px; }
 .menu.open { display: flex; }
 .menu a {

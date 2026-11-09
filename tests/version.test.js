@@ -25,3 +25,10 @@ test("writeVersionFile throws when the version is not MAJOR.MINOR.PATCH", () => 
   writeFileSync(pkg, JSON.stringify({ version: "1.2" }));
   assert.throws(() => writeVersionFile(pkg, join(dir, "version.json")), /semantic/i);
 });
+
+test("writeVersionFile accepts a dev version such as 0.2.1-dev.3", () => {
+  const dir = tempDir();
+  const pkg = join(dir, "package.json");
+  writeFileSync(pkg, JSON.stringify({ version: "0.2.1-dev.3" }));
+  assert.equal(writeVersionFile(pkg, join(dir, "version.json")), "0.2.1-dev.3");
+});

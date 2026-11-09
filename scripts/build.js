@@ -3,7 +3,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseFrontMatter } from "../public/js/markdown.js";
 
-const SEMVER = /^\d+\.\d+\.\d+$/;
+const SEMVER = /^\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?$/;
 
 export function writeVersionFile(packageJsonPath, outPath) {
   const { version } = JSON.parse(readFileSync(packageJsonPath, "utf8"));

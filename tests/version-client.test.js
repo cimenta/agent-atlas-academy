@@ -20,3 +20,8 @@ test("loadVersion says unknown for malformed data", async () => {
   assert.equal(await loadVersion(async () => ({ ok: true, json: async () => ({}) })), "unknown");
   assert.equal(await loadVersion(async () => ({ ok: true, json: async () => ({ version: "<b>x</b>" }) })), "unknown");
 });
+
+test("loadVersion accepts a dev version such as 0.2.1-dev.3", async () => {
+  const fetchFn = async () => ({ ok: true, json: async () => ({ version: "0.2.1-dev.3" }) });
+  assert.equal(await loadVersion(fetchFn), "0.2.1-dev.3");
+});

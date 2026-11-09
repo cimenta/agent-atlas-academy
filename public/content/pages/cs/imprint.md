@@ -2,20 +2,8 @@
 title: Provozovatel
 ---
 
-## Provozovatel tohoto webu
+**Provozovatel:** [Radek Šimčík](https://portfolio.radeksimcik.cz)
 
-Radek Šimčík
+**Kontakt:** info@agentatlas.academy
 
-Poštovní adresa je na požádání k dispozici e-mailem.
-
-## Kontakt
-
-E-mail: agent-atlas-academy@radeksimcik.cz
-
-## Registrace
-
-IČO: 06018025
-
-## Odpovědnost za obsah
-
-Radek Šimčík
+**Obsah:** Radek Šimčík, IČO: 06018025

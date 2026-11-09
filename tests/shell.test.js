@@ -34,3 +34,13 @@ test("the shell has the menu, main area and footer", () => {
   assert.ok(html.includes('<main id="main"'));
   assert.ok(html.includes('<footer id="footer"'));
 });
+
+test("the header holds the site title, the version and the tagline", () => {
+  assert.match(html, /<header[\s\S]*class="brand"[\s\S]*id="version"[\s\S]*id="tagline"[\s\S]*<\/header>/);
+});
+
+test("the footer no longer carries the tagline or version text", () => {
+  const main = readFileSync(join(appDir, "public", "js", "main.js"), "utf8");
+  assert.ok(!main.includes("footer.educational"));
+  assert.ok(!main.includes("footer.version"));
+});
