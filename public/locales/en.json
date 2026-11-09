@@ -120,7 +120,6 @@
   "play.delete": "Delete",
   "play.deleteLabel": "Delete the run {title}",
   "play.runNotFound": "That run was not found in this browser or in the examples.",
-  "play.back": "Back to all runs",
   "play.resultEmpty": "No result yet. Make a run on the Create tab and its result shows up here.",
   "result.title": "Result: {title}",
   "result.status": "How it ended",

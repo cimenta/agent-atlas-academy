@@ -120,7 +120,6 @@
   "play.delete": "Smazat",
   "play.deleteLabel": "Smazat běh {title}",
   "play.runNotFound": "Tento běh se nenašel v tomto prohlížeči ani mezi ukázkami.",
-  "play.back": "Zpět na všechny běhy",
   "play.resultEmpty": "Zatím žádný výsledek. Spusťte běh na kartě Vytvořit a výsledek se objeví tady.",
   "result.title": "Výsledek: {title}",
   "result.status": "Jak to skončilo",

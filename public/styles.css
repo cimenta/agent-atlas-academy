@@ -343,3 +343,6 @@ button.step.sel { background: var(--accent-bg); border: 2px solid var(--accent-l
 .rounds { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
 .rounds button { min-height: 30px; min-width: 0; padding: 2px 12px; font-size: 0.8rem; }
 .rounds button.sel { background: var(--accent-bg); border-color: var(--accent-line); color: var(--accent); }
+.run-row[aria-current="true"] { background: var(--accent-bg); }
+.run-row[aria-current="true"] .run-title { color: var(--accent); }
+.run-lists { margin-top: 16px; }
