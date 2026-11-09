@@ -197,3 +197,53 @@ test("an invalid timeScale falls back to 1", () => {
   p.play();
   assert.deepEqual(clock.delays, [1000]);
 });
+
+test("a live player follows appended events and notifies", () => {
+  const events = [];
+  const p = createPlayer({ events, clock: fakeClock(), live: true });
+  let notified = 0;
+  p.subscribe(() => (notified += 1));
+  for (const e of ev(0, 10, 20)) p.append(e);
+  assert.equal(p.cursor, 3);
+  assert.equal(events.length, 3);
+  assert.equal(notified, 3);
+  assert.equal(p.live, true);
+});
+
+test("a live player is not finished until endLive, then it is an ordinary finished player", () => {
+  const p = createPlayer({ events: [], clock: fakeClock(), live: true });
+  for (const e of ev(0, 10)) p.append(e);
+  assert.equal(p.finished, false);
+  p.endLive();
+  assert.equal(p.live, false);
+  assert.equal(p.finished, true);
+});
+
+test("moving back stops following, and seeking to the end follows again", () => {
+  const p = createPlayer({ events: [], clock: fakeClock(), live: true });
+  for (const e of ev(0, 10, 20)) p.append(e);
+  p.prev();
+  assert.equal(p.cursor, 2);
+  p.append({ t: 30, type: "round" });
+  assert.equal(p.cursor, 2);
+  p.seek(4);
+  p.append({ t: 40, type: "round" });
+  assert.equal(p.cursor, 5);
+});
+
+test("play does nothing while live: no timer, not playing", () => {
+  const clock = fakeClock();
+  const p = createPlayer({ events: [], clock, live: true });
+  for (const e of ev(0, 10)) p.append(e);
+  p.play();
+  assert.equal(clock.pendingCount(), 0);
+  assert.equal(p.playing, false);
+});
+
+test("a player that is not live is unchanged by the live code", () => {
+  const p = createPlayer({ events: ev(0, 10), clock: fakeClock() });
+  assert.equal(p.live, false);
+  assert.equal(p.finished, false);
+  p.seek(2);
+  assert.equal(p.finished, true);
+});

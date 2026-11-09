@@ -25,6 +25,8 @@
   "player.timeline": "Steps",
   "player.play": "Play",
   "player.pause": "Pause",
+  "player.live": "Live",
+  "player.stop": "Stop",
   "player.restart": "Restart",
   "player.previous": "Previous step",
   "player.next": "Next step",

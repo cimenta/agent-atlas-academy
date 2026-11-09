@@ -208,3 +208,7 @@ button[aria-pressed="true"], button.primary {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+.live-badge { display: inline-block; margin-left: 10px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; vertical-align: middle; color: var(--accent-text); background: var(--working); border-radius: 999px; }
+.live-badge[hidden], button[hidden] { display: none; }
+button.danger { border-color: var(--working); color: var(--working); }

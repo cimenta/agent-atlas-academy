@@ -33,13 +33,27 @@ function mountError(container, doc, t, errors) {
 export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1 }) {
   const validation = validateRun(run);
   if (!validation.ok) return mountError(container, doc, t, validation.errors);
+  return mountView(container, { events: run.events, title: run.title, recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false });
+}
 
-  const events = run.events;
-  const player = createPlayer({ events, clock, timeScale });
+// A player that shows a run while it is still arriving. Events are added with append(), end() closes it.
+export function mountLiveReplay(container, { title, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {} }) {
+  const view = mountView(container, { events: [], title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop });
+  return {
+    append: (event) => view.player.append(event),
+    end: () => view.player.endLive(),
+    destroy: () => view.destroy(),
+  };
+}
+
+function mountView(container, { events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop }) {
+  const player = createPlayer({ events, clock, timeScale, live });
   let selection = null; // { index, cursor }
 
   const graph = h(doc, "div", { class: "graph", role: "list", "aria-label": t("player.agents") });
   const playButton = h(doc, "button", { type: "button", class: "primary" });
+  const liveBadge = h(doc, "span", { class: "live-badge" }, t("player.live"));
+  const stopButton = h(doc, "button", { type: "button", class: "danger" }, t("player.stop"));
   const restartButton = h(doc, "button", { type: "button" }, t("player.restart"));
   const previousButton = h(doc, "button", { type: "button" }, t("player.previous"));
   const nextButton = h(doc, "button", { type: "button" }, t("player.next"));
@@ -66,11 +80,11 @@ export function mountReplay(container, { run, explanations = {}, t, doc = docume
   const root = h(
     doc,
     "section",
-    { class: "replay", "aria-label": t("player.title", { title: run.title }) },
-    h(doc, "h2", {}, t("player.title", { title: run.title })),
-    h(doc, "p", { class: "recorded" }, t("player.recordedWith", run.recordedWith)),
+    { class: "replay", "aria-label": t("player.title", { title }) },
+    h(doc, "h2", {}, t("player.title", { title }), liveBadge),
+    h(doc, "p", { class: "recorded" }, t("player.recordedWith", recordedWith)),
     graph,
-    h(doc, "div", { class: "controls" }, playButton, restartButton, previousButton, nextButton, speedGroup),
+    h(doc, "div", { class: "controls" }, playButton, stopButton, restartButton, previousButton, nextButton, speedGroup),
     range,
     status,
     explanation,
@@ -145,7 +159,11 @@ export function mountReplay(container, { run, explanations = {}, t, doc = docume
     for (const button of speedButtons) {
       button.setAttribute("aria-pressed", String(Number(button.getAttribute("data-speed")) === player.speed));
     }
+    range.max = String(events.length);
     range.value = String(player.cursor);
+    playButton.disabled = player.live;
+    liveBadge.hidden = !player.live;
+    stopButton.hidden = !player.live;
     const parts = [t("player.step", { n: player.cursor, total: events.length })];
     if (state.tokens.input || state.tokens.output) parts.push(t("player.tokens", state.tokens));
     if (player.finished) parts.push(t("player.finished"));
@@ -162,6 +180,7 @@ export function mountReplay(container, { run, explanations = {}, t, doc = docume
 
   playButton.addEventListener("click", () => (player.playing ? player.pause() : player.play()));
   restartButton.addEventListener("click", () => player.restart());
+  stopButton.addEventListener("click", () => onStop?.());
   previousButton.addEventListener("click", () => player.prev());
   nextButton.addEventListener("click", () => player.next());
   for (const button of speedButtons) {
@@ -178,6 +197,7 @@ export function mountReplay(container, { run, explanations = {}, t, doc = docume
   if (autoStart) player.play();
 
   return {
+    player,
     destroy() {
       player.pause();
       unsubscribe();

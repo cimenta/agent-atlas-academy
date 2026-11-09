@@ -2,15 +2,20 @@ export const SPEEDS = [0.25, 0.5, 1, 2];
 
 const validSpeed = (x) => typeof x === "number" && Number.isFinite(x) && x > 0;
 
-export function createPlayer({ events, clock, maxGapMs = 2000, speeds = SPEEDS, speed = 1, timeScale = 1 }) {
+export function createPlayer({ events, clock, maxGapMs = 2000, speeds = SPEEDS, speed = 1, timeScale = 1, live = false }) {
   const scale = validSpeed(timeScale) ? timeScale : 1;
+  let isLive = Boolean(live);
+  let following = true;
   let cursor = 0;
   let playing = false;
   let currentSpeed = validSpeed(speed) ? speed : 1;
   let timer = null;
   const listeners = new Set();
 
-  const isFinished = () => events.length > 0 && cursor >= events.length;
+  const isFinished = () => !isLive && events.length > 0 && cursor >= events.length;
+  const updateFollowing = () => {
+    if (isLive) following = cursor >= events.length;
+  };
   const notify = () => listeners.forEach((listener) => listener(player));
 
   function clearTimer() {
@@ -63,8 +68,21 @@ export function createPlayer({ events, clock, maxGapMs = 2000, speeds = SPEEDS, 
     get finished() {
       return isFinished();
     },
+    get live() {
+      return isLive;
+    },
+    append(event) {
+      events.push(event);
+      if (following) cursor = events.length;
+      notify();
+    },
+    endLive() {
+      isLive = false;
+      stop();
+      notify();
+    },
     play() {
-      if (events.length === 0) return;
+      if (isLive || events.length === 0) return;
       if (isFinished()) cursor = 0;
       playing = true;
       if (cursor === 0) cursor = 1;
@@ -85,17 +103,20 @@ export function createPlayer({ events, clock, maxGapMs = 2000, speeds = SPEEDS, 
     next() {
       stop();
       if (cursor < events.length) cursor += 1;
+      updateFollowing();
       notify();
     },
     prev() {
       stop();
       if (cursor > 0) cursor -= 1;
+      updateFollowing();
       notify();
     },
     seek(target) {
       const n = Math.floor(Number(target));
       if (!Number.isFinite(n)) return;
       cursor = Math.max(0, Math.min(events.length, n));
+      updateFollowing();
       if (playing && isFinished()) playing = false;
       schedule();
       notify();
@@ -103,6 +124,7 @@ export function createPlayer({ events, clock, maxGapMs = 2000, speeds = SPEEDS, 
     restart() {
       stop();
       cursor = 0;
+      updateFollowing();
       notify();
     },
     subscribe(listener) {

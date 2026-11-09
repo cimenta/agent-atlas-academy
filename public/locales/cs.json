@@ -25,6 +25,8 @@
   "player.timeline": "Kroky",
   "player.play": "Přehrát",
   "player.pause": "Pozastavit",
+  "player.live": "Živě",
+  "player.stop": "Zastavit",
   "player.restart": "Od začátku",
   "player.previous": "Předchozí krok",
   "player.next": "Další krok",
