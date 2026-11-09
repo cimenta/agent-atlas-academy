@@ -1,0 +1,161 @@
+// The diagram editor's state and rules. Pure: no DOM. The rules mirror validateDesign, so
+// the editor refuses a connection the server would refuse anyway, with the same error code.
+import { AGENT_TYPES, DEFAULT_MODEL, NODE_MAX } from "../engine/catalog.js";
+import { validateDesign } from "../engine/patterns.js";
+
+const ONCE_ONLY = new Set(["supervisor", "combiner", "judge", "free"]);
+const EDITABLE = ["model", "search", "name", "instructions", "stance"];
+const DEFAULT_ROUNDS = 2;
+
+export function createEditor(initialPattern) {
+  let pattern = initialPattern;
+  let nodes = [];
+  let edges = [];
+  let rounds = DEFAULT_ROUNDS;
+
+  const find = (id) => nodes.find((n) => n.id === id);
+  const hasEdge = (from, to) => edges.some((e) => e.from === from && e.to === to);
+
+  function nextId(agent) {
+    if (!find(agent)) return agent;
+    let n = 2;
+    while (find(`${agent}-${n}`)) n += 1;
+    return `${agent}-${n}`;
+  }
+
+  // Would adding from -> to close a loop in the chain?
+  function closesCycle(from, to) {
+    let current = to;
+    const next = new Map(edges.map((e) => [e.from, e.to]));
+    for (let guard = 0; guard <= nodes.length && current !== undefined; guard++) {
+      if (current === from) return true;
+      current = next.get(current);
+    }
+    return false;
+  }
+
+  return {
+    design() {
+      const copy = { pattern, nodes: structuredClone(nodes), edges: structuredClone(edges) };
+      if (pattern === "debate") copy.rounds = rounds;
+      return copy;
+    },
+
+    addNode(agent, overrides = {}) {
+      const type = AGENT_TYPES[agent];
+      if (!type) return { ok: false, code: "node.agent" };
+      if (!type.patterns.includes(pattern)) return { ok: false, code: "node.agentNotAllowed" };
+      if (nodes.length >= NODE_MAX) return { ok: false, code: "node.count" };
+      if (ONCE_ONLY.has(agent) && nodes.some((n) => n.agent === agent)) return { ok: false, code: "node.duplicate" };
+      const node = { id: nextId(agent), agent, model: DEFAULT_MODEL, search: type.searchDefault };
+      if (type.free) {
+        node.name = "";
+        node.instructions = "";
+      }
+      for (const key of EDITABLE) if (key in overrides) node[key] = overrides[key];
+      nodes.push(node);
+      return { ok: true, id: node.id };
+    },
+
+    removeNode(id) {
+      nodes = nodes.filter((n) => n.id !== id);
+      edges = edges.filter((e) => e.from !== id && e.to !== id);
+    },
+
+    setNode(id, patch) {
+      const node = find(id);
+      if (!node) return;
+      for (const key of EDITABLE) if (key in patch) node[key] = patch[key];
+    },
+
+    connect(from, to) {
+      const a = find(from);
+      const b = find(to);
+      if (!a || !b) return { ok: false, code: "edge.unknownNode" };
+      if (from === to) return { ok: false, code: "edge.self" };
+      if (hasEdge(from, to)) return { ok: false, code: "edge.duplicate" };
+      let code = null;
+      if (pattern === "sequential") {
+        const taken = edges.some((e) => e.from === from) || edges.some((e) => e.to === to) || closesCycle(from, to);
+        if (taken) code = "seq.notChain";
+      } else if (pattern === "parallel") {
+        if (!(b.agent === "combiner" && a.agent !== "combiner")) code = "par.edges";
+      } else if (pattern === "supervisor") {
+        if (!(a.agent === "supervisor" && b.agent !== "supervisor")) code = "sup.edges";
+      } else if (!(a.agent === "debater" && b.agent === "judge")) {
+        code = "deb.edges";
+      }
+      if (code) return { ok: false, code };
+      edges.push({ from, to });
+      return { ok: true };
+    },
+
+    disconnect(from, to) {
+      edges = edges.filter((e) => !(e.from === from && e.to === to));
+    },
+
+    paletteFor() {
+      return Object.entries(AGENT_TYPES).map(([agent, type]) => ({
+        agent,
+        label: type.label,
+        allowed: type.patterns.includes(pattern) && !(ONCE_ONLY.has(agent) && nodes.some((n) => n.agent === agent)),
+      }));
+    },
+
+    errors() {
+      return validateDesign(this.design()).errors;
+    },
+
+    setRounds(n) {
+      if (Number.isInteger(n)) rounds = n;
+    },
+
+    reset(nextPattern) {
+      pattern = nextPattern;
+      nodes = [];
+      edges = [];
+      rounds = DEFAULT_ROUNDS;
+    },
+  };
+}
+
+// Places nodes on a small fixed grid. "rank" is the direction of flow; "offset" is across it.
+// Vertical flow goes top to bottom (rank is y), horizontal goes left to right (rank is x).
+export function layoutDesign(design, { orientation = "vertical" } = {}) {
+  const { nodes, edges, pattern } = design;
+  const connected = new Set(edges.flatMap((e) => [e.from, e.to]));
+  const spots = new Map(); // id -> { rank, offset }
+
+  if (pattern === "sequential") {
+    const incoming = new Map(nodes.map((n) => [n.id, 0]));
+    for (const e of edges) incoming.set(e.to, (incoming.get(e.to) ?? 0) + 1);
+    let level = nodes.filter((n) => connected.has(n.id) && incoming.get(n.id) === 0).map((n) => n.id);
+    for (let rank = 0; level.length > 0 && rank <= nodes.length; rank++) {
+      level.forEach((id, offset) => spots.set(id, { rank, offset }));
+      level = edges.filter((e) => level.includes(e.from) && !spots.has(e.to)).map((e) => e.to);
+    }
+  } else {
+    const hubAgent = { parallel: "combiner", supervisor: "supervisor", debate: "judge" }[pattern];
+    const hub = nodes.find((n) => n.agent === hubAgent && connected.has(n.id));
+    const spokes = nodes.filter((n) => n.agent !== hubAgent && connected.has(n.id));
+    const spokeRank = pattern === "supervisor" ? 1 : 0;
+    const hubRank = pattern === "supervisor" ? 0 : 1;
+    spokes.forEach((n, offset) => spots.set(n.id, { rank: spokeRank, offset }));
+    if (hub) spots.set(hub.id, { rank: hubRank, offset: Math.floor((spokes.length - 1) / 2) });
+  }
+
+  const placed = [...spots.values()];
+  const maxRank = placed.length ? Math.max(...placed.map((s) => s.rank)) : -1;
+  const staged = nodes.filter((n) => !spots.has(n.id));
+  staged.forEach((n, offset) => spots.set(n.id, { rank: maxRank + 2, offset }));
+
+  const out = nodes.map((n) => {
+    const { rank, offset } = spots.get(n.id);
+    return orientation === "horizontal" ? { id: n.id, x: rank, y: offset } : { id: n.id, x: offset, y: rank };
+  });
+  return {
+    nodes: out,
+    width: out.length ? Math.max(...out.map((n) => n.x)) + 1 : 0,
+    height: out.length ? Math.max(...out.map((n) => n.y)) + 1 : 0,
+  };
+}
