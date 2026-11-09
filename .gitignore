@@ -1,0 +1,5 @@
+node_modules/
+public/version.json
+public/content/articles/*/index.json
+.env*
+.vercel/
