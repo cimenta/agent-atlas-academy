@@ -323,3 +323,29 @@ button.danger:hover { background: var(--err-bg); }
 .dnode-body small { max-width: calc(100% - 30px); }
 .dnode[data-selected="true"] .dnode-body strong { max-width: calc(100% - 22px); }
 .dnode-remove { position: absolute; right: 2px; top: 2px; width: 22px; height: 22px; min-width: 22px; min-height: 22px; padding: 0; line-height: 1; border-radius: 50%; border: 0; background: #c0392b; color: #fff; font-size: 1rem; }
+
+/* Replay layout: agent cards, tabs, step list and detail box */
+.graph { flex-direction: row; flex-wrap: wrap; align-items: stretch; gap: 8px; }
+button.node { flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 6px; height: auto; background: var(--card); text-align: left; padding: 10px 12px; border-radius: var(--radius-lg); }
+button.node[aria-pressed="true"] { border: 2px solid var(--accent-line); padding: 9px 11px; }
+.node + .node::before { content: none; }
+.node-name { font-size: 0.95rem; }
+.tabs { display: flex; gap: 2px; margin: 12px 0; border-bottom: 1px solid var(--border); }
+.tab { min-height: 40px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; color: var(--muted); margin-bottom: -1px; }
+.tab[aria-selected="true"] { color: var(--accent); font-weight: 600; border-bottom-color: var(--accent-line); background: none; }
+.lb { margin: 0 0 6px; font-size: 0.8rem; color: var(--muted); }
+.timeline button.step { display: flex; align-items: flex-start; gap: 8px; width: 100%; height: auto; min-height: 40px; padding: 7px 10px; text-align: left; font-weight: 400; background: var(--card); }
+.timeline button.step[aria-current="step"] { border: 2px solid var(--accent-line); padding: 6px 9px; background: var(--accent-bg); color: var(--text); font-weight: 400; }
+.step .ti { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.tg { flex: none; padding: 1px 7px; font-size: 0.72rem; border-radius: 4px; background: var(--surface); color: var(--muted); white-space: nowrap; }
+.tg[data-kind="tool_call"], .tg[data-kind="tool_result"] { background: var(--accent-bg); color: var(--accent); }
+.tg[data-kind="agent_output"], .tg[data-kind="done"] { background: var(--done-bg); color: var(--done); }
+.tg[data-kind="handoff"], .tg[data-kind="warning"] { background: var(--working-bg); color: var(--working); }
+.tg[data-kind="error"] { background: var(--err-bg); color: var(--err); }
+.box { background: var(--surface); border-radius: var(--radius-lg); padding: 12px 14px; }
+.message-panel h3 { font-size: 0.95rem; }
+.message { background: var(--card); border-radius: 8px; padding: 8px 10px; font: 0.8rem/1.45 ui-monospace, Consolas, monospace; }
+.output-card { margin-bottom: 8px; padding: 8px 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+.output-card .message { margin: 6px 0 0; padding: 0; background: none; }
+.replay .explanation:not(:empty) { margin: 8px 0; }
+@media (max-width: 719px) { .message-panel.open { background: var(--surface); } }

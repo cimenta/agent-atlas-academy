@@ -10,6 +10,8 @@ const STATUS_KEY = {
   done: "player.statusDone",
 };
 
+const KINDS = new Set(["run_start", "agent_start", "round", "tool_call", "tool_result", "handoff", "warning", "title", "agent_output", "done", "error"]);
+
 const defaultClock = {
   setTimeout: (fn, ms) => globalThis.setTimeout(fn, ms),
   clearTimeout: (id) => globalThis.clearTimeout(id),
@@ -49,6 +51,8 @@ export function mountLiveReplay(container, { title, recordedWith, t, doc = docum
 function mountView(container, { events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop }) {
   const player = createPlayer({ events, clock, timeScale, live });
   let selection = null; // { index, cursor }
+  let tab = "steps"; // "steps" | "output"
+  let filterAgent = null;
 
   const graph = h(doc, "div", { class: "graph", role: "list", "aria-label": t("player.agents") });
   const playButton = h(doc, "button", { type: "button", class: "primary" });
@@ -72,10 +76,21 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
   const status = h(doc, "div", { class: "status", "aria-live": "polite" });
   const explanation = h(doc, "div", { class: "explanation" });
   const timeline = h(doc, "ol", { class: "timeline" });
+  const outputList = h(doc, "div", { class: "output-list" });
+  const stepsHead = h(doc, "p", { class: "lb" });
+  const tabButtons = ["steps", "output"].map((name) => {
+    const b = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-tab": name }, t(name === "steps" ? "player.tabSteps" : "player.tabOutput"));
+    b.addEventListener("click", () => {
+      tab = name;
+      render();
+    });
+    return b;
+  });
+  const tabs = h(doc, "div", { class: "tabs", role: "tablist" }, ...tabButtons);
   const messageTitle = h(doc, "h3", {}, t("player.message"));
   const messageBody = h(doc, "pre", { class: "message" });
   const closeButton = h(doc, "button", { type: "button", class: "close" }, t("player.close"));
-  const panel = h(doc, "section", { class: "message-panel", "aria-label": t("player.message") }, messageTitle, messageBody, closeButton);
+  const panel = h(doc, "section", { class: "message-panel box", "aria-label": t("player.message") }, messageTitle, messageBody, closeButton);
 
   const root = h(
     doc,
@@ -88,7 +103,8 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
     range,
     status,
     explanation,
-    h(doc, "div", { class: "replay-columns" }, h(doc, "div", {}, h(doc, "h3", {}, t("player.timeline")), timeline), panel),
+    tabs,
+    h(doc, "div", { class: "replay-columns" }, h(doc, "div", { class: "steps-col" }, stepsHead, timeline, outputList), panel),
   );
   container.replaceChildren(root);
 
@@ -99,16 +115,39 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
 
   function renderGraph(state) {
     graph.replaceChildren(
-      ...buildGraphModel(state).nodes.map((node) =>
-        h(
+      ...buildGraphModel(state).nodes.map((node) => {
+        const card = h(
           doc,
-          "div",
-          { class: "node", role: "listitem", "data-status": node.status, "aria-current": node.active ? "true" : undefined },
+          "button",
+          {
+            type: "button",
+            class: "node",
+            role: "listitem",
+            "data-status": node.status,
+            "aria-pressed": String(filterAgent === node.id),
+            "aria-current": node.active ? "true" : undefined,
+          },
           h(doc, "span", { class: "node-name" }, node.label),
           h(doc, "span", { class: "node-status" }, t(STATUS_KEY[node.status])),
-        ),
-      ),
+        );
+        card.addEventListener("click", () => {
+          filterAgent = filterAgent === node.id ? null : node.id;
+          render();
+        });
+        return card;
+      }),
     );
+  }
+
+  function renderOutput(state) {
+    const blocks = [];
+    events.slice(0, player.cursor).forEach((event) => {
+      if (event.type !== "agent_output" || typeof event.text !== "string") return;
+      if (filterAgent && event.agent !== filterAgent) return;
+      blocks.push(h(doc, "div", { class: "output-card" }, h(doc, "strong", {}, event.agent ?? ""), h(doc, "pre", { class: "message" }, event.text)));
+    });
+    if (blocks.length === 0) blocks.push(h(doc, "p", { class: "hint" }, t("player.noOutput")));
+    outputList.replaceChildren(...blocks);
   }
 
   function renderTimeline() {
@@ -116,14 +155,18 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
     const model = buildTimelineModel(events, player.cursor, explanations);
     const state = deriveState(events, player.cursor);
     const current = effectiveIndex();
+    const shown = model.items.filter((item) => !filterAgent || item.agent === filterAgent);
+    stepsHead.textContent = filterAgent ? t("player.stepsOf", { agent: filterAgent }) : t("player.allAgents");
     timeline.replaceChildren(
-      ...model.items.map((item) => {
+      ...shown.map((item) => {
         const { key, params } = describeStep(state.steps[item.index]);
+        const kind = KINDS.has(item.type) ? item.type : "unknown";
         const button = h(
           doc,
           "button",
-          { type: "button", "data-index": item.index, "aria-current": item.index === current ? "step" : undefined },
-          t(key, params),
+          { type: "button", class: "step", "data-kind": kind, "data-index": item.index, "aria-current": item.index === current ? "step" : undefined },
+          h(doc, "span", { class: "tg", "data-kind": kind }, t(`kind.${kind}`)),
+          h(doc, "span", { class: "ti" }, t(key, params)),
         );
         button.addEventListener("click", () => {
           selection = { index: item.index, cursor: item.index + 1 };
@@ -174,7 +217,11 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
     if (shown && shown.explanation) {
       explanation.append(h(doc, "strong", {}, `${t("player.explanation")}: `), doc.createTextNode(shown.explanation));
     }
+    for (const b of tabButtons) b.setAttribute("aria-selected", String(b.getAttribute("data-tab") === tab));
+    timeline.hidden = tab !== "steps";
+    outputList.hidden = tab !== "output";
     renderTimeline();
+    renderOutput(state);
     renderPanel(state);
   }
 

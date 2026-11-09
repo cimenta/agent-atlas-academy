@@ -291,5 +291,22 @@
   "settings.imported": "Naimportováno běhů: {added}, přeskočeno těch, které už máte: {skipped}, neuložilo se: {failed}.",
   "editor.portHelp": "Přetáhněte na jiného agenta, nebo klepněte a pak klepněte na druhého agenta",
   "editor.tidy": "Uspořádat diagram",
-  "editor.removeNamed": "Odebrat: {name}"
+  "editor.removeNamed": "Odebrat: {name}",
+  "kind.run_start": "Zadání",
+  "kind.agent_start": "Spuštění",
+  "kind.round": "Kolo",
+  "kind.tool_call": "Nástroj",
+  "kind.tool_result": "Výsledek",
+  "kind.handoff": "Předání",
+  "kind.warning": "Varování",
+  "kind.title": "Název",
+  "kind.agent_output": "Odpověď",
+  "kind.done": "Hotovo",
+  "kind.error": "Chyba",
+  "kind.unknown": "Krok",
+  "player.tabSteps": "Kroky a nástroje",
+  "player.tabOutput": "Výstup agenta",
+  "player.noOutput": "Zatím neodpověděl žádný agent.",
+  "player.allAgents": "Všichni agenti, kliknutím na agenta filtrujete",
+  "player.stepsOf": "Kroky agenta {agent}, dalším kliknutím zobrazíte všechny"
 }

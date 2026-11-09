@@ -291,5 +291,22 @@
   "settings.imported": "Imported {added} runs, skipped {skipped} that you already had, {failed} could not be saved.",
   "editor.portHelp": "Drag onto another agent to connect, or tap and then tap the other agent",
   "editor.tidy": "Tidy up the diagram",
-  "editor.removeNamed": "Remove {name}"
+  "editor.removeNamed": "Remove {name}",
+  "kind.run_start": "Task",
+  "kind.agent_start": "Start",
+  "kind.round": "Round",
+  "kind.tool_call": "Tool",
+  "kind.tool_result": "Result",
+  "kind.handoff": "Handoff",
+  "kind.warning": "Warning",
+  "kind.title": "Title",
+  "kind.agent_output": "Answer",
+  "kind.done": "Done",
+  "kind.error": "Error",
+  "kind.unknown": "Step",
+  "player.tabSteps": "Steps and tools",
+  "player.tabOutput": "Agent output",
+  "player.noOutput": "No agent has answered yet.",
+  "player.allAgents": "All agents, click an agent to filter",
+  "player.stepsOf": "Steps of {agent}, click the agent again for all"
 }
