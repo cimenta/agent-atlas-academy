@@ -20,6 +20,25 @@ This builds the generated files and serves `public/` at http://localhost:8080.
 npm test
 ```
 
+```bash
+npm run build
+```
+
+Writes `public/version.json` and the article indexes (generated, not committed).
+
+## Releases
+
+The version lives in `package.json` and is shown in the footer. The project owner uses `push.bat` to commit and push, and `release.bat patch|minor|major` to bump the version, tag it and create a GitHub release. A release is refused while any `[[OWNER: ...]]` marker is left in the legal texts, `README.md` or `SECURITY.md` (`npm run check:release`).
+
+## Contributing a language
+
+1. Add the language code to `SUPPORTED_LANGUAGES` in `public/js/i18n.js` (and update the list asserted in `tests/i18n.test.js`).
+2. Copy `public/locales/en.json` to `public/locales/<code>.json` and translate every value. Add a `lang.<code>` key (the language's own name) to every locale file.
+3. Add `public/content/articles/<code>/` and `public/content/pages/<code>/` files with the same names as the English ones. Any article or page you leave out falls back to English, with a notice.
+4. Run `npm test`. The locale tests fail until every key exists and every placeholder such as `{speed}` is kept.
+
+Contributions are reviewed in pull requests. By contributing text you agree it is licensed under CC BY 4.0.
+
 ## Licences
 
 - Code: MIT (see `LICENSE`).

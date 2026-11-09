@@ -114,21 +114,24 @@ test("loadDictionary returns the dictionary on success", async () => {
   assert.deepEqual(result, { a: "b" });
 });
 
-test("English and Czech locale files have exactly the same keys", () => {
+test("every supported locale file has exactly the same keys as English", () => {
   const en = Object.keys(readLocale("en")).sort();
-  const cs = Object.keys(readLocale("cs")).sort();
-  assert.deepEqual(cs, en);
+  for (const lang of SUPPORTED_LANGUAGES) {
+    assert.deepEqual(Object.keys(readLocale(lang)).sort(), en, lang);
+  }
 });
 
 test("every locale value is a non-empty string with matching placeholders", () => {
   const en = readLocale("en");
-  const cs = readLocale("cs");
   const placeholders = (s) => (s.match(/\{\w+\}/g) || []).sort().join(",");
-  for (const key of Object.keys(en)) {
-    assert.equal(typeof en[key], "string", key);
-    assert.ok(en[key].length > 0, key);
-    assert.ok(cs[key].length > 0, key);
-    assert.equal(placeholders(cs[key]), placeholders(en[key]), `placeholders of ${key}`);
+  for (const lang of SUPPORTED_LANGUAGES) {
+    const other = readLocale(lang);
+    for (const key of Object.keys(en)) {
+      assert.equal(typeof en[key], "string", key);
+      assert.ok(en[key].length > 0, key);
+      assert.ok(typeof other[key] === "string" && other[key].length > 0, `${lang}:${key}`);
+      assert.equal(placeholders(other[key]), placeholders(en[key]), `${lang}: placeholders of ${key}`);
+    }
   }
 });
 
