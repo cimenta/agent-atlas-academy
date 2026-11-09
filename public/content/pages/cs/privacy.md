@@ -8,7 +8,7 @@ Agent Atlas je vzdělávací web. Používá **žádné cookies**, žádné sled
 
 ## Kdo za web odpovídá
 
-Radek Šimčík (IČO 06018025). Kontakt pro žádosti o ochranu osobních údajů: agent-atlas-academy@radeksimcik.cz.
+Radek Šimčík (IČO 06018025). Kontakt pro žádosti o ochranu osobních údajů: info@agentatlas.academy.
 
 ## Co se ukládá ve vašem prohlížeči
 

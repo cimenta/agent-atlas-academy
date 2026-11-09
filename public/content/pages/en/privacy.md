@@ -8,7 +8,7 @@ Agent Atlas is an educational website. It uses **no cookies**, no trackers and n
 
 ## Who is responsible
 
-Radek Šimčík (Company ID 06018025). Contact for privacy requests: agent-atlas-academy@radeksimcik.cz.
+Radek Šimčík (Company ID 06018025). Contact for privacy requests: info@agentatlas.academy.
 
 ## What is stored in your browser
 

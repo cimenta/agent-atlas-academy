@@ -26,4 +26,4 @@ These terms are governed by the law of the Czech Republic. Disputes are resolved
 
 ## Contact
 
-agent-atlas-academy@radeksimcik.cz
+info@agentatlas.academy

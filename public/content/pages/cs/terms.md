@@ -26,4 +26,4 @@ Tyto podmínky se řídí právem České republiky. Spory řeší příslušné
 
 ## Kontakt
 
-agent-atlas-academy@radeksimcik.cz
+info@agentatlas.academy
