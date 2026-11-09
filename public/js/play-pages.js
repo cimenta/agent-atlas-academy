@@ -3,6 +3,7 @@ import { h } from "./dom.js";
 import { mountReplay } from "./replay/view.js";
 import { getJson, loadExplanations, renderLanding, renderNotFound, setTitle } from "./pages.js";
 import { buildReplayList, buildResultModel } from "./play-model.js";
+import { renderCreate } from "./create/create-page.js";
 
 const TABS = [
   { view: "replay", href: "#/play", key: "play.tab.replay" },
@@ -31,7 +32,7 @@ export async function renderPlay(ctx, route = { params: { view: "replay" } }) {
   const inner = { ...ctx, main: content };
   switch (view) {
     case "create":
-      return renderCreateTab(inner);
+      return renderCreate(inner);
     case "result":
       return renderResultTab(inner, id);
     case "run":
@@ -189,10 +190,6 @@ export async function renderResultTab(ctx, id) {
     cost,
     h(doc, "p", {}, h(doc, "a", { href: `#/play/run/${run.id}` }, t("result.watch"))),
   );
-}
-
-function renderCreateTab(ctx) {
-  ctx.main.replaceChildren(h(ctx.doc, "p", { class: "notice" }, ctx.t("play.createSoon")));
 }
 
 export { renderNotFound };

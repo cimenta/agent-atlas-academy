@@ -258,3 +258,16 @@ button.danger { border-color: var(--working); color: var(--working); }
 .editor-settings h4 { margin: 0 0 8px; }
 .notice.ok { border-color: var(--done); }
 .field textarea { padding: 8px 12px; min-height: 6rem; }
+
+.field.wide { max-width: none; }
+.field.wide textarea { padding: 8px 12px; min-height: 6rem; }
+.pattern-choice { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.pattern-button { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 10px 12px; height: auto; text-align: left; }
+.pattern-icon { color: var(--accent); }
+.pattern-button[aria-pressed="true"] .pattern-icon, .pattern-button[aria-pressed="true"] .palette-help { color: var(--accent-text); }
+.review { margin-top: 16px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); }
+.review h4 { margin: 16px 0 6px; }
+.reasons { margin: 8px 0; padding-left: 20px; color: var(--working); }
+.run-button { margin-top: 8px; min-width: 140px; }
+.run-button:disabled { opacity: 0.5; cursor: not-allowed; }
+.run-after { margin-top: 12px; }
