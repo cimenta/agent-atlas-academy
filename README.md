@@ -28,7 +28,7 @@ Writes `public/version.json` and the article indexes (generated, not committed).
 
 ## Releases
 
-The version lives in `package.json` and is shown in the footer. The project owner uses `push.bat` to commit and push, and `release.bat patch|minor|major` to bump the version, tag it and create a GitHub release. A release is refused while any owner placeholder marker is left in the legal texts, `README.md` or `SECURITY.md` (`npm run check:release`).
+The version lives in `package.json` and is shown in the footer. The project owner uses one script, `release.bat`: without an argument it shows the current version; `release.bat patch|minor|major` commits everything with a message, bumps the version, tags it, pushes and creates a GitHub release. A release is refused while any owner placeholder marker is left in the legal texts, `README.md` or `SECURITY.md` (`npm run check:release`).
 
 ## Contributing a language
 
