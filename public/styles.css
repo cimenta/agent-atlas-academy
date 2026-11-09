@@ -156,7 +156,8 @@ button[aria-pressed="true"], button.primary {
 .node[data-status="done"] .node-status { color: var(--done); }
 
 .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
-.speed { display: flex; gap: 4px; margin-left: auto; }
+.speed { display: flex; flex-wrap: wrap; gap: 4px; }
+@media (min-width: 720px) { .speed { margin-left: auto; } }
 .replay input[type="range"] { width: 100%; height: var(--touch); }
 .replay .status { margin: 4px 0; font-size: 0.9rem; color: var(--muted); }
 .replay .explanation:not(:empty) { margin: 8px 0; padding: 8px 12px; border-left: 4px solid var(--accent); background: var(--surface); }

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "sample-sequential",
+  "title": "Sample sequential run",
+  "language": "en",
+  "pattern": "sequential",
+  "recordedWith": { "provider": "anthropic", "model": "sample-model" },
+  "appVersion": "0.1.0",
+  "events": [
+    { "t": 0, "type": "run_start", "task": "Explain why the sky is blue." },
+    { "t": 100, "type": "agent_start", "agent": "planner", "role": "Plans the work" },
+    { "t": 1500, "type": "agent_output", "agent": "planner", "text": "Plan: 1. Look up Rayleigh scattering. 2. Write a short answer.", "tokens": { "input": 120, "output": 40 } },
+    { "t": 1600, "type": "handoff", "from": "planner", "to": "researcher", "note": "Look up Rayleigh scattering." },
+    { "t": 1700, "type": "agent_start", "agent": "researcher", "role": "Finds facts" },
+    { "t": 2500, "type": "tool_call", "agent": "researcher", "tool": "web_search", "input": "Rayleigh scattering sky colour" },
+    { "t": 6500, "type": "tool_result", "agent": "researcher", "tool": "web_search", "output": "Shorter wavelengths scatter more strongly in the atmosphere." },
+    { "t": 8000, "type": "agent_output", "agent": "researcher", "text": "Blue light scatters about ten times more than red light.", "tokens": { "input": 300, "output": 60 } },
+    { "t": 8100, "type": "handoff", "from": "researcher", "to": "writer", "note": "Write the answer." },
+    { "t": 8200, "type": "agent_start", "agent": "writer", "role": "Writes the answer" },
+    { "t": 10000, "type": "agent_output", "agent": "writer", "text": "The sky is blue because air scatters blue light more than red light.", "tokens": { "input": 400, "output": 50 } },
+    { "t": 10100, "type": "title", "text": "Why the sky is blue" },
+    { "t": 10200, "type": "done" }
+  ]
+}

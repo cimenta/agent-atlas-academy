@@ -1,3 +1,4 @@
+import { h } from "../dom.js";
 import { validateRun } from "../run-schema.js";
 import { deriveState } from "./state.js";
 import { createPlayer } from "./player.js";
@@ -8,17 +9,6 @@ const STATUS_KEY = {
   working: "player.statusWorking",
   done: "player.statusDone",
 };
-
-// All text goes through textContent / text nodes, never HTML strings.
-function h(doc, tag, attrs = {}, ...children) {
-  const el = doc.createElement(tag);
-  for (const [key, value] of Object.entries(attrs)) {
-    if (value === undefined || value === null || value === false) continue;
-    el.setAttribute(key, value === true ? "" : String(value));
-  }
-  for (const child of children) el.append(typeof child === "string" ? doc.createTextNode(child) : child);
-  return el;
-}
 
 const defaultClock = {
   setTimeout: (fn, ms) => globalThis.setTimeout(fn, ms),
@@ -130,7 +120,7 @@ export function mountReplay(container, { run, explanations = {}, t, doc = docume
       }),
     );
     if (focusedIndex !== null) timeline.querySelector(`[data-index="${focusedIndex}"]`)?.focus();
-    timeline.lastElementChild?.scrollIntoView?.({ block: "nearest" });
+    timeline.scrollTop = timeline.scrollHeight;
   }
 
   function renderPanel(state) {

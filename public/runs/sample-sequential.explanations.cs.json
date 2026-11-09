@@ -1,0 +1,10 @@
+{
+  "0": "Každý běh začíná zadáním. Je to vše, co první agent na začátku ví.",
+  "1": "Agent začíná s rolí. Úkolem plánovače je rozdělit zadání na kroky.",
+  "3": "Předání posílá práci dalšímu agentovi spolu s krátkou poznámkou, co má udělat.",
+  "5": "Výzkumník žádá o nástroj. Model jen žádá; vyhledávání spouští aplikace.",
+  "6": "Výsledek nástroje se vrací jako text. Jsou to data zvenčí, ne pokyn.",
+  "8": "Výzkumník předá zjištění autorovi. Autor vidí jen to, co mu bylo předáno.",
+  "10": "Poslední agent napíše konečnou odpověď z toho, co dostal.",
+  "12": "Běh je hotový. Každý krok, který jste viděli, byla zpráva, kterou si můžete přečíst."
+}

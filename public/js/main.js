@@ -1,0 +1,176 @@
+import { h } from "./dom.js";
+import { parseRoute } from "./router.js";
+import { loadVersion } from "./version.js";
+import {
+  SUPPORTED_LANGUAGES,
+  createLanguageStore,
+  createTranslator,
+  loadDictionary,
+  resolveLocale,
+} from "./i18n.js";
+import {
+  renderArticle,
+  renderLearn,
+  renderLegalPage,
+  renderNotFound,
+  renderPlay,
+  renderTextPage,
+  setTitle,
+} from "./pages.js";
+
+const doc = document;
+const fetchFn = (url) => fetch(url);
+
+function safeStorage() {
+  try {
+    return window.localStorage;
+  } catch {
+    return undefined;
+  }
+}
+
+const store = createLanguageStore(safeStorage());
+const menu = doc.getElementById("menu");
+const menuToggle = doc.getElementById("menu-toggle");
+const switcher = doc.getElementById("language-switcher");
+const main = doc.getElementById("main");
+const footer = doc.getElementById("footer");
+
+let lang = resolveLocale({
+  stored: store.get(),
+  browserLanguages: navigator.languages && navigator.languages.length ? [...navigator.languages] : [navigator.language],
+});
+let englishDict = {};
+let translator = createTranslator({}, {});
+let version = "unknown";
+let token = 0;
+let cleanups = [];
+
+const t = (key, params) => translator.t(key, params);
+
+const MENU = [
+  { route: "play", href: "#/play", key: "menu.play" },
+  { route: "learn", href: "#/learn", key: "menu.learn" },
+  { route: "help", href: "#/help", key: "menu.help" },
+  { route: "about", href: "#/about", key: "menu.about" },
+];
+
+function menuRouteFor(route) {
+  if (route.name === "article") return "learn";
+  return route.name;
+}
+
+function renderChrome(route) {
+  const active = menuRouteFor(route);
+  menu.setAttribute("aria-label", t("menu.label"));
+  menu.replaceChildren(
+    ...MENU.map((item) =>
+      h(doc, "a", { href: item.href, "aria-current": item.route === active ? "page" : undefined }, t(item.key)),
+    ),
+  );
+  menuToggle.textContent = t("menu.toggle");
+
+  switcher.replaceChildren(
+    ...SUPPORTED_LANGUAGES.map((code) => {
+      const button = h(
+        doc,
+        "button",
+        { type: "button", lang: code, "aria-pressed": String(code === lang), "aria-label": `${t("lang.label")}: ${t(`lang.${code}`)}` },
+        code.toUpperCase(),
+      );
+      button.addEventListener("click", () => switchLanguage(code));
+      return button;
+    }),
+  );
+
+  const links = h(
+    doc,
+    "ul",
+    {},
+    ...[
+      ["privacy", "footer.privacy"],
+      ["terms", "footer.terms"],
+      ["imprint", "footer.imprint"],
+    ].map(([name, key]) => h(doc, "li", {}, h(doc, "a", { href: `#/page/${name}` }, t(key)))),
+  );
+  footer.replaceChildren(
+    h(doc, "p", {}, t("footer.educational")),
+    links,
+    h(doc, "p", {}, `${t("footer.version", { version })} · ${t("footer.license")}`),
+  );
+  doc.querySelector(".skip-link").textContent = t("a11y.skip");
+  doc.documentElement.lang = lang;
+}
+
+async function renderRoute(isNavigation) {
+  for (const cleanup of cleanups) cleanup();
+  cleanups = [];
+  token += 1;
+  const mine = token;
+  const route = parseRoute(location.hash);
+  renderChrome(route);
+  menu.classList.remove("open");
+  menuToggle.setAttribute("aria-expanded", "false");
+  const ctx = {
+    doc,
+    main,
+    t,
+    lang,
+    version,
+    fetchFn,
+    autoStart: !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches),
+    isStale: () => mine !== token,
+    onLeave: (fn) => cleanups.push(fn),
+  };
+  try {
+    switch (route.name) {
+      case "play":
+        await renderPlay(ctx);
+        break;
+      case "learn":
+        await renderLearn(ctx);
+        break;
+      case "article":
+        await renderArticle(ctx, route.params.slug);
+        break;
+      case "help":
+        renderTextPage(ctx, "help.title", "help.body");
+        break;
+      case "about":
+        renderTextPage(ctx, "about.title", "about.body", true);
+        break;
+      case "page":
+        await renderLegalPage(ctx, route.params.name);
+        break;
+      default:
+        renderNotFound(ctx);
+    }
+  } catch {
+    if (mine === token) {
+      setTitle(ctx, t("error.notFound"));
+      main.replaceChildren(h(doc, "p", { class: "notice", role: "alert" }, t("error.loadFailed")));
+    }
+  }
+  if (isNavigation && mine === token) {
+    window.scrollTo(0, 0);
+    main.focus();
+  }
+}
+
+async function switchLanguage(code) {
+  lang = code;
+  store.set(code);
+  translator = createTranslator(code === "en" ? englishDict : await loadDictionary(code, fetchFn), englishDict);
+  await renderRoute(false);
+}
+
+menuToggle.addEventListener("click", () => {
+  const open = menu.classList.toggle("open");
+  menuToggle.setAttribute("aria-expanded", String(open));
+});
+window.addEventListener("hashchange", () => renderRoute(true));
+
+englishDict = await loadDictionary("en", fetchFn);
+translator = createTranslator(lang === "en" ? englishDict : await loadDictionary(lang, fetchFn), englishDict);
+version = await loadVersion(fetchFn);
+await renderRoute(false);
