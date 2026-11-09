@@ -5,6 +5,7 @@ import { createVault } from "./storage/key-vault.js";
 import { createSettingsStore } from "./storage/settings.js";
 import { createIndexedDbBackend, createMemoryBackend, createRunStore } from "./storage/runs-store.js";
 import { renderSettings } from "./settings-page.js";
+import { renderPlay } from "./play-pages.js";
 import {
   SUPPORTED_LANGUAGES,
   createLanguageStore,
@@ -17,7 +18,6 @@ import {
   renderLearn,
   renderLegalPage,
   renderNotFound,
-  renderPlay,
   renderTextPage,
   setTitle,
 } from "./pages.js";

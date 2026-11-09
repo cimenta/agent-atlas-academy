@@ -13,13 +13,13 @@ export function setTitle(ctx, title) {
   ctx.doc.title = title ? `${title} · ${ctx.t("site.name")}` : ctx.t("site.name");
 }
 
-async function getJson(ctx, url) {
+export async function getJson(ctx, url) {
   const response = await ctx.fetchFn(url);
   if (!response.ok) throw new Error(`${url}: ${response.status}`);
   return response.json();
 }
 
-async function loadExplanations(ctx, id) {
+export async function loadExplanations(ctx, id) {
   for (const lang of [ctx.lang, "en"]) {
     try {
       return await getJson(ctx, `/runs/${id}.explanations.${lang}.json`);
@@ -41,7 +41,7 @@ export function renderNotFound(ctx) {
   );
 }
 
-export async function renderPlay(ctx) {
+export async function renderLanding(ctx) {
   const { doc, t } = ctx;
   setTitle(ctx, "");
   const host = h(doc, "div", { class: "replay-host" });

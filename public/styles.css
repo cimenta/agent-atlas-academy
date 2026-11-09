@@ -223,3 +223,14 @@ button.danger { border-color: var(--working); color: var(--working); }
 .field input[type="checkbox"] { width: 22px; height: 22px; }
 .confirm { margin-top: 12px; padding: 12px; border: 1px solid var(--working); border-radius: var(--radius); }
 [hidden] { display: none !important; }
+
+.subtabs { display: flex; gap: 4px; margin: 0 0 16px; border-bottom: 1px solid var(--border); }
+.subtabs a { display: flex; align-items: center; min-height: var(--touch); padding: 0 16px; text-decoration: none; color: var(--text); border-bottom: 3px solid transparent; }
+.subtabs a[aria-current="page"] { font-weight: 600; border-bottom-color: var(--accent); }
+.run-list { list-style: none; margin: 0 0 16px; padding: 0; }
+.run-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-height: var(--touch); padding: 4px 0; border-bottom: 1px solid var(--border); }
+.run-row .run-title { font-weight: 600; }
+.run-row .run-meta { color: var(--muted); font-size: 0.9rem; flex: 1; }
+.result-table { border-collapse: collapse; margin: 8px 0 16px; }
+.result-table th, .result-table td { padding: 6px 12px; border: 1px solid var(--border); text-align: left; }
+.final-text { padding: 12px; background: var(--surface); border-radius: var(--radius); }
