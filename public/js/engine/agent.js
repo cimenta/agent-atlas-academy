@@ -16,11 +16,28 @@ function searchOutput(content) {
   return content.map((r) => `${r.title ?? ""} - ${r.url ?? ""}`.trim()).join("\n");
 }
 
+// What a run record keeps of a message block: enough to read the conversation, without the
+// provider's encrypted search payloads.
+function slimBlock(block) {
+  if (block?.type === "web_search_tool_result") {
+    return {
+      type: "web_search_tool_result",
+      content: Array.isArray(block.content) ? block.content.map((r) => ({ title: r.title ?? "", url: r.url ?? "" })) : block.content,
+    };
+  }
+  if (block?.type === "server_tool_use" || block?.type === "tool_use") return { type: block.type, name: block.name, input: block.input };
+  if (block?.type === "text") return { type: "text", text: block.text };
+  return { type: String(block?.type ?? "unknown") };
+}
+const slimMessage = (m) => ({ role: m.role, content: typeof m.content === "string" ? m.content : (m.content ?? []).map(slimBlock) });
+
 export function createAgent({ node, call, emit, budget, signal, language = "en", sleep = defaultSleep }) {
   const model = (MODELS.find((m) => m.key === node.model) ?? MODELS[0]).id;
   const system = systemPromptFor(node, { language });
   const label = node.agent === "free" && node.name ? node.name : (AGENT_TYPES[node.agent]?.label ?? node.agent);
   const messages = [];
+  let sent = 0; // how many messages earlier requests already carried
+  let round = 0;
 
   async function request() {
     budget.chargeStep();
@@ -49,13 +66,34 @@ export function createAgent({ node, call, emit, budget, signal, language = "en",
   return {
     id: node.id,
     async run(input) {
-      emit({ type: "agent_start", agent: node.id, role: label });
+      emit({
+        type: "agent_start",
+        agent: node.id,
+        role: label,
+        model,
+        tools: toolsFor(node, budget).map((tool) => tool.name),
+        system,
+      });
       messages.push({ role: "user", content: input });
       const total = { input: 0, output: 0, searches: 0 };
       const texts = [];
       let pauses = 0;
       for (;;) {
+        const fresh = messages.slice(sent).map(slimMessage);
+        sent = messages.length;
+        const startedAt = Date.now();
         const response = await requestWithRetry();
+        round += 1;
+        emit({
+          type: "round",
+          agent: node.id,
+          round,
+          ms: Date.now() - startedAt,
+          stop: response.stop_reason,
+          usage: { input: response.usage?.input_tokens ?? 0, output: response.usage?.output_tokens ?? 0 },
+          newMessages: fresh,
+          content: (response.content ?? []).map(slimBlock),
+        });
         for (const block of response.content ?? []) {
           if (block.type === "server_tool_use") {
             const query = block.input?.query;

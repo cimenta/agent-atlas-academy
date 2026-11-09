@@ -35,10 +35,10 @@ test("a plain reply emits agent_start then agent_output with tokens and returns 
   const result = await agent.run("Task: x");
   assert.equal(result.text, "hello");
   assert.deepEqual(result.usage, { input: 10, output: 5, searches: 0 });
-  assert.deepEqual(events.map((e) => e.type), ["agent_start", "agent_output"]);
+  assert.deepEqual(events.map((e) => e.type), ["agent_start", "round", "agent_output"]);
   assert.equal(events[0].agent, "critic");
   assert.equal(events[0].role, "Critic");
-  assert.deepEqual(events[1], { type: "agent_output", agent: "critic", text: "hello", tokens: { input: 10, output: 5 } });
+  assert.deepEqual(events[2], { type: "agent_output", agent: "critic", text: "hello", tokens: { input: 10, output: 5 } });
 });
 
 test("the second run sends the earlier messages again", async () => {
@@ -75,9 +75,9 @@ test("search blocks become tool_call and tool_result events", async () => {
     nodeExtra: { agent: "researcher", id: "researcher", search: true },
   });
   const result = await agent.run("t");
-  assert.deepEqual(events.map((e) => e.type), ["agent_start", "tool_call", "tool_result", "agent_output"]);
-  assert.deepEqual([events[1].tool, events[1].input], ["web_search", "sky colour"]);
-  assert.ok(events[2].output.includes("Sky") && events[2].output.includes("https://example.org/sky"));
+  assert.deepEqual(events.map((e) => e.type), ["agent_start", "round", "tool_call", "tool_result", "agent_output"]);
+  assert.deepEqual([events[2].tool, events[2].input], ["web_search", "sky colour"]);
+  assert.ok(events[3].output.includes("Sky") && events[3].output.includes("https://example.org/sky"));
   assert.equal(result.usage.searches, 1);
   assert.equal(budget.usage().searches, 1);
 });
@@ -178,4 +178,39 @@ test("system prompts start with the role line and carry language, stance and fre
   assert.ok(supervisor.includes('"action":"call"') && supervisor.includes('"action":"finish"'));
   const judge = systemPromptFor({ id: "j", agent: "judge", model: "fast", search: false }, { language: "en" });
   assert.ok(!judge.includes('"action"'));
+});
+
+test("agent_start records the model, the tool names and the system prompt", async () => {
+  const { agent, events } = setup({ replies: [reply(text("x"))], nodeExtra: { search: true, model: "balanced" } });
+  await agent.run("t");
+  assert.equal(events[0].model, "claude-sonnet-5-5");
+  assert.deepEqual(events[0].tools, ["web_search"]);
+  assert.ok(events[0].system.startsWith("Role: critic"));
+});
+
+test("a round event carries the new messages, a slim reply, the stop reason and usage", async () => {
+  const blocks = [
+    { type: "server_tool_use", id: "s1", name: "web_search", input: { query: "sky" } },
+    { type: "web_search_tool_result", tool_use_id: "s1", content: [{ title: "Sky", url: "https://e.org", encrypted_content: "SECRET" }] },
+    { type: "text", text: "done" },
+  ];
+  const { agent, events } = setup({ replies: [reply(blocks)], nodeExtra: { search: true } });
+  await agent.run("Task: x");
+  const round = events.find((e) => e.type === "round");
+  assert.equal(round.round, 1);
+  assert.equal(round.stop, "end_turn");
+  assert.deepEqual(round.usage, { input: 10, output: 5 });
+  assert.deepEqual(round.newMessages, [{ role: "user", content: "Task: x" }]);
+  assert.equal(typeof round.ms, "number");
+  assert.ok(!JSON.stringify(round).includes("SECRET"));
+  assert.deepEqual(round.content[1], { type: "web_search_tool_result", content: [{ title: "Sky", url: "https://e.org" }] });
+});
+
+test("the second run's round lists only what is new: the earlier answer and the new task", async () => {
+  const { agent, events } = setup({ replies: [reply(text("one")), reply(text("two"))] });
+  await agent.run("first");
+  await agent.run("second");
+  const rounds = events.filter((e) => e.type === "round");
+  assert.deepEqual(rounds[1].newMessages.map((m) => m.role), ["assistant", "user"]);
+  assert.equal(rounds[1].round, 2);
 });

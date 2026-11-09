@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Run inspector: the player now shows agent cards, then Steps and tools, Messages (system prompt, every model round and the exact messages sent) and Agent output (JSON tree or text with search). New runs record the model rounds, system prompts and tool names; older runs show their steps only.
+- Warmer, neater look: cards, soft blue accents, pill chips.
 - Stage 2, live runs: a settings page (cog next to About) for the API key, default limits and local data.
 - Play now has three tabs: Re-play (examples and your own runs), Create and Result.
 - Create: describe a task, choose a pattern (sequential, parallel, supervisor, debate), build a diagram from predefined agents plus one free agent, review the estimated cost and limits, and run it live in the player with a Stop button.

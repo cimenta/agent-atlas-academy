@@ -34,7 +34,7 @@ function checkEvent(event, index, previousT, errors, agents) {
     }
     previousT = event.t;
   }
-  if (["agent_start", "agent_output", "tool_call", "tool_result"].includes(event.type) && !isText(event.agent)) {
+  if (["agent_start", "agent_output", "tool_call", "tool_result", "round"].includes(event.type) && !isText(event.agent)) {
     errors.push(`${at}.agent must be a non-empty string`);
   }
   if (isText(event.agent) && !agents.has(event.agent)) {
