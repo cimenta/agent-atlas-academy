@@ -1,6 +1,7 @@
 // The diagram editor on screen: palette, diagram with arrows, settings for one agent, and the
 // list of rules the design still breaks. All rules live in editor-model.js; this file only draws.
 import { h } from "../dom.js";
+import { agentLabel } from "../engine/labels.js";
 import { AGENT_TYPES, MODELS } from "../engine/catalog.js";
 import { TOOLS } from "../engine/tools.js";
 import { roleText } from "../engine/prompts.js";

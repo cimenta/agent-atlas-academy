@@ -3,6 +3,7 @@ import { MODELS, AGENT_TYPES } from "./catalog.js";
 import { systemPromptFor } from "./prompts.js";
 import { toolsFor } from "./tools.js";
 import { AnthropicError, redact } from "./anthropic.js";
+import { agentLabel } from "./labels.js";
 
 const MAX_OUTPUT_TOKENS = 4000;
 const MAX_PAUSES = 4;
@@ -20,10 +21,10 @@ function searchOutput(content) {
 // A copy is taken so later changes to the conversation cannot reach an event already sent.
 const copy = (value) => structuredClone(value);
 
-export function createAgent({ node, call, emit, budget, signal, language = "en", sleep = defaultSleep }) {
+export function createAgent({ node, design = null, call, emit, budget, signal, language = "en", sleep = defaultSleep }) {
   const model = (MODELS.find((m) => m.key === node.model) ?? MODELS[0]).id;
   const system = systemPromptFor(node, { language });
-  const label = node.agent === "free" && node.name ? node.name : (AGENT_TYPES[node.agent]?.label ?? node.agent);
+  const label = agentLabel(node, design, AGENT_TYPES[node.agent]?.label ?? node.agent);
   const messages = [];
   let lastRequest = null;
   let sent = 0; // how many messages earlier requests already carried

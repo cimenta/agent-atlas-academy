@@ -1,3 +1,4 @@
+import { numberRepeatedLabels } from "../engine/labels.js";
 // Turns a run's events into what the inspector shows: one entry per agent, with its steps
 // (model calls, tool calls, handoffs), the messages of each model round and its output.
 // Pure: no DOM.
@@ -161,6 +162,10 @@ export function deriveInspector(events, cursor = events.length) {
       default:
         break;
     }
+  });
+  const numbered = numberRepeatedLabels(order.map((id) => agents[id].label));
+  order.forEach((id, i) => {
+    agents[id].label = numbered[i];
   });
   for (const agent of Object.values(state.agents)) reconstruct(agent, state.task);
   return state;

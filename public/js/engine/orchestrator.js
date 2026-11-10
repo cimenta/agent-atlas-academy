@@ -35,7 +35,7 @@ export async function runDesign({ design, task, limits, language = "en", call, e
   else signal?.addEventListener("abort", onAbort, { once: true });
 
   const agents = new Map(
-    design.nodes.map((node) => [node.id, createAgent({ node, call, emit: send, budget, signal: control.signal, language })]),
+    design.nodes.map((node) => [node.id, createAgent({ node, design, call, emit: send, budget, signal: control.signal, language })]),
   );
   send({ type: "run_start", task, pattern: design.pattern, design });
 
