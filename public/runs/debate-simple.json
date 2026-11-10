@@ -1,0 +1,385 @@
+{
+  "schemaVersion": 1,
+  "id": "debate-simple",
+  "title": "Should schools start later in the morning?",
+  "language": "en",
+  "pattern": "debate",
+  "recordedWith": {
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "appVersion": "0.7.1-dev.9",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "Should schools start later in the morning?",
+      "pattern": "debate",
+      "design": {
+        "pattern": "debate",
+        "nodes": [
+          {
+            "id": "debater",
+            "agent": "debater",
+            "model": "fast",
+            "search": false,
+            "stance": "for"
+          },
+          {
+            "id": "debater-2",
+            "agent": "debater",
+            "model": "fast",
+            "search": false,
+            "stance": "against"
+          },
+          {
+            "id": "judge",
+            "agent": "judge",
+            "model": "fast",
+            "search": false
+          }
+        ],
+        "edges": [
+          {
+            "from": "debater",
+            "to": "judge"
+          },
+          {
+            "from": "debater-2",
+            "to": "judge"
+          }
+        ],
+        "rounds": 1
+      },
+      "t": 0
+    },
+    {
+      "type": "agent_start",
+      "agent": "debater",
+      "role": "Debater",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: debater\nYou are a Debater and your position is \"for\". Argue your side in one short paragraph. When you can see the other side's points, answer them.\nKeep every reply under 300 words. Answer in English.",
+      "t": 1
+    },
+    {
+      "type": "round",
+      "agent": "debater",
+      "round": 1,
+      "ms": 2613,
+      "stop": "end_turn",
+      "usage": {
+        "input": 111,
+        "output": 336
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Should schools start later in the morning?\n\nThe debate so far:\n(nothing yet)\n\nGive your argument now."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "Schools should start later because the science on adolescent sleep is clear. During puberty, the circadian clock shifts so that teenagers naturally fall asleep later, often not until 11 p.m. or after, yet most secondary schools start before 8 a.m. The result is chronic sleep deprivation, which the American Academy of Pediatrics and the American Academy of Sleep Medicine have linked to poorer attention, lower grades, higher rates of car crashes among teen drivers, and worse mood and mental health. Later start times are not just a convenience for students. Districts that have moved bell times later, such as Seattle and parts of Minnesota, have reported longer sleep, fewer tardies and absences, and better attendance. Critics raise real concerns about bus schedules, after-school jobs, sports, and childcare for working parents, and those logistics deserve serious planning. But they are problems to solve, not reasons to keep a schedule that works against how young people's bodies actually function. A few hours of rescheduling is a small price for better health and learning."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011Cgv4nVqjcywxDELZxkjmg",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 111,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 336,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        },
+        "http": {
+          "status": 200,
+          "requestId": "req_011Cgv4nV1swiBkFcHwgbMpA",
+          "ms": 2613
+        }
+      },
+      "t": 2615
+    },
+    {
+      "type": "agent_output",
+      "agent": "debater",
+      "text": "Schools should start later because the science on adolescent sleep is clear. During puberty, the circadian clock shifts so that teenagers naturally fall asleep later, often not until 11 p.m. or after, yet most secondary schools start before 8 a.m. The result is chronic sleep deprivation, which the American Academy of Pediatrics and the American Academy of Sleep Medicine have linked to poorer attention, lower grades, higher rates of car crashes among teen drivers, and worse mood and mental health. Later start times are not just a convenience for students. Districts that have moved bell times later, such as Seattle and parts of Minnesota, have reported longer sleep, fewer tardies and absences, and better attendance. Critics raise real concerns about bus schedules, after-school jobs, sports, and childcare for working parents, and those logistics deserve serious planning. But they are problems to solve, not reasons to keep a schedule that works against how young people's bodies actually function. A few hours of rescheduling is a small price for better health and learning.",
+      "tokens": {
+        "input": 111,
+        "output": 336
+      },
+      "t": 2615
+    },
+    {
+      "type": "handoff",
+      "from": "debater",
+      "to": "judge",
+      "note": "Schools should start later because the science on adolescent sleep is clear. During puberty, the circadian clock shifts so that teenagers naturally fall asleep later, often not until 11 p.m. or after, yet most secondary schools start before 8 a.m. The result is chronic sleep deprivation, which the American Academy of Pediatrics and the American Academy of Sleep Medicine have linked to poorer attention, lower grades, higher rates of car crashes among teen drivers, and worse mood and mental health. Later start times are not just a convenience for students. Districts that have moved bell times later, such as Seattle and parts of Minnesota, have reported longer sleep, fewer tardies and absences, and better attendance. Critics raise real concerns about bus schedules, after-school jobs, sports, and childcare for working parents, and those logistics deserve serious planning. But they are problems to solve, not reasons to keep a schedule that works against how young people's bodies actually function. A few hours of rescheduling is a small price for better health and learning.",
+      "t": 2615
+    },
+    {
+      "type": "agent_start",
+      "agent": "debater-2",
+      "role": "Debater",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: debater\nYou are a Debater and your position is \"against\". Argue your side in one short paragraph. When you can see the other side's points, answer them.\nKeep every reply under 300 words. Answer in English.",
+      "t": 2615
+    },
+    {
+      "type": "round",
+      "agent": "debater-2",
+      "round": 1,
+      "ms": 5886,
+      "stop": "end_turn",
+      "usage": {
+        "input": 441,
+        "output": 878
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Should schools start later in the morning?\n\nThe debate so far:\ndebater: Schools should start later because the science on adolescent sleep is clear. During puberty, the circadian clock shifts so that teenagers naturally fall asleep later, often not until 11 p.m. or after, yet most secondary schools start before 8 a.m. The result is chronic sleep deprivation, which the American Academy of Pediatrics and the American Academy of Sleep Medicine have linked to poorer attention, lower grades, higher rates of car crashes among teen drivers, and worse mood and mental health. Later start times are not just a convenience for students. Districts that have moved bell times later, such as Seattle and parts of Minnesota, have reported longer sleep, fewer tardies and absences, and better attendance. Critics raise real concerns about bus schedules, after-school jobs, sports, and childcare for working parents, and those logistics deserve serious planning. But they are problems to solve, not reasons to keep a schedule that works against how young people's bodies actually function. A few hours of rescheduling is a small price for better health and learning.\n\nGive your argument now."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "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"
+        },
+        {
+          "type": "text",
+          "text": "Later start times sound like a simple fix, but the costs and evidence don't support making them a national policy. The debater is right that teens' circadian rhythms shift, but the research on the benefits is weaker than the summary suggests. Much of the evidence on sleep, grades, and attendance comes from observational studies and self-reported surveys, and measured academic gains have been modest or inconsistent. Teens who get more sleep may differ in other ways, and a later bell does not guarantee earlier bedtimes, especially when phones keep students up. The logistics are also not a minor inconvenience. Staggering bus routes often requires buying more buses and hiring more drivers, which is expensive for districts already short on money, and it can push some schools' start times earlier. Later dismissal also cuts into time for sports, part-time jobs that many families depend on, and extracurriculars, and it can leave younger siblings unsupervised or force working parents to find new childcare. These are not just \"problems to solve.\" They are real tradeoffs that fall hardest on low-income families, who are least able to absorb them. Before shifting an entire district's schedule, leaders should weigh these costs against benefits that are plausible but not yet proven. Sleep education, later school hours for high schools only, or flexible options may deliver similar gains with fewer disruptions."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011Cgv4nfsjjNWBa6jZQjhB7",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 441,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 878,
+            "output_tokens_details": {
+              "thinking_tokens": 454
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        },
+        "http": {
+          "status": 200,
+          "requestId": "req_011Cgv4nfbcb5NS9LbVXq9uJ",
+          "ms": 5886
+        }
+      },
+      "t": 8501
+    },
+    {
+      "type": "agent_output",
+      "agent": "debater-2",
+      "text": "Later start times sound like a simple fix, but the costs and evidence don't support making them a national policy. The debater is right that teens' circadian rhythms shift, but the research on the benefits is weaker than the summary suggests. Much of the evidence on sleep, grades, and attendance comes from observational studies and self-reported surveys, and measured academic gains have been modest or inconsistent. Teens who get more sleep may differ in other ways, and a later bell does not guarantee earlier bedtimes, especially when phones keep students up. The logistics are also not a minor inconvenience. Staggering bus routes often requires buying more buses and hiring more drivers, which is expensive for districts already short on money, and it can push some schools' start times earlier. Later dismissal also cuts into time for sports, part-time jobs that many families depend on, and extracurriculars, and it can leave younger siblings unsupervised or force working parents to find new childcare. These are not just \"problems to solve.\" They are real tradeoffs that fall hardest on low-income families, who are least able to absorb them. Before shifting an entire district's schedule, leaders should weigh these costs against benefits that are plausible but not yet proven. Sleep education, later school hours for high schools only, or flexible options may deliver similar gains with fewer disruptions.",
+      "tokens": {
+        "input": 441,
+        "output": 878
+      },
+      "t": 8502
+    },
+    {
+      "type": "handoff",
+      "from": "debater-2",
+      "to": "judge",
+      "note": "Later start times sound like a simple fix, but the costs and evidence don't support making them a national policy. The debater is right that teens' circadian rhythms shift, but the research on the benefits is weaker than the summary suggests. Much of the evidence on sleep, grades, and attendance comes from observational studies and self-reported surveys, and measured academic gains have been modest or inconsistent. Teens who get more sleep may differ in other ways, and a later bell does not guarantee earlier bedtimes, especially when phones keep students up. The logistics are also not a minor inconvenience. Staggering bus routes often requires buying more buses and hiring more drivers, which is expensive for districts already short on money, and it can push some schools' start times earlier. Later dismissal also cuts into time for sports, part-time jobs that many families depend on, and extracurriculars, and it can leave younger siblings unsupervised or force working parents to find new childcare. These are not just \"problems to solve.\" They are real tradeoffs that fall hardest on low-income families, who are least able to absorb them. Before shifting an entire district's schedule, leaders should weigh these costs against benefits that are plausible but not yet proven. Sleep education, later school hours for high schools only, or flexible options may deliver similar gains with fewer disruptions.",
+      "t": 8502
+    },
+    {
+      "type": "agent_start",
+      "agent": "judge",
+      "role": "Judge",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: judge\nYou are the Judge. Read the debate and decide which side argued better. Give a short verdict with your reasons.\nKeep every reply under 300 words. Answer in English.",
+      "t": 8502
+    },
+    {
+      "type": "round",
+      "agent": "judge",
+      "round": 1,
+      "ms": 2665,
+      "stop": "end_turn",
+      "usage": {
+        "input": 864,
+        "output": 417
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Should schools start later in the morning?\n\nThe whole debate:\ndebater: Schools should start later because the science on adolescent sleep is clear. During puberty, the circadian clock shifts so that teenagers naturally fall asleep later, often not until 11 p.m. or after, yet most secondary schools start before 8 a.m. The result is chronic sleep deprivation, which the American Academy of Pediatrics and the American Academy of Sleep Medicine have linked to poorer attention, lower grades, higher rates of car crashes among teen drivers, and worse mood and mental health. Later start times are not just a convenience for students. Districts that have moved bell times later, such as Seattle and parts of Minnesota, have reported longer sleep, fewer tardies and absences, and better attendance. Critics raise real concerns about bus schedules, after-school jobs, sports, and childcare for working parents, and those logistics deserve serious planning. But they are problems to solve, not reasons to keep a schedule that works against how young people's bodies actually function. A few hours of rescheduling is a small price for better health and learning.\n\ndebater-2: Later start times sound like a simple fix, but the costs and evidence don't support making them a national policy. The debater is right that teens' circadian rhythms shift, but the research on the benefits is weaker than the summary suggests. Much of the evidence on sleep, grades, and attendance comes from observational studies and self-reported surveys, and measured academic gains have been modest or inconsistent. Teens who get more sleep may differ in other ways, and a later bell does not guarantee earlier bedtimes, especially when phones keep students up. The logistics are also not a minor inconvenience. Staggering bus routes often requires buying more buses and hiring more drivers, which is expensive for districts already short on money, and it can push some schools' start times earlier. Later dismissal also cuts into time for sports, part-time jobs that many families depend on, and extracurriculars, and it can leave younger siblings unsupervised or force working parents to find new childcare. These are not just \"problems to solve.\" They are real tradeoffs that fall hardest on low-income families, who are least able to absorb them. Before shifting an entire district's schedule, leaders should weigh these costs against benefits that are plausible but not yet proven. Sleep education, later school hours for high schools only, or flexible options may deliver similar gains with fewer disruptions.\n\nGive your verdict now."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "**Verdict: Debater 2 argued better.**\n\n**Why:** Debater 1 made a strong opening case, grounding the claim in the circadian shift during puberty and citing major medical bodies. However, the argument relied heavily on authority and anecdotes (Seattle, Minnesota) and treated logistics as easily solved (\"a few hours of rescheduling\"), which understated the real costs.\n\nDebater 2 directly engaged the core evidence, pointing out that much of the research is observational and self-reported, which weakens causal claims about grades and attendance. This is a substantive challenge, not a dismissal. Debater 2 also made the logistics concrete: bus costs, driver shortages, dismissal times affecting sports and jobs, and childcare burdens. Most importantly, they identified who bears the costs, noting that low-income families are least able to absorb them.\n\nDebater 2 also offered alternatives (phone policies, sleep education, high-school-only changes, flexible options), which moved the discussion toward a practical policy question rather than a yes-or-no.\n\nDebater 1 was not wrong about the biology, and Debater 2 conceded it. But on the question of whether schools should adopt later start times as policy, Debater 2 better weighed the evidence and the tradeoffs."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011Cgv4o74or579cuMYHS4AJ",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 864,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 417,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        },
+        "http": {
+          "status": 200,
+          "requestId": "req_011Cgv4o6mSy4RVss5J3uCia",
+          "ms": 2665
+        }
+      },
+      "t": 11168
+    },
+    {
+      "type": "agent_output",
+      "agent": "judge",
+      "text": "**Verdict: Debater 2 argued better.**\n\n**Why:** Debater 1 made a strong opening case, grounding the claim in the circadian shift during puberty and citing major medical bodies. However, the argument relied heavily on authority and anecdotes (Seattle, Minnesota) and treated logistics as easily solved (\"a few hours of rescheduling\"), which understated the real costs.\n\nDebater 2 directly engaged the core evidence, pointing out that much of the research is observational and self-reported, which weakens causal claims about grades and attendance. This is a substantive challenge, not a dismissal. Debater 2 also made the logistics concrete: bus costs, driver shortages, dismissal times affecting sports and jobs, and childcare burdens. Most importantly, they identified who bears the costs, noting that low-income families are least able to absorb them.\n\nDebater 2 also offered alternatives (phone policies, sleep education, high-school-only changes, flexible options), which moved the discussion toward a practical policy question rather than a yes-or-no.\n\nDebater 1 was not wrong about the biology, and Debater 2 conceded it. But on the question of whether schools should adopt later start times as policy, Debater 2 better weighed the evidence and the tradeoffs.",
+      "tokens": {
+        "input": 864,
+        "output": 417
+      },
+      "t": 11168
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 1416,
+        "output": 1631,
+        "searches": 0,
+        "steps": 3
+      },
+      "finalText": "**Verdict: Debater 2 argued better.**\n\n**Why:** Debater 1 made a strong opening case, grounding the claim in the circadian shift during puberty and citing major medical bodies. However, the argument relied heavily on authority and anecdotes (Seattle, Minnesota) and treated logistics as easily solved (\"a few hours of rescheduling\"), which understated the real costs.\n\nDebater 2 directly engaged the core evidence, pointing out that much of the research is observational and self-reported, which weakens causal claims about grades and attendance. This is a substantive challenge, not a dismissal. Debater 2 also made the logistics concrete: bus costs, driver shortages, dismissal times affecting sports and jobs, and childcare burdens. Most importantly, they identified who bears the costs, noting that low-income families are least able to absorb them.\n\nDebater 2 also offered alternatives (phone policies, sleep education, high-school-only changes, flexible options), which moved the discussion toward a practical policy question rather than a yes-or-no.\n\nDebater 1 was not wrong about the biology, and Debater 2 conceded it. But on the question of whether schools should adopt later start times as policy, Debater 2 better weighed the evidence and the tradeoffs.",
+      "t": 11169
+    }
+  ],
+  "design": {
+    "pattern": "debate",
+    "nodes": [
+      {
+        "id": "debater",
+        "agent": "debater",
+        "model": "fast",
+        "search": false,
+        "stance": "for"
+      },
+      {
+        "id": "debater-2",
+        "agent": "debater",
+        "model": "fast",
+        "search": false,
+        "stance": "against"
+      },
+      {
+        "id": "judge",
+        "agent": "judge",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "debater",
+        "to": "judge"
+      },
+      {
+        "from": "debater-2",
+        "to": "judge"
+      }
+    ],
+    "rounds": 1
+  },
+  "task": "Should schools start later in the morning?",
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 1416,
+    "output": 1631,
+    "searches": 0,
+    "steps": 3
+  },
+  "startedAt": "2026-11-10T22:50:59.417Z",
+  "endedAt": "2026-11-10T22:51:10.819Z",
+  "durationMs": 11402,
+  "about": {
+    "title": "Should schools start later?",
+    "author": "Radek Šimčík",
+    "url": "https://portfolio.radeksimcik.cz",
+    "description": "A **debate** run in its simplest form: two **Debaters**, one round, one **Judge**.\n\n1. The first Debater argues **for** later school start times. It speaks first and sees nothing yet.\n2. The second Debater argues **against**. It reads the first argument and answers it directly, so the two sides really meet.\n3. The **Judge** reads the whole debate and gives a short verdict with reasons. The verdict is the final answer.\n\nCompare with the larger debate in the library, which has four Debaters, two rounds and a stronger Judge."
+  }
+}

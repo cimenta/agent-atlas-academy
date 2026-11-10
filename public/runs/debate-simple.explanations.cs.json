@@ -1,0 +1,11 @@
+{
+  "0": "Každý běh začíná zadáním. V debatě dostanou všichni debatéři stejnou otázku a každý má svou stranu.",
+  "1": "První debatér mluví pro pozdější začátek školy. Debatéři mluví jeden po druhém, ne současně.",
+  "3": "První argument. Zapíše se do záznamu, který si přečte další debatér.",
+  "4": "Předání zaznamená tah pro soudce, který na konci čte vše.",
+  "5": "Druhý debatér mluví proti. Jeho vstup obsahuje první argument, takže na něj může odpovědět.",
+  "7": "Druhý argument odpovídá na první bod po bodu, místo aby jen opakoval svou stranu.",
+  "9": "Soudce začíná až po všech kolech. S jedním kolem je to hned po druhém debatérovi.",
+  "11": "Verdikt: která strana argumentovala lépe a proč. Stává se konečnou odpovědí.",
+  "12": "Běh končí. Konečná odpověď je verdikt soudce."
+}

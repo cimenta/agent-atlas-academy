@@ -49,6 +49,13 @@
       "pattern": "debate",
       "language": "en",
       "timeScale": 3
+    },
+    {
+      "id": "debate-simple",
+      "title": "Should schools start later in the morning?",
+      "pattern": "debate",
+      "language": "en",
+      "timeScale": 2
     }
   ]
 }

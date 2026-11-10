@@ -1,0 +1,11 @@
+{
+  "0": "Every run starts with a task. In a debate all the debaters get the same question, and each has a side.",
+  "1": "The first Debater argues for later start times. Debaters speak one at a time, not at the same time.",
+  "3": "The first argument. It goes into the transcript that the next Debater will read.",
+  "4": "A handoff records the turn for the Judge, who reads everything at the end.",
+  "5": "The second Debater argues against. Its input holds the first argument, so it can answer it.",
+  "7": "The second argument answers the first point by point, instead of just repeating its own side.",
+  "9": "The Judge starts only after all rounds are done. With one round, that is right after the second Debater.",
+  "11": "The verdict: which side argued better and why. It becomes the final answer.",
+  "12": "The run ends. The final answer is the Judge's verdict."
+}

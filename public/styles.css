@@ -551,3 +551,16 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .center-tip-close { display: block; width: 100%; margin: 0; border: 0; border-top: 1px solid var(--border); border-radius: 0; background: var(--surface); padding: 10px 16px; }
 
 .round-badge { display: inline-block; margin-right: 10px; padding: 3px 12px; font-size: 0.9rem; font-weight: 700; color: var(--accent); background: var(--accent-bg); border: 1px solid var(--accent-line); border-radius: 999px; }
+
+/* About a run */
+.about-panel { margin: 12px 0; padding: 14px 16px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg, 12px); }
+.about-panel[hidden] { display: none; }
+.about-panel h3 { margin: 0 0 8px; font-size: 1rem; }
+.about-title { margin: 0 0 2px; font-size: 1.15rem; font-weight: 600; }
+.about-author { margin: 0 0 6px; color: var(--muted); }
+.about-url { margin: 0 0 10px; overflow-wrap: anywhere; }
+.about-description { margin: 8px 0 0; }
+.about-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+/* The Result tab is light green when there is a result to see */
+.site-header .subtabs a.has-result { background: var(--result-bg); color: var(--result-text); font-weight: 700; }
