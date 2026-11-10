@@ -16,12 +16,22 @@
         "agent": "writer",
         "model": "fast",
         "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "search": false
       }
     ],
     "edges": [
       {
         "from": "researcher",
         "to": "writer"
+      },
+      {
+        "from": "writer",
+        "to": "critic"
       }
     ]
   }

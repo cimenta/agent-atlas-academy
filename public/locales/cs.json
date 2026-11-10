@@ -68,6 +68,7 @@
   "settings.keyIntro": "Živé běhy používají váš vlastní klíč. Odesílá se jen spolu s požadavkem na běh a na našem serveru se neukládá. Ve výchozím stavu zůstává v paměti této karty a po jejím zavření nebo obnovení zmizí.",
   "settings.keyLabel": "Klíč API",
   "settings.keySave": "Uložit pro tuto kartu",
+  "settings.keySaveDevice": "Uložit pro tento počítač",
   "settings.keyAvailable": "V této kartě je k dispozici klíč.",
   "settings.keyLocked": "Klíč je v tomto zařízení zapamatovaný, ale zamčený. Odemkněte ho heslem.",
   "settings.keyNone": "Zatím žádný klíč.",

@@ -50,6 +50,7 @@ export function renderSettings(ctx) {
   const saveButton = h(doc, "button", { type: "button", class: "primary" }, t("settings.keySave"));
   rememberBox.addEventListener("change", () => {
     passBlock.hidden = !rememberBox.checked;
+    saveButton.textContent = t(rememberBox.checked ? "settings.keySaveDevice" : "settings.keySave");
   });
   saveButton.addEventListener("click", async () => {
     const key = keyInput.value.trim();

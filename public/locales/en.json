@@ -68,6 +68,7 @@
   "settings.keyIntro": "Live runs use your own key. It is sent only with the run request and is never stored on our server. By default it stays in this tab's memory and is gone when you close or reload the tab.",
   "settings.keyLabel": "API key",
   "settings.keySave": "Save for this tab",
+  "settings.keySaveDevice": "Save for this computer",
   "settings.keyAvailable": "A key is available in this tab.",
   "settings.keyLocked": "A key is remembered on this device but locked. Unlock it with your passphrase.",
   "settings.keyNone": "No key yet.",
