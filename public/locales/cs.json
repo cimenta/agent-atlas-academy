@@ -40,8 +40,8 @@
   "player.explanation": "Proč je to důležité",
   "player.finished": "Přehrávání skončilo",
   "landing.title": "Podívejte se, jak AI agenti spolupracují",
-  "landing.intro": "Sledujte skutečný nahraný běh krok za krokem. Tlačítky zpomalení a kroků můžete sledovat každou zprávu.",
-  "landing.body": "## Co jste právě viděli\n\n**Agent** je jazykový model s rolí, cílem a nástroji. Pracuje ve smyčce: přečte si, co ví, rozhodne se, co udělá dál, podle potřeby použije nástroj a opakuje to, dokud není hotovo.\n\n**Orchestrace** určuje, kdo kdy pracuje, co který agent vidí a kdy se skončí. V tomto běhu pracují agenti jeden po druhém, jde o *sekvenční řetězec*: každý agent předá svůj výsledek dalšímu.\n\nKlikněte na libovolný krok a přečtěte si přesnou zprávu, která byla odeslána. Všechna čísla pocházejí z původního běhu a sledování nic nestojí.\n\n## Kam dál\n\n- Přečtěte si články v sekci [Učení](#/learn) o jednotlivých pojmech.\n- V [nápovědě](#/help) najdete, jak přehrávač funguje.\n- Přečtěte si více [o projektu](#/about).",
+  "landing.intro": "Sledujte skutečný zaznamenaný běh krok za krokem. Agenti si předávají práci, používají nástroje a skládají jednu odpověď.",
+  "landing.body": "## Co je Agent Atlas?\n\nBezplatný web, který ukazuje, jak AI agenti fungují, komunikují mezi sebou a jak se řídí. **Agent** je jazykový model s rolí a někdy i s nástroji. **Orchestrace** rozhoduje, kdo kdy pracuje, co každý agent vidí a kdy se skončí.\n\n- **Sledujte:** přehrajte skutečné běhy a čtěte přesné zprávy, které byly odeslány.\n- **Porovnávejte:** podívejte se, jak se liší sekvenční, paralelní a řídicí uspořádání.\n- **Vyzkoušejte:** spusťte vlastní malý pokus s vlastním klíčem Anthropic. Na serveru se nic neukládá.",
   "learn.title": "Učení",
   "learn.intro": "Krátké články o každém pojmu v Agent Atlas. Některé články zmiňují funkce, například vlastní pokusy s vlastním API klíčem, které přijdou v pozdější verzi.",
   "learn.section.basics": "Základy",
@@ -59,7 +59,7 @@
   "about.body": "Agent Atlas je vzdělávací projekt, který pomáhá pochopit, jak AI agenti fungují, komunikují a jak se orchestrují.\n\n## Pouze pro vzdělávání\n\nAgent Atlas je nástroj k učení. Není určen pro skutečnou práci.\n\n## Licence\n\n- Kód je open source pod licencí MIT.\n- Texty webu, články a překlady jsou pod licencí CC BY 4.0.\n- Název a logo Agent Atlas nejsou licencovány k dalšímu použití.\n\n## Právní informace\n\nPřečtěte si [zásady ochrany osobních údajů](#/page/privacy), [podmínky používání](#/page/terms) a [údaje o provozovateli](#/page/imprint).",
   "error.notFound": "Stránka nenalezena",
   "error.notFoundBody": "Nepodařilo se najít, co hledáte.",
-  "error.goHome": "Přejít na přehrávání",
+  "error.goHome": "Přejít na úvodní stránku",
   "error.loadFailed": "Obsah se nepodařilo načíst. Zkuste to prosím znovu.",
   "error.invalidRun": "Toto přehrávání nelze zobrazit, protože jeho data nejsou platná.",
   "error.details": "Podrobnosti",
@@ -384,5 +384,6 @@
   "search.next": "Další výskyt",
   "search.count": "{n} z {total}",
   "search.none": "Nic nenalezeno",
-  "result.search": "Hledat v odpovědi"
+  "result.search": "Hledat v odpovědi",
+  "menu.home": "Domů"
 }

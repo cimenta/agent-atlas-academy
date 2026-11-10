@@ -6,6 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Home page: the site name and a new Home menu item lead to a page with a simple recorded run that plays by itself and a short text on what the site is about. The Re-play tab no longer repeats the intro text.
 - Stage 3, Play tab: the Re-play, Create and Result tabs now sit in the site header with a library search box and a "load last opened" button next to them. Nothing is loaded in Re-play until you pick a run. The examples are now called the library.
 - Re-play shows the library as a pane next to the player (hide or show it with the ▤ button; the choice is remembered). Your runs come first, with an import icon to load a run from a JSON file; each run type has its own colour.
 - Search with next/previous in long texts: the final answer on the Result tab, and one search box next to the inspector tabs that searches whatever the open tab shows (steps, messages or agent output). The agent card says "No tools used" instead of listing unused tools, and the page heading sits above the play tabs.

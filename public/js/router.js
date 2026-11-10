@@ -2,12 +2,11 @@ const SLUG = /^[a-z0-9-]+$/;
 const LEGAL_PAGES = new Set(["privacy", "terms", "imprint"]);
 const NOT_FOUND = { name: "notfound", params: {} };
 const PLAY_REPLAY = { name: "play", params: { view: "replay" } };
+const HOME = { name: "home", params: {} };
 
-// A missing or non-string hash means "no route chosen yet", which opens the replay.
+// A missing or non-string hash means "no route chosen yet", which opens the home page.
 export function parseRoute(hash) {
-  if (typeof hash !== "string" || hash === "" || hash === "#" || hash === "#/") {
-    return { name: "play", params: { view: "replay" } };
-  }
+  if (typeof hash !== "string" || hash === "" || hash === "#" || hash === "#/") return HOME;
   const match = /^#\/([^/]+)(?:\/([^/]+))?(?:\/([^/]+))?$/.exec(hash);
   if (!match) return NOT_FOUND;
   const [, first, second, third] = match;

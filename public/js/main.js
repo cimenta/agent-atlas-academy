@@ -15,6 +15,7 @@ import {
 } from "./i18n.js";
 import {
   renderArticle,
+  renderLanding,
   renderLearn,
   renderLegalPage,
   renderNotFound,
@@ -71,6 +72,7 @@ let cleanups = [];
 const t = (key, params) => translator.t(key, params);
 
 const MENU = [
+  { route: "home", href: "#/", key: "menu.home" },
   { route: "play", href: "#/play", key: "menu.play" },
   { route: "learn", href: "#/learn", key: "menu.learn" },
   { route: "help", href: "#/help", key: "menu.help" },
@@ -167,6 +169,9 @@ async function renderRoute(isNavigation) {
   };
   try {
     switch (route.name) {
+      case "home":
+        await renderLanding(ctx);
+        break;
       case "play":
         await renderPlay(ctx, route.params);
         break;
@@ -210,10 +215,10 @@ async function switchLanguage(code) {
   await renderRoute(false);
 }
 
-// The site name always leads to the home page, the Re-play tab with nothing loaded. When the
+// The site name always leads to the home page. When the
 // address is already that page, the link does not change the address, so draw the page again.
 doc.querySelector(".brand")?.addEventListener("click", (event) => {
-  if (location.hash === "#/play" || location.hash === "" || location.hash === "#/") {
+  if (location.hash === "" || location.hash === "#" || location.hash === "#/") {
     event.preventDefault();
     renderRoute(true);
   }

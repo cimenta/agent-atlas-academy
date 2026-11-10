@@ -2,10 +2,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseRoute } from "../public/js/router.js";
 
-test("empty hashes and #/play open the replay view of Play", () => {
-  for (const hash of ["", "#", "#/", "#/play"]) {
-    assert.deepEqual(parseRoute(hash), { name: "play", params: { view: "replay" } }, hash);
-  }
+test("empty hashes open the home page", () => {
+  for (const hash of ["", "#", "#/"]) assert.deepEqual(parseRoute(hash), { name: "home", params: {} }, hash);
+  assert.deepEqual(parseRoute(undefined), { name: "home", params: {} });
+});
+
+test("#/play opens the replay view of Play", () => {
+  assert.deepEqual(parseRoute("#/play"), { name: "play", params: { view: "replay" } });
 });
 
 test("the Play sub-tabs have their own routes", () => {
@@ -61,7 +64,7 @@ test("anything unexpected is not found", () => {
     null,
     42,
   ]) {
-    const expected = hash === undefined || hash === null || hash === 42 ? "play" : "notfound";
+    const expected = hash === undefined || hash === null || hash === 42 ? "home" : "notfound";
     assert.equal(parseRoute(hash).name, expected, String(hash));
   }
 });

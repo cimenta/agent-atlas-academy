@@ -40,8 +40,8 @@
   "player.explanation": "Why this matters",
   "player.finished": "Replay finished",
   "landing.title": "See how AI agents work together",
-  "landing.intro": "Watch a real recorded run, step by step. Use the slow-down and step buttons to follow every message.",
-  "landing.body": "## What you just watched\n\nAn **agent** is a language model with a role, a goal and tools. It works in a loop: it reads what it knows, decides what to do next, uses a tool if it needs one, and repeats until it is done.\n\n**Orchestration** decides who works when, what each agent sees, and when to stop. In this run the agents work one after another, a *sequential chain*: each agent passes its result to the next.\n\nClick any step to read the exact message that was sent. Every number comes from the original run, and watching costs nothing.\n\n## Where to go next\n\n- Read the [Learn](#/learn) articles on each concept.\n- See [Help](#/help) for how the player works.\n- Read more [about the project](#/about).",
+  "landing.intro": "Watch a real recorded run, step by step. Agents hand work to each other, use tools and build one answer.",
+  "landing.body": "## What is Agent Atlas?\n\nA free site that shows how AI agents work, talk to each other and are organised. An **agent** is a language model with a role and, sometimes, tools. **Orchestration** decides who works when, what each agent sees and when to stop.\n\n- **Watch:** replay real runs and read the exact messages that were sent.\n- **Compare:** see how sequential, parallel and supervisor designs behave differently.\n- **Try:** run your own small experiment with your own Anthropic key. Nothing is stored on a server.",
   "learn.title": "Learn",
   "learn.intro": "Short articles on every concept in Agent Atlas. Some articles mention features, such as running your own experiments with your own API key, that arrive in a later version.",
   "learn.section.basics": "Basics",
@@ -59,7 +59,7 @@
   "about.body": "Agent Atlas is an educational project that helps to understand how AI agents work, communicate and are orchestrated.\n\n## Educational use only\n\nAgent Atlas is a learning tool. It is not meant for real work.\n\n## Licences\n\n- The code is open source under the MIT licence.\n- The site text, articles and translations are under CC BY 4.0.\n- The name and logo of Agent Atlas are not licensed for reuse.\n\n## Legal\n\nRead the [privacy policy](#/page/privacy), the [terms of use](#/page/terms) and the [imprint](#/page/imprint).",
   "error.notFound": "Page not found",
   "error.notFoundBody": "We could not find what you were looking for.",
-  "error.goHome": "Go to the replay",
+  "error.goHome": "Go to the home page",
   "error.loadFailed": "Could not load this content. Please try again.",
   "error.invalidRun": "This replay cannot be shown because its data is not valid.",
   "error.details": "Details",
@@ -384,5 +384,6 @@
   "search.next": "Next match",
   "search.count": "{n} of {total}",
   "search.none": "No matches",
-  "result.search": "Search the answer"
+  "result.search": "Search the answer",
+  "menu.home": "Home"
 }

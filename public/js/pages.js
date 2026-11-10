@@ -37,25 +37,17 @@ export function renderNotFound(ctx) {
     ctx,
     h(doc, "h1", {}, t("error.notFound")),
     h(doc, "p", {}, t("error.notFoundBody")),
-    h(doc, "p", {}, h(doc, "a", { href: "#/play" }, t("error.goHome"))),
+    h(doc, "p", {}, h(doc, "a", { href: "#/" }, t("error.goHome"))),
   );
 }
 
-// The landing texts without the player: the heading and intro, and the longer body.
-export function landingParts(ctx) {
-  const { doc, t } = ctx;
-  return {
-    head: [h(doc, "h1", {}, t("landing.title")), h(doc, "p", {}, t("landing.intro"))],
-    body: h(doc, "div", { class: "landing-body" }, markdown(ctx, t("landing.body"))),
-  };
-}
-
+// The home page: a simple run that plays by itself, and what the site is about. Nothing else.
 export async function renderLanding(ctx) {
   const { doc, t } = ctx;
   setTitle(ctx, "");
-  const host = h(doc, "div", { class: "replay-host" });
-  const parts = landingParts(ctx);
-  show(ctx, ...parts.head, host, parts.body);
+  const host = h(doc, "div", { class: "replay-host", "data-ui": "home-player" });
+  const about = h(doc, "div", { class: "landing-body", "data-ui": "home-about" }, markdown(ctx, t("landing.body")));
+  show(ctx, h(doc, "h1", {}, t("landing.title")), h(doc, "p", { class: "lead" }, t("landing.intro")), host, about);
   try {
     const index = await getJson(ctx, "/runs/index.json");
     const first = index.runs[0];

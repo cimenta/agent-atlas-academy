@@ -1,7 +1,7 @@
 // The Play section: sub-tabs Re-play, Create and Result.
 import { h } from "./dom.js";
 import { mountReplay } from "./replay/view.js";
-import { getJson, landingParts, loadExplanations, renderNotFound, setTitle } from "./pages.js";
+import { getJson, loadExplanations, renderNotFound, setTitle } from "./pages.js";
 import { buildReplayList, filterLibrary, prepareImport } from "./play-model.js";
 import { makeRunId } from "./engine/run-record.js";
 import { renderResult } from "./result-page.js";
@@ -139,8 +139,7 @@ export async function renderReplayTab(ctx, requestedId) {
   const host = h(doc, "div", { class: "replay-host", "data-ui": "player-host" });
   const pane = h(doc, "aside", { class: "library-pane", "data-ui": "library-pane", "aria-label": t("play.library") });
   const layout = h(doc, "div", { class: "replay-layout", "data-ui": "replay-layout", "data-pane": lib.open ? "open" : "closed" }, pane, host);
-  const parts = landingParts(ctx);
-  ctx.main.replaceChildren(layout, parts.body);
+  ctx.main.replaceChildren(layout);
   pane.hidden = !lib.open;
 
   let gallery = [];
@@ -163,7 +162,6 @@ export async function renderReplayTab(ctx, requestedId) {
   const currentId = requestedId;
   let redraw = async () => {};
   tabBar(ctx, requestedId ? "run" : "replay", {
-    intro: parts.head,
     onQuery: () => redraw(),
     onToggle: (open) => {
       pane.hidden = !open;

@@ -493,3 +493,5 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .tab-row .search-bar { margin: 0 0 4px; }
 .tab-row .search-bar .vq { max-width: 14rem; min-width: 6rem; }
 @media (max-width: 599px) { .tab-row { flex-wrap: wrap; } .tab-row .search-bar { width: 100%; } }
+
+.lead { color: var(--muted); font-size: 1.05rem; max-width: 46rem; }
