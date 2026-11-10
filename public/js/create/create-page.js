@@ -307,7 +307,8 @@ export function renderCreate(ctx) {
       if (ctx.settings.get().tooltips) {
         const tipNotice = outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: buildResultModel(finalRecord).cost });
         const tipContent = result.ok ? h(doc, "div", {}, tipNotice, h(doc, "p", { class: "center-tip-link" }, h(doc, "a", { href: `#/play/result/${id}`, "data-ui": "tip-see-result" }, t("create.seeResult")))) : tipNotice;
-        const tip = showCenterTip({ doc, content: tipContent });
+        // A run that did not finish well keeps its tooltip on the screen until the visitor closes it.
+        const tip = showCenterTip({ doc, content: tipContent, sticky: done?.outcome !== "finished", closeLabel: t("about.close") });
         ctx.onLeave(tip.close);
       }
       const children = [notice];

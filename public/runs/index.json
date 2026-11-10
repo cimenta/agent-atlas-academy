@@ -21,6 +21,13 @@
       "pattern": "supervisor",
       "language": "en",
       "timeScale": 2
+    },
+    {
+      "id": "supervisor-complex",
+      "title": "A small cafe wants to start selling coffee beans online. Prepare a one-page action plan with the main risks.",
+      "pattern": "supervisor",
+      "language": "en",
+      "timeScale": 3
     }
   ]
 }

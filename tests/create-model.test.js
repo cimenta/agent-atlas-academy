@@ -93,3 +93,12 @@ test("canRun says the saved key is locked when one is saved but not unlocked", (
   assert.deepEqual(canRun({ ...good, apiKey: null, keyLocked: true }).reasons, ["keyLocked"]);
   assert.deepEqual(canRun({ ...good, apiKey: null }).reasons, ["noKey"]);
 });
+
+test("runOutcomeMessageKey names the limit a run stopped at and falls back when unknown", () => {
+  for (const reason of ["time", "steps", "tokens", "searches"]) {
+    assert.equal(runOutcomeMessageKey("stopped_limit", reason), `run.outcome.stopped_limit.${reason}`);
+  }
+  assert.equal(runOutcomeMessageKey("stopped_limit"), "run.outcome.stopped_limit");
+  assert.equal(runOutcomeMessageKey("stopped_limit", "bogus"), "run.outcome.stopped_limit");
+  assert.equal(runOutcomeMessageKey("failed", "tokens"), "run.outcome.failed");
+});

@@ -1,0 +1,16 @@
+{
+  "0": "Every run starts with a task. In a supervisor run the Supervisor also gets the list of its workers: here four, including a free agent.",
+  "1": "The Supervisor's role: manage the workers and decide who works next. It answers with JSON only.",
+  "3": "The Supervisor calls the Researcher and says what to find. The workers only see this instruction and the task.",
+  "4": "A handoff passes the instruction to the worker.",
+  "5": "The Researcher's role: collect the facts. This one has web search turned on.",
+  "7": "The Researcher asks for web searches. The model only asks; the app runs them.",
+  "10": "Search results come back as text. They are data from outside, not instructions.",
+  "13": "The Researcher's notes. They go back to the Supervisor, not to the next worker.",
+  "14": "In this pattern every result returns to the Supervisor.",
+  "17": "The Supervisor calls the Writer. It pastes the research into the instruction, because the Writer cannot see the Researcher's notes, and it adds what to mark as unverified.",
+  "22": "The Writer's role: write the answer from what the Supervisor gave it.",
+  "24": "The Writer's action plan. It goes back to the Supervisor.",
+  "28": "The Supervisor finishes: its reply holds the final answer. It never called the Critic or the Finance advisor, because it decided it did not need them.",
+  "29": "The run ends. The final answer is the one the Supervisor returned."
+}

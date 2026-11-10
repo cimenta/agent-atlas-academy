@@ -1,0 +1,1380 @@
+{
+  "schemaVersion": 1,
+  "id": "supervisor-complex",
+  "title": "A small cafe wants to start selling coffee beans online. Pre…",
+  "language": "en",
+  "pattern": "supervisor",
+  "recordedWith": {
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "appVersion": "0.7.1-dev.4",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "A small cafe wants to start selling coffee beans online. Prepare a one-page action plan with the main risks.",
+      "pattern": "supervisor",
+      "design": {
+        "pattern": "supervisor",
+        "nodes": [
+          {
+            "id": "supervisor",
+            "agent": "supervisor",
+            "model": "fast",
+            "search": false
+          },
+          {
+            "id": "researcher",
+            "agent": "researcher",
+            "model": "fast",
+            "search": true
+          },
+          {
+            "id": "writer",
+            "agent": "writer",
+            "model": "fast",
+            "search": false
+          },
+          {
+            "id": "critic",
+            "agent": "critic",
+            "model": "fast",
+            "search": false
+          },
+          {
+            "id": "free",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Finance advisor",
+            "instructions": "Answer as a finance advisor for small businesses. Estimate the start-up costs and the main cash-flow risks for the plan you are given."
+          }
+        ],
+        "edges": [
+          {
+            "from": "supervisor",
+            "to": "researcher"
+          },
+          {
+            "from": "supervisor",
+            "to": "writer"
+          },
+          {
+            "from": "supervisor",
+            "to": "critic"
+          },
+          {
+            "from": "supervisor",
+            "to": "free"
+          }
+        ]
+      },
+      "t": 1
+    },
+    {
+      "type": "agent_start",
+      "agent": "supervisor",
+      "role": "Supervisor",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: supervisor\nYou are the Supervisor. You manage workers and decide who works next. The first message lists the worker ids. Call one worker at a time; each worker's result comes back to you. When you have enough, finish.\nReply with JSON only, in one of these two forms:\n{\"action\":\"call\",\"worker\":\"<worker id>\",\"instruction\":\"<what the worker should do>\"}\n{\"action\":\"finish\",\"answer\":\"<the final answer for the user>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 2
+    },
+    {
+      "type": "round",
+      "agent": "supervisor",
+      "round": 1,
+      "ms": 1593,
+      "stop": "end_turn",
+      "usage": {
+        "input": 226,
+        "output": 192
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: A small cafe wants to start selling coffee beans online. Prepare a one-page action plan with the main risks.\nWorkers: researcher, writer, critic, free"
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"action\":\"call\",\"worker\":\"researcher\",\"instruction\":\"Research the key steps for a small independent cafe to start selling coffee beans online. Cover typical costs (e-commerce platform, packaging, shipping, roasting/sourcing compliance such as food labeling and sales tax), logistics options for fresh roasted coffee, marketing channels, and the main risks (e.g., shipping damage, freshness complaints, inventory waste, regulatory requirements, margin pressure, competition from established roasters). Keep findings concise, in bullet points, with sources or assumptions noted.\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011Cgv39xiN2hfFRAnBRNhyq",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 226,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 192,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        },
+        "http": {
+          "status": 200,
+          "requestId": "req_011Cgv39wxTwUVVx2uZ5TuEW",
+          "ms": 1592
+        }
+      },
+      "t": 1595
+    },
+    {
+      "type": "agent_output",
+      "agent": "supervisor",
+      "text": "{\"action\":\"call\",\"worker\":\"researcher\",\"instruction\":\"Research the key steps for a small independent cafe to start selling coffee beans online. Cover typical costs (e-commerce platform, packaging, shipping, roasting/sourcing compliance such as food labeling and sales tax), logistics options for fresh roasted coffee, marketing channels, and the main risks (e.g., shipping damage, freshness complaints, inventory waste, regulatory requirements, margin pressure, competition from established roasters). Keep findings concise, in bullet points, with sources or assumptions noted.\"}",
+      "tokens": {
+        "input": 226,
+        "output": 192
+      },
+      "t": 1595
+    },
+    {
+      "type": "handoff",
+      "from": "supervisor",
+      "to": "researcher",
+      "note": "Research the key steps for a small independent cafe to start selling coffee beans online. Cover typical costs (e-commerce platform, packaging, shipping, roasting/sourcing compliance such as food labeling and sales tax), logistics options for fresh roasted coffee, marketing channels, and the main risks (e.g., shipping damage, freshness complaints, inventory waste, regulatory requirements, margin pressure, competition from established roasters). Keep findings concise, in bullet points, with sources or assumptions noted.",
+      "t": 1596
+    },
+    {
+      "type": "agent_start",
+      "agent": "researcher",
+      "role": "Researcher",
+      "model": "claude-haiku-5-5",
+      "tools": [
+        "web_search"
+      ],
+      "system": "Role: researcher\nYou are the Researcher. Collect the facts the task needs. If you have a web search tool, use it, and state only facts you found or know. Name your sources when you have them. Keep it brief.\nKeep every reply under 300 words. Answer in English.",
+      "t": 1596
+    },
+    {
+      "type": "round",
+      "agent": "researcher",
+      "round": 1,
+      "ms": 17010,
+      "stop": "end_turn",
+      "usage": {
+        "input": 31268,
+        "output": 3319
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: A small cafe wants to start selling coffee beans online. Prepare a one-page action plan with the main risks.\n\nInstruction from the supervisor:\nResearch the key steps for a small independent cafe to start selling coffee beans online. Cover typical costs (e-commerce platform, packaging, shipping, roasting/sourcing compliance such as food labeling and sales tax), logistics options for fresh roasted coffee, marketing channels, and the main risks (e.g., shipping damage, freshness complaints, inventory waste, regulatory requirements, margin pressure, competition from established roasters). Keep findings concise, in bullet points, with sources or assumptions noted."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQSoAcKEAgTGAI4AUIIdGhpbmtpbmcSDKnJBoD6yLulzlprkRoMJx/THe/xvvut/ttRIjCE7H4IM83/ZL1suwrlpzaIs6OKs4uqV6nApuFFa88gIhaQbGdcabWixo8MHhv4ZewqvQa43OSzRtXC+qQvXKT7eYpCWm3ha83S5DiGazaSnei1JQmdzxsy/H2dIj+cIdORrH44KjYqTWhszTaRvg5OQA9m0FBPuu8eRkvz/PnwFPgJUPhUK8iLvBJ0B0QFzynj7GKW4w6Y5uJnueK5hot5HCPTFa396flVZwJTEDD2hBkTXjUzRQefdg4Wv5I0u18Pdy32RNqNFegv3bDJHS6cewqnGQytkWywoLGPGo+btYWom3sfLN5hlaWNW7emUjSbYIVFFfg3tjGsl1Gu6NFdM4K3R9yQEuTxooNj1y2iDaBBu234zYoiEc0T5ZzC7vNwxt+n2lLls5cd3R3JlliwextTIWlzuexpMYXE0wmagb0/hmbDTLeGv/H1y7sVZLkp+7by3+1jreFQZvCCL2g6LRLG/3UgeuDao6k5/8Z7Djdh+7fU8F7LPikQOHJSQZ0CfHvnu1Z4iWTV5XWkaUp3zXyvjh2pqD/dFVXFjg3Q9lim3e5OVlr2SF/SKGCc5PYzlgVoFiV003rHeysQj0D5GhXOEbzkQBJvyNs2cT9OVHr/jby1BcaJWf0H1c0nUgnOzPJR3bIRJGHXyrUIAuI+YOQt5Q+SDoHLrBY2warII+ebiH3OP4k7mFddlXypzfpR5sfV3JBSZvDa4ORS1/XrlSVOzxLJ3FhEj1zd4tI/3zl+XVTe8k9FS49ZFfR5Z+O+D+He/y49Vr1tZh1s/hO6IUwvwaSFySNZ8fRzBZt5C+2r3FqJbXj/gsy7ur96Z+Q2oCcLRYsoH3of0zYj5s0vRzjzlX53VhnEaRuRFQ0rbxGKEEQ8oIesPYwCkVFJWBoy1UWgmzOhMm8iMa4Z0IT+jCpZQ30mbAkBrDrXtVG4lVvObjywXBbtx90whg+rRRPrtKk4BlBHleG3uZAcPxMW6TDgW6gNlrpLS66uJf5UZxehCsrobtiQnqXdlNDAwZQU8J9HhXISYP9hutHwhH8IZw/pOtoJ4JmCNlPOEYCUCatvNENjEYb8bh+W1VEnztvnzcVDWhtf4NsC9MklrnFnqZPMDaokPZ7/SnLa0HN38/1qOITLy5K7Ab8Q3TqFMLrSB1ZOadNUlAiLlqSyF0+jGAE="
+        },
+        {
+          "type": "server_tool_use",
+          "id": "srvtoolu_01PUiCUhwRVeJNuH57FudMuL",
+          "name": "web_search",
+          "input": {
+            "query": "selling coffee beans online small business costs shipping packaging"
+          }
+        },
+        {
+          "type": "server_tool_use",
+          "id": "srvtoolu_01PTGVUTbeZD8wj7rjNr2dek",
+          "name": "web_search",
+          "input": {
+            "query": "food labeling requirements packaged coffee FDA small business"
+          }
+        },
+        {
+          "type": "server_tool_use",
+          "id": "srvtoolu_01XSPmGzTKuqZyHCGQEzKoqL",
+          "name": "web_search",
+          "input": {
+            "query": "shipping fresh roasted coffee beans freshness complaints"
+          }
+        },
+        {
+          "type": "web_search_tool_result",
+          "tool_use_id": "srvtoolu_01PUiCUhwRVeJNuH57FudMuL",
+          "content": [
+            {
+              "type": "web_search_result",
+              "title": "How to Ship Coffee Beans: What You Need to Know",
+              "url": "https://www.easyship.com/blog/shipping-coffee-guide-and-tips",
+              "encrypted_content": "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",
+              "page_age": "1308 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "How to Start an Online Coffee Business (2026)",
+              "url": "https://bellwethercoffee.com/blog/start-online-coffee-business-guide",
+              "encrypted_content": "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",
+              "page_age": "75 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Shipping Coffee: How to Pack and Ship Coffee Beans (2026) - Shopify",
+              "url": "https://www.shopify.com/blog/shipping-coffee",
+              "encrypted_content": "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",
+              "page_age": "243 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "How to Sell Coffee Online: Store Setup Guide (2026)",
+              "url": "https://bellwethercoffee.com/blog/the-complete-guide-to-setting-up-your-coffee-ecommerce-store",
+              "encrypted_content": "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",
+              "page_age": "52 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Coffee Shipping 101: Costs, Challenges, & How-to Ship",
+              "url": "https://www.shipbob.com/blog/coffee-shipping/",
+              "encrypted_content": "EssNCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDHSd2g7d1B+ktNsa0RoMglSrCNLFnj4sYAMmIjBXST2tMg8Xruv90LrfJLMSHGGPDHYw3Xu4dqnMsGY87spiUS9Q5NS6mfs73P9FzmgqzgwpK0d+Z9JlguK4eX+pTBLhubaXRmOWAZWkhkKWt7bDfhI+BR2WxQj0ddeCzeVtmDPMuUJwI/KWfDTK3DT1KHy0KnB618hYmkqFZ/0/wwXUMrMJ7dhTbqfxuc2WhL0Ew3agBLlc+6lPC/TGw84j7dzw6XebMJs7uc/8zflwdQV/lsS0icBhYytbDXdZYVT1GK9Na/29o6VATrwjzCnQnNXh/JnlfmoVD9epStwK7pGKoZJS7IJ0l2BVtSLdRQ8gtE0dRWcoi/4KAw6bQ9SwQPUiRxh5ybF9obYJWsRnptuPtlXiP0KMl8eEEHrdFxe4P9kAAGkFD/XpftdJtbZw3lDDTlWnsjmKgAF/AJU8up53LtmxfuCxNm3rvBgXk8Q61SWsBnjjdpLOuSwCzJTua7DdM8uOZeYSQdwyjvF7i+mFIo3HY5w6ovbwOrJXR+/5itZY7pjVTmA18SBNXPyl0tdIGWjH0e8KGabJizCtkZEac+TDu2UsC1rINL+LcI6bGnEZlrJS5HIVffslN0qKvdmcmakeWE/AmDg7wOXwuy6i0Er2gYTB0jQqli6Bmger4Sr4TreXgGZay8Rmk6kTHYfjDZIACzL6H5XuaayAH1IwglG9eWI+wHkhdHteq5twLK72O8qUsP0gs/MWBlGJGLk04R975E9tZJ0EBbpFK+u9cRvxlsVZ0si92JYECHqaemZCdelVqEzU2ERgOfMiE0AMvWNP+AORtKWErE8Kek7fC+JBxyYeB5UOkXGWYbnwaNoWeqaLiRG5b3ndPw13f1cyuj6Du2HR5nI4T1GoHwhBgVH/O/P+SHxDFYkeirXeyEf6NBHOyTTC00SSv1HKct9WViePANUE/z+TjNQicxH+2CAsWw4E3Ec4URACm/N6my07ubGHizqkajKO6RSSWztH741YjYYPi2TsA4sHJ40MOBkHqDyHdEhp6ttkL6BK4Q2LhFoyG0JqIHOcLycfvbQMTZ0DPdumL5rhsmN3AC4P2ViZ8ZqOJZQRV8t5xZf5tomXV5OwfBW732gwVUmGdwO0MUIyK2n9ClyCwckK66ISlsPYb5czAu21udp8i5ZARWqhHDoDg2Hq7VDHVWpXA2iHiUX/uksVZytFZbMwhIqSDKWo3mGXmc6gZmESRQjdO1mseT7CLs3JG995N3bC6GaGM1q2b/BF8mfkEAG/1q3XMKPlvg9bL332jGhA4mxAoZ/mHKAXeQd4XdzdLbikY5+JBjk66lLkYYXTHE22qftIQLfBA4BEB7qD37S8Oy87QjDNk4R3+nI2QcI1Fl9CWSGlS+bcxoJV+aDoT/+O1IkrbyhhVIuL+5mTX12M0WM4FqNC6YUuveVQEnoDwTEEEXw7JKp9Y5yfFnPw1qHiqb0goS2ccTT6+v0veV/3NXsPGXnDr1WTtz5B/wRRiSDf7XpQgm6t5d/FXqgReT5cXvHtBBV8WjnJ+dpINEXLox9f1sivIEcjNxPxiZsSCbTSNPIqLhOWUShrEm1Yt6h/k34cvJRkxaTijx02EOm7KGlRkIPKY2YC2r6Lrjedch1liyHboJNDUOO3yf9OPdkESL995EuJQRagHKPZIdkqcEzKnVTR84QU+0e9zyB3wYP9bkNzdIeTkI0Gg7flrB9OOk6MggMSYZLobyoh4VhHHHaL3XXiSmmUS+Ao1WiC9pXCI2itnKGdtzDMLktJoVRlTBDFF0KcP3ENN0zko1KAsA1xpnarjssFbRIJKSA2R5DOo676ROkQn2/XoQ/ZU1dXGZOKyVlFobAyTAeykIRAitdbf5EMKmFKwqFB0D5xgO2MWI9Acb7cfzLc4NulBGsy+PiPjZ38e0DE7CKi90OebS4X3XlZnpzMsUu+USmXVUYm/ooKShZBf1eTi1NQe4CfCvDcRMKZKp2hFzeWOSNjJD3igwWQ2Rp9U9+HOC+hKXd9zkakNMO9B7q8uWtLXY78PNurJjQ1IKBE/jLkOxzCudonZyF7E2mrb/tf6gWOshbxJX29/RjSAgsmOA26I57PaDdPoJkHQn7uPORNXdXwBCLjBlMUEweaAaCSFnKRQbgUk92ONWU4ZGMhUh8a1mnJZFpHPs7wXRrCF9NHU+TlA50mSLm9F0zab2oi6CVuOTvUlbSzAnVQZRQoxiMlYN3sfRgYAw==",
+              "page_age": "134 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "How to Sell Coffee Beans and Start Your Own Successful Business",
+              "url": "https://makelocalforglobal.com/how-to-sell-coffee-beans-and-start-your-own-successful-business/",
+              "encrypted_content": "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",
+              "page_age": "477 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "How to Sell Coffee Online in 2026 - Online Store Kit",
+              "url": "https://www.onlinestorekit.com/sell-coffee-online/",
+              "encrypted_content": "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",
+              "page_age": "0 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Dropship Coffee Supplier",
+              "url": "https://roastify.app/dropshipping",
+              "encrypted_content": "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",
+              "page_age": null
+            },
+            {
+              "type": "web_search_result",
+              "title": "How to Sell Coffee and Roasted Beans From Home",
+              "url": "https://findhomegrown.com/blog/sell-coffee-roasted-beans-from-home",
+              "encrypted_content": "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",
+              "page_age": "33 days ago"
+            }
+          ],
+          "caller": {
+            "type": "direct"
+          }
+        },
+        {
+          "type": "web_search_tool_result",
+          "tool_use_id": "srvtoolu_01PTGVUTbeZD8wj7rjNr2dek",
+          "content": [
+            {
+              "type": "web_search_result",
+              "title": "Which Foods Are Not Required to Have a Nutrition Label? - Blue Label Packaging",
+              "url": "https://www.bluelabelpackaging.com/blog/which-foods-are-not-required-to-have-a-nutrition-label/",
+              "encrypted_content": "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",
+              "page_age": "32 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "A Guide to Labels & Barcodes for Coffee Packaging",
+              "url": "https://www.roastar.com/blog/the-business-of-the-bag-navigating-labels-barcodes-and-more",
+              "encrypted_content": "EsYLCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDDAzct14+LeHJFDZsBoMO3ozX52iPpdzzH+KIjBToGQfcU9MdnZzicIRUVfHH2RANnGhxbm8KP8npu5euOJCrqmf4bFkjRzks1VPzCkqyQq9i/L+IQitJgDiyhdMY5xb0qZDrP3Pi++aJC6e8Av3uGc98hq45b1/nHhxie/Y3Rc8X9ORELzhLvienlLqvbuizVQrvRhaqip40xiamoaXL2Z1Yic3zea7z5ADAELqSyqpkp5KdWtjT2s01AnNBs1/hf8uioO9SRaXB32yd/QN5WuWGT55Z/J10Og9CIFu2vkUl5xjp35LGjqc86dBdXBSLBscmwJiiRJq4NxrYn1/7avrl1F0GEjodCppsH9s6gtLZvOBwB0cnICoLUUvQLMlIHAEBXPU9NQVMr2RI79B0zlz4lmKEiEBZoBm7tL9pLvcDFC7LngwYDICo3V5UJ9pFVnIUH8ovimicQjKhGSdkZn5m8Wpy3Z7eqMf237DKI/N916xOmNObhLA5dFDjhjFJXj6EYmVWEboDmNSmulbgSSMNr9KIlSflZJrymT5ZiTeJx/OdsEuoDQ36RGw5LfbiQchs7fp9JLdKI6X48e60gqktfSN25HhWYhXNI/+qSSMh6iCL7h2z8p870oPD/0I2jjl5KuhX0wLYAcsFbo27IF/dJMhonbzghEX83bXqSsEEPB0Bs6gKY+4aXDtt+X75uHr70xrLxWAyYzy0XsbJxVjhfmPo/9BnJtQJZGeh8vM5gGawBWzF8JtPWujrQUJWlsZRGYoUDabVUbeZSgU4iR42X5dVjQKn/3norOuvfYKfyhbIFZOexFOSCf+q7QmITxHmDqm2AK4UFyrYg6WyAxGKiAHfj6iowO7yQEcUaTmnKO1y08mrE7Lez9Sq0+8l45fOWIYAmBKXld8LljErlASxqEmuAvCNNK+H9kdMWO4CmVFeMTE7sjJ4FQB6tZTRCCRDi05tO1Ws/FUhJ2stRDbxbj4bew4fstlpbxQhO6qS3ZGKXYGLUcMhSpw5FNytiWmCl/fJ5NSicUN1filuJBHbw1agjbMKgmcYMgeY14Tvg+vg4B89UuA/oZB7CCQize7EnI+h0winXItjjSpipxM7t5fs/f8A5IBJuQrf87NR28eolVViFSof1w4KxcmtfKODsJIg6kodLepazou2p6tYOUsSOcNx+lgpk0a5tI9kBf4R+ZjaVfxoRbefwAOVzp5e8tpTFJAtOaGlApAztzDiF3X6ja+DQGW5zi6o0xCnG41cySic1UB8JPDX4ZiTJlK+JVEHthDQI7BjuF+Bg9x9WgEemPRKjeXyiidlm77OTmtqB0mLMIIIHlQqEYA4X0FSTC9IqpIcR8qjTDI+y+mf20jLXF0O81WLbreqSOuW6uozQN99B1fK+HP+fARjth5l2WXPphN22qEb2f4pgN7HPrv9Ggs936XlvaPQpftHafb3lzBNvZTO644JVEzRAeJoyMBSNSsZ5PLzC7fWzOCGU52Bxyaqnbpxv7mTgH2Ditb1P06it63nyCIMMCTLUQb7QPy6AO1sv4Wi9K30ucBn5iIAJeEt8dE0kCiPVGMzEHzMrbDDxCUldMhKSg2FAgnpXJ00QXCeGssLqEvip5GtNwiZHf9IQiUq7BUGYBH9PvQVgTc8A5u3PK80wBdUp2jLVUhuVWZrQtIqN/xMH5pgsWe3Oqh2HSUCJKRM9F0HYBzw7/RFbjARslIkt4/I5Ua/6RFLlC8EvAVHIm0XZY/utrQgxOo3kPtzqhJJiOC7XGSYN5TpiPQ/jYGCkxKzTZahw1xNub3Ty98OnYQkw4Gq8fldG1ieH0VqjM0NMHogr7ZQV0wqMrbPhlHdDLgRHWITLuNUrHZWiF3D3/F43ROQ+x2fBl0M79GdkBtzeDKQJJUGtvBRskYAw==",
+              "page_age": "817 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Nutrition Facts Requirements For Coffee, Tea, And Spices",
+              "url": "https://www.registrarcorp.com/blog/food-beverage/food-beverage-regulations/nutrition-facts-requirements-for-coffee-tea-and-spices/",
+              "encrypted_content": "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",
+              "page_age": "351 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "FDA Coffee Label Requirements: Expert Q&A & Guidance",
+              "url": "https://www.justanswer.com/small-appliance/llj1q-need-help-fda-requirements-coffee-label-i-m.html",
+              "encrypted_content": "EpELCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDN6qzTYEjtSmUg/+mxoM7d69jOY2Y6vLltjYIjDwNrTXw8jH6LChyxGzz7gISLRfOhR16fpSN1vHt4/rOikuMig9byUQdg+xXFloC/YqlArlYaQq/3bG+OOAJ7ZlCqXo2UVvCXJmMInWnXUDoAkmBZeqrCANcFeFjJj00YpGZKc7i7V35dF5qlH9l2TlgmrHsY1CAJKigpl4wtFW5TVZpTXxnie7Qqech2JrwewAnFad04CT4DjoXh9Pscyky9bL+jRVlp4K2Up3zIl0QaRUpAb0fPtYRkPy9fGxT3vUkc1dJ8AdtzDbjhieT70A2I1MyHmXGbUeduNUr8R0AWaRsECJIwcL43szTVDPX4zC9HpMnCFfPIMzc4mgbcaKb0NVUblOqoLPiqugWEitiqVdjWQMmwJBNF6+NaQbl+Yje5RUF3OMt4BCwLAKmwxTDq7jVrbMY3z5s/bARr2eV4UwgLJurB8WkXAjYUWZTXhy02dkL6WWQotVfhfApwUW4OXV2rBupFcWatpBbzM+yKhgcRvx3lxDoZLDzl6ECXNpjBAywydoHONCnxuNLfrH8JSrwqZT+jc8i44R+0x/YajS0AXJ0CwyBxXE+OOR4gfborkXyi8Wi4k1frhKa8TCqUmQf8E4qCs05QDHCX7paf7VRvAz1booej8oT/9+ukth2/ZwgHU10bAhdovhk6KovU1PrAmcHwcntONRX2j4fo9JKsSQAluZspuR1/y3qgrUu/+/cCntbc8cfP54VEdVLT0AYfJDZYJYfLXKyAWl9LR684r63pLG6Rsr/zMWb79dek5DQSk0Q3PyeIkW9BW3obDUyUhvkL/L04aOOfxad6OF6+S4ixJjKc0TRMyB9iQHRYQpg3ONUb0IfggbdcS/c+lheKkFkbb2X634GQFqKoPcaDNM/nv4WSk/NEk4PTQ3Szsq72sPudb9qFbwASDVn2PuVs6bwLKV6RNjIUND885avpsEgMkvNwJVVy5xxwTHyWGoqYXqFoTyfGLO7AqAylfncnTlHi2gyKnYoyga40xkF2w+Lxn1mzzHkgzBL7slh7tL/3XJKg5Sss1KsLgVug6cte7YwQc8XOsxOSMClIisVeEP+s92W7Z1hb8akcWcjqfklLOOK0675w8lWHj6jzOpydE1MJ0HmPep/Xbb/K68p/7Jop/GY8aleMIERTfPStE/wAqt6dA9DSaCcoEgYYnkCUG0N+n+A3g3nzPa8u2ZqTrxyEy2j1hb0b0oQESIdeNvzBEs4SzrmGwT5qh7t8i2LYbveGwypuFeaZxeGGF2eBWvNq+ZtDs5zPfbkcpJ7YuCwycZ0Ue4p3X9G68Nc+QNUX24K4d4kYtH1CSZ70aKWoXBqo0k3RIang62bFYRV98I+vla5m9p7k8TWiHBmKwTma97Ye4ufX3XW8gRQk0N6hNZeEH1xh2IEpHyFczIejtUav5+MbFupxSaLqaB+zQixgJ5yx/jc2+adaVK0QAiMfCm2AlH9HLOHZ4JyYvnVviXDdNh0GLOHDbhGZjATn9zExqyOkO6yNdoqNLcTBNCwKa1tKklvFNJypy+0AsYBoYAloDW4JKR98g8cbOqlx7kYzmctHPT+4x55KzBGFiCDeuUNttWmXvbbzDJBAjwg/kyMKNas5AE7bMcvRKRfzShR3+j60BJOloCvao1HoiCUkwCvRcOAOQysArECG0xsgz0KeNpKjoq28trDNjb4vC04v4FAd/n6SUdy2VsfSDxXluntFhhkmKgangfiAhis9l2GhuKFBgfEOTjHKF9XJHguMtguXOgx1Beamhf5jF7i+z0XOj7cFJ9Y9mwFuVqSnM//DW5GAM=",
+              "page_age": "1322 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Coffee Labeling Guide",
+              "url": "https://www.ncausa.org/Industry-Resources/Coffee-Labeling/Coffee-Labeling-Guide",
+              "encrypted_content": "EqsHCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDKKRGQ/m+3o9RHijSBoMRfEQfF2dIxJeda8nIjCf3FlHlbxrFc9AJ/AamW3VIuL3M1OFy9BpvpNUULS+SCi4BeJPN+yBJfF+jyOOd+AqrgaGT2swnCu7sDNjx0hLzQDVVKCv6CFg1OuPrH2VcKiusbAp6zcXIJLRwC5nwrMibgTT4h1zT9RGPVgvbf2ksjN4Oo7WqXibPDcOq49aOi57ZPcVUNrbEYWSBzkqVHovMmWSCq9dFUXhTKNN+Kw50bWv2lbpWv+8SmzK7587dsOy3KSJPNOSTYAbcDUQaDkUP/sE8Y5hraa+Akkscsz7c3YWsx6rdR3gntFfP5tkeXCbrm6jt0eGhfnpG/zVvwdLtNasxvwKPXjjKbJ2PxNl7HmF7yo4o4tDxQxOKjbpYms/utVVEsFJBH4U7M+dK3aqLz86auGsQvNzrfSnxhVTbuT9fDenqwupUGU0O4ykfhFF3+kTusCYQLG/qSzH7h9WWHsExKUXUpPxh6e7QUp3MiBnWsjbvNPeojDundZaS5plqm69T3ggcXOfB87ULRD9QN0rkB0EfPCfgJw6no7XOLJ7oaoTWLm6UKueCAYP2q+C7UOuDLnsXMTvuuFmUN+rI4N5A2Ezb2NzGFMpLTdbk111wkI484TPBrM6ih/Bs1W9LSEdhv8KS45JJu7/uRLC3ajQhHbqGjDU/B5tmHnE1Yr4OyHwXybpKfbxKAJuV1XWBWZzuqiC3gL32eaw4oQKSCApPmSudWX/vaEAG28kxQJvTN5CpWN/slWi6aounJJiQmqN5GchErUuhmsyckPkAaOkDIytBf1TbcH1bTZoK2zImYMA6AKbAuP76AyYAD8l0yVOFm5Pd1sGtAP7fz49gHRBXwMAhGWJIeiZHwpa0HflNQl83F5YTW6yM2f9rVxx4Z1xdw4B0/fSK1yBf7yqjj9nZuLYKvOYFFukxCTa9YwDFEzTVDIITN7fS2Nal6qB4w1vPH2wJ4vAdITIL87hHPwGW8u170Wc6C1j3bkr5MxA+L92ZgUSMnGnv9sJMJnc+iuHscbZCt6tigaHUf41Vd266FToLq/Y4bysPPt2+KfTfjmMEjlGT9OH9h1OY28oC1T/WrSB9xIksv8JtWG9pU522kXU1hc0gkOnqmnKsizn670W4gcp9Nv3hL29GJNSDsyYWT8fxE6IVhNktR2KGAM=",
+              "page_age": "1806 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "eCFR :: 21 CFR Part 101 -- Food Labeling",
+              "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-B/part-101",
+              "encrypted_content": "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",
+              "page_age": "4845 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Journal by Inheritance Coffee: What Has to Be on a Coffee Bag Label?",
+              "url": "https://inheritancecoffee.com/blogs/guide/coffee-bag-label-requirements",
+              "encrypted_content": "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",
+              "page_age": "46 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Coffee Labels: What You Need to Know (2025) for Compliance",
+              "url": "https://www.wizardlabels.com/blog/coffee-labels-2025-compliance/",
+              "encrypted_content": "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",
+              "page_age": "357 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "FDA Registration for Coffee Products",
+              "url": "https://www.fdaregistrationassistance.com/fda-registration-for-coffee-products/",
+              "encrypted_content": "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",
+              "page_age": "163 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Coffee Label Requirements: What the FDA Makes You Print on the Bag - Labels Unlimited Company",
+              "url": "https://labelsunlimited.net/coffee-label-requirements/",
+              "encrypted_content": "EuMNCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDJTNGuTLN0BWfMcqDRoM3QC85WjaB/Z6lT51IjACZ2bSbgrvtHaq6naUaWjhs6tev7BUJHIRlN2jzrohojysUoG5i1+7Bwce3fcxTpQq5gx3tjn/5EZyxbQNGiUf9HgFYHUoJE9KTsJEutnvrhpzcH17/GtHs6r0Uapc90Khy8bySDHhxaZpr29+FtPQ50xUE8bPpadffRdhBJglk3ZEbh4QUbO2XuTFstW7AvtiH6Jfe5wYdsM3Q3gEZYMRcwL35t7pEU6MXKtLSYM4/+wabHHvOyPQlgS4VoItXZETsfhC97gENdT08N5COqH0d3JsYdUZTZxDH27F5kvBGH9y40IO/ILiwd3aaBrjZ7f5vOiohGxlYsumWeIfBe7tOR/t+SMNPV1JsUHZQ+4on/62W5JG6WvUPTGiVt7/vYRVaw9nd8T96/FGveyL+BVUsX7UBkmVHVBQQ76xInFhjSgQhwt6E2YmqjMox3tN1ZrSfcwJql9Rnxqq+57KH/bjrDbSq1dMjwAE0n9FXDn5lea46bYl/8Peb1JloBXP1q64L529xG29B2Fs1upo4JqAg6R57zC3c3EUQpa67m4FDN5LFY16A+rGrFwMDhWftH8rz1xNcj5GL/7TZ7BSnhHcCT/KHzde3uyBG7q+0X4OmBBSrIlBi4sRPTu3zErXk+0xN93veYCJQ7pRgwgAFf5CcjJmlZXADNKL0xK9HKBdbt9D9CvBcBXnUOzYJNGv80Ircb5AsXhOQQghcfw2iRlALeygMYdnF9XfIXCDE03xMWss3m/6c4+KBIo71u24+q10vg4SUy7Bvtoa4EZGxrY8QSsmx24KfsWwgrRn6q8tnLJw/97prbLYSI0a3cn6+4YqhfIac98bsjC1NFOHrjTxl0SfiKr+4ovRB7yIVIE2dB6aLe931N5qk35PL0YCb5RfxBJj8aNv+HcuwrfEWKaxXIht7zkJQkKtJ2isbVAqrc0MqUI1+dNUjlZ6ubwnVBpIwU7RxLYrPDf5LaL+Ej2+93okGS7/gfwd7kvUt9L5MIF0yphNvFUzhC/qdn4iuG7/vSu2AMBZn2z9pAChItsUGNcAhSBkgOHU8xW9A0mUl7fXZjOVVRlHclUudha0AoQWNvuozOwAhXzr+V3WJfCsNExX2sEqDTbQu5OUbpaBHcfaOw36mZ4+qAFrJZ6iaenme/sIFAIAXljJkuY1KiylOS3N5CA6qe81faGy4PfJnt6Quo3HMQbjhJDAohtx/htVOj35kPpz/4R4Q8MTmw/LWQdITHU8vPpYZBZH1wyE44dvg+Nf3U8hPJ26F6YgfjWk4HVo2FysRY2MIRfsl1YxB3ds4qDoOWpKw7X6p0PIHreHClq+kkybA3Q4MTIcVSehpk1+0gGvsseRP23relXKHIR14M2tT4LaCzybMouUlQKU176ZX5CQxXUq6IkKkCYpT0/xBAHs+ACdD8G0PeM7FlHqHDex3NVwuDnbWJrWpEhNmKXwHbQCZRXQtOjbcQ9UCcB2TsPvxr/GY2158ATWYBKfLWAcAuoLFfhUm48kC2Afyuk784rwr+Yn34R4tWE6rkiimhmEJhN5VqB6FlUItvqVJTgkIRQg96u1Jp6ONTd/lDN5oV+/5gorkoGucvhnqXhlc6Z7izqAzSV0nCqaNEijFH3iIQlVy8eszWY/eoIHPq5rpWb/6aA1iaIgnO8mBEWDA+e5eWHpS5zna9rNeU4YcDeOAnteYpMuUozY+MAvwkHfkX+Izg1isB0OXMglGcPyxEdKY40bikC/6ftbFPeMP22cQpllbWIGABXUGNZIG2Fq1tNEMbJMuS92q8LqGOYYsxqXtNPL11vYNdqLGMRvp22XdiIgYzd6CTJiIl97KRgZpb0TGfRukky4HHKtmVq9vPkPbZ5E2yhHcwJY/fiPI/rAmZqGF38gZD3L+u87oC1QZz+KkijnE8NzO8S3+nPjmNEe1O5qWVRGJvKJJ3UaoUqm9h+dC4/wJi/OE5pAheX2x6U+0Cw8hzievacCfkOJ6SBNx+bJ1gpX+0jJ6XzoUxXoy3ZkdOPFTqVsSbEWFgjioIHYTM9E2cnD2XUPRGFR2uQ4Fqb9v1GJaVTjTbHHrIWzpXB6Y96VpX+yGkPbu+bn2OQ/yIOpHQIHnt4a09FfVSqa8qpChtdD/88HcVRZVVcscg3eqLCTwyyiTSAZ+lcgOt726ITr5nmMm/fz6ajQ1f7dv9KCr3HNsSoFm4n7HRZ2l3uTCJXeR70l8Hj8RpnKhM1Hww5EjfBzNK9HXgrnUpFXWq4YAw==",
+              "page_age": "42 days ago"
+            }
+          ],
+          "caller": {
+            "type": "direct"
+          }
+        },
+        {
+          "type": "web_search_tool_result",
+          "tool_use_id": "srvtoolu_01XSPmGzTKuqZyHCGQEzKoqL",
+          "content": [
+            {
+              "type": "web_search_result",
+              "title": "Fresh-Roasted Coffee: Why It Matters + How to Buy It",
+              "url": "https://beanbox.com/blog/fresh-roasted-coffee",
+              "encrypted_content": "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",
+              "page_age": "112 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Best Fast-Shipping Fresh Roasted Coffee for Home Brewing Enthusiasts",
+              "url": "https://jimmysjava.com/blogs/blog-posts/best-fast-shipping-fresh-roasted-coffee-for-home-brewing-enthusiasts",
+              "encrypted_content": "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",
+              "page_age": "116 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Coffee Freshness During Shipping: Keep Roast Date Flavor",
+              "url": "https://mainlineroastery.com/blogs/news/coffee-freshness-during-shipping",
+              "encrypted_content": "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",
+              "page_age": "24 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Fresh Coffee Shipping Timeline Explained",
+              "url": "https://artisanbean.com/blogs/news/fresh-coffee-shipping-timeline",
+              "encrypted_content": "EpgICioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDELOQT1TJoOEzz1XYhoMffRQ5BC13B+8bNC3IjCuU1d+aqX1mUhPj148ZaKtva1yA7Cjilte4EKzE7V8XHDX/C8pPO6dr1eXnNZaem0qmwc/6avNNaBUlGEs6Agab3kkXG9izmXdvhCRxZ0agGw8ratJ23MCRK2KqwczDKynNaC70yyZzWyGDT0CWAgRY3wcE4Ybfcz7nFv5rJR7vSZb32LvVkOUF+Dgj9hb6LSwaHpmDMuZnEaaHDbBd+QQRHOXtemRt8fBvlzFWMGFZa09Kz7NVN4IY/gyfsRjs6FSCE91vcE5l/gvPmoNJI4vL8+eYik/L2LcACIKD79w2JTnsDZyr7UERywg2aaqaPDnX3E+7YCduLDGrwGgap5G+mE0fzKl0IQlZAZyNRlLfz28gE7tBvTNN2yvjA9lQXgFY9LttvOjkbvFaSLVViErf6vyTOidHEEpZ9ZxnadWgByQQu5PPw5WjHbBuF8i33hf/3cyGlpXn1Qjqu6EZlqGEeW9I21SVoijote4pCcS8IO2nayPWQouZJ0gsjhYt2mTQdPea/iWIC3DheDbyM9kLFaRhqBhl45EpvRLGBy1TL6D+oiy7wZZqV5Pcz3zSgib5ONCy1rGNIUm+biC8gh7BcT4PoXBMhiPFn9fCcIbGOy6p/pxGbu3IZFEJVDvAnlKMXTY9+hlg0vx3dQgFSFbnvBOidFR39mbqCGGtid/NecK+zYR59BX29cLg9Dos5oT5hbTnWcTxQZieqpHqpMlh9sfawRQhGulRJB/e8FRA8Zs355JL4s6Lk0+Js64XADeyexyVs5o3zRphCnRqfa61NXRZl3c/Inubepcw+nt8bpI4+Z8PBpSNX4jq0BP3NEklhA98DqakBGcY/XfxphqT5BfWK/lvr9gM3K+IFm+K3qfGhxnpN+BDhf0+pc4e3Rz1SeQY/D+U79lZtHlScd9NHVDk2WXw3hCl7nz5Y1hzQBkwFqz3kBwh8PLxhQX3swzTN15eKbfO775vvS7q7TH4M4GUqERu38MaAC7Z7kOBSJcrKYS7xqqf9RjaVcvu8E6qeRvPAC3wHho7Hja4RXb0+V6R8YNgZsoZriyQKx+kkDikhBg4ogEHzfxIKnmzWXLc+bMp8SN8FvrOnFs23tRW0RYr4vQ5fD8Ikgm2UoabHzUNQua0nckZiFBMYsPxkipHRJbdwlucmdNFg2mLcf9ejuI1WVctziU9gep3cN13pAns+cstLn38ABLeQ8dAFRHsOSivR/tTywoMqHd+HCKxRUmKAHhvIfIehLJg+FvVI0zbZ4WKCtuekP0+3yQtv53BAA+K+W/xfiv1ZPTIxgD",
+              "page_age": "142 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Best Coffee Bean Delivery: Why Fast Isn't Enough",
+              "url": "https://iprefercraftcoffee.com/blogs/news/best-coffee-bean-delivery-what-actually-matters",
+              "encrypted_content": "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",
+              "page_age": "77 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "How Fresh Should Coffee Beans Be When Ordering Online?",
+              "url": "https://armadilloroasters.com/blog/how-fresh-should-coffee-beans-be-when-ordering-online/",
+              "encrypted_content": "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",
+              "page_age": "105 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "at.trustpilot.com",
+              "url": "https://at.trustpilot.com/review/drinktrade.com",
+              "encrypted_content": "ErcNCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDLnqTWM1Oy6CajPMfxoMgrS8Nd+If+itDWjfIjCWVSd0jrJQ8lRzBnTgWEg6G0UUDIaiLKP6HAx5ExZjMxqyot0Pj/yf+Tz2OkC5vfoqugyDt1Y0bXG7ggKzHgP3bzXpvhuudiwD4JAMY+RYZZnTaooe8zqOOjuLssJcUI4ypZ3doOzQjSxgpVAkCoiJX7ao0qRC0GIv7jSbt1B8YYeQ9l24SBYxzFLZzu+CJ/jIilOnAG0ScQg9+RfIzRCGmg7FjvsOHzu8VbI6i9YCXQTy7NG2Li70FzfnS3xIzopUqTzJateyzwRDV5BgRs0S5ra9ttmhXu3FiZJtwNQMhmx1NRg88y3iSvlRd9nalY5MfJYu2QhkAzGDYAaGDLJPoBR5B+3ekOB2mUcFnjKcW0bVq/q2px9QlDJe1DiGAI8wriVgSy9ASnLEJSWxNV6ChG7YNYbmphr30jvSVSzEN/OSxynT34iyJvy/XrFo9A90sZM0zoSDeHI6gym3bAAhi5YYlht6KGOkMBdRGk7jGcAIjuX5J29WtAOcsLDxWexmim0jm7fpJCfi8hYMnsrqtrkmDmJoXf+z0dcNZYbk+dfjDy4J/2sv17rayR7V4gj3AsFuURfIeVX2XEplAWZReoqzp8ImQ14n1CHaEbNS6/094NpyzThJBrkx+8ipAtQjItKWoGbvvH0oZqnBfttYNSbm9/Ty9UisfZIT1yv6lJD0/kcA2IiK7l+VEydas/yUjq7soAnP47eljApLGavQmyuBYLdsVF9LQXmNdHjtjANKPyxFXY4I5Lx10bDF01T9GPVhVoju6IVuNJj581xCbXGIC2SNtSrCHnbzHBuYF3b7JUqEzOD0q9QJFF5wGUa16lwoyX9XrCRgGjZyIs1ZAzmsU7dlAC5DuY3BzN79QdTHh5zIbkyD1C6JEF0N+BWBA7Jl29tpEITBfAkWr94sacMuhVpi4M3derLAlg5BlnGO3chXAHPu9N38VV0Jqv/CmLIce5hiC2ZOvbUFUf6zdJJlzZfFT7QExpZ06p27p6pnpIx2ORL9Nyrnp141mmxlaZFCzbqBxc8rW81AcQnwuEfMHVMoExJjLMGtlbGIbInWXbya2xoZjI9c9dCjQYj8FZ4aJVxU9Ep2u7cJ2V8oOhIN9VHv6uCJkvLS9LYPhRxCXyYkC+tg91wRocL0fJDR0nLFR5ChCv2/1Xl56A1fWb+6Oqg9pRJxWOzhHUlm68JAcq6kiw0T0e2AB6FCjtaAaVYHxJ5DVLVFDZYD35KH167ZB7CnERt+48sMlkJ/wCZ1OkNrGz+dQFQXI5TARRvWU+BaB85l8dVYBso+B31Pbs1GoZltQ/xrizeEUf7SrbOUBYTMoDOCFfkqdLospbqEUIIZ/xI4l66AepoCSF3GM42bFPgkkMfBQNlUj84dgc7HXfYPlznWaPyi4W3RbPte0zGLzEuM9A/eeP01D7wnbQnyeXLdaRIvrbUIeNh4T1aBhDd0u7NqaocaC/2uY+wLcklr38ZLmmnq9VdeZzeNdcTBAEsGGSsXovNksL+IBYp9STIpZ1BpOe7iM4Y2FSx8oCI8WNHRQSfsPLRiWkq2S36S0jnsRXjL0WHpFJNgn6ifNWrRXGXQhPjTS5MHY2I8jkXhXsqDyvdxbf63tazibD7AVs7MjAPbKHrPYGQTURBQxXyP+svkm7TL1iGYnxsb3/ZbTDZx6D4Cptb83Da4cmUuL2mJPNGa77qvbXc+vS3MYM0H6d2kXJ+o67OKsbUk3ZyCuWEFYp/cORdVjAzGOt4zjhav2F8eCjO/5F6dxqU/a65JHvQS3NWeDFo4JSpkbfkliq39/nuHu7CGbTh8SKv/baSGBEckhJoGn6/ZayAS98pkJN/PxspZkMt5vWwGkYQc0VujU45HkPsFwlD5YrL98jL9MLcLQ09DRrNBBn1G42iToRho/sTasRs8sOaLj13T6z7OT/WtWHM3+b0MNsYX4rTbYrs7i+tEKnP+GU3fe2/3HBupJsWrXtxZqtXTzgu5MXJYo/18XHnTZXJZ6J5jE1VUShXonq2FkOZQpcU/BPpWW/ShMvabLe1aG4aOapbIY+UjHsGhhHdyolhfu6wUWUbsI2rgiDkw4/3pmtFyZ/buxWyJyDRExxlMq7kXa87sIvsaKxVnY3yIuSm13rcXlLOZLuQqoytmMuOc41rLWIq0EkRvIh6DNhp6Y1gdjZ6xcNDQf5Im1C7fGAM=",
+              "page_age": null
+            },
+            {
+              "type": "web_search_result",
+              "title": "es.trustpilot.com",
+              "url": "https://es.trustpilot.com/review/drinktrade.com",
+              "encrypted_content": "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",
+              "page_age": null
+            },
+            {
+              "type": "web_search_result",
+              "title": "17K items sold",
+              "url": "https://www.ebay.com/usr/smokinbeans",
+              "encrypted_content": "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",
+              "page_age": null
+            }
+          ],
+          "caller": {
+            "type": "direct"
+          }
+        },
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "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"
+        },
+        {
+          "type": "text",
+          "text": "**Assumption:** US market, selling roasted beans from a cafe that buys from a roaster or roasts in-house. I found no sources on marketing costs or inventory waste, so those points are my own assumptions.\n\n**Costs**\n- Platform: Shopify "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "For most coffee businesses, Shopify is the safest choice: it starts at $29/month billed yearly, includes a free subscriptions app, and has discounted ...",
+              "url": "https://bellwethercoffee.com/blog/the-complete-guide-to-setting-up-your-coffee-ecommerce-store",
+              "title": "How to Sell Coffee Online: Store Setup Guide (2026)",
+              "encrypted_index": "Eo8BCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDFz2XmAKmwcCH8Wn7hoMt3AVdbKbXLSAgpR6IjAMxDCIDJEGafPzigyqLQHC/WBwXAtZd3VgTDPquUi2JOGZoxgcPUGpAiJcnez68g4qE6qX0X/Opc3jj5Kf3UWS0GeQrWkYBA=="
+            }
+          ],
+          "type": "text",
+          "text": "starts at $29/month billed yearly, includes a free subscriptions app, and has discounted shipping and automatic sales tax built in."
+        },
+        {
+          "type": "text",
+          "text": "\n- Payments: cards at "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "# How To Sell Coffee Online: Your Guide for 2025\nTo sell coffee online, you need a bag you can price to the ounce, a label that meets FDA rules, a par...",
+              "url": "https://www.onlinestorekit.com/sell-coffee-online/",
+              "title": "How to Sell Coffee Online in 2026 - Online Store Kit",
+              "encrypted_index": "Eo8BCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDJgNJPrzoPsYOPEdVxoMgiq76fgUzsSqidK+IjBPoVWkEY9hVk8mWkF6xVFSac8A+4jLhObHKpHWwOJ9YJRBKK5pvqjdRxmQCCXpZ20qE+q1c6PiMIr12x8vE3jCdaLpRl4YBA=="
+            }
+          ],
+          "type": "text",
+          "text": "2.9% plus 30 cents"
+        },
+        {
+          "type": "text",
+          "text": ".\n- Packaging: "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "These bags cost $0.30 to $0.60 each.\n\n",
+              "url": "https://findhomegrown.com/blog/sell-coffee-roasted-beans-from-home",
+              "title": "How to Sell Coffee and Roasted Beans From Home",
+              "encrypted_index": "Eo8BCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDJR4x3K4c8UfIZHCDBoMR6VbsuALdqikZTVVIjDXn3n9kCuGgjrDKNyOEIH3MuMhnoN7BgEt6xgpgIGYEbhb3jPwOqRn/x/rCEotM6oqE0C7dMN1vtD1V6QFEQxLDy3s1SoYBA=="
+            }
+          ],
+          "type": "text",
+          "text": "Degassing-valve bags cost $0.30 to $0.60 each."
+        },
+        {
+          "type": "text",
+          "text": "\n- Shipping: "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "As of July 2026, USPS Ground Advantage costs $6.93 to $8.40 at commercial rates for a single 12 oz bag packed under 1 pound, depending on distance. ",
+              "url": "https://bellwethercoffee.com/blog/the-complete-guide-to-setting-up-your-coffee-ecommerce-store",
+              "title": "How to Sell Coffee Online: Store Setup Guide (2026)",
+              "encrypted_index": "EpABCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDGvqY996vkAR3ab+QhoMXCX3XIBULKy6V+SBIjDv+SO3RpaWHgg2eNoz0nGGl/rXewiiwVpi7aNeT/91LLMBnS8SaSxxsg6ZAz20qnUqFI/jdAEOOb4rUg5EjuKhwzlnPVFfGAQ="
+            }
+          ],
+          "type": "text",
+          "text": "USPS Ground Advantage costs $6.93 to $8.40 at commercial rates for a single 12 oz bag"
+        },
+        {
+          "type": "text",
+          "text": " (as of July 2026).\n- Capital: "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "Most successful online coffee businesses start with $10,000–$30,000 including inventory, e-commerce setup, and initial marketing.",
+              "url": "https://bellwethercoffee.com/blog/start-online-coffee-business-guide",
+              "title": "How to Start an Online Coffee Business (2026)",
+              "encrypted_index": "Eo8BCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDD9c1ha+Icm5hqHWxRoMVON+9Bg2xDS/p40IIjBvL8aDXrfMYP4VSqPfJ55c6YBD6aExk3hQgNaFJCjly9/0G7BCNrOMqiGNx3IavqYqE0etwEQ3CnpdPTGbtmRbuQDfbJMYBA=="
+            }
+          ],
+          "type": "text",
+          "text": "Most successful online coffee businesses start with $10,000–$30,000"
+        },
+        {
+          "type": "text",
+          "text": " (vendor blog; treat as rough).\n\n**Compliance (verify with your state and county)**\n- A packaged bag needs "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "## Questions we get about coffee bag labels\n\nA bag of plain roasted coffee needs three things under federal law: a statement of identity, a net quanti...",
+              "url": "https://inheritancecoffee.com/blogs/guide/coffee-bag-label-requirements",
+              "title": "Journal by Inheritance Coffee: What Has to Be on a Coffee Bag Label?",
+              "encrypted_index": "EpABCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDFpMIFGdZFrzdnCZbxoMuoqgV72uHjy+VajAIjDCwMRv70MOG+F8K2gWMtcIfV1i+mGXocTX7047aE+DK+2rpKBFW78k+wFir+JIUmAqFN2ZT326X+qW6afjAs0KDq2VGcC8GAQ="
+            }
+          ],
+          "type": "text",
+          "text": "a statement of identity, a net quantity of contents, and the name and place of business of the manufacturer, packer, or distributor."
+        },
+        {
+          "type": "text",
+          "text": "\n- Net weight goes in both US and metric units ("
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "You also need to include the net quantity of contents in both U.S. and metric units, such as ounces and grams.\n\n",
+              "url": "https://www.roastar.com/blog/the-business-of-the-bag-navigating-labels-barcodes-and-more",
+              "title": "A Guide to Labels & Barcodes for Coffee Packaging",
+              "encrypted_index": "EpABCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDHbeYibtFcMXMmmtZRoM54eCkIa9HOzQYRONIjDoOE9+FagpwbK9/WmRE3qLQ8tk3oo3qt0Xc+XsYSXBjTPhM8l3iLXdBQnSTCTkyVAqFCxE5pzyTnw1/v+WzaXpqrazf7LMGAQ="
+            }
+          ],
+          "type": "text",
+          "text": "ounces and grams"
+        },
+        {
+          "type": "text",
+          "text": ").\n- Plain coffee is usually exempt from Nutrition Facts, but "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "The exemption holds only while the label, the labeling and the advertising carry no nutrition claims.\n\n",
+              "url": "https://labelsunlimited.net/coffee-label-requirements/",
+              "title": "Coffee Label Requirements: What the FDA Makes You Print on the Bag - Labels Unlimited Company",
+              "encrypted_index": "EpEBCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDK6Tn4MJittwh2XHpBoMLo4K02z0rwui2+pMIjB1ZVZxT0jjf6yQSuVkLECCq2nSftG8VfJ64D7HWWBitqfA+o4P1OHQQYquGDYcaYgqFV94D+m1B8XWY4qjx7BBnaQh+9S91hgE"
+            }
+          ],
+          "type": "text",
+          "text": "the exemption holds only while the label, the labeling and the advertising carry no nutrition claims."
+        },
+        {
+          "type": "text",
+          "text": "\n- Flavored blends need an ingredient list ("
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "These delightful concoctions require ingredient lists on their packaging.\n\n",
+              "url": "https://www.roastar.com/blog/the-business-of-the-bag-navigating-labels-barcodes-and-more",
+              "title": "A Guide to Labels & Barcodes for Coffee Packaging",
+              "encrypted_index": "EpABCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDITYK9JOM/UwrgAMPRoMUTJofcy6xG5H+YbgIjDjYLpg4F2tUtgtV8DH4RWXy50/B//I64tKrjz2bq+ot5INcoZa1DCz3Ih702qwjFsqFF7ta8gchwFvsh1jxI0Eqr01ihKtGAQ="
+            }
+          ],
+          "type": "text",
+          "text": "These delightful concoctions require ingredient lists on their packaging."
+        },
+        {
+          "type": "text",
+          "text": ").\n- Small-business exemption requires an annual FDA filing ("
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "You must file annually through FDA’s Small Business Nutrition Labeling Exemption system.",
+              "url": "https://www.bluelabelpackaging.com/blog/which-foods-are-not-required-to-have-a-nutrition-label/",
+              "title": "Which Foods Are Not Required to Have a Nutrition Label? - Blue Label Packaging",
+              "encrypted_index": "EpABCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDKhXaRmnmvg+Qs05+hoMkxnty8H97D//mm2dIjDSnMVp8Q6GJURsVwdZezH5YLscv0zIHnm4CP/Og/L5yHMCf2iVj1FTScqe6yHlsSYqFDro7I0kJik82B1EOEDQRggeVzvtGAQ="
+            }
+          ],
+          "type": "text",
+          "text": "FDA's Small Business Nutrition Labeling Exemption system"
+        },
+        {
+          "type": "text",
+          "text": ").\n- Expect a state or local food permit ("
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "| Roast it yourself | Buy green beans, roast, pack and ship | The FDA registration test in the next section, plus your state or local food permit | Gr...",
+              "url": "https://www.onlinestorekit.com/sell-coffee-online/",
+              "title": "How to Sell Coffee Online in 2026 - Online Store Kit",
+              "encrypted_index": "Eo8BCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDIIA/H7NvqquO8FltBoM4tLkgyTwkBYUA43/IjDKyhL7kBk4T736du1rCq2jgkqe6QdpL1QBvNZuBUEz3yrIAFlO9yvS5npcXch2BKMqE8+UOX5Vfa+HtEu5tXcia1DUw+kYBA=="
+            }
+          ],
+          "type": "text",
+          "text": "your state or local food permit"
+        },
+        {
+          "type": "text",
+          "text": ").\n\n**Logistics and freshness**\n- Fast shipping of old roasts still delivers old coffee ("
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "Fast shipping of an old roast is still old coffee.\n\n",
+              "url": "https://iprefercraftcoffee.com/blogs/news/best-coffee-bean-delivery-what-actually-matters",
+              "title": "Best Coffee Bean Delivery: Why Fast Isn't Enough",
+              "encrypted_index": "EpABCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDDWFOBfjq5L8k5bTghoMXSmdWtgBl3JuTL/1IjBnfWg1XbpmvX1OUZcV0mBnRsr+rc3/KJueKRVJm8OihX5fNgDIsd1HhHGBvXg47+gqFNkzaW6wq3E47ni8AKjsxFWQf3rXGAQ="
+            }
+          ],
+          "type": "text",
+          "text": "Fast shipping of an old roast is still old coffee."
+        },
+        {
+          "type": "text",
+          "text": "). Ship close to roast date.\n- Gas release: "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "Freshly roasted coffee releases CO2 for 24 to 48 hours. ",
+              "url": "https://findhomegrown.com/blog/sell-coffee-roasted-beans-from-home",
+              "title": "How to Sell Coffee and Roasted Beans From Home",
+              "encrypted_index": "Eo8BCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDJJnETaLDFvj7hg6gBoMEw3hmQPg0RS29EneIjCnqYpxT7Vv2M3um4L3OIEApRTiu7KJZs4dTsryXr62jz2TLuFWwYbMnMHgT/i4VKQqE/Vg7rZ22ljX2bC3nEpEPoJFo3EYBA=="
+            }
+          ],
+          "type": "text",
+          "text": "Freshly roasted coffee releases CO2 for 24 to 48 hours."
+        },
+        {
+          "type": "text",
+          "text": " Valve bags handle this.\n- Packaging matters: "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "Shipping time matters, but packaging matters more.\n\n",
+              "url": "https://mainlineroastery.com/blogs/news/coffee-freshness-during-shipping",
+              "title": "Coffee Freshness During Shipping: Keep Roast Date Flavor",
+              "encrypted_index": "EpEBCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDNIVmmhkBmBRbrSFjRoMpPQJSEIhYX42iN0YIjCg2/BqR4SrZ4qV4+cZEZzFhDu+6pWbQoyIb+FESpTZ1PPeLJlbB6N4ZzIRTOfC+ZQqFVKbBH0D/DBE4D0O/C0+iyJjsG5mNBgE"
+            }
+          ],
+          "type": "text",
+          "text": "Shipping time matters, but packaging matters more."
+        },
+        {
+          "type": "text",
+          "text": "\n\n**Marketing (assumption)**\n- Start with existing cafe customers, email, and local pickup. Marketplaces such as Etsy take fees; one source notes "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "### Online Pre-Orders and Subscriptions\n**Etsy** works for shipping nationally, but it takes 6.5% per sale on top of processing fees, and most home co...",
+              "url": "https://findhomegrown.com/blog/sell-coffee-roasted-beans-from-home",
+              "title": "How to Sell Coffee and Roasted Beans From Home",
+              "encrypted_index": "EpABCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDA7shMA9xoXcxm5WEBoMP6k7hPjWCdUCQZ0+IjDVWx07ktffON3g5KE1oSSMCXFZ4Wk37lgfxlpG+Db8OknBgu8VmUFlOz00/j3NcfwqFIFmjFyO2vV8IT8Ie+bPQ4RL7RiBGAQ="
+            }
+          ],
+          "type": "text",
+          "text": "it takes 6.5% per sale on top of processing fees"
+        },
+        {
+          "type": "text",
+          "text": ".\n\n**Main risks**\n- Shipping damage: a torn bag "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "For instance, if the coffee bean bag were to rip and tear, your coffee beans would become compromised, ultimately impacting the taste of your coffee.\n...",
+              "url": "https://www.easyship.com/blog/shipping-coffee-guide-and-tips",
+              "title": "How to Ship Coffee Beans: What You Need to Know",
+              "encrypted_index": "Eo8BCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDEWLZqV9l0H50JQSbxoMbNZ9Yvu4FH3c3KTUIjDovc0lH3KW3fgxbK8ltDZq6H7oQBlUPll91YwV6wv1IJtbdcptLTIjStTKvk2gf9UqE93nqrHjN+JCtEnqW9mmJpmOKzQYBA=="
+            }
+          ],
+          "type": "text",
+          "text": "would become compromised, ultimately impacting the taste of your coffee."
+        },
+        {
+          "type": "text",
+          "text": "\n- Freshness complaints: "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "## The Grocery Store Problem: Best By vs Roast Date\nA lot of pre-packaged grocery store coffee doesn’t carry a roast date at all. ",
+              "url": "https://armadilloroasters.com/blog/how-fresh-should-coffee-beans-be-when-ordering-online/",
+              "title": "How Fresh Should Coffee Beans Be When Ordering Online?",
+              "encrypted_index": "EpABCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDJctufxU0fAzyMoWyxoMb7ESo4oTXgXUbyBeIjBdyuWIft1xODOHa3zCQ58CPZSxylWk7YGarzbl8BAtpHSX7QCgvAY7CDNNTcFqc0AqFBT7vz/yISYGz83/P6ljZJTVm/3ZGAQ="
+            }
+          ],
+          "type": "text",
+          "text": "A lot of pre-packaged grocery store coffee doesn't carry a roast date at all."
+        },
+        {
+          "type": "text",
+          "text": " Print the roast date to set expectations.\n- Regulatory: Net-weight errors are common; one source says it is "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "| Name and place of business | Information | Manufacturer, packer or distributor, qualified if not the manufacturer |\n| Nutrition Facts | Information ...",
+              "url": "https://labelsunlimited.net/coffee-label-requirements/",
+              "title": "Coffee Label Requirements: What the FDA Makes You Print on the Bag - Labels Unlimited Company",
+              "encrypted_index": "EpABCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDFdEGvACUyzn1zuiqRoMkPrnO7qWsi7YYKK4IjAfAtVt9MJ3k8dpl/7eQOzP+G5cFfsQQ154RmtPmd/33DLnEYRisu+RQllN4QQHhD4qFC83xMlAJDHUDcmMR+YbOyzYZv9oGAQ="
+            }
+          ],
+          "type": "text",
+          "text": "the rule most small roasters get wrong"
+        },
+        {
+          "type": "text",
+          "text": ".\n- Margin: Postage has risen; "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "Coffee ships, and the customer gets tracking\n\n## Step 4: Get Shipping Right\n### What shipping a bag of coffee costs in 2026\n\n- **The old \"$8 padded en...",
+              "url": "https://bellwethercoffee.com/blog/the-complete-guide-to-setting-up-your-coffee-ecommerce-store",
+              "title": "How to Sell Coffee Online: Store Setup Guide (2026)",
+              "encrypted_index": "Eo8BCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDPp9sKYdU3JGXig0LRoMkkZsNECqRzErjzA7IjBByHCEYOG/xgVW3Wso94uWXIGSM6nHJwzPupiXnOFBvtV9kTRXKHUpop2mo+ShJl0qEzsFIEVYXwQoG7nsPvM6aYYRoP4YBA=="
+            }
+          ],
+          "type": "text",
+          "text": "The old \"$8 padded envelope\" math is gone."
+        },
+        {
+          "type": "text",
+          "text": "\n- Competition: National subscription services roast for many buyers; one describes sourcing "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "A very good coffee club\nTrade offers a wide variety of selected coffee beans, based on drinking preferences, from roasters across the country.\n\n",
+              "url": "https://at.trustpilot.com/review/drinktrade.com",
+              "title": "at.trustpilot.com",
+              "encrypted_index": "EpEBCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDAn40tRT567/W5hHTxoMkWM3lTiowe0ZAqD1IjBOl8LV9X3cKsB4F4NgK7CG6tGthSdPF6DWK64jlE2xVt/+aGc0u0IzyBaKxeBL4/EqFWHLV5Rr+pJTzlTnvq9zi8MPCCr9ghgE"
+            }
+          ],
+          "type": "text",
+          "text": "from roasters across the country."
+        },
+        {
+          "type": "text",
+          "text": "\n- Inventory waste (assumption): Roast in small batches to limit unsold stock.\n\n**Action plan**\n1. Choose a model: roast in-house, repack, or private-label.\n2. Confirm permits and FDA label content; file the exemption if eligible.\n3. Set up Shopify (or cheaper alternative) with tax settings checked.\n4. Test packaging with sample shipments to your region.\n5. Launch to existing customers; track margin per order and freshness feedback monthly."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [
+            {
+              "type": "web_search_20250305",
+              "name": "web_search",
+              "max_uses": 3
+            }
+          ],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011Cgv3A4Zqon1jNu5JtMFjs",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 31268,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 3319,
+            "output_tokens_details": {
+              "thinking_tokens": 1675
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard",
+            "server_tool_use": {
+              "web_search_requests": 3,
+              "web_fetch_requests": 0
+            }
+          }
+        },
+        "http": {
+          "status": 200,
+          "requestId": "req_011Cgv3A4EzCzj5VS2Mdd9L4",
+          "ms": 17010
+        }
+      },
+      "t": 18606
+    },
+    {
+      "type": "tool_call",
+      "agent": "researcher",
+      "tool": "web_search",
+      "input": "selling coffee beans online small business costs shipping packaging",
+      "t": 18607
+    },
+    {
+      "type": "tool_call",
+      "agent": "researcher",
+      "tool": "web_search",
+      "input": "food labeling requirements packaged coffee FDA small business",
+      "t": 18607
+    },
+    {
+      "type": "tool_call",
+      "agent": "researcher",
+      "tool": "web_search",
+      "input": "shipping fresh roasted coffee beans freshness complaints",
+      "t": 18607
+    },
+    {
+      "type": "tool_result",
+      "agent": "researcher",
+      "tool": "web_search",
+      "output": "How to Ship Coffee Beans: What You Need to Know - https://www.easyship.com/blog/shipping-coffee-guide-and-tips\nHow to Start an Online Coffee Business (2026) - https://bellwethercoffee.com/blog/start-online-coffee-business-guide\nShipping Coffee: How to Pack and Ship Coffee Beans (2026) - Shopify - https://www.shopify.com/blog/shipping-coffee\nHow to Sell Coffee Online: Store Setup Guide (2026) - https://bellwethercoffee.com/blog/the-complete-guide-to-setting-up-your-coffee-ecommerce-store\nCoffee Shipping 101: Costs, Challenges, & How-to Ship - https://www.shipbob.com/blog/coffee-shipping/\nHow to Sell Coffee Beans and Start Your Own Successful Business - https://makelocalforglobal.com/how-to-sell-coffee-beans-and-start-your-own-successful-business/\nHow to Sell Coffee Online in 2026 - Online Store Kit - https://www.onlinestorekit.com/sell-coffee-online/\nDropship Coffee Supplier - https://roastify.app/dropshipping\nHow to Sell Coffee and Roasted Beans From Home - https://findhomegrown.com/blog/sell-coffee-roasted-beans-from-home",
+      "t": 18607
+    },
+    {
+      "type": "tool_result",
+      "agent": "researcher",
+      "tool": "web_search",
+      "output": "Which Foods Are Not Required to Have a Nutrition Label? - Blue Label Packaging - https://www.bluelabelpackaging.com/blog/which-foods-are-not-required-to-have-a-nutrition-label/\nA Guide to Labels & Barcodes for Coffee Packaging - https://www.roastar.com/blog/the-business-of-the-bag-navigating-labels-barcodes-and-more\nNutrition Facts Requirements For Coffee, Tea, And Spices - https://www.registrarcorp.com/blog/food-beverage/food-beverage-regulations/nutrition-facts-requirements-for-coffee-tea-and-spices/\nFDA Coffee Label Requirements: Expert Q&A & Guidance - https://www.justanswer.com/small-appliance/llj1q-need-help-fda-requirements-coffee-label-i-m.html\nCoffee Labeling Guide - https://www.ncausa.org/Industry-Resources/Coffee-Labeling/Coffee-Labeling-Guide\neCFR :: 21 CFR Part 101 -- Food Labeling - https://www.ecfr.gov/current/title-21/chapter-I/subchapter-B/part-101\nJournal by Inheritance Coffee: What Has to Be on a Coffee Bag Label? - https://inheritancecoffee.com/blogs/guide/coffee-bag-label-requirements\nCoffee Labels: What You Need to Know (2025) for Compliance - https://www.wizardlabels.com/blog/coffee-labels-2025-compliance/\nFDA Registration for Coffee Products - https://www.fdaregistrationassistance.com/fda-registration-for-coffee-products/\nCoffee Label Requirements: What the FDA Makes You Print on the Bag - Labels Unlimited Company - https://labelsunlimited.net/coffee-label-requirements/",
+      "t": 18607
+    },
+    {
+      "type": "tool_result",
+      "agent": "researcher",
+      "tool": "web_search",
+      "output": "Fresh-Roasted Coffee: Why It Matters + How to Buy It - https://beanbox.com/blog/fresh-roasted-coffee\nBest Fast-Shipping Fresh Roasted Coffee for Home Brewing Enthusiasts - https://jimmysjava.com/blogs/blog-posts/best-fast-shipping-fresh-roasted-coffee-for-home-brewing-enthusiasts\nCoffee Freshness During Shipping: Keep Roast Date Flavor - https://mainlineroastery.com/blogs/news/coffee-freshness-during-shipping\nFresh Coffee Shipping Timeline Explained - https://artisanbean.com/blogs/news/fresh-coffee-shipping-timeline\nBest Coffee Bean Delivery: Why Fast Isn't Enough - https://iprefercraftcoffee.com/blogs/news/best-coffee-bean-delivery-what-actually-matters\nHow Fresh Should Coffee Beans Be When Ordering Online? - https://armadilloroasters.com/blog/how-fresh-should-coffee-beans-be-when-ordering-online/\nat.trustpilot.com - https://at.trustpilot.com/review/drinktrade.com\nes.trustpilot.com - https://es.trustpilot.com/review/drinktrade.com\n17K items sold - https://www.ebay.com/usr/smokinbeans",
+      "t": 18607
+    },
+    {
+      "type": "agent_output",
+      "agent": "researcher",
+      "text": "**Assumption:** US market, selling roasted beans from a cafe that buys from a roaster or roasts in-house. I found no sources on marketing costs or inventory waste, so those points are my own assumptions.\n\n**Costs**\n- Platform: Shopify \nstarts at $29/month billed yearly, includes a free subscriptions app, and has discounted shipping and automatic sales tax built in.\n\n- Payments: cards at \n2.9% plus 30 cents\n.\n- Packaging: \nDegassing-valve bags cost $0.30 to $0.60 each.\n\n- Shipping: \nUSPS Ground Advantage costs $6.93 to $8.40 at commercial rates for a single 12 oz bag\n (as of July 2026).\n- Capital: \nMost successful online coffee businesses start with $10,000–$30,000\n (vendor blog; treat as rough).\n\n**Compliance (verify with your state and county)**\n- A packaged bag needs \na statement of identity, a net quantity of contents, and the name and place of business of the manufacturer, packer, or distributor.\n\n- Net weight goes in both US and metric units (\nounces and grams\n).\n- Plain coffee is usually exempt from Nutrition Facts, but \nthe exemption holds only while the label, the labeling and the advertising carry no nutrition claims.\n\n- Flavored blends need an ingredient list (\nThese delightful concoctions require ingredient lists on their packaging.\n).\n- Small-business exemption requires an annual FDA filing (\nFDA's Small Business Nutrition Labeling Exemption system\n).\n- Expect a state or local food permit (\nyour state or local food permit\n).\n\n**Logistics and freshness**\n- Fast shipping of old roasts still delivers old coffee (\nFast shipping of an old roast is still old coffee.\n). Ship close to roast date.\n- Gas release: \nFreshly roasted coffee releases CO2 for 24 to 48 hours.\n Valve bags handle this.\n- Packaging matters: \nShipping time matters, but packaging matters more.\n\n\n**Marketing (assumption)**\n- Start with existing cafe customers, email, and local pickup. Marketplaces such as Etsy take fees; one source notes \nit takes 6.5% per sale on top of processing fees\n.\n\n**Main risks**\n- Shipping damage: a torn bag \nwould become compromised, ultimately impacting the taste of your coffee.\n\n- Freshness complaints: \nA lot of pre-packaged grocery store coffee doesn't carry a roast date at all.\n Print the roast date to set expectations.\n- Regulatory: Net-weight errors are common; one source says it is \nthe rule most small roasters get wrong\n.\n- Margin: Postage has risen; \nThe old \"$8 padded envelope\" math is gone.\n\n- Competition: National subscription services roast for many buyers; one describes sourcing \nfrom roasters across the country.\n\n- Inventory waste (assumption): Roast in small batches to limit unsold stock.\n\n**Action plan**\n1. Choose a model: roast in-house, repack, or private-label.\n2. Confirm permits and FDA label content; file the exemption if eligible.\n3. Set up Shopify (or cheaper alternative) with tax settings checked.\n4. Test packaging with sample shipments to your region.\n5. Launch to existing customers; track margin per order and freshness feedback monthly.",
+      "tokens": {
+        "input": 31268,
+        "output": 3319
+      },
+      "t": 18608
+    },
+    {
+      "type": "handoff",
+      "from": "researcher",
+      "to": "supervisor",
+      "note": "**Assumption:** US market, selling roasted beans from a cafe that buys from a roaster or roasts in-house. I found no sources on marketing costs or inventory waste, so those points are my own assumptions.\n\n**Costs**\n- Platform: Shopify \nstarts at $29/month billed yearly, includes a free subscriptions app, and has discounted shipping and automatic sales tax built in.\n\n- Payments: cards at \n2.9% plus 30 cents\n.\n- Packaging: \nDegassing-valve bags cost $0.30 to $0.60 each.\n\n- Shipping: \nUSPS Ground Advantage costs $6.93 to $8.40 at commercial rates for a single 12 oz bag\n (as of July 2026).\n- Capital: \nMost successful online coffee businesses start with $10,000–$30,000\n (vendor blog; treat as rough).\n\n**Compliance (verify with your state and county)**\n- A packaged bag needs \na statement of identity, a net quantity of contents, and the name and place of business of the manufacturer, packer, or distributor.\n\n- Net weight goes in both US and metric units (\nounces and grams\n).\n- Plain coffee is usually exempt from Nutrition Facts, but \nthe exemption holds only while the label, the labeling and the advertising carry no nutrition claims.\n\n- Flavored blends need an ingredient list (\nThese delightful concoctions require ingredient lists on their packaging.\n).\n- Small-business exemption requires an annual FDA filing (\nFDA's Small Business Nutrition Labeling Exemption system\n).\n- Expect a state or local food permit (\nyour state or local food permit\n).\n\n**Logistics and freshness**\n- Fast shipping of old roasts still delivers old coffee (\nFast shipping of an old roast is still old coffee.\n). Ship close to roast date.\n- Gas release: \nFreshly roasted coffee releases CO2 for 24 to 48 hours.\n Valve bags handle this.\n- Packaging matters: \nShipping time matters, but packaging matters more.\n\n\n**Marketing (assumption)**\n- Start with existing cafe customers, email, and local pickup. Marketplaces such as Etsy take fees; one source notes \nit takes 6.5% per sale on top of processing fees\n.\n\n**M",
+      "t": 18608
+    },
+    {
+      "type": "agent_start",
+      "agent": "supervisor",
+      "role": "Supervisor",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: supervisor\nYou are the Supervisor. You manage workers and decide who works next. The first message lists the worker ids. Call one worker at a time; each worker's result comes back to you. When you have enough, finish.\nReply with JSON only, in one of these two forms:\n{\"action\":\"call\",\"worker\":\"<worker id>\",\"instruction\":\"<what the worker should do>\"}\n{\"action\":\"finish\",\"answer\":\"<the final answer for the user>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 18608
+    },
+    {
+      "type": "round",
+      "agent": "supervisor",
+      "round": 2,
+      "ms": 4768,
+      "stop": "end_turn",
+      "usage": {
+        "input": 1552,
+        "output": 995
+      },
+      "newMessages": [
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"action\":\"call\",\"worker\":\"researcher\",\"instruction\":\"Research the key steps for a small independent cafe to start selling coffee beans online. Cover typical costs (e-commerce platform, packaging, shipping, roasting/sourcing compliance such as food labeling and sales tax), logistics options for fresh roasted coffee, marketing channels, and the main risks (e.g., shipping damage, freshness complaints, inventory waste, regulatory requirements, margin pressure, competition from established roasters). Keep findings concise, in bullet points, with sources or assumptions noted.\"}"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": "Result from researcher:\n**Assumption:** US market, selling roasted beans from a cafe that buys from a roaster or roasts in-house. I found no sources on marketing costs or inventory waste, so those points are my own assumptions.\n\n**Costs**\n- Platform: Shopify \nstarts at $29/month billed yearly, includes a free subscriptions app, and has discounted shipping and automatic sales tax built in.\n\n- Payments: cards at \n2.9% plus 30 cents\n.\n- Packaging: \nDegassing-valve bags cost $0.30 to $0.60 each.\n\n- Shipping: \nUSPS Ground Advantage costs $6.93 to $8.40 at commercial rates for a single 12 oz bag\n (as of July 2026).\n- Capital: \nMost successful online coffee businesses start with $10,000–$30,000\n (vendor blog; treat as rough).\n\n**Compliance (verify with your state and county)**\n- A packaged bag needs \na statement of identity, a net quantity of contents, and the name and place of business of the manufacturer, packer, or distributor.\n\n- Net weight goes in both US and metric units (\nounces and grams\n).\n- Plain coffee is usually exempt from Nutrition Facts, but \nthe exemption holds only while the label, the labeling and the advertising carry no nutrition claims.\n\n- Flavored blends need an ingredient list (\nThese delightful concoctions require ingredient lists on their packaging.\n).\n- Small-business exemption requires an annual FDA filing (\nFDA's Small Business Nutrition Labeling Exemption system\n).\n- Expect a state or local food permit (\nyour state or local food permit\n).\n\n**Logistics and freshness**\n- Fast shipping of old roasts still delivers old coffee (\nFast shipping of an old roast is still old coffee.\n). Ship close to roast date.\n- Gas release: \nFreshly roasted coffee releases CO2 for 24 to 48 hours.\n Valve bags handle this.\n- Packaging matters: \nShipping time matters, but packaging matters more.\n\n\n**Marketing (assumption)**\n- Start with existing cafe customers, email, and local pickup. Marketplaces such as Etsy take fees; one source notes \nit takes 6.5% per sale on top of processing fees\n.\n\n**Main risks**\n- Shipping damage: a torn bag \nwould become compromised, ultimately impacting the taste of your coffee.\n\n- Freshness complaints: \nA lot of pre-packaged grocery store coffee doesn't carry a roast date at all.\n Print the roast date to set expectations.\n- Regulatory: Net-weight errors are common; one source says it is \nthe rule most small roasters get wrong\n.\n- Margin: Postage has risen; \nThe old \"$8 padded envelope\" math is gone.\n\n- Competition: National subscription services roast for many buyers; one describes sourcing \nfrom roasters across the country.\n\n- Inventory waste (assumption): Roast in small batches to limit unsold stock.\n\n**Action plan**\n1. Choose a model: roast in-house, repack, or private-label.\n2. Confirm permits and FDA label content; file the exemption if eligible.\n3. Set up Shopify (or cheaper alternative) with tax settings checked.\n4. Test packaging with sample shipments to your region.\n5. Launch to existing customers; track margin per order and freshness feedback monthly."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQSkAcKEAgTGAI4AUIIdGhpbmtpbmcSDGXSRJJ/oxbF7AXVPRoMG4ssbG/Z/pQgbzBjIjCoZiw6VYq0/OsTCjBlH62Mu4I1NoShDaHVY7NlC8viZfjTvIAjQKnfBbzh2AiBTNQqrQYkPWE2eBsAxE+qBCI1g3vbJcUZ2MYQOzPFXbDToS375z7dRFOsnTofDahQ0mrTqnjDm6TVMmxce+dGvBFNyaRE0nE9OPKwJmQIYWBsKq42NFS/w9EK4LNtDGcZDoX4O3a1Ll1G1HauALzw5eZQeHus66Rjn02DB7RGxe51DjVdWcMytW2l/Mi+Kpp9X50SJUrNLzs4o8aKvZhpG1syrQIMUigdQLtqvKdKs/PQZowvi19zP1ZMk68dnMnd8jNuZnZXTSPr/e41z506vyVtrZsHZdKtF1NPapcPveHMjuvpcV+PZ/EzfXQ5YGmSzL2lhqjYFo46baZsQskvqD5WxlSk/i5oaxCxkil+hIPmqn9SbT2e0PNQUsV33WLkihN9smhC+W0za0Mixxxc0w6kMWaVDxutMwnKmDPU1JXNll4SMBFfTZLg5hiLyjpW737eN9RGayZ/y9zMMG7pk3n0222693AkiPe/RjL0TtT3YfqnmFqvW3IuYHJuPUXUQCMP8XzxBLvrqolge0K4AWM3AOqFPJyDLMFYRI6buRBovgPG7+rSyZwdiSq5DMdTgVOFoiLv0AghFrx6Jyc9cp9vBoToceCSR5P3qFKPPIpaS1GspH+GJleFbHgfbsYLfEr+TbFAwGSmvixYXXlUKZup9yrPt8Kyyjym+8m+U4dv0kUtdeg3h3VPrlSfRUSuEhebVNuHlsaE6PW2vjy4UJ8hKqZY9cwINj5jpmGHqUYjwKAr7BGk0Qo8ss2uSt1gOJW4Q35f3EEpRwZxGKbC8c1XuNystiMlISS71lK2R1cB55CD/F171CJuNACAH83DCV2vKAA5MheyW2inMdTWHtMhnfVrYdIqpPymKLO2ToQo+s30rT1jxRmqQhMRR7mb2X8uVcC7ZSIpcuR0TY8mZWcwi5FKMC4+BYQSlDP11luoXfuygp86Z0LA2/D43rcGoyXEfgcUGXbnvUSjaB9NoVWrJHdJMUSjw3zoR6EZelOV23rAJfAcdEVqSYJw4sB4OFAqDABGpX6Hcj7dF4qzamLgEmWGuNKhz0lJZ5K4b1w/+iGLDwFZhw6cijIa1hJ+J5EYAQ=="
+        },
+        {
+          "type": "text",
+          "text": "{\"action\":\"call\",\"worker\":\"writer\",\"instruction\":\"Using the researcher's findings below, write a one-page action plan for a small cafe starting to sell roasted coffee beans online. Structure it as: (1) Goal and model choice, (2) Setup steps with costs, (3) Compliance checklist (labeling, FDA small-business exemption filing if eligible, state/local permits, sales tax), (4) Freshness and shipping approach, (5) Launch and marketing, (6) Main risks with a mitigation for each, (7) 30/60/90-day timeline. Keep it under 500 words. Mark clearly which figures are assumptions or unverified, and do not present vendor-blog figures or the 'as of July 2026' shipping price as confirmed facts. Remove the stray quotation fragments and state that the user should verify labeling and permit rules with their state and county.\\n\\nResearcher findings:\\n\"\n\nResearcher findings:\n- Assumption: US market, selling roasted beans from a cafe that buys from a roaster or roasts in-house. Marketing costs and inventory waste are unsourced assumptions.\n- Shopify from $29/month (annual billing), with built-in discounted shipping and automatic sales tax.\n- Card payments: 2.9% + $0.30.\n- Degassing-valve bags: $0.30 to $0.60 each.\n- USPS Ground Advantage: $6.93 to $8.40 per 12 oz bag at commercial rates (stated as of July 2026; verify).\n- Startup capital: $10,000 to $30,000 (vendor blog; rough).\n- Labeling: statement of identity, net quantity in oz and g, name and place of business of manufacturer/packer/distributor. Flavored blends need an ingredient list. Plain coffee is usually exempt from Nutrition Facts only if no nutrition claims are made.\n- Small-business Nutrition Labeling Exemption requires an annual FDA filing. Expect a state or local food permit.\n- Freshness: roasted coffee releases CO2 for 24 to 48 hours; use valve bags; ship close to roast date; print the roast date.\n- Risks: shipping damage, freshness complaints, net-weight labeling errors, rising postage squeezing margins, competition from national subscription roasters, inventory waste from unsold stock.\n- Marketplaces such as Etsy charge a per-sale fee (one source cites 6.5%) on top of processing fees.\n- Suggested sequence: choose model (in-house roast, repack, or private label); confirm permits and labels; set up Shopify with tax checked; test packaging with sample shipments; launch to existing customers and track margin and freshness feedback monthly.\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 3
+        },
+        "response": {
+          "id": "msg_011Cgv3BKL7qqt9iZYB5Eq9c",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 1552,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 995,
+            "output_tokens_details": {
+              "thinking_tokens": 101
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        },
+        "http": {
+          "status": 200,
+          "requestId": "req_011Cgv3BK2mke5hdAjAQb32V",
+          "ms": 4768
+        }
+      },
+      "t": 23376
+    },
+    {
+      "type": "agent_output",
+      "agent": "supervisor",
+      "text": "{\"action\":\"call\",\"worker\":\"writer\",\"instruction\":\"Using the researcher's findings below, write a one-page action plan for a small cafe starting to sell roasted coffee beans online. Structure it as: (1) Goal and model choice, (2) Setup steps with costs, (3) Compliance checklist (labeling, FDA small-business exemption filing if eligible, state/local permits, sales tax), (4) Freshness and shipping approach, (5) Launch and marketing, (6) Main risks with a mitigation for each, (7) 30/60/90-day timeline. Keep it under 500 words. Mark clearly which figures are assumptions or unverified, and do not present vendor-blog figures or the 'as of July 2026' shipping price as confirmed facts. Remove the stray quotation fragments and state that the user should verify labeling and permit rules with their state and county.\\n\\nResearcher findings:\\n\"\n\nResearcher findings:\n- Assumption: US market, selling roasted beans from a cafe that buys from a roaster or roasts in-house. Marketing costs and inventory waste are unsourced assumptions.\n- Shopify from $29/month (annual billing), with built-in discounted shipping and automatic sales tax.\n- Card payments: 2.9% + $0.30.\n- Degassing-valve bags: $0.30 to $0.60 each.\n- USPS Ground Advantage: $6.93 to $8.40 per 12 oz bag at commercial rates (stated as of July 2026; verify).\n- Startup capital: $10,000 to $30,000 (vendor blog; rough).\n- Labeling: statement of identity, net quantity in oz and g, name and place of business of manufacturer/packer/distributor. Flavored blends need an ingredient list. Plain coffee is usually exempt from Nutrition Facts only if no nutrition claims are made.\n- Small-business Nutrition Labeling Exemption requires an annual FDA filing. Expect a state or local food permit.\n- Freshness: roasted coffee releases CO2 for 24 to 48 hours; use valve bags; ship close to roast date; print the roast date.\n- Risks: shipping damage, freshness complaints, net-weight labeling errors, rising postage squeezing margins, competition from national subscription roasters, inventory waste from unsold stock.\n- Marketplaces such as Etsy charge a per-sale fee (one source cites 6.5%) on top of processing fees.\n- Suggested sequence: choose model (in-house roast, repack, or private label); confirm permits and labels; set up Shopify with tax checked; test packaging with sample shipments; launch to existing customers and track margin and freshness feedback monthly.\"}",
+      "tokens": {
+        "input": 1552,
+        "output": 995
+      },
+      "t": 23377
+    },
+    {
+      "type": "agent_start",
+      "agent": "supervisor",
+      "role": "Supervisor",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: supervisor\nYou are the Supervisor. You manage workers and decide who works next. The first message lists the worker ids. Call one worker at a time; each worker's result comes back to you. When you have enough, finish.\nReply with JSON only, in one of these two forms:\n{\"action\":\"call\",\"worker\":\"<worker id>\",\"instruction\":\"<what the worker should do>\"}\n{\"action\":\"finish\",\"answer\":\"<the final answer for the user>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 23377
+    },
+    {
+      "type": "round",
+      "agent": "supervisor",
+      "round": 3,
+      "ms": 3918,
+      "stop": "end_turn",
+      "usage": {
+        "input": 2583,
+        "output": 939
+      },
+      "newMessages": [
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "thinking",
+              "thinking": "",
+              "signature": "CAQSkAcKEAgTGAI4AUIIdGhpbmtpbmcSDGXSRJJ/oxbF7AXVPRoMG4ssbG/Z/pQgbzBjIjCoZiw6VYq0/OsTCjBlH62Mu4I1NoShDaHVY7NlC8viZfjTvIAjQKnfBbzh2AiBTNQqrQYkPWE2eBsAxE+qBCI1g3vbJcUZ2MYQOzPFXbDToS375z7dRFOsnTofDahQ0mrTqnjDm6TVMmxce+dGvBFNyaRE0nE9OPKwJmQIYWBsKq42NFS/w9EK4LNtDGcZDoX4O3a1Ll1G1HauALzw5eZQeHus66Rjn02DB7RGxe51DjVdWcMytW2l/Mi+Kpp9X50SJUrNLzs4o8aKvZhpG1syrQIMUigdQLtqvKdKs/PQZowvi19zP1ZMk68dnMnd8jNuZnZXTSPr/e41z506vyVtrZsHZdKtF1NPapcPveHMjuvpcV+PZ/EzfXQ5YGmSzL2lhqjYFo46baZsQskvqD5WxlSk/i5oaxCxkil+hIPmqn9SbT2e0PNQUsV33WLkihN9smhC+W0za0Mixxxc0w6kMWaVDxutMwnKmDPU1JXNll4SMBFfTZLg5hiLyjpW737eN9RGayZ/y9zMMG7pk3n0222693AkiPe/RjL0TtT3YfqnmFqvW3IuYHJuPUXUQCMP8XzxBLvrqolge0K4AWM3AOqFPJyDLMFYRI6buRBovgPG7+rSyZwdiSq5DMdTgVOFoiLv0AghFrx6Jyc9cp9vBoToceCSR5P3qFKPPIpaS1GspH+GJleFbHgfbsYLfEr+TbFAwGSmvixYXXlUKZup9yrPt8Kyyjym+8m+U4dv0kUtdeg3h3VPrlSfRUSuEhebVNuHlsaE6PW2vjy4UJ8hKqZY9cwINj5jpmGHqUYjwKAr7BGk0Qo8ss2uSt1gOJW4Q35f3EEpRwZxGKbC8c1XuNystiMlISS71lK2R1cB55CD/F171CJuNACAH83DCV2vKAA5MheyW2inMdTWHtMhnfVrYdIqpPymKLO2ToQo+s30rT1jxRmqQhMRR7mb2X8uVcC7ZSIpcuR0TY8mZWcwi5FKMC4+BYQSlDP11luoXfuygp86Z0LA2/D43rcGoyXEfgcUGXbnvUSjaB9NoVWrJHdJMUSjw3zoR6EZelOV23rAJfAcdEVqSYJw4sB4OFAqDABGpX6Hcj7dF4qzamLgEmWGuNKhz0lJZ5K4b1w/+iGLDwFZhw6cijIa1hJ+J5EYAQ=="
+            },
+            {
+              "type": "text",
+              "text": "{\"action\":\"call\",\"worker\":\"writer\",\"instruction\":\"Using the researcher's findings below, write a one-page action plan for a small cafe starting to sell roasted coffee beans online. Structure it as: (1) Goal and model choice, (2) Setup steps with costs, (3) Compliance checklist (labeling, FDA small-business exemption filing if eligible, state/local permits, sales tax), (4) Freshness and shipping approach, (5) Launch and marketing, (6) Main risks with a mitigation for each, (7) 30/60/90-day timeline. Keep it under 500 words. Mark clearly which figures are assumptions or unverified, and do not present vendor-blog figures or the 'as of July 2026' shipping price as confirmed facts. Remove the stray quotation fragments and state that the user should verify labeling and permit rules with their state and county.\\n\\nResearcher findings:\\n\"\n\nResearcher findings:\n- Assumption: US market, selling roasted beans from a cafe that buys from a roaster or roasts in-house. Marketing costs and inventory waste are unsourced assumptions.\n- Shopify from $29/month (annual billing), with built-in discounted shipping and automatic sales tax.\n- Card payments: 2.9% + $0.30.\n- Degassing-valve bags: $0.30 to $0.60 each.\n- USPS Ground Advantage: $6.93 to $8.40 per 12 oz bag at commercial rates (stated as of July 2026; verify).\n- Startup capital: $10,000 to $30,000 (vendor blog; rough).\n- Labeling: statement of identity, net quantity in oz and g, name and place of business of manufacturer/packer/distributor. Flavored blends need an ingredient list. Plain coffee is usually exempt from Nutrition Facts only if no nutrition claims are made.\n- Small-business Nutrition Labeling Exemption requires an annual FDA filing. Expect a state or local food permit.\n- Freshness: roasted coffee releases CO2 for 24 to 48 hours; use valve bags; ship close to roast date; print the roast date.\n- Risks: shipping damage, freshness complaints, net-weight labeling errors, rising postage squeezing margins, competition from national subscription roasters, inventory waste from unsold stock.\n- Marketplaces such as Etsy charge a per-sale fee (one source cites 6.5%) on top of processing fees.\n- Suggested sequence: choose model (in-house roast, repack, or private label); confirm permits and labels; set up Shopify with tax checked; test packaging with sample shipments; launch to existing customers and track margin and freshness feedback monthly.\"}"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": "Reply with valid JSON as instructed. Valid workers: researcher, writer, critic, free."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "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"
+        },
+        {
+          "type": "text",
+          "text": "{\"action\":\"call\",\"worker\":\"writer\",\"instruction\":\"Using the researcher findings, write a one-page action plan for a small cafe starting to sell roasted coffee beans online. Structure it as: (1) Goal and model choice, (2) Setup steps with costs, (3) Compliance checklist (labeling, FDA small-business exemption filing if eligible, state and local permits, sales tax), (4) Freshness and shipping approach, (5) Launch and marketing, (6) Main risks with a mitigation for each, (7) 30/60/90-day timeline. Keep it under 500 words. Mark figures that are assumptions or unverified, including the vendor-blog capital estimate and the shipping price dated July 2026, and do not present them as confirmed. Tell the user to verify labeling and permit rules with their state and county. Researcher findings: US market; Shopify from $29/month; card fees 2.9% plus $0.30; degassing-valve bags $0.30 to $0.60 each; USPS Ground Advantage $6.93 to $8.40 per 12 oz bag; startup capital $10,000 to $30,000 (rough); labels need statement of identity, net quantity in oz and g, and manufacturer/packer/distributor name and place of business; flavored blends need ingredient lists; plain coffee usually exempt from Nutrition Facts if no nutrition claims; small-business FDA exemption requires annual filing; state or local food permit likely; roasted coffee off-gasses for 24 to 48 hours, so use valve bags, ship close to roast date, and print the roast date; risks are shipping damage, freshness complaints, net-weight labeling errors, rising postage, competition from national subscription roasters, and unsold inventory; marketplaces such as Etsy charge per-sale fees (one source cites 6.5%); suggested sequence is choose model, confirm permits and labels, set up Shopify with tax checked, test packaging with sample shipments, then launch to existing customers and track margin and freshness feedback monthly.\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 5
+        },
+        "response": {
+          "id": "msg_011Cgv3BfhUm6Ma3a5P2SVdy",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 2583,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 939,
+            "output_tokens_details": {
+              "thinking_tokens": 268
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        },
+        "http": {
+          "status": 200,
+          "requestId": "req_011Cgv3BfP8DZhaP1ETzS6w6",
+          "ms": 3918
+        }
+      },
+      "t": 27295
+    },
+    {
+      "type": "agent_output",
+      "agent": "supervisor",
+      "text": "{\"action\":\"call\",\"worker\":\"writer\",\"instruction\":\"Using the researcher findings, write a one-page action plan for a small cafe starting to sell roasted coffee beans online. Structure it as: (1) Goal and model choice, (2) Setup steps with costs, (3) Compliance checklist (labeling, FDA small-business exemption filing if eligible, state and local permits, sales tax), (4) Freshness and shipping approach, (5) Launch and marketing, (6) Main risks with a mitigation for each, (7) 30/60/90-day timeline. Keep it under 500 words. Mark figures that are assumptions or unverified, including the vendor-blog capital estimate and the shipping price dated July 2026, and do not present them as confirmed. Tell the user to verify labeling and permit rules with their state and county. Researcher findings: US market; Shopify from $29/month; card fees 2.9% plus $0.30; degassing-valve bags $0.30 to $0.60 each; USPS Ground Advantage $6.93 to $8.40 per 12 oz bag; startup capital $10,000 to $30,000 (rough); labels need statement of identity, net quantity in oz and g, and manufacturer/packer/distributor name and place of business; flavored blends need ingredient lists; plain coffee usually exempt from Nutrition Facts if no nutrition claims; small-business FDA exemption requires annual filing; state or local food permit likely; roasted coffee off-gasses for 24 to 48 hours, so use valve bags, ship close to roast date, and print the roast date; risks are shipping damage, freshness complaints, net-weight labeling errors, rising postage, competition from national subscription roasters, and unsold inventory; marketplaces such as Etsy charge per-sale fees (one source cites 6.5%); suggested sequence is choose model, confirm permits and labels, set up Shopify with tax checked, test packaging with sample shipments, then launch to existing customers and track margin and freshness feedback monthly.\"}",
+      "tokens": {
+        "input": 2583,
+        "output": 939
+      },
+      "t": 27295
+    },
+    {
+      "type": "handoff",
+      "from": "supervisor",
+      "to": "writer",
+      "note": "Using the researcher findings, write a one-page action plan for a small cafe starting to sell roasted coffee beans online. Structure it as: (1) Goal and model choice, (2) Setup steps with costs, (3) Compliance checklist (labeling, FDA small-business exemption filing if eligible, state and local permits, sales tax), (4) Freshness and shipping approach, (5) Launch and marketing, (6) Main risks with a mitigation for each, (7) 30/60/90-day timeline. Keep it under 500 words. Mark figures that are assumptions or unverified, including the vendor-blog capital estimate and the shipping price dated July 2026, and do not present them as confirmed. Tell the user to verify labeling and permit rules with their state and county. Researcher findings: US market; Shopify from $29/month; card fees 2.9% plus $0.30; degassing-valve bags $0.30 to $0.60 each; USPS Ground Advantage $6.93 to $8.40 per 12 oz bag; startup capital $10,000 to $30,000 (rough); labels need statement of identity, net quantity in oz and g, and manufacturer/packer/distributor name and place of business; flavored blends need ingredient lists; plain coffee usually exempt from Nutrition Facts if no nutrition claims; small-business FDA exemption requires annual filing; state or local food permit likely; roasted coffee off-gasses for 24 to 48 hours, so use valve bags, ship close to roast date, and print the roast date; risks are shipping damage, freshness complaints, net-weight labeling errors, rising postage, competition from national subscription roasters, and unsold inventory; marketplaces such as Etsy charge per-sale fees (one source cites 6.5%); suggested sequence is choose model, confirm permits and labels, set up Shopify with tax checked, test packaging with sample shipments, then launch to existing customers and track margin and freshness feedback monthly.",
+      "t": 27295
+    },
+    {
+      "type": "agent_start",
+      "agent": "writer",
+      "role": "Writer",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: writer\nYou are the Writer. Write the final answer for the user from the material you were given. Be clear and short, with no filler.\nKeep every reply under 300 words. Answer in English.",
+      "t": 27295
+    },
+    {
+      "type": "round",
+      "agent": "writer",
+      "round": 1,
+      "ms": 9389,
+      "stop": "end_turn",
+      "usage": {
+        "input": 769,
+        "output": 2152
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: A small cafe wants to start selling coffee beans online. Prepare a one-page action plan with the main risks.\n\nInstruction from the supervisor:\nUsing the researcher findings, write a one-page action plan for a small cafe starting to sell roasted coffee beans online. Structure it as: (1) Goal and model choice, (2) Setup steps with costs, (3) Compliance checklist (labeling, FDA small-business exemption filing if eligible, state and local permits, sales tax), (4) Freshness and shipping approach, (5) Launch and marketing, (6) Main risks with a mitigation for each, (7) 30/60/90-day timeline. Keep it under 500 words. Mark figures that are assumptions or unverified, including the vendor-blog capital estimate and the shipping price dated July 2026, and do not present them as confirmed. Tell the user to verify labeling and permit rules with their state and county. Researcher findings: US market; Shopify from $29/month; card fees 2.9% plus $0.30; degassing-valve bags $0.30 to $0.60 each; USPS Ground Advantage $6.93 to $8.40 per 12 oz bag; startup capital $10,000 to $30,000 (rough); labels need statement of identity, net quantity in oz and g, and manufacturer/packer/distributor name and place of business; flavored blends need ingredient lists; plain coffee usually exempt from Nutrition Facts if no nutrition claims; small-business FDA exemption requires annual filing; state or local food permit likely; roasted coffee off-gasses for 24 to 48 hours, so use valve bags, ship close to roast date, and print the roast date; risks are shipping damage, freshness complaints, net-weight labeling errors, rising postage, competition from national subscription roasters, and unsold inventory; marketplaces such as Etsy charge per-sale fees (one source cites 6.5%); suggested sequence is choose model, confirm permits and labels, set up Shopify with tax checked, test packaging with sample shipments, then launch to existing customers and track margin and freshness feedback monthly."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "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"
+        },
+        {
+          "type": "text",
+          "text": "# Action Plan: Online Sales of Roasted Coffee Beans\n\n**1. Goal and model**\nSell whole-bean coffee direct to US customers through the cafe's own Shopify store, starting with existing customers. Add subscriptions later. Marketplaces such as Etsy are optional; one source cites a 6.5% per-sale fee (unverified).\n\n**2. Setup and costs** (all figures unverified)\n- Shopify: from $29/month\n- Card processing: 2.9% + $0.30 per sale\n- Degassing-valve bags: $0.30 to $0.60 each\n- USPS Ground Advantage: $6.93 to $8.40 per 12 oz bag (July 2026 price; recheck)\n- Startup capital: $10,000 to $30,000 (vendor-blog estimate, rough)\n\n**3. Compliance checklist** (verify with your state and county)\n- Labels: statement of identity, net weight in oz and g, and manufacturer/packer/distributor name and place of business\n- Flavored blends: ingredient list required\n- Plain coffee: usually exempt from Nutrition Facts if no nutrition claims are made\n- FDA small-business exemption: if eligible, file annually (confirm)\n- State or local food permit: likely required\n- Sales tax: enable in Shopify and confirm where you must collect\n\n**4. Freshness and shipping**\nUse valve bags, print the roast date, and ship after the 24 to 48 hour off-gassing window. Test packaging with sample shipments before launch.\n\n**5. Launch and marketing**\nSoft-launch to the cafe's email list and regulars. Track margin per bag and freshness feedback monthly.\n\n**6. Main risks and mitigations**\n\n| Risk | Mitigation |\n|---|---|\n| Shipping damage | Valve bags, sturdy boxes, tested packaging |\n| Freshness complaints | Printed roast date, brew guidance, ship promptly |\n| Net-weight labeling errors | Checklist review and weigh-checks per batch |\n| Rising postage | Review rates quarterly, build margin buffer |\n| National subscription roasters | Compete on local story and community |\n| Unsold inventory | Small roast batches, start with few SKUs |\n\n**7. 30/60/90-day timeline**\n- **Days 1–30:** Choose model, confirm permits, labels, and FDA status, set up sales tax, select bags.\n- **Days 31–60:** Build Shopify store, run sample shipments, finalize pricing.\n- **Days 61–90:** Soft launch to existing customers, review margin and feedback monthly."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011Cgv3BxSYiSfzpS7NwXFbv",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 769,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 2152,
+            "output_tokens_details": {
+              "thinking_tokens": 1285
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        },
+        "http": {
+          "status": 200,
+          "requestId": "req_011Cgv3Bx9C75JtF1aKq9rTE",
+          "ms": 9389
+        }
+      },
+      "t": 36684
+    },
+    {
+      "type": "agent_output",
+      "agent": "writer",
+      "text": "# Action Plan: Online Sales of Roasted Coffee Beans\n\n**1. Goal and model**\nSell whole-bean coffee direct to US customers through the cafe's own Shopify store, starting with existing customers. Add subscriptions later. Marketplaces such as Etsy are optional; one source cites a 6.5% per-sale fee (unverified).\n\n**2. Setup and costs** (all figures unverified)\n- Shopify: from $29/month\n- Card processing: 2.9% + $0.30 per sale\n- Degassing-valve bags: $0.30 to $0.60 each\n- USPS Ground Advantage: $6.93 to $8.40 per 12 oz bag (July 2026 price; recheck)\n- Startup capital: $10,000 to $30,000 (vendor-blog estimate, rough)\n\n**3. Compliance checklist** (verify with your state and county)\n- Labels: statement of identity, net weight in oz and g, and manufacturer/packer/distributor name and place of business\n- Flavored blends: ingredient list required\n- Plain coffee: usually exempt from Nutrition Facts if no nutrition claims are made\n- FDA small-business exemption: if eligible, file annually (confirm)\n- State or local food permit: likely required\n- Sales tax: enable in Shopify and confirm where you must collect\n\n**4. Freshness and shipping**\nUse valve bags, print the roast date, and ship after the 24 to 48 hour off-gassing window. Test packaging with sample shipments before launch.\n\n**5. Launch and marketing**\nSoft-launch to the cafe's email list and regulars. Track margin per bag and freshness feedback monthly.\n\n**6. Main risks and mitigations**\n\n| Risk | Mitigation |\n|---|---|\n| Shipping damage | Valve bags, sturdy boxes, tested packaging |\n| Freshness complaints | Printed roast date, brew guidance, ship promptly |\n| Net-weight labeling errors | Checklist review and weigh-checks per batch |\n| Rising postage | Review rates quarterly, build margin buffer |\n| National subscription roasters | Compete on local story and community |\n| Unsold inventory | Small roast batches, start with few SKUs |\n\n**7. 30/60/90-day timeline**\n- **Days 1–30:** Choose model, confirm permits, labels, and FDA status, set up sales tax, select bags.\n- **Days 31–60:** Build Shopify store, run sample shipments, finalize pricing.\n- **Days 61–90:** Soft launch to existing customers, review margin and feedback monthly.",
+      "tokens": {
+        "input": 769,
+        "output": 2152
+      },
+      "t": 36684
+    },
+    {
+      "type": "handoff",
+      "from": "writer",
+      "to": "supervisor",
+      "note": "# Action Plan: Online Sales of Roasted Coffee Beans\n\n**1. Goal and model**\nSell whole-bean coffee direct to US customers through the cafe's own Shopify store, starting with existing customers. Add subscriptions later. Marketplaces such as Etsy are optional; one source cites a 6.5% per-sale fee (unverified).\n\n**2. Setup and costs** (all figures unverified)\n- Shopify: from $29/month\n- Card processing: 2.9% + $0.30 per sale\n- Degassing-valve bags: $0.30 to $0.60 each\n- USPS Ground Advantage: $6.93 to $8.40 per 12 oz bag (July 2026 price; recheck)\n- Startup capital: $10,000 to $30,000 (vendor-blog estimate, rough)\n\n**3. Compliance checklist** (verify with your state and county)\n- Labels: statement of identity, net weight in oz and g, and manufacturer/packer/distributor name and place of business\n- Flavored blends: ingredient list required\n- Plain coffee: usually exempt from Nutrition Facts if no nutrition claims are made\n- FDA small-business exemption: if eligible, file annually (confirm)\n- State or local food permit: likely required\n- Sales tax: enable in Shopify and confirm where you must collect\n\n**4. Freshness and shipping**\nUse valve bags, print the roast date, and ship after the 24 to 48 hour off-gassing window. Test packaging with sample shipments before launch.\n\n**5. Launch and marketing**\nSoft-launch to the cafe's email list and regulars. Track margin per bag and freshness feedback monthly.\n\n**6. Main risks and mitigations**\n\n| Risk | Mitigation |\n|---|---|\n| Shipping damage | Valve bags, sturdy boxes, tested packaging |\n| Freshness complaints | Printed roast date, brew guidance, ship promptly |\n| Net-weight labeling errors | Checklist review and weigh-checks per batch |\n| Rising postage | Review rates quarterly, build margin buffer |\n| National subscription roasters | Compete on local story and community |\n| Unsold inventory | Small roast batches, start with few SKUs |\n\n**7. 30/60/90-day timeline**\n- **Days 1–30:** Choose model, confirm permits, labels, and FD",
+      "t": 36684
+    },
+    {
+      "type": "agent_start",
+      "agent": "supervisor",
+      "role": "Supervisor",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: supervisor\nYou are the Supervisor. You manage workers and decide who works next. The first message lists the worker ids. Call one worker at a time; each worker's result comes back to you. When you have enough, finish.\nReply with JSON only, in one of these two forms:\n{\"action\":\"call\",\"worker\":\"<worker id>\",\"instruction\":\"<what the worker should do>\"}\n{\"action\":\"finish\",\"answer\":\"<the final answer for the user>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 36685
+    },
+    {
+      "type": "round",
+      "agent": "supervisor",
+      "round": 4,
+      "ms": 3621,
+      "stop": "end_turn",
+      "usage": {
+        "input": 4398,
+        "output": 1029
+      },
+      "newMessages": [
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "thinking",
+              "thinking": "",
+              "signature": "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"
+            },
+            {
+              "type": "text",
+              "text": "{\"action\":\"call\",\"worker\":\"writer\",\"instruction\":\"Using the researcher findings, write a one-page action plan for a small cafe starting to sell roasted coffee beans online. Structure it as: (1) Goal and model choice, (2) Setup steps with costs, (3) Compliance checklist (labeling, FDA small-business exemption filing if eligible, state and local permits, sales tax), (4) Freshness and shipping approach, (5) Launch and marketing, (6) Main risks with a mitigation for each, (7) 30/60/90-day timeline. Keep it under 500 words. Mark figures that are assumptions or unverified, including the vendor-blog capital estimate and the shipping price dated July 2026, and do not present them as confirmed. Tell the user to verify labeling and permit rules with their state and county. Researcher findings: US market; Shopify from $29/month; card fees 2.9% plus $0.30; degassing-valve bags $0.30 to $0.60 each; USPS Ground Advantage $6.93 to $8.40 per 12 oz bag; startup capital $10,000 to $30,000 (rough); labels need statement of identity, net quantity in oz and g, and manufacturer/packer/distributor name and place of business; flavored blends need ingredient lists; plain coffee usually exempt from Nutrition Facts if no nutrition claims; small-business FDA exemption requires annual filing; state or local food permit likely; roasted coffee off-gasses for 24 to 48 hours, so use valve bags, ship close to roast date, and print the roast date; risks are shipping damage, freshness complaints, net-weight labeling errors, rising postage, competition from national subscription roasters, and unsold inventory; marketplaces such as Etsy charge per-sale fees (one source cites 6.5%); suggested sequence is choose model, confirm permits and labels, set up Shopify with tax checked, test packaging with sample shipments, then launch to existing customers and track margin and freshness feedback monthly.\"}"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": "Result from writer:\n# Action Plan: Online Sales of Roasted Coffee Beans\n\n**1. Goal and model**\nSell whole-bean coffee direct to US customers through the cafe's own Shopify store, starting with existing customers. Add subscriptions later. Marketplaces such as Etsy are optional; one source cites a 6.5% per-sale fee (unverified).\n\n**2. Setup and costs** (all figures unverified)\n- Shopify: from $29/month\n- Card processing: 2.9% + $0.30 per sale\n- Degassing-valve bags: $0.30 to $0.60 each\n- USPS Ground Advantage: $6.93 to $8.40 per 12 oz bag (July 2026 price; recheck)\n- Startup capital: $10,000 to $30,000 (vendor-blog estimate, rough)\n\n**3. Compliance checklist** (verify with your state and county)\n- Labels: statement of identity, net weight in oz and g, and manufacturer/packer/distributor name and place of business\n- Flavored blends: ingredient list required\n- Plain coffee: usually exempt from Nutrition Facts if no nutrition claims are made\n- FDA small-business exemption: if eligible, file annually (confirm)\n- State or local food permit: likely required\n- Sales tax: enable in Shopify and confirm where you must collect\n\n**4. Freshness and shipping**\nUse valve bags, print the roast date, and ship after the 24 to 48 hour off-gassing window. Test packaging with sample shipments before launch.\n\n**5. Launch and marketing**\nSoft-launch to the cafe's email list and regulars. Track margin per bag and freshness feedback monthly.\n\n**6. Main risks and mitigations**\n\n| Risk | Mitigation |\n|---|---|\n| Shipping damage | Valve bags, sturdy boxes, tested packaging |\n| Freshness complaints | Printed roast date, brew guidance, ship promptly |\n| Net-weight labeling errors | Checklist review and weigh-checks per batch |\n| Rising postage | Review rates quarterly, build margin buffer |\n| National subscription roasters | Compete on local story and community |\n| Unsold inventory | Small roast batches, start with few SKUs |\n\n**7. 30/60/90-day timeline**\n- **Days 1–30:** Choose model, confirm permits, labels, and FDA status, set up sales tax, select bags.\n- **Days 31–60:** Build Shopify store, run sample shipments, finalize pricing.\n- **Days 61–90:** Soft launch to existing customers, review margin and feedback monthly."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQS9QgKEAgTGAI4AUIIdGhpbmtpbmcSDFb7dJ2wOX1M+ajv4RoMhD0KpXNzOIwa9dApIjBZiYJOKN+PsM8/Z7t22p+Pqm8fJ6PqtinSAL4bzWqQLhSTIsQt+KS7b5ZWyWetOwUqkgggTx28toGlD1Sk1YS3hL0J4+sOZguapQLWbVbHr4nSorfcvqLezENZefcAmMuBFLrHSswQebD6EWCPXNKRSwK6rDMICK2Mn05WeDUOMN9gdbKxnNtCje1p2+o3WcJ/Y5aW2wUNotJf3WB2ZkF9YgsmM3Q8JzhD2+D35E/k00KWITNKvqy8pOE/R8ShCxtUeJleqqq5GIQoCrJgXj1DRccn2mAV9Yb5TiJmavO7pXQDJDB+/avyihMsSz8k/idAzP6BQzYXOuQ3ModSi5LnTIel5cCQqjFdZfGsVDVXKiA1D/c7FAM76haLwEMQ+gO5oGTdeTtuTSTqdYIqa262ZAgbH1em1TCGPcLzYsJqNw/jo1Xl/Lj2f4cULjAc0nACCaxT+kjR1c/LUShA6crV1C8eRZgSebOeub6iivhupC/+fgR/AC7PXbuDB/enAm7nBAvuypx1AcjdoQt+PfAXsgSpr+UJ6Tf3ufgxYM9tITuufAMGLTMlKcW9rOSrpZfnIbS8pG2i2jArWbaDfZpJaHBXRtcoJGj5vAMtME3hO3Y2H0RP9CiHJUQKRK2kT3bVF68lAWxtgrx7HpFCBwbP5TzeWTTkzoEPf8Z5CLyd6Iy8jItADfD6tRmWCTcIFXVldW5YuPIVoBYJ2Fhh6JiGeskVox/OKV7KElJ8NO7FqARXD/Zb5CfGvtOAMOgT+nA4gzUPDzWWLiJoxHYupVlCg7mULDcHEnmstcuMBoeJjCdBBjXa5Vvbv3VP/VQOA8EDdiZKXYkgy1fF2OkjNgy/93oamMpEdWptw96rahRQeT2ziPWaue5x92t68/UpBQXh8OfYpgtjM4HLzM/nyfZLrlyISRSI4mRYJW87os+LZh/fg8R/0H05+zsvuXOoBdsacAMSWXAIQa07pQbIFCIWkn5pvyCK/OZWdkwl/xXFZRge9PyQMCRqNb1Bt6h60SexZDRXlGBZtAauXBKRUNZVMfQnF9SghdiqwXjKrvytXGpH+4sqah46et2JqagMyOf4UgxhaRMD4aMH45syQhGqefDD9lmzZ6iW+Oz+STdl6b1caS4JZZ+yMf5ClMHrUju4aX99kZAqtmnsFKlaesXJOFOFxz4JJNlyGLv2gq77ttR/RKqAitxPy/hm0KBzCK0peEfPIYk1A26jhhs1zITQ9wVi6fb1fZuPhiVM6v+B2BABDVuMB8UGbuodKmb2lXeD7f0MzgopD0gigw6V+W9MFBil8gE/cZhRZgBD9DNAxyYKld7sYB5khuwFyqSqvAafnwgF+mXXNpiJJmR0Xz4NbX+Ph+2YN7vFxqlxFQtlfVc8n1jl5FNol92ejTRVeXPwKCnsr/JBnMNmJt2IsiEpvnrqUSZUYWOfzojuM1F6ifVFM0hwGAE="
+        },
+        {
+          "type": "text",
+          "text": "{\"action\":\"finish\",\"answer\":\"# Action Plan: Online Sales of Roasted Coffee Beans\\n\\n**1. Goal and model**\\nSell whole-bean coffee direct to US customers through the cafe's own Shopify store, starting with existing customers. Add subscriptions later. Marketplaces such as Etsy are optional (one source cites a 6.5% per-sale fee, unverified).\\n\\n**2. Setup and costs** (all unverified; check current prices)\\n- Shopify: from $29/month\\n- Card processing: 2.9% + $0.30 per sale\\n- Degassing-valve bags: $0.30 to $0.60 each\\n- USPS Ground Advantage: $6.93 to $8.40 per 12 oz bag (July 2026 price; recheck)\\n- Startup capital: $10,000 to $30,000 (vendor-blog estimate, rough)\\n\\n**3. Compliance checklist** (verify with your state and county)\\n- Labels: statement of identity, net weight in oz and g, manufacturer/packer/distributor name and place of business\\n- Flavored blends: ingredient list required\\n- Plain coffee: usually exempt from Nutrition Facts if no nutrition claims are made\\n- FDA small-business exemption: if eligible, file annually (confirm)\\n- State or local food permit: likely required\\n- Sales tax: enable in Shopify and confirm where you must collect\\n\\n**4. Freshness and shipping**\\nUse valve bags, print the roast date, and ship after the 24 to 48 hour off-gassing window. Test packaging with sample shipments before launch.\\n\\n**5. Launch and marketing**\\nSoft-launch to the cafe's email list and regulars. Track margin per bag and freshness feedback monthly.\\n\\n**6. Main risks and mitigations**\\n- Shipping damage: valve bags, sturdy boxes, tested packaging\\n- Freshness complaints: printed roast date, brew guidance, prompt shipping\\n- Net-weight labeling errors: checklist review and batch weigh-checks\\n- Rising postage: review rates quarterly, build a margin buffer\\n- Competition from national subscription roasters: compete on local story and community\\n- Unsold inventory: small roast batches, start with few SKUs\\n\\n**7. 30/60/90-day timeline**\\n- Days 1–30: choose model, confirm permits, labels, and FDA status, set up sales tax, select bags\\n- Days 31–60: build Shopify store, run sample shipments, finalize pricing\\n- Days 61–90: soft launch to existing customers, review margin and feedback monthly\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 7
+        },
+        "response": {
+          "id": "msg_011Cgv3CeeVxdJERAfL7cuTH",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 4398,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 1029,
+            "output_tokens_details": {
+              "thinking_tokens": 140
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        },
+        "http": {
+          "status": 200,
+          "requestId": "req_011Cgv3CeMdpvKY6iKSeg8Ai",
+          "ms": 3621
+        }
+      },
+      "t": 40306
+    },
+    {
+      "type": "agent_output",
+      "agent": "supervisor",
+      "text": "{\"action\":\"finish\",\"answer\":\"# Action Plan: Online Sales of Roasted Coffee Beans\\n\\n**1. Goal and model**\\nSell whole-bean coffee direct to US customers through the cafe's own Shopify store, starting with existing customers. Add subscriptions later. Marketplaces such as Etsy are optional (one source cites a 6.5% per-sale fee, unverified).\\n\\n**2. Setup and costs** (all unverified; check current prices)\\n- Shopify: from $29/month\\n- Card processing: 2.9% + $0.30 per sale\\n- Degassing-valve bags: $0.30 to $0.60 each\\n- USPS Ground Advantage: $6.93 to $8.40 per 12 oz bag (July 2026 price; recheck)\\n- Startup capital: $10,000 to $30,000 (vendor-blog estimate, rough)\\n\\n**3. Compliance checklist** (verify with your state and county)\\n- Labels: statement of identity, net weight in oz and g, manufacturer/packer/distributor name and place of business\\n- Flavored blends: ingredient list required\\n- Plain coffee: usually exempt from Nutrition Facts if no nutrition claims are made\\n- FDA small-business exemption: if eligible, file annually (confirm)\\n- State or local food permit: likely required\\n- Sales tax: enable in Shopify and confirm where you must collect\\n\\n**4. Freshness and shipping**\\nUse valve bags, print the roast date, and ship after the 24 to 48 hour off-gassing window. Test packaging with sample shipments before launch.\\n\\n**5. Launch and marketing**\\nSoft-launch to the cafe's email list and regulars. Track margin per bag and freshness feedback monthly.\\n\\n**6. Main risks and mitigations**\\n- Shipping damage: valve bags, sturdy boxes, tested packaging\\n- Freshness complaints: printed roast date, brew guidance, prompt shipping\\n- Net-weight labeling errors: checklist review and batch weigh-checks\\n- Rising postage: review rates quarterly, build a margin buffer\\n- Competition from national subscription roasters: compete on local story and community\\n- Unsold inventory: small roast batches, start with few SKUs\\n\\n**7. 30/60/90-day timeline**\\n- Days 1–30: choose model, confirm permits, labels, and FDA status, set up sales tax, select bags\\n- Days 31–60: build Shopify store, run sample shipments, finalize pricing\\n- Days 61–90: soft launch to existing customers, review margin and feedback monthly\"}",
+      "tokens": {
+        "input": 4398,
+        "output": 1029
+      },
+      "t": 40306
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 40796,
+        "output": 8626,
+        "searches": 3,
+        "steps": 6
+      },
+      "finalText": "# Action Plan: Online Sales of Roasted Coffee Beans\n\n**1. Goal and model**\nSell whole-bean coffee direct to US customers through the cafe's own Shopify store, starting with existing customers. Add subscriptions later. Marketplaces such as Etsy are optional (one source cites a 6.5% per-sale fee, unverified).\n\n**2. Setup and costs** (all unverified; check current prices)\n- Shopify: from $29/month\n- Card processing: 2.9% + $0.30 per sale\n- Degassing-valve bags: $0.30 to $0.60 each\n- USPS Ground Advantage: $6.93 to $8.40 per 12 oz bag (July 2026 price; recheck)\n- Startup capital: $10,000 to $30,000 (vendor-blog estimate, rough)\n\n**3. Compliance checklist** (verify with your state and county)\n- Labels: statement of identity, net weight in oz and g, manufacturer/packer/distributor name and place of business\n- Flavored blends: ingredient list required\n- Plain coffee: usually exempt from Nutrition Facts if no nutrition claims are made\n- FDA small-business exemption: if eligible, file annually (confirm)\n- State or local food permit: likely required\n- Sales tax: enable in Shopify and confirm where you must collect\n\n**4. Freshness and shipping**\nUse valve bags, print the roast date, and ship after the 24 to 48 hour off-gassing window. Test packaging with sample shipments before launch.\n\n**5. Launch and marketing**\nSoft-launch to the cafe's email list and regulars. Track margin per bag and freshness feedback monthly.\n\n**6. Main risks and mitigations**\n- Shipping damage: valve bags, sturdy boxes, tested packaging\n- Freshness complaints: printed roast date, brew guidance, prompt shipping\n- Net-weight labeling errors: checklist review and batch weigh-checks\n- Rising postage: review rates quarterly, build a margin buffer\n- Competition from national subscription roasters: compete on local story and community\n- Unsold inventory: small roast batches, start with few SKUs\n\n**7. 30/60/90-day timeline**\n- Days 1–30: choose model, confirm permits, labels, and FDA status, set up sales tax, select bags\n- Days 31–60: build Shopify store, run sample shipments, finalize pricing\n- Days 61–90: soft launch to existing customers, review margin and feedback monthly",
+      "t": 40307
+    }
+  ],
+  "design": {
+    "pattern": "supervisor",
+    "nodes": [
+      {
+        "id": "supervisor",
+        "agent": "supervisor",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "search": true
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Finance advisor",
+        "instructions": "Answer as a finance advisor for small businesses. Estimate the start-up costs and the main cash-flow risks for the plan you are given."
+      }
+    ],
+    "edges": [
+      {
+        "from": "supervisor",
+        "to": "researcher"
+      },
+      {
+        "from": "supervisor",
+        "to": "writer"
+      },
+      {
+        "from": "supervisor",
+        "to": "critic"
+      },
+      {
+        "from": "supervisor",
+        "to": "free"
+      }
+    ]
+  },
+  "task": "A small cafe wants to start selling coffee beans online. Prepare a one-page action plan with the main risks.",
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 80000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 40796,
+    "output": 8626,
+    "searches": 3,
+    "steps": 6
+  },
+  "startedAt": "2026-11-10T22:29:36.518Z",
+  "endedAt": "2026-11-10T22:30:17.483Z",
+  "durationMs": 40965,
+  "about": {
+    "title": "Online coffee beans action plan",
+    "author": "Radek Šimčík",
+    "url": "https://portfolio.radeksimcik.cz",
+    "description": "A **supervisor** run with four workers: Researcher, Writer, Critic and a free agent, **Finance advisor**. The Supervisor decides who works next, one at a time, and may skip a worker.\n\n1. The **Supervisor** reads the task and the list of workers, and calls the **Researcher** first. The Researcher uses web search (3 searches).\n2. The research comes back to the Supervisor, which writes a new instruction for the **Writer** and pastes the facts into it. It also tells the Writer which figures to mark as unverified.\n3. The Writer's plan comes back and the Supervisor finishes with it as the final answer.\n\nThe **Critic** and the **Finance advisor** were never called: the Supervisor judged that it did not need them. In a supervisor run, unlike a fixed sequence, the Supervisor chooses.\n\nOpen the **Messages** tab on a Supervisor step to see its JSON replies (`call` and `finish`)."
+  }
+}

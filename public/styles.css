@@ -275,6 +275,8 @@ button.ag { flex: 1; min-width: 0; display: flex; flex-direction: column; align-
 button.ag .n { font-weight: 600; font-size: 0.95rem; }
 button.ag .tl { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-size: 0.78rem; margin-bottom: 4px; }
 button.ag.sel { background: var(--accent-bg); border: 2px solid var(--accent-line); padding: 9px 11px; }
+button.ag[data-status="working"] { background: var(--accent-bg); }
+button.ag[data-status="working"] .st.working { background: var(--card); }
 .st { display: inline-block; padding: 2px 8px; font-size: 0.72rem; border-radius: 6px; background: var(--surface); color: var(--muted); }
 .st.done { background: var(--done-bg); color: var(--done); }
 .st.working { background: var(--accent-bg); color: var(--accent); }
@@ -553,3 +555,5 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .about-panel textarea { width: 100%; }
 .site-header .subtabs a.has-result { background: var(--result-bg); color: var(--result-text); font-weight: 700; }
 .center-tip-link { margin: 8px 0 0; text-align: center; }
+.center-tip.sticky { padding-bottom: 8px; }
+.center-tip-close { display: block; margin: 8px auto 0; }

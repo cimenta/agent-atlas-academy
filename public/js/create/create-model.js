@@ -24,7 +24,11 @@ export function reviewSummary({ design, limits }) {
 
 const OUTCOMES = new Set(["finished", "stopped_user", "stopped_limit", "interrupted", "failed"]);
 
-export function runOutcomeMessageKey(outcome) {
+const LIMIT_REASONS = new Set(["time", "steps", "tokens", "searches"]);
+
+// A run stopped at a limit says which one when the done event recorded it; older runs keep the general message.
+export function runOutcomeMessageKey(outcome, reason) {
+  if (outcome === "stopped_limit" && LIMIT_REASONS.has(reason)) return `run.outcome.stopped_limit.${reason}`;
   return `run.outcome.${OUTCOMES.has(outcome) ? outcome : "failed"}`;
 }
 

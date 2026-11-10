@@ -8,12 +8,13 @@ export function outcomeNotice({ doc, t, outcome, events, cost, durationMs }) {
   const meta = [];
   if (took !== null) meta.push(t("run.outcome.took", { time: formatDuration(took) }));
   if (info.cost !== null) meta.push(t("run.outcome.cost", { usd: formatUsd(info.cost) }));
+  const reason = Array.isArray(events) ? events.findLast?.((e) => e?.type === "done")?.reason : undefined;
   const notice = h(
     doc,
     "p",
     { class: `notice outcome outcome-${info.level}`, "data-ui": "run-outcome", "data-outcome": outcome ?? "failed", role: "status" },
     h(doc, "span", { class: "outcome-icon", role: "img", "aria-label": t(`run.outcome.icon.${info.level}`) }, info.icon),
-    h(doc, "span", { class: "outcome-text" }, t(runOutcomeMessageKey(outcome))),
+    h(doc, "span", { class: "outcome-text" }, t(runOutcomeMessageKey(outcome, reason))),
   );
   if (meta.length) notice.append(h(doc, "span", { class: "outcome-meta", title: info.cost !== null ? t("run.outcome.costHint") : undefined }, meta.join(" · ")));
   return notice;

@@ -75,3 +75,21 @@ test("a run opened from the library turns the Result tab green and makes it lead
   assert.equal(tab.attrs.href, "#/play/result/sequential-simple");
   await refreshResultTab({ ...ctx, doc: docWith(fakeTab()) }, false, "x");
 });
+
+test("a sticky tip is not closed by the timer and has a close button; a normal tip is closed by the timer", () => {
+  const timers = [];
+  const setTimer = (fn) => timers.push(fn);
+  const doc = tipDoc();
+  const normal = showCenterTip({ doc, content: doc.createElement(), setTimer, clearTimer: () => {} });
+  assert.equal(timers.length, 1);
+  timers[0]();
+  assert.equal(normal.element.removed, true);
+  timers.length = 0;
+  const sticky = showCenterTip({ doc, content: doc.createElement(), sticky: true, setTimer, clearTimer: () => {} });
+  assert.equal(timers.length, 0);
+  assert.equal(sticky.element.removed, false);
+  const button = sticky.element.children.at(-1);
+  assert.equal(button.attrs["data-ui"], "center-tip-close");
+  sticky.element.handlers.click({ target: button });
+  assert.equal(sticky.element.removed, true);
+});
