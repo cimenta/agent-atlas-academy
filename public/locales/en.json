@@ -320,5 +320,6 @@
   "insp.doc.web_search": "Web search is run by Anthropic inside the API call. The model receives titles, URLs and snippets. The number of searches is capped.",
   "insp.doc.handoff": "The output of one agent is exactly what the next agent receives as its first message.",
   "kind.tool": "Tool",
-  "insp.reconstructed": "Reconstructed from the recorded steps: this run was saved before the exact messages were kept."
+  "insp.reconstructed": "Reconstructed from the recorded steps: this run was saved before the exact messages were kept.",
+  "play.deleteConfirm": "Delete this run? It cannot be undone.\n\n{title}"
 }

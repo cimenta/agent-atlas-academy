@@ -19,6 +19,20 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
   let selectedEdge = null;
   let suppressClick = false;
   let pendingDrop = null;
+  let livePos = new Map(); // where the nodes are drawn right now, so a change never moves them
+
+  // Once the visitor works on the diagram the layout is theirs: pin every node where it is.
+  const freeze = () => {
+    for (const [id, p] of livePos) editor.setPosition(id, p.x, p.y);
+  };
+  // The next free spot to the right of the existing nodes (landscape), or a new row when the row is full.
+  const nextSpot = () => {
+    const points = [...livePos.values()];
+    if (points.length === 0) return null;
+    const right = points.reduce((a, b) => (b.x > a.x ? b : a));
+    if (right.x + 2 * BOX_W + 40 <= 720) return { x: right.x + BOX_W + 40, y: right.y };
+    return { x: Math.min(...points.map((p) => p.x)), y: Math.max(...points.map((p) => p.y)) + BOX_H + 40 };
+  };
 
   const nodeLabel = (node) => {
     if (node.name) return node.name;
@@ -38,19 +52,19 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
   container.replaceChildren(root);
 
   function addAgent(agent) {
+    const spot = pendingDrop ?? nextSpot();
+    freeze();
     const result = editor.addNode(agent);
     if (!result.ok) return refuse(result.code), draw();
     notice = "";
     selectedId = result.id;
-    if (pendingDrop) {
-      for (const [id, pt] of Object.entries(editor.positions())) editor.setPosition(id, pt.x, pt.y);
-      editor.setPosition(result.id, pendingDrop.x, pendingDrop.y);
-      pendingDrop = null;
-    }
+    if (spot) editor.setPosition(result.id, spot.x, spot.y);
+    pendingDrop = null;
     changed();
   }
 
   function tryConnect(from, to) {
+    freeze();
     const result = editor.connect(from, to);
     connectFrom = null;
     if (!result.ok) {
@@ -64,6 +78,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
 
   function removeSelected() {
     if (selectedId === null) return;
+    freeze();
     editor.removeNode(selectedId);
     selectedId = null;
     connectFrom = null;
@@ -109,7 +124,9 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
   }
 
   function diagramBlock(design) {
-    const orientation = design.pattern === "sequential" ? "vertical" : "horizontal";
+    // A chain reads top to bottom on a narrow screen and left to right when there is room.
+    const wide = (doc.defaultView?.innerWidth ?? 0) >= 720;
+    const orientation = design.pattern === "sequential" && !wide ? "vertical" : "horizontal";
     const auto = layoutDesign(design, { orientation });
     const stored = editor.positions();
     const pos = new Map(); // id -> { x, y } top-left in px, updated live while dragging
@@ -117,6 +134,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       const a = auto.nodes.find((n) => n.id === node.id);
       pos.set(node.id, stored[node.id] ?? { x: a.x * CELL_W + (CELL_W - BOX_W) / 2, y: a.y * CELL_H + (CELL_H - BOX_H) / 2 });
     }
+    livePos = pos;
     const extent = () => {
       const xs = [...pos.values()].map((p) => p.x + BOX_W + 24);
       const ys = [...pos.values()].map((p) => p.y + BOX_H + 24);

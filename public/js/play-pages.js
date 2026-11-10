@@ -144,6 +144,7 @@ export async function renderReplayTab(ctx, requestedId) {
             { class: "run-list" },
             ...mine.map((item) =>
               row(item, async () => {
+                if (!doc.defaultView.confirm(t("play.deleteConfirm", { title: item.title }))) return;
                 await ctx.runStore.remove(item.id);
                 if (item.id === currentId) {
                   rememberRun(gallery[0]?.id ?? "");
