@@ -3,6 +3,7 @@
 import { h } from "../dom.js";
 import { AGENT_TYPES, MODELS } from "../engine/catalog.js";
 import { TOOLS } from "../engine/tools.js";
+import { roleText } from "../engine/prompts.js";
 import { layoutDesign } from "./editor-model.js";
 
 const CELL_W = 160;
@@ -319,7 +320,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         selectedEdge = null;
         onNodeActivate(node.id);
       });
-      const port = h(doc, "button", { type: "button", class: "dnode-port", "data-focus-key": `connect-${node.id}`, "aria-pressed": String(connectFrom === node.id), "aria-label": t("editor.connectFrom", { name: nodeLabel(node) }), title: t("editor.portHelp") }, "→");
+      const port = h(doc, "button", { type: "button", class: AGENT_TYPES[node.agent]?.free ? "dnode-port free" : "dnode-port", "data-focus-key": `connect-${node.id}`, "aria-pressed": String(connectFrom === node.id), "aria-label": t("editor.connectFrom", { name: nodeLabel(node) }), title: t("editor.portHelp") }, "→");
       port.addEventListener("click", () => {
         if (suppressClick) return;
         connectFrom = connectFrom === node.id ? null : node.id;
@@ -345,6 +346,21 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     size();
     drawEdges();
 
+    // A click on the empty diagram (one that also started there, so the end of a drag does not count) deselects.
+    const onBackground = (event) => !event.target.closest?.(".dnode, .edge-hit, .edge-remove");
+    let pressedOnBackground = false;
+    area.addEventListener("pointerdown", (event) => {
+      pressedOnBackground = onBackground(event);
+    });
+    area.addEventListener("click", (event) => {
+      if (!pressedOnBackground || !onBackground(event)) return;
+      pressedOnBackground = false;
+      if (selectedId === null && connectFrom === null && selectedEdge === null) return;
+      selectedId = null;
+      connectFrom = null;
+      selectedEdge = null;
+      draw();
+    });
     area.addEventListener("dragover", (event) => event.preventDefault());
     area.addEventListener("drop", (event) => {
       event.preventDefault();
@@ -429,6 +445,19 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         changed();
       });
       parts.push(field("ed-stance", t("editor.stance"), stance));
+    }
+    if (!type.free) {
+      // The built-in agents are defined by a fixed prompt; show it so nothing is hidden.
+      parts.push(
+        h(
+          doc,
+          "details",
+          { class: "agent-prompt", "data-ui": "agent-prompt", open: true },
+          h(doc, "summary", {}, t("editor.prompt")),
+          h(doc, "pre", {}, roleText(node)),
+          h(doc, "p", { class: "hint" }, t("editor.promptHelp")),
+        ),
+      );
     }
     const remove = h(doc, "button", { type: "button", class: "danger", "data-focus-key": "remove-node" }, t("editor.remove"));
     remove.addEventListener("click", () => {

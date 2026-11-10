@@ -409,5 +409,7 @@
   "create.clearDefinition": "Vymazat definici",
   "create.clearDefinitionHint": "Vyprázdnit zadání i diagram a začít znovu",
   "create.clearConfirm": "Vymazat zadání i diagram?",
-  "create.definition.cleared": "Vymazáno. Začněte nový běh nebo načtěte definici."
+  "create.definition.cleared": "Vymazáno. Začněte nový běh nebo načtěte definici.",
+  "editor.prompt": "Prompt tohoto agenta",
+  "editor.promptHelp": "Tohle je pokyn, který agent dostane. Každý agent dostane i dvě pevné řádky: odpovídat do 300 slov a odpovídat v jazyce webu. Samotný prompt je vždy anglicky."
 }

@@ -6,6 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Clicking empty space in the diagram deselects the selected agent.
 - A parallel run can have a line of agents after the combiner (for example a critic, then a writer). The demo definition parallel-complex uses it.
 - The export buttons moved into a cog menu in the corner of the player head. Four demo definitions (simple and complex, sequential and parallel) in demo-definitions.
 - Run definitions: Export definition (next to Export run, which used to be Export JSON) saves only the task and the design of a run, and Load definition on the Create tab fills the page from such a file so anyone can check it and press Run. The Create tab text now says orchestration pattern.

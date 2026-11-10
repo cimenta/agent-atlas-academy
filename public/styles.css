@@ -522,3 +522,10 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .editor-connections .connection-list li { max-width: none; font-size: 0.85rem; gap: 6px; }
 .editor-connections .connection-list button { min-height: 28px; min-width: 28px; padding: 0 6px; }
 @media (max-width: 640px) { .editor-lower { grid-template-columns: 1fr; } }
+.agent-prompt { margin: 8px 0; }
+.agent-prompt summary { cursor: pointer; font-weight: 600; }
+.agent-prompt pre { margin: 6px 0; padding: 8px 10px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.85rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; }
+/* The connect button of a free agent is light blue, so free agents stand out in the diagram. */
+:root { --free-bg: #a9cdf0; --free-line: #5f9bd6; }
+@media (prefers-color-scheme: dark) { :root { --free-bg: #2c5080; --free-line: #5b8fc7; } }
+.dnode-port.free:not([aria-pressed="true"]) { background: var(--free-bg); border-left-color: var(--free-line); }

@@ -409,5 +409,7 @@
   "create.clearDefinition": "Clear definition",
   "create.clearDefinitionHint": "Empty the task and the diagram and start again",
   "create.clearConfirm": "Clear the task and the diagram?",
-  "create.definition.cleared": "Cleared. Start a new run or load a definition."
+  "create.definition.cleared": "Cleared. Start a new run or load a definition.",
+  "editor.prompt": "Prompt of this agent",
+  "editor.promptHelp": "This is the instruction the agent is given. Every agent also gets two fixed lines: keep replies under 300 words, and answer in the language of the site. The prompt itself is always in English."
 }

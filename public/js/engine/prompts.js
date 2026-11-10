@@ -17,7 +17,7 @@ Reply with JSON only, in one of these two forms:
 {"action":"call","worker":"<worker id>","instruction":"<what the worker should do>"}
 {"action":"finish","answer":"<the final answer for the user>"}`;
 
-function roleText(node) {
+export function roleText(node) {
   if (node.agent === "supervisor") return SUPERVISOR;
   if (node.agent === "debater") {
     return `You are a Debater and your position is "${node.stance ?? "for"}". Argue your side in one short paragraph. When you can see the other side's points, answer them.`;
