@@ -35,6 +35,13 @@
       "pattern": "parallel",
       "language": "en",
       "timeScale": 2
+    },
+    {
+      "id": "parallel-complex",
+      "title": "A town of 20000 people wants to reduce car traffic in its centre. Which measures would work best, and what are the risks?",
+      "pattern": "parallel",
+      "language": "en",
+      "timeScale": 3
     }
   ]
 }

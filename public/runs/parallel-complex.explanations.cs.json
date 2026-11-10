@@ -1,0 +1,19 @@
+{
+  "0": "Každý běh začíná zadáním. V paralelním běhu dostanou všichni agenti na začátku stejné zadání.",
+  "1": "Role výzkumníka: sesbírat fakta. Má vyhledávání na webu a začíná ve stejném okamžiku jako tři volní agenti.",
+  "2": "Dopravní plánovač je volný agent. Jeho jméno a pokyny napsal ten, kdo tento běh vytvořil.",
+  "3": "Majitel místního obchodu je další volný agent: totéž zadání viděné z jiné strany.",
+  "4": "Obyvatel je třetí volný agent. Paralelní agenti s různými pohledy jsou levný způsob, jak získat pestré odpovědi.",
+  "6": "Obyvatel skončil první. Jeho odpověď čeká na ostatní.",
+  "12": "Výzkumník žádá o vyhledávání na webu. Model jen žádá; vyhledávání spouští aplikace.",
+  "14": "Výsledky hledání se vrátí jako text. Jsou to data zvenčí, ne pokyny.",
+  "16": "Odpověď výzkumníka s tím, co vyhledávání našlo. Upozorňuje, že důkazy jsou většinou z velkých měst.",
+  "17": "Předání posílá odpověď výzkumníka slučovači. Stejnou cestou jdou i další tři odpovědi.",
+  "21": "Slučovač začne, až dorazí všechny čtyři odpovědi. Jeho role: spojit je a říct, v čem se liší.",
+  "23": "Jedna společná odpověď. Jde dál ke kontrolorovi, ne rovnou ke čtenáři.",
+  "25": "Role kontrolora: najít slabá místa v odpovědi, kterou dostal. Za slučovačem je běh obyčejný řetěz, jeden agent po druhém.",
+  "27": "Kritika: nepodložená čísla, nejasné zdroje a chybějící rizika. Uvidí ji pisatel.",
+  "29": "Role pisatele: napsat konečnou odpověď z podkladů, které dostal.",
+  "31": "Konečná odpověď pisatele, ovlivněná kritikou: postup opatření se spouštěči.",
+  "32": "Běh končí. Konečná odpověď je text pisatele."
+}

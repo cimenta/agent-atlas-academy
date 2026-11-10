@@ -10,6 +10,7 @@ const CELL_W = 160;
 const CELL_H = 96;
 const BOX_W = 132;
 const BOX_H = 60;
+const DEBATE_GUTTER = 40;
 const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -135,9 +136,10 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     const auto = layoutDesign(design, { orientation });
     const stored = editor.positions();
     const pos = new Map(); // id -> { x, y } top-left in px, updated live while dragging
+    const gutter = design.pattern === "debate" ? DEBATE_GUTTER : 0; // room left of the debaters for the next-round arrow
     for (const node of design.nodes) {
       const a = auto.nodes.find((n) => n.id === node.id);
-      pos.set(node.id, stored[node.id] ?? { x: a.x * CELL_W + (CELL_W - BOX_W) / 2, y: a.y * CELL_H + (CELL_H - BOX_H) / 2 });
+      pos.set(node.id, stored[node.id] ?? { x: a.x * CELL_W + (CELL_W - BOX_W) / 2 + gutter, y: a.y * CELL_H + (CELL_H - BOX_H) / 2 });
     }
     livePos = pos;
     const extent = () => {
@@ -187,9 +189,42 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     for (const [k, v] of Object.entries({ "stroke-width": "2", stroke: "currentColor", "stroke-dasharray": "6 4", "marker-end": "url(#arrowhead)", visibility: "hidden" })) rubber.setAttribute(k, v);
     svg.append(rubber);
 
+    // In a debate the debaters answer each other in turn. The visitor connects each debater to the judge;
+    // the turn arrows between the debaters are drawn for them and cannot be edited.
+    function drawTurns() {
+      if (design.pattern !== "debate") return;
+      const ids = design.nodes.filter((n) => n.agent === "debater" && pos.has(n.id)).map((n) => n.id);
+      if (ids.length < 2) return;
+      const add = (el) => {
+        el.setAttribute("pointer-events", "none");
+        el.setAttribute("data-ui", "debate-turn");
+        svg.insertBefore(el, rubber);
+        edgeParts.push(el);
+      };
+      for (let i = 0; i + 1 < ids.length; i++) {
+        const a = centerOf(ids[i]);
+        const b = centerOf(ids[i + 1]);
+        const line = doc.createElementNS(SVG_NS, "line");
+        for (const [k, v] of Object.entries({ "marker-end": "url(#arrowhead)", "stroke-width": "2", stroke: "currentColor" })) line.setAttribute(k, v);
+        setLine(line, clip(b, a), clip(a, b));
+        add(line);
+      }
+      if ((design.rounds ?? 1) > 1) {
+        const first = pos.get(ids[0]);
+        const last = pos.get(ids.at(-1));
+        const left = Math.min(first.x, last.x);
+        const bend = Math.max(2, left - 36);
+        const path = doc.createElementNS(SVG_NS, "path");
+        const d = `M ${last.x} ${last.y + BOX_H / 2} Q ${bend} ${(first.y + last.y + BOX_H) / 2} ${first.x - 2} ${first.y + BOX_H / 2}`;
+        for (const [k, v] of Object.entries({ d, fill: "none", "marker-end": "url(#arrowhead)", "stroke-width": "2", stroke: "currentColor", "stroke-dasharray": "6 4" })) path.setAttribute(k, v);
+        add(path);
+      }
+    }
+
     function drawEdges() {
       for (const part of edgeParts) part.remove();
       edgeParts = [];
+      drawTurns();
       for (const edge of design.edges) {
         const a = centerOf(edge.from);
         const b = centerOf(edge.to);

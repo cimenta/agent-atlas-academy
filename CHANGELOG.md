@@ -13,6 +13,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 ### Added
 
 - The tooltip shown when a run ends has a link to the result (and, when the run did not finish ok, stays on the screen with a Close button until you close it), and the Result tab has a light green background whenever there is a result to see, including a run opened from the library (the tab then leads to that run).
+- Debate diagram on the Create tab shows the turns: arrows between the debaters in turn order and a dashed arrow back to the first debater for the next round (when there is more than one round). They are drawn automatically; you still connect each debater to the judge.
+- A sixth library run: the complex parallel demo (Researcher and three free agents working at the same time, then Combiner, Critic and Writer in a chain), with an About text and explanations in English and Czech.
 - The tooltip shown when a run ends looks like one card: the message on top and, under a divider, a full-width See the result link (and Close button) as a footer.
 - A fifth library run: the simple parallel demo (Researcher and a Home cook free agent working at the same time, then a Combiner), with an About text and explanations in English and Czech.
 - In the player, every agent that is working has the blue background, not only the one being inspected (for example two parallel agents). The inspected agent keeps its border.

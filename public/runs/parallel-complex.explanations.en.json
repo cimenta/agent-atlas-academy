@@ -1,0 +1,19 @@
+{
+  "0": "Every run starts with a task. In a parallel run, all the agents at the start get the same task.",
+  "1": "The Researcher's role: collect the facts. It has web search and starts at the same moment as the three free agents.",
+  "2": "The Traffic planner is a free agent. Its name and instructions were written by whoever made this run.",
+  "3": "The Local shop owner is another free agent: the same task seen from a different side.",
+  "4": "The Resident is the third free agent. Parallel agents with different points of view are a cheap way to get varied answers.",
+  "6": "The Resident finished first. Its answer waits for the others.",
+  "12": "The Researcher asks for web searches. The model only asks; the app runs them.",
+  "14": "Search results come back as text. They are data from outside, not instructions.",
+  "16": "The Researcher's answer, with what the searches found. It notes that the evidence is mostly from large cities.",
+  "17": "A handoff sends the Researcher's answer to the Combiner. The other three answers go the same way.",
+  "21": "The Combiner starts only when all four answers have arrived. Its role: merge them and say where they disagree.",
+  "23": "One combined answer. It goes on to the Critic, not straight to the reader.",
+  "25": "The Critic's role: find weak spots in the answer it is given. After the Combiner the run is a normal chain, one agent after another.",
+  "27": "The critique: unsupported figures, vague sourcing and missing risks. The Writer will see it.",
+  "29": "The Writer's role: write the final answer from what it was given.",
+  "31": "The Writer's final answer, shaped by the critique: a sequence of measures with triggers.",
+  "32": "The run ends. The final answer is the Writer's text."
+}
