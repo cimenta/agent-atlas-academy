@@ -16,26 +16,16 @@ function searchOutput(content) {
   return content.map((r) => `${r.title ?? ""} - ${r.url ?? ""}`.trim()).join("\n");
 }
 
-// What a run record keeps of a message block: enough to read the conversation, without the
-// provider's encrypted search payloads.
-function slimBlock(block) {
-  if (block?.type === "web_search_tool_result") {
-    return {
-      type: "web_search_tool_result",
-      content: Array.isArray(block.content) ? block.content.map((r) => ({ title: r.title ?? "", url: r.url ?? "" })) : block.content,
-    };
-  }
-  if (block?.type === "server_tool_use" || block?.type === "tool_use") return { type: block.type, name: block.name, input: block.input };
-  if (block?.type === "text") return { type: "text", text: block.text };
-  return { type: String(block?.type ?? "unknown") };
-}
-const slimMessage = (m) => ({ role: m.role, content: typeof m.content === "string" ? m.content : (m.content ?? []).map(slimBlock) });
+// A run record keeps everything the provider returned, so nothing has to be asked for again.
+// A copy is taken so later changes to the conversation cannot reach an event already sent.
+const copy = (value) => structuredClone(value);
 
 export function createAgent({ node, call, emit, budget, signal, language = "en", sleep = defaultSleep }) {
   const model = (MODELS.find((m) => m.key === node.model) ?? MODELS[0]).id;
   const system = systemPromptFor(node, { language });
   const label = node.agent === "free" && node.name ? node.name : (AGENT_TYPES[node.agent]?.label ?? node.agent);
   const messages = [];
+  let lastRequest = null;
   let sent = 0; // how many messages earlier requests already carried
   let round = 0;
 
@@ -49,6 +39,7 @@ export function createAgent({ node, call, emit, budget, signal, language = "en",
       messages,
       ...(tools.length > 0 ? { tools } : {}),
     };
+    lastRequest = { model: body.model, max_tokens: body.max_tokens, tools: copy(body.tools ?? []), messageCount: body.messages.length };
     return call(body, { signal });
   }
 
@@ -79,7 +70,7 @@ export function createAgent({ node, call, emit, budget, signal, language = "en",
       const texts = [];
       let pauses = 0;
       for (;;) {
-        const fresh = messages.slice(sent).map(slimMessage);
+        const fresh = copy(messages.slice(sent));
         sent = messages.length;
         const startedAt = Date.now();
         const response = await requestWithRetry();
@@ -92,7 +83,20 @@ export function createAgent({ node, call, emit, budget, signal, language = "en",
           stop: response.stop_reason,
           usage: { input: response.usage?.input_tokens ?? 0, output: response.usage?.output_tokens ?? 0 },
           newMessages: fresh,
-          content: (response.content ?? []).map(slimBlock),
+          content: copy(response.content ?? []),
+          raw: {
+            request: lastRequest,
+            response: {
+              id: response.id ?? null,
+              type: response.type ?? null,
+              role: response.role ?? null,
+              model: response.model ?? null,
+              stop_reason: response.stop_reason ?? null,
+              stop_sequence: response.stop_sequence ?? null,
+              usage: copy(response.usage ?? {}),
+            },
+            http: response._meta ? copy(response._meta) : null,
+          },
         });
         for (const block of response.content ?? []) {
           if (block.type === "server_tool_use") {

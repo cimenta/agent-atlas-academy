@@ -239,7 +239,20 @@ export function renderCreate(ctx) {
     const id = makeRunId(Date.now());
     const events = [];
     const firstModel = MODELS.find((m) => m.key === design.nodes[0]?.model) ?? MODELS[0];
-    const record = () => buildRunRecord({ id, design, task, events, limits, language: ctx.lang, appVersion: ctx.version });
+    const startedAt = Date.now();
+    let endedAt;
+    const client = {
+      language: typeof navigator === "undefined" ? undefined : navigator.language,
+      timezone: (() => {
+        try {
+          return Intl.DateTimeFormat().resolvedOptions().timeZone;
+        } catch {
+          return undefined;
+        }
+      })(),
+      userAgent: typeof navigator === "undefined" ? undefined : navigator.userAgent,
+    };
+    const record = () => buildRunRecord({ id, design, task, events, limits, language: ctx.lang, appVersion: ctx.version, startedAt, endedAt, client });
     const saver = createBatchedSaver(ctx.runStore);
 
     const host = h(doc, "div", { class: "replay-host", "data-ui": "player-host" });
@@ -252,6 +265,7 @@ export function renderCreate(ctx) {
     const finish = async () => {
       if (ended) return;
       ended = true;
+      endedAt = Date.now();
       live.end();
       const finalRecord = record();
       await saver.flush();

@@ -26,6 +26,7 @@ export async function callAnthropic(body, { apiKey, fetchImpl = fetch, signal, t
   const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
 
   let response;
+  const startedAt = Date.now();
   try {
     response = await fetchImpl(API_URL, {
       method: "POST",
@@ -49,5 +50,18 @@ export async function callAnthropic(body, { apiKey, fetchImpl = fetch, signal, t
     const message = redact(data?.error?.message, apiKey) || `Anthropic answered with status ${response.status}`;
     throw new AnthropicError(message, { status: response.status, retryable: RETRYABLE_STATUS.has(response.status) });
   }
+  // The HTTP side of the answer travels with the data but stays out of it (not enumerable, so
+  // it never changes what the caller compares or serialises by accident).
+  const headers = {};
+  const wanted = /^(request-id|retry-after|anthropic-ratelimit-.*|date)$/i;
+  try {
+    for (const [name, value] of response.headers?.entries?.() ?? []) if (wanted.test(name)) headers[name.toLowerCase()] = value;
+  } catch {
+    // headers are a bonus
+  }
+  Object.defineProperty(data, "_meta", {
+    value: { status: response.status, requestId: headers["request-id"] ?? null, headers, ms: Date.now() - startedAt },
+    enumerable: false,
+  });
   return data;
 }

@@ -124,3 +124,17 @@ test("the mock honours an aborted signal", async () => {
   done.abort();
   await assert.rejects(call({ system: "Role: planner", messages: [] }, { signal: done.signal }), AnthropicError);
 });
+
+test("the HTTP status, request id, rate-limit headers and duration travel with the answer without being part of it", async () => {
+  const fetchImpl = async () =>
+    new Response(JSON.stringify({ content: [], usage: {} }), {
+      status: 200,
+      headers: { "request-id": "req_42", "anthropic-ratelimit-requests-remaining": "99", "x-other": "ignored" },
+    });
+  const data = await callAnthropic({}, { apiKey: "sk-ant-test-key-123456", fetchImpl });
+  assert.deepEqual(Object.keys(data).sort(), ["content", "usage"]);
+  assert.equal(data._meta.status, 200);
+  assert.equal(data._meta.requestId, "req_42");
+  assert.deepEqual(data._meta.headers, { "request-id": "req_42", "anthropic-ratelimit-requests-remaining": "99" });
+  assert.equal(typeof data._meta.ms, "number");
+});

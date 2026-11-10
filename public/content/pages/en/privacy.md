@@ -16,7 +16,7 @@ Agent Atlas remembers things only locally, in your own browser. Nothing that it 
 
 - the language you choose (local storage, key `aa.lang`);
 - your settings, such as default run limits (local storage, key `aa.settings`);
-- every run you make: the task, the agents, their messages and the result (the browser database IndexedDB, database `aa`);
+- every run you make, in full: the task, the agents and their instructions, every message and every answer of Anthropic as it came back (including search results, the request id, token counts and timings), when the run started and ended, and basic details of your browser (language, time zone, browser identification) (the browser database IndexedDB, database `aa`). Your API key is never part of it;
 - only if you choose "Remember on this device", your Anthropic API key, encrypted with a password you set (local storage, key `aa.vault`). The password is not stored anywhere, so it cannot be recovered. If you forget it, you enter the key again.
 
 By default your API key is kept only in the memory of the open tab and is gone when you close or reload it. You can remove everything at any time in Settings (delete all runs, forget key), or by clearing the site data in your browser. You can also export a backup to a file and import it later; the file is yours and never sent to us.

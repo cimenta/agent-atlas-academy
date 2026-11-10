@@ -16,7 +16,7 @@ Agent Atlas si věci pamatuje jen lokálně, ve vašem vlastním prohlížeči. 
 
 - jazyk, který zvolíte (místní úložiště, klíč `aa.lang`);
 - vaše nastavení, například výchozí limity běhů (místní úložiště, klíč `aa.settings`);
-- každý běh, který spustíte: úkol, agenty, jejich zprávy a výsledek (databáze prohlížeče IndexedDB, databáze `aa`);
+- každý běh, který spustíte, celý: úkol, agenty a jejich instrukce, každou zprávu a každou odpověď Anthropicu tak, jak přišla (včetně výsledků hledání, identifikátoru požadavku, počtů tokenů a časů), kdy běh začal a skončil a základní údaje o vašem prohlížeči (jazyk, časové pásmo, identifikace prohlížeče) (databáze prohlížeče IndexedDB, databáze `aa`). Váš klíč API jeho součástí není nikdy;
 - jen pokud zvolíte „Zapamatovat v tomto zařízení“, váš klíč Anthropic API zašifrovaný heslem, které si nastavíte (místní úložiště, klíč `aa.vault`). Heslo se nikam neukládá, takže ho nelze obnovit. Pokud ho zapomenete, zadáte klíč znovu.
 
 Ve výchozím stavu zůstává váš klíč API jen v paměti otevřené karty a po jejím zavření nebo obnovení zmizí. Vše můžete kdykoli odstranit v Nastavení (smazat všechny běhy, zapomenout klíč) nebo vymazáním dat webu v prohlížeči. Můžete také exportovat zálohu do souboru a později ji importovat; soubor patří vám a nikam se neposílá.

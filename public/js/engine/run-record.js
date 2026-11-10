@@ -28,7 +28,7 @@ function sumUsage(events) {
   return usage;
 }
 
-export function buildRunRecord({ id, design, task, events, limits, language, appVersion }) {
+export function buildRunRecord({ id, design, task, events, limits, language, appVersion, startedAt, endedAt, client }) {
   const done = [...events].reverse().find((e) => e.type === "done");
   const firstModel = MODELS.find((m) => m.key === design.nodes[0]?.model) ?? MODELS[0];
   return {
@@ -46,5 +46,9 @@ export function buildRunRecord({ id, design, task, events, limits, language, app
     outcome: done?.outcome ?? "interrupted",
     usage: done?.usage ?? sumUsage(events),
     source: "local",
+    ...(typeof startedAt === "number" ? { startedAt: new Date(startedAt).toISOString() } : {}),
+    ...(typeof endedAt === "number" ? { endedAt: new Date(endedAt).toISOString() } : {}),
+    ...(typeof startedAt === "number" && typeof endedAt === "number" ? { durationMs: endedAt - startedAt } : {}),
+    ...(client ? { client } : {}),
   };
 }

@@ -188,7 +188,7 @@ test("agent_start records the model, the tool names and the system prompt", asyn
   assert.ok(events[0].system.startsWith("Role: critic"));
 });
 
-test("a round event carries the new messages, a slim reply, the stop reason and usage", async () => {
+test("a round event carries the new messages, the whole reply, the stop reason and usage", async () => {
   const blocks = [
     { type: "server_tool_use", id: "s1", name: "web_search", input: { query: "sky" } },
     { type: "web_search_tool_result", tool_use_id: "s1", content: [{ title: "Sky", url: "https://e.org", encrypted_content: "SECRET" }] },
@@ -202,8 +202,8 @@ test("a round event carries the new messages, a slim reply, the stop reason and 
   assert.deepEqual(round.usage, { input: 10, output: 5 });
   assert.deepEqual(round.newMessages, [{ role: "user", content: "Task: x" }]);
   assert.equal(typeof round.ms, "number");
-  assert.ok(!JSON.stringify(round).includes("SECRET"));
-  assert.deepEqual(round.content[1], { type: "web_search_tool_result", content: [{ title: "Sky", url: "https://e.org" }] });
+  assert.deepEqual(round.content, blocks);
+  assert.ok(JSON.stringify(round).includes("SECRET"), "the provider's own fields are kept");
 });
 
 test("the second run's round lists only what is new: the earlier answer and the new task", async () => {
@@ -213,4 +213,27 @@ test("the second run's round lists only what is new: the earlier answer and the 
   const rounds = events.filter((e) => e.type === "round");
   assert.deepEqual(rounds[1].newMessages.map((m) => m.role), ["assistant", "user"]);
   assert.equal(rounds[1].round, 2);
+});
+
+test("a round records the request parameters and every field of the provider's answer", async () => {
+  const response = { id: "msg_1", type: "message", role: "assistant", model: "claude-haiku-5-5", content: [{ type: "text", text: "hi" }], stop_reason: "end_turn", stop_sequence: null, usage: { input_tokens: 10, output_tokens: 5, cache_read_input_tokens: 3 } };
+  const events = [];
+  const call = async () => response;
+  const agent = createAgent({ node: node({ search: true }), call, emit: (e) => events.push(e), budget: createBudget(LIMIT_DEFAULTS), language: "en", sleep: async () => {} });
+  await agent.run("t");
+  const raw = events.find((e) => e.type === "round").raw;
+  assert.deepEqual(raw.response, { id: "msg_1", type: "message", role: "assistant", model: "claude-haiku-5-5", stop_reason: "end_turn", stop_sequence: null, usage: { input_tokens: 10, output_tokens: 5, cache_read_input_tokens: 3 } });
+  assert.equal(raw.request.model, "claude-haiku-5-5");
+  assert.equal(raw.request.tools[0].name, "web_search");
+  assert.equal(raw.request.messageCount, 1);
+  assert.equal(raw.http, null);
+});
+
+test("the HTTP details of the provider's answer are recorded when the call supplies them", async () => {
+  const response = { content: [{ type: "text", text: "hi" }], stop_reason: "end_turn", usage: { input_tokens: 1, output_tokens: 1 } };
+  Object.defineProperty(response, "_meta", { value: { status: 200, requestId: "req_9", headers: { "request-id": "req_9" }, ms: 123 }, enumerable: false });
+  const events = [];
+  const agent = createAgent({ node: node(), call: async () => response, emit: (e) => events.push(e), budget: createBudget(LIMIT_DEFAULTS), language: "en", sleep: async () => {} });
+  await agent.run("t");
+  assert.deepEqual(events.find((e) => e.type === "round").raw.http, { status: 200, requestId: "req_9", headers: { "request-id": "req_9" }, ms: 123 });
 });

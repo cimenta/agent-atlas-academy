@@ -102,3 +102,14 @@ test("nothing but the named fields ends up in the record, so a key cannot ride a
   assert.ok(!json.includes("SECRETSECRET"));
   assert.ok(!json.includes("hunter2"));
 });
+
+test("a run record keeps when it started and ended and the client details when they are given", () => {
+  const design = { pattern: "sequential", nodes: [{ id: "planner", agent: "planner", model: "fast", search: false }], edges: [] };
+  const rec = buildRunRecord({ id: "local-x", design, task: "t", events: [], limits: {}, language: "en", appVersion: "1", startedAt: Date.UTC(2026, 10, 10, 8, 0, 0), endedAt: Date.UTC(2026, 10, 10, 8, 1, 28), client: { timezone: "Europe/Prague" } });
+  assert.equal(rec.startedAt, "2026-11-10T08:00:00.000Z");
+  assert.equal(rec.endedAt, "2026-11-10T08:01:28.000Z");
+  assert.equal(rec.durationMs, 88000);
+  assert.deepEqual(rec.client, { timezone: "Europe/Prague" });
+  const bare = buildRunRecord({ id: "local-y", design, task: "t", events: [], limits: {}, language: "en", appVersion: "1" });
+  assert.ok(!("startedAt" in bare) && !("client" in bare));
+});
