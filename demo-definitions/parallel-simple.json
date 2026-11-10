@@ -1,0 +1,38 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Name three ways to reduce food waste at home.",
+  "design": {
+    "pattern": "parallel",
+    "nodes": [
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "search": true
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "combiner",
+        "agent": "combiner",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "researcher",
+        "to": "combiner"
+      },
+      {
+        "from": "critic",
+        "to": "combiner"
+      }
+    ]
+  }
+}

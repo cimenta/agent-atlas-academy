@@ -1,0 +1,60 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "A town of 20000 people wants to reduce car traffic in its centre. Which measures would work best, and what are the risks?",
+  "design": {
+    "pattern": "parallel",
+    "nodes": [
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "search": true
+      },
+      {
+        "id": "planner",
+        "agent": "planner",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Local shop owner",
+        "instructions": "Answer as the owner of a small shop in the town centre. Say how each measure would affect your customers and deliveries."
+      },
+      {
+        "id": "combiner",
+        "agent": "combiner",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "researcher",
+        "to": "combiner"
+      },
+      {
+        "from": "planner",
+        "to": "combiner"
+      },
+      {
+        "from": "critic",
+        "to": "combiner"
+      },
+      {
+        "from": "free",
+        "to": "combiner"
+      }
+    ]
+  }
+}

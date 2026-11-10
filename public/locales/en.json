@@ -404,5 +404,6 @@
   "create.definition.tooBig": "That file is too large to be a run definition.",
   "create.definition.invalid": "That definition is not a valid design.",
   "create.definition.note.model": "A model that is not available here was replaced by the default.",
-  "create.definition.note.taskCut": "The task was too long and was shortened."
+  "create.definition.note.taskCut": "The task was too long and was shortened.",
+  "player.exportMenu": "Export"
 }

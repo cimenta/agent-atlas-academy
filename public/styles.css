@@ -508,4 +508,9 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .player-title h2 { overflow-wrap: anywhere; }
 .create-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
 .create-head h2 { margin: 0; }
-.export-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.export-menu { position: relative; flex: none; }
+.cog-button { min-height: 36px; min-width: 36px; padding: 0 8px; font-size: 1.15rem; line-height: 1; background: transparent; }
+.export-list { position: absolute; right: 0; top: calc(100% + 4px); z-index: 20; display: flex; flex-direction: column; min-width: 12rem; padding: 4px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); }
+.export-list[hidden] { display: none; }
+.export-item { text-align: left; border: 0; background: transparent; min-height: 36px; font-size: 0.9rem; }
+.export-item:hover, .export-item:focus-visible { background: var(--border); }

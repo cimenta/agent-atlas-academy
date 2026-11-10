@@ -70,16 +70,51 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   const viewer = createViewer({ doc, t });
   let state = deriveInspector(events, 0);
 
-  const exportRunButton = exportRun
-    ? h(doc, "button", { type: "button", class: "export-json", "data-ui": "export-json", title: t("player.exportHint") }, t("player.export"))
-    : "";
-  if (exportRun) exportRunButton.addEventListener("click", () => downloadFile(doc, `${safeFileName(exportRun.id)}.json`, JSON.stringify(exportRun, null, 2), "application/json"));
+  // A cog in the corner of the player head opens a small menu with the two exports.
   const definition = exportRun ? definitionFromRun(exportRun) : null;
-  const exportDefinitionButton = definition
-    ? h(doc, "button", { type: "button", class: "export-json", "data-ui": "export-definition", title: t("player.exportDefinitionHint") }, t("player.exportDefinition"))
+  const menuItem = (ui, label, hint, onClick) => {
+    const item = h(doc, "button", { type: "button", role: "menuitem", class: "export-item", "data-ui": ui, title: hint }, label);
+    item.addEventListener("click", () => {
+      closeMenu();
+      onClick();
+    });
+    return item;
+  };
+  const menuList = exportRun
+    ? h(
+        doc,
+        "div",
+        { class: "export-list", role: "menu", "data-ui": "export-menu", hidden: true },
+        menuItem("export-json", t("player.export"), t("player.exportHint"), () => downloadFile(doc, `${safeFileName(exportRun.id)}.json`, JSON.stringify(exportRun, null, 2), "application/json")),
+        definition ? menuItem("export-definition", t("player.exportDefinition"), t("player.exportDefinitionHint"), () => downloadFile(doc, `${safeFileName(exportRun.id)}-definition.json`, JSON.stringify(definition, null, 2), "application/json")) : "",
+      )
     : "";
-  if (definition) exportDefinitionButton.addEventListener("click", () => downloadFile(doc, `${safeFileName(exportRun.id)}-definition.json`, JSON.stringify(definition, null, 2), "application/json"));
-  const exportButton = h(doc, "div", { class: "export-buttons" }, exportRunButton, exportDefinitionButton);
+  const cogButton = exportRun
+    ? h(doc, "button", { type: "button", class: "cog-button", "data-ui": "export-cog", "aria-haspopup": "menu", "aria-expanded": "false", "aria-label": t("player.exportMenu"), title: t("player.exportMenu") }, "⚙")
+    : "";
+  const outsideClick = (event) => {
+    if (!exportButton.contains(event.target)) closeMenu();
+  };
+  const escapeKey = (event) => {
+    if (event.key === "Escape") closeMenu();
+  };
+  function closeMenu() {
+    if (!exportRun || menuList.hidden) return;
+    menuList.hidden = true;
+    cogButton.setAttribute("aria-expanded", "false");
+    doc.removeEventListener("click", outsideClick);
+    doc.removeEventListener("keydown", escapeKey);
+  }
+  if (exportRun) {
+    cogButton.addEventListener("click", () => {
+      if (!menuList.hidden) return closeMenu();
+      menuList.hidden = false;
+      cogButton.setAttribute("aria-expanded", "true");
+      doc.addEventListener("click", outsideClick);
+      doc.addEventListener("keydown", escapeKey);
+    });
+  }
+  const exportButton = h(doc, "div", { class: "export-menu" }, cogButton, menuList);
   const playButton = h(doc, "button", { type: "button", class: "primary", "data-ui": "play-button" });
   const liveBadge = h(doc, "span", { class: "live-badge", "data-ui": "live-badge" }, t("player.live"));
   const stopButton = h(doc, "button", { type: "button", class: "danger", "data-ui": "stop-button" }, t("player.stop"));

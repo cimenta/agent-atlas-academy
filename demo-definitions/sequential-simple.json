@@ -1,0 +1,28 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Explain why the sky is blue.",
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "search": true
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "researcher",
+        "to": "writer"
+      }
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Should a small company run its own servers or move everything to the cloud? Give a recommendation for a team of ten people.",
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "planner",
+        "agent": "planner",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "search": true
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Cost checker",
+        "instructions": "Check the cost claims in the previous answer. Point out anything that ignores staff time, migration work or ongoing fees, and give a rough monthly cost range for a team of ten."
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "planner",
+        "to": "researcher"
+      },
+      {
+        "from": "researcher",
+        "to": "critic"
+      },
+      {
+        "from": "critic",
+        "to": "free"
+      },
+      {
+        "from": "free",
+        "to": "writer"
+      }
+    ]
+  }
+}

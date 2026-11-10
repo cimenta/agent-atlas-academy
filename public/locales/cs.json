@@ -404,5 +404,6 @@
   "create.definition.tooBig": "Tento soubor je příliš velký na definici běhu.",
   "create.definition.invalid": "Tato definice není platný návrh.",
   "create.definition.note.model": "Model, který tu není k dispozici, byl nahrazen výchozím.",
-  "create.definition.note.taskCut": "Zadání bylo příliš dlouhé a bylo zkráceno."
+  "create.definition.note.taskCut": "Zadání bylo příliš dlouhé a bylo zkráceno.",
+  "player.exportMenu": "Exportovat"
 }
