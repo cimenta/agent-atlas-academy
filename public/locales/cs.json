@@ -379,7 +379,7 @@
   "play.importNotJson": "Tento soubor není platný JSON.",
   "play.importInvalid": "Tento soubor není běh exportovaný z Agent Atlas.",
   "play.importFailed": "Běh se nepodařilo uložit v tomto prohlížeči.",
-  "insp.noToolsUsed": "Žádné nástroje nepoužity",
+  "insp.noToolsUsed": "žádné nástroje nepoužity",
   "search.prev": "Předchozí výskyt",
   "search.next": "Další výskyt",
   "search.count": "{n} z {total}",

@@ -484,3 +484,6 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .play-intro { flex: 0 0 100%; }
 .play-intro h1 { margin: 4px 0 2px; font-size: 1.25rem; }
 .play-intro p { margin: 0 0 6px; color: var(--muted); font-size: 0.9rem; }
+/* Less white space between the brand row and the heading above the tabs */
+.play-intro h1 { margin: 0 0 2px; line-height: 1.2; }
+@media (min-width: 720px) { .site-header { row-gap: 0; } .site-header .subtabs { margin-top: -6px; } }

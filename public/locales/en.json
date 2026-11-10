@@ -379,7 +379,7 @@
   "play.importNotJson": "That file is not valid JSON.",
   "play.importInvalid": "That file is not a run exported from Agent Atlas.",
   "play.importFailed": "The run could not be saved in this browser.",
-  "insp.noToolsUsed": "No tools used",
+  "insp.noToolsUsed": "no tools used",
   "search.prev": "Previous match",
   "search.next": "Next match",
   "search.count": "{n} of {total}",
