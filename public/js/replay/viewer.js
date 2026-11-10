@@ -1,7 +1,6 @@
 // A box for long text and JSON: a collapsible tree or raw text, and a search that marks matches.
 // Each viewer keeps its own mode and query, keyed by an id the caller chooses.
 import { h } from "../dom.js";
-import { searchBar } from "../text-search.js";
 
 function tryJson(value) {
   if (value && typeof value === "object") return value;
@@ -54,8 +53,7 @@ export function createViewer({ doc, t }) {
       const fillBody = () => {
         bodyBox.replaceChildren(...(json !== undefined && st.mode === "tree" ? [h(doc, "div", { class: "jt" }, tree(json, st.q))] : marked(raw, st.q)));
       };
-      let search = null;
-      const redraw = () => (search ? search.run() : fillBody());
+      const redraw = fillBody;
       const bar = h(doc, "div", { class: "vbar" });
       if (json !== undefined) {
         const seg = h(doc, "span", { class: "vseg" });
@@ -69,19 +67,6 @@ export function createViewer({ doc, t }) {
           seg.append(button);
         }
         bar.append(seg);
-      }
-      if (raw.length > 200 || st.q) {
-        search = searchBar({
-          doc,
-          t,
-          value: st.q,
-          apply: (q) => {
-            st.q = q;
-            fillBody();
-            return [...bodyBox.querySelectorAll("mark")];
-          },
-        });
-        bar.append(search.element);
       }
       redraw();
       return h(doc, "div", { class: "viewer", "data-ui": "output-viewer" }, bar.children.length ? bar : "", bodyBox);

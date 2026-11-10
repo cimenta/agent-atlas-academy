@@ -8,7 +8,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 - Stage 3, Play tab: the Re-play, Create and Result tabs now sit in the site header with a library search box and a "load last opened" button next to them. Nothing is loaded in Re-play until you pick a run. The examples are now called the library.
 - Re-play shows the library as a pane next to the player (hide or show it with the ▤ button; the choice is remembered). Your runs come first, with an import icon to load a run from a JSON file; each run type has its own colour.
-- Search with next/previous in long texts: the final answer on the Result tab and the Output tab of the inspector. The agent card says "No tools used" instead of listing unused tools, and the page heading sits above the play tabs.
+- Search with next/previous in long texts: the final answer on the Result tab, and one search box next to the inspector tabs that searches whatever the open tab shows (steps, messages or agent output). The agent card says "No tools used" instead of listing unused tools, and the page heading sits above the play tabs.
 - The player has an Export JSON button next to its title.
 - Result tab: the outcome notice (icon, time, cost) on top, then tabs Final answer and Statistics. The answer is shown formatted or as raw markdown, with a copy button and export to .md, .html or PDF (print). Statistics shows total time, cost, tokens, searches, model calls and a per-agent table.
 - Run inspector: the player now shows agent cards, then Steps and tools, Messages (system prompt, every model round and the exact messages sent) and Agent output (JSON tree or text with search). New runs record the model rounds, system prompts and tool names; older runs show their steps only.

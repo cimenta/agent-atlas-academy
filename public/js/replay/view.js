@@ -5,6 +5,7 @@ import { validateRun } from "../run-schema.js";
 import { createPlayer } from "./player.js";
 import { deriveInspector } from "./inspect-model.js";
 import { createViewer } from "./viewer.js";
+import { markText, searchBar } from "../text-search.js";
 import { downloadFile, safeFileName } from "../download.js";
 import { stepDetail } from "./step-detail.js";
 
@@ -89,6 +90,18 @@ function mountView(container, { exportRun, events, title, recordedWith, explanat
   });
   const tabs = h(doc, "div", { class: "tabs", "data-ui": "inspector-tabs", role: "tablist" }, ...tabButtons);
   const body = h(doc, "div", { class: "inspect-body", "data-ui": "inspector-body" });
+  // One search box next to the tabs: it searches the text of the tab that is open.
+  let drawBody = () => {};
+  const search = searchBar({
+    doc,
+    t,
+    ui: "inspector-search",
+    apply: (q) => {
+      drawBody();
+      return markText(doc, body, q);
+    },
+  });
+  const tabRow = h(doc, "div", { class: "tab-row", "data-ui": "inspector-tab-row" }, tabs, search.element);
 
   const root = h(
     doc,
@@ -101,7 +114,7 @@ function mountView(container, { exportRun, events, title, recordedWith, explanat
     status,
     banners,
     chips,
-    tabs,
+    tabRow,
     body,
   );
   container.replaceChildren(root);
@@ -293,12 +306,16 @@ function mountView(container, { exportRun, events, title, recordedWith, explanat
     for (const b of tabButtons) b.setAttribute("aria-selected", String(b.getAttribute("data-tab") === ui.tab));
     renderBanners();
     renderChips();
-    const agent = currentAgent();
-    if (!agent) {
-      body.replaceChildren(h(doc, "p", { class: "doc" }, t("insp.waiting")));
-      return;
-    }
-    body.replaceChildren(ui.tab === "steps" ? renderSteps(agent) : ui.tab === "messages" ? renderMessages(agent) : renderOutput(agent));
+    drawBody = () => {
+      const agent = currentAgent();
+      if (!agent) {
+        body.replaceChildren(h(doc, "p", { class: "doc" }, t("insp.waiting")));
+        return;
+      }
+      body.replaceChildren(ui.tab === "steps" ? renderSteps(agent) : ui.tab === "messages" ? renderMessages(agent) : renderOutput(agent));
+    };
+    if (search.query()) search.run();
+    else drawBody();
   }
 
   const follow = (fn) => () => {
