@@ -13,6 +13,8 @@
   --working-bg: #faeeda;
   --done: #27500a;
   --done-bg: #eaf3de;
+  --result-bg: #b4df85;
+  --result-text: #173d05;
   --err: #791f1f;
   --err-bg: #fcebeb;
   --gutter: 16px;
@@ -38,6 +40,8 @@
     --working-bg: #633806;
     --done: #c0dd97;
     --done-bg: #27500a;
+    --result-bg: #4a8a1c;
+    --result-text: #f0fbe2;
     --err: #f7c1c1;
     --err-bg: #791f1f;
   }
@@ -547,5 +551,5 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .about-description { margin: 8px 0; }
 .about-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .about-panel textarea { width: 100%; }
-.site-header .subtabs a.has-result { background: var(--done-bg); }
+.site-header .subtabs a.has-result { background: var(--result-bg); color: var(--result-text); font-weight: 700; }
 .center-tip-link { margin: 8px 0 0; text-align: center; }
