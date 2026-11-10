@@ -514,3 +514,11 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .export-list[hidden] { display: none; }
 .export-item { text-align: left; border: 0; background: transparent; min-height: 36px; font-size: 0.9rem; }
 .export-item:hover, .export-item:focus-visible { background: var(--border); }
+.editor-diagram-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.editor-diagram-head h3 { margin: 0; }
+.editor-lower { display: grid; grid-template-columns: minmax(0, 1fr) 12rem; gap: 12px; align-items: start; }
+.editor-connections h4 { margin: 0 0 6px; font-size: 0.9rem; }
+.editor-connections .hint { margin: 0; font-size: 0.85rem; }
+.editor-connections .connection-list li { max-width: none; font-size: 0.85rem; gap: 6px; }
+.editor-connections .connection-list button { min-height: 28px; min-width: 28px; padding: 0 6px; }
+@media (max-width: 640px) { .editor-lower { grid-template-columns: 1fr; } }

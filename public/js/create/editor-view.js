@@ -364,7 +364,8 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       editor.clearPositions();
       changed();
     });
-    return h(doc, "section", { class: "editor-diagram", "aria-label": t("editor.diagram") }, h(doc, "h3", {}, t("editor.diagram")), empty, connecting, wrap, design.nodes.length ? tidy : "");
+    const head = h(doc, "div", { class: "editor-diagram-head" }, h(doc, "h3", {}, t("editor.diagram")), design.nodes.length ? tidy : "");
+    return h(doc, "section", { class: "editor-diagram", "aria-label": t("editor.diagram") }, head, empty, connecting, wrap);
   }
 
   function connectionsBlock(design) {
@@ -464,10 +465,8 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       notice ? h(doc, "p", { class: "notice", role: "alert" }, notice) : "",
       paletteBlock(design),
       diagramBlock(design),
+      h(doc, "div", { class: "editor-lower" }, settingsBlock(design), h(doc, "section", { class: "editor-connections", "aria-label": t("editor.connections") }, h(doc, "h4", {}, t("editor.connections")), connectionsBlock(design))),
       roundsBlock(design),
-      h(doc, "h3", {}, t("editor.connections")),
-      connectionsBlock(design),
-      settingsBlock(design),
       problemsBlock(),
     );
     if (focusKey) root.querySelector(`[data-focus-key="${focusKey}"]`)?.focus();
