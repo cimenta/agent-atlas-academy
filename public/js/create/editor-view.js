@@ -79,6 +79,10 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
 
   function removeSelected() {
     if (selectedId === null) return;
+    // Removing an agent also removes its connections, so ask first (the cross, the button and the Delete key all come here).
+    const doomed = editor.design().nodes.find((n) => n.id === selectedId);
+    const ask = doc.defaultView?.confirm;
+    if (doomed && ask && !ask.call(doc.defaultView, t("editor.removeConfirm", { name: nodeLabel(doomed) }))) return;
     freeze();
     editor.removeNode(selectedId);
     selectedId = null;
@@ -460,12 +464,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       );
     }
     const remove = h(doc, "button", { type: "button", class: "danger", "data-focus-key": "remove-node" }, t("editor.remove"));
-    remove.addEventListener("click", () => {
-      editor.removeNode(node.id);
-      selectedId = null;
-      connectFrom = null;
-      changed();
-    });
+    remove.addEventListener("click", () => removeSelected());
     parts.push(remove);
     return h(doc, "section", { class: "editor-settings", "aria-label": t("editor.settings", { name: nodeLabel(node) }) }, ...parts);
   }

@@ -411,5 +411,9 @@
   "create.clearConfirm": "Clear the task and the diagram?",
   "create.definition.cleared": "Cleared. Start a new run or load a definition.",
   "editor.prompt": "Prompt of this agent",
-  "editor.promptHelp": "This is the instruction the agent is given. Every agent also gets two fixed lines: keep replies under 300 words, and answer in the language of the site. The prompt itself is always in English."
+  "editor.promptHelp": "This is the instruction the agent is given. Every agent also gets two fixed lines: keep replies under 300 words, and answer in the language of the site. The prompt itself is always in English.",
+  "editor.removeConfirm": "Remove {name} and its connections?",
+  "create.patternConfirm": "Changing the orchestration pattern clears the diagram. Continue?",
+  "create.loadConfirm": "Loading this definition replaces the task and the diagram you have now. Continue?",
+  "settings.forgetConfirm": "Forget the stored key? You will have to enter the key and a passphrase again to store it."
 }

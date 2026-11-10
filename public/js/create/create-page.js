@@ -95,6 +95,7 @@ export function renderCreate(ctx) {
           button.addEventListener("click", () => {
             if (draft.pattern === p) return;
             const hadNodes = draft.editor.design().nodes.length > 0;
+            if (hadNodes && !doc.defaultView.confirm(t("create.patternConfirm"))) return;
             draft.pattern = p;
             draft.editor.reset(p);
             editorHandle.refresh();
@@ -223,6 +224,7 @@ export function renderCreate(ctx) {
         showForm(`${t(`create.definition.${loaded.code}`)}${detail}`);
         return;
       }
+      if (draft.editor.design().nodes.length > 0 && !doc.defaultView.confirm(t("create.loadConfirm"))) return;
       draft.task = loaded.task;
       draft.pattern = loaded.pattern;
       draft.editor = loaded.editor;

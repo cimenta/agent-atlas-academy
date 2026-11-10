@@ -85,6 +85,7 @@ export function renderSettings(ctx) {
   // Forget the remembered key and the key in memory.
   const forgetButton = h(doc, "button", { type: "button" }, t("settings.forget"));
   forgetButton.addEventListener("click", () => {
+    if (!doc.defaultView.confirm(t("settings.forgetConfirm"))) return;
     vault.forget();
     vault.clearSessionKey();
     say(t("settings.forgotten"));

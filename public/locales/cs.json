@@ -411,5 +411,9 @@
   "create.clearConfirm": "Vymazat zadání i diagram?",
   "create.definition.cleared": "Vymazáno. Začněte nový běh nebo načtěte definici.",
   "editor.prompt": "Prompt tohoto agenta",
-  "editor.promptHelp": "Tohle je pokyn, který agent dostane. Každý agent dostane i dvě pevné řádky: odpovídat do 300 slov a odpovídat v jazyce webu. Samotný prompt je vždy anglicky."
+  "editor.promptHelp": "Tohle je pokyn, který agent dostane. Každý agent dostane i dvě pevné řádky: odpovídat do 300 slov a odpovídat v jazyce webu. Samotný prompt je vždy anglicky.",
+  "editor.removeConfirm": "Odebrat {name} i jeho spojení?",
+  "create.patternConfirm": "Změna vzoru orchestrace vymaže diagram. Pokračovat?",
+  "create.loadConfirm": "Načtení této definice nahradí zadání a diagram, které teď máte. Pokračovat?",
+  "settings.forgetConfirm": "Zapomenout uložený klíč? Pro jeho uložení budete muset znovu zadat klíč a heslo."
 }
