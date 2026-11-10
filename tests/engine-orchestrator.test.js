@@ -116,7 +116,9 @@ test("agents after the combiner work in order on the combined answer", async () 
   assert.equal(result.finalText, "WRITER");
   assert.deepEqual(calls.map(roleOf).slice(-3), ["combiner", "critic", "writer"]);
   assert.ok(calls.find((c) => roleOf(c) === "critic").messages[0].content.includes("COMBINER"));
-  assert.ok(calls.find((c) => roleOf(c) === "writer").messages[0].content.includes("CRITIC"));
+  const writerInput = calls.find((c) => roleOf(c) === "writer").messages[0].content;
+  assert.ok(writerInput.includes("CRITIC"));
+  assert.ok(writerInput.includes("COMBINER"), "the writer still sees the combined answer, not only the critic's notes");
   assert.deepEqual(events.filter((e) => e.type === "handoff").map((e) => `${e.from}>${e.to}`).slice(-2), ["combiner>critic", "critic>writer"]);
 });
 

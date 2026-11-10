@@ -1,0 +1,63 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Should a town of 20000 people ban cars from its centre?",
+  "design": {
+    "pattern": "debate",
+    "nodes": [
+      {
+        "id": "debater",
+        "agent": "debater",
+        "model": "fast",
+        "search": false,
+        "stance": "for"
+      },
+      {
+        "id": "debater-2",
+        "agent": "debater",
+        "model": "fast",
+        "search": false,
+        "stance": "against"
+      },
+      {
+        "id": "debater-3",
+        "agent": "debater",
+        "model": "fast",
+        "search": false,
+        "stance": "for"
+      },
+      {
+        "id": "debater-4",
+        "agent": "debater",
+        "model": "fast",
+        "search": false,
+        "stance": "against"
+      },
+      {
+        "id": "judge",
+        "agent": "judge",
+        "model": "strong",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "debater",
+        "to": "judge"
+      },
+      {
+        "from": "debater-2",
+        "to": "judge"
+      },
+      {
+        "from": "debater-3",
+        "to": "judge"
+      },
+      {
+        "from": "debater-4",
+        "to": "judge"
+      }
+    ],
+    "rounds": 2
+  }
+}

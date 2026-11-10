@@ -1,0 +1,60 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "A small cafe wants to start selling coffee beans online. Prepare a one-page action plan with the main risks.",
+  "design": {
+    "pattern": "supervisor",
+    "nodes": [
+      {
+        "id": "supervisor",
+        "agent": "supervisor",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "search": true
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Finance advisor",
+        "instructions": "Answer as a finance advisor for small businesses. Estimate the start-up costs and the main cash-flow risks for the plan you are given."
+      }
+    ],
+    "edges": [
+      {
+        "from": "supervisor",
+        "to": "researcher"
+      },
+      {
+        "from": "supervisor",
+        "to": "writer"
+      },
+      {
+        "from": "supervisor",
+        "to": "critic"
+      },
+      {
+        "from": "supervisor",
+        "to": "free"
+      }
+    ]
+  }
+}

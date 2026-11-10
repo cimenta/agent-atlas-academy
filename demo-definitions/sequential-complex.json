@@ -18,8 +18,8 @@
         "search": true
       },
       {
-        "id": "critic",
-        "agent": "critic",
+        "id": "writer",
+        "agent": "writer",
         "model": "fast",
         "search": false
       },
@@ -28,14 +28,16 @@
         "agent": "free",
         "model": "fast",
         "search": false,
-        "name": "Cost checker",
-        "instructions": "Check the cost claims in the previous answer. Point out anything that ignores staff time, migration work or ongoing fees, and give a rough monthly cost range for a team of ten."
+        "name": "Fact checker",
+        "instructions": "Check the draft from the previous agent. Fix wrong or unsupported claims and add anything important that is missing, especially staff time, migration work and ongoing fees. Return the whole corrected draft, not a list of comments."
       },
       {
-        "id": "writer",
-        "agent": "writer",
+        "id": "free-2",
+        "agent": "free",
         "model": "fast",
-        "search": false
+        "search": false,
+        "name": "Editor",
+        "instructions": "Edit the text from the previous agent for a busy manager. Keep it under 200 words, use plain language, and end with one sentence that gives the recommendation."
       }
     ],
     "edges": [
@@ -45,15 +47,15 @@
       },
       {
         "from": "researcher",
-        "to": "critic"
+        "to": "writer"
       },
       {
-        "from": "critic",
+        "from": "writer",
         "to": "free"
       },
       {
         "from": "free",
-        "to": "writer"
+        "to": "free-2"
       }
     ]
   }

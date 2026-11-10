@@ -1,0 +1,41 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Should schools start later in the morning?",
+  "design": {
+    "pattern": "debate",
+    "nodes": [
+      {
+        "id": "debater",
+        "agent": "debater",
+        "model": "fast",
+        "search": false,
+        "stance": "for"
+      },
+      {
+        "id": "debater-2",
+        "agent": "debater",
+        "model": "fast",
+        "search": false,
+        "stance": "against"
+      },
+      {
+        "id": "judge",
+        "agent": "judge",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "debater",
+        "to": "judge"
+      },
+      {
+        "from": "debater-2",
+        "to": "judge"
+      }
+    ],
+    "rounds": 1
+  }
+}

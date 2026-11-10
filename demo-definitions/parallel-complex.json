@@ -12,18 +12,28 @@
         "search": true
       },
       {
-        "id": "planner",
-        "agent": "planner",
+        "id": "free",
+        "agent": "free",
         "model": "fast",
-        "search": false
+        "search": false,
+        "name": "Traffic planner",
+        "instructions": "Answer as a traffic planner. Propose measures to reduce car traffic in the centre and say how much each is likely to help."
       },
       {
-        "id": "free",
+        "id": "free-2",
         "agent": "free",
         "model": "fast",
         "search": false,
         "name": "Local shop owner",
         "instructions": "Answer as the owner of a small shop in the town centre. Say how each measure would affect your customers and deliveries."
+      },
+      {
+        "id": "free-3",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Resident",
+        "instructions": "Answer as a resident who lives in the centre. Say what would improve daily life and what would make it worse."
       },
       {
         "id": "combiner",
@@ -50,11 +60,15 @@
         "to": "combiner"
       },
       {
-        "from": "planner",
+        "from": "free",
         "to": "combiner"
       },
       {
-        "from": "free",
+        "from": "free-2",
+        "to": "combiner"
+      },
+      {
+        "from": "free-3",
         "to": "combiner"
       },
       {

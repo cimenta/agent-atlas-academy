@@ -20,7 +20,12 @@ export async function run({ design, task, agents, emit }) {
   let previous = { id: combiner.id, text: merged.text };
   for (const id of followers) {
     emit({ type: "handoff", from: previous.id, to: id, note: previous.text.slice(0, NOTE_MAX) });
-    const result = await agents.get(id).run(`Task: ${task}\n\nThe previous agent (${previous.id}) wrote:\n${previous.text}`);
+    // Every agent in the line sees the combined answer, so a critic's notes do not replace it for the next agent.
+    const seen =
+      previous.id === combiner.id
+        ? `The combined answer:\n${previous.text}`
+        : `The combined answer:\n${merged.text}\n\nThe previous agent (${previous.id}) wrote:\n${previous.text}`;
+    const result = await agents.get(id).run(`Task: ${task}\n\n${seen}`);
     previous = { id, text: result.text };
   }
   return previous.text;
