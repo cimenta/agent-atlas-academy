@@ -210,6 +210,15 @@ async function switchLanguage(code) {
   await renderRoute(false);
 }
 
+// The site name always leads to the home page, the Re-play tab with nothing loaded. When the
+// address is already that page, the link does not change the address, so draw the page again.
+doc.querySelector(".brand")?.addEventListener("click", (event) => {
+  if (location.hash === "#/play" || location.hash === "" || location.hash === "#/") {
+    event.preventDefault();
+    renderRoute(true);
+  }
+});
+
 menuToggle.addEventListener("click", () => {
   const open = menu.classList.toggle("open");
   menuToggle.setAttribute("aria-expanded", String(open));
