@@ -317,3 +317,9 @@ test("positions never leak into the design that is sent to the server", () => {
   editor.setPosition(a, 50, 50);
   assert.ok(!JSON.stringify(editor.design()).includes("50"));
 });
+
+test("with nothing connected yet the first node sits in the first cell, not one cell in", () => {
+  const design = { pattern: "sequential", nodes: [{ id: "planner", agent: "planner" }], edges: [] };
+  assert.deepEqual(layoutDesign(design, { orientation: "horizontal" }).nodes, [{ id: "planner", x: 0, y: 0 }]);
+  assert.deepEqual(layoutDesign(design, { orientation: "vertical" }).nodes, [{ id: "planner", x: 0, y: 0 }]);
+});

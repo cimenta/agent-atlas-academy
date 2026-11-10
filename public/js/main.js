@@ -55,6 +55,9 @@ const footer = doc.getElementById("footer");
 const versionLabel = doc.getElementById("version");
 const tagline = doc.getElementById("tagline");
 
+// Opening the site with ?ui in the address shows the data-ui name of every labelled element.
+if (new URLSearchParams(globalThis.location?.search ?? "").has("ui")) doc.body.setAttribute("data-show-ui", "");
+
 let lang = resolveLocale({
   stored: store.get(),
   browserLanguages: navigator.languages && navigator.languages.length ? [...navigator.languages] : [navigator.language],

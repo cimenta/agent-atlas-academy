@@ -8,7 +8,8 @@ import { mountLiveReplay } from "../replay/view.js";
 import { createBatchedSaver } from "../storage/runs-store.js";
 import { createEditor } from "./editor-model.js";
 import { mountEditor } from "./editor-view.js";
-import { canRun, reviewSummary, runOutcomeMessageKey } from "./create-model.js";
+import { canRun, describeOutcome, formatDuration, formatUsd, reviewSummary, runOutcomeMessageKey } from "./create-model.js";
+import { buildResultModel } from "../play-model.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const LIMIT_FIELDS = [
@@ -83,7 +84,7 @@ export function renderCreate(ctx) {
     updateCounter();
 
     // Pattern.
-    const patternGroup = h(doc, "div", { class: "pattern-choice", role: "group", "aria-label": t("create.patternHeading") });
+    const patternGroup = h(doc, "div", { class: "pattern-choice", "data-ui": "pattern-choice", role: "group", "aria-label": t("create.patternHeading") });
     const patternNotice = h(doc, "p", { class: "notice", role: "status", hidden: true });
     const drawPatterns = () => {
       patternGroup.replaceChildren(
@@ -113,8 +114,8 @@ export function renderCreate(ctx) {
     };
 
     // Editor.
-    const editorHost = h(doc, "div", { class: "editor-host" });
-    const reviewHost = h(doc, "section", { class: "review", "aria-label": t("create.reviewHeading") });
+    const editorHost = h(doc, "div", { class: "editor-host", "data-ui": "editor" });
+    const reviewHost = h(doc, "section", { class: "review", "data-ui": "run-review", "aria-label": t("create.reviewHeading") });
     let editorHandle;
 
     // Review.
@@ -241,8 +242,8 @@ export function renderCreate(ctx) {
     const record = () => buildRunRecord({ id, design, task, events, limits, language: ctx.lang, appVersion: ctx.version });
     const saver = createBatchedSaver(ctx.runStore);
 
-    const host = h(doc, "div", { class: "replay-host" });
-    const after = h(doc, "div", { class: "run-after" });
+    const host = h(doc, "div", { class: "replay-host", "data-ui": "player-host" });
+    const after = h(doc, "div", { class: "run-after", "data-ui": "run-after" });
     root.replaceChildren(host, after);
     const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 60), recordedWith: { provider: "anthropic", model: firstModel.id }, t, doc, onStop: () => activeRun?.stop() });
     ctx.onLeave(live.destroy);
@@ -257,7 +258,19 @@ export function renderCreate(ctx) {
       const result = await ctx.runStore.save(finalRecord);
       activeRun = null;
       const done = events.at(-1);
-      const children = [h(doc, "p", { class: "notice", role: "status" }, t(runOutcomeMessageKey(done?.outcome)))];
+      const info = describeOutcome({ outcome: done?.outcome, events, cost: buildResultModel(finalRecord).cost });
+      const meta = [];
+      if (info.durationMs !== null) meta.push(t("run.outcome.took", { time: formatDuration(info.durationMs) }));
+      if (info.cost !== null) meta.push(t("run.outcome.cost", { usd: formatUsd(info.cost) }));
+      const notice = h(
+        doc,
+        "p",
+        { class: `notice outcome outcome-${info.level}`, id: "run-outcome", "data-ui": "run-outcome", "data-outcome": done?.outcome ?? "failed", role: "status" },
+        h(doc, "span", { class: "outcome-icon", role: "img", "aria-label": t(`run.outcome.icon.${info.level}`) }, info.icon),
+        h(doc, "span", { class: "outcome-text" }, t(runOutcomeMessageKey(done?.outcome))),
+      );
+      if (meta.length) notice.append(h(doc, "span", { class: "outcome-meta", title: info.cost !== null ? t("run.outcome.costHint") : undefined }, meta.join(" · ")));
+      const children = [notice];
       if (result.ok) children.push(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${id}` }, t("create.seeResult"))));
       else children.push(h(doc, "p", { class: "notice", role: "alert" }, t("create.saveFailed")), downloadButton(ctx, finalRecord));
       const again = h(doc, "button", { type: "button", class: "primary" }, t("create.newRun"));

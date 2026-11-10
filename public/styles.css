@@ -346,3 +346,18 @@ button.step.sel { background: var(--accent-bg); border: 2px solid var(--accent-l
 .run-row[aria-current="true"] { background: var(--accent-bg); }
 .run-row[aria-current="true"] .run-title { color: var(--accent); }
 .run-lists { margin-top: 16px; }
+
+/* Outcome notice under a finished run */
+.outcome { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.outcome-icon { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 22px; height: 22px; border-radius: 50%; font-size: 0.8rem; font-weight: 700; color: #fff; }
+.outcome-ok .outcome-icon { background: #2e7d32; }
+.outcome-warn .outcome-icon { background: #b26a00; }
+.outcome-fail .outcome-icon { background: #c0392b; }
+.outcome-ok { border-color: var(--done); background: var(--done-bg); color: var(--done); }
+.outcome-warn { border-color: var(--working); background: var(--working-bg); color: var(--working); }
+.outcome-fail { border-color: var(--err); background: var(--err-bg); color: var(--err); }
+.outcome-meta { margin-left: auto; font-size: 0.85rem; opacity: 0.9; }
+
+/* ?ui shows the data-ui name of each labelled element, to talk about the page */
+body[data-show-ui] [data-ui] { outline: 1px dashed #c0392b; outline-offset: -1px; position: relative; }
+body[data-show-ui] [data-ui]::after { content: attr(data-ui); position: absolute; top: 0; right: 0; z-index: 50; padding: 0 4px; font: 10px/1.4 ui-monospace, Consolas, monospace; color: #fff; background: #c0392b; pointer-events: none; }

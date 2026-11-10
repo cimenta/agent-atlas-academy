@@ -26,3 +26,28 @@ const OUTCOMES = new Set(["finished", "stopped_user", "stopped_limit", "interrup
 export function runOutcomeMessageKey(outcome) {
   return `run.outcome.${OUTCOMES.has(outcome) ? outcome : "failed"}`;
 }
+
+export function formatDuration(ms) {
+  if (typeof ms !== "number" || !Number.isFinite(ms) || ms < 0) return "";
+  const seconds = ms / 1000;
+  if (seconds < 60) return `${seconds.toFixed(1)} s`;
+  return `${Math.floor(seconds / 60)} min ${Math.round(seconds % 60)} s`;
+}
+
+export function formatUsd(usd) {
+  if (typeof usd !== "number" || !Number.isFinite(usd)) return "";
+  return usd < 0.1 ? usd.toFixed(4) : usd.toFixed(2);
+}
+
+// What the notice under a finished run shows next to its message: pass or fail, time and cost.
+// Finished is a pass, a stop you asked for or a limit you set is a warning, anything else failed.
+export function describeOutcome({ outcome, events, cost }) {
+  const level = outcome === "finished" ? "ok" : outcome === "stopped_user" || outcome === "stopped_limit" ? "warn" : "fail";
+  const lastT = Array.isArray(events) ? events.at(-1)?.t : undefined;
+  return {
+    level,
+    icon: { ok: "✓", warn: "!", fail: "✕" }[level],
+    durationMs: typeof lastT === "number" && Number.isFinite(lastT) ? lastT : null,
+    cost: typeof cost === "number" && Number.isFinite(cost) ? cost : null,
+  };
+}

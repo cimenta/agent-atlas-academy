@@ -321,5 +321,12 @@
   "insp.doc.handoff": "The output of one agent is exactly what the next agent receives as its first message.",
   "kind.tool": "Tool",
   "insp.reconstructed": "Reconstructed from the recorded steps: this run was saved before the exact messages were kept.",
-  "play.deleteConfirm": "Delete this run? It cannot be undone.\n\n{title}"
+  "play.deleteConfirm": "Delete this run? It cannot be undone.\n\n{title}",
+  "run.outcome.took": "Took {time}",
+  "run.outcome.cost": "cost about {usd} USD",
+  "run.outcome.costHint": "An estimate: the token counts come from the provider, the prices are list prices. Your Anthropic console shows the exact bill.",
+  "run.outcome.icon.ok": "Passed",
+  "run.outcome.icon.warn": "Stopped",
+  "run.outcome.icon.fail": "Failed",
+  "insp.toolUnused": "not used"
 }

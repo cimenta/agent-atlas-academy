@@ -58,22 +58,22 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
   const viewer = createViewer({ doc, t });
   let state = deriveInspector(events, 0);
 
-  const playButton = h(doc, "button", { type: "button", class: "primary" });
-  const liveBadge = h(doc, "span", { class: "live-badge" }, t("player.live"));
-  const stopButton = h(doc, "button", { type: "button", class: "danger" }, t("player.stop"));
-  const restartButton = h(doc, "button", { type: "button" }, t("player.restart"));
-  const previousButton = h(doc, "button", { type: "button" }, t("player.previous"));
-  const nextButton = h(doc, "button", { type: "button" }, t("player.next"));
+  const playButton = h(doc, "button", { type: "button", class: "primary", "data-ui": "play-button" });
+  const liveBadge = h(doc, "span", { class: "live-badge", "data-ui": "live-badge" }, t("player.live"));
+  const stopButton = h(doc, "button", { type: "button", class: "danger", "data-ui": "stop-button" }, t("player.stop"));
+  const restartButton = h(doc, "button", { type: "button", "data-ui": "restart-button" }, t("player.restart"));
+  const previousButton = h(doc, "button", { type: "button", "data-ui": "previous-button" }, t("player.previous"));
+  const nextButton = h(doc, "button", { type: "button", "data-ui": "next-button" }, t("player.next"));
   const speedButtons = player.speeds.map((speed) =>
     h(doc, "button", { type: "button", "data-speed": speed }, t("player.speedOption", { speed })),
   );
-  const speedGroup = h(doc, "div", { class: "speed", role: "group", "aria-label": t("player.speedLabel") }, ...speedButtons);
-  const range = h(doc, "input", { type: "range", min: 0, max: events.length, step: 1, value: 0, "aria-label": t("player.progress") });
-  const status = h(doc, "div", { class: "status", "aria-live": "polite" });
-  const banners = h(doc, "div", { class: "banners" });
-  const chips = h(doc, "div", { class: "chips", role: "list", "aria-label": t("player.agents") });
+  const speedGroup = h(doc, "div", { class: "speed", "data-ui": "speed-buttons", role: "group", "aria-label": t("player.speedLabel") }, ...speedButtons);
+  const range = h(doc, "input", { type: "range", "data-ui": "player-slider", min: 0, max: events.length, step: 1, value: 0, "aria-label": t("player.progress") });
+  const status = h(doc, "div", { class: "status", "data-ui": "player-status", "aria-live": "polite" });
+  const banners = h(doc, "div", { class: "banners", "data-ui": "run-banners" });
+  const chips = h(doc, "div", { class: "chips", "data-ui": "agent-cards", role: "list", "aria-label": t("player.agents") });
   const tabButtons = ["steps", "messages", "output"].map((name) => {
-    const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-tab": name }, t({ steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput" }[name]));
+    const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-tab": name, "data-ui": `tab-${name}` }, t({ steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput" }[name]));
     button.addEventListener("click", () => {
       ui.tab = name;
       ui.follow = false;
@@ -81,16 +81,16 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
     });
     return button;
   });
-  const tabs = h(doc, "div", { class: "tabs", role: "tablist" }, ...tabButtons);
-  const body = h(doc, "div", { class: "inspect-body" });
+  const tabs = h(doc, "div", { class: "tabs", "data-ui": "inspector-tabs", role: "tablist" }, ...tabButtons);
+  const body = h(doc, "div", { class: "inspect-body", "data-ui": "inspector-body" });
 
   const root = h(
     doc,
     "section",
-    { class: "replay", "aria-label": t("player.title", { title }) },
+    { class: "replay", "data-ui": "player", "aria-label": t("player.title", { title }) },
     h(doc, "h2", {}, t("player.title", { title }), liveBadge),
     h(doc, "p", { class: "recorded" }, t("player.recordedWith", recordedWith)),
-    h(doc, "div", { class: "controls" }, playButton, stopButton, restartButton, previousButton, nextButton, speedGroup),
+    h(doc, "div", { class: "controls", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, speedGroup),
     range,
     status,
     banners,
@@ -122,11 +122,19 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
     state.order.forEach((id, i) => {
       const a = state.agents[id];
       if (i > 0) nodes.push(h(doc, "span", { class: "arrow", "aria-hidden": "true" }, "→"));
-      const tools = a.tools.length ? a.tools.join(", ") : t("insp.noTools");
+      const tools = a.tools.length
+        ? a.tools
+            .map((name) => {
+              const used = a.steps.filter((x) => x.kind === "tool" && x.tool === name).length;
+              if (used > 0) return `${name} ×${used}`;
+              return a.status === "done" ? `${name} (${t("insp.toolUnused")})` : name;
+            })
+            .join(", ")
+        : t("insp.noTools");
       const chip = h(
         doc,
         "button",
-        { type: "button", class: `ag${agent && agent.id === id ? " sel" : ""}`, role: "listitem", "data-status": a.status, "aria-pressed": String(agent?.id === id) },
+        { type: "button", class: `ag${agent && agent.id === id ? " sel" : ""}`, "data-ui": `agent-card-${id}`, role: "listitem", "data-status": a.status, "aria-pressed": String(agent?.id === id) },
         h(doc, "span", { class: "n" }, a.label),
         h(doc, "span", { class: "tl" }, tools),
         h(doc, "span", { class: `st ${a.status}` }, `${t(STATUS_KEY[a.status])}${a.ms ? ` · ${fmt(a.ms)}` : ""}`),
@@ -160,11 +168,11 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
       return button;
     });
     const head = h(doc, "p", { class: "agenthead" }, `${t("insp.stepsOf")} `, h(doc, "b", {}, agent.label), agent.model ? h(doc, "span", { class: "badge" }, agent.model) : "");
-    const left = h(doc, "div", {}, head, ...list);
+    const left = h(doc, "div", { "data-ui": "step-list" }, head, ...list);
     if (agent.status === "working") left.append(h(doc, "div", { class: "working" }, t("insp.working")));
 
     const step = agent.steps[selected];
-    const right = h(doc, "div", { class: "box" }, h(doc, "p", { class: "lb" }, t("insp.whatHappens")));
+    const right = h(doc, "div", { class: "box", "data-ui": "step-detail" }, h(doc, "p", { class: "lb" }, t("insp.whatHappens")));
     if (!step) {
       right.append(h(doc, "p", { class: "doc" }, t("insp.noSteps")));
     } else {
@@ -209,7 +217,7 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
   };
 
   function renderMessages(agent) {
-    const system = h(doc, "div", { class: "mc sysbox" }, h(doc, "span", { class: "lb" }, t("insp.sysPrompt")), h(doc, "div", { class: "pre" }, agent.system || "—"));
+    const system = h(doc, "div", { class: "mc sysbox", "data-ui": "system-prompt" }, h(doc, "span", { class: "lb" }, t("insp.sysPrompt")), h(doc, "div", { class: "pre" }, agent.system || "—"));
     if (agent.rounds.length === 0) return h(doc, "div", {}, agent.system ? system : "", h(doc, "p", { class: "doc" }, t("insp.noCalls")));
     const index = ui.round === null ? agent.rounds.length - 1 : Math.min(ui.round, agent.rounds.length - 1);
     const round = agent.rounds[index];
@@ -231,7 +239,7 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
       {},
       agent.system ? system : "",
       round.reconstructed ? h(doc, "p", { class: "hint" }, t("insp.reconstructed")) : "",
-      h(doc, "div", { class: "rounds" }, ...buttons, h(doc, "span", { class: "lb" }, `${t("insp.roundNote")}${round.ms != null ? ` · ${fmt(round.ms)}` : ""}`)),
+      h(doc, "div", { class: "rounds", "data-ui": "round-buttons" }, ...buttons, h(doc, "span", { class: "lb" }, `${t("insp.roundNote")}${round.ms != null ? ` · ${fmt(round.ms)}` : ""}`)),
       h(
         doc,
         "div",

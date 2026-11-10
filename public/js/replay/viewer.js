@@ -80,7 +80,7 @@ export function createViewer({ doc, t }) {
         bar.append(input, count);
       }
       fillBody();
-      return h(doc, "div", { class: "viewer" }, bar.children.length ? bar : "", bodyBox);
+      return h(doc, "div", { class: "viewer", "data-ui": "output-viewer" }, bar.children.length ? bar : "", bodyBox);
     },
   };
 }

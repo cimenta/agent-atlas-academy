@@ -60,3 +60,31 @@ test("runOutcomeMessageKey maps each outcome and falls back for an unknown one",
   assert.equal(runOutcomeMessageKey("weird"), "run.outcome.failed");
   assert.equal(runOutcomeMessageKey(undefined), "run.outcome.failed");
 });
+
+test("describeOutcome: finished passes, a requested stop or a limit warns, anything else fails", async () => {
+  const { describeOutcome } = await import("../public/js/create/create-model.js");
+  assert.equal(describeOutcome({ outcome: "finished", events: [] }).level, "ok");
+  assert.equal(describeOutcome({ outcome: "stopped_user", events: [] }).level, "warn");
+  assert.equal(describeOutcome({ outcome: "stopped_limit", events: [] }).level, "warn");
+  for (const outcome of ["failed", "interrupted", undefined, "nonsense"]) assert.equal(describeOutcome({ outcome, events: [] }).level, "fail");
+  assert.deepEqual(["ok", "warn", "fail"].map((l) => describeOutcome({ outcome: { ok: "finished", warn: "stopped_user", fail: "failed" }[l], events: [] }).icon), ["✓", "!", "✕"]);
+});
+
+test("describeOutcome takes the duration from the last event and the cost as given", async () => {
+  const { describeOutcome } = await import("../public/js/create/create-model.js");
+  const info = describeOutcome({ outcome: "finished", events: [{ t: 0 }, { t: 87800 }], cost: 0.0123 });
+  assert.equal(info.durationMs, 87800);
+  assert.equal(info.cost, 0.0123);
+  const none = describeOutcome({ outcome: "failed", events: [], cost: null });
+  assert.deepEqual([none.durationMs, none.cost], [null, null]);
+});
+
+test("formatDuration and formatUsd", async () => {
+  const { formatDuration, formatUsd } = await import("../public/js/create/create-model.js");
+  assert.equal(formatDuration(87800), "1 min 28 s");
+  assert.equal(formatDuration(5300), "5.3 s");
+  assert.equal(formatDuration(-1), "");
+  assert.equal(formatUsd(0.01234), "0.0123");
+  assert.equal(formatUsd(1.2345), "1.23");
+  assert.equal(formatUsd(null), "");
+});

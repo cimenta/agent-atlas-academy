@@ -120,7 +120,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       });
       return button;
     });
-    return h(doc, "section", { class: "editor-palette", "aria-label": t("editor.palette") }, h(doc, "h3", {}, t("editor.palette")), h(doc, "p", { class: "hint" }, t("editor.paletteHelp")), h(doc, "div", { class: "palette-list" }, ...buttons));
+    return h(doc, "section", { class: "editor-palette", "data-ui": "agent-palette", "aria-label": t("editor.palette") }, h(doc, "h3", {}, t("editor.palette")), h(doc, "p", { class: "hint" }, t("editor.paletteHelp")), h(doc, "div", { class: "palette-list" }, ...buttons));
   }
 
   function diagramBlock(design) {
@@ -140,7 +140,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       const ys = [...pos.values()].map((p) => p.y + BOX_H + 24);
       return { width: Math.max(CELL_W, ...xs), height: Math.max(CELL_H * 2, ...ys) };
     };
-    const area = h(doc, "div", { class: "diagram", role: "group", "aria-label": t("editor.diagram") });
+    const area = h(doc, "div", { class: "diagram", "data-ui": "diagram", role: "group", "aria-label": t("editor.diagram") });
     const wrap = h(doc, "div", { class: "diagram-wrap" }, area);
     const svg = doc.createElementNS(SVG_NS, "svg");
     svg.setAttribute("class", "diagram-arrows");

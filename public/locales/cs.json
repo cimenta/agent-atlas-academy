@@ -321,5 +321,12 @@
   "insp.doc.handoff": "Výstup jednoho agenta je přesně to, co dostane další agent jako první zprávu.",
   "kind.tool": "Nástroj",
   "insp.reconstructed": "Zrekonstruováno ze zaznamenaných kroků: tento běh byl uložen dřív, než se ukládaly přesné zprávy.",
-  "play.deleteConfirm": "Smazat tento běh? Nejde to vrátit zpět.\n\n{title}"
+  "play.deleteConfirm": "Smazat tento běh? Nejde to vrátit zpět.\n\n{title}",
+  "run.outcome.took": "Trvalo {time}",
+  "run.outcome.cost": "cena asi {usd} USD",
+  "run.outcome.costHint": "Odhad: počty tokenů hlásí poskytovatel, ceny jsou ceníkové. Přesnou částku ukazuje vaše konzole Anthropic.",
+  "run.outcome.icon.ok": "Prošlo",
+  "run.outcome.icon.warn": "Zastaveno",
+  "run.outcome.icon.fail": "Selhalo",
+  "insp.toolUnused": "nepoužit"
 }

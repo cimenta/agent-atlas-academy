@@ -10,22 +10,22 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
-  <header class="site-header">
+  <header class="site-header" data-ui="site-header">
     <div class="brand-block">
       <div class="brand-row">
-        <a class="brand" href="#/play">Agent Atlas</a>
-        <span id="version" class="version"></span>
+        <a class="brand" data-ui="brand" href="#/play">Agent Atlas</a>
+        <span id="version" class="version" data-ui="version"></span>
       </div>
       <p id="tagline" class="tagline"></p>
     </div>
     <button id="menu-toggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="menu">Menu</button>
-    <nav id="menu" class="menu" aria-label="Main"></nav>
-    <div id="language-switcher" class="language-switcher"></div>
+    <nav id="menu" class="menu" data-ui="menu" aria-label="Main"></nav>
+    <div id="language-switcher" class="language-switcher" data-ui="language-switcher"></div>
   </header>
-  <main id="main" class="main" tabindex="-1">
+  <main id="main" class="main" data-ui="main" tabindex="-1">
     <noscript><p>Agent Atlas needs JavaScript to show the replay and the articles.</p></noscript>
   </main>
-  <footer id="footer" class="site-footer"></footer>
+  <footer id="footer" class="site-footer" data-ui="footer"></footer>
   <script type="module" src="/js/main.js"></script>
 </body>
 </html>

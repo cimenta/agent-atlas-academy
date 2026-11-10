@@ -18,7 +18,7 @@ function tabBar(ctx, view) {
   return h(
     doc,
     "nav",
-    { class: "subtabs", "aria-label": t("play.tabs") },
+    { class: "subtabs", "data-ui": "play-tabs", "aria-label": t("play.tabs") },
     ...TABS.map((tab) => h(doc, "a", { href: tab.href, "aria-current": tab.view === active ? "page" : undefined }, t(tab.key))),
   );
 }
@@ -82,8 +82,8 @@ const rememberRun = (id) => {
 export async function renderReplayTab(ctx, requestedId) {
   const { doc, t } = ctx;
   setTitle(ctx, "");
-  const host = h(doc, "div", { class: "replay-host" });
-  const lists = h(doc, "div", { class: "run-lists" });
+  const host = h(doc, "div", { class: "replay-host", "data-ui": "player-host" });
+  const lists = h(doc, "div", { class: "run-lists", "data-ui": "run-lists" });
   const parts = landingParts(ctx);
   ctx.main.replaceChildren(...parts.head, host, lists, parts.body);
 
@@ -134,14 +134,14 @@ export async function renderReplayTab(ctx, requestedId) {
     };
     lists.replaceChildren(
       h(doc, "h2", {}, t("play.gallery")),
-      h(doc, "ul", { class: "run-list" }, ...shown.map((item) => row(item))),
+      h(doc, "ul", { class: "run-list", "data-ui": "run-list-gallery" }, ...shown.map((item) => row(item))),
       h(doc, "h2", {}, t("play.mine")),
       mine.length === 0
         ? h(doc, "p", { class: "notice" }, t("play.empty"))
         : h(
             doc,
             "ul",
-            { class: "run-list" },
+            { class: "run-list", "data-ui": "run-list-mine" },
             ...mine.map((item) =>
               row(item, async () => {
                 if (!doc.defaultView.confirm(t("play.deleteConfirm", { title: item.title }))) return;

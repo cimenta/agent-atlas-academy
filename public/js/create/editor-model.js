@@ -167,7 +167,7 @@ export function layoutDesign(design, { orientation = "vertical" } = {}) {
   const placed = [...spots.values()];
   const maxRank = placed.length ? Math.max(...placed.map((s) => s.rank)) : -1;
   const staged = nodes.filter((n) => !spots.has(n.id));
-  staged.forEach((n, offset) => spots.set(n.id, { rank: maxRank + 2, offset }));
+  staged.forEach((n, offset) => spots.set(n.id, { rank: maxRank < 0 ? 0 : maxRank + 2, offset }));
 
   const out = nodes.map((n) => {
     const { rank, offset } = spots.get(n.id);
