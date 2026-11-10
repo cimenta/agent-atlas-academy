@@ -252,7 +252,7 @@ export function renderCreate(ctx) {
     const host = h(doc, "div", { class: "replay-host", "data-ui": "player-host" });
     const after = h(doc, "div", { class: "run-after", "data-ui": "run-after" });
     root.replaceChildren(host, after);
-    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 60), recordedWith: { provider: "anthropic", model: firstModel.id }, t, doc, onStop: () => activeRun?.stop() });
+    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: draft.pattern, recordedWith: { provider: "anthropic", model: firstModel.id }, t, doc, onStop: () => activeRun?.stop() });
     ctx.onLeave(live.destroy);
 
     let ended = false;

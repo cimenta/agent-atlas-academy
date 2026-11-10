@@ -6,6 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Every replay shows its task as the heading (Replay: Explain why the sky is blue.) and a coloured tag with the pattern next to it. The demo on the home page plays again by itself five seconds after it finishes. The Home menu item is gone; the site name leads home.
 - Home page: the site name and a new Home menu item lead to a page with a simple recorded run that plays by itself and a short text on what the site is about. The Re-play tab no longer repeats the intro text.
 - Stage 3, Play tab: the Re-play, Create and Result tabs now sit in the site header with a library search box and a "load last opened" button next to them. Nothing is loaded in Re-play until you pick a run. The examples are now called the library.
 - Re-play shows the library as a pane next to the player (hide or show it with the ▤ button; the choice is remembered). Your runs come first, with an import icon to load a run from a JSON file; each run type has its own colour.

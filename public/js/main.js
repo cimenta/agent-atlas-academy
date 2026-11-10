@@ -72,7 +72,6 @@ let cleanups = [];
 const t = (key, params) => translator.t(key, params);
 
 const MENU = [
-  { route: "home", href: "#/", key: "menu.home" },
   { route: "play", href: "#/play", key: "menu.play" },
   { route: "learn", href: "#/learn", key: "menu.learn" },
   { route: "help", href: "#/help", key: "menu.help" },

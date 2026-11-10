@@ -39,15 +39,23 @@ function mountError(container, doc, t, errors) {
   return { destroy: () => container.replaceChildren() };
 }
 
+// The heading of a replay is the task the run was given (its first line), or the run's title.
+export function headingOf(run) {
+  const task = run.events.find((e) => e.type === "run_start")?.task;
+  const line = typeof task === "string" ? task.split(/\r?\n/)[0].trim() : "";
+  if (!line) return run.title;
+  return line.length > 120 ? `${line.slice(0, 117)}…` : line;
+}
+
 export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1 }) {
   const validation = validateRun(run);
   if (!validation.ok) return mountError(container, doc, t, validation.errors);
-  return mountView(container, { exportRun: run, events: run.events, title: run.title, recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false });
+  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false });
 }
 
 // A player that shows a run while it is still arriving. Events are added with append(), end() closes it.
-export function mountLiveReplay(container, { title, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {} }) {
-  const view = mountView(container, { events: [], title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop });
+export function mountLiveReplay(container, { title, pattern, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {} }) {
+  const view = mountView(container, { events: [], pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop });
   return {
     append: (event) => view.player.append(event),
     end: () => view.player.endLive(),
@@ -55,7 +63,7 @@ export function mountLiveReplay(container, { title, recordedWith, t, doc = docum
   };
 }
 
-function mountView(container, { exportRun, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop }) {
+function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop }) {
   const player = createPlayer({ events, clock, timeScale, live });
   const ui = { agent: null, tab: "steps", step: null, round: null, follow: true };
   const viewer = createViewer({ doc, t });
@@ -107,7 +115,13 @@ function mountView(container, { exportRun, events, title, recordedWith, explanat
     doc,
     "section",
     { class: "replay", "data-ui": "player", "aria-label": t("player.title", { title }) },
-    h(doc, "div", { class: "player-head", "data-ui": "player-head" }, h(doc, "h2", {}, t("player.title", { title }), liveBadge), exportButton),
+    h(
+      doc,
+      "div",
+      { class: "player-head", "data-ui": "player-head" },
+      h(doc, "div", { class: "player-title" }, h(doc, "h2", {}, t("player.title", { title }), liveBadge), pattern ? h(doc, "span", { class: `type-chip type-${pattern}`, "data-ui": "player-pattern" }, t(`pattern.${pattern}`)) : ""),
+      exportButton,
+    ),
     h(doc, "p", { class: "recorded" }, t("player.recordedWith", recordedWith)),
     h(doc, "div", { class: "controls", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, speedGroup),
     range,

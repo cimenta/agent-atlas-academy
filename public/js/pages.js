@@ -5,6 +5,7 @@ import { SECTION_ORDER, loadArticle, loadArticleIndex, loadPage } from "./conten
 import { mountReplay } from "./replay/view.js";
 
 const RUN_ID = /^[a-z0-9-]+$/;
+const LOOP_WAIT_MS = 5000;
 
 const markdown = (ctx, text) => renderBlocks(parseMarkdown(text), ctx.doc);
 const show = (ctx, ...nodes) => ctx.main.replaceChildren(...nodes);
@@ -75,6 +76,21 @@ export async function renderLanding(ctx) {
     }
     const handle = mountReplay(host, { run, explanations, t, doc, autoStart: ctx.autoStart, timeScale: first.timeScale });
     ctx.onLeave(handle.destroy);
+    // The demo plays again by itself, a few seconds after it has finished.
+    if (ctx.autoStart && handle.player) {
+      let timer;
+      const unsubscribe = handle.player.subscribe(() => {
+        if (!handle.player.finished || timer) return;
+        timer = setTimeout(() => {
+          timer = undefined;
+          if (handle.player.finished) handle.player.play();
+        }, LOOP_WAIT_MS);
+      });
+      ctx.onLeave(() => {
+        clearTimeout(timer);
+        unsubscribe();
+      });
+    }
   } catch {
     if (!ctx.isStale()) host.replaceChildren(h(doc, "p", { class: "notice", role: "alert" }, t("error.loadFailed")));
   }

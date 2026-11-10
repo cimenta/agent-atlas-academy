@@ -384,7 +384,6 @@
   "search.count": "{n} of {total}",
   "search.none": "No matches",
   "result.search": "Search the answer",
-  "menu.home": "Home",
   "landing.aboutTitle": "What is Agent Atlas?",
   "landing.aboutText": "A free site that shows how AI agents work, talk to each other and are organised. An agent is a language model with a role and, sometimes, tools. Orchestration decides who works when, what each agent sees and when to stop.",
   "landing.watch.title": "Watch",

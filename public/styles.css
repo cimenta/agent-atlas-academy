@@ -504,3 +504,5 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .about-box b { display: block; margin-bottom: 4px; }
 .home-task { margin: 0 0 8px; padding: 8px 12px; background: var(--surface); border-radius: 8px; font-size: 0.95rem; }
 .home-task .lb { font-weight: 600; }
+.player-title { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-width: 0; }
+.player-title h2 { overflow-wrap: anywhere; }

@@ -384,7 +384,6 @@
   "search.count": "{n} z {total}",
   "search.none": "Nic nenalezeno",
   "result.search": "Hledat v odpovědi",
-  "menu.home": "Domů",
   "landing.aboutTitle": "Co je Agent Atlas?",
   "landing.aboutText": "Bezplatný web, který ukazuje, jak AI agenti fungují, komunikují mezi sebou a jak se řídí. Agent je jazykový model s rolí a někdy i s nástroji. Orchestrace rozhoduje, kdo kdy pracuje, co každý agent vidí a kdy se skončí.",
   "landing.watch.title": "Sledujte",
