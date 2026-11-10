@@ -506,3 +506,6 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .home-task .lb { font-weight: 600; }
 .player-title { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-width: 0; }
 .player-title h2 { overflow-wrap: anywhere; }
+.create-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.create-head h2 { margin: 0; }
+.export-buttons { display: flex; flex-wrap: wrap; gap: 8px; }

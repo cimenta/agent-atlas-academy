@@ -6,6 +6,7 @@ import { createPlayer } from "./player.js";
 import { deriveInspector } from "./inspect-model.js";
 import { createViewer } from "./viewer.js";
 import { markText, searchBar } from "../text-search.js";
+import { definitionFromRun } from "../create/definition.js";
 import { downloadFile, safeFileName } from "../download.js";
 import { stepDetail } from "./step-detail.js";
 
@@ -69,10 +70,16 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   const viewer = createViewer({ doc, t });
   let state = deriveInspector(events, 0);
 
-  const exportButton = exportRun
+  const exportRunButton = exportRun
     ? h(doc, "button", { type: "button", class: "export-json", "data-ui": "export-json", title: t("player.exportHint") }, t("player.export"))
     : "";
-  if (exportRun) exportButton.addEventListener("click", () => downloadFile(doc, `${safeFileName(exportRun.id)}.json`, JSON.stringify(exportRun, null, 2), "application/json"));
+  if (exportRun) exportRunButton.addEventListener("click", () => downloadFile(doc, `${safeFileName(exportRun.id)}.json`, JSON.stringify(exportRun, null, 2), "application/json"));
+  const definition = exportRun ? definitionFromRun(exportRun) : null;
+  const exportDefinitionButton = definition
+    ? h(doc, "button", { type: "button", class: "export-json", "data-ui": "export-definition", title: t("player.exportDefinitionHint") }, t("player.exportDefinition"))
+    : "";
+  if (definition) exportDefinitionButton.addEventListener("click", () => downloadFile(doc, `${safeFileName(exportRun.id)}-definition.json`, JSON.stringify(definition, null, 2), "application/json"));
+  const exportButton = h(doc, "div", { class: "export-buttons" }, exportRunButton, exportDefinitionButton);
   const playButton = h(doc, "button", { type: "button", class: "primary", "data-ui": "play-button" });
   const liveBadge = h(doc, "span", { class: "live-badge", "data-ui": "live-badge" }, t("player.live"));
   const stopButton = h(doc, "button", { type: "button", class: "danger", "data-ui": "stop-button" }, t("player.stop"));

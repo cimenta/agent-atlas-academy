@@ -6,6 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Run definitions: Export definition (next to Export run, which used to be Export JSON) saves only the task and the design of a run, and Load definition on the Create tab fills the page from such a file so anyone can check it and press Run. The Create tab text now says orchestration pattern.
 - Every replay shows its task as the heading (Replay: Explain why the sky is blue.) and a coloured tag with the pattern next to it. The demo on the home page plays again by itself five seconds after it finishes. The Home menu item is gone; the site name leads home.
 - Home page: the site name and a new Home menu item lead to a page with a simple recorded run that plays by itself and a short text on what the site is about. The Re-play tab no longer repeats the intro text.
 - Stage 3, Play tab: the Re-play, Create and Result tabs now sit in the site header with a library search box and a "load last opened" button next to them. Nothing is loaded in Re-play until you pick a run. The examples are now called the library.

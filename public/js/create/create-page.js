@@ -12,6 +12,7 @@ import { createEditor } from "./editor-model.js";
 import { mountEditor } from "./editor-view.js";
 import { canRun, reviewSummary } from "./create-model.js";
 import { buildResultModel } from "../play-model.js";
+import { loadDefinition } from "./definition.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const LIMIT_FIELDS = [
@@ -67,7 +68,7 @@ export function renderCreate(ctx) {
   let activeRun = null;
   ctx.onLeave(() => activeRun?.stop());
 
-  function showForm(startNotice = "") {
+  function showForm(startNotice = "", noticeRole = "alert") {
     // Task.
     const taskInput = h(doc, "textarea", { id: "cr-task", rows: 4, maxlength: TASK_MAX_CHARS });
     taskInput.value = draft.task;
@@ -199,6 +200,27 @@ export function renderCreate(ctx) {
       );
     }
 
+    const definitionFile = h(doc, "input", { type: "file", accept: ".json,application/json", hidden: true, "data-ui": "definition-file" });
+    const loadButton = h(doc, "button", { type: "button", "data-ui": "load-definition", title: t("create.loadDefinitionHint") }, t("create.loadDefinition"));
+    loadButton.addEventListener("click", () => definitionFile.click());
+    definitionFile.addEventListener("change", async () => {
+      const file = definitionFile.files?.[0];
+      definitionFile.value = "";
+      if (!file) return;
+      const loaded = loadDefinition(await file.text());
+      if (!loaded.ok) {
+        const first = loaded.errors?.[0];
+        const detail = first ? ` ${t(`design.error.${first.code}`, first.params)}` : "";
+        showForm(`${t(`create.definition.${loaded.code}`)}${detail}`);
+        return;
+      }
+      draft.task = loaded.task;
+      draft.pattern = loaded.pattern;
+      draft.editor = loaded.editor;
+      const notes = loaded.notes.map((n) => t(`create.definition.note.${n}`)).join(" ");
+      showForm(`${t("create.definition.loaded")} ${notes}`.trim(), "status");
+    });
+
     taskInput.addEventListener("input", () => {
       draft.task = taskInput.value;
       updateCounter();
@@ -206,8 +228,8 @@ export function renderCreate(ctx) {
     });
 
     root.replaceChildren(
-      h(doc, "h2", {}, t("create.title")),
-      startNotice ? h(doc, "p", { class: "notice", role: "alert" }, startNotice) : "",
+      h(doc, "div", { class: "create-head" }, h(doc, "h2", {}, t("create.title")), loadButton, definitionFile),
+      startNotice ? h(doc, "p", { class: "notice", role: noticeRole }, startNotice) : "",
       h(doc, "div", { class: "field wide" }, h(doc, "label", { for: "cr-task" }, t("create.taskLabel")), taskInput, counter),
       h(doc, "h3", {}, t("create.patternHeading")),
       h(doc, "p", { class: "hint" }, t("create.patternHelp")),
