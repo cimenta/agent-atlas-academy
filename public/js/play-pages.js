@@ -10,6 +10,7 @@ import { createRunMenu } from "./replay/run-menu.js";
 import { definitionFromRun } from "./create/definition.js";
 import { downloadFile, safeFileName } from "./download.js";
 import { runForExport } from "./run-export.js";
+import { refreshResultTab } from "./tab-state.js";
 
 const TABS = [
   { view: "replay", href: "#/play", key: "play.tab.replay" },
@@ -29,7 +30,7 @@ const paneOpen = () => {
 const lib = { query: "", open: paneOpen() };
 
 // The tab bar lives in the site header, with the library search next to it.
-function tabBar(ctx, view, { onQuery, onToggle, intro } = {}) {
+function tabBar(ctx, view, { onQuery, onToggle, intro, resultOpen = false } = {}) {
   const { doc, t } = ctx;
   const slot = doc.getElementById("play-tabs");
   if (!slot) return;
@@ -38,7 +39,7 @@ function tabBar(ctx, view, { onQuery, onToggle, intro } = {}) {
     doc,
     "nav",
     { class: "play-tabs", "aria-label": t("play.tabs") },
-    ...TABS.map((tab) => h(doc, "a", { href: tab.href, "aria-current": tab.view === active ? "page" : undefined }, t(tab.key))),
+    ...TABS.map((tab) => h(doc, "a", { href: tab.href, "data-ui": `tab-${tab.view}`, "aria-current": tab.view === active ? "page" : undefined }, t(tab.key))),
   );
   const input = h(doc, "input", { type: "search", value: lib.query, placeholder: t("play.search"), "aria-label": t("play.searchLabel"), "data-ui": "library-search", autocomplete: "off" });
   const last = h(doc, "button", { type: "button", "data-ui": "load-last", title: t("play.loadLast"), "aria-label": t("play.loadLast") }, "↻");
@@ -77,6 +78,7 @@ function tabBar(ctx, view, { onQuery, onToggle, intro } = {}) {
   });
   slot.replaceChildren(...(intro?.length ? [h(doc, "div", { class: "play-intro", "data-ui": "play-intro" }, ...intro)] : []), nav, form);
   slot.hidden = false;
+  refreshResultTab(ctx, resultOpen);
 }
 
 // Draws the content area, then fills it. The tab bar is in the site header.
@@ -86,7 +88,7 @@ export async function renderPlay(ctx, route = { params: { view: "replay" } }) {
   const content = h(ctx.doc, "div", { class: "play-content" });
   ctx.main.replaceChildren(content);
   const inner = { ...ctx, main: content };
-  if (view !== "replay" && view !== "run") tabBar(ctx, view);
+  if (view !== "replay" && view !== "run") tabBar(ctx, view, { resultOpen: view === "result" && Boolean(id) });
   switch (view) {
     case "create":
       return renderCreate(inner);
@@ -233,6 +235,7 @@ export async function renderReplayTab(ctx, requestedId) {
       location.hash = "#/play";
       return;
     }
+    await refreshResultTab(ctx);
     await draw();
   };
 

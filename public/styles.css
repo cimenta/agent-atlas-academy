@@ -547,3 +547,5 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .about-description { margin: 8px 0; }
 .about-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .about-panel textarea { width: 100%; }
+.site-header .subtabs a.has-result { background: var(--done-bg); }
+.center-tip-link { margin: 8px 0 0; text-align: center; }

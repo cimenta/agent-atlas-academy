@@ -10,6 +10,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- The tooltip shown when a run ends has a link to the result, and the Result tab has a light green background whenever there is a result to see.
 - A third library run: the supervisor simple demo (Supervisor, Researcher, Writer) with an About text and explanations in English and Czech. The home page demo is now chosen by home true in runs/index.json (the sky is blue run) and no longer depends on the order of the list.
 - A second library run: the complex sequential demo (Planner, Researcher, Writer and two free agents, a Fact checker and an Editor), recorded in Czech and translated into English, with an About text and explanations in English and Czech.
 - The library's example is now a real recorded run: the sequential simple demo (Researcher, Writer, Critic) with an About text and explanations in English and Czech. It replaces the hand-made sample run.
