@@ -3,10 +3,11 @@
 import { h } from "../dom.js";
 import { validateRun } from "../run-schema.js";
 import { createPlayer } from "./player.js";
-import { deriveInspector } from "./inspect-model.js";
+import { debateProgress, deriveInspector } from "./inspect-model.js";
 import { createViewer } from "./viewer.js";
 import { markText, searchBar } from "../text-search.js";
 import { definitionFromRun } from "../create/definition.js";
+import { openInCreate } from "../create/draft.js";
 import { downloadFile, safeFileName } from "../download.js";
 import { stepDetail } from "./step-detail.js";
 import { createAboutPanel } from "./about.js";
@@ -100,6 +101,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
         getItems: () => [
           { ui: "run-about", label: t("player.about"), hint: t("player.aboutHint"), onClick: () => aboutPanel.toggle() },
           { ui: "export-json", label: t("player.export"), hint: t("player.exportHint"), onClick: () => downloadFile(doc, `${safeFileName(exportRun.id)}.json`, JSON.stringify(runForExport(exportRun), null, 2), "application/json") },
+          ...(definition ? [{ ui: "use-in-create", label: t("player.useInCreate"), hint: t("player.useInCreateHint"), onClick: () => openInCreate(doc, t, definition) }] : []),
           ...(definition ? [{ ui: "export-definition", label: t("player.exportDefinition"), hint: t("player.exportDefinitionHint"), onClick: () => downloadFile(doc, `${safeFileName(exportRun.id)}-definition.json`, JSON.stringify(definition, null, 2), "application/json") }] : []),
           ...(typeof onDelete === "function" ? [{ ui: "run-delete", label: t("play.delete"), hint: t("player.deleteHint"), danger: true, onClick: () => onDelete() }] : []),
         ],
@@ -350,7 +352,9 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     const parts = [t("player.step", { n: player.cursor, total: events.length })];
     if (state.tokens.input || state.tokens.output) parts.push(t("player.tokens", state.tokens));
     if (player.finished) parts.push(t("player.finished"));
-    status.textContent = parts.join(" · ");
+    const debate = debateProgress(events, player.cursor);
+    const roundBadge = debate ? h(doc, "span", { class: "round-badge", "data-ui": "debate-round" }, debate.verdict ? t("player.debateVerdict") : t("player.debateRound", { n: debate.round, total: debate.rounds })) : "";
+    status.replaceChildren(...(debate ? [roundBadge] : []), parts.join(" · "));
     for (const b of tabButtons) b.setAttribute("aria-selected", String(b.getAttribute("data-tab") === ui.tab));
     renderBanners();
     renderChips();

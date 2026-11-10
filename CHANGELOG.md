@@ -13,6 +13,9 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 ### Added
 
 - The tooltip shown when a run ends has a link to the result (and, when the run did not finish ok, stays on the screen with a Close button until you close it), and the Result tab has a light green background whenever there is a result to see, including a run opened from the library (the tab then leads to that run).
+- Use in Create: the run menu (player and library rows) has a new item that fills the Create tab with the run task and design, ready to change and run. It asks first if you already have work there.
+- Replay: a debate shows a clear Round n of N badge next to the step line (and Judge verdict once the judge speaks).
+- Replay: in a debate the agent cards list the debaters first and the judge last, so the arrows read debater to judge.
 - Debate diagram on the Create tab shows the turns: arrows between the debaters in turn order and a dashed arrow back to the first debater for the next round (when there is more than one round). They are drawn automatically; you still connect each debater to the judge.
 - A sixth library run: the complex parallel demo (Researcher and three free agents working at the same time, then Combiner, Critic and Writer in a chain), with an About text and explanations in English and Czech.
 - The tooltip shown when a run ends looks like one card: the message on top and, under a divider, a full-width See the result link (and Close button) as a footer.

@@ -11,6 +11,7 @@ import { startRun, RunStartError } from "../run-client.js";
 import { mountLiveReplay } from "../replay/view.js";
 import { createBatchedSaver } from "../storage/runs-store.js";
 import { createEditor } from "./editor-model.js";
+import { draft } from "./draft.js";
 import { mountEditor } from "./editor-view.js";
 import { canRun, reviewSummary } from "./create-model.js";
 import { buildResultModel } from "../play-model.js";
@@ -23,8 +24,6 @@ const LIMIT_FIELDS = [
   ["maxSearches", "settings.limitSearches"],
 ];
 
-// Kept while the app is open, so a language switch or a visit to another tab does not lose the diagram.
-const draft = { task: "", pattern: "sequential", editor: createEditor("sequential"), limits: null };
 
 function patternIcon(doc, pattern) {
   const svg = doc.createElementNS(SVG_NS, "svg");

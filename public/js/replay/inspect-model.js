@@ -16,6 +16,12 @@ function agentIds(events) {
       add(e.to);
     }
   }
+  // In a debate the judge comes in after the first debater's turn, but it speaks last: keep it at the end of the row.
+  const design = events.find((e) => e.type === "run_start")?.design;
+  if (design?.pattern === "debate") {
+    const judges = new Set((design.nodes ?? []).filter((n) => n.agent === "judge").map((n) => n.id));
+    return [...seen.filter((id) => !judges.has(id)), ...seen.filter((id) => judges.has(id))];
+  }
   return seen;
 }
 
@@ -198,4 +204,18 @@ function reconstruct(agent, task) {
     outCut: summary.cut,
     eventIndex: agent.firstIndex ?? 0,
   });
+}
+
+// Where a debate stands at the cursor: which round the debaters are in, or that the judge is speaking.
+// Null for runs that are not debates. Each debater turn starts with an agent_start event.
+export function debateProgress(events, cursor) {
+  const design = events.find((e) => e.type === "run_start")?.design;
+  if (design?.pattern !== "debate" || !Number.isInteger(design.rounds)) return null;
+  const debaters = new Set(design.nodes.filter((n) => n.agent === "debater").map((n) => n.id));
+  const judges = new Set(design.nodes.filter((n) => n.agent === "judge").map((n) => n.id));
+  if (debaters.size === 0) return null;
+  const seen = events.slice(0, cursor).filter((e) => e.type === "agent_start");
+  if (seen.some((e) => judges.has(e.agent))) return { verdict: true, rounds: design.rounds };
+  const turns = seen.filter((e) => debaters.has(e.agent)).length;
+  return { verdict: false, round: Math.min(design.rounds, Math.max(1, Math.ceil(turns / debaters.size))), rounds: design.rounds };
 }

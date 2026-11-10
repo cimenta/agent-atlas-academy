@@ -124,3 +124,28 @@ test("a reconstructed model step completes when the agent answered and has the a
   assert.equal(s.agents.planner.steps[0].at, 3);
   assert.equal(s.agents.planner.steps[0].text, "a plan");
 });
+
+test("in a debate the judge is listed after all the debaters, although it is first handed a turn early", () => {
+  const design = { pattern: "debate", rounds: 1, nodes: [{ id: "d1", agent: "debater" }, { id: "j", agent: "judge" }, { id: "d2", agent: "debater" }], edges: [] };
+  const debate = [
+    { t: 0, type: "run_start", task: "x", pattern: "debate", design },
+    { t: 1, type: "agent_start", agent: "d1", role: "Debater", model: "m", tools: [] },
+    { t: 2, type: "handoff", from: "d1", to: "j", note: "a" },
+    { t: 3, type: "agent_start", agent: "d2", role: "Debater", model: "m", tools: [] },
+    { t: 4, type: "handoff", from: "d2", to: "j", note: "b" },
+    { t: 5, type: "agent_start", agent: "j", role: "Judge", model: "m", tools: [] },
+  ];
+  assert.deepEqual(deriveInspector(debate, 6).order, ["d1", "d2", "j"]);
+});
+
+test("debateProgress says which round a debate is in, then that the judge speaks", async () => {
+  const { debateProgress } = await import("../public/js/replay/inspect-model.js");
+  const design = { pattern: "debate", rounds: 2, nodes: [{ id: "a", agent: "debater" }, { id: "b", agent: "debater" }, { id: "j", agent: "judge" }], edges: [] };
+  const ev = [{ type: "run_start", design }, ...["a", "b", "a", "b", "j"].map((agent) => ({ type: "agent_start", agent }))];
+  assert.deepEqual(debateProgress(ev, 0), { verdict: false, round: 1, rounds: 2 });
+  assert.equal(debateProgress(ev, 2).round, 1);
+  assert.equal(debateProgress(ev, 4).round, 2);
+  assert.equal(debateProgress(ev, 5).round, 2);
+  assert.equal(debateProgress(ev, 6).verdict, true);
+  assert.equal(debateProgress([{ type: "run_start", design: { pattern: "parallel", nodes: [] } }], 1), null);
+});

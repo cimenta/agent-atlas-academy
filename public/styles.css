@@ -549,3 +549,5 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .center-tip-link a::after { content: " \2192"; }
 .center-tip-link a:hover, .center-tip-link a:focus-visible { text-decoration: underline; }
 .center-tip-close { display: block; width: 100%; margin: 0; border: 0; border-top: 1px solid var(--border); border-radius: 0; background: var(--surface); padding: 10px 16px; }
+
+.round-badge { display: inline-block; margin-right: 10px; padding: 3px 12px; font-size: 0.9rem; font-weight: 700; color: var(--accent); background: var(--accent-bg); border: 1px solid var(--accent-line); border-radius: 999px; }
