@@ -99,3 +99,15 @@ test("every definition file in demo-definitions loads", async () => {
   const files = existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(".json")) : [];
   for (const f of files) assert.equal(loadDefinition(readFileSync(new URL(f, dir), "utf8")).ok, true, f);
 });
+
+test("a critic that adds its notes to the previous output keeps that setting through a definition", () => {
+  const editor = createEditor("sequential");
+  const a = editor.addNode("researcher").id;
+  const b = editor.addNode("critic", { addToPrevious: true }).id;
+  editor.connect(a, b);
+  const design = editor.design();
+  const def = buildDefinition({ task: "t", design });
+  const loaded = loadDefinition(JSON.stringify(def));
+  assert.equal(loaded.ok, true);
+  assert.equal(loaded.editor.design().nodes[1].addToPrevious, true);
+});

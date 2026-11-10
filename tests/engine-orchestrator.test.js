@@ -122,6 +122,40 @@ test("agents after the combiner work in order on the combined answer", async () 
   assert.deepEqual(events.filter((e) => e.type === "handoff").map((e) => `${e.from}>${e.to}`).slice(-2), ["combiner>critic", "critic>writer"]);
 });
 
+test("a sequential critic with addToPrevious passes on the previous text and its own notes", async () => {
+  const design = {
+    pattern: "sequential",
+    nodes: [node("researcher", "researcher"), node("critic", "critic", { addToPrevious: true }), node("writer", "writer")],
+    edges: [edge("researcher", "critic"), edge("critic", "writer")],
+  };
+  const { call, calls } = byRole({ researcher: "FACTS-TEXT", critic: "NOTES-TEXT", writer: "FINAL-TEXT" });
+  const { result } = await run(design, call);
+  assert.equal(result.outcome, "finished");
+  const writerInput = calls.find((c) => roleOf(c.body) === "writer").body.messages[0].content;
+  assert.ok(writerInput.includes("FACTS-TEXT") && writerInput.includes("NOTES-TEXT"));
+  // as the last agent, the critic's result is the previous text followed by its notes
+  const last = { ...design, nodes: [design.nodes[0], design.nodes[1]], edges: [design.edges[0]] };
+  const second = await run(last, byRole({ researcher: "FACTS-TEXT", critic: "NOTES-TEXT" }).call);
+  assert.ok(second.result.finalText.startsWith("FACTS-TEXT") && second.result.finalText.endsWith("NOTES-TEXT"));
+  // without the option only the critic's notes are passed on
+  const plain = structuredClone(design);
+  delete plain.nodes[1].addToPrevious;
+  const third = byRole({ researcher: "FACTS-TEXT", critic: "NOTES-TEXT", writer: "FINAL-TEXT" });
+  await run(plain, third.call);
+  const plainInput = third.calls.find((c) => roleOf(c.body) === "writer").body.messages[0].content;
+  assert.ok(plainInput.includes("NOTES-TEXT") && !plainInput.includes("FACTS-TEXT"));
+});
+
+test("a critic after the combiner with addToPrevious adds its notes to the combined answer", async () => {
+  const design = fan();
+  design.nodes.push(node("critic", "critic", { addToPrevious: true }), node("writer", "writer"));
+  design.edges.push(edge("combiner", "critic"), edge("critic", "writer"));
+  const { call, calls } = byRole({ combiner: "COMBINED-TEXT", critic: "NOTES-TEXT", writer: "FINAL-TEXT" });
+  await run(design, call);
+  const writerInput = calls.find((c) => roleOf(c.body) === "writer").body.messages[0].content;
+  assert.ok(writerInput.includes("COMBINED-TEXT") && writerInput.includes("NOTES-TEXT"));
+});
+
 test("an invalid design fails at once and calls nothing", async () => {
   let calls = 0;
   const { result, events } = await run({ pattern: "sequential", nodes: [], edges: [] }, async () => {

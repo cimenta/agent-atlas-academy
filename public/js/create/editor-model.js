@@ -4,7 +4,7 @@ import { AGENT_TYPES, DEFAULT_MODEL, NODE_MAX } from "../engine/catalog.js";
 import { validateDesign } from "../engine/patterns.js";
 
 const ONCE_ONLY = new Set(["supervisor", "combiner", "judge"]);
-const EDITABLE = ["model", "search", "name", "instructions", "stance"];
+const EDITABLE = ["model", "search", "name", "instructions", "stance", "addToPrevious"];
 const DEFAULT_ROUNDS = 2;
 
 export function createEditor(initialPattern) {

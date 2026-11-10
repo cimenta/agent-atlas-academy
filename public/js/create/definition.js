@@ -68,6 +68,7 @@ export function loadDefinition(text) {
       }
     }
     if (typeof node.search === "boolean") overrides.search = node.search;
+    if (node.addToPrevious === true) overrides.addToPrevious = true;
     for (const key of ["name", "instructions", "stance"]) if (typeof node[key] === "string") overrides[key] = node[key];
     const added = editor.addNode(node.agent, overrides);
     if (!added.ok) return fail("invalid", [{ code: added.code }]);

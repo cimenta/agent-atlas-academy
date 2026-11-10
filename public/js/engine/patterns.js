@@ -53,6 +53,8 @@ export function validateDesign(design) {
     }
     if (typeof node.search !== "boolean") add("node.search", { id: node.id });
     if (node.stance !== undefined && node.stance !== "for" && node.stance !== "against") add("node.stance", { id: node.id });
+    // Only a critic in a chain can add its notes to the output of the agent before it.
+    if (node.addToPrevious !== undefined && !(node.addToPrevious === true && node.agent === "critic" && (pattern === "sequential" || pattern === "parallel"))) add("node.addToPrevious", { id: node.id });
   }
 
   const goodEdges = [];

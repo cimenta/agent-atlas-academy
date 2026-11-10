@@ -135,6 +135,21 @@ test("settings: defaults when empty, clamped when out of range, defaults when ma
   assert.deepEqual(settings.get().limits, LIMIT_DEFAULTS);
 });
 
+test("settings: tooltips are on by default, can be turned off, and keep the limits", () => {
+  const data = new Map();
+  const storage = { getItem: (k) => data.get(k) ?? null, setItem: (k, v) => data.set(k, v) };
+  const settings = createSettingsStore(storage);
+  assert.equal(settings.get().tooltips, true);
+  settings.setLimits({ maxSteps: 5, maxTokens: 1000, maxSearches: 1 });
+  settings.setTooltips(false);
+  assert.equal(settings.get().tooltips, false);
+  assert.equal(settings.get().limits.maxSteps, 5);
+  settings.setLimits({ maxSteps: 6, maxTokens: 1000, maxSearches: 1 });
+  assert.equal(settings.get().tooltips, false);
+  settings.setTooltips(true);
+  assert.equal(settings.get().tooltips, true);
+});
+
 test("settings: does not throw when storage throws", () => {
   const storage = {
     getItem: () => {

@@ -529,3 +529,7 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 :root { --free-bg: #a9cdf0; --free-line: #5f9bd6; }
 @media (prefers-color-scheme: dark) { :root { --free-bg: #2c5080; --free-line: #5b8fc7; } }
 .dnode-port.free:not([aria-pressed="true"]) { background: var(--free-bg); border-left-color: var(--free-line); }
+
+/* Tooltip shown in the middle of the screen */
+.center-tip { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; max-width: min(32rem, calc(100vw - 32px)); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); border-radius: var(--radius); background: var(--card, #fff); }
+.center-tip .notice { margin: 0; }

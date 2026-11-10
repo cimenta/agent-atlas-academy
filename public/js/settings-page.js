@@ -27,7 +27,7 @@ export function renderSettings(ctx) {
   const refreshStatus = () => {
     const available = vault.getSessionKey() !== null;
     status.textContent = available
-      ? t("settings.keyAvailable")
+      ? t(vault.hasStoredKey() ? "settings.keyAvailableSaved" : "settings.keyAvailable")
       : vault.hasStoredKey()
         ? t("settings.keyLocked")
         : t("settings.keyNone");
@@ -126,6 +126,14 @@ export function renderSettings(ctx) {
     input.dataset.key = key;
     input.labelKey = labelKey;
     return input;
+  });
+
+  // Tooltips.
+  const tipsBox = h(doc, "input", { id: "set-tooltips", type: "checkbox" });
+  tipsBox.checked = !settings.get().tooltips;
+  tipsBox.addEventListener("change", () => {
+    settings.setTooltips(!tipsBox.checked);
+    say(t(tipsBox.checked ? "settings.tooltipsOff" : "settings.tooltipsOn"));
   });
 
   // Local data.
@@ -240,6 +248,14 @@ export function renderSettings(ctx) {
       h(doc, "h2", {}, t("settings.limitsHeading")),
       h(doc, "p", {}, t("settings.limitsIntro")),
       ...limitInputs.map((input) => field(input.id, t(input.labelKey), input)),
+    ),
+    h(
+      doc,
+      "section",
+      { class: "settings-section" },
+      h(doc, "h2", {}, t("settings.tooltipsHeading")),
+      h(doc, "p", {}, t("settings.tooltipsIntro")),
+      h(doc, "div", { class: "field checkbox" }, tipsBox, h(doc, "label", { for: "set-tooltips" }, t("settings.tooltipsLabel"))),
     ),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.dataHeading")), h(doc, "p", {}, t("settings.dataIntro")), deleteButton, confirmBox, h(doc, "h3", {}, t("settings.backupHeading")), h(doc, "p", {}, t("settings.backupIntro")), h(doc, "div", { class: "field checkbox" }, includeKey, h(doc, "label", { for: "set-include-key" }, t("settings.includeKey"))), exportButton, field("set-import", t("settings.importLabel"), importFile), importProblems, importChoice),
   );

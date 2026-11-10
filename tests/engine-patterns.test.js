@@ -229,3 +229,19 @@ test("limit constants match the plan", () => {
   assert.deepEqual(LIMIT_DEFAULTS, { maxSteps: 20, maxTokens: 40000, maxSearches: 3 });
   assert.deepEqual(LIMIT_MAX, { maxSteps: 60, maxTokens: 150000, maxSearches: 10 });
 });
+
+test("addToPrevious is allowed only on a critic in a sequential or parallel design", () => {
+  const seq = sequential();
+  seq.nodes[2].addToPrevious = true;
+  assert.equal(validateDesign(seq).ok, true);
+  const notCritic = sequential();
+  notCritic.nodes[3].addToPrevious = true;
+  assert.deepEqual(codes(validateDesign(notCritic)), ["node.addToPrevious"]);
+  const notBoolean = sequential();
+  notBoolean.nodes[2].addToPrevious = "yes";
+  assert.deepEqual(codes(validateDesign(notBoolean)), ["node.addToPrevious"]);
+  const sup = supervisor();
+  sup.nodes.push(node("critic", "critic", { addToPrevious: true }));
+  sup.edges.push(edge("supervisor", "critic"));
+  assert.deepEqual(codes(validateDesign(sup)), ["node.addToPrevious"]);
+});

@@ -12,16 +12,23 @@ export function createSettingsStore(storage) {
     } catch {
       stored = {};
     }
-    return { limits: clampLimits(stored?.limits) };
+    // Tooltips are on unless the user turned them off.
+    return { limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false };
+  }
+  function save(next) {
+    try {
+      storage.setItem(KEY, JSON.stringify(next));
+    } catch {
+      // the setting just does not persist
+    }
   }
   return {
     get,
     setLimits(limits) {
-      try {
-        storage.setItem(KEY, JSON.stringify({ limits: clampLimits(limits) }));
-      } catch {
-        // the setting just does not persist
-      }
+      save({ ...get(), limits: clampLimits(limits) });
+    },
+    setTooltips(on) {
+      save({ ...get(), tooltips: on !== false });
     },
   };
 }

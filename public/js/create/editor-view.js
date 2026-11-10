@@ -442,6 +442,14 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       });
       parts.push(field("ed-name", t("editor.name"), name), field("ed-instructions", t("editor.instructions"), instructions));
     }
+    if (node.agent === "critic" && (design.pattern === "sequential" || design.pattern === "parallel")) {
+      const adds = h(doc, "input", { id: "ed-add-previous", type: "checkbox", checked: node.addToPrevious === true });
+      adds.addEventListener("change", () => {
+        editor.setNode(node.id, { addToPrevious: adds.checked ? true : undefined });
+        changed();
+      });
+      parts.push(h(doc, "div", { class: "field checkbox" }, adds, h(doc, "label", { for: "ed-add-previous" }, t("editor.addToPrevious"))), h(doc, "p", { class: "hint" }, t("editor.addToPreviousHelp")));
+    }
     if (node.agent === "debater") {
       const stance = h(doc, "select", { id: "ed-stance" }, ...["", "for", "against"].map((s) => h(doc, "option", { value: s, selected: (node.stance ?? "") === s }, t(`editor.stance.${s || "none"}`))));
       stance.addEventListener("change", () => {

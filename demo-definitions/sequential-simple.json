@@ -21,7 +21,8 @@
         "id": "critic",
         "agent": "critic",
         "model": "fast",
-        "search": false
+        "search": false,
+        "addToPrevious": true
       }
     ],
     "edges": [

@@ -2,6 +2,7 @@
 import { h } from "../dom.js";
 import { downloadFile } from "../download.js";
 import { outcomeNotice } from "../outcome-view.js";
+import { showCenterTip } from "../center-tip.js";
 import { MODELS, TASK_MAX_CHARS, LIMIT_MAX } from "../engine/catalog.js";
 import { PATTERNS, clampLimits } from "../engine/patterns.js";
 import { buildRunRecord, makeRunId } from "../engine/run-record.js";
@@ -301,6 +302,10 @@ export function renderCreate(ctx) {
       const done = events.at(-1);
       const notice = outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: buildResultModel(finalRecord).cost });
       notice.id = "run-outcome";
+      if (ctx.settings.get().tooltips) {
+        const tip = showCenterTip({ doc, content: outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: buildResultModel(finalRecord).cost }) });
+        ctx.onLeave(tip.close);
+      }
       const children = [notice];
       if (result.ok) children.push(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${id}` }, t("create.seeResult"))));
       else children.push(h(doc, "p", { class: "notice", role: "alert" }, t("create.saveFailed")), downloadButton(ctx, finalRecord));

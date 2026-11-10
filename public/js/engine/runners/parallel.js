@@ -26,7 +26,9 @@ export async function run({ design, task, agents, emit }) {
         ? `The combined answer:\n${previous.text}`
         : `The combined answer:\n${merged.text}\n\nThe previous agent (${previous.id}) wrote:\n${previous.text}`;
     const result = await agents.get(id).run(`Task: ${task}\n\n${seen}`);
-    previous = { id, text: result.text };
+    // A critic can add its notes to what the agent before it wrote, so the next agent gets both.
+    const adds = design.nodes.find((n) => n.id === id)?.addToPrevious === true;
+    previous = { id, text: adds ? `${previous.text}\n\n--- ${id} ---\n${result.text}` : result.text };
   }
   return previous.text;
 }

@@ -11,7 +11,9 @@ export async function run({ design, task, agents, emit }) {
       ? `Task: ${task}\n\nThe previous agent (${previous.id}) wrote:\n${previous.text}`
       : `Task: ${task}`;
     const result = await agents.get(id).run(input);
-    previous = { id, text: result.text };
+    // A critic can add its notes to what the agent before it wrote, so the next agent gets both.
+    const adds = previous && design.nodes.find((n) => n.id === id)?.addToPrevious === true;
+    previous = { id, text: adds ? `${previous.text}\n\n--- ${id} ---\n${result.text}` : result.text };
   }
   return previous ? previous.text : "";
 }

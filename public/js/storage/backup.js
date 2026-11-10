@@ -73,6 +73,7 @@ export async function applyBackup(backup, { runStore, settingsStore, vault, mode
     else failed += 1;
   }
   if (isObject(backup.settings?.limits)) settingsStore.setLimits(backup.settings.limits);
+  if (typeof backup.settings?.tooltips === "boolean") settingsStore.setTooltips(backup.settings.tooltips);
   if (backup.vault && (mode === "replace" || !vault.hasStoredKey())) vault.importRecord(backup.vault);
   return { added, skipped, failed };
 }

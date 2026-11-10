@@ -337,3 +337,15 @@ test("with nothing connected yet the first node sits in the first cell, not one 
   assert.deepEqual(layoutDesign(design, { orientation: "horizontal" }).nodes, [{ id: "planner", x: 0, y: 0 }]);
   assert.deepEqual(layoutDesign(design, { orientation: "vertical" }).nodes, [{ id: "planner", x: 0, y: 0 }]);
 });
+
+test("a critic can be set to add its notes to the previous agent's output", () => {
+  const editor = createEditor("sequential");
+  const a = editor.addNode("researcher").id;
+  const b = editor.addNode("critic", { addToPrevious: true }).id;
+  editor.connect(a, b);
+  assert.equal(editor.design().nodes[1].addToPrevious, true);
+  assert.equal(validateDesign(editor.design()).ok, true);
+  editor.setNode(b, { addToPrevious: undefined });
+  assert.equal(editor.design().nodes[1].addToPrevious, undefined);
+  assert.equal(validateDesign(editor.design()).ok, true);
+});
