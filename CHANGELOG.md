@@ -13,6 +13,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 ### Added
 
 - The tooltip shown when a run ends has a link to the result (and, when the run did not finish ok, stays on the screen with a Close button until you close it), and the Result tab has a light green background whenever there is a result to see, including a run opened from the library (the tab then leads to that run).
+- Replay: agent names (and their numbers) are set from the start of the run and no longer change or lose their number when an agent becomes active; the Round n of N badge for a debate and the Use in Create menu item now have their texts (they showed the raw key).
+- A debater has a Name setting. The name shows in the diagram, the run and Replay, and the debater is told it in its instructions.
 - Agents of the same type are numbered (Debater 1, Debater 2) in the Create diagram, in new runs and in Replay of older runs, so two debaters can be told apart.
 - Use in Create: the run menu (player and library rows) has a new item that fills the Create tab with the run task and design, ready to change and run. It asks first if you already have work there.
 - Replay: a debate shows a clear Round n of N badge next to the step line (and Judge verdict once the judge speaks).

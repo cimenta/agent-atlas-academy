@@ -11,7 +11,7 @@ export async function run({ design, task, agents, emit }) {
     for (const debater of debaters) {
       const input = `Task: ${task}\n\nThe debate so far:\n${transcriptText(turns)}\n\nGive your argument now.`;
       const result = await agents.get(debater.id).run(input);
-      turns.push({ id: debater.id, text: result.text });
+      turns.push({ id: debater.name?.trim() || debater.id, text: result.text });
       emit({ type: "handoff", from: debater.id, to: judge.id, note: result.text.slice(0, NOTE_MAX) });
     }
   }

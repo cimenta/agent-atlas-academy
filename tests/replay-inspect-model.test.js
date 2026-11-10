@@ -149,3 +149,15 @@ test("debateProgress says which round a debate is in, then that the judge speaks
   assert.equal(debateProgress(ev, 6).verdict, true);
   assert.equal(debateProgress([{ type: "run_start", design: { pattern: "parallel", nodes: [] } }], 1), null);
 });
+
+test("agent names come from the run design from the start and do not change when an agent becomes active", () => {
+  const design = { pattern: "debate", rounds: 1, nodes: [{ id: "debater", agent: "debater" }, { id: "debater-2", agent: "debater" }, { id: "judge", agent: "judge" }], edges: [] };
+  const ev = [
+    { t: 0, type: "run_start", task: "x", design },
+    { t: 1, type: "agent_start", agent: "debater", role: "Debater", model: "m", tools: [] },
+  ];
+  for (const cursor of [1, 2]) {
+    const s = deriveInspector(ev, cursor);
+    assert.deepEqual(s.order.map((id) => s.agents[id].label), ["Debater 1", "Debater 2", "Judge"].slice(0, s.order.length));
+  }
+});

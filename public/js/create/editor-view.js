@@ -487,6 +487,13 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       parts.push(h(doc, "div", { class: "field checkbox" }, adds, h(doc, "label", { for: "ed-add-previous" }, t("editor.addToPrevious"))), h(doc, "p", { class: "hint" }, t("editor.addToPreviousHelp")));
     }
     if (node.agent === "debater") {
+      const debaterName = h(doc, "input", { id: "ed-name", type: "text", maxlength: 40, value: node.name ?? "" });
+      debaterName.addEventListener("input", () => {
+        editor.setNode(node.id, { name: debaterName.value });
+        onChange();
+      });
+      debaterName.addEventListener("change", () => draw());
+      parts.push(field("ed-name", t("editor.name"), debaterName));
       const stance = h(doc, "select", { id: "ed-stance" }, ...["", "for", "against"].map((s) => h(doc, "option", { value: s, selected: (node.stance ?? "") === s }, t(`editor.stance.${s || "none"}`))));
       stance.addEventListener("change", () => {
         editor.setNode(node.id, { stance: stance.value === "" ? undefined : stance.value });

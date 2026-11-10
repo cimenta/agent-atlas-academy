@@ -20,7 +20,7 @@ Reply with JSON only, in one of these two forms:
 export function roleText(node) {
   if (node.agent === "supervisor") return SUPERVISOR;
   if (node.agent === "debater") {
-    return `You are a Debater and your position is "${node.stance ?? "for"}". Argue your side in one short paragraph. When you can see the other side's points, answer them.`;
+    return `You are a Debater${node.name?.trim() ? ` called ${node.name.trim()}` : ""} and your position is "${node.stance ?? "for"}". Argue your side in one short paragraph. When you can see the other side's points, answer them.`;
   }
   if (node.agent === "free") {
     const name = node.name ? node.name : "a free agent";

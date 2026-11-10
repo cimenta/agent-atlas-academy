@@ -1,8 +1,11 @@
-// The name an agent is shown with. A free agent shows the name it was given. Agents of the same type
+// The name an agent is shown with. A free agent or a debater shows the name it was given. Agents of the same type
 // are numbered in the order they are in the design (Debater 1, Debater 2), so they can be told apart.
+const CAN_BE_NAMED = new Set(["free", "debater"]);
+const givenName = (node) => (CAN_BE_NAMED.has(node.agent) && typeof node.name === "string" ? node.name.trim() : "");
+
 export function agentLabel(node, design, baseLabel) {
-  if (node.agent === "free" && node.name) return node.name;
-  const same = Array.isArray(design?.nodes) ? design.nodes.filter((n) => n.agent === node.agent && !(n.agent === "free" && n.name)) : [];
+  if (givenName(node)) return givenName(node);
+  const same = Array.isArray(design?.nodes) ? design.nodes.filter((n) => n.agent === node.agent && !givenName(n)) : [];
   if (same.length < 2) return baseLabel;
   return `${baseLabel} ${same.findIndex((n) => n.id === node.id) + 1}`;
 }

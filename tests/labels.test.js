@@ -28,3 +28,10 @@ test("an older run with two agents both called Debater shows Debater 1 and Debat
   const s = deriveInspector(events, 3);
   assert.deepEqual(s.order.map((id) => s.agents[id].label), ["Debater 1", "Debater 2"]);
 });
+
+test("a debater shows the name it was given and the others are numbered among themselves", () => {
+  const d = { nodes: [{ id: "debater", agent: "debater", name: "Optimist" }, { id: "debater-2", agent: "debater" }, { id: "debater-3", agent: "debater", name: "  " }] };
+  assert.equal(agentLabel(d.nodes[0], d, "Debater"), "Optimist");
+  assert.equal(agentLabel(d.nodes[1], d, "Debater"), "Debater 1");
+  assert.equal(agentLabel(d.nodes[2], d, "Debater"), "Debater 2");
+});

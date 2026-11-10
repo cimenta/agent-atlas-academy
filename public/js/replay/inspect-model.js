@@ -1,4 +1,5 @@
-import { numberRepeatedLabels } from "../engine/labels.js";
+import { agentLabel, numberRepeatedLabels } from "../engine/labels.js";
+import { AGENT_TYPES } from "../engine/catalog.js";
 // Turns a run's events into what the inspector shows: one entry per agent, with its steps
 // (model calls, tool calls, handoffs), the messages of each model round and its output.
 // Pure: no DOM.
@@ -37,6 +38,25 @@ function emptyAgent(id) {
   return { id, label: id, status: "waiting", steps: [], rounds: [], model: "", tools: [], system: "", output: null, ms: null, startT: null, from: null, usage: null };
 }
 
+// The name each agent is shown with, known from the start of the run so it does not change when the agent
+// becomes active. A run that recorded its design uses it; an older run uses the roles its agents started
+// with, and an agent that was never started keeps its id.
+function labelsFor(events, order) {
+  const design = events.find((e) => e.type === "run_start")?.design;
+  const labels = new Map();
+  if (Array.isArray(design?.nodes)) {
+    for (const node of design.nodes) labels.set(node.id, agentLabel(node, design, AGENT_TYPES[node.agent]?.label ?? node.agent));
+  }
+  const missing = order.filter((id) => !labels.has(id));
+  const roles = missing.map((id) => {
+    const start = events.find((e) => e.type === "agent_start" && e.agent === id && typeof e.role === "string" && e.role);
+    return start ? start.role : id;
+  });
+  const numbered = numberRepeatedLabels(roles);
+  missing.forEach((id, i) => labels.set(id, numbered[i]));
+  return labels;
+}
+
 export function deriveInspector(events, cursor = events.length) {
   const applied = events.slice(0, Math.max(0, Math.min(events.length, cursor)));
   const agents = {};
@@ -55,7 +75,6 @@ export function deriveInspector(events, cursor = events.length) {
         agent.status = "working";
         agent.startT = event.t ?? 0;
         agent.firstIndex = index;
-        if (typeof event.role === "string" && event.role) agent.label = event.role;
         if (typeof event.model === "string") agent.model = event.model;
         if (Array.isArray(event.tools)) agent.tools = event.tools;
         if (typeof event.system === "string") agent.system = event.system;
@@ -163,9 +182,9 @@ export function deriveInspector(events, cursor = events.length) {
         break;
     }
   });
-  const numbered = numberRepeatedLabels(order.map((id) => agents[id].label));
-  order.forEach((id, i) => {
-    agents[id].label = numbered[i];
+  const labels = labelsFor(events, order);
+  order.forEach((id) => {
+    agents[id].label = labels.get(id);
   });
   for (const agent of Object.values(state.agents)) reconstruct(agent, state.task);
   return state;
