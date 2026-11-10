@@ -121,7 +121,7 @@ export function renderCreate(ctx) {
       const limits = clampLimits(draft.limits);
       const summary = reviewSummary({ design, limits });
       const apiKey = ctx.vault.getSessionKey();
-      const verdict = canRun({ task: taskInput.value, apiKey, editorErrors: draft.editor.errors() });
+      const verdict = canRun({ task: taskInput.value, apiKey, editorErrors: draft.editor.errors(), keyLocked: apiKey === null && ctx.vault.hasStoredKey() });
 
       const limitInputs = LIMIT_FIELDS.map(([key, labelKey]) => {
         const input = h(doc, "input", { id: `cr-${key}`, type: "number", min: key === "maxSearches" ? 0 : 1, max: LIMIT_MAX[key], step: 1, value: limits[key] });

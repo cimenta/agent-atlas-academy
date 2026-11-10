@@ -88,3 +88,8 @@ test("formatDuration and formatUsd", async () => {
   assert.equal(formatUsd(1.2345), "1.23");
   assert.equal(formatUsd(null), "");
 });
+
+test("canRun says the saved key is locked when one is saved but not unlocked", () => {
+  assert.deepEqual(canRun({ ...good, apiKey: null, keyLocked: true }).reasons, ["keyLocked"]);
+  assert.deepEqual(canRun({ ...good, apiKey: null }).reasons, ["noKey"]);
+});

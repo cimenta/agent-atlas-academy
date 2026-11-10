@@ -248,6 +248,7 @@
   "create.reason.noTask": "Describe the task first.",
   "create.reason.taskTooLong": "The task is too long.",
   "create.reason.noKey": "Add your API key first.",
+  "create.reason.keyLocked": "Your saved key is locked. Enter your passphrase and press Unlock.",
   "create.reason.designInvalid": "The diagram is not ready yet. See the problems listed under the diagram.",
   "create.run": "Run",
   "create.seeResult": "See the result",

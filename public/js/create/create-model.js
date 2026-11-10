@@ -3,12 +3,13 @@ import { AGENT_TYPES, TASK_MAX_CHARS } from "../engine/catalog.js";
 import { estimateRun } from "../engine/estimate.js";
 import { TOOLS } from "../engine/tools.js";
 
-export function canRun({ task, apiKey, editorErrors }) {
+// keyLocked: a key is saved on this computer but not unlocked yet, so the reason says to unlock it.
+export function canRun({ task, apiKey, editorErrors, keyLocked = false }) {
   const reasons = [];
   const text = typeof task === "string" ? task.trim() : "";
   if (text === "") reasons.push("noTask");
   else if (text.length > TASK_MAX_CHARS) reasons.push("taskTooLong");
-  if (typeof apiKey !== "string" || apiKey === "") reasons.push("noKey");
+  if (typeof apiKey !== "string" || apiKey === "") reasons.push(keyLocked ? "keyLocked" : "noKey");
   if (Array.isArray(editorErrors) && editorErrors.length > 0) reasons.push("designInvalid");
   return { ok: reasons.length === 0, reasons };
 }

@@ -248,6 +248,7 @@
   "create.reason.noTask": "Nejdřív popište úkol.",
   "create.reason.taskTooLong": "Úkol je příliš dlouhý.",
   "create.reason.noKey": "Nejdřív přidejte svůj klíč API.",
+  "create.reason.keyLocked": "Váš uložený klíč je zamčený. Zadejte heslo a stiskněte Odemknout.",
   "create.reason.designInvalid": "Diagram ještě není hotový. Problémy jsou vypsané pod diagramem.",
   "create.run": "Spustit",
   "create.seeResult": "Zobrazit výsledek",
