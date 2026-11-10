@@ -11,6 +11,7 @@ import { downloadFile, safeFileName } from "../download.js";
 import { stepDetail } from "./step-detail.js";
 import { createAboutPanel } from "./about.js";
 import { createRunMenu } from "./run-menu.js";
+import { runForExport } from "../run-export.js";
 
 const STATUS_KEY = {
   waiting: "player.statusWaiting",
@@ -98,7 +99,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
         t,
         getItems: () => [
           { ui: "run-about", label: t("player.about"), hint: t("player.aboutHint"), onClick: () => aboutPanel.toggle() },
-          { ui: "export-json", label: t("player.export"), hint: t("player.exportHint"), onClick: () => downloadFile(doc, `${safeFileName(exportRun.id)}.json`, JSON.stringify(exportRun, null, 2), "application/json") },
+          { ui: "export-json", label: t("player.export"), hint: t("player.exportHint"), onClick: () => downloadFile(doc, `${safeFileName(exportRun.id)}.json`, JSON.stringify(runForExport(exportRun), null, 2), "application/json") },
           ...(definition ? [{ ui: "export-definition", label: t("player.exportDefinition"), hint: t("player.exportDefinitionHint"), onClick: () => downloadFile(doc, `${safeFileName(exportRun.id)}-definition.json`, JSON.stringify(definition, null, 2), "application/json") }] : []),
           ...(typeof onDelete === "function" ? [{ ui: "run-delete", label: t("play.delete"), hint: t("player.deleteHint"), danger: true, onClick: () => onDelete() }] : []),
         ],

@@ -1,5 +1,6 @@
 import { h } from "./dom.js";
 import { parseMarkdown } from "./markdown.js";
+import { pickHomeRun } from "./play-model.js";
 import { renderBlocks } from "./render.js";
 import { SECTION_ORDER, loadArticle, loadArticleIndex, loadPage } from "./content.js";
 import { mountReplay } from "./replay/view.js";
@@ -64,7 +65,7 @@ export async function renderLanding(ctx) {
   show(ctx, h(doc, "h1", {}, t("landing.title")), h(doc, "p", { class: "lead" }, t("landing.intro")), about, taskBar, host);
   try {
     const index = await getJson(ctx, "/runs/index.json");
-    const first = index.runs[0];
+    const first = pickHomeRun(index.runs);
     if (!first || !RUN_ID.test(first.id)) throw new Error("no run");
     const run = await getJson(ctx, `/runs/${first.id}.json`);
     const explanations = await loadExplanations(ctx, first.id);

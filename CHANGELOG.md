@@ -4,8 +4,14 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ## [Unreleased]
 
+### Changed
+
+- Export run no longer includes the language, time zone and browser of the person who made the run, or the response headers (request ids and rate limits). The copy kept in the browser is unchanged.
+
 ### Added
 
+- A third library run: the supervisor simple demo (Supervisor, Researcher, Writer) with an About text and explanations in English and Czech. The home page demo is now chosen by home true in runs/index.json (the sky is blue run) and no longer depends on the order of the list.
+- A second library run: the complex sequential demo (Planner, Researcher, Writer and two free agents, a Fact checker and an Editor), recorded in Czech and translated into English, with an About text and explanations in English and Czech.
 - The library's example is now a real recorded run: the sequential simple demo (Researcher, Writer, Critic) with an About text and explanations in English and Czech. It replaces the hand-made sample run.
 - Library rows have a cog in the top right corner with the same menu as the player (About, Export run, Export definition, Delete), and the pattern tag now sits on the outcome line, right aligned. Delete moved into the menu; the run menu in the player has it too, for your own runs.
 - About a run: the cog menu is now the run menu, with About first. About shows a title, author, link and a description in Markdown; on your own runs it can be edited, and it is saved in the run, so Export run carries it (this is how library runs get their About text).

@@ -1,0 +1,14 @@
+{
+  "0": "Každý běh začíná zadáním. V běhu se supervizorem dostane supervizor také seznam svých pracovníků.",
+  "1": "Role supervizora: řídit pracovníky a rozhodovat, kdo pracuje dál. Odpovídá jen ve formátu JSON.",
+  "3": "Supervizor zavolá výzkumníka a řekne mu, co má zjistit. Pracovníci vidí jen tento pokyn a zadání.",
+  "4": "Předání posílá pokyn pracovníkovi.",
+  "5": "Role výzkumníka: sesbírat fakta. Může použít vyhledávání na webu; tady odpověděl z toho, co model ví.",
+  "7": "Poznámky výzkumníka. Vracejí se supervizorovi, ne dalšímu pracovníkovi.",
+  "8": "V tomto uspořádání se každý výsledek vrací supervizorovi.",
+  "11": "Supervizor zavolá pisatele. Vloží do pokynu výzkum, protože pisatel poznámky výzkumníka nevidí.",
+  "13": "Role pisatele: napsat odpověď z toho, co mu dal supervizor.",
+  "15": "Dva odstavce od pisatele. Vracejí se supervizorovi.",
+  "19": "Supervizor končí: jeho odpověď obsahuje konečnou odpověď.",
+  "20": "Běh končí. Konečnou odpovědí je ta, kterou vrátil supervizor."
+}

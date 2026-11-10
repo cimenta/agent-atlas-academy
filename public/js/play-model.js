@@ -3,6 +3,12 @@ import { MODELS, SEARCH_PRICE_USD } from "./engine/catalog.js";
 import { deriveInspector } from "./replay/inspect-model.js";
 import { validateRun } from "./run-schema.js";
 
+// The library run the home page plays: the one marked "home": true in runs/index.json, else the first.
+export function pickHomeRun(runs) {
+  const list = Array.isArray(runs) ? runs : [];
+  return list.find((r) => r?.home === true) ?? list[0];
+}
+
 export function buildReplayList(gallery, local) {
   return {
     gallery: gallery.map((r) => ({ id: r.id, title: r.title, pattern: r.pattern, source: "gallery" })),

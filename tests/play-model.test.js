@@ -131,3 +131,12 @@ test("prepareImport rejects text that is not JSON, not an object or not a run", 
   assert.equal(prepareImport("null", () => "x").reason, "invalid");
   assert.equal(prepareImport('{"title":"a"}', () => "x").reason, "invalid");
 });
+
+import { pickHomeRun } from "../public/js/play-model.js";
+
+test("the home page plays the run marked home, else the first one", () => {
+  assert.equal(pickHomeRun([{ id: "a" }, { id: "b", home: true }, { id: "c" }]).id, "b");
+  assert.equal(pickHomeRun([{ id: "a" }, { id: "b" }]).id, "a");
+  assert.equal(pickHomeRun([]), undefined);
+  assert.equal(pickHomeRun(undefined), undefined);
+});

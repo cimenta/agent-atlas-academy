@@ -9,6 +9,7 @@ import { renderCreate } from "./create/create-page.js";
 import { createRunMenu } from "./replay/run-menu.js";
 import { definitionFromRun } from "./create/definition.js";
 import { downloadFile, safeFileName } from "./download.js";
+import { runForExport } from "./run-export.js";
 
 const TABS = [
   { view: "replay", href: "#/play", key: "play.tab.replay" },
@@ -263,7 +264,7 @@ export async function renderReplayTab(ctx, requestedId) {
                 location.hash = `#/play/run/${item.id}`;
               },
             },
-            { ui: "export-json", label: t("player.export"), hint: t("player.exportHint"), onClick: () => downloadFile(doc, `${safeFileName(run.id)}.json`, JSON.stringify(run, null, 2), "application/json") },
+            { ui: "export-json", label: t("player.export"), hint: t("player.exportHint"), onClick: () => downloadFile(doc, `${safeFileName(run.id)}.json`, JSON.stringify(runForExport(run), null, 2), "application/json") },
             ...(definition ? [{ ui: "export-definition", label: t("player.exportDefinition"), hint: t("player.exportDefinitionHint"), onClick: () => downloadFile(doc, `${safeFileName(run.id)}-definition.json`, JSON.stringify(definition, null, 2), "application/json") }] : []),
             ...(found.source === "local" ? [{ ui: "run-delete", label: t("play.delete"), hint: t("player.deleteHint"), danger: true, onClick: () => removeRun(item) }] : []),
           ];

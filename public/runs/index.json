@@ -5,6 +5,21 @@
       "title": "Explain why the sky is blue.",
       "pattern": "sequential",
       "language": "en",
+      "timeScale": 2,
+      "home": true
+    },
+    {
+      "id": "sequential-complex",
+      "title": "Should a small company run its own servers or move everything to the cloud?",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3
+    },
+    {
+      "id": "supervisor-simple",
+      "title": "Explain how noise-cancelling headphones work, in two short paragraphs for a teenager.",
+      "pattern": "supervisor",
+      "language": "en",
       "timeScale": 2
     }
   ]

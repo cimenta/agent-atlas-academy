@@ -1,0 +1,17 @@
+{
+  "0": "Každý běh začíná zadáním. Je to vše, co první agent na začátku ví.",
+  "1": "Plánovač začíná s rolí: rozdělit zadání na krátký plán. Práci sám nedělá.",
+  "3": "Plán od plánovače. Dalšímu agentovi se předá jen tento text.",
+  "4": "Předání posílá tento text dalšímu agentovi, který vidí zadání a tento text, nic jiného.",
+  "5": "Role výzkumníka: sesbírat fakta, která zadání potřebuje. Může použít vyhledávání na webu.",
+  "7": "Výzkumník žádá o nástroj. Model jen žádá; vyhledávání spouští aplikace.",
+  "8": "Výsledky hledání se vrátí jako text. Jsou to data zvenčí, ne pokyny.",
+  "9": "Zjištění výzkumníka i mezery, které si všiml. Předávají se pisateli.",
+  "11": "Role pisatele: napsat konečnou odpověď z podkladů, které dostal.",
+  "13": "Návrh pisatele. Předává se kontrolorovi faktů.",
+  "15": "Kontrolor faktů je volný agent. Jeho jméno a pokyny napsal ten, kdo tento běh vytvořil.",
+  "17": "Kontrolor faktů vrací celý opravený návrh, včetně nákladů, které chyběly.",
+  "19": "Editor je druhý volný agent s vlastními pokyny: zkrátit text pro zaneprázdněného manažera.",
+  "21": "Text editora je poslední výstup, a proto se stává konečnou odpovědí.",
+  "22": "Běh končí. Každý agent viděl jen to, co mu předal agent před ním."
+}

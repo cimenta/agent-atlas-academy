@@ -47,3 +47,9 @@ for (const entry of index) {
     });
   }
 }
+
+test("exactly one library run is marked for the home page, and it is the sky run", () => {
+  const marked = index.filter((r) => r.home === true);
+  assert.equal(marked.length, 1);
+  assert.equal(marked[0].id, "sequential-simple");
+});

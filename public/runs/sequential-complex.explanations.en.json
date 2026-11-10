@@ -1,0 +1,17 @@
+{
+  "0": "Every run starts with a task. It is all the first agent knows at the start.",
+  "1": "The Planner starts with a role: break the task into a short plan. It does not do the work itself.",
+  "3": "The Planner's plan. Only this text is passed on to the next agent.",
+  "4": "A handoff passes that text to the next agent, which sees the task and this text, nothing else.",
+  "5": "The Researcher's role: collect the facts the task needs. It may use the web search tool.",
+  "7": "The Researcher asks for a tool. The model only asks; the application runs the search.",
+  "8": "The search results come back as text. They are data from outside, not instructions.",
+  "9": "The Researcher's findings, with the gaps it noticed. They are passed on to the Writer.",
+  "11": "The Writer's role: write the final answer from the material it was given.",
+  "13": "The Writer's draft. It is passed on to the Fact checker.",
+  "15": "The Fact checker is a free agent. Its name and instructions were written by the person who built this run.",
+  "17": "The Fact checker returns the whole corrected draft, with the costs that were missing.",
+  "19": "The Editor is a second free agent, with its own instructions: make the text short for a busy manager.",
+  "21": "The Editor's text is the last output, so it becomes the final answer.",
+  "22": "The run ends. Each agent saw only what the one before it passed on."
+}

@@ -1,0 +1,812 @@
+{
+  "schemaVersion": 1,
+  "id": "sequential-complex",
+  "title": "Should a small company run its own servers or move everythin…",
+  "language": "en",
+  "pattern": "sequential",
+  "recordedWith": {
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "appVersion": "0.7.1-dev.1",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "Should a small company run its own servers or move everything to the cloud? Give a recommendation for a team of ten people.",
+      "pattern": "sequential",
+      "design": {
+        "pattern": "sequential",
+        "nodes": [
+          {
+            "id": "planner",
+            "agent": "planner",
+            "model": "fast",
+            "search": false
+          },
+          {
+            "id": "researcher",
+            "agent": "researcher",
+            "model": "fast",
+            "search": true
+          },
+          {
+            "id": "writer",
+            "agent": "writer",
+            "model": "fast",
+            "search": false
+          },
+          {
+            "id": "free",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Fact checker",
+            "instructions": "Check the draft from the previous agent. Fix wrong or unsupported claims and add anything important that is missing, especially staff time, migration work and ongoing fees. Return the whole corrected draft, not a list of comments."
+          },
+          {
+            "id": "free-2",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Editor",
+            "instructions": "Edit the text from the previous agent for a busy manager. Keep it under 200 words, use plain language, and end with one sentence that gives the recommendation."
+          }
+        ],
+        "edges": [
+          {
+            "from": "planner",
+            "to": "researcher"
+          },
+          {
+            "from": "researcher",
+            "to": "writer"
+          },
+          {
+            "from": "writer",
+            "to": "free"
+          },
+          {
+            "from": "free",
+            "to": "free-2"
+          }
+        ]
+      },
+      "t": 0
+    },
+    {
+      "type": "agent_start",
+      "agent": "planner",
+      "role": "Planner",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: planner\nYou are the Planner. Break the task into a short numbered plan of 3 to 5 steps. Do not do the work yourself.\nKeep every reply under 300 words. Answer in English.",
+      "t": 1
+    },
+    {
+      "type": "round",
+      "agent": "planner",
+      "round": 1,
+      "ms": 2589,
+      "stop": "end_turn",
+      "usage": {
+        "input": 114,
+        "output": 351
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Should a small company run its own servers or move everything to the cloud? Give a recommendation for a team of ten people."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "1. **Clarify the constraints:** Identify the team's workloads, expected growth, budget (capex vs. opex), compliance or data-residency requirements, and the in-house IT skills available.\n2. **Inventory current usage:** List the applications, databases, file storage, and peak load patterns, and estimate monthly resource needs for the next 2 to 3 years.\n3. **Estimate total cost of ownership:** Compare hardware purchase, power, space, maintenance, and staff time for on-premises against cloud subscription and egress costs for the same workload, using at least two realistic scenarios.\n4. **Assess risk and operational fit:** Evaluate uptime requirements, backup and disaster recovery needs, security responsibilities, and how much administration time the team can realistically spare without hurting its main work.\n5. **Form and test the recommendation:** Pick the option (or a hybrid such as managed cloud for general services and a small local setup for special needs) that best fits the findings, then run a short pilot or proof of concept to confirm the cost and performance assumptions before committing."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011CguzjzPvR1uS8ZbcJM9k2",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 114,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 351,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        },
+        "http": {
+          "status": 200,
+          "requestId": "req_011Cguzjya4J6a2DiJPFbgGb",
+          "ms": 2589
+        }
+      },
+      "t": 2591
+    },
+    {
+      "type": "agent_output",
+      "agent": "planner",
+      "text": "1. **Clarify the constraints:** Identify the team's workloads, expected growth, budget (capex vs. opex), compliance or data-residency requirements, and the in-house IT skills available.\n2. **Inventory current usage:** List the applications, databases, file storage, and peak load patterns, and estimate monthly resource needs for the next 2 to 3 years.\n3. **Estimate total cost of ownership:** Compare hardware purchase, power, space, maintenance, and staff time for on-premises against cloud subscription and egress costs for the same workload, using at least two realistic scenarios.\n4. **Assess risk and operational fit:** Evaluate uptime requirements, backup and disaster recovery needs, security responsibilities, and how much administration time the team can realistically spare without hurting its main work.\n5. **Form and test the recommendation:** Pick the option (or a hybrid such as managed cloud for general services and a small local setup for special needs) that best fits the findings, then run a short pilot or proof of concept to confirm the cost and performance assumptions before committing.",
+      "tokens": {
+        "input": 114,
+        "output": 351
+      },
+      "t": 2592
+    },
+    {
+      "type": "handoff",
+      "from": "planner",
+      "to": "researcher",
+      "note": "1. **Clarify the constraints:** Identify the team's workloads, expected growth, budget (capex vs. opex), compliance or data-residency requirements, and the in-house IT skills available.\n2. **Inventory current usage:** List the applications, databases, file storage, and peak load patterns, and estimate monthly resource needs for the next 2 to 3 years.\n3. **Estimate total cost of ownership:** Compare hardware purchase, power, space, maintenance, and staff time for on-premises against cloud subscription and egress costs for the same workload, using at least two realistic scenarios.\n4. **Assess risk and operational fit:** Evaluate uptime requirements, backup and disaster recovery needs, security responsibilities, and how much administration time the team can realistically spare without hurting its main work.\n5. **Form and test the recommendation:** Pick the option (or a hybrid such as managed cloud for general services and a small local setup for special needs) that best fits the findings, then run a short pilot or proof of concept to confirm the cost and performance assumptions before committing.",
+      "t": 2592
+    },
+    {
+      "type": "agent_start",
+      "agent": "researcher",
+      "role": "Researcher",
+      "model": "claude-haiku-5-5",
+      "tools": [
+        "web_search"
+      ],
+      "system": "Role: researcher\nYou are the Researcher. Collect the facts the task needs. If you have a web search tool, use it, and state only facts you found or know. Name your sources when you have them. Keep it brief.\nKeep every reply under 300 words. Answer in English.",
+      "t": 2592
+    },
+    {
+      "type": "round",
+      "agent": "researcher",
+      "round": 1,
+      "ms": 9688,
+      "stop": "end_turn",
+      "usage": {
+        "input": 14737,
+        "output": 1514
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Should a small company run its own servers or move everything to the cloud? Give a recommendation for a team of ten people.\n\nThe previous agent (planner) wrote:\n1. **Clarify the constraints:** Identify the team's workloads, expected growth, budget (capex vs. opex), compliance or data-residency requirements, and the in-house IT skills available.\n2. **Inventory current usage:** List the applications, databases, file storage, and peak load patterns, and estimate monthly resource needs for the next 2 to 3 years.\n3. **Estimate total cost of ownership:** Compare hardware purchase, power, space, maintenance, and staff time for on-premises against cloud subscription and egress costs for the same workload, using at least two realistic scenarios.\n4. **Assess risk and operational fit:** Evaluate uptime requirements, backup and disaster recovery needs, security responsibilities, and how much administration time the team can realistically spare without hurting its main work.\n5. **Form and test the recommendation:** Pick the option (or a hybrid such as managed cloud for general services and a small local setup for special needs) that best fits the findings, then run a short pilot or proof of concept to confirm the cost and performance assumptions before committing."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQSjgsKEAgTGAI4AUIIdGhpbmtpbmcSDAqnNLrGrJmfeV9/tBoMTgOpGqKqDhvphEzfIjDePShGs7U7euQg7ShQSMdK7V1A8kM90L5qALAWkU032J+Yhz3ftIrGRZsTz7BLoJgqqwp33JolPozk7/hvdIWZjKag9Fay8dgExAOlfHooQH8YoPOJS1TPa1dNXI1VEyc5tXo6vsmgnGiMmiSvlYSsrTb7KeY+5Lb+pDm4vQOyrnG9gxkLfPZEz9jvQh4PIdROLfbk9bjFxiYTfqbC4f5bBZdn6DrNnuzvarU628eA8+CTdsaNTPcn43O7rPkR25sEChvSb+4R4SqOyjON+MUtWbf/F4LcwaY1bye7Ie1A5gUgMpfcXGhP0pBMI0xtqbzRORiiHZzHtrsSMk04okdAefSTgQGCmJ6bJoLqq1+qBNVF0XWX12Xfq9vTInE6J1SPVk95JvNbX0jIIyt9RRieqG055X0FzhHSSPUS16CJmRcVlZls3aNaJcayiDFystlPHkfNmFmWLjCq2+TrWGLTEIrlMTiNXCStrTql279MUJkacRcyqdXcm0Np1jPjf+X+tK6JVmdU3m6ISJu965ENdUiSbdzvFMdOp+9S8r5dque4dSgqXTmmP9XCC0F/tFHshrc9c6s/KTDvRlcwt8WdEJOcAHb2BJEpcCdfbwGesAIERWXAAkn+EA2Ge96xbZHXJ59lHe3n47q9eeO/3Qd0G6O/Ycqv00KqQ0xROrSP6A5WffTE+5AiFTsNOAAjIsjHP+u3Vkc94lGBwA+gBZ9fmW6JqJ4gXdSEjbyB/WSRxkhJjWg5YlViilYrc0TNvByeL7Wyw0qjE5ceDJq4wLj4gt4eDCTvbAkHS1zhMJ4A7RPkKmoxGnf0EJLbChufAlo4ahvCcWysH/3ppd+ZCWy50eDHk7w+YFLPNX+hWWaKY2Gnj+TE9M6Jdrn599WmHvbZsLuFaraPV8gfKyva2CoPU313xn5zT3ToMSM9UizFARWFTz/3gXKQpfibdSEHg5sE8x8/qBEDXO7WwVjq2/0zf/OWKfz98Gm8fm8hmkEE2ePeBdSED29a0ITVaBNyoi2o6SfjmXo+w2YQpk/chkyBX5oyJ1pTGvkvyK9jEpdH/b9g8LX59g5NCEj8X4oo18aeFk5PIMUdVkP6vK9DDsNTbRUTGpUWXaYNBKg/cP6bDch/W/VC+nP6dxh6qitPexSv3477Mt2XiB1F7ze79ZAQ5WOaQe/HQkhppc/BYKFkeJ6D2I4c9mGBk7RcyfGF77/VaZuU9FJDwAjGKmkGYFrrAu0JyiWmmZl+pbeurJJgn66Km8PASf5i//eOS1cmQOv0UDwDalKbb1Yk8ur9O1OBN0SpqDSVYd5aFTw4mR0Ed8Pi0oJVlRAOGyZBbHVlZm5ESHdHnFP+ZWCDq+0MQYqdfjGM8in+E4WQG9KxvFvbM51TO+S3VB2SyWHLby8lQDQSDvoyM9ms/sT1FuVI67xzPzEVhyeZYfbexc1ic0Xn3+742es7+TvcOaLk1N1hecSTh4oyNbE/nl8oC5GSSFWJ3uCbT9pLf2VSVsqulB832tbCkRg8L5gEnruZBr0RYX4qWUJBTqzxTT8xrmi2DBB/dBddiEcX2+ViZbQ3PXZccyltQXkLMvxnjL5dSITwM/nvpeh/MU6gkBJ5r+CvVHj6D7FFtvjl34TibUy22bfd7gJolJyqJykDRu4WJY7VxhXbv2LDnuv8lVOWUjz5JgCQ18T0FbVHXSq6rcEhKzMSCF7K+Io100M6EbwqBVqB2El+KAWkTA3LACRcR5EdclokG6HFERBzmv6tnCmSNcCLeAlvgkSacUojA5KmVx+fxEMIrvDqTi9htn3NkjJl2275udDONg8e1fXPMDDK1OcYAQ=="
+        },
+        {
+          "type": "server_tool_use",
+          "id": "srvtoolu_01W6HFomKA4DDpmXSzbcqUzH",
+          "name": "web_search",
+          "input": {
+            "query": "small business on-premises vs cloud total cost of ownership 2026"
+          }
+        },
+        {
+          "type": "web_search_tool_result",
+          "tool_use_id": "srvtoolu_01W6HFomKA4DDpmXSzbcqUzH",
+          "content": [
+            {
+              "type": "web_search_result",
+              "title": "Cloud vs. On-Premises: The Complete Comparison",
+              "url": "https://gartsolutions.com/cloud-vs-on-premises/",
+              "encrypted_content": "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",
+              "page_age": "8 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "On-Premises vs. Cloud: Real Cost and Risk Comparison",
+              "url": "https://www.netrixglobal.com/blog/on-premises-vs-cloud-the-real-cost-and-risk-comparison-for-enterprise-it",
+              "encrypted_content": "EtILCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDCTEQ7rmIwCh31/Y1BoMKWnUeUvkhr93x296IjDZIYTdi30ucXBbeIIYFtlEqLX4PfMZAbHFwUQEbhLmeSAS90J6aTkR3znndQhlTakq1Qp2+o9PL3gemIdQ3nVa9LzEf+RLwj8OhbvY1tJ2nMq2idJfDDiWmDgrJ8MXoqHk3WCwms4S6svZF1nCct0W4/ih1iQ/0cnqtbPn6SDAuKhzXG2xIwRXqJpFint/lofhQTD9QATW/E1nvqi9oqudN60Alk7K+c2M2bWv1BJsXjNE7dOl7hZCQeqsoQwtplNLxh2CVuBVT1pagmQEpDvpwkzf7lEIan3BD0G+xsbXC+5QsgUcfk8ALlTHldyzL8h3XP2Dwp9Mg9JzzODlSb/JaespO1G0EtTm/ALoqJIPQ2eAd+WjboFbGEKRbATNZZKGn0gnr6uObO8zpVTpZYte2G3TzZhTURDc+La/EX2lNyacbQD2JZXEJsZtlCM0CsfDFpt9E0Hz16vvI+sPWPTP7lf2ur5G8EyH/QgPFFbt8cPmVRRnHtWNbaRomUZIQ+H3Ocxr7MEKfGSXIVuIiSTpH9QKG1yGtWt70rqKuDVOQoj9nOqwU92NGN9sYnklyMQlOGVYJgwSOgp6w9Qaf6fyoqrPbyo+Ln4A/u18eaqzozxhPOCO2KOB/NRmZ9ca93xp0QcnDb31gqTL+2fAaCAealQ8o2rXqBXAP+aA3bJHVGExRA0ux64BNJVeJFvfTLY08xPb+CrkGyurHVB8BdOMOVJNeSaGsj8u60yRVQYmz6ccOe8ubMpmINOWrj/0kO7JGTqhIAumKE37mhOsNKYtd9sihrZV+M35j2cd59LlzAoRIhW/yGxPl853ncVgsXUou14EZeGoE7ASZOfRCbcZ45dtsM7VdSNwNQ+Cf/s8cDh6qh2YphdSiH8j+mDTa8TFP1M8hvfiV/aOEgP9EAfByFl7wxfvktr++mjMy7FS7AkOvfw15bYQRxbt59nFMVZSwVg7nZQrVlQdBXVCy6e9MoBxWtqRkobswXlInoiw1uHUClKCIgwKY2qRysld5Zw9ekuI0rLC87U1/tOrCTdUotcFkK8k41cbauN4sIeWYubkjHpdlUSXpmKU1dq7K33ED9TvW8Z1/YjbabF2svEHH0c7DtTEKvA4b3Yp9p79EL1KX5MztI2j/O1lK6o8zxgv6N7Khtm+dUbGt01TnST9I79OWRtVtJT5EHzqxDJJ1Z5O4XUwHHRy86KseESCHejMoZh1SkL7P94fKz7RYUwbwX3KdduugAYsAcyYWFFVjILL4b/CJHc/TpKnlBouPzF5cZ5BFPqGwuvurdxhYbaoZlTqUa4qC6DvudUFP1libfRMZ2S5bdmy+jz7jpebeEL0HyqgjHSPAsF4hWQS0284cVECiS2ZqN8tdIQpm80uikSAOf08Q1WQKNWNxP0gyArliOxHO+wp5+p70WVTQoYoqGSfO/O2aW+Z7QIQt7lRB1+OfxMS8F66CY8n2+Jp+wkIavfc3+UXNU+DqZ+4SP3I01Asd7jHRoDll98MYVXfw2I6HEvGRgupEv3Ku8NPeNK0UTk5+wrI0tOh+xwpNJ+iVc0QiAdH/hn4AmijLSqug3MxUQxgcpreKpzqbsta1ANf30wE4Tn389JqIO4I5lZr8VBfbAuE1VRcVqu6KLCI2xZz/hMaxxjv/HixLm4Fm4cGlncruRlgqylWmP8df/Krqx9wsRWgUfgQJgTJqPMacrSsXQZnmHgd2+Bxd6WEtooPq3huGHSGQ2zfua+2/XAmLt9ITV/sOqGyCeA7LeKmqjOzoR01QGXuWCHF7q98F+55poe4ADAkVaIdFMxM40cOzLbPtcCLQrdwRIz0UWc+e5WxfdaDo1dDqZ42OMJPKQF3tCwarkCbTzRv+zj6LgkFdv9pBUyGM50YAw==",
+              "page_age": "133 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Best Small Business Servers 2026: On-Premise vs Cloud vs Hybrid Guide",
+              "url": "https://ifeeltech.com/blog/best-small-business-servers",
+              "encrypted_content": "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",
+              "page_age": "106 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Cloud vs. On-Premise: The Decision Most Small Businesses Get Wrong - Next Level Computers",
+              "url": "https://zerogeeks.com/cloud-vs-on-premise-small-business/",
+              "encrypted_content": "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",
+              "page_age": "127 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Cloud vs. On-Premise ERP Cost: 10-Year TCO Comparison",
+              "url": "https://bizowie.com/erp-tco-comparison-cloud-vs-on-premise-over-10-years",
+              "encrypted_content": "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",
+              "page_age": "3 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Cloud ERP Vs On-Premise: 2026 Cost Comparison",
+              "url": "https://www.go-globe.com/cloud-erp-vs-on-premise/",
+              "encrypted_content": "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",
+              "page_age": "81 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Cloud vs On-Premise: The 2026 SMB Decision Guide - NzingaNet Inc.",
+              "url": "https://www.nzinganet.net/blog/cloud-vs-on-premise-smb-2026/",
+              "encrypted_content": "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",
+              "page_age": "113 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Cloud vs On-Premises Security for Small Business 2026",
+              "url": "https://defendmybusiness.com/cloud-security-vs-on-premises-security-small-business/",
+              "encrypted_content": "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",
+              "page_age": "35 days ago"
+            },
+            {
+              "type": "web_search_result",
+              "title": "Cloud Security vs On-Premises Security for Small Business: A 2026 Cost and Risk Comparison",
+              "url": "https://defendmybusiness.com/cloud-security-vs-on-premises-security-small-business-2026/",
+              "encrypted_content": "EsYLCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDABB8rQ8Z2G4KGRIqBoMpqr04El7qCgo6pd0IjBLiyI1LgqCqMfmtg0PmQGJAnTJ47AFphdpdxkCIoWZZlopWhAXeZBUQesKJaoRzGoqyQrI1jgsyJsFjwbB9yD58Zuhy4JH4Fel1v77KrfO0wVoqMfbzv9YC0pmOXyC9rKgUggfjC5CVUPOYvUh70QZjrStPiD4OCGMZSXiKUf9JuPc0c5ne2kqLQgKPyFtbP4ZQ7KV42sQEsz3K4olCS0a1b4oI24mGeSIFUdFhbGitSTy2aE1XuEj/8WP7FDOMOzj10PRj6Ein7UGeuQY6WJlOfKCxKbL2ebD5TiLjhlsXpBLPi/gxjGa1dgYnKnN6s5iBiVuRBpkMpuYbJmojIwIU+zhn8QuowccOShByzTaCrseMBf5FUd9LDICeQZlqXvkeGl7xeHH34uGSXU+kmBvqx18Xy72iueq3C+2bjI/FOVec0Pxf3id17LLsDzNgnTWCssIaPKl5o3dvFDdMFK01TZ23YTgkHyyefrBxhoeRz202sRByKrUOMC3ZMrP2dvx0UFg+n7Iyjd0e2NvYg2kcHLO8kv77p2txuXKB2Nqnaxoa/Z0e5ME1pFtsKRSgmpzDMuzQAjJvRTnXIawgD0eaWrfXBFZQgisv0GSwRf77y+9+IY4LfvY0hvr/5Rzc4S19BzqSYXOtt0bIUkINKnQTX497OIWshzeEu3hmPkKQpMsJJ9bo9twJ6xbIMhvlBpX89VXRo6WPk68S/8XSizNC66Ax9+R8nUGoFj6l74ImjjjJbYbV8HRNGQRgDUw/IDmA/frWfWG4z9ZOSZ0PfcA+HAQQTpudAxFzQNW+QVeKS03P9xIYK0oiRbmnLJZBFDz0V3dddPmLjPeE0svpouhsbB2Hv69dSXm261z+GO4KXlh0rq60LzrwP1NJ0ifvuCQgGMG2RDW3wgAP3Go1VrNHlpqRNJEyXl4ElnJSPKj2S33n8ywzUbsKHIYa140SSiPrEdK0QYVttrrhVZHuNXHq30mVyd65MYh/y/zQJbUErjdKbBHsDcWWuWu7oR+ukwGFPH43bq1BLVbnCQKnZwnbFjcOQXc8VgZB7g9Jl3OgZUDlbzirg7C7JkIwzfxsZpA8GH4G472BTz9q3dlAIe3yk4oJaKq/HqcCaB9GHQgzq0IvKKVodoykWlATX1Mu1Yp19J2kqWG+BqP/g1GUr+X2uyN7LdCWABWeQo4HyfMx3qodXPsJ9lLw00hAWRq17l/tBCIv2ilZSptzl6IkDjSboodJ6pUUCzcf7nGLL82JvxJ8XgbahRMpMI2qiK/PeYAqLdCrslux+I1SfJu7VfaRRXx2KhfNBmIbGzHn63zO1aPLZJ8iQTm6hz6MsofO1zN4B2tw2VqLTvSv2SshH+SwExksUPEQqd/nYp6g0x80M5aXM/bpgmrSSVAw1Svh5mIEE90f8/JLJ8KR0pIjtY+eHrxKdc8qM3kWpEZLes8C00fRyEwZU9bO4HCY3b/JM3WzLsCmzIQqHIGY+eIWVpkruHmIqYLLiQkr0SJQC2NzdOSnKZtVuQOYkzqXdExYVg5JZgDS/JVV1KpqEZfJ6NlbvSsqJ4n9YeuF9pN+xMjVdDJ/YtVAVE4nFjisBZtK5v0ywt8EzrdS6N9D8NjkdtDbdmT8HGA3A8Hb7l1sD0H2G6C9A3azKep02M89twxmtlKm1s7Enq8E0aJqvc/idAhY4dvedtrVzDBeP+j1+32kOyZQhAR7yDnyFuzdcRgYr3vHdFFY7pO58LdvYfpfex4Z5pgDuMFzgtXMUo5QG+xAdmS51BlRn1pNtU8+FG5lVm3yGqnMe84mhvq6CmpCKkw6mwyiF5uhVBE93AcAI0NXCdHCEFgbLSux83pmf1M9nsshQIx415MdPUGbiIYAw==",
+              "page_age": "204 days ago"
+            }
+          ],
+          "caller": {
+            "type": "direct"
+          }
+        },
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQSmgkKEAgTGAI4AUIIdGhpbmtpbmcSDPGyUzlMU1aB9D4ZvhoMQwk/QHtWuk8dtcFmIjC2MPArmVSy0pKXrO6qNfuZQtGyCkMuEGPc1xmU+aXdG5p24GQHNRmnZE/q8UK8UVgqtwi9YuOCLpuOE/EKE366rMW5TpQL/CSiFWv9olLieOwCd2gWMTjZecDLuwVh+zRPnLiK7Mf/P7PLI0mVeSJn188TIEWFfCyq+AfAFMuKEy5AbIXzRX4jz4i9kBub37iubE3GhjGbRNI3yMZ+YE4ipNMzW+SnDtytSKDkGMT90wT6nJpkEOwFTdwaXBlAonimGdRGNGeRRFxK5JOS7EkfKCBm2RK4qMuOkUd/KvRodzqcFGrJ9idw9XbpICsHKhRi9m903yaswMKPeoQ98jxQBfcBnWkBpmw/n8QZm5eek4XmXab78TPxv+NH+JL8BWjJQETR/9E1zcvf/muzDSL6+FMe5KH90QkvGqNnSu7LBJnjjIRMAgVI+CT6m0FQZnw3j9i1XzEusTn4sYF06DD45uYdk+Z8uSTqPIffmmze5dRSQO31cx5c7IEd0gYsXG5LKrkSnJOTB0xdDn2jzeHum2jcyudGOg+fQG4HblfbNeD1TgraW1ZJ1VL+Rh+ZVupSExwt/5SRvwgc+TDGjKoF6VBs0+ZM0+4Wuf6W3iOpjtidv3udFFbzH8O3cxoP/707Y/InS98+Hc0K7qktLrHrNBTEVToJFqwFRduSbNJSQX2ui53W2m55RF4ZdcVKT4iWV/NjAHfbLEtF3vbS3gqIkWw5dakHktF5+JAE84NYd8oGIc5R3lCVTEwqKPYYtPwM+Y4Z7wydh7o4Lyd6tm5TMCj9zF1cfGmUu7rexmva3HVMQ6HtIKUvHzjjuX/8A6Bl7DCtUEatSYYVzRxYB2mhUlJwJRQApYy78zdHveOntVXVy6vj8BGrUs/j8iS3d0ag00VnPQ8IkqPLhkB3ZqCChMtTKuaX1Zex3E+AXy6TDKXFpTptx95wRi4zI6DJYw0Esz7XGoxyjzW7PH3uGklyZ4wXZHPYnsx++/dMW5e4X+UkirLfg+nUpXI0rPY1u9uMxdC/E8ba3uQleO+DKAUf28+mAc+00RAzaCSOOvVxSh0zBYImC5CSdRxrLbdlVptZYplnMljKG1AV97t2Gym+7gQiqxw2RdQoUVw9syy1ZkeYdvn0r5vPF7umVgRShCT4qS25rxdku/zlzLFm18Ws0btQt6hKGUUvliTAW5AKL/E2zR9+/cjZMR1VexkCgHKz/ZF8Jiascee81iaBQ5HODPLP7uaB+XxMzW6ZG/cCaCKFRHB+L0tFRgR1LsfsJ73Bp8PhOEnHDhXtYJ1YzUnxmTu0JOpw33Jf+neuZS0Lmf4BjEmK0/H7hdQ8Bau0xQiF/zYG0eCNnyOc1wPeKShE4rNwFgSEprSFk6lq8moaYNPD32IHEhJba6bX0Qo2ju61o82gkkEsdWv7blEJYvgYnCGgOcA4NR8Cop/s4dLlb4/6MIpTzVM5wrGFqjve6mSBBBhamD0wZ5PPAIUbuumcLYuC/JPfpXmQTxgB"
+        },
+        {
+          "type": "text",
+          "text": "**Recommendation: for a team of ten people, mostly cloud (SaaS and managed services), with your own server only for exceptions.** The sources are not independent studies but mostly vendor blogs, so treat the numbers as rough guidance.\n\n**What the sources say**\n- According to one analysis, "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "# Cloud vs. On-Premises: The Complete Comparison\n## Cost & Total Cost of Ownership (TCO)\n### On-Premises Cost Structure\n- High upfront hardware, licen...",
+              "url": "https://gartsolutions.com/cloud-vs-on-premises/",
+              "title": "Cloud vs. On-Premises: The Complete Comparison",
+              "encrypted_index": "Eo8BCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDJtbaOkCJObNsUuomBoMfckH6cpeYpWJ8lAiIjDqmcE9LC5qv58LnSYZ91DhUZTGFy8sNreBZpZ+jxURdYKvgGs7xC88vlsfayVyTIkqE83cu3/Q/ILRf7RaVuWI5R/zYQkYBA=="
+            }
+          ],
+          "type": "text",
+          "text": "the 5-year TCO for organizations with 50–150 users comes to roughly USD 350,000–820,000 for cloud and USD 553,000–1,138,000 for fully loaded on-premises operation."
+        },
+        {
+          "type": "text",
+          "text": " The authors stress that running your own pays off mainly for stable, large and predictable workloads.\n- For small offices of 5–25 people that mainly share files and keep backups, a "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "For offices with 5–25 employees doing primarily file sharing, backup, and collaboration, the NAS ecosystem tends to have a low total cost of ownership...",
+              "url": "https://ifeeltech.com/blog/best-small-business-servers",
+              "title": "Best Small Business Servers 2026: On-Premise vs Cloud vs Hybrid Guide",
+              "encrypted_index": "Eo8BCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDPN0Q7kBOHx4VpCnPRoMn9QX5B7xo1TWD0huIjAJWAnXA9te6FWfsZxlTFSmqvhA3nxp10+72hZmmDhzwdvgwJUT67bTAFa2OcVUn7gqEzY2AIFyN7p6llJhZew3n9YiSYAYBA=="
+            }
+          ],
+          "type": "text",
+          "text": "NAS setup is usually cheaper in total cost of ownership than a traditional server."
+        },
+        {
+          "type": "text",
+          "text": "\n- For teams of around ten people, SaaS is often more relevant than IT infrastructure: "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "For many small offices, **SaaS collaboration** (Microsoft 365 at $12.50–22/user/month, Google Workspace at $7–22/user/month on annual plans) is a more...",
+              "url": "https://ifeeltech.com/blog/best-small-business-servers",
+              "title": "Best Small Business Servers 2026: On-Premise vs Cloud vs Hybrid Guide",
+              "encrypted_index": "EpABCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDIB9rk06w1Hw21DpcRoM85m0uafndxoqOdZzIjB8Ac9K34skr2TSuSDNmaIZ85fmyDitfESfLfFajHMNDy1/LSYHcDDezvVuY7wK0eAqFOZHVCwQSJOhH1RUOPMGPQcwUSIDGAQ="
+            }
+          ],
+          "type": "text",
+          "text": "Microsoft 365 at USD 12.50–22 per user per month or Google Workspace at USD 7–22"
+        },
+        {
+          "type": "text",
+          "text": " replace email, file sharing and collaboration.\n- One security study says that "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "**On-Premises Security Stack (15 employees)**\n\n| Component | Upfront | Monthly | 3-Year Total |\n\n| Total | $5,000–10,500 | $675–1,350 | $29,400–59,100...",
+              "url": "https://defendmybusiness.com/cloud-security-vs-on-premises-security-small-business/",
+              "title": "Cloud vs On-Premises Security for Small Business 2026",
+              "encrypted_index": "Eo8BCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDJHzuCnhRR8GLMdsDhoM84aY+ZLiZKXRSNB6IjBfzmerB10zBzRGOWMuk5Wb+dZB81kUuX71fQ9/oDHCWqygefh1mSyEVZDVi9+SWfAqEzcNtLpJV7WXebYsIliDVsWzt3UYBA=="
+            }
+          ],
+          "type": "text",
+          "text": "your own security stack for 15 people costs USD 5,000–10,500 upfront and USD 675–1,350 a month including IT labor."
+        },
+        {
+          "type": "text",
+          "text": " These numbers come from vendors and do not account for specific requirements.\n- A hybrid model is common: "
+        },
+        {
+          "citations": [
+            {
+              "type": "web_search_result_location",
+              "cited_text": "# Best Small Business Servers 2026: On-Premise vs Cloud vs Hybrid Compared\n\n- **Hybrid is common:** many small businesses keep daily workloads local a...",
+              "url": "https://ifeeltech.com/blog/best-small-business-servers",
+              "title": "Best Small Business Servers 2026: On-Premise vs Cloud vs Hybrid Guide",
+              "encrypted_index": "Eo8BCioIFRgCIiQxZmViZmVjYi03YzhmLTQzYWEtYTA4Yi1lNmE0NDZiZjZhYzgSDK98GtPpErcaOu8IjBoMuk0f6XjT+F5gfsRtIjCuwzIJ1D09XoJVfiXRkYvit5o4Up6O781yVQn7pLKTpD6ayClkols0DQqXujtIwckqEzl8t490L/ndYxE2guvK3sBqsfgYBA=="
+            }
+          ],
+          "type": "text",
+          "text": "many small companies keep day-to-day workloads on site and move backups and disaster recovery to the cloud."
+        },
+        {
+          "type": "text",
+          "text": "\n\n**Recommendation**\n1. Move email, documents and collaboration to SaaS.\n2. Handle backups and disaster recovery in the cloud, with tested restores.\n3. Keep local hardware only for specific reasons: a legacy application, data residency, large local data volumes or offline work.\n4. Before committing, run a pilot of 2–3 months and compare real monthly costs, response time and time spent on administration.\n\n**Gaps in the sources:** I have no data on your team's specific requirements (compliance, performance, budget, available IT skills). There is also no independent data for the Czech environment or prices in crowns. The conclusion therefore holds only if this is not an exceptionally demanding or regulated application."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [
+            {
+              "type": "web_search_20250305",
+              "name": "web_search",
+              "max_uses": 3
+            }
+          ],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011CguzkAQusUKYewTg3p4ZQ",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 14737,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 1514,
+            "output_tokens_details": {
+              "thinking_tokens": 432
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard",
+            "server_tool_use": {
+              "web_search_requests": 1,
+              "web_fetch_requests": 0
+            }
+          }
+        },
+        "http": {
+          "status": 200,
+          "requestId": "req_011CguzkA84WahW8thX4Hw5u",
+          "ms": 9688
+        }
+      },
+      "t": 12280
+    },
+    {
+      "type": "tool_call",
+      "agent": "researcher",
+      "tool": "web_search",
+      "input": "small business on-premises vs cloud total cost of ownership 2026",
+      "t": 12280
+    },
+    {
+      "type": "tool_result",
+      "agent": "researcher",
+      "tool": "web_search",
+      "output": "Cloud vs. On-Premises: The Complete Comparison - https://gartsolutions.com/cloud-vs-on-premises/\nOn-Premises vs. Cloud: Real Cost and Risk Comparison - https://www.netrixglobal.com/blog/on-premises-vs-cloud-the-real-cost-and-risk-comparison-for-enterprise-it\nBest Small Business Servers 2026: On-Premise vs Cloud vs Hybrid Guide - https://ifeeltech.com/blog/best-small-business-servers\nCloud vs. On-Premise: The Decision Most Small Businesses Get Wrong - Next Level Computers - https://zerogeeks.com/cloud-vs-on-premise-small-business/\nCloud vs. On-Premise ERP Cost: 10-Year TCO Comparison - https://bizowie.com/erp-tco-comparison-cloud-vs-on-premise-over-10-years\nCloud ERP Vs On-Premise: 2026 Cost Comparison - https://www.go-globe.com/cloud-erp-vs-on-premise/\nCloud vs On-Premise: The 2026 SMB Decision Guide - NzingaNet Inc. - https://www.nzinganet.net/blog/cloud-vs-on-premise-smb-2026/\nCloud vs On-Premises Security for Small Business 2026 - https://defendmybusiness.com/cloud-security-vs-on-premises-security-small-business/\nCloud Security vs On-Premises Security for Small Business: A 2026 Cost and Risk Comparison - https://defendmybusiness.com/cloud-security-vs-on-premises-security-small-business-2026/",
+      "t": 12281
+    },
+    {
+      "type": "agent_output",
+      "agent": "researcher",
+      "text": "**Recommendation: for a team of ten people, mostly cloud (SaaS and managed services), with your own server only for exceptions.** The sources are not independent studies but mostly vendor blogs, so treat the numbers as rough guidance.\n\n**What the sources say**\n- According to one analysis, \nthe 5-year TCO for organizations with 50–150 users comes to roughly USD 350,000–820,000 for cloud and USD 553,000–1,138,000 for fully loaded on-premises operation.\n The authors stress that running your own pays off mainly for stable, large and predictable workloads.\n- For small offices of 5–25 people that mainly share files and keep backups, a \nNAS setup is usually cheaper in total cost of ownership than a traditional server.\n\n- For teams of around ten people, SaaS is often more relevant than IT infrastructure: \nMicrosoft 365 at USD 12.50–22 per user per month or Google Workspace at USD 7–22\n replace email, file sharing and collaboration.\n- One security study says that \nyour own security stack for 15 people costs USD 5,000–10,500 upfront and USD 675–1,350 a month including IT labor.\n These numbers come from vendors and do not account for specific requirements.\n- A hybrid model is common: \nmany small companies keep day-to-day workloads on site and move backups and disaster recovery to the cloud.\n\n\n**Recommendation**\n1. Move email, documents and collaboration to SaaS.\n2. Handle backups and disaster recovery in the cloud, with tested restores.\n3. Keep local hardware only for specific reasons: a legacy application, data residency, large local data volumes or offline work.\n4. Before committing, run a pilot of 2–3 months and compare real monthly costs, response time and time spent on administration.\n\n**Gaps in the sources:** I have no data on your team's specific requirements (compliance, performance, budget, available IT skills). There is also no independent data for the Czech environment or prices in crowns. The conclusion therefore holds only if this is not an exceptionally demanding or regulated application.",
+      "tokens": {
+        "input": 14737,
+        "output": 1514
+      },
+      "t": 12281
+    },
+    {
+      "type": "handoff",
+      "from": "researcher",
+      "to": "writer",
+      "note": "**Recommendation: for a team of ten people, mostly cloud (SaaS and managed services), with your own server only for exceptions.** The sources are not independent studies but mostly vendor blogs, so treat the numbers as rough guidance.\n\n**What the sources say**\n- According to one analysis, \nthe 5-year TCO for organizations with 50–150 users comes to roughly USD 350,000–820,000 for cloud and USD 553,000–1,138,000 for fully loaded on-premises operation.\n The authors stress that running your own pays off mainly for stable, large and predictable workloads.\n- For small offices of 5–25 people that mainly share files and keep backups, a \nNAS setup is usually cheaper in total cost of ownership than a traditional server.\n\n- For teams of around ten people, SaaS is often more relevant than IT infrastructure: \nMicrosoft 365 at USD 12.50–22 per user per month or Google Workspace at USD 7–22\n replace email, file sharing and collaboration.\n- One security study says that \nyour own security stack for 15 people costs USD 5,000–10,500 upfront and USD 675–1,350 a month including IT labor.\n These numbers come from vendors and do not account for specific requirements.\n- A hybrid model is common: \nmany small companies keep day-to-day workloads on site and move backups and disaster recovery to the cloud.\n\n\n**Recommendation**\n1. Move email, documents and collaboration to SaaS.\n2. Handle backups and disaster recovery in the cloud, with tested restores.\n3. Keep local hardware only for specific reasons: a legacy application, data residency, large local data volumes or offline work.\n4. Before committing, run a pilot of 2–3 months and compare real monthly costs, response time and time spent on administration.\n\n**Gaps in the sources:** I have no data on your team's specific requirements (compliance, performance, budget, available IT skills). There is also no independent data for the Czech environment or prices in crowns. The conclusion therefore holds only if this is not an exceptionally demanding",
+      "t": 12281
+    },
+    {
+      "type": "agent_start",
+      "agent": "writer",
+      "role": "Writer",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: writer\nYou are the Writer. Write the final answer for the user from the material you were given. Be clear and short, with no filler.\nKeep every reply under 300 words. Answer in English.",
+      "t": 12281
+    },
+    {
+      "type": "round",
+      "agent": "writer",
+      "round": 1,
+      "ms": 3623,
+      "stop": "end_turn",
+      "usage": {
+        "input": 1058,
+        "output": 774
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Should a small company run its own servers or move everything to the cloud? Give a recommendation for a team of ten people.\n\nThe previous agent (researcher) wrote:\n**Recommendation: for a team of ten people, mostly cloud (SaaS and managed services), with your own server only for exceptions.** The sources are not independent studies but mostly vendor blogs, so treat the numbers as rough guidance.\n\n**What the sources say**\n- According to one analysis, \nthe 5-year TCO for organizations with 50–150 users comes to roughly USD 350,000–820,000 for cloud and USD 553,000–1,138,000 for fully loaded on-premises operation.\n The authors stress that running your own pays off mainly for stable, large and predictable workloads.\n- For small offices of 5–25 people that mainly share files and keep backups, a \nNAS setup is usually cheaper in total cost of ownership than a traditional server.\n\n- For teams of around ten people, SaaS is often more relevant than IT infrastructure: \nMicrosoft 365 at USD 12.50–22 per user per month or Google Workspace at USD 7–22\n replace email, file sharing and collaboration.\n- One security study says that \nyour own security stack for 15 people costs USD 5,000–10,500 upfront and USD 675–1,350 a month including IT labor.\n These numbers come from vendors and do not account for specific requirements.\n- A hybrid model is common: \nmany small companies keep day-to-day workloads on site and move backups and disaster recovery to the cloud.\n\n\n**Recommendation**\n1. Move email, documents and collaboration to SaaS.\n2. Handle backups and disaster recovery in the cloud, with tested restores.\n3. Keep local hardware only for specific reasons: a legacy application, data residency, large local data volumes or offline work.\n4. Before committing, run a pilot of 2–3 months and compare real monthly costs, response time and time spent on administration.\n\n**Gaps in the sources:** I have no data on your team's specific requirements (compliance, performance, budget, available IT skills). There is also no independent data for the Czech environment or prices in crowns. The conclusion therefore holds only if this is not an exceptionally demanding or regulated application."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQS2QYKEAgTGAI4AUIIdGhpbmtpbmcSDOVKFNC6ZV18HPhrJRoMo2VlC96Cq4l6DRS9IjBsLP9xnY+P32Z2aqOK+aj0hFmdUO6BSAIqa7fh7fpfPkiC6Csr4Y25lhavJdhGsDsq9gXTXArnp5nBwkZ9BvNMUyKqRRBOxeo4ABsserDJegNZG67D3BnprrKAwGJDtRhx3NtjJ76KYvjz2d0VhBarbOGRaG+jhVW2xFHQ+QQJKQvpOgTCWfaf8EL8wDm0OqRW1N2BP2vzGMM1VlL4RYif3UVtfP5rDGQOgbhmRXYDdQGHplX6NaroJVdUEa1jMrhMSnRaY742T6NfDM+Ze5iYvneJ9c4NZixdX6AYMpdtByzoGhfxUaMDP/T7t7LoSGP/5Gtzr0N0x7Ba6DVp64wyy5y/oQFt0IsgrMrFYvA1OgDT+NSvvAgahVmspTcwHMAMNLxz+WtyeKyUJkIVi5OIoroupKk+Sr2fU+b1odpJbj92+OHw5oDLeIsjHB4Q0VPqfjgGA4+xOppiZ/whXu8m0zKx4hKnfC3qHy7DIhxUkAhrKAKezk9rWybRZxyzrslpdqFwGa/KBWT0T7iDey5AgtQducH3rAOJHdBjIohMSk0LNCy1183nCqxaeTpL0jXAzd3CkeNevq+Oe29IJ7Rc5Rl5Mb3rmbI6oHkIPex1PSGofHpF/QZxO4YKgfL91arta9f2e9mXKn3NAmFBG8mpFRpz4R71TTXxdUjBD9H83GUR3yA3yC9ZPmDNUDP6JPfmzG9867YWKiZwFOZ/C3gGi83PmgtEp8mCNQycEAEfnMJOJLaVpshFoJkAo6TW2156U2nsGLWG321LyVbTRvHWm22Oo+7k8ju+PK2bcxriR4/5G9GvI8NXJKqPoaGDbcUNx/FAu2aUZkPsEyRLRKEMCn3f6YW/DQtsikJEPbs/a4g+9yAqzoEYpqvgLYsBeLlH8unRs/Ngo65ZgVgYMWN/VjLSvptDTVzWI7f6iBp42sRDsQ3ecuNz2/mpRmiQLGOeDol4yHp1A/LN0YN3fMOrGqh8wk4cFFua+RpyI9TDEIrRxMT59lvlEtts2+mp/yyX2UtDzxCC0LM/ndzUjc44Q4nw0yhejyoj6xZE2EQOMNFUgzdJVIL34RgB"
+        },
+        {
+          "type": "text",
+          "text": "**Recommendation:** For a team of ten people, mostly cloud (SaaS and managed services) makes sense. Keep your own server only for specific exceptions.\n\n**Why cloud**\n- Email, documents and collaboration can be covered by SaaS services, for example Microsoft 365 (about USD 12.50–22 per user per month) or Google Workspace (about USD 7–22).\n- According to the available analyses, running your own pays off mainly for large, stable and predictable workloads. For a team of ten there is usually no reason to invest in hardware and administration.\n- According to vendor studies, your own security stack costs more than a small team can bear. These numbers are not independent, though.\n\n**Recommended steps**\n1. Move email, documents and collaboration to SaaS.\n2. Handle backups and disaster recovery in the cloud and test restores regularly.\n3. Keep local hardware only for specific reasons: an old application, data residency requirements, large local data volumes or offline work.\n4. Before committing, run a two- to three-month pilot and compare real monthly costs, response time and time spent on administration.\n\n**Limits of this conclusion**\n- The sources are mostly vendor blogs, not independent studies. Treat the numbers as rough guidance.\n- I have no data on your requirements: compliance, performance, budget or the team's IT skills.\n- There is no data for the Czech environment or prices in crowns.\n- The conclusion holds only if this is not an exceptionally demanding or regulated application. If it is, it needs to be reconsidered."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011CguzksrJ4tGmmzeydpXZV",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 1058,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 774,
+            "output_tokens_details": {
+              "thinking_tokens": 77
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        },
+        "http": {
+          "status": 200,
+          "requestId": "req_011CguzksXheHy87vUDKcGP3",
+          "ms": 3623
+        }
+      },
+      "t": 15904
+    },
+    {
+      "type": "agent_output",
+      "agent": "writer",
+      "text": "**Recommendation:** For a team of ten people, mostly cloud (SaaS and managed services) makes sense. Keep your own server only for specific exceptions.\n\n**Why cloud**\n- Email, documents and collaboration can be covered by SaaS services, for example Microsoft 365 (about USD 12.50–22 per user per month) or Google Workspace (about USD 7–22).\n- According to the available analyses, running your own pays off mainly for large, stable and predictable workloads. For a team of ten there is usually no reason to invest in hardware and administration.\n- According to vendor studies, your own security stack costs more than a small team can bear. These numbers are not independent, though.\n\n**Recommended steps**\n1. Move email, documents and collaboration to SaaS.\n2. Handle backups and disaster recovery in the cloud and test restores regularly.\n3. Keep local hardware only for specific reasons: an old application, data residency requirements, large local data volumes or offline work.\n4. Before committing, run a two- to three-month pilot and compare real monthly costs, response time and time spent on administration.\n\n**Limits of this conclusion**\n- The sources are mostly vendor blogs, not independent studies. Treat the numbers as rough guidance.\n- I have no data on your requirements: compliance, performance, budget or the team's IT skills.\n- There is no data for the Czech environment or prices in crowns.\n- The conclusion holds only if this is not an exceptionally demanding or regulated application. If it is, it needs to be reconsidered.",
+      "tokens": {
+        "input": 1058,
+        "output": 774
+      },
+      "t": 15904
+    },
+    {
+      "type": "handoff",
+      "from": "writer",
+      "to": "free",
+      "note": "**Recommendation:** For a team of ten people, mostly cloud (SaaS and managed services) makes sense. Keep your own server only for specific exceptions.\n\n**Why cloud**\n- Email, documents and collaboration can be covered by SaaS services, for example Microsoft 365 (about USD 12.50–22 per user per month) or Google Workspace (about USD 7–22).\n- According to the available analyses, running your own pays off mainly for large, stable and predictable workloads. For a team of ten there is usually no reason to invest in hardware and administration.\n- According to vendor studies, your own security stack costs more than a small team can bear. These numbers are not independent, though.\n\n**Recommended steps**\n1. Move email, documents and collaboration to SaaS.\n2. Handle backups and disaster recovery in the cloud and test restores regularly.\n3. Keep local hardware only for specific reasons: an old application, data residency requirements, large local data volumes or offline work.\n4. Before committing, run a two- to three-month pilot and compare real monthly costs, response time and time spent on administration.\n\n**Limits of this conclusion**\n- The sources are mostly vendor blogs, not independent studies. Treat the numbers as rough guidance.\n- I have no data on your requirements: compliance, performance, budget or the team's IT skills.\n- There is no data for the Czech environment or prices in crowns.\n- The conclusion holds only if this is not an exceptionally demanding or regulated application. If it is, it needs to be reconsidered.",
+      "t": 15904
+    },
+    {
+      "type": "agent_start",
+      "agent": "free",
+      "role": "Fact checker",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Fact checker. Check the draft from the previous agent. Fix wrong or unsupported claims and add anything important that is missing, especially staff time, migration work and ongoing fees. Return the whole corrected draft, not a list of comments.\nKeep every reply under 300 words. Answer in English.",
+      "t": 15904
+    },
+    {
+      "type": "round",
+      "agent": "free",
+      "round": 1,
+      "ms": 12683,
+      "stop": "end_turn",
+      "usage": {
+        "input": 861,
+        "output": 2741
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Should a small company run its own servers or move everything to the cloud? Give a recommendation for a team of ten people.\n\nThe previous agent (writer) wrote:\n**Recommendation:** For a team of ten people, mostly cloud (SaaS and managed services) makes sense. Keep your own server only for specific exceptions.\n\n**Why cloud**\n- Email, documents and collaboration can be covered by SaaS services, for example Microsoft 365 (about USD 12.50–22 per user per month) or Google Workspace (about USD 7–22).\n- According to the available analyses, running your own pays off mainly for large, stable and predictable workloads. For a team of ten there is usually no reason to invest in hardware and administration.\n- According to vendor studies, your own security stack costs more than a small team can bear. These numbers are not independent, though.\n\n**Recommended steps**\n1. Move email, documents and collaboration to SaaS.\n2. Handle backups and disaster recovery in the cloud and test restores regularly.\n3. Keep local hardware only for specific reasons: an old application, data residency requirements, large local data volumes or offline work.\n4. Before committing, run a two- to three-month pilot and compare real monthly costs, response time and time spent on administration.\n\n**Limits of this conclusion**\n- The sources are mostly vendor blogs, not independent studies. Treat the numbers as rough guidance.\n- I have no data on your requirements: compliance, performance, budget or the team's IT skills.\n- There is no data for the Czech environment or prices in crowns.\n- The conclusion holds only if this is not an exceptionally demanding or regulated application. If it is, it needs to be reconsidered."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQS7CUKEAgTGAI4AUIIdGhpbmtpbmcSDIRMbLRBeUENEf0hkBoMAgUpRX6EZsQt3dE4IjA9bX0BnhlnogS4OtM6n6tJp85w6zDiOwt8acd2p9yAZN3IwMKOSFT+SKB1IwJVpEoqiSUAVJBhAPY66+0vZkHQ7ubObxRPR0sa6T3uUpxzfP3SzcNV6E/5dyE8wtSUcb0y2ck+lBSomovrJngaVY8Zj6W2khDMy2yi187ILtnlgjkq0BC1u/dVpFaP6fpUJGnwjsdASYki2+10D4ItlnPHzJR8hQHE+/pXhW3vqy/yPI8zRCRlvk1BKCKkuii+rcftcIS2foCfcthm1hoITaoyH5nZgmcGcb99UlSpezwIHhkRlesPa2DzPPJmfz4aWTBQR4cueFpezsfI/ZlPv3smbFHPEhwaAbFmEC3xXErXpmxGmEUcUsl5RkDQjZIaFrnlJ7JV5ITweRTEg9gR/HilgQlQL+eTSPKEmlNHcbBQDjlIduxr/9SxBZUKa1S+X8LNU2lBmlgPTibYqdh13B+xWHcc67hremsDHkZtjNxUIiBnVoC12qhC5K0yjuNMSVrkNBPcROtKjsYhdRAWDzsueRUT9h87VJU2xfg8gIA3HthWBzY39kTIzxo3/P5nksGeOtDaU5xaAjpmwxpIY4o4Vg+iVzshLAboZbM7Mv4se8KQL+Dgu60+YlDBUsVyjX/KYduZndwOwGNj0+5jrW4W/16JwvraWjTV5uplBA2MKgoXzDKeXgJfUNGw2fllwC6R4jx3yCUcvgbcMKZwJPExxgiVmDOKQn5gyYfcRSaNzoG4DyeKMyG0bNHWOPp/4QBaPZ6K1RHvhkl0Q9cIcrleMcU0LEhK/p60D8HRR6pNpjfp/EYCzqt8qKXtZDeI0mcK0T9eV5InER1naxKA6fVLIKJi+8zHqjPAuUTc6HDilNbOjGUwFGq1uoGhXlwUvNgX4eRBMSAdyj481nxJq+KNPZhIYlontRpCGj7udD1dYY0Ngupg/4El3cVWEMQMQiOonsszmbNhOczQl19Qzg9vzUrJyhfb33yuAQjCV4zoQ5toPRevURnOJyZ9YYWVPZXdRrUw6TZQiirMngfNAzupoOBDfzIBWE0ugeJSH1AmJYpMjkAhSoL3m/cp/VlaIBF57rAddi27vCbXVdIDuiH5zPRH57RD1fqWzATxZ4JZT/sRFZRCl81LAhC6SdUn8XDDE5GmU4DbajmBHWCEW1/pVDYrwqxr/tWawICy4A+AIJ34IHSqQVUS3FHmk7VkPnSM6pmgSq7kX5D+/YE/TDEqBObYgrEnWYrrUDhCeNAUibIraBvk/2C3u/ikZuABf9nDwZD8k/scx3/31Z4fsonsyGKZECIZ6C18SxlKrCy6QgqR3TcHfppMVeZAC/6XLgjTY5e++2edbRxZQTdwAa+pk01BQimQimYJBR0oy273dO2OYtz3Bs/6cucoy4KRvxuimomdNqy3s5pbRZYrh1rbJnLYXauFv91bqb9XjVblLuz1Xf+OCRVsOxhkpiWKAcwFrG8xjTWrQZ8Myd5jK80utcQyB+qU4d776xo0WwlLPjJBjIUZeXGlWdGAQyllHQ5oGyS7inmZ8ve68htrlTVHGf7dBsEMvUIKgq4zyf+7UnvINM+T2+x0xBr0U3sckeRLkvMCGd4DWrfGTdISWC5pEJc4GIFsdka2moRldmtbLxsbM/7P0zTB9UZhPbA5yJhNoN7nk/scxdCOUWqDLEYxypIQQyx0/Rti81vboEe9OF47Dq/EVQZDQwzqVCrymuqDnn1Co4YVASrMWsFLf6ptS+wesMEJ+oBfO0mi3rkpdI9Wu/TmfpYGKoLS60zDdwMsTeA/4pyaXyaKvAs+tT7kMOljWiAh9i3Dao+ZNuBX+0+utHdTDQ2+ux8/ekuWAN+llycPGJtPS2e6fvJLjKd3622pGaVrnp+ZmUlQ30rQ/5SpQ8uf5vj2S6l7J1kmaOzHS7zjWS6cL43SieYsUo2jOU0S94JOK3SEpOmWWN6vn08XrvnuGwKftMAqCHI7zh1g2xoGNmYCvgjPuvAdxQ0+VWWSkwMvUh/QsIEmj3eGXKB/9XPaKMPRq3dcJAmy9/z8k7ZcIF0IybzWpTBdVu2+47xhhOo3JmXLHYPhprvk7g8C70bvzasHhjnNlY+epSeyvTr3Xgam7DTljZ+97JnRn+Qk/uLCTl54+y+Qn3wdR2By2u1lR+hyGUJIWDZjqKGzZTjkZgPquDm/dE/Jhrf/gMcyRAfesoGqaO08qvd83ZahKHhkfFij6xg9qM60OEdsGJnZmlqIc6uPdopLzMp28KkJdN82zsSMsrGIjHpuR3bn/iGFywZFpV2X2h3GHkiYDlGcQMQU6GKPcV0fyeOM2T8mn5BySeImCortrAfe65e9Wu88+s4X1JpX4udQoqiehTp+lNR/wnf3pl5vbBc5ZZOMMr9BaLSFkitKPWIgCMj56hwvTtQWnYZf4bO7yV/AsuqbBwtTWSknQiNFQIDt5ZG3BZgbl6p1BDNStegtDxavbxUR2WniZVqYNBtV9xhq76WKnYcPXg9NuIfgbeIOciR6GvKKtGam6INgf5C1CIyFrPS5mJLs80K9G2UT5MJanbFlRTpSUvp4Cg13LBGv43daOTVfJqZwPRRbXWvUj1JfssIE2I6x5Jqzfj2iBIX+q6x/7GYB+BOlzMJ6GZMysF5tiGl6SUvA5D88YZMc/guvN1GbcnLSHHRuCD5Z2XdBIizI5xxhdf6b3Ivu/Si3dUs5U7SYB73385SCTU/ZrBYSYpNhCkfBMUlcMIoA5cOXWqhFhx47U2X1iRpziXSVCY/DbXzsHtYz6fTJVnUNepetoCyobAytfNZIs5/sPL61IHBlpSV4wSuMHMrHUoYSsareUbUa7X+7TY8oHwdc3eZekuiK0u4NtBKxR/lm7HhK5dytUbJ+XVf2voShw0yENIrFBlwTu0jOIBB6wZ6rOPdmxZ/7k8lqGmVWgwV+DdNhhwKR7uMmdgkawrxwuO/u83+2+Fa5fbOnyFu6Yem4DXzGTsr1GOXJRP6tw6UAafgfQcRI441ku9rzbXYXTXuR66aJyZRMX87Lg16zi0TtwFyPwlt2e49yDSdE4Qqr/yhzkFDCOGi3xAnytjVRruBzMPDzcX4IsJzAFPP/6FzOVzPS4sUSje42WLmR5Aa7IBmFGMDqChuNnI4psqQeC9SO64NOHjgNSzr1hoBzI82P499XIvFpi8eKe1JSqTPqBEYvXv1MVXCcwLJIY9VjgQkPm1MF6SpDtCchI84PAav583eQBKg8IWtztzRl3cFk2c4A8tz75/y6KJXjPhqIMC2D+VjnE2F90oe03wxhLJ0cp5fkty4IdqO8q/vWCh5J+vzuI4znZwfYSXgk4cciaJANp6xsPHOvEhAGAl8Hui0TkHfXvTofI3AznG9cRI/Ar5vywFcxpRi8QghHX0QkkCetUjCGO8ql/r8yGPa7SSx+S060zqV21tb+j5vYuTxhLE8QhsIomqJtsq8AY8zUlJmuK95YghXhFR297CdO1qWy4pP3sskFJK0mdChSlErE8FFBiShhQB931X7FfrRSGw3LC1F2KyOPCnUPpWd0rgbPSKdWzhGpbwNNcLirSYVTQ4VY7JJXu251DG9gaSqkpgfn61/S9/7yY5XNy+03OYoYVfoB/lA6a7HbVLEdIZ2A7/6Tn8Iy0+WoJfnf8Gl+YrSDwm7grBlZbQhZn8eaERcBfNREnnLk1Jk+eRoyMjp2VxrNu+WQ/PVKL+CIKvRf4et+ZrCF2rHQA4pc17BofRJBDADlLseiLTgXLApbSIyx0Js68VRjWvrQU9kqGupRrudesIltPmEsBuf0Ab7yHDAV03Nuiua3um6FSLsgVkMt+a1mxGBGepqCQFbPl6a1PDEz7Y/1CETRbfqPjdPZafwxWUA11nf5yhFJ4Mg62r0+3CYMXO2SjMeYHpOPjoUoLQ3NIZIPib0eL5n5TtrlSuekygOYcnD+fdW2XDhUh51HCOtoMkDbca9Iwfaj9/QiPDEZDi8qsf/ukpMD/j0N6j4kQw03n59zywLgZYj2IgGOEYGm/RiiBqfcd1BGEYZ1YT7Ti+TzeaqhUjq9ep4GutS9jLU/hzX1k3mIYecIu84smhyXiyVKqtoBCC+wuCktdo7Y4EGeKU+xXeYRlKrYANb0c068KGjHOVZUFS/l4GIfSk27Nz6Pf4R/88KRgbh64hrhXVXBPKo+vvmHQXe2G848/kFBfWjIzqMGzt88v5iMYfEphV0qGivu8xTJ3Vwfri4kDbLLyb49VAkPkw8j+9mAWWBNYMU1yIJEMm9dnkr59cQxSuLP8yMupGk9Cpzp57YyZg6GCNd7c6aGPmBAhbjNKqwvZgApf/iDa4PdiqVvtvOcqKn7fN0W5W6J/bfwZQ1pXLtC+wGeST1+iHpCBSOp37ACWpQJHhGxUFfbViY9tBtmuL5btO+k1NUYQKws3jTe87yMWDtUzM2U8kC+t2Y6ZxAN8K922SOa6kgF3ixZCwRSVPbxSVaA/zC2zxMkDyW68MZjUSretsiRquwNHZujvsikMnmqtLid8lQYOmlI+nWfKE4klZUcdLcXinL1RtJ/gnqe71UMyEjs7J2ddbzh2b0qVr1qjbeqP+lks5mxiGPa3NiXqK69Hn5p5wc00sepaVHDoOuI2qsOI6bmEZrrYcKqz24WJaUSE0UVWRf3+BvDLsvC7QdTax4Qbww/fmVkydi1WV4Hd+F5D4AWwzsImkMefkWqGUH1ByfYdMlC2o/cmiCGzsLiKHSflT5okpefPfjwcLyJlnfGERKApJasTZmshVR4mNiRNH8kIWcERQXDUX0cFiKhc+JMwneMfbwFP2RD82qVbG9ZK0U0PdCT6ihj6MCSN/y0ed15GHygCMIevb0CMMjWIF2QGNdB7/RU35OZ2PZpLVody6fyF2TPlphftf7bUFm2AkZLYbwMHTlokC6kN3YEBWyT/1R35xoOIji7tFOufuaR3A1DsvAHE26LzEOuo4QNA4WBPZFPmgLNwFkqqNm9O7Hqya+z/ucL20f9CRjJ9fXsSgossmA6vUrFpcTc3H2J+VpPcmCAA8dDCEjCVV4gFXXAriHXjTLqCYEGVJwcZAjFBq7ICMnghoYIGHXIpU6iWfs8ibdC1ecoKzJSLit3/ELvHMRi2NIvJo37reyJkr0S3c27XbuPzbyblDMnNCqmiED3w6OvLi2j4ymczCb3AH9SPtFggS7koFrx4Few2fFd0tIkV7qh7XhkaJy1K9hKK6MIpUh/PdMLP1r8QzEIjJTd/DJVGWAqL95jG2Sr/bVuXZI2VDlBWrd4A1zu5buco0pf9u6nzEqpASOkVEx0x7fLnyPwTv1LlymrgY+odY4R9Ax8SIZNLnAmNAEjQyAwgSGCq6hN0aPMnkVIqJIlIA48QVwHiQXXSsu/OsWa2feuiMFyJCRFBeJaZ7K7ZMw4Tv86Jfu1lmBRf23bQ4IJ5ZLFDLr+/u6CPzIpZENmY1I8FDiPViOdYhIyPJhtoHFP1YLkOy0e9Svanmmiqd5e2b+WyBy5hRj+qj1c4eAVgXd3MeIfz4buYONDBwYbnhCcon7FdYX3btsuQrZZjiyfx79YrGUO4d3x/moGg3QpCqRh1/3Jx4E6TWD0+mbfCw8aSoPPTSi3UCWwNLFmC1cLFgntpLh77YXnQRvZS6fFom6OCVPdB33Z35cZqPvbE1knDe1XkFEAgsSTNEHEsePjUkMMjXro3wIBIbZ4SY9tleobg4ng5s3zx0N3EGH9eYM+o6sHK/K9/VKgO+buBcO5iXd8VHCv2XhphtLJpdrpBLaPLeDpFUHQqga2Eb8e1HIb91Jf1Q3qgoEMQPwPCZUueV4AQUUHhdT0MNqtFVuDPmdGCDZ/6BDYcK9s3Ju/J0jXSvPn609CwVTSbOMJudGwqiwP7vqeoAARVs487AhnHqzsYpgnEpiJE5nhBT0hNLh6vUw0rL6KsGxcSbED9TJqOcy39dCyt8v0ajS4Pa/0LQVNBn2KUQXjREHq6h/ZbP7FVTVl8k9o6mAvP2M5EveGnCRtsfBgEEyStxwZNO1STpaAF+NX2pYb4LwkYac6NH9P8zN1cC18cdQoPTsYDOZlZFbAIwdzddYEXCD39bB2OoTuleIueauwQILT8w2/Inl2wU6bsLNeABU/NQutjQ+FdXcCz9LRNqBS9OL8q40+tOAPkLv19Fb9NfftyNBzb5Z3uWkSMRIE+nZHYUvXNX3F8EcCFn1aJPZcQVXoABPXsVQrNUMYcwJd5G3F0sO6Db10aj00tYmkWvE5jX76Swv7AgIhjz8cIwsa9QmmCveG9ON6qR6EYKe78anM/DpBdFrb3dVvwArBteX93b6kD7G9QOl/SYjgaF87fHbciV/FpGq6NrVR1yqwfBji5Fvmz8utwv1q2hgB"
+        },
+        {
+          "type": "text",
+          "text": "**Recommendation:** For a team of ten people, cloud (SaaS and managed services) is usually the more sensible choice. Keep your own server only for specific exceptions.\n\n**Why cloud**\n- Email, documents and collaboration can be covered by SaaS services. Indicative prices for Microsoft 365 Business (Standard to Premium) are roughly USD 12.50–22 per user per month with an annual commitment. Google Workspace Business costs roughly USD 7–18. Prices are in USD excluding VAT, they change, and you need to verify them in the current price list and convert them to crowns.\n- Your own server means costs for hardware, server OS licenses, off-site backups, electricity, a UPS and replacement roughly every 4–5 years. For ten users this usually does not pay off unless you have a specific need.\n- Vendor studies on savings or security are not independent, so I do not use them as evidence in the conclusion.\n\n**Costs that are easy to overlook**\n- **Migration:** planning, moving email and data, setting up access, training and parallel running. For a team of this type it is on the order of tens of hours of work (a rough estimate, not measured data).\n- **Ongoing fees:** per-user licenses, price increases, add-on services (backups, security, archiving) and possible fees for transferring data out of the cloud.\n- **Administrator time:** even SaaS needs management of accounts, permissions and a check of the settings. For a small team it is usually a few hours a week, often spread across several people.\n\n**Recommended steps**\n1. Move email, documents and collaboration to SaaS.\n2. Handle backups and disaster recovery in the cloud and test restores regularly.\n3. Keep local hardware only for specific reasons: an old application, data residency, large local data volumes or offline work.\n4. Before committing, run a two- to three-month pilot and measure real monthly costs, response time and administration time.\n\n**Limits of this conclusion**\n- The sources are mostly vendor blogs, treat the numbers as rough guidance.\n- I do not know your requirements for compliance, performance, budget or the team's IT skills.\n- There is no data for the Czech environment or prices in crowns.\n- The conclusion does not apply to an exceptionally demanding or regulated application. In that case it must be reconsidered."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011Cguzm9Wsdycjxk8fowtZX",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 861,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 2741,
+            "output_tokens_details": {
+              "thinking_tokens": 1732
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        },
+        "http": {
+          "status": 200,
+          "requestId": "req_011Cguzm9EWjzxUeaNVk1asu",
+          "ms": 12683
+        }
+      },
+      "t": 28587
+    },
+    {
+      "type": "agent_output",
+      "agent": "free",
+      "text": "**Recommendation:** For a team of ten people, cloud (SaaS and managed services) is usually the more sensible choice. Keep your own server only for specific exceptions.\n\n**Why cloud**\n- Email, documents and collaboration can be covered by SaaS services. Indicative prices for Microsoft 365 Business (Standard to Premium) are roughly USD 12.50–22 per user per month with an annual commitment. Google Workspace Business costs roughly USD 7–18. Prices are in USD excluding VAT, they change, and you need to verify them in the current price list and convert them to crowns.\n- Your own server means costs for hardware, server OS licenses, off-site backups, electricity, a UPS and replacement roughly every 4–5 years. For ten users this usually does not pay off unless you have a specific need.\n- Vendor studies on savings or security are not independent, so I do not use them as evidence in the conclusion.\n\n**Costs that are easy to overlook**\n- **Migration:** planning, moving email and data, setting up access, training and parallel running. For a team of this type it is on the order of tens of hours of work (a rough estimate, not measured data).\n- **Ongoing fees:** per-user licenses, price increases, add-on services (backups, security, archiving) and possible fees for transferring data out of the cloud.\n- **Administrator time:** even SaaS needs management of accounts, permissions and a check of the settings. For a small team it is usually a few hours a week, often spread across several people.\n\n**Recommended steps**\n1. Move email, documents and collaboration to SaaS.\n2. Handle backups and disaster recovery in the cloud and test restores regularly.\n3. Keep local hardware only for specific reasons: an old application, data residency, large local data volumes or offline work.\n4. Before committing, run a two- to three-month pilot and measure real monthly costs, response time and administration time.\n\n**Limits of this conclusion**\n- The sources are mostly vendor blogs, treat the numbers as rough guidance.\n- I do not know your requirements for compliance, performance, budget or the team's IT skills.\n- There is no data for the Czech environment or prices in crowns.\n- The conclusion does not apply to an exceptionally demanding or regulated application. In that case it must be reconsidered.",
+      "tokens": {
+        "input": 861,
+        "output": 2741
+      },
+      "t": 28587
+    },
+    {
+      "type": "handoff",
+      "from": "free",
+      "to": "free-2",
+      "note": "**Recommendation:** For a team of ten people, cloud (SaaS and managed services) is usually the more sensible choice. Keep your own server only for specific exceptions.\n\n**Why cloud**\n- Email, documents and collaboration can be covered by SaaS services. Indicative prices for Microsoft 365 Business (Standard to Premium) are roughly USD 12.50–22 per user per month with an annual commitment. Google Workspace Business costs roughly USD 7–18. Prices are in USD excluding VAT, they change, and you need to verify them in the current price list and convert them to crowns.\n- Your own server means costs for hardware, server OS licenses, off-site backups, electricity, a UPS and replacement roughly every 4–5 years. For ten users this usually does not pay off unless you have a specific need.\n- Vendor studies on savings or security are not independent, so I do not use them as evidence in the conclusion.\n\n**Costs that are easy to overlook**\n- **Migration:** planning, moving email and data, setting up access, training and parallel running. For a team of this type it is on the order of tens of hours of work (a rough estimate, not measured data).\n- **Ongoing fees:** per-user licenses, price increases, add-on services (backups, security, archiving) and possible fees for transferring data out of the cloud.\n- **Administrator time:** even SaaS needs management of accounts, permissions and a check of the settings. For a small team it is usually a few hours a week, often spread across several people.\n\n**Recommended steps**\n1. Move email, documents and collaboration to SaaS.\n2. Handle backups and disaster recovery in the cloud and test restores regularly.\n3. Keep local hardware only for specific reasons: an old application, data residency, large local data volumes or offline work.\n4. Before committing, run a two- to three-month pilot and measure real monthly costs, response time and administration time.\n\n**Limits of this conclusion**\n- The sources are mostly vendor blogs, treat the numbers as",
+      "t": 28587
+    },
+    {
+      "type": "agent_start",
+      "agent": "free-2",
+      "role": "Editor",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Editor. Edit the text from the previous agent for a busy manager. Keep it under 200 words, use plain language, and end with one sentence that gives the recommendation.\nKeep every reply under 300 words. Answer in English.",
+      "t": 28587
+    },
+    {
+      "type": "round",
+      "agent": "free-2",
+      "round": 1,
+      "ms": 6085,
+      "stop": "end_turn",
+      "usage": {
+        "input": 1149,
+        "output": 1449
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Should a small company run its own servers or move everything to the cloud? Give a recommendation for a team of ten people.\n\nThe previous agent (free) wrote:\n**Recommendation:** For a team of ten people, cloud (SaaS and managed services) is usually the more sensible choice. Keep your own server only for specific exceptions.\n\n**Why cloud**\n- Email, documents and collaboration can be covered by SaaS services. Indicative prices for Microsoft 365 Business (Standard to Premium) are roughly USD 12.50–22 per user per month with an annual commitment. Google Workspace Business costs roughly USD 7–18. Prices are in USD excluding VAT, they change, and you need to verify them in the current price list and convert them to crowns.\n- Your own server means costs for hardware, server OS licenses, off-site backups, electricity, a UPS and replacement roughly every 4–5 years. For ten users this usually does not pay off unless you have a specific need.\n- Vendor studies on savings or security are not independent, so I do not use them as evidence in the conclusion.\n\n**Costs that are easy to overlook**\n- **Migration:** planning, moving email and data, setting up access, training and parallel running. For a team of this type it is on the order of tens of hours of work (a rough estimate, not measured data).\n- **Ongoing fees:** per-user licenses, price increases, add-on services (backups, security, archiving) and possible fees for transferring data out of the cloud.\n- **Administrator time:** even SaaS needs management of accounts, permissions and a check of the settings. For a small team it is usually a few hours a week, often spread across several people.\n\n**Recommended steps**\n1. Move email, documents and collaboration to SaaS.\n2. Handle backups and disaster recovery in the cloud and test restores regularly.\n3. Keep local hardware only for specific reasons: an old application, data residency, large local data volumes or offline work.\n4. Before committing, run a two- to three-month pilot and measure real monthly costs, response time and administration time.\n\n**Limits of this conclusion**\n- The sources are mostly vendor blogs, treat the numbers as rough guidance.\n- I do not know your requirements for compliance, performance, budget or the team's IT skills.\n- There is no data for the Czech environment or prices in crowns.\n- The conclusion does not apply to an exceptionally demanding or regulated application. In that case it must be reconsidered."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "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"
+        },
+        {
+          "type": "text",
+          "text": "**Summary: cloud or your own server for a team of ten?**\n\nFor a team of ten, cloud pays off. Email, documents and collaboration can run on SaaS services, which need no servers of your own and no hardware maintenance.\n\n**Why cloud**\n- Your own server means hardware, off-site backups, an uninterruptible power supply (UPS) and replacement roughly every 4–5 years. For ten people this usually does not pay off.\n- Software prices are roughly USD 7–22 per user per month. Check the current price list and the conversion to crowns.\n\n**What to watch for**\n- Migration: on the order of tens of hours of work (an estimate, not measured data).\n- Ongoing fees: licenses, backups, price increases.\n- Managing accounts and permissions: a few hours a week.\n\n**Steps**\n1. Move email, documents and collaboration to the cloud.\n2. Handle backups in the cloud and test restores regularly.\n3. Keep a local server only for a specific reason, for example an old application or data storage requirements.\n4. Before committing, try a two- to three-month pilot and measure real costs.\n\n**Caution:** The numbers are rough and the sources are mostly from providers. The conclusion does not apply to a demanding or regulated application.\n\n**Recommendation:** Move to the cloud and keep your own server only where you have a specific reason for it."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011Cguzn5Z2hzXb3HiDGci1z",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 1149,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 1449,
+            "output_tokens_details": {
+              "thinking_tokens": 832
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        },
+        "http": {
+          "status": 200,
+          "requestId": "req_011Cguzn5GRGpDJb3wDqCPrj",
+          "ms": 6085
+        }
+      },
+      "t": 34672
+    },
+    {
+      "type": "agent_output",
+      "agent": "free-2",
+      "text": "**Summary: cloud or your own server for a team of ten?**\n\nFor a team of ten, cloud pays off. Email, documents and collaboration can run on SaaS services, which need no servers of your own and no hardware maintenance.\n\n**Why cloud**\n- Your own server means hardware, off-site backups, an uninterruptible power supply (UPS) and replacement roughly every 4–5 years. For ten people this usually does not pay off.\n- Software prices are roughly USD 7–22 per user per month. Check the current price list and the conversion to crowns.\n\n**What to watch for**\n- Migration: on the order of tens of hours of work (an estimate, not measured data).\n- Ongoing fees: licenses, backups, price increases.\n- Managing accounts and permissions: a few hours a week.\n\n**Steps**\n1. Move email, documents and collaboration to the cloud.\n2. Handle backups in the cloud and test restores regularly.\n3. Keep a local server only for a specific reason, for example an old application or data storage requirements.\n4. Before committing, try a two- to three-month pilot and measure real costs.\n\n**Caution:** The numbers are rough and the sources are mostly from providers. The conclusion does not apply to a demanding or regulated application.\n\n**Recommendation:** Move to the cloud and keep your own server only where you have a specific reason for it.",
+      "tokens": {
+        "input": 1149,
+        "output": 1449
+      },
+      "t": 34672
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 17919,
+        "output": 6829,
+        "searches": 1,
+        "steps": 5
+      },
+      "finalText": "**Summary: cloud or your own server for a team of ten?**\n\nFor a team of ten, cloud pays off. Email, documents and collaboration can run on SaaS services, which need no servers of your own and no hardware maintenance.\n\n**Why cloud**\n- Your own server means hardware, off-site backups, an uninterruptible power supply (UPS) and replacement roughly every 4–5 years. For ten people this usually does not pay off.\n- Software prices are roughly USD 7–22 per user per month. Check the current price list and the conversion to crowns.\n\n**What to watch for**\n- Migration: on the order of tens of hours of work (an estimate, not measured data).\n- Ongoing fees: licenses, backups, price increases.\n- Managing accounts and permissions: a few hours a week.\n\n**Steps**\n1. Move email, documents and collaboration to the cloud.\n2. Handle backups in the cloud and test restores regularly.\n3. Keep a local server only for a specific reason, for example an old application or data storage requirements.\n4. Before committing, try a two- to three-month pilot and measure real costs.\n\n**Caution:** The numbers are rough and the sources are mostly from providers. The conclusion does not apply to a demanding or regulated application.\n\n**Recommendation:** Move to the cloud and keep your own server only where you have a specific reason for it.",
+      "t": 34673
+    }
+  ],
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "planner",
+        "agent": "planner",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "search": true
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Fact checker",
+        "instructions": "Check the draft from the previous agent. Fix wrong or unsupported claims and add anything important that is missing, especially staff time, migration work and ongoing fees. Return the whole corrected draft, not a list of comments."
+      },
+      {
+        "id": "free-2",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Editor",
+        "instructions": "Edit the text from the previous agent for a busy manager. Keep it under 200 words, use plain language, and end with one sentence that gives the recommendation."
+      }
+    ],
+    "edges": [
+      {
+        "from": "planner",
+        "to": "researcher"
+      },
+      {
+        "from": "researcher",
+        "to": "writer"
+      },
+      {
+        "from": "writer",
+        "to": "free"
+      },
+      {
+        "from": "free",
+        "to": "free-2"
+      }
+    ]
+  },
+  "task": "Should a small company run its own servers or move everything to the cloud? Give a recommendation for a team of ten people.",
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 17919,
+    "output": 6829,
+    "searches": 1,
+    "steps": 5
+  },
+  "startedAt": "2026-11-10T21:57:58.022Z",
+  "endedAt": "2026-11-10T21:58:32.987Z",
+  "durationMs": 34965,
+  "about": {
+    "title": "Cloud or own server?",
+    "author": "Radek Šimčík",
+    "url": "https://portfolio.radeksimcik.cz",
+    "description": "A **sequential** run with five agents, each working on what the one before it passed on:\n\n1. **Planner** breaks the task into a short plan.\n2. **Researcher** searches the web for facts and sources.\n3. **Writer** turns the findings into a clear recommendation.\n4. **Fact checker** *(free agent)* corrects weak or unsupported claims and adds missing costs such as staff time and migration.\n5. **Editor** *(free agent)* shortens the text for a busy manager and ends with one recommendation.\n\nThe two free agents show how you can add your own roles with your own instructions. This run was recorded in Czech and translated into English for the library, so the wording follows the original answers closely. Open the **Messages** tab to see exactly what each agent received."
+  }
+}
