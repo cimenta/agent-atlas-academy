@@ -495,3 +495,12 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 @media (max-width: 599px) { .tab-row { flex-wrap: wrap; } .tab-row .search-bar { width: 100%; } }
 
 .lead { color: var(--muted); font-size: 1.05rem; max-width: 46rem; }
+
+.about { margin: 8px 0 20px; }
+.about h2 { margin: 0 0 6px; font-size: 1.25rem; }
+.about p { max-width: 46rem; }
+.about-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-top: 12px; }
+.about-box { padding: 12px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+.about-box b { display: block; margin-bottom: 4px; }
+.home-task { margin: 0 0 8px; padding: 8px 12px; background: var(--surface); border-radius: 8px; font-size: 0.95rem; }
+.home-task .lb { font-weight: 600; }

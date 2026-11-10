@@ -41,7 +41,6 @@
   "player.finished": "Replay finished",
   "landing.title": "See how AI agents work together",
   "landing.intro": "Watch a real recorded run, step by step. Agents hand work to each other, use tools and build one answer.",
-  "landing.body": "## What is Agent Atlas?\n\nA free site that shows how AI agents work, talk to each other and are organised. An **agent** is a language model with a role and, sometimes, tools. **Orchestration** decides who works when, what each agent sees and when to stop.\n\n- **Watch:** replay real runs and read the exact messages that were sent.\n- **Compare:** see how sequential, parallel and supervisor designs behave differently.\n- **Try:** run your own small experiment with your own Anthropic key. Nothing is stored on a server.",
   "learn.title": "Learn",
   "learn.intro": "Short articles on every concept in Agent Atlas. Some articles mention features, such as running your own experiments with your own API key, that arrive in a later version.",
   "learn.section.basics": "Basics",
@@ -385,5 +384,14 @@
   "search.count": "{n} of {total}",
   "search.none": "No matches",
   "result.search": "Search the answer",
-  "menu.home": "Home"
+  "menu.home": "Home",
+  "landing.aboutTitle": "What is Agent Atlas?",
+  "landing.aboutText": "A free site that shows how AI agents work, talk to each other and are organised. An agent is a language model with a role and, sometimes, tools. Orchestration decides who works when, what each agent sees and when to stop.",
+  "landing.watch.title": "Watch",
+  "landing.watch.text": "Replay real runs and read the exact messages that were sent.",
+  "landing.compare.title": "Compare",
+  "landing.compare.text": "See how sequential, parallel and supervisor designs behave differently.",
+  "landing.try.title": "Try",
+  "landing.try.text": "Run your own small experiment with your own Anthropic key. Nothing is stored on a server.",
+  "landing.task": "Task"
 }

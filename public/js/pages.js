@@ -41,13 +41,26 @@ export function renderNotFound(ctx) {
   );
 }
 
-// The home page: a simple run that plays by itself, and what the site is about. Nothing else.
+// The home page: what the site is about, and a simple run that plays by itself. Nothing else.
 export async function renderLanding(ctx) {
   const { doc, t } = ctx;
   setTitle(ctx, "");
   const host = h(doc, "div", { class: "replay-host", "data-ui": "home-player" });
-  const about = h(doc, "div", { class: "landing-body", "data-ui": "home-about" }, markdown(ctx, t("landing.body")));
-  show(ctx, h(doc, "h1", {}, t("landing.title")), h(doc, "p", { class: "lead" }, t("landing.intro")), host, about);
+  const taskBar = h(doc, "p", { class: "home-task", "data-ui": "home-task", hidden: true });
+  const about = h(
+    doc,
+    "section",
+    { class: "about", "data-ui": "home-about" },
+    h(doc, "h2", {}, t("landing.aboutTitle")),
+    h(doc, "p", {}, t("landing.aboutText")),
+    h(
+      doc,
+      "div",
+      { class: "about-cols", "data-ui": "home-about-boxes" },
+      ...["watch", "compare", "try"].map((key) => h(doc, "div", { class: "about-box" }, h(doc, "b", {}, t(`landing.${key}.title`)), t(`landing.${key}.text`))),
+    ),
+  );
+  show(ctx, h(doc, "h1", {}, t("landing.title")), h(doc, "p", { class: "lead" }, t("landing.intro")), about, taskBar, host);
   try {
     const index = await getJson(ctx, "/runs/index.json");
     const first = index.runs[0];
@@ -55,6 +68,11 @@ export async function renderLanding(ctx) {
     const run = await getJson(ctx, `/runs/${first.id}.json`);
     const explanations = await loadExplanations(ctx, first.id);
     if (ctx.isStale()) return;
+    const task = run.events.find((e) => e.type === "run_start")?.task;
+    if (typeof task === "string" && task) {
+      taskBar.replaceChildren(h(doc, "span", { class: "lb" }, `${t("landing.task")}: `), task);
+      taskBar.hidden = false;
+    }
     const handle = mountReplay(host, { run, explanations, t, doc, autoStart: ctx.autoStart, timeScale: first.timeScale });
     ctx.onLeave(handle.destroy);
   } catch {
