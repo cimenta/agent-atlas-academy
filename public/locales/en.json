@@ -405,5 +405,9 @@
   "create.definition.invalid": "That definition is not a valid design.",
   "create.definition.note.model": "A model that is not available here was replaced by the default.",
   "create.definition.note.taskCut": "The task was too long and was shortened.",
-  "player.exportMenu": "Export"
+  "player.exportMenu": "Export",
+  "create.clearDefinition": "Clear definition",
+  "create.clearDefinitionHint": "Empty the task and the diagram and start again",
+  "create.clearConfirm": "Clear the task and the diagram?",
+  "create.definition.cleared": "Cleared. Start a new run or load a definition."
 }

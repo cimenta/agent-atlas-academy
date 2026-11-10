@@ -203,6 +203,15 @@ export function renderCreate(ctx) {
     const definitionFile = h(doc, "input", { type: "file", accept: ".json,application/json", hidden: true, "data-ui": "definition-file" });
     const loadButton = h(doc, "button", { type: "button", "data-ui": "load-definition", title: t("create.loadDefinitionHint") }, t("create.loadDefinition"));
     loadButton.addEventListener("click", () => definitionFile.click());
+    const clearButton = h(doc, "button", { type: "button", "data-ui": "clear-definition", title: t("create.clearDefinitionHint") }, t("create.clearDefinition"));
+    clearButton.addEventListener("click", () => {
+      const hasWork = draft.task.trim() !== "" || draft.editor.design().nodes.length > 0;
+      if (hasWork && !doc.defaultView.confirm(t("create.clearConfirm"))) return;
+      draft.task = "";
+      draft.pattern = "sequential";
+      draft.editor = createEditor("sequential");
+      showForm(t("create.definition.cleared"), "status");
+    });
     definitionFile.addEventListener("change", async () => {
       const file = definitionFile.files?.[0];
       definitionFile.value = "";
@@ -228,7 +237,7 @@ export function renderCreate(ctx) {
     });
 
     root.replaceChildren(
-      h(doc, "div", { class: "create-head" }, h(doc, "h2", {}, t("create.title")), loadButton, definitionFile),
+      h(doc, "div", { class: "create-head" }, h(doc, "h2", {}, t("create.title")), loadButton, clearButton, definitionFile),
       startNotice ? h(doc, "p", { class: "notice", role: noticeRole }, startNotice) : "",
       h(doc, "div", { class: "field wide" }, h(doc, "label", { for: "cr-task" }, t("create.taskLabel")), taskInput, counter),
       h(doc, "h3", {}, t("create.patternHeading")),

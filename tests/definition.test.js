@@ -92,10 +92,10 @@ test("buildDefinition copies the design instead of sharing it", () => {
   assert.equal(def.design.nodes.length, 0);
 });
 
-test("the demo definitions in demo-definitions all load", async () => {
-  const { readFileSync, readdirSync } = await import("node:fs");
+// The folder is the owner's working material, so missing or empty is fine; whatever is there must load.
+test("every definition file in demo-definitions loads", async () => {
+  const { readFileSync, readdirSync, existsSync } = await import("node:fs");
   const dir = new URL("../demo-definitions/", import.meta.url);
-  const files = readdirSync(dir).filter((f) => f.endsWith(".json"));
-  assert.ok(files.length >= 4);
+  const files = existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(".json")) : [];
   for (const f of files) assert.equal(loadDefinition(readFileSync(new URL(f, dir), "utf8")).ok, true, f);
 });

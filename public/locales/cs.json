@@ -405,5 +405,9 @@
   "create.definition.invalid": "Tato definice není platný návrh.",
   "create.definition.note.model": "Model, který tu není k dispozici, byl nahrazen výchozím.",
   "create.definition.note.taskCut": "Zadání bylo příliš dlouhé a bylo zkráceno.",
-  "player.exportMenu": "Exportovat"
+  "player.exportMenu": "Exportovat",
+  "create.clearDefinition": "Vymazat definici",
+  "create.clearDefinitionHint": "Vyprázdnit zadání i diagram a začít znovu",
+  "create.clearConfirm": "Vymazat zadání i diagram?",
+  "create.definition.cleared": "Vymazáno. Začněte nový běh nebo načtěte definici."
 }
