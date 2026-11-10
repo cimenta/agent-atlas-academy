@@ -1,9 +1,11 @@
 // Parallel: every worker gets the task and works at the same time; one combiner writes the answer.
+// Agents that follow the combiner (a critic, a writer) then work one after another on that answer.
+import { parallelParts } from "../patterns.js";
+
 const NOTE_MAX = 2000;
 
 export async function run({ design, task, agents, emit }) {
-  const combiner = design.nodes.find((n) => n.agent === "combiner");
-  const workers = design.nodes.filter((n) => n.agent !== "combiner");
+  const { hub: combiner, workers, followers } = parallelParts(design.nodes, design.edges);
   const results = await Promise.all(
     workers.map(async (worker) => {
       const result = await agents.get(worker.id).run(`Task: ${task}`);
@@ -14,6 +16,12 @@ export async function run({ design, task, agents, emit }) {
     emit({ type: "handoff", from: result.id, to: combiner.id, note: result.text.slice(0, NOTE_MAX) });
   }
   const input = `Task: ${task}\n\nResults from the agents:\n${results.map((r) => `--- ${r.id} ---\n${r.text}`).join("\n\n")}`;
-  const final = await agents.get(combiner.id).run(input);
-  return final.text;
+  const merged = await agents.get(combiner.id).run(input);
+  let previous = { id: combiner.id, text: merged.text };
+  for (const id of followers) {
+    emit({ type: "handoff", from: previous.id, to: id, note: previous.text.slice(0, NOTE_MAX) });
+    const result = await agents.get(id).run(`Task: ${task}\n\nThe previous agent (${previous.id}) wrote:\n${previous.text}`);
+    previous = { id, text: result.text };
+  }
+  return previous.text;
 }

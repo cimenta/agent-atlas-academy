@@ -12,10 +12,12 @@
         "search": true
       },
       {
-        "id": "critic",
-        "agent": "critic",
+        "id": "free",
+        "agent": "free",
         "model": "fast",
-        "search": false
+        "search": false,
+        "name": "Home cook",
+        "instructions": "Answer as an experienced home cook. Give practical ways to waste less food in a normal kitchen."
       },
       {
         "id": "combiner",
@@ -30,7 +32,7 @@
         "to": "combiner"
       },
       {
-        "from": "critic",
+        "from": "free",
         "to": "combiner"
       }
     ]

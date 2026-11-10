@@ -33,7 +33,7 @@ test("an agent that does not belong to the pattern is refused", () => {
   assert.deepEqual(editor.addNode("nonsense"), { ok: false, code: "node.agent" });
 });
 
-test("supervisor, combiner, judge and the free agent can only be added once", () => {
+test("supervisor, combiner and judge can only be added once, free agents as often as needed", () => {
   const sup = createEditor("supervisor");
   add(sup, "supervisor");
   assert.deepEqual(sup.addNode("supervisor"), { ok: false, code: "node.duplicate" });
@@ -44,8 +44,10 @@ test("supervisor, combiner, judge and the free agent can only be added once", ()
   add(deb, "judge");
   assert.deepEqual(deb.addNode("judge"), { ok: false, code: "node.duplicate" });
   const seq = createEditor("sequential");
-  add(seq, "free");
-  assert.deepEqual(seq.addNode("free"), { ok: false, code: "node.duplicate" });
+  const first = add(seq, "free");
+  const second = add(seq, "free");
+  assert.notEqual(first, second);
+  assert.equal(seq.design().nodes.filter((n) => n.agent === "free").length, 2);
 });
 
 test("the free agent starts with an empty name and instructions", () => {
@@ -106,8 +108,20 @@ test("hub patterns accept only spoke-to-hub edges, in the right direction", () =
   const p2 = add(par, "researcher");
   const comb = add(par, "combiner");
   assert.deepEqual(par.connect(p1, p2), { ok: false, code: "par.edges" });
-  assert.deepEqual(par.connect(comb, p1), { ok: false, code: "par.edges" });
   assert.deepEqual(par.connect(p1, comb), { ok: true });
+  assert.deepEqual(par.connect(comb, p1), { ok: false, code: "par.edges" }, "a worker cannot also follow the combiner");
+  assert.deepEqual(par.connect(p2, comb), { ok: true });
+
+  // After the combiner a line of agents may follow, one at a time.
+  const critic = add(par, "critic");
+  const writer = add(par, "writer");
+  assert.deepEqual(par.connect(writer, critic), { ok: false, code: "par.edges" });
+  assert.deepEqual(par.connect(comb, critic), { ok: true });
+  assert.deepEqual(par.connect(comb, writer), { ok: false, code: "par.edges" }, "the line continues from its last agent");
+  assert.deepEqual(par.connect(critic, comb), { ok: false, code: "par.edges" });
+  assert.deepEqual(par.connect(critic, writer), { ok: true });
+  assert.deepEqual(par.errors(), []);
+  assert.deepEqual(layoutDesign(par.design()).nodes.find((n) => n.id === writer).y, 3);
 });
 
 test("each pattern can be built into a design that passes validateDesign", () => {

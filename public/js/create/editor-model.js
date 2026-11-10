@@ -3,7 +3,7 @@
 import { AGENT_TYPES, DEFAULT_MODEL, NODE_MAX } from "../engine/catalog.js";
 import { validateDesign } from "../engine/patterns.js";
 
-const ONCE_ONLY = new Set(["supervisor", "combiner", "judge", "free"]);
+const ONCE_ONLY = new Set(["supervisor", "combiner", "judge"]);
 const EDITABLE = ["model", "search", "name", "instructions", "stance"];
 const DEFAULT_ROUNDS = 2;
 
@@ -81,7 +81,18 @@ export function createEditor(initialPattern) {
         const taken = edges.some((e) => e.from === from) || edges.some((e) => e.to === to) || closesCycle(from, to);
         if (taken) code = "seq.notChain";
       } else if (pattern === "parallel") {
-        if (!(b.agent === "combiner" && a.agent !== "combiner")) code = "par.edges";
+        // A worker feeds the combiner; after the combiner a line of agents may follow, one at a time.
+        const combiner = nodes.find((n) => n.agent === "combiner");
+        const touched = (id) => edges.some((e) => e.from === id || e.to === id);
+        let tail = combiner?.id;
+        for (let guard = 0; guard <= nodes.length; guard++) {
+          const out = edges.find((e) => e.from === tail);
+          if (!out) break;
+          tail = out.to;
+        }
+        if (b.agent === "combiner") {
+          if (a.agent === "combiner" || edges.some((e) => e.to === a.id)) code = "par.edges";
+        } else if (!(combiner && from === tail && !touched(to))) code = "par.edges";
       } else if (pattern === "supervisor") {
         if (!(a.agent === "supervisor" && b.agent !== "supervisor")) code = "sup.edges";
       } else if (!(a.agent === "debater" && b.agent === "judge")) {
@@ -157,11 +168,22 @@ export function layoutDesign(design, { orientation = "vertical" } = {}) {
   } else {
     const hubAgent = { parallel: "combiner", supervisor: "supervisor", debate: "judge" }[pattern];
     const hub = nodes.find((n) => n.agent === hubAgent && connected.has(n.id));
-    const spokes = nodes.filter((n) => n.agent !== hubAgent && connected.has(n.id));
+    const followers = [];
+    if (pattern === "parallel" && hub) {
+      let current = hub.id;
+      for (let i = 0; i < nodes.length; i++) {
+        const out = edges.find((e) => e.from === current);
+        if (!out) break;
+        followers.push(out.to);
+        current = out.to;
+      }
+    }
+    const spokes = nodes.filter((n) => n.agent !== hubAgent && connected.has(n.id) && !followers.includes(n.id));
     const spokeRank = pattern === "supervisor" ? 1 : 0;
     const hubRank = pattern === "supervisor" ? 0 : 1;
     spokes.forEach((n, offset) => spots.set(n.id, { rank: spokeRank, offset }));
     if (hub) spots.set(hub.id, { rank: hubRank, offset: Math.floor((spokes.length - 1) / 2) });
+    followers.forEach((id, i) => spots.set(id, { rank: hubRank + 1 + i, offset: Math.floor((spokes.length - 1) / 2) }));
   }
 
   const placed = [...spots.values()];

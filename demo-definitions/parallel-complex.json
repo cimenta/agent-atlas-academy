@@ -18,12 +18,6 @@
         "search": false
       },
       {
-        "id": "critic",
-        "agent": "critic",
-        "model": "fast",
-        "search": false
-      },
-      {
         "id": "free",
         "agent": "free",
         "model": "fast",
@@ -34,6 +28,18 @@
       {
         "id": "combiner",
         "agent": "combiner",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
         "model": "fast",
         "search": false
       }
@@ -48,12 +54,16 @@
         "to": "combiner"
       },
       {
-        "from": "critic",
+        "from": "free",
         "to": "combiner"
       },
       {
-        "from": "free",
-        "to": "combiner"
+        "from": "combiner",
+        "to": "critic"
+      },
+      {
+        "from": "critic",
+        "to": "writer"
       }
     ]
   }

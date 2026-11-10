@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { validateDesign, orderOf, clampLimits, PATTERNS } from "../public/js/engine/patterns.js";
+import { validateDesign, orderOf, clampLimits, parallelParts, PATTERNS } from "../public/js/engine/patterns.js";
 import { LIMIT_DEFAULTS, LIMIT_MAX, NODE_MAX, MODELS, AGENT_TYPES } from "../public/js/engine/catalog.js";
 
 const node = (id, agent, extra = {}) => ({ id, agent, model: "fast", search: false, ...extra });
@@ -145,7 +145,37 @@ test("parallel rules", () => {
   assert.ok(codes(validateDesign(extra)).includes("par.edges"));
   const back = parallel();
   back.edges[0] = edge("combiner", "researcher");
+  back.edges.push(edge("researcher", "combiner"));
   assert.ok(codes(validateDesign(back)).includes("par.edges"));
+});
+
+const followed = () => {
+  const d = parallel();
+  d.nodes.push(node("critic", "critic"), node("writer", "writer"));
+  d.edges.push(edge("combiner", "critic"), edge("critic", "writer"));
+  return d;
+};
+
+test("a parallel run may have a line of agents after the combiner", () => {
+  assert.equal(validateDesign(followed()).ok, true);
+  const parts = parallelParts(followed().nodes, followed().edges);
+  assert.deepEqual(parts.workers.map((n) => n.id), ["researcher", "researcher-2"]);
+  assert.deepEqual(parts.followers, ["critic", "writer"]);
+});
+
+test("the line after the combiner must be one line that starts at the combiner", () => {
+  const forked = followed();
+  forked.edges.push(edge("combiner", "writer"));
+  assert.ok(codes(validateDesign(forked)).includes("par.edges"));
+  const loose = followed();
+  loose.edges = loose.edges.filter((e) => e.from !== "critic");
+  assert.ok(codes(validateDesign(loose)).includes("par.edges"));
+  const loop = followed();
+  loop.edges.push(edge("writer", "combiner"));
+  assert.ok(codes(validateDesign(loop)).includes("par.edges"));
+  const fromWorker = followed();
+  fromWorker.edges.push(edge("researcher", "critic"));
+  assert.ok(codes(validateDesign(fromWorker)).includes("par.edges"));
 });
 
 test("supervisor rules", () => {

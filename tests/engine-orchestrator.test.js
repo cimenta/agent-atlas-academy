@@ -101,6 +101,25 @@ test("parallel workers run at the same time and the combiner sees every result",
   assert.deepEqual(events.filter((e) => e.type === "handoff").map((e) => e.to), ["combiner", "combiner"]);
 });
 
+test("agents after the combiner work in order on the combined answer", async () => {
+  const design = fan();
+  design.nodes.push(node("critic", "critic"), node("writer", "writer"));
+  design.edges.push(edge("combiner", "critic"), edge("critic", "writer"));
+  const calls = [];
+  const call = async (body) => {
+    calls.push(structuredClone(body));
+    return reply(roleOf(body).toUpperCase());
+  };
+  const events = [];
+  const result = await runDesign({ design, task: "t", limits: LIMIT_DEFAULTS, call, emit: (e) => events.push(e) });
+  assert.equal(result.outcome, "finished");
+  assert.equal(result.finalText, "WRITER");
+  assert.deepEqual(calls.map(roleOf).slice(-3), ["combiner", "critic", "writer"]);
+  assert.ok(calls.find((c) => roleOf(c) === "critic").messages[0].content.includes("COMBINER"));
+  assert.ok(calls.find((c) => roleOf(c) === "writer").messages[0].content.includes("CRITIC"));
+  assert.deepEqual(events.filter((e) => e.type === "handoff").map((e) => `${e.from}>${e.to}`).slice(-2), ["combiner>critic", "critic>writer"]);
+});
+
 test("an invalid design fails at once and calls nothing", async () => {
   let calls = 0;
   const { result, events } = await run({ pattern: "sequential", nodes: [], edges: [] }, async () => {

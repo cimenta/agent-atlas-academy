@@ -94,10 +94,10 @@ export function validateDesign(design) {
     if (!chainOrder(goodNodes, goodEdges)) add("seq.notChain");
   } else if (pattern === "parallel") {
     const combiners = byAgent("combiner");
-    const workers = others("combiner");
+    const parts = parallelParts(goodNodes, goodEdges);
     if (combiners.length !== 1) add("par.combiner");
-    if (workers.length < 2) add("par.workers");
-    if (combiners.length === 1 && !hubEdgesOk(workers, combiners[0], true)) add("par.edges");
+    if ((parts ? parts.workers.length : others("combiner").length) < 2) add("par.workers");
+    if (combiners.length === 1 && !parts) add("par.edges");
   } else if (pattern === "supervisor") {
     const supervisors = byAgent("supervisor");
     const workers = others("supervisor");
@@ -113,6 +113,36 @@ export function validateDesign(design) {
     if (!Number.isInteger(design.rounds) || design.rounds < 1 || design.rounds > 4) add("deb.rounds");
   }
   return finish();
+}
+
+// The parts of a parallel design: workers that all feed the one combiner, and an optional line
+// of agents after the combiner, each passing its result to the next. Null when the edges do not
+// fit that shape (or there is not exactly one combiner).
+export function parallelParts(nodes, edges) {
+  const hubs = nodes.filter((n) => n.agent === "combiner");
+  if (hubs.length !== 1) return null;
+  const hub = hubs[0];
+  const followers = [];
+  let current = hub.id;
+  for (;;) {
+    const outgoing = edges.filter((e) => e.from === current);
+    if (outgoing.length === 0) break;
+    if (outgoing.length > 1) return null;
+    const next = outgoing[0].to;
+    if (next === hub.id || followers.includes(next)) return null;
+    followers.push(next);
+    current = next;
+  }
+  const line = new Set([hub.id, ...followers]);
+  const workers = nodes.filter((n) => !line.has(n.id));
+  const feeding = edges.filter((e) => !line.has(e.from));
+  const covered = new Set();
+  for (const e of feeding) {
+    if (e.to !== hub.id || covered.has(e.from)) return null;
+    covered.add(e.from);
+  }
+  if (feeding.length !== workers.length || workers.some((w) => !covered.has(w.id))) return null;
+  return { hub, workers, followers };
 }
 
 // Node ids from start to end when the edges form one path through all nodes, else null.
