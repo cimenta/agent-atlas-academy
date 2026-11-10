@@ -64,9 +64,31 @@ function checkEvent(event, index, previousT, errors, agents) {
   return previousT;
 }
 
+// The optional About section of a run: who made it and what it shows. The description is Markdown.
+export const ABOUT_FIELDS = ["title", "author", "url", "description"];
+export const ABOUT_LIMITS = { title: 120, author: 120, url: 500, description: 5000 };
+
+function checkAbout(about, errors) {
+  if (!isObject(about)) {
+    errors.push("about must be an object");
+    return;
+  }
+  for (const key of Object.keys(about)) {
+    if (!ABOUT_FIELDS.includes(key)) errors.push(`about.${key} is not a known field`);
+  }
+  for (const key of ABOUT_FIELDS) {
+    const value = about[key];
+    if (value === undefined) continue;
+    if (typeof value !== "string") errors.push(`about.${key} must be a string`);
+    else if (value.length > ABOUT_LIMITS[key]) errors.push(`about.${key} must be at most ${ABOUT_LIMITS[key]} characters`);
+  }
+  if (typeof about.url === "string" && about.url !== "" && !/^https?:\/\/\S+$/i.test(about.url)) errors.push("about.url must start with http:// or https://");
+}
+
 export function validateRun(run) {
   const errors = [];
   if (!isObject(run)) return { ok: false, errors: ["The run must be an object"] };
+  if (run.about !== undefined) checkAbout(run.about, errors);
   if (run.schemaVersion !== RUN_SCHEMA_VERSION) {
     errors.push(`schemaVersion must be ${RUN_SCHEMA_VERSION}`);
   }

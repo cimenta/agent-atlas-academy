@@ -6,6 +6,9 @@ import { buildReplayList, filterLibrary, prepareImport } from "./play-model.js";
 import { makeRunId } from "./engine/run-record.js";
 import { renderResult } from "./result-page.js";
 import { renderCreate } from "./create/create-page.js";
+import { createRunMenu } from "./replay/run-menu.js";
+import { definitionFromRun } from "./create/definition.js";
+import { downloadFile, safeFileName } from "./download.js";
 
 const TABS = [
   { view: "replay", href: "#/play", key: "play.tab.replay" },
@@ -95,25 +98,22 @@ export async function renderPlay(ctx, route = { params: { view: "replay" } }) {
   }
 }
 
-function runRow(ctx, item, onDelete) {
+// A row of the library: the title and the cog on top, the outcome and the pattern tag below.
+function runRow(ctx, item, menu) {
   const { doc, t } = ctx;
-  const parts = [];
-  if (item.outcome) parts.push(t(`result.status.${item.outcome}`));
-  const row = h(
+  return h(
     doc,
     "li",
-    { class: "run-row" },
+    { class: "run-row", "data-ui": "run-row" },
     h(doc, "a", { href: `#/play/run/${item.id}`, class: "run-title" }, item.title),
+    menu,
+    item.outcome ? h(doc, "span", { class: "run-meta" }, t(`result.status.${item.outcome}`)) : "",
     h(doc, "span", { class: `type-chip type-${item.pattern}`, "data-ui": "run-type" }, t(`pattern.${item.pattern}`)),
-    parts.length ? h(doc, "span", { class: "run-meta" }, parts.join(" · ")) : "",
   );
-  if (onDelete) {
-    const button = h(doc, "button", { type: "button", "aria-label": t("play.deleteLabel", { title: item.title }) }, t("play.delete"));
-    button.addEventListener("click", onDelete);
-    row.append(button);
-  }
-  return row;
 }
+
+// Set when About was chosen on a row of another run: that run opens with its About panel shown.
+let openAboutFor = null;
 
 const LAST_RUN_KEY = "aa.lastRun";
 const rememberedRun = () => {
@@ -181,7 +181,20 @@ export async function renderReplayTab(ctx, requestedId) {
       rememberRun(currentId);
       const explanations = found.source === "gallery" ? await loadExplanations(ctx, currentId) : {};
       if (ctx.isStale()) return;
-      handle = mountReplay(host, { run: found.run, explanations, t, doc, autoStart: false });
+      // Only the visitor's own runs can be edited; the library's runs are read-only files.
+      const onAboutSave =
+        found.source === "local"
+          ? async (about) => {
+              const next = { ...found.run };
+              if (about) next.about = about;
+              else delete next.about;
+              return ctx.runStore.save(next);
+            }
+          : null;
+      const onDelete = found.source === "local" ? () => removeRun({ id: currentId, title: found.run.title }) : null;
+      handle = mountReplay(host, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete });
+      if (openAboutFor === currentId) handle.openAbout?.();
+      openAboutFor = null;
       handle.player?.seek(found.run.events.length);
       host.append(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${currentId}` }, t("play.tab.result"))));
     }
@@ -209,6 +222,19 @@ export async function renderReplayTab(ctx, requestedId) {
   const importButton = h(doc, "button", { type: "button", class: "icon-button", "data-ui": "import-run", title: t("play.import"), "aria-label": t("play.import") }, "⤒");
   importButton.addEventListener("click", () => fileInput.click());
 
+  // Deleting one of your own runs asks first. If it is the run on screen, the page shows no run afterwards.
+  const removeRun = async (item) => {
+    if (!doc.defaultView.confirm(t("play.deleteConfirm", { title: item.title }))) return;
+    await ctx.runStore.remove(item.id);
+    if (item.id === currentId) {
+      rememberRun("");
+      handle?.destroy();
+      location.hash = "#/play";
+      return;
+    }
+    await draw();
+  };
+
   const draw = async () => {
     local = await listLocal();
     if (ctx.isStale()) return;
@@ -216,8 +242,35 @@ export async function renderReplayTab(ctx, requestedId) {
     const shown = filterLibrary(built.gallery, lib.query);
     const mine = filterLibrary(built.mine, lib.query);
     const none = (key) => h(doc, "p", { class: "notice" }, t(key));
-    const row = (item, onDelete) => {
-      const li = runRow(ctx, item, onDelete);
+    // The menu of a row loads its run when it is opened, so the list stays light.
+    const menuOf = (item) =>
+      createRunMenu({
+        doc,
+        t,
+        getItems: async () => {
+          const found = await loadAnyRun(ctx, item.id);
+          if (!found) return [];
+          const run = found.run;
+          const definition = definitionFromRun(run);
+          return [
+            {
+              ui: "run-about",
+              label: t("player.about"),
+              hint: t("player.aboutHint"),
+              onClick: () => {
+                if (item.id === currentId) return handle?.openAbout();
+                openAboutFor = item.id;
+                location.hash = `#/play/run/${item.id}`;
+              },
+            },
+            { ui: "export-json", label: t("player.export"), hint: t("player.exportHint"), onClick: () => downloadFile(doc, `${safeFileName(run.id)}.json`, JSON.stringify(run, null, 2), "application/json") },
+            ...(definition ? [{ ui: "export-definition", label: t("player.exportDefinition"), hint: t("player.exportDefinitionHint"), onClick: () => downloadFile(doc, `${safeFileName(run.id)}-definition.json`, JSON.stringify(definition, null, 2), "application/json") }] : []),
+            ...(found.source === "local" ? [{ ui: "run-delete", label: t("play.delete"), hint: t("player.deleteHint"), danger: true, onClick: () => removeRun(item) }] : []),
+          ];
+        },
+      }).element;
+    const row = (item) => {
+      const li = runRow(ctx, item, menuOf(item));
       if (item.id === currentId) li.setAttribute("aria-current", "true");
       return li;
     };
@@ -230,18 +283,7 @@ export async function renderReplayTab(ctx, requestedId) {
             doc,
             "ul",
             { class: "run-list", "data-ui": "run-list-mine" },
-            ...mine.map((item) =>
-              row(item, async () => {
-                if (!doc.defaultView.confirm(t("play.deleteConfirm", { title: item.title }))) return;
-                await ctx.runStore.remove(item.id);
-                if (item.id === currentId) {
-                  rememberRun("");
-                  handle?.destroy();
-                  return renderReplayTab(ctx);
-                }
-                await draw();
-              }),
-            ),
+            ...mine.map((item) => row(item)),
           ),
       h(doc, "div", { class: "pane-head" }, h(doc, "h2", {}, t("play.library"))),
       shown.length === 0 ? none("play.noMatches") : h(doc, "ul", { class: "run-list", "data-ui": "run-list-library" }, ...shown.map((item) => row(item))),

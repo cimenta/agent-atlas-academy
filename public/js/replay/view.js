@@ -9,6 +9,8 @@ import { markText, searchBar } from "../text-search.js";
 import { definitionFromRun } from "../create/definition.js";
 import { downloadFile, safeFileName } from "../download.js";
 import { stepDetail } from "./step-detail.js";
+import { createAboutPanel } from "./about.js";
+import { createRunMenu } from "./run-menu.js";
 
 const STATUS_KEY = {
   waiting: "player.statusWaiting",
@@ -48,10 +50,10 @@ export function headingOf(run) {
   return line.length > 120 ? `${line.slice(0, 117)}…` : line;
 }
 
-export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1 }) {
+export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null }) {
   const validation = validateRun(run);
   if (!validation.ok) return mountError(container, doc, t, validation.errors);
-  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false });
+  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete });
 }
 
 // A player that shows a run while it is still arriving. Events are added with append(), end() closes it.
@@ -64,68 +66,43 @@ export function mountLiveReplay(container, { title, pattern, recordedWith, t, do
   };
 }
 
-function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop }) {
+function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null }) {
   const player = createPlayer({ events, clock, timeScale, live });
   const ui = { agent: null, tab: "steps", step: null, round: null, follow: true };
   const viewer = createViewer({ doc, t });
   let state = deriveInspector(events, 0);
 
-  // A cog in the corner of the player head opens a small menu with the two exports.
-  const definition = exportRun ? definitionFromRun(exportRun) : null;
-  const menuItem = (ui, label, hint, onClick) => {
-    const item = h(doc, "button", { type: "button", role: "menuitem", class: "export-item", "data-ui": ui, title: hint }, label);
-    item.addEventListener("click", () => {
-      closeMenu();
-      onClick();
-    });
-    return item;
-  };
-  const menuList = exportRun
-    ? h(
+  // The About panel: read by everyone, edited only where a save function is given (the visitor's own runs).
+  const aboutPanel = exportRun
+    ? createAboutPanel({
         doc,
-        "div",
-        { class: "export-list", role: "menu", "data-ui": "export-menu", hidden: true },
-        menuItem("export-json", t("player.export"), t("player.exportHint"), () => downloadFile(doc, `${safeFileName(exportRun.id)}.json`, JSON.stringify(exportRun, null, 2), "application/json")),
-        definition ? menuItem("export-definition", t("player.exportDefinition"), t("player.exportDefinitionHint"), () => downloadFile(doc, `${safeFileName(exportRun.id)}-definition.json`, JSON.stringify(definition, null, 2), "application/json")) : "",
-      )
-    : "";
-  const cogButton = exportRun
-    ? h(doc, "button", { type: "button", class: "cog-button", "data-ui": "export-cog", "aria-haspopup": "menu", "aria-expanded": "false", "aria-label": t("player.exportMenu"), title: t("player.exportMenu") }, "⚙")
-    : "";
-  const outsideClick = (event) => {
-    if (!exportButton.contains(event.target)) closeMenu();
-  };
-  const escapeKey = (event) => {
-    if (event.key === "Escape") closeMenu();
-  };
-  function closeMenu() {
-    if (!exportRun || menuList.hidden) return;
-    menuList.hidden = true;
-    cogButton.setAttribute("aria-expanded", "false");
-    doc.removeEventListener("click", outsideClick);
-    doc.removeEventListener("keydown", escapeKey);
-  }
-  if (exportRun) {
-    cogButton.addEventListener("click", () => {
-      if (!menuList.hidden) return closeMenu();
-      menuList.hidden = false;
-      cogButton.setAttribute("aria-expanded", "true");
-      doc.addEventListener("click", outsideClick);
-      doc.addEventListener("keydown", escapeKey);
-    });
-  }
-  const exportButton = h(doc, "div", { class: "export-menu" }, cogButton, menuList);
-  // With a mouse the menu closes shortly after the pointer leaves it. On a touch screen it stays until a tap elsewhere.
-  if (exportRun) {
-    let leaveTimer;
-    const hasMouse = () => doc.defaultView?.matchMedia?.("(hover: hover)").matches === true;
-    exportButton.addEventListener("mouseleave", () => {
-      if (!hasMouse()) return;
-      clearTimeout(leaveTimer);
-      leaveTimer = setTimeout(closeMenu, 250);
-    });
-    exportButton.addEventListener("mouseenter", () => clearTimeout(leaveTimer));
-  }
+        t,
+        getAbout: () => exportRun.about ?? null,
+        editable: typeof onAboutSave === "function",
+        onSave: async (about) => {
+          const result = await onAboutSave(about);
+          if (result?.ok) {
+            if (about) exportRun.about = about;
+            else delete exportRun.about;
+          }
+          return result;
+        },
+      })
+    : null;
+  // The cog in the corner of the player head opens the run menu: About, the two exports, and Delete for your own runs.
+  const runMenu = exportRun
+    ? createRunMenu({
+        doc,
+        t,
+        getItems: () => [
+          { ui: "run-about", label: t("player.about"), hint: t("player.aboutHint"), onClick: () => aboutPanel.toggle() },
+          { ui: "export-json", label: t("player.export"), hint: t("player.exportHint"), onClick: () => downloadFile(doc, `${safeFileName(exportRun.id)}.json`, JSON.stringify(exportRun, null, 2), "application/json") },
+          ...(definition ? [{ ui: "export-definition", label: t("player.exportDefinition"), hint: t("player.exportDefinitionHint"), onClick: () => downloadFile(doc, `${safeFileName(exportRun.id)}-definition.json`, JSON.stringify(definition, null, 2), "application/json") }] : []),
+          ...(typeof onDelete === "function" ? [{ ui: "run-delete", label: t("play.delete"), hint: t("player.deleteHint"), danger: true, onClick: () => onDelete() }] : []),
+        ],
+      })
+    : null;
+  const exportButton = runMenu ? runMenu.element : "";
   const playButton = h(doc, "button", { type: "button", class: "primary", "data-ui": "play-button" });
   const liveBadge = h(doc, "span", { class: "live-badge", "data-ui": "live-badge" }, t("player.live"));
   const stopButton = h(doc, "button", { type: "button", class: "danger", "data-ui": "stop-button" }, t("player.stop"));
@@ -175,6 +152,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       h(doc, "div", { class: "player-title" }, h(doc, "h2", {}, t("player.title", { title }), liveBadge), pattern ? h(doc, "span", { class: `type-chip type-${pattern}`, "data-ui": "player-pattern" }, t(`pattern.${pattern}`)) : ""),
       exportButton,
     ),
+    aboutPanel ? aboutPanel.element : "",
     h(doc, "p", { class: "recorded" }, t("player.recordedWith", recordedWith)),
     h(doc, "div", { class: "controls", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, speedGroup),
     range,
@@ -403,6 +381,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
 
   return {
     player,
+    openAbout: () => aboutPanel?.open(),
     destroy() {
       player.pause();
       unsubscribe();
