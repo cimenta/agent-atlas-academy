@@ -6,6 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- The library's example is now a real recorded run: the sequential simple demo (Researcher, Writer, Critic) with an About text and explanations in English and Czech. It replaces the hand-made sample run.
 - Library rows have a cog in the top right corner with the same menu as the player (About, Export run, Export definition, Delete), and the pattern tag now sits on the outcome line, right aligned. Delete moved into the menu; the run menu in the player has it too, for your own runs.
 - About a run: the cog menu is now the run menu, with About first. About shows a title, author, link and a description in Markdown; on your own runs it can be edited, and it is saved in the run, so Export run carries it (this is how library runs get their About text).
 - A Critic in a sequential or parallel design has a checkbox that adds its notes to the output of the agent before it, so the next agent gets both. The sequential-simple demo (now Researcher, Writer, Critic) uses it.

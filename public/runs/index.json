@@ -1,8 +1,8 @@
 {
   "runs": [
     {
-      "id": "sample-sequential",
-      "title": "Sample sequential run",
+      "id": "sequential-simple",
+      "title": "Explain why the sky is blue.",
       "pattern": "sequential",
       "language": "en",
       "timeScale": 2

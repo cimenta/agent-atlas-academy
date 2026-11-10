@@ -1,0 +1,11 @@
+{
+  "0": "Každý běh začíná zadáním. Je to vše, co první agent na začátku ví.",
+  "1": "Výzkumník začíná s rolí: sesbírat fakta, která zadání potřebuje. Může použít vyhledávání na webu; tady odpověděl z toho, co model už ví.",
+  "3": "Odpověď výzkumníka. Dalšímu agentovi se předá jen tento text.",
+  "4": "Předání posílá tento text dalšímu agentovi. Pisatel vidí zadání a tento text, nic jiného.",
+  "5": "Role pisatele: napsat konečnou odpověď z podkladů, které dostal.",
+  "7": "Návrh pisatele. Předává se kritikovi.",
+  "9": "Role kritika: zhodnotit dosavadní práci a upozornit na chyby a mezery.",
+  "11": "Poznámky kritika. Tento kritik má nastaveno přidat své poznámky k textu pisatele, takže výsledek obsahuje obojí.",
+  "12": "Běh končí. Konečným výsledkem je odpověď pisatele následovaná poznámkami kritika."
+}

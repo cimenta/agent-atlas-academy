@@ -1,0 +1,11 @@
+{
+  "0": "Every run starts with a task. It is all the first agent knows at the start.",
+  "1": "The Researcher starts with a role: collect the facts the task needs. It may use web search; here it answered from what the model already knows.",
+  "3": "The Researcher's answer. Only this text is passed on to the next agent.",
+  "4": "A handoff passes that text to the next agent. The Writer sees the task and this text, nothing else.",
+  "5": "The Writer's role: write the final answer from the material it was given.",
+  "7": "The Writer's draft. It is passed on to the Critic.",
+  "9": "The Critic's role: review the work so far and point out errors and gaps.",
+  "11": "The Critic's notes. This Critic is set to add its notes to the Writer's text, so the result holds both.",
+  "12": "The run ends. The final result is the Writer's answer followed by the Critic's notes."
+}

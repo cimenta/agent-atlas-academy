@@ -58,7 +58,7 @@ const fakeDoc = {
   body: new Node("body"),
 };
 const t = (key, params) => (params ? `${key} ${JSON.stringify(params)}` : key);
-const run = JSON.parse(readFileSync(new URL("../public/runs/sample-sequential.json", import.meta.url), "utf8"));
+const run = JSON.parse(readFileSync(new URL("../public/runs/sequential-simple.json", import.meta.url), "utf8"));
 
 function mount() {
   const main = new Node("main");

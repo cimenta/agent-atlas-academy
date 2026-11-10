@@ -54,7 +54,7 @@ test("buildResultModel on a finished mock run", async () => {
 });
 
 test("a run without a design has no cost", () => {
-  const sample = JSON.parse(readFileSync(new URL("../public/runs/sample-sequential.json", import.meta.url), "utf8"));
+  const sample = JSON.parse(readFileSync(new URL("./fixtures/sample-run.json", import.meta.url), "utf8"));
   const model = buildResultModel(sample);
   assert.equal(model.cost, null);
   assert.ok(Array.isArray(model.perAgent));
@@ -93,7 +93,7 @@ test("filterLibrary needs every word and looks in title, pattern, id and tags, i
 });
 
 test("buildStatistics lists each started agent with its time, tokens and share", () => {
-  const run = JSON.parse(fs.readFileSync(new URL("../public/runs/sample-sequential.json", import.meta.url), "utf8"));
+  const run = JSON.parse(fs.readFileSync(new URL("../public/runs/sequential-simple.json", import.meta.url), "utf8"));
   const stats = buildStatistics(run);
   assert.ok(stats.perAgent.length >= 2);
   const share = stats.perAgent.reduce((n, a) => n + a.share, 0);
@@ -103,7 +103,7 @@ test("buildStatistics lists each started agent with its time, tokens and share",
 });
 
 test("buildStatistics prefers the recorded duration and keeps start and end times", () => {
-  const run = JSON.parse(fs.readFileSync(new URL("../public/runs/sample-sequential.json", import.meta.url), "utf8"));
+  const run = JSON.parse(fs.readFileSync(new URL("../public/runs/sequential-simple.json", import.meta.url), "utf8"));
   const stats = buildStatistics({ ...run, durationMs: 4321, startedAt: "2026-11-10T08:00:00.000Z", endedAt: "2026-11-10T08:00:04.321Z" });
   assert.equal(stats.totalMs, 4321);
   assert.equal(stats.startedAt, "2026-11-10T08:00:00.000Z");
@@ -118,7 +118,7 @@ test("safeFileName keeps letters and digits and never returns an empty name", ()
 import { prepareImport } from "../public/js/play-model.js";
 
 test("prepareImport accepts a valid run and gives it a fresh id", () => {
-  const run = JSON.parse(fs.readFileSync(new URL("../public/runs/sample-sequential.json", import.meta.url), "utf8"));
+  const run = JSON.parse(fs.readFileSync(new URL("../public/runs/sequential-simple.json", import.meta.url), "utf8"));
   const result = prepareImport(JSON.stringify(run), () => "local-new-0001");
   assert.equal(result.ok, true);
   assert.equal(result.run.id, "local-new-0001");

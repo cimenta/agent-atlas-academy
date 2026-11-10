@@ -72,6 +72,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   const viewer = createViewer({ doc, t });
   let state = deriveInspector(events, 0);
 
+  const definition = exportRun ? definitionFromRun(exportRun) : null;
+
   // The About panel: read by everyone, edited only where a save function is given (the visitor's own runs).
   const aboutPanel = exportRun
     ? createAboutPanel({
