@@ -42,6 +42,13 @@
       "pattern": "parallel",
       "language": "en",
       "timeScale": 3
+    },
+    {
+      "id": "debate-complex",
+      "title": "Should a town of 20000 people ban cars from its centre?",
+      "pattern": "debate",
+      "language": "en",
+      "timeScale": 3
     }
   ]
 }

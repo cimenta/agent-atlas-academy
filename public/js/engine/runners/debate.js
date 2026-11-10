@@ -1,4 +1,6 @@
 // Debate: debaters answer in turns for a number of rounds, then one judge decides.
+import { agentLabel } from "../labels.js";
+
 const NOTE_MAX = 2000;
 
 const transcriptText = (turns) => (turns.length === 0 ? "(nothing yet)" : turns.map((t) => `${t.id}: ${t.text}`).join("\n\n"));
@@ -11,7 +13,7 @@ export async function run({ design, task, agents, emit }) {
     for (const debater of debaters) {
       const input = `Task: ${task}\n\nThe debate so far:\n${transcriptText(turns)}\n\nGive your argument now.`;
       const result = await agents.get(debater.id).run(input);
-      turns.push({ id: debater.name?.trim() || debater.id, text: result.text });
+      turns.push({ id: agentLabel(debater, design, "Debater"), text: result.text });
       emit({ type: "handoff", from: debater.id, to: judge.id, note: result.text.slice(0, NOTE_MAX) });
     }
   }

@@ -1,0 +1,15 @@
+{
+  "0": "Každý běh začíná zadáním. V debatě dostanou všichni debatéři stejnou otázku a každý má svou stranu.",
+  "1": "První debatér mluví pro zákaz. Debatéři mluví jeden po druhém, ve stanoveném pořadí, ne současně.",
+  "3": "První argument. Zapíše se do záznamu, který si přečte další debatér.",
+  "4": "Předání zaznamená tah pro soudce, který na konci čte vše.",
+  "5": "Druhý debatér mluví proti. Vidí první argument a odpovídá na něj.",
+  "9": "Třetí debatér je znovu pro zákaz. Vidí oba dřívější argumenty.",
+  "13": "Čtvrtý debatér, proti. Odpovídá přímo předchozímu debatérovi.",
+  "17": "Začíná 2. kolo: první debatér mluví znovu, tentokrát s celým prvním kolem před sebou.",
+  "23": "Tah ve 2. kole navazuje na to, co druhá strana připustila. Debata se posouvá.",
+  "31": "Poslední tah posledního kola. Debatéři se nyní shodnou na podmínkách a hádají se o načasování.",
+  "33": "Soudce začíná až po všech kolech. Je to silnější model, protože posuzování vyžaduje víc péče.",
+  "35": "Verdikt: která strana argumentovala lépe a proč. Stává se konečnou odpovědí.",
+  "36": "Běh končí. Konečná odpověď je verdikt soudce."
+}

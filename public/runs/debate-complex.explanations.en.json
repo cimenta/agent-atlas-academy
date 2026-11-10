@@ -1,0 +1,15 @@
+{
+  "0": "Every run starts with a task. In a debate all the debaters get the same question, and each has a side.",
+  "1": "The first Debater argues for the ban. Debaters speak one at a time, in order, not at the same time.",
+  "3": "The first argument. It goes into the transcript that the next Debater will read.",
+  "4": "A handoff records the turn for the Judge, who reads everything at the end.",
+  "5": "The second Debater argues against. It sees the first argument and answers it.",
+  "9": "The third Debater is for the ban again. It sees both earlier arguments.",
+  "13": "The fourth Debater, against. It answers the previous Debater directly.",
+  "17": "Round 2 begins: the first Debater speaks again, now with the whole of round 1 in front of it.",
+  "23": "A turn in round 2 builds on what the other side conceded. The debate is moving.",
+  "31": "The last turn of the last round. The debaters now agree on the conditions and argue about timing.",
+  "33": "The Judge starts only after all rounds are done. It is a stronger model, because judging needs more care.",
+  "35": "The verdict: which side argued better and why. It becomes the final answer.",
+  "36": "The run ends. The final answer is the Judge's verdict."
+}
