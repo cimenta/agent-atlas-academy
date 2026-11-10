@@ -36,6 +36,9 @@ class Node {
   get firstChild() {
     return this.children[0];
   }
+  set textContent(value) {
+    this.children = [{ tag: "#text", textContent: String(value), find: () => [] }];
+  }
   get textContent() {
     return this.children.map((c) => (typeof c === "string" ? c : c.textContent)).join("");
   }

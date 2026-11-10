@@ -128,15 +128,14 @@ function mountView(container, { exportRun, events, title, recordedWith, explanat
     state.order.forEach((id, i) => {
       const a = state.agents[id];
       if (i > 0) nodes.push(h(doc, "span", { class: "arrow", "aria-hidden": "true" }, "→"));
-      const tools = a.tools.length
-        ? a.tools
-            .map((name) => {
-              const used = a.steps.filter((x) => x.kind === "tool" && x.tool === name).length;
-              if (used > 0) return `${name} ×${used}`;
-              return a.status === "done" ? `${name} (${t("insp.toolUnused")})` : name;
-            })
-            .join(", ")
-        : t("insp.noTools");
+      // While the agent works, the tools it may use. Once it is done, only the tools it did use.
+      const usedCount = (name) => a.steps.filter((x) => x.kind === "tool" && x.tool === name).length;
+      const tools =
+        a.tools.length === 0
+          ? t("insp.noTools")
+          : a.status !== "done"
+            ? a.tools.join(", ")
+            : a.tools.filter((name) => usedCount(name) > 0).map((name) => `${name} ×${usedCount(name)}`).join(", ") || t("insp.noToolsUsed");
       const chip = h(
         doc,
         "button",

@@ -1,6 +1,7 @@
 // A box for long text and JSON: a collapsible tree or raw text, and a search that marks matches.
 // Each viewer keeps its own mode and query, keyed by an id the caller chooses.
 import { h } from "../dom.js";
+import { searchBar } from "../text-search.js";
 
 function tryJson(value) {
   if (value && typeof value === "object") return value;
@@ -50,12 +51,11 @@ export function createViewer({ doc, t }) {
       const json = tryJson(value);
       const raw = json !== undefined ? JSON.stringify(json, null, 2) : String(value ?? "");
       const bodyBox = h(doc, "div", { class: "pre vbody" });
-      const count = h(doc, "span", { class: "vc" });
       const fillBody = () => {
         bodyBox.replaceChildren(...(json !== undefined && st.mode === "tree" ? [h(doc, "div", { class: "jt" }, tree(json, st.q))] : marked(raw, st.q)));
-        const n = st.q ? (raw.match(new RegExp(escapeRegExp(st.q), "gi")) ?? []).length : 0;
-        count.textContent = st.q ? `${n} ${t("insp.vMatches")}` : "";
       };
+      let search = null;
+      const redraw = () => (search ? search.run() : fillBody());
       const bar = h(doc, "div", { class: "vbar" });
       if (json !== undefined) {
         const seg = h(doc, "span", { class: "vseg" });
@@ -64,22 +64,26 @@ export function createViewer({ doc, t }) {
           button.addEventListener("click", () => {
             st.mode = mode;
             for (const b of seg.children) b.className = b.getAttribute("data-vm") === mode ? "sel" : "";
-            fillBody();
+            redraw();
           });
           seg.append(button);
         }
         bar.append(seg);
       }
-      if (raw.length > 600 || st.q) {
-        const input = h(doc, "input", { class: "vq", type: "search", placeholder: t("insp.vSearch"), "aria-label": t("insp.vSearch") });
-        input.value = st.q;
-        input.addEventListener("input", () => {
-          st.q = input.value.trim();
-          fillBody();
+      if (raw.length > 200 || st.q) {
+        search = searchBar({
+          doc,
+          t,
+          value: st.q,
+          apply: (q) => {
+            st.q = q;
+            fillBody();
+            return [...bodyBox.querySelectorAll("mark")];
+          },
         });
-        bar.append(input, count);
+        bar.append(search.element);
       }
-      fillBody();
+      redraw();
       return h(doc, "div", { class: "viewer", "data-ui": "output-viewer" }, bar.children.length ? bar : "", bodyBox);
     },
   };

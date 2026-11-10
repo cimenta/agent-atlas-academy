@@ -327,7 +327,6 @@
   "run.outcome.icon.ok": "Prošlo",
   "run.outcome.icon.warn": "Zastaveno",
   "run.outcome.icon.fail": "Selhalo",
-  "insp.toolUnused": "nepoužit",
   "insp.at": "Dokončeno v čase {time} na hodinách běhu (0 s = začátek celého běhu)",
   "insp.tookTime": "Trvalo {time}",
   "insp.total": "{time} tento agent",
@@ -379,5 +378,11 @@
   "play.import": "Importovat běh ze souboru JSON",
   "play.importNotJson": "Tento soubor není platný JSON.",
   "play.importInvalid": "Tento soubor není běh exportovaný z Agent Atlas.",
-  "play.importFailed": "Běh se nepodařilo uložit v tomto prohlížeči."
+  "play.importFailed": "Běh se nepodařilo uložit v tomto prohlížeči.",
+  "insp.noToolsUsed": "Žádné nástroje nepoužity",
+  "search.prev": "Předchozí výskyt",
+  "search.next": "Další výskyt",
+  "search.count": "{n} z {total}",
+  "search.none": "Nic nenalezeno",
+  "result.search": "Hledat v odpovědi"
 }

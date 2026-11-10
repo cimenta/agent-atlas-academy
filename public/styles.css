@@ -472,3 +472,15 @@ body[data-show-ui] [data-ui]::after { content: attr(data-ui); position: absolute
   .replay-layout { grid-template-columns: minmax(0, 1fr); }
   .library-pane { order: 2; max-height: none; }
 }
+
+.search-bar { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; }
+.search-bar .vq { flex: 1; min-width: 8rem; max-width: 22rem; min-height: 36px; padding: 0 12px; font: inherit; font-size: 16px; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 8px; }
+.search-bar .vc { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+mark { background: #fff0a0; color: inherit; border-radius: 3px; }
+mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
+@media (prefers-color-scheme: dark) { mark { background: #6b5b00; } mark.cur { background: #a65f00; outline-color: #ffb74d; } }
+.vbody mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
+
+.play-intro { flex: 0 0 100%; }
+.play-intro h1 { margin: 4px 0 2px; font-size: 1.25rem; }
+.play-intro p { margin: 0 0 6px; color: var(--muted); font-size: 0.9rem; }

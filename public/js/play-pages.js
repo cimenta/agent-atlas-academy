@@ -25,7 +25,7 @@ const paneOpen = () => {
 const lib = { query: "", open: paneOpen() };
 
 // The tab bar lives in the site header, with the library search next to it.
-function tabBar(ctx, view, { onQuery, onToggle } = {}) {
+function tabBar(ctx, view, { onQuery, onToggle, intro } = {}) {
   const { doc, t } = ctx;
   const slot = doc.getElementById("play-tabs");
   if (!slot) return;
@@ -71,7 +71,7 @@ function tabBar(ctx, view, { onQuery, onToggle } = {}) {
     lib.query = input.value;
     onQuery?.(lib.query);
   });
-  slot.replaceChildren(nav, form);
+  slot.replaceChildren(...(intro?.length ? [h(doc, "div", { class: "play-intro", "data-ui": "play-intro" }, ...intro)] : []), nav, form);
   slot.hidden = false;
 }
 
@@ -140,7 +140,7 @@ export async function renderReplayTab(ctx, requestedId) {
   const pane = h(doc, "aside", { class: "library-pane", "data-ui": "library-pane", "aria-label": t("play.library") });
   const layout = h(doc, "div", { class: "replay-layout", "data-ui": "replay-layout", "data-pane": lib.open ? "open" : "closed" }, pane, host);
   const parts = landingParts(ctx);
-  ctx.main.replaceChildren(...parts.head, layout, parts.body);
+  ctx.main.replaceChildren(layout, parts.body);
   pane.hidden = !lib.open;
 
   let gallery = [];
@@ -163,6 +163,7 @@ export async function renderReplayTab(ctx, requestedId) {
   const currentId = requestedId;
   let redraw = async () => {};
   tabBar(ctx, requestedId ? "run" : "replay", {
+    intro: parts.head,
     onQuery: () => redraw(),
     onToggle: (open) => {
       pane.hidden = !open;

@@ -6,6 +6,7 @@ import { buildResultModel, buildStatistics } from "./play-model.js";
 import { copyText, downloadFile, safeFileName } from "./download.js";
 import { formatDuration, formatUsd } from "./create/create-model.js";
 import { outcomeNotice } from "./outcome-view.js";
+import { markText, searchBar } from "./text-search.js";
 
 const PAGE_CSS = "body{font:16px/1.6 system-ui,Segoe UI,sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem;color:#1f2328}h1,h2,h3{line-height:1.25}pre{background:#f3f3f1;padding:12px;overflow:auto}code{background:#f3f3f1;padding:0 4px}";
 
@@ -21,7 +22,7 @@ export function renderResult(ctx, run) {
   const model = buildResultModel(run);
   const stats = buildStatistics(run);
   const answer = model.finalText || "";
-  const ui = { tab: "answer", view: "formatted" };
+  const ui = { tab: "answer", view: "formatted", q: "" };
 
   const head = h(doc, "div", { class: "result-head" }, h(doc, "h2", {}, t("result.title", { title: run.title })));
   const outcome = outcomeNotice({ doc, t, outcome: model.status, events: run.events, cost: model.cost, durationMs: stats.totalMs });
@@ -47,14 +48,29 @@ export function renderResult(ctx, run) {
 
   const answerView = () => {
     if (!answer) return h(doc, "p", { class: "notice" }, t("result.noText"));
-    const article = h(doc, "article", { class: "answer rendered", "data-ui": "answer-formatted" });
-    article.append(renderBlocks(parseMarkdown(answer), doc));
-    const raw = h(doc, "pre", { class: "raw", "data-ui": "answer-raw" }, answer);
+    const cleanArticle = () => {
+      const article = h(doc, "article", { class: "answer rendered", "data-ui": "answer-formatted" });
+      article.append(renderBlocks(parseMarkdown(answer), doc));
+      return article;
+    };
+    const holder = h(doc, "div", { class: "answer-holder" });
+    const search = searchBar({
+      doc,
+      t,
+      value: ui.q,
+      placeholder: t("result.search"),
+      ui: "answer-search",
+      apply: (q) => {
+        ui.q = q;
+        holder.replaceChildren(ui.view === "raw" ? h(doc, "pre", { class: "raw", "data-ui": "answer-raw" }, answer) : cleanArticle());
+        return markText(doc, holder, q);
+      },
+    });
 
     const copied = h(doc, "span", { class: "copy-note", role: "status" });
     const copy = h(doc, "button", { type: "button", class: "icon-button", "data-ui": "answer-copy", title: t("result.copy"), "aria-label": t("result.copy") }, "⧉", " ", h(doc, "span", { class: "label" }, t("result.copy")));
     copy.addEventListener("click", async () => {
-      const text = ui.view === "raw" ? answer : (article.innerText ?? article.textContent);
+      const text = ui.view === "raw" ? answer : (holder.innerText ?? holder.textContent);
       copied.textContent = (await copyText(doc, text)) ? t("result.copied") : t("result.copyFailed");
       setTimeout(() => (copied.textContent = ""), 2500);
     });
@@ -86,13 +102,14 @@ export function renderResult(ctx, run) {
       h(doc, "span", { class: "label" }, `${t("result.export")}:`),
       exportButton("md", ".md", () => downloadFile(doc, `${base}.md`, answer, "text/markdown")),
       exportButton("html", ".html", () => {
-        const page = `<!doctype html><html lang="${escapeHtml(ctx.lang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(run.title)}</title><style>${PAGE_CSS}</style></head><body>${article.innerHTML}</body></html>`;
+        const page = `<!doctype html><html lang="${escapeHtml(ctx.lang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(run.title)}</title><style>${PAGE_CSS}</style></head><body>${cleanArticle().innerHTML}</body></html>`;
         downloadFile(doc, `${base}.html`, page, "text/html");
       }),
       exportButton("pdf", t("result.export.pdf"), () => doc.defaultView.print()),
     );
 
-    return h(doc, "div", { class: "answer-wrap" }, h(doc, "div", { class: "answer-toolbar noprint" }, segment, copy, copied, exports), ui.view === "raw" ? raw : article);
+    search.run();
+    return h(doc, "div", { class: "answer-wrap" }, h(doc, "div", { class: "answer-toolbar noprint" }, segment, copy, copied, exports), search.element, holder);
   };
 
   const statsView = () => {

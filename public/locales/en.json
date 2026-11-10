@@ -327,7 +327,6 @@
   "run.outcome.icon.ok": "Passed",
   "run.outcome.icon.warn": "Stopped",
   "run.outcome.icon.fail": "Failed",
-  "insp.toolUnused": "not used",
   "insp.at": "Finished at {time} on the run clock (0 s = when the whole run started)",
   "insp.tookTime": "Took {time}",
   "insp.total": "{time} for this agent",
@@ -379,5 +378,11 @@
   "play.import": "Import a run from a JSON file",
   "play.importNotJson": "That file is not valid JSON.",
   "play.importInvalid": "That file is not a run exported from Agent Atlas.",
-  "play.importFailed": "The run could not be saved in this browser."
+  "play.importFailed": "The run could not be saved in this browser.",
+  "insp.noToolsUsed": "No tools used",
+  "search.prev": "Previous match",
+  "search.next": "Next match",
+  "search.count": "{n} of {total}",
+  "search.none": "No matches",
+  "result.search": "Search the answer"
 }
