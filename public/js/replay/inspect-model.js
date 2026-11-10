@@ -70,6 +70,10 @@ export function deriveInspector(events, cursor = events.length) {
         agent.steps.push({
           kind: "model",
           tool: "model",
+          at: event.t,
+          stop: event.stop,
+          text: (event.content ?? []).filter((b) => b.type === "text").map((b) => b.text).join("\n\n"),
+          messageCount: messages.length,
           title: { key: "insp.modelCall", params: { n: event.round ?? agent.rounds.length } },
           ms: event.ms ?? null,
           input: { key: "insp.msgsCount", params: { n: messages.length } },
@@ -84,6 +88,7 @@ export function deriveInspector(events, cursor = events.length) {
         agent.steps.push({
           kind: "tool",
           tool: event.tool,
+          at: event.t,
           title: `${event.tool}: ${typeof event.input === "string" ? event.input : JSON.stringify(event.input ?? "")}`,
           ms: null,
           server: true,
@@ -96,8 +101,10 @@ export function deriveInspector(events, cursor = events.length) {
         if (!agent) break;
         const output = typeof event.output === "string" ? event.output : (event.text ?? "");
         const open = agent.steps.find((s) => s.kind === "tool" && s.tool === event.tool && s.output === null);
-        if (open) open.output = output;
-        else agent.steps.push({ kind: "tool", tool: event.tool, title: String(event.tool), ms: null, server: true, input: "", output, eventIndex: index });
+        if (open) {
+          open.output = output;
+          open.at = event.t;
+        } else agent.steps.push({ kind: "tool", at: event.t, tool: event.tool, title: String(event.tool), ms: null, server: true, input: "", output, eventIndex: index });
         break;
       }
       case "handoff": {
@@ -106,6 +113,9 @@ export function deriveInspector(events, cursor = events.length) {
           from.steps.push({
             kind: "handoff",
             tool: "handoff",
+            at: event.t,
+            from: event.from,
+            to: event.to,
             title: { key: "insp.handoffTo", params: { name: event.to } },
             ms: null,
             input: { key: "insp.handoffIn", params: { name: event.from } },
@@ -120,11 +130,12 @@ export function deriveInspector(events, cursor = events.length) {
         break;
       }
       case "title":
-        if (agent) agent.steps.push({ kind: "title", tool: "title", title: { key: "insp.title", params: {} }, ms: null, input: "", output: typeof event.text === "string" ? event.text : "", eventIndex: index });
+        if (agent) agent.steps.push({ kind: "title", tool: "title", at: event.t, title: { key: "insp.title", params: {} }, ms: null, input: "", output: typeof event.text === "string" ? event.text : "", eventIndex: index });
         break;
       case "agent_output":
         if (!agent) break;
         agent.status = "done";
+        agent.endT = event.t;
         agent.output = typeof event.text === "string" ? event.text : "";
         agent.ms = agent.startT !== null && typeof event.t === "number" ? Math.max(0, event.t - agent.startT) : null;
         agent.usage = event.tokens ?? null;
@@ -176,6 +187,10 @@ function reconstruct(agent, task) {
   agent.steps.unshift({
     kind: "model",
     tool: "model",
+    at: agent.endT,
+    stop: agent.output === null ? undefined : "end_turn",
+    text: agent.output ?? "",
+    messageCount: input ? 1 : 0,
     title: { key: "insp.modelCall", params: { n: 1 } },
     ms: agent.ms,
     input: { key: "insp.msgsCount", params: { n: input ? 1 : 0 } },

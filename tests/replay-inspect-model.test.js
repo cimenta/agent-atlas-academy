@@ -108,3 +108,19 @@ test("tokens add up and an error marks the working agent", () => {
   assert.equal(failed.agents.researcher.status, "error");
   assert.equal(failed.error, "boom");
 });
+
+test("steps carry their completion time, model steps the full reply text, handoffs both ends", () => {
+  const s = deriveInspector(events);
+  const model = s.agents.planner.steps[0];
+  assert.deepEqual([model.at, model.stop, model.text, model.messageCount], [2, "end_turn", "a plan", 1]);
+  const tools = s.agents.researcher.steps.filter((x) => x.kind === "tool");
+  assert.deepEqual(tools.map((x) => x.at), [9, 10]);
+  const handoff = s.agents.planner.steps.at(-1);
+  assert.deepEqual([handoff.at, handoff.from, handoff.to], [4, "planner", "researcher"]);
+});
+
+test("a reconstructed model step completes when the agent answered and has the answer as its text", () => {
+  const s = deriveInspector(old);
+  assert.equal(s.agents.planner.steps[0].at, 3);
+  assert.equal(s.agents.planner.steps[0].text, "a plan");
+});

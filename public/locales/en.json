@@ -328,5 +328,18 @@
   "run.outcome.icon.ok": "Passed",
   "run.outcome.icon.warn": "Stopped",
   "run.outcome.icon.fail": "Failed",
-  "insp.toolUnused": "not used"
+  "insp.toolUnused": "not used",
+  "insp.at": "Completed {time} into the run",
+  "insp.tookTime": "Took {time}",
+  "insp.total": "{time} in total",
+  "insp.inModelHint": "Web searches run inside the model call, so their time is part of the call and is not measured separately.",
+  "insp.searchQuery": "Search query",
+  "insp.resultsCount": "{n} search results",
+  "insp.messagesSent": "{n} messages sent to the model",
+  "insp.showMessages": "Show the exact messages",
+  "insp.noText": "No text: in this round the model only used tools.",
+  "insp.stop.end_turn": "the model finished its answer.",
+  "insp.stop.tool_use": "the model asked for a tool.",
+  "insp.stop.pause_turn": "the model paused a long turn.",
+  "insp.stop.max_tokens": "the answer was cut at the token limit."
 }

@@ -5,6 +5,7 @@ import { validateRun } from "../run-schema.js";
 import { createPlayer } from "./player.js";
 import { deriveInspector } from "./inspect-model.js";
 import { createViewer } from "./viewer.js";
+import { stepDetail } from "./step-detail.js";
 
 const STATUS_KEY = {
   waiting: "player.statusWaiting",
@@ -158,7 +159,7 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
         { type: "button", class: `step${i === selected ? " sel" : ""}`, "data-kind": step.kind, "aria-current": i === selected ? "step" : undefined },
         h(doc, "span", { class: "tg", "data-kind": step.kind }, t(KIND_KEY[step.kind] ?? "kind.model")),
         h(doc, "span", { class: "ti" }, label(step.title)),
-        h(doc, "span", { class: "ms" }, step.ms != null ? fmt(step.ms) : step.server ? t("insp.inModel") : ""),
+        h(doc, "span", { class: "ms", title: step.ms == null && step.server ? t("insp.inModelHint") : undefined }, step.ms != null ? fmt(step.ms) : step.server ? t("insp.inModel") : ""),
       );
       button.addEventListener("click", () => {
         ui.step = i;
@@ -167,7 +168,7 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
       });
       return button;
     });
-    const head = h(doc, "p", { class: "agenthead" }, `${t("insp.stepsOf")} `, h(doc, "b", {}, agent.label), agent.model ? h(doc, "span", { class: "badge" }, agent.model) : "");
+    const head = h(doc, "p", { class: "agenthead" }, `${t("insp.stepsOf")} `, h(doc, "b", {}, agent.label), agent.model ? h(doc, "span", { class: "badge" }, agent.model) : "", agent.ms != null ? h(doc, "span", { class: "badge time" }, t("insp.total", { time: fmt(agent.ms) })) : "");
     const left = h(doc, "div", { "data-ui": "step-list" }, head, ...list);
     if (agent.status === "working") left.append(h(doc, "div", { class: "working" }, t("insp.working")));
 
@@ -176,22 +177,25 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
     if (!step) {
       right.append(h(doc, "p", { class: "doc" }, t("insp.noSteps")));
     } else {
-      const why = explanations[String(step.eventIndex)];
-      right.append(h(doc, "h3", {}, label(step.title)));
-      const key = step.kind === "tool" ? `insp.doc.${step.tool}` : `insp.doc.${step.kind}`;
-      const explained = t(key);
-      right.append(h(doc, "p", { class: "doc" }, explained === key ? "" : explained));
-      if (why) right.append(h(doc, "p", { class: "why" }, h(doc, "strong", {}, `${t("player.explanation")}: `), why));
-      if (step.input) right.append(h(doc, "p", { class: "lb" }, t("insp.input")), h(doc, "div", { class: "pre" }, label(step.input)));
-      const cut = step.outCut ? h(doc, "button", { type: "button", class: "cutnote" }, t("insp.outCut")) : null;
-      if (cut) {
-        cut.addEventListener("click", () => {
-          ui.tab = "output";
-          render();
-        });
-      }
-      right.append(h(doc, "p", { class: "lb" }, t("insp.output"), cut ?? ""));
-      right.append(viewer.view(`s-${agent.id}-${selected}`, step.output ?? (agent.status === "working" ? t("insp.waitingRes") : "—")));
+      right.append(
+        stepDetail({
+          doc,
+          t,
+          step,
+          why: explanations[String(step.eventIndex)],
+          viewer,
+          viewerId: `s-${agent.id}-${selected}`,
+          fmt,
+          waiting: agent.status === "working" ? t("insp.waitingRes") : "—",
+          onShowMessages:
+            step.kind === "model"
+              ? () => {
+                  Object.assign(ui, { tab: "messages", round: Math.max(0, (step.title.params?.n ?? 1) - 1), follow: false });
+                  render();
+                }
+              : undefined,
+        }),
+      );
     }
     return h(doc, "div", { class: "cols" }, left, right);
   }

@@ -328,5 +328,18 @@
   "run.outcome.icon.ok": "Prošlo",
   "run.outcome.icon.warn": "Zastaveno",
   "run.outcome.icon.fail": "Selhalo",
-  "insp.toolUnused": "nepoužit"
+  "insp.toolUnused": "nepoužit",
+  "insp.at": "Dokončeno {time} od začátku běhu",
+  "insp.tookTime": "Trvalo {time}",
+  "insp.total": "celkem {time}",
+  "insp.inModelHint": "Hledání na webu běží uvnitř volání modelu, takže jeho čas je součástí volání a neměří se zvlášť.",
+  "insp.searchQuery": "Hledaný dotaz",
+  "insp.resultsCount": "Výsledků hledání: {n}",
+  "insp.messagesSent": "Modelu odesláno zpráv: {n}",
+  "insp.showMessages": "Ukázat přesné zprávy",
+  "insp.noText": "Bez textu: v tomto kole model jen použil nástroje.",
+  "insp.stop.end_turn": "model dokončil odpověď.",
+  "insp.stop.tool_use": "model požádal o nástroj.",
+  "insp.stop.pause_turn": "model pozastavil dlouhý tah.",
+  "insp.stop.max_tokens": "odpověď byla useknuta na limitu tokenů."
 }
