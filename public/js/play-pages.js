@@ -165,6 +165,7 @@ export async function renderReplayTab(ctx, requestedId) {
   const currentId = requestedId;
   let redraw = async () => {};
   tabBar(ctx, requestedId ? "run" : "replay", {
+    resultOpen: Boolean(requestedId),
     onQuery: () => redraw(),
     onToggle: (open) => {
       pane.hidden = !open;
@@ -178,6 +179,8 @@ export async function renderReplayTab(ctx, requestedId) {
   if (currentId) {
     const found = await loadAnyRun(ctx, currentId);
     if (ctx.isStale()) return;
+    // A run that is loaded has a result to see, so the Result tab shows it and leads to it.
+    refreshResultTab(ctx, Boolean(found), found ? currentId : undefined);
     if (!found) {
       host.replaceChildren(h(doc, "p", { class: "notice", role: "alert" }, t("play.runNotFound")));
     } else {

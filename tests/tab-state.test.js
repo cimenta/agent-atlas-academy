@@ -5,7 +5,8 @@ import { showCenterTip } from "../public/js/center-tip.js";
 
 function fakeTab() {
   const classes = new Set();
-  return { classes, classList: { add: (c) => classes.add(c), remove: (c) => classes.delete(c) } };
+  const attrs = {};
+  return { classes, attrs, setAttribute: (k, v) => (attrs[k] = v), classList: { add: (c) => classes.add(c), remove: (c) => classes.delete(c) } };
 }
 const docWith = (tab) => ({ querySelector: (sel) => (sel === '[data-ui="tab-result"]' ? tab : null) });
 
@@ -64,4 +65,13 @@ test("a press inside the tip keeps it open so its link can be followed, a press 
   const again = showCenterTip({ doc, content: link, setTimer: () => 1, clearTimer: () => {} });
   doc.listeners.pointerdown({ target: {} });
   assert.equal(again.element.removed, true);
+});
+
+test("a run opened from the library turns the Result tab green and makes it lead to that run", async () => {
+  const tab = fakeTab();
+  const ctx = { doc: docWith(tab), runStore: { list: async () => [] } };
+  await refreshResultTab(ctx, true, "sequential-simple");
+  assert.equal(tab.classes.has("has-result"), true);
+  assert.equal(tab.attrs.href, "#/play/result/sequential-simple");
+  await refreshResultTab({ ...ctx, doc: docWith(fakeTab()) }, false, "x");
 });
