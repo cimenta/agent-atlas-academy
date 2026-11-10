@@ -144,6 +144,11 @@ async function renderRoute(isNavigation) {
   const mine = token;
   const route = parseRoute(location.hash);
   renderChrome(route);
+  const playSlot = doc.getElementById("play-tabs");
+  if (playSlot) {
+    playSlot.replaceChildren();
+    playSlot.hidden = true;
+  }
   menu.classList.remove("open");
   menuToggle.setAttribute("aria-expanded", "false");
   const ctx = {

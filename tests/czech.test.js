@@ -30,7 +30,7 @@ for (const slug of slugs("en")) {
 test("Czech strings are translated except for an allow-list", () => {
   const en = JSON.parse(readFileSync(new URL("locales/en.json", root), "utf8"));
   const cs = JSON.parse(readFileSync(new URL("locales/cs.json", root), "utf8"));
-  const allowed = new Set(["site.name", "lang.en", "lang.cs", "player.speedOption", "result.agent", "editor.diagram", "editor.model", "kind.model"]);
+  const allowed = new Set(["site.name", "lang.en", "lang.cs", "player.speedOption", "result.agent", "editor.diagram", "editor.model", "kind.model", "stats.agent", "stats.model"]);
   const same = Object.keys(en).filter((key) => en[key] === cs[key] && !allowed.has(key));
   assert.deepEqual(same, []);
 });

@@ -1,5 +1,7 @@
 // The Create tab: task, pattern, diagram, review, then a live run in the player.
 import { h } from "../dom.js";
+import { downloadFile } from "../download.js";
+import { outcomeNotice } from "../outcome-view.js";
 import { MODELS, TASK_MAX_CHARS, LIMIT_MAX } from "../engine/catalog.js";
 import { PATTERNS, clampLimits } from "../engine/patterns.js";
 import { buildRunRecord, makeRunId } from "../engine/run-record.js";
@@ -8,7 +10,7 @@ import { mountLiveReplay } from "../replay/view.js";
 import { createBatchedSaver } from "../storage/runs-store.js";
 import { createEditor } from "./editor-model.js";
 import { mountEditor } from "./editor-view.js";
-import { canRun, describeOutcome, formatDuration, formatUsd, reviewSummary, runOutcomeMessageKey } from "./create-model.js";
+import { canRun, reviewSummary } from "./create-model.js";
 import { buildResultModel } from "../play-model.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -54,15 +56,7 @@ function patternIcon(doc, pattern) {
 function downloadButton(ctx, run) {
   const { doc, t } = ctx;
   const button = h(doc, "button", { type: "button" }, t("create.download"));
-  button.addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify(run, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = h(doc, "a", { href: url, download: `${run.id}.json` });
-    doc.body.append(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  });
+  button.addEventListener("click", () => downloadFile(doc, `${run.id}.json`, JSON.stringify(run, null, 2), "application/json"));
   return button;
 }
 
@@ -272,18 +266,8 @@ export function renderCreate(ctx) {
       const result = await ctx.runStore.save(finalRecord);
       activeRun = null;
       const done = events.at(-1);
-      const info = describeOutcome({ outcome: done?.outcome, events, cost: buildResultModel(finalRecord).cost });
-      const meta = [];
-      if (info.durationMs !== null) meta.push(t("run.outcome.took", { time: formatDuration(info.durationMs) }));
-      if (info.cost !== null) meta.push(t("run.outcome.cost", { usd: formatUsd(info.cost) }));
-      const notice = h(
-        doc,
-        "p",
-        { class: `notice outcome outcome-${info.level}`, id: "run-outcome", "data-ui": "run-outcome", "data-outcome": done?.outcome ?? "failed", role: "status" },
-        h(doc, "span", { class: "outcome-icon", role: "img", "aria-label": t(`run.outcome.icon.${info.level}`) }, info.icon),
-        h(doc, "span", { class: "outcome-text" }, t(runOutcomeMessageKey(done?.outcome))),
-      );
-      if (meta.length) notice.append(h(doc, "span", { class: "outcome-meta", title: info.cost !== null ? t("run.outcome.costHint") : undefined }, meta.join(" · ")));
+      const notice = outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: buildResultModel(finalRecord).cost });
+      notice.id = "run-outcome";
       const children = [notice];
       if (result.ok) children.push(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${id}` }, t("create.seeResult"))));
       else children.push(h(doc, "p", { class: "notice", role: "alert" }, t("create.saveFailed")), downloadButton(ctx, finalRecord));

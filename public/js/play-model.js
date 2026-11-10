@@ -1,5 +1,7 @@
 // Pure helpers for the Play tabs: the list of runs to replay and the numbers on the Result tab.
 import { MODELS, SEARCH_PRICE_USD } from "./engine/catalog.js";
+import { deriveInspector } from "./replay/inspect-model.js";
+import { validateRun } from "./run-schema.js";
 
 export function buildReplayList(gallery, local) {
   return {
@@ -50,4 +52,67 @@ export function buildResultModel(run) {
     perAgent,
     cost,
   };
+}
+
+// Library search: every word typed must appear in the title, the pattern, the id or a tag.
+export function filterLibrary(items, query) {
+  const words = String(query ?? "").toLowerCase().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return items;
+  return items.filter((item) => {
+    const haystack = [item.title, item.pattern, item.id, ...(Array.isArray(item.tags) ? item.tags : [])].join(" ").toLowerCase();
+    return words.every((w) => haystack.includes(w));
+  });
+}
+
+// The numbers on the Statistics tab: how long the run took, what it cost and what each agent used.
+export function buildStatistics(run) {
+  const base = buildResultModel(run);
+  const events = Array.isArray(run?.events) ? run.events : [];
+  const inspector = deriveInspector(events);
+  const totalMs = typeof run?.durationMs === "number" ? run.durationMs : (events.at(-1)?.t ?? null);
+  const agentMs = inspector.order.reduce((n, id) => n + (inspector.agents[id].ms ?? 0), 0);
+  const perAgent = inspector.order
+    .filter((id) => inspector.agents[id].startT !== null)
+    .map((id) => {
+      const a = inspector.agents[id];
+      const node = run?.design?.nodes?.find((n) => n.id === id);
+      const tokens = base.perAgent.find((x) => x.agent === id);
+      return {
+        agent: id,
+        label: a.label,
+        model: a.model || node?.model || "",
+        ms: a.ms,
+        input: tokens?.input ?? 0,
+        output: tokens?.output ?? 0,
+        calls: a.rounds.filter((r) => !r.reconstructed).length,
+        searches: a.steps.filter((s) => s.kind === "tool").length,
+        share: agentMs > 0 && a.ms !== null ? a.ms / agentMs : 0,
+      };
+    });
+  return {
+    status: base.status,
+    cost: base.cost,
+    usage: base.usage,
+    totalMs,
+    startedAt: run?.startedAt ?? null,
+    endedAt: run?.endedAt ?? null,
+    appVersion: run?.appVersion ?? null,
+    calls: perAgent.reduce((n, a) => n + a.calls, 0),
+    perAgent,
+  };
+}
+
+// A run file chosen for import: it must be JSON that passes the run schema. It always gets a fresh
+// id, so importing never replaces an example or one of your own runs.
+export function prepareImport(text, makeId) {
+  let run;
+  try {
+    run = JSON.parse(text);
+  } catch {
+    return { ok: false, reason: "json" };
+  }
+  if (run === null || typeof run !== "object" || Array.isArray(run)) return { ok: false, reason: "invalid" };
+  const copy = { ...run, id: makeId() };
+  const check = validateRun(copy);
+  return check.ok ? { ok: true, run: copy } : { ok: false, reason: "invalid", errors: check.errors };
 }

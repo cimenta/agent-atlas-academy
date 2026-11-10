@@ -381,3 +381,94 @@ body[data-show-ui] [data-ui]::after { content: attr(data-ui); position: absolute
 .rendered > :last-child { margin-bottom: 0; }
 .rendered h1, .rendered h2, .rendered h3 { font-size: 1rem; }
 .linklike { min-height: 0; min-width: 0; padding: 0; border: 0; background: none; color: var(--accent); text-decoration: underline; font-size: 0.85rem; }
+
+/* Stage 3: tabs in the header, library search, result page */
+.site-header .subtabs { order: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; width: 100%; margin: 0; border: 0; }
+.site-header .subtabs nav, .play-tabs { display: flex; gap: 2px; }
+.site-header .subtabs a { min-height: 36px; padding: 0 12px; margin: 0; border: 0; border-radius: 8px; }
+.site-header .subtabs a[aria-current="page"] { background: var(--accent-bg); color: var(--accent); }
+.lib-search { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 12rem; max-width: 22rem; }
+.lib-search input { flex: 1; min-width: 0; min-height: 36px; padding: 0 12px; font: inherit; font-size: 16px; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+.lib-search button { min-width: 36px; min-height: 36px; padding: 0 8px; }
+/* On a wide screen the tabs are their own row, starting where the page content starts. */
+@media (min-width: 720px) {
+  .site-header .subtabs { box-sizing: border-box; padding-left: max(0px, calc((100% - var(--max) + 2 * var(--gutter)) / 2)); }
+}
+.player-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.player-head h2 { margin: 0; }
+.export-json { min-height: 36px; font-size: 0.85rem; }
+.library-hint { color: var(--muted); }
+.result-head h2 { margin-top: 0; }
+.outcome-link { margin-left: 8px; font-size: 0.85rem; }
+.result-tabs { display: flex; gap: 2px; margin: 16px 0 0; border-bottom: 1px solid var(--border); }
+.result-tabs .tab { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; min-height: var(--touch); padding: 0 16px; color: var(--muted); }
+.result-tabs .tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent-line); font-weight: 600; }
+.answer-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0; }
+.answer-toolbar .exports { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.answer-toolbar .label { color: var(--muted); font-size: 0.85rem; }
+.answer-toolbar .copy-note { font-size: 0.85rem; color: var(--done); }
+.seg { display: inline-flex; }
+.seg button { border-radius: 0; margin-left: -1px; }
+.seg button:first-child { border-radius: 8px 0 0 8px; margin-left: 0; }
+.seg button:last-child { border-radius: 0 8px 8px 0; }
+.seg button[aria-pressed="true"] { position: relative; background: var(--accent-bg); color: var(--accent); border-color: var(--accent-line); }
+.answer { padding: 4px 18px; max-height: none; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.raw { margin: 0; padding: 14px; background: var(--surface); border-radius: var(--radius-lg); white-space: pre-wrap; overflow-wrap: anywhere; font: 0.85rem/1.5 ui-monospace, Consolas, monospace; }
+.stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 12px 0; }
+.stat { padding: 10px 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+.stat b { display: block; font-size: 1.2rem; }
+.stat span { font-size: 0.8rem; color: var(--muted); }
+.stats-table { width: 100%; }
+.share-bar { display: block; height: 8px; min-width: 100px; border-radius: 4px; background: var(--accent-bg); overflow: hidden; }
+.share-bar i { display: block; height: 100%; background: var(--accent-line); }
+.stats-note { color: var(--muted); font-size: 0.85rem; }
+.share-bar i.w0 { width: 0%; }
+.share-bar i.w5 { width: 5%; }
+.share-bar i.w10 { width: 10%; }
+.share-bar i.w15 { width: 15%; }
+.share-bar i.w20 { width: 20%; }
+.share-bar i.w25 { width: 25%; }
+.share-bar i.w30 { width: 30%; }
+.share-bar i.w35 { width: 35%; }
+.share-bar i.w40 { width: 40%; }
+.share-bar i.w45 { width: 45%; }
+.share-bar i.w50 { width: 50%; }
+.share-bar i.w55 { width: 55%; }
+.share-bar i.w60 { width: 60%; }
+.share-bar i.w65 { width: 65%; }
+.share-bar i.w70 { width: 70%; }
+.share-bar i.w75 { width: 75%; }
+.share-bar i.w80 { width: 80%; }
+.share-bar i.w85 { width: 85%; }
+.share-bar i.w90 { width: 90%; }
+.share-bar i.w95 { width: 95%; }
+.share-bar i.w100 { width: 100%; }
+@media print {
+  .site-header, .site-footer, .skip-link, .noprint, .result-tabs, .outcome, .result-head, .subtabs { display: none !important; }
+  .answer { border: 0; }
+}
+
+/* Library pane next to the player */
+.replay-layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 16px; align-items: start; margin-top: 8px; }
+.replay-layout[data-pane="closed"] { grid-template-columns: minmax(0, 1fr); }
+.library-pane { max-height: 640px; overflow: auto; }
+.library-pane .run-list { margin-bottom: 12px; padding: 0; }
+.library-pane .run-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 8px 12px; }
+.library-pane .run-row .run-title { grid-column: 1; }
+.library-pane .run-row .type-chip { grid-column: 2; grid-row: 1; justify-self: end; }
+.library-pane .run-row .run-meta { grid-column: 1 / -1; font-size: 0.8rem; }
+.library-pane .run-row button { grid-column: 2; grid-row: 2; justify-self: end; min-height: 32px; font-size: 0.8rem; }
+.library-pane .run-row[aria-current="true"] { border-left: 3px solid var(--accent-line); }
+.pane-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pane-head h2 { margin: 12px 0 8px; font-size: 1rem; }
+.icon-button { min-width: 36px; min-height: 36px; padding: 0 10px; }
+.pane-toggle[aria-pressed="true"] { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-line); }
+.type-chip { display: inline-block; padding: 1px 10px; font-size: 0.75rem; font-weight: 600; border-radius: 999px; background: var(--surface); color: var(--text); white-space: nowrap; }
+.type-sequential { background: var(--accent-bg); color: var(--accent); }
+.type-parallel { background: var(--done-bg); color: var(--done); }
+.type-supervisor { background: var(--working-bg); color: var(--working); }
+.type-debate { background: var(--err-bg); color: var(--err); }
+@media (max-width: 759px) {
+  .replay-layout { grid-template-columns: minmax(0, 1fr); }
+  .library-pane { order: 2; max-height: none; }
+}

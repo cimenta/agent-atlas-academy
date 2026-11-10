@@ -5,6 +5,7 @@ import { validateRun } from "../run-schema.js";
 import { createPlayer } from "./player.js";
 import { deriveInspector } from "./inspect-model.js";
 import { createViewer } from "./viewer.js";
+import { downloadFile, safeFileName } from "../download.js";
 import { stepDetail } from "./step-detail.js";
 
 const STATUS_KEY = {
@@ -40,7 +41,7 @@ function mountError(container, doc, t, errors) {
 export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1 }) {
   const validation = validateRun(run);
   if (!validation.ok) return mountError(container, doc, t, validation.errors);
-  return mountView(container, { events: run.events, title: run.title, recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false });
+  return mountView(container, { exportRun: run, events: run.events, title: run.title, recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false });
 }
 
 // A player that shows a run while it is still arriving. Events are added with append(), end() closes it.
@@ -53,12 +54,16 @@ export function mountLiveReplay(container, { title, recordedWith, t, doc = docum
   };
 }
 
-function mountView(container, { events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop }) {
+function mountView(container, { exportRun, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop }) {
   const player = createPlayer({ events, clock, timeScale, live });
   const ui = { agent: null, tab: "steps", step: null, round: null, follow: true };
   const viewer = createViewer({ doc, t });
   let state = deriveInspector(events, 0);
 
+  const exportButton = exportRun
+    ? h(doc, "button", { type: "button", class: "export-json", "data-ui": "export-json", title: t("player.exportHint") }, t("player.export"))
+    : "";
+  if (exportRun) exportButton.addEventListener("click", () => downloadFile(doc, `${safeFileName(exportRun.id)}.json`, JSON.stringify(exportRun, null, 2), "application/json"));
   const playButton = h(doc, "button", { type: "button", class: "primary", "data-ui": "play-button" });
   const liveBadge = h(doc, "span", { class: "live-badge", "data-ui": "live-badge" }, t("player.live"));
   const stopButton = h(doc, "button", { type: "button", class: "danger", "data-ui": "stop-button" }, t("player.stop"));
@@ -89,7 +94,7 @@ function mountView(container, { events, title, recordedWith, explanations, t, do
     doc,
     "section",
     { class: "replay", "data-ui": "player", "aria-label": t("player.title", { title }) },
-    h(doc, "h2", {}, t("player.title", { title }), liveBadge),
+    h(doc, "div", { class: "player-head", "data-ui": "player-head" }, h(doc, "h2", {}, t("player.title", { title }), liveBadge), exportButton),
     h(doc, "p", { class: "recorded" }, t("player.recordedWith", recordedWith)),
     h(doc, "div", { class: "controls", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, speedGroup),
     range,
