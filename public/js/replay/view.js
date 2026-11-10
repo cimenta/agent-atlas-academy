@@ -115,6 +115,17 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     });
   }
   const exportButton = h(doc, "div", { class: "export-menu" }, cogButton, menuList);
+  // With a mouse the menu closes shortly after the pointer leaves it. On a touch screen it stays until a tap elsewhere.
+  if (exportRun) {
+    let leaveTimer;
+    const hasMouse = () => doc.defaultView?.matchMedia?.("(hover: hover)").matches === true;
+    exportButton.addEventListener("mouseleave", () => {
+      if (!hasMouse()) return;
+      clearTimeout(leaveTimer);
+      leaveTimer = setTimeout(closeMenu, 250);
+    });
+    exportButton.addEventListener("mouseenter", () => clearTimeout(leaveTimer));
+  }
   const playButton = h(doc, "button", { type: "button", class: "primary", "data-ui": "play-button" });
   const liveBadge = h(doc, "span", { class: "live-badge", "data-ui": "live-badge" }, t("player.live"));
   const stopButton = h(doc, "button", { type: "button", class: "danger", "data-ui": "stop-button" }, t("player.stop"));
