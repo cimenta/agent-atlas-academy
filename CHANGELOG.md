@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- A Critic in a sequential or parallel design has a checkbox that adds its notes to the output of the agent before it, so the next agent gets both. The sequential-simple demo (now Researcher, Writer, Critic) uses it.
+- Settings: a checkbox to turn off tooltips. When a run ends, its outcome also appears as a tooltip in the middle of the screen. On Settings the key button reads Save for this computer when Remember on this device is ticked, and the status says when the key is saved and unlocked. The Create page says a saved key is locked instead of asking for a key.
 - Clicking empty space in the diagram deselects the selected agent.
 - A parallel run can have a line of agents after the combiner (for example a critic, then a writer). The demo definition parallel-complex uses it.
 - The export buttons moved into a cog menu in the corner of the player head. Four demo definitions (simple and complex, sequential and parallel) in demo-definitions.
