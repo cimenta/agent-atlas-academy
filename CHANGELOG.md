@@ -13,6 +13,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 ### Added
 
 - The tooltip shown when a run ends has a link to the result (and, when the run did not finish ok, stays on the screen with a Close button until you close it), and the Result tab has a light green background whenever there is a result to see, including a run opened from the library (the tab then leads to that run).
+- The tooltip shown when a run ends looks like one card: the message on top and, under a divider, a full-width See the result link (and Close button) as a footer.
+- A fifth library run: the simple parallel demo (Researcher and a Home cook free agent working at the same time, then a Combiner), with an About text and explanations in English and Czech.
 - In the player, every agent that is working has the blue background, not only the one being inspected (for example two parallel agents). The inspected agent keeps its border.
 - A fourth library run: the complex supervisor demo (Supervisor with Researcher, Writer, Critic and a Finance advisor free agent; the Supervisor used only the Researcher and the Writer), with an About text and explanations in English and Czech.
 - A third library run: the supervisor simple demo (Supervisor, Researcher, Writer) with an About text and explanations in English and Czech. The home page demo is now chosen by home true in runs/index.json (the sky is blue run) and no longer depends on the order of the list.

@@ -28,6 +28,13 @@
       "pattern": "supervisor",
       "language": "en",
       "timeScale": 3
+    },
+    {
+      "id": "parallel-simple",
+      "title": "Name three ways to reduce food waste at home.",
+      "pattern": "parallel",
+      "language": "en",
+      "timeScale": 2
     }
   ]
 }

@@ -1,0 +1,12 @@
+{
+  "0": "Každý běh začíná zadáním. V paralelním běhu dostanou všichni agenti na začátku stejné zadání.",
+  "1": "Role výzkumníka: sesbírat fakta. Začíná ve stejném okamžiku jako domácí kuchař.",
+  "2": "Domácí kuchař je volný agent. Jeho jméno a pokyny napsal ten, kdo tento běh vytvořil. Pracuje současně s výzkumníkem.",
+  "4": "Domácí kuchař skončil první. Jeho odpověď čeká na druhého agenta.",
+  "6": "Odpověď výzkumníka. Vyhledávání na webu bylo k dispozici, ale model odpověděl z toho, co ví.",
+  "7": "Předání posílá odpověď výzkumníka slučovači.",
+  "8": "Odpověď domácího kuchaře jde také slučovači. Slučovač začne, až dorazí obě.",
+  "9": "Role slučovače: spojit odpovědi a říct, v čem se agenti liší.",
+  "11": "Jedna společná odpověď a seznam toho, v čem se agenti lišili. Stává se konečnou odpovědí.",
+  "12": "Běh končí. Agenti pracovali paralelně, takže běh trval asi tak dlouho jako pomalejší z nich plus slučovač."
+}

@@ -1,0 +1,12 @@
+{
+  "0": "Every run starts with a task. In a parallel run, all the agents at the start get the same task.",
+  "1": "The Researcher's role: collect the facts. It starts at the same moment as the Home cook.",
+  "2": "The Home cook is a free agent. Its name and instructions were written by whoever made this run. It works at the same time as the Researcher.",
+  "4": "The Home cook finished first. Its answer waits for the other agent.",
+  "6": "The Researcher's answer. Web search was available, but the model answered from what it knows.",
+  "7": "A handoff sends the Researcher's answer to the Combiner.",
+  "8": "The Home cook's answer goes to the Combiner too. The Combiner starts only when both have arrived.",
+  "9": "The Combiner's role: merge the answers and say where the agents disagree.",
+  "11": "One combined answer, followed by a list of where the agents differed. It becomes the final answer.",
+  "12": "The run ends. Because the agents worked in parallel, the run took about as long as the slower one, plus the Combiner."
+}
