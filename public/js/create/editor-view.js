@@ -148,7 +148,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
 
     const defs = doc.createElementNS(SVG_NS, "defs");
     const marker = doc.createElementNS(SVG_NS, "marker");
-    for (const [k, v] of Object.entries({ id: "arrowhead", viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "8", markerHeight: "8", orient: "auto-start-reverse" })) marker.setAttribute(k, v);
+    for (const [k, v] of Object.entries({ id: "arrowhead", viewBox: "0 0 10 10", refX: "10", refY: "5", markerWidth: "8", markerHeight: "8", orient: "auto-start-reverse" })) marker.setAttribute(k, v);
     const tip = doc.createElementNS(SVG_NS, "path");
     tip.setAttribute("d", "M0,0 L10,5 L0,10 z");
     tip.setAttribute("fill", "currentColor");

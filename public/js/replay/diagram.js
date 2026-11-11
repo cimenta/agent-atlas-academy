@@ -28,7 +28,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
   const svg = svgEl(doc, "svg", { class: "diagram-arrows", "aria-hidden": "true", width, height });
   const defs = svgEl(doc, "defs");
   for (const head of HEADS) {
-    const marker = svgEl(doc, "marker", { id: `flow-head-${head}`, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 10, markerHeight: 10, markerUnits: "userSpaceOnUse", orient: "auto-start-reverse", class: `flow-head ${head}` });
+    const marker = svgEl(doc, "marker", { id: `flow-head-${head}`, viewBox: "0 0 10 10", refX: 10, refY: 5, markerWidth: 10, markerHeight: 10, markerUnits: "userSpaceOnUse", orient: "auto-start-reverse", class: `flow-head ${head}` });
     marker.append(svgEl(doc, "path", { d: "M0,0 L10,5 L0,10 z" }));
     defs.append(marker);
   }

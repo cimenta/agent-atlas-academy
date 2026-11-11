@@ -7,6 +7,7 @@ export const CELL_H = 96;
 export const BOX_W = 132;
 export const BOX_H = 60;
 export const DEBATE_GUTTER = 40; // room left of the debaters for the next-round arrow
+export const TOUCH = 2; // arrows end this far inside the box, so the tip touches the body of the agent
 export const TWO_WAY_GAP = 9; // distance of each of the two arrows of a two-way connection from the middle
 
 // A chain reads top to bottom on a narrow screen and left to right when there is room.
@@ -51,7 +52,9 @@ export function straight(pos, from, to, shift = 0) {
   const length = Math.hypot(end.x - start.x, end.y - start.y) || 1;
   const nx = (-(end.y - start.y) / length) * shift;
   const ny = ((end.x - start.x) / length) * shift;
-  return { x1: start.x + nx, y1: start.y + ny, x2: end.x + nx, y2: end.y + ny };
+  const ux = (end.x - start.x) / length;
+  const uy = (end.y - start.y) / length;
+  return { x1: start.x + nx - ux * TOUCH, y1: start.y + ny - uy * TOUCH, x2: end.x + nx + ux * TOUCH, y2: end.y + ny + uy * TOUCH };
 }
 
 // The data goes both ways between a supervisor and its workers: the instruction down, the result back.
