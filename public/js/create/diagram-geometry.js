@@ -43,18 +43,32 @@ export function clipToBox(from, to) {
   return { x: to.x - dx * scale, y: to.y - dy * scale };
 }
 
-// Where a straight arrow from box `from` to box `to` starts and ends, moved sideways by `shift` pixels.
+// How far along the direction (ux, uy), starting at a point that lies (ox, oy) away from the middle of a box,
+// you can go before leaving the box.
+function exitDistance(ox, oy, ux, uy) {
+  const along = (offset, unit, half) => (unit === 0 ? Infinity : ((unit > 0 ? half : -half) - offset) / unit);
+  return Math.max(0, Math.min(along(ox, ux, BOX_W / 2), along(oy, uy, BOX_H / 2)));
+}
+
+// Where a straight arrow from box `from` to box `to` starts and ends. The arrow runs parallel to the line between
+// the two middles, moved sideways by `shift` pixels; it starts at the edge of the first box and ends at the edge of
+// the second one, then goes TOUCH pixels into the box so the tip meets the body.
 export function straight(pos, from, to, shift = 0) {
   const a = centerOf(pos, from);
   const b = centerOf(pos, to);
-  const start = clipToBox(b, a);
-  const end = clipToBox(a, b);
-  const length = Math.hypot(end.x - start.x, end.y - start.y) || 1;
-  const nx = (-(end.y - start.y) / length) * shift;
-  const ny = ((end.x - start.x) / length) * shift;
-  const ux = (end.x - start.x) / length;
-  const uy = (end.y - start.y) / length;
-  return { x1: start.x + nx - ux * TOUCH, y1: start.y + ny - uy * TOUCH, x2: end.x + nx + ux * TOUCH, y2: end.y + ny + uy * TOUCH };
+  const length = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+  const ux = (b.x - a.x) / length;
+  const uy = (b.y - a.y) / length;
+  const nx = -uy * shift;
+  const ny = ux * shift;
+  const leave = exitDistance(nx, ny, ux, uy);
+  const enter = exitDistance(nx, ny, -ux, -uy);
+  return {
+    x1: a.x + nx + ux * (leave - TOUCH),
+    y1: a.y + ny + uy * (leave - TOUCH),
+    x2: b.x + nx - ux * (enter - TOUCH),
+    y2: b.y + ny - uy * (enter - TOUCH),
+  };
 }
 
 // The data goes both ways between a supervisor and its workers: the instruction down, the result back.

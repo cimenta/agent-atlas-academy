@@ -133,3 +133,18 @@ test("the replay diagram colours boxes by state, lights the arrow just used and 
   // Once the time is over every arrow that has carried data is solid grey, the latest one too.
   assert.equal(paths.find((p) => p.attrs["data-flow"] === "w1>s").attrs.class, "flow used");
 });
+
+test("the arrows of a two-way connection start and end on the edges of the boxes, not under them", async () => {
+  const { BOX_H, BOX_W, TOUCH, autoPositions, straight } = await import("../public/js/create/diagram-geometry.js");
+  const pos = autoPositions(supervisor, { wide: true });
+  const inside = (p, id) => {
+    const b = pos.get(id);
+    return p.x > b.x + TOUCH + 0.01 && p.x < b.x + BOX_W - TOUCH - 0.01 && p.y > b.y + TOUCH + 0.01 && p.y < b.y + BOX_H - TOUCH - 0.01;
+  };
+  for (const [from, to] of [["s", "w1"], ["w1", "s"], ["s", "w2"], ["w2", "s"]]) {
+    const l = straight(pos, from, to, -9);
+    // The ends are at most TOUCH pixels inside the boxes: neither end is deep inside a box.
+    assert.equal(inside({ x: l.x1, y: l.y1 }, from), false, `${from}>${to} start`);
+    assert.equal(inside({ x: l.x2, y: l.y2 }, to), false, `${from}>${to} end`);
+  }
+});

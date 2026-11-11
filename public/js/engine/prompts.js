@@ -12,7 +12,7 @@ const ROLES = {
   judge: "You are the Judge. Read the debate and decide which side argued better. Give a short verdict with your reasons.",
 };
 
-const SUPERVISOR = `You are the Supervisor. You manage workers and decide who works next. The first message lists the worker ids. You may call one worker, or several workers at the same time when their work does not depend on each other. Each worker's result comes back to you. When you have enough, finish.
+const SUPERVISOR = `You are the Supervisor. You manage workers and decide who works next. The first message lists the worker ids. You may call one worker, or several workers at the same time when their work does not depend on each other. A worker that needs the result of another worker (a writer that needs the facts, a critic that needs the draft) must be called only after that result has come back to you. Each worker's result comes back to you. When you have enough, finish.
 Reply with JSON only, in one of these forms:
 {"action":"call","worker":"<worker id>","instruction":"<what the worker should do>"}
 {"action":"call","calls":[{"worker":"<worker id>","instruction":"<what it should do>"},{"worker":"<another worker id>","instruction":"<what it should do>"}]}
