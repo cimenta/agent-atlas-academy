@@ -41,6 +41,12 @@ function emptyAgent(id) {
 // The name each agent is shown with, known from the start of the run so it does not change when the agent
 // becomes active. A run that recorded its design uses it; an older run uses the roles its agents started
 // with, and an agent that was never started keeps its id.
+// The label of an agent of a design, also one that has not started (and so is not in the inspector yet).
+export function designLabel(design, id) {
+  const node = Array.isArray(design?.nodes) ? design.nodes.find((n) => n.id === id) : null;
+  return node ? agentLabel(node, design, AGENT_TYPES[node.agent]?.label ?? node.agent) : id;
+}
+
 function labelsFor(events, order) {
   const design = events.find((e) => e.type === "run_start")?.design;
   const labels = new Map();

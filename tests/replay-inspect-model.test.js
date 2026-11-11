@@ -161,3 +161,11 @@ test("agent names come from the run design from the start and do not change when
     assert.deepEqual(s.order.map((id) => s.agents[id].label), ["Debater 1", "Debater 2", "Judge"].slice(0, s.order.length));
   }
 });
+
+test("designLabel gives the name of a free agent that has not started, and numbers agents of the same type", async () => {
+  const { designLabel } = await import("../public/js/replay/inspect-model.js");
+  const design = { pattern: "supervisor", nodes: [{ id: "supervisor", agent: "supervisor" }, { id: "r1", agent: "researcher" }, { id: "r2", agent: "researcher" }, { id: "free", agent: "free", name: "Finance advisor" }], edges: [] };
+  assert.equal(designLabel(design, "free"), "Finance advisor");
+  assert.equal(designLabel(design, "r2"), "Researcher 2");
+  assert.equal(designLabel(design, "unknown"), "unknown");
+});

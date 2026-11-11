@@ -3,7 +3,7 @@
 import { h } from "../dom.js";
 import { validateRun } from "../run-schema.js";
 import { createPlayer } from "./player.js";
-import { debateProgress, deriveInspector } from "./inspect-model.js";
+import { debateProgress, deriveInspector, designLabel } from "./inspect-model.js";
 import { createViewer } from "./viewer.js";
 import { markText, searchBar } from "../text-search.js";
 import { definitionFromRun } from "../create/definition.js";
@@ -203,7 +203,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
           doc,
           design,
           wide,
-          boxLabel: (id) => id,
+          boxLabel: (id) => designLabel(design, id),
           statusText: (a) => `${t(STATUS_KEY[a.status])}${a.ms ? ` · ${fmt(a.ms)}` : ""}`,
           onSelect: (id) => {
             Object.assign(ui, { agent: id, follow: false, step: null, round: null });

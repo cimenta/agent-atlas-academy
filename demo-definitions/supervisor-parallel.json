@@ -1,0 +1,58 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "A small cafe wants to start selling coffee beans online. Prepare a one-page action plan with the main risks. Two things can be researched independently, so research them at the same time: (1) the market: competitors, prices and typical customers; (2) the practical side: shipping, packaging and the legal rules for selling food online. Write and review the plan only after both results are back.",
+  "design": {
+    "pattern": "supervisor",
+    "nodes": [
+      {
+        "id": "supervisor",
+        "agent": "supervisor",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "search": true
+      },
+      {
+        "id": "researcher-2",
+        "agent": "researcher",
+        "model": "fast",
+        "search": true
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "supervisor",
+        "to": "researcher"
+      },
+      {
+        "from": "supervisor",
+        "to": "researcher-2"
+      },
+      {
+        "from": "supervisor",
+        "to": "writer"
+      },
+      {
+        "from": "supervisor",
+        "to": "critic"
+      }
+    ]
+  }
+}
