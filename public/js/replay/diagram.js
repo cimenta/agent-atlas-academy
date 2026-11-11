@@ -75,7 +75,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       parts.box.setAttribute("data-status", status);
       parts.box.setAttribute("aria-pressed", String(selectedId === id));
       parts.name.textContent = agent?.label ?? boxLabel(id);
-      parts.status.textContent = agent ? statusText(agent) : "";
+      parts.status.textContent = statusText(agent ?? { status: "waiting", ms: null });
     }
     const { used, latest } = flowState(events, cursor, design);
     const time = now();

@@ -6,6 +6,10 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- In the Replay diagram an agent that has not started yet is a grey box with a dashed border and says waiting, instead of a plain white box.
+
+
+
 - The outcome of a run in Your runs (Finished, Stopped and so on) is a coloured tag like the pattern tag: green when it finished, amber when you or a limit stopped it, red when it failed or was interrupted.
 
 
