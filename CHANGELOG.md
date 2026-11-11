@@ -6,6 +6,10 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- In the Replay diagram of a debate the number of the current round flashes in the Round n of N badge.
+
+
+
 - In the Replay diagram an agent that has not started yet is a grey box with a dashed border and says waiting, instead of a plain white box.
 
 

@@ -13,7 +13,7 @@ import { stepDetail } from "./step-detail.js";
 import { createAboutPanel } from "./about.js";
 import { createRunMenu } from "./run-menu.js";
 import { runForExport } from "../run-export.js";
-import { createReplayDiagram } from "./diagram.js";
+import { createReplayDiagram, ROUND_MARK } from "./diagram.js";
 import { outcomeNotice } from "../outcome-view.js";
 import { buildResultModel } from "../play-model.js";
 
@@ -239,7 +239,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       cursor: player.cursor,
       state,
       selectedId: currentAgent()?.id ?? null,
-      badgeText: debate ? (debate.verdict ? t("player.debateVerdict") : t("player.debateRound", { n: debate.round, total: debate.rounds })) : "",
+      badgeText: debate ? (debate.verdict ? t("player.debateVerdict") : t("player.debateRound", { n: ROUND_MARK, total: debate.rounds })) : "",
+      badgeNumber: debate && !debate.verdict ? debate.round : undefined,
     });
     return true;
   }

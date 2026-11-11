@@ -96,6 +96,7 @@ function fakeDoc() {
       setAttribute(k, v) { this.attrs[k] = String(v); },
       getAttribute(k) { return this.attrs[k]; },
       append(...c) { this.children.push(...c); },
+      replaceChildren(...c) { this.children = c; },
       addEventListener(type, fn) { this.listeners[type] = fn; },
     };
     return el;
@@ -148,3 +149,25 @@ test("the arrows of a two-way connection start and end on the edges of the boxes
     assert.equal(inside({ x: l.x2, y: l.y2 }, to), false, `${from}>${to} end`);
   }
 });
+
+test("the round number in the badge of a debate is its own flashing element", async () => {
+  const { createReplayDiagram, ROUND_MARK } = await import("../public/js/replay/diagram.js");
+  const diagram = createReplayDiagram({ doc: fakeDoc2(), design: debate, wide: true, boxLabel: (id) => id, statusText: () => "", onSelect: () => {}, clock: { setTimeout: () => 1, clearTimeout: () => {} } });
+  const badge = diagram.element.children.at(-1);
+  diagram.update({ events: [], cursor: 0, state: { agents: {} }, selectedId: null, badgeText: `Round ${ROUND_MARK} of 3`, badgeNumber: 2 });
+  assert.equal(badge.children.length, 3);
+  assert.equal(badge.children[1].attrs.class, "round-no");
+  assert.equal(badge.children[0].text + badge.children[1].children[0].text + badge.children[2].text, "Round 2 of 3");
+});
+
+function fakeDoc2() {
+  const make = (name) => ({
+    name, attrs: {}, children: [], style: {}, listeners: {}, hidden: false, textContent: "",
+    setAttribute(k, v) { this.attrs[k] = String(v); },
+    getAttribute(k) { return this.attrs[k]; },
+    append(...c) { this.children.push(...c); },
+    replaceChildren(...c) { this.children = c; },
+    addEventListener() {},
+  });
+  return { createElement: make, createElementNS: (ns, name) => make(name), createTextNode: (text) => ({ text }) };
+}

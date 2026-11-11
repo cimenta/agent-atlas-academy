@@ -600,3 +600,6 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .run-meta .outcome-chip.warn { background: var(--working-bg); color: var(--working); }
 .run-meta .outcome-chip.fail { background: var(--err-bg); color: var(--err); }
 .run-meta .run-when-text { margin-left: 6px; }
+
+@keyframes round-flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+.round-badge .round-no { display: inline-block; animation: round-flash 1s ease-in-out infinite; }

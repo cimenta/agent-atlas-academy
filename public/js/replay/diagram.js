@@ -15,6 +15,7 @@ function svgEl(doc, name, attrs = {}) {
 }
 
 export const HOLD_MS = 2500;
+export const ROUND_MARK = "\u0001"; // where the round number goes in the badge text
 const realClock = { setTimeout: (fn, ms) => globalThis.setTimeout(fn, ms), clearTimeout: (id) => globalThis.clearTimeout(id) };
 
 export function createReplayDiagram({ doc, design, wide, onSelect, statusText, boxLabel, clock = realClock, now = () => Date.now() }) {
@@ -68,7 +69,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
   // events: all events of the run; cursor: how many are applied; state: the inspector state; selectedId: the agent shown below.
   function update(args) {
     lastArgs = args;
-    const { events, cursor, state, selectedId, badgeText } = args;
+    const { events, cursor, state, selectedId, badgeText, badgeNumber } = args;
     for (const [id, parts] of boxes) {
       const agent = state.agents[id];
       const status = agent?.status ?? "waiting";
@@ -103,7 +104,13 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       if (lastArgs) update(lastArgs);
     }, Math.max(0, nextExpiry - time) + 20);
     badge.hidden = !badgeText;
-    badge.textContent = badgeText ?? "";
+    // The number of the current round flashes. badgeText holds it as a marker (RN) where the number goes.
+    const pieces = typeof badgeText === "string" && badgeNumber !== undefined ? badgeText.split(ROUND_MARK) : null;
+    if (pieces && pieces.length === 2) {
+      badge.replaceChildren(doc.createTextNode(pieces[0]), h(doc, "span", { class: "round-no", "data-ui": "debate-round-number" }, String(badgeNumber)), doc.createTextNode(pieces[1]));
+    } else {
+      badge.replaceChildren(doc.createTextNode(badgeText ?? ""));
+    }
   }
 
   return { element: wrap, update, destroy: () => { if (timer !== null) clock.clearTimeout(timer); timer = null; } };
