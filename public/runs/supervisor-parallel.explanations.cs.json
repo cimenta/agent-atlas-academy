@@ -1,0 +1,22 @@
+{
+  "0": "Každý běh začíná zadáním. Toto zadání říká supervizorovi, že dvě věci lze zkoumat současně a že psaní a posouzení musí počkat na oba výsledky.",
+  "1": "Supervizor začíná. Vidí zadání a seznam pracovníků: dva výzkumníky, pisatele a kritika.",
+  "3": "Odpověď supervizora je jedna zpráva JSON se dvěma voláními, pro každého výzkumníka jedno. Takto supervizor spouští pracovníky paralelně.",
+  "4": "První pokyn: prozkoumat trh (konkurenci, ceny, zákazníky).",
+  "5": "Druhý pokyn, odeslaný ve stejném okamžiku: prozkoumat praktickou stránku (doprava, balení, právní pravidla).",
+  "6": "Výzkumník 1 začíná pracovat.",
+  "7": "Výzkumník 2 začíná hned, aniž by čekal na Výzkumníka 1. Oba teď pracují současně.",
+  "15": "Zjištění Výzkumníka 1: konkurence, cenová pásma a typičtí zákazníci.",
+  "16": "Výsledek se vrací supervizorovi, jakmile je hotový, i když Výzkumník 2 ještě pracuje.",
+  "26": "Zjištění Výzkumníka 2: doprava, čerstvost, balení a pravidla pro prodej potravin online.",
+  "27": "Druhý výsledek se vrací. Teď má supervizor všechno, na co čekal.",
+  "28": "Supervizor začíná znovu. Čte oba výsledky společně a rozhoduje, co bude dál.",
+  "30": "Teď volá pisatele, který výzkum potřebuje. Fakta mu předá v pokynu. Dřív ho nevolal, protože závisí na výsledcích.",
+  "34": "Koncept pisatele: jednostránkový akční plán s postupem spuštění a tabulkou rizik.",
+  "38": "Supervizor volá kritika s konceptem, který kritik potřebuje k posouzení.",
+  "42": "Posouzení kritika. Upozorňuje, že nedostal samotný výzkum, jen koncept, takže nemohl ověřit čísla. Supervizor rozhoduje, co každý pracovník uvidí.",
+  "46": "Supervizor se snaží skončit konečnou odpovědí, ale do textu v JSON vložil zalomení řádků, takže JSON není platný.",
+  "47": "Odpověď, která není platná, se nepřijme. Supervizor je jednou požádán, aby odpověděl znovu ve správném tvaru.",
+  "49": "Druhá odpověď je platný JSON a přijme se: je to konečný plán.",
+  "50": "Běh končí. Konečná odpověď je plán, který supervizor napsal poté, co své části udělali výzkumníci, pisatel a kritik."
+}

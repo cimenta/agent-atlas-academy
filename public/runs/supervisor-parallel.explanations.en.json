@@ -1,0 +1,22 @@
+{
+  "0": "Every run starts with a task. This one tells the Supervisor that two things can be researched at the same time, and that the writing and the review must wait for both results.",
+  "1": "The Supervisor starts. It sees the task and the list of workers: two Researchers, a Writer and a Critic.",
+  "3": "The Supervisor's reply is one JSON message with two calls: one for each Researcher. This is how a Supervisor starts workers in parallel.",
+  "4": "The first instruction: research the market (competitors, prices, customers).",
+  "5": "The second instruction, sent in the same moment: research the practical side (shipping, packaging, legal rules).",
+  "6": "Researcher 1 starts working.",
+  "7": "Researcher 2 starts at once, without waiting for Researcher 1. Both are working at the same time now.",
+  "15": "Researcher 1's findings: competitors, price bands and typical customers.",
+  "16": "The result goes back to the Supervisor as soon as it is ready, even though Researcher 2 is still working.",
+  "26": "Researcher 2's findings: shipping, freshness, packaging and the rules for selling food online.",
+  "27": "The second result goes back. Now the Supervisor has everything it was waiting for.",
+  "28": "The Supervisor starts again. It reads both results together and decides what comes next.",
+  "30": "Now it calls the Writer, which needs the research. It passes the facts in the instruction. This worker was not called earlier because it depends on the results.",
+  "34": "The Writer's draft: a one-page action plan with a launch plan and a table of risks.",
+  "38": "The Supervisor calls the Critic with the draft, which the Critic needs to review.",
+  "42": "The Critic's review. It notes that it did not receive the research itself, only the draft, so it could not check the figures. A Supervisor decides what each worker sees.",
+  "46": "The Supervisor tries to finish with the final answer, but it put line breaks inside the JSON text, which makes the JSON invalid.",
+  "47": "A reply that is not valid is not accepted. The Supervisor is asked once to answer again in the right form.",
+  "49": "The second answer is valid JSON and is accepted: this is the final plan.",
+  "50": "The run ends. The final answer is the plan the Supervisor wrote after the Researchers, the Writer and the Critic had done their parts."
+}
