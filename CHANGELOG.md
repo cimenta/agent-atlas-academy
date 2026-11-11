@@ -6,7 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
-- A run in Your runs has a green background when it finished and a red one when it did not (stopped, failed, interrupted or stopped at a limit).
+- The outcome of a run in Your runs (Finished, Stopped and so on) is a coloured tag like the pattern tag: green when it finished, amber when you or a limit stopped it, red when it failed or was interrupted.
 
 
 

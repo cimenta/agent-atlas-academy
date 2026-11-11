@@ -105,10 +105,13 @@ export async function renderPlay(ctx, route = { params: { view: "replay" } }) {
 // The line under the title: how the run ended and when it was made (your own runs).
 function runMeta({ doc, t, lang }, item) {
   const parts = [];
-  if (item.outcome) parts.push(t(`result.status.${item.outcome}`));
+  if (item.outcome) {
+    const level = item.outcome === "finished" ? "ok" : item.outcome === "stopped_user" || item.outcome === "stopped_limit" ? "warn" : "fail";
+    parts.push(h(doc, "span", { class: `outcome-chip ${level}`, "data-ui": "run-outcome-chip", "data-outcome": item.outcome }, t(`result.status.${item.outcome}`)));
+  }
   const when = formatRunWhen(item.createdAt, lang);
-  if (when) parts.push(when);
-  return parts.length ? h(doc, "span", { class: "run-meta", "data-ui": "run-when" }, parts.join(" · ")) : "";
+  if (when) parts.push(h(doc, "span", { class: "run-when-text", "data-ui": "run-when" }, when));
+  return parts.length ? h(doc, "span", { class: "run-meta" }, ...parts) : "";
 }
 
 // A row of the library: the title and the cog on top, the outcome and the pattern tag below.
@@ -117,7 +120,7 @@ function runRow(ctx, item, menu) {
   return h(
     doc,
     "li",
-    { class: "run-row", "data-ui": "run-row", "data-outcome": item.outcome },
+    { class: "run-row", "data-ui": "run-row" },
     h(doc, "a", { href: `#/play/run/${item.id}`, class: "run-title" }, item.title),
     menu,
     runMeta(ctx, item),
