@@ -6,6 +6,10 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- A row in Your runs shows the date and time of the run next to how it ended.
+
+
+
 - On the Create tab the message that says how the run ended now sits above the player. The Replay tab shows the same message above the player for a run that did not finish well (failed, stopped by you, stopped at a limit or interrupted).
 
 - A Supervisor can now call several workers at once. They work at the same time, all their results go back to the Supervisor, and the Supervisor then decides what to do next. Calling one worker works as before, and recorded runs are not affected. The Supervisor is told about the new reply form in its instructions.

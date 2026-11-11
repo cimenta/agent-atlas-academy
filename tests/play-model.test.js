@@ -140,3 +140,12 @@ test("the home page plays the run marked home, else the first one", () => {
   assert.equal(pickHomeRun([]), undefined);
   assert.equal(pickHomeRun(undefined), undefined);
 });
+
+test("formatRunWhen gives the date and time of a run, and nothing when it is unknown", async () => {
+  const { formatRunWhen } = await import("../public/js/play-model.js");
+  const when = formatRunWhen(Date.UTC(2026, 10, 11, 9, 40), "en");
+  assert.match(when, /2026/);
+  assert.match(when, /\d{1,2}:\d{2}/);
+  assert.equal(formatRunWhen(undefined, "en"), "");
+  assert.equal(formatRunWhen(Number.NaN, "en"), "");
+});

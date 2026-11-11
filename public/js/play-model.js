@@ -122,3 +122,15 @@ export function prepareImport(text, makeId) {
   const check = validateRun(copy);
   return check.ok ? { ok: true, run: copy } : { ok: false, reason: "invalid", errors: check.errors };
 }
+
+// The date and time of a run as shown on its row in the library, in the visitor's language. Empty when unknown.
+export function formatRunWhen(ms, lang) {
+  if (typeof ms !== "number" || !Number.isFinite(ms)) return "";
+  const date = new Date(ms);
+  if (Number.isNaN(date.getTime())) return "";
+  try {
+    return date.toLocaleString(lang, { dateStyle: "medium", timeStyle: "short" });
+  } catch {
+    return date.toLocaleString();
+  }
+}

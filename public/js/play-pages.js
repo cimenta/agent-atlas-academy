@@ -2,7 +2,7 @@
 import { h } from "./dom.js";
 import { mountReplay } from "./replay/view.js";
 import { getJson, loadExplanations, renderNotFound, setTitle } from "./pages.js";
-import { buildReplayList, filterLibrary, prepareImport } from "./play-model.js";
+import { buildReplayList, filterLibrary, formatRunWhen, prepareImport } from "./play-model.js";
 import { makeRunId } from "./engine/run-record.js";
 import { renderResult } from "./result-page.js";
 import { renderCreate } from "./create/create-page.js";
@@ -102,6 +102,15 @@ export async function renderPlay(ctx, route = { params: { view: "replay" } }) {
   }
 }
 
+// The line under the title: how the run ended and when it was made (your own runs).
+function runMeta({ doc, t, lang }, item) {
+  const parts = [];
+  if (item.outcome) parts.push(t(`result.status.${item.outcome}`));
+  const when = formatRunWhen(item.createdAt, lang);
+  if (when) parts.push(when);
+  return parts.length ? h(doc, "span", { class: "run-meta", "data-ui": "run-when" }, parts.join(" · ")) : "";
+}
+
 // A row of the library: the title and the cog on top, the outcome and the pattern tag below.
 function runRow(ctx, item, menu) {
   const { doc, t } = ctx;
@@ -111,7 +120,7 @@ function runRow(ctx, item, menu) {
     { class: "run-row", "data-ui": "run-row" },
     h(doc, "a", { href: `#/play/run/${item.id}`, class: "run-title" }, item.title),
     menu,
-    item.outcome ? h(doc, "span", { class: "run-meta" }, t(`result.status.${item.outcome}`)) : "",
+    runMeta(ctx, item),
     h(doc, "span", { class: `type-chip type-${item.pattern}`, "data-ui": "run-type" }, t(`pattern.${item.pattern}`)),
   );
 }
