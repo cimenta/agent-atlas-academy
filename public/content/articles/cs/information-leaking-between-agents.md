@@ -23,4 +23,4 @@ Obrana se snadno popíše:
 - Nikdy nevkládejte tajemství, například API klíče, do pokynů ani zpráv.
 - Před zveřejněním běh projděte. Zveřejněný běh je veřejný a nelze ho úplně vzít zpět.
 
-Když v Agent Atlasu zveřejníte běh, potvrzujete, že neobsahuje osobní údaje.
+Agent Atlas při Exportu běhu odstraní jazyk, časové pásmo a prohlížeč toho, kdo běh vytvořil, ale nevidí, co jste napsali do zadání. Před sdílením si běh přečtěte.

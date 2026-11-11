@@ -4,6 +4,7 @@ section: orchestration
 order: 9
 summary: Agent předá řízení jinému agentovi. Bez centrálního šéfa.
 related: [supervisor-and-workers, how-agents-communicate, what-each-agent-sees]
+coming: true
 ---
 
 Při **předání** se agent rozhodne, že má pokračovat jiný agent, a předá mu řízení. Technicky je to často volání nástroje, například „předej autorovi“, s krátkou poznámkou, co už je hotovo.

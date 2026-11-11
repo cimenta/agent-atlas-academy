@@ -116,6 +116,7 @@ export async function renderLearn(ctx) {
         h(doc, "a", { href: `#/learn/${item.slug}` }, item.title),
         h(doc, "span", { class: "summary" }, ` ${item.summary}`),
       );
+      if (item.coming) entry.append(h(doc, "span", { class: "tag coming", "data-ui": "learn-coming" }, ` ${t("learn.coming")}`));
       if (fallbackSlugs.has(item.slug)) entry.append(h(doc, "span", { class: "tag" }, ` (${t("lang.en")})`));
       list.append(entry);
     }
@@ -132,6 +133,7 @@ export async function renderArticle(ctx, slug) {
   const title = article.meta.title || slug;
   setTitle(ctx, title);
   const nodes = [h(doc, "p", {}, h(doc, "a", { href: "#/learn" }, `← ${t("learn.back")}`)), h(doc, "h1", {}, title)];
+  if (article.meta?.coming === "true") nodes.push(h(doc, "p", { class: "notice coming", "data-ui": "learn-coming-notice" }, t("learn.comingNotice")));
   if (article.isFallback) nodes.push(h(doc, "p", { class: "notice" }, t("learn.fallbackNotice")));
   nodes.push(h(doc, "article", { class: "article" }, renderBlocks(article.blocks, doc)));
   const related = Array.isArray(article.meta.related) ? article.meta.related : [];

@@ -13,6 +13,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 ### Added
 
 - The tooltip shown when a run ends has a link to the result (and, when the run did not finish ok, stays on the screen with a Close button until you close it), and the Result tab has a light green background whenever there is a result to see, including a run opened from the library (the tab then leads to that run).
+- Help now covers the three tabs, the library and run menu, creating a run and Settings. Learn marks topics Agent Atlas does not do yet with "is coming" (single agent, handoff, evaluator loop, summary memory, scratchpad memory, human approval, guardrails), and sentences that promised missing features (graph in Replay, comparing runs, page fetching, a recorded injection demo, publishing) now say what exists and what is coming. The time limit is stated as 270 seconds.
 - An eighth library run: the simple debate demo (two Debaters, one round, a Judge), with an About text and explanations in English and Czech.
 - Restored the styles of the About panel and the light green Result tab, which had gone missing from the style sheet.
 - A seventh library run: the complex debate demo (four Debaters for and against, two rounds, a stronger Judge), with an About text and explanations in English and Czech. The debate transcript now names debaters Debater 1, Debater 2 instead of their internal ids.

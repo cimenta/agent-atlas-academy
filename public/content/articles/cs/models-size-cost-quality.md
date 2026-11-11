@@ -13,4 +13,4 @@ Poskytovatelé nabízejí jazykové modely v několika velikostech. Obecně plat
 
 Volba modelu je tak součástí orchestrace. Běh nepotřebuje stejný model pro každého agenta. Běžný návrh používá větší model na plánování a posuzování a menší na rutinní kroky.
 
-Ceny a modely se často mění, proto tento článek neuvádí žádná čísla. V Agent Atlasu můžete nastavit model pro každého agenta a porovnat běhy téže úlohy: sledujte kvalitu výsledku, spotřebované tokeny a potřebný čas.
+Ceny a modely se často mění, proto tento článek neuvádí žádná čísla. V Agent Atlasu můžete nastavit model pro každého agenta a spustit tutéž úlohu znovu: sledujte kvalitu výsledku, spotřebované tokeny a potřebný čas. Porovnání běhů vedle sebe se připravuje.

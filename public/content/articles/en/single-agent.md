@@ -4,6 +4,7 @@ section: orchestration
 order: 5
 summary: One agent does the whole task. The baseline to compare everything else against.
 related: [sequential-chain, models-size-cost-quality]
+coming: true
 ---
 
 In this pattern **one agent does everything**: it plans, gathers information, thinks and writes the answer.

@@ -4,6 +4,7 @@ section: orchestration
 order: 5
 summary: Jeden agent udělá celou úlohu. Základ, s nímž se vše ostatní porovnává.
 related: [sequential-chain, models-size-cost-quality]
+coming: true
 ---
 
 V tomto vzoru **jeden agent dělá všechno**: plánuje, shání informace, přemýšlí a píše odpověď.

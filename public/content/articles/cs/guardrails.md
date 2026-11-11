@@ -4,6 +4,7 @@ section: security
 order: 28
 summary: Kontroly toho, co do agenta vstupuje a co z něj vychází.
 related: [structured-output, self-critique, human-approval, prompt-injection]
+coming: true
 ---
 
 **Ochranné kontroly** (guardrails) jsou kontroly umístěné kolem agenta. Mohou zkoumat vstup dřív, než ho agent uvidí, nebo výstup dřív, než se použije.

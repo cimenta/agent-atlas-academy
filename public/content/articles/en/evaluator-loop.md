@@ -4,6 +4,7 @@ section: orchestration
 order: 10
 summary: Generate, critique, revise. Repeat until the result is good enough or a limit is reached.
 related: [self-critique, budgets-and-stop-conditions, supervisor-and-workers]
+coming: true
 ---
 
 In an **evaluator loop** one agent produces a draft and another agent, the **evaluator**, judges it against stated criteria. If it is not good enough, the feedback goes back to the first agent, which revises. The loop ends when the evaluator accepts the result or a limit is reached.

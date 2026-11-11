@@ -4,6 +4,7 @@ section: orchestration
 order: 9
 summary: An agent passes control to another agent. No central boss.
 related: [supervisor-and-workers, how-agents-communicate, what-each-agent-sees]
+coming: true
 ---
 
 In a **handoff** an agent decides that another agent should continue and passes control to it. Technically this is often a tool call such as "transfer to the writing agent", with a short note about what has been done.

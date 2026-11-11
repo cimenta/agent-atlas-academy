@@ -18,4 +18,4 @@ The cause is simple: to a language model, instructions and data are both just te
 - Require human approval for risky actions.
 - Do not let untrusted text flow into the instructions of other agents.
 
-No single measure is enough. Agent Atlas shows prompt injection in a **recorded** run using a harmless demonstration page. It never attacks anything live.
+No single measure is enough. A **recorded** demonstration of prompt injection, using a harmless page, is coming to the library. Agent Atlas will never attack anything live.

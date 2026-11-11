@@ -16,4 +16,4 @@ Examples:
 
 Why it matters: if an agent is fooled, by a prompt injection or by its own mistake, the damage is limited to what it was allowed to do. An agent with nothing dangerous in its hands can do nothing dangerous.
 
-This is why Agent Atlas offers only read-only tools. When you choose tools per agent, ask for each one: does this agent really need this? If not, remove it.
+This is why Agent Atlas offers only a read-only web search. When you choose tools per agent, ask for each one: does this agent really need this? If not, remove it.

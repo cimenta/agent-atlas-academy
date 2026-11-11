@@ -33,6 +33,7 @@ export function buildArticleIndexes(articlesDir) {
         order,
         summary: meta.summary || "",
         related: Array.isArray(meta.related) ? meta.related : [],
+        ...(meta.coming === "true" ? { coming: true } : {}),
       });
     }
     items.sort((a, b) => a.order - b.order);

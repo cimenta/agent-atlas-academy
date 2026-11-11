@@ -8,7 +8,7 @@ related: [how-agents-communicate, tokens-cost-and-time]
 
 **Přehrávání** ukazuje zaznamenaný běh krok za krokem.
 
-- **Graf** zobrazuje agenty jako obdélníky. Šipky ukazují zprávy a předání. Agent, který právě pracuje, je zvýrazněn. Když pracuje víc agentů současně, uvidíte zvýrazněných několik najednou.
+- **Karty agentů** ukazují agenty v řadě s jejich stavem a časem. Agent, který právě pracuje, je zvýrazněn, a když pracuje víc agentů současně, uvidíte zvýrazněných několik najednou. Graf se šipkami pro zprávy a předání, jako je diagram na kartě Vytvořit, se připravuje.
 - **Časová osa** vypisuje kroky v pořadí: agent začne, zavolá nástroj, dostane výsledek, předá práci nebo skončí.
 - **Kliknutím na krok** si přečtete přesnou zprávu.
 - **Přehrát a pozastavit** pouští přehrávání zaznamenaným tempem.

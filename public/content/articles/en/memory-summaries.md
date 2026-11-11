@@ -4,6 +4,7 @@ section: memory
 order: 14
 summary: Older messages are replaced by a short summary to keep the context small.
 related: [memory-shared-conversation, what-each-agent-sees]
+coming: true
 ---
 
 With **summary memory**, old messages are condensed into a short summary, and the agent sees the summary plus the most recent messages.

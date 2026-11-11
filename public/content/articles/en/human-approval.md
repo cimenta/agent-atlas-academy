@@ -4,6 +4,7 @@ section: control-and-cost
 order: 22
 summary: Pausing so a person can check, edit or refuse before the agents continue.
 related: [least-privilege, guardrails, prompt-injection]
+coming: true
 ---
 
 In a **human approval** step, the run stops and waits for a person before something important happens. The person can approve, change or reject what the agent proposes.

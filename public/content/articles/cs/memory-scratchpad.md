@@ -4,6 +4,7 @@ section: memory
 order: 15
 summary: Sdílená sada poznámek, z níž agenti čtou a do níž zapisují.
 related: [memory-summaries, information-leaking-between-agents, trust-boundaries]
+coming: true
 ---
 
 **Zápisník** je sdílené místo pro poznámky. Agenti do něj zapisují fakta, rozhodnutí a úkoly, na kterých záleží, a čtou ho, když ho potřebují. Na rozdíl od konverzace obsahuje jen to, co se agenti rozhodli uchovat.

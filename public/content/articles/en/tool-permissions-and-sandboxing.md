@@ -16,4 +16,4 @@ Typical rules:
 - **Read-only**: tools that cannot change anything.
 - **Sandbox**: running risky code in an isolated space with no access to the rest of the system.
 
-The page-fetching tool in Agent Atlas works like this: it refuses internal addresses, has a time limit and only reads. The principle is to put the rule in the code that runs the tool, not in the instructions the agent is asked to follow.
+The web search in Agent Atlas only reads, and the app runs it, not the model. A page-fetching tool is coming, and it will work like this: it refuses internal addresses, has a time limit and only reads. The principle is to put the rule in the code that runs the tool, not in the instructions the agent is asked to follow.

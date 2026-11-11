@@ -564,3 +564,5 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 
 /* The Result tab is light green when there is a result to see */
 .site-header .subtabs a.has-result { background: var(--result-bg); color: var(--result-text); font-weight: 700; }
+
+.tag.coming { display: inline-block; margin-left: 4px; padding: 1px 8px; font-size: 0.75rem; font-weight: 600; color: var(--working); background: var(--working-bg); border-radius: 999px; }

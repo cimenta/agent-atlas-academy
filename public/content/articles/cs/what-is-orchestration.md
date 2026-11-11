@@ -13,6 +13,6 @@ related: [what-is-an-agent, single-agent, sequential-chain, supervisor-and-worke
 3. **Co vidí?** Informace, které každý agent dostane.
 4. **Kdy se skončí?** Při úspěchu, při dosažení limitu nebo při selhání.
 
-Stejní agenti uspořádaní jinak mohou dát jinou kvalitu, cenu i rychlost. Proto vám Agent Atlas umožňuje spustit jednu úlohu s několika vzory a porovnat je.
+Stejní agenti uspořádaní jinak mohou dát jinou kvalitu, cenu i rychlost. Proto vám Agent Atlas umožňuje spustit jednu úlohu s různými vzory. Porovnání běhů vedle sebe se připravuje.
 
 Někdy pořadí určuje obyčejný programový kód. Jindy rozhoduje agent, jako ve vzoru supervizor. V obou případech orchestrace mění sadu samostatných volání modelu v jeden proces.

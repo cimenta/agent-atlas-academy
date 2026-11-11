@@ -4,6 +4,7 @@ section: orchestration
 order: 10
 summary: Vytvořit, zkritizovat, přepracovat. Opakovat, dokud výsledek není dost dobrý nebo nepadne limit.
 related: [self-critique, budgets-and-stop-conditions, supervisor-and-workers]
+coming: true
 ---
 
 Ve **smyčce s hodnotitelem** jeden agent vytvoří návrh a jiný agent, **hodnotitel**, ho posoudí podle stanovených kritérií. Pokud není dost dobrý, zpětná vazba jde zpět prvnímu agentovi, který ho přepracuje. Smyčka končí, když hodnotitel výsledek přijme nebo když padne limit.

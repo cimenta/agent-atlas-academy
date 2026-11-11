@@ -16,4 +16,4 @@ Typická pravidla:
 - **Jen pro čtení**: nástroje, které nemohou nic změnit.
 - **Izolované prostředí**: spuštění riskantního kódu v odděleném prostoru bez přístupu ke zbytku systému.
 
-Nástroj pro stahování stránek v Agent Atlasu funguje takto: odmítá interní adresy, má časový limit a jen čte. Zásada zní dát pravidlo do kódu, který nástroj spouští, ne do pokynů, jimiž se má agent řídit.
+Vyhledávání na webu v Agent Atlasu jen čte a spouští ho aplikace, ne model. Nástroj pro stahování stránek se připravuje a bude fungovat takto: odmítá interní adresy, má časový limit a jen čte. Zásada zní dát pravidlo do kódu, který nástroj spouští, ne do pokynů, jimiž se má agent řídit.

@@ -17,4 +17,4 @@ Jak to funguje:
 
 Model sám nikdy nic nespouští. Může jen požádat a aplikace rozhodne, zda a jak žádost provede. Agent je omezen na nástroje, které dostal.
 
-Výsledky nástrojů jsou **data zvenčí**. Webová stránka může být nesprávná, zastaralá nebo dokonce napsaná tak, aby klamala. Agent Atlas nabízí jen nástroje pouze pro čtení (hledání a stahování), takže nic v běhu nemůže změnit nic mimo aplikaci.
+Výsledky nástrojů jsou **data zvenčí**. Webová stránka může být nesprávná, zastaralá nebo dokonce napsaná tak, aby klamala. Agent Atlas nabízí jen vyhledávání na webu pouze pro čtení, takže nic v běhu nemůže změnit nic mimo aplikaci. Nástroj pro stažení stránky se připravuje.

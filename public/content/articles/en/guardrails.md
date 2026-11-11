@@ -4,6 +4,7 @@ section: security
 order: 28
 summary: Checks on what goes into and comes out of an agent.
 related: [structured-output, self-critique, human-approval, prompt-injection]
+coming: true
 ---
 
 **Guardrails** are checks placed around an agent. They can look at the input before the agent sees it, or at the output before it is used.

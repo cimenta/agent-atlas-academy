@@ -18,4 +18,4 @@ Příčina je jednoduchá: pro jazykový model jsou pokyny i data jen text. Nedo
 - Pro riskantní akce vyžadujte schválení člověkem.
 - Nenechte nedůvěryhodný text proniknout do pokynů jiných agentů.
 
-Žádné jednotlivé opatření nestačí. Agent Atlas ukazuje prompt injection v **nahraném** běhu s neškodnou ukázkovou stránkou. Nikdy na nic nezaútočí naživo.
+Žádné jednotlivé opatření nestačí. **Nahraná** ukázka prompt injection s neškodnou stránkou se připravuje do knihovny. Agent Atlas nikdy na nic nezaútočí naživo.

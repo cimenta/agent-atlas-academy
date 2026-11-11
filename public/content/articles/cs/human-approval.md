@@ -4,6 +4,7 @@ section: control-and-cost
 order: 22
 summary: Pozastavení, aby člověk mohl před pokračováním agentů zkontrolovat, upravit nebo odmítnout.
 related: [least-privilege, guardrails, prompt-injection]
+coming: true
 ---
 
 Při **schválení člověkem** se běh zastaví a čeká na člověka, než se stane něco důležitého. Člověk může to, co agent navrhuje, schválit, změnit nebo odmítnout.

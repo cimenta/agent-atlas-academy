@@ -17,4 +17,4 @@ Typical limits:
 
 A good run also stops cleanly. It should keep what was already finished and say why it stopped, instead of vanishing.
 
-In Agent Atlas every run is limited, and the time limit is 300 seconds. A run that hits a limit is marked as stopped and the completed part is still replayable. These limits also keep the app educational: it is meant for small experiments, not for real work.
+In Agent Atlas every run is limited, and the time limit is 270 seconds. A run that hits a limit is marked as stopped and the completed part is still replayable. These limits also keep the app educational: it is meant for small experiments, not for real work.

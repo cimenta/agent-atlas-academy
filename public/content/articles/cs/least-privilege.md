@@ -16,4 +16,4 @@ Příklady:
 
 Proč na tom záleží: když je agent oklamán, prompt injection nebo vlastní chybou, škoda je omezena na to, co směl dělat. Agent, který nemá v rukou nic nebezpečného, nemůže udělat nic nebezpečného.
 
-Proto Agent Atlas nabízí jen nástroje pouze pro čtení. Když vybíráte nástroje pro každého agenta, ptejte se u každého: opravdu to tento agent potřebuje? Pokud ne, odeberte ho.
+Proto Agent Atlas nabízí jen vyhledávání na webu pouze pro čtení. Když vybíráte nástroje pro každého agenta, ptejte se u každého: opravdu to tento agent potřebuje? Pokud ne, odeberte ho.

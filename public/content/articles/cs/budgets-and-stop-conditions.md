@@ -17,4 +17,4 @@ Typické limity:
 
 Dobrý běh se také zastaví čistě. Měl by zachovat, co už je hotové, a říct, proč skončil, místo aby prostě zmizel.
 
-V Agent Atlasu je každý běh omezen a časový limit je 300 sekund. Běh, který narazí na limit, je označen jako zastavený a dokončenou část lze stále přehrát. Tyto limity také udržují aplikaci vzdělávací: je určena pro malé pokusy, ne pro skutečnou práci.
+V Agent Atlasu je každý běh omezen a časový limit je 270 sekund. Běh, který narazí na limit, je označen jako zastavený a dokončenou část lze stále přehrát. Tyto limity také udržují aplikaci vzdělávací: je určena pro malé pokusy, ne pro skutečnou práci.

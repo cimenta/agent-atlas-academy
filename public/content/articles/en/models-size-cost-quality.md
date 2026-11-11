@@ -13,4 +13,4 @@ Providers offer language models in several sizes. As a general pattern:
 
 That makes model choice part of orchestration. A run does not need the same model for every agent. A common design uses a larger model for planning and judging and a smaller one for routine steps.
 
-Prices and models change often, so this article gives no numbers. In Agent Atlas you can set the model per agent and compare runs of the same task: look at the quality of the result, the tokens used and the time taken.
+Prices and models change often, so this article gives no numbers. In Agent Atlas you can set the model per agent and run the same task again: look at the quality of the result, the tokens used and the time taken. A side-by-side comparison of runs is coming.

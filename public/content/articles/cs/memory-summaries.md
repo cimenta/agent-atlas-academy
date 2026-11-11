@@ -4,6 +4,7 @@ section: memory
 order: 14
 summary: Starší zprávy se nahradí krátkým shrnutím, aby kontext zůstal malý.
 related: [memory-shared-conversation, what-each-agent-sees]
+coming: true
 ---
 
 Při **paměti se shrnutím** se staré zprávy zhustí do krátkého shrnutí a agent vidí shrnutí plus několik nejnovějších zpráv.

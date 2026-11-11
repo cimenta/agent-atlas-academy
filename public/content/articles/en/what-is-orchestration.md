@@ -13,6 +13,6 @@ related: [what-is-an-agent, single-agent, sequential-chain, supervisor-and-worke
 3. **What do they see?** The information each agent receives.
 4. **When does it stop?** Success, a limit, or a failure.
 
-The same agents arranged differently can give different quality, cost and speed. That is why Agent Atlas lets you run one task with several patterns and compare them.
+The same agents arranged differently can give different quality, cost and speed. That is why Agent Atlas lets you run one task with different patterns. Putting the runs side by side to compare them is coming.
 
 Sometimes ordinary program code decides the order. Sometimes an agent decides, as in the supervisor pattern. Either way, the orchestration is what turns a set of separate model calls into one process.

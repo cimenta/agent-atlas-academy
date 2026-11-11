@@ -23,4 +23,4 @@ The defences are simple to state:
 - Never put secrets, such as API keys, into instructions or messages.
 - Look through a run before publishing it. A published run is public and cannot be fully taken back.
 
-When you publish a run on Agent Atlas, you confirm that it contains no personal data.
+Agent Atlas removes the language, time zone and browser of the person who made a run when you use Export run, but it cannot see what you typed into a task. Read a run before you share it.
