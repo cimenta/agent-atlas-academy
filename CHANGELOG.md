@@ -6,7 +6,9 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
-- The Replay tab now draws the same diagram as the Create tab for every pattern: boxes coloured by state (waiting grey, working blue with a thick border, done green), arrows that are dashed grey until they carry data, solid afterwards and blue and blinking for about a second when just used, turn arrows between debaters, and the Round n of N badge on the diagram. Clicking a box selects that agent. Runs without a recorded design keep the agent cards.
+- In the Replay diagram the word working blinks in the box of an agent that is working.
+
+- The Replay tab now draws the same diagram as the Create tab for every pattern: boxes coloured by state (waiting grey, working blue with a thick border, done green), arrows that are dashed grey until they carry data, solid afterwards and blue and blinking for about two and a half seconds when just used, turn arrows between debaters, and the Round n of N badge on the diagram. Clicking a box selects that agent. Runs without a recorded design keep the agent cards.
 
 - The connection between a supervisor and a worker is drawn with two arrows, one for each direction, on the Create and Replay tabs.
 

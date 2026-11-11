@@ -7,7 +7,7 @@ export const CELL_H = 96;
 export const BOX_W = 132;
 export const BOX_H = 60;
 export const DEBATE_GUTTER = 40; // room left of the debaters for the next-round arrow
-export const TWO_WAY_GAP = 5; // distance of each of the two arrows of a two-way connection from the middle
+export const TWO_WAY_GAP = 9; // distance of each of the two arrows of a two-way connection from the middle
 
 // A chain reads top to bottom on a narrow screen and left to right when there is room.
 export function orientationFor(pattern, wide) {

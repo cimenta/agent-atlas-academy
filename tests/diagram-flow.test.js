@@ -106,7 +106,8 @@ function fakeDoc() {
 test("the replay diagram colours boxes by state, lights the arrow just used and blinks it once", async () => {
   const { createReplayDiagram } = await import("../public/js/replay/diagram.js");
   const selected = [];
-  const diagram = createReplayDiagram({ doc: fakeDoc(), design: supervisor, wide: true, boxLabel: (id) => id, statusText: (a) => a.status, onSelect: (id) => selected.push(id) });
+  let clockNow = 1000;
+  const diagram = createReplayDiagram({ doc: fakeDoc(), design: supervisor, wide: true, boxLabel: (id) => id, statusText: (a) => a.status, onSelect: (id) => selected.push(id), clock: { setTimeout: () => 1, clearTimeout: () => {} }, now: () => clockNow });
   const events = [{ type: "run_start" }, { type: "handoff", from: "s", to: "w1" }];
   const state = { agents: { s: { status: "working", label: "Supervisor" }, w1: { status: "waiting", label: "Researcher" } } };
   diagram.update({ events, cursor: 2, state, selectedId: "s", badgeText: "" });
@@ -120,12 +121,15 @@ test("the replay diagram colours boxes by state, lights the arrow just used and 
   assert.equal(boxes.find((b) => b.attrs["data-node-id"] === "w2").attrs["data-status"], "waiting");
   boxes[0].listeners.click();
   assert.deepEqual(selected, ["s"]);
-  // The same step drawn again does not blink again.
-  diagram.update({ events, cursor: 2, state, selectedId: "s", badgeText: "" });
-  assert.equal(paths.find((p) => p.attrs["data-flow"] === "s>w1").attrs.class, "flow lit");
-  // The arrow is solid once something else is the latest.
+  // A second later, when the next step arrives, the first arrow is still lit and blinking.
+  clockNow = 2000;
   const more = [...events, { type: "handoff", from: "w1", to: "s" }];
   diagram.update({ events: more, cursor: 3, state, selectedId: "s", badgeText: "Round 1 of 3" });
+  assert.match(paths.find((p) => p.attrs["data-flow"] === "s>w1").attrs.class, /lit blink-/);
+  // Some seconds later it has settled to a solid arrow.
+  clockNow = 9000;
+  diagram.update({ events: more, cursor: 3, state, selectedId: "s", badgeText: "" });
   assert.equal(paths.find((p) => p.attrs["data-flow"] === "s>w1").attrs.class, "flow used");
-  assert.match(paths.find((p) => p.attrs["data-flow"] === "w1>s").attrs.class, /lit blink-/);
+  // Once the time is over every arrow that has carried data is solid grey, the latest one too.
+  assert.equal(paths.find((p) => p.attrs["data-flow"] === "w1>s").attrs.class, "flow used");
 });

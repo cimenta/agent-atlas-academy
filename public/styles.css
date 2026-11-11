@@ -575,8 +575,9 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .replay-diagram .rnode[data-status="working"] { background: var(--accent-bg); border: 3px solid var(--accent-line); padding: 2px 6px; }
 .replay-diagram .rnode[data-status="error"] { background: var(--working-bg); border-color: var(--working); }
 .replay-diagram .rnode[aria-pressed="true"] { outline: 3px solid var(--accent); outline-offset: 1px; }
-.replay-diagram .diagram-badge { position: absolute; z-index: 2; left: 8px; top: 4px; margin: 0; }
-.replay-diagram .diagram-badge[hidden] { display: none; }
+.replay-diagram-wrap { display: flex; flex-direction: column; }
+.replay-diagram-wrap .diagram-badge { order: -1; align-self: flex-start; margin: 8px 0 0 8px; }
+.replay-diagram-wrap .diagram-badge[hidden] { display: none; }
 .flow { stroke-linecap: round; }
 .flow.pending { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 4; opacity: 0.7; }
 .flow.used { stroke: var(--muted); stroke-width: 2; }
@@ -584,8 +585,11 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .flow-head.pending path { fill: var(--muted); }
 .flow-head.used path { fill: var(--muted); }
 .flow-head.lit path { fill: var(--accent-line); }
-@keyframes flow-blink-a { 0%, 100% { opacity: 1; } 20%, 60% { opacity: 0.15; } 40%, 80% { opacity: 1; } }
-@keyframes flow-blink-b { 0%, 100% { opacity: 1; } 20%, 60% { opacity: 0.15; } 40%, 80% { opacity: 1; } }
-.flow.blink-a { animation: flow-blink-a 1s ease-in-out 1; }
-.flow.blink-b { animation: flow-blink-b 1s ease-in-out 1; }
+@keyframes flow-blink-a { 0%, 100% { opacity: 1; } 10%, 30%, 50%, 70%, 90% { opacity: 0.2; } 20%, 40%, 60%, 80% { opacity: 1; } }
+@keyframes flow-blink-b { 0%, 100% { opacity: 1; } 10%, 30%, 50%, 70%, 90% { opacity: 0.2; } 20%, 40%, 60%, 80% { opacity: 1; } }
+.flow.blink-a { animation: flow-blink-a 2.5s ease-in-out 1; }
+.flow.blink-b { animation: flow-blink-b 2.5s ease-in-out 1; }
 @media (prefers-reduced-motion: reduce) { .flow.blink-a, .flow.blink-b { animation: none; } }
+@keyframes working-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+.replay-diagram .rnode[data-status="working"] small { color: var(--accent); font-weight: 600; animation: working-blink 1.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .replay-diagram .rnode[data-status="working"] small { animation: none; } }
