@@ -14,6 +14,8 @@ import { createAboutPanel } from "./about.js";
 import { createRunMenu } from "./run-menu.js";
 import { runForExport } from "../run-export.js";
 import { createReplayDiagram } from "./diagram.js";
+import { outcomeNotice } from "../outcome-view.js";
+import { buildResultModel } from "../play-model.js";
 
 const STATUS_KEY = {
   waiting: "player.statusWaiting",
@@ -147,10 +149,24 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   });
   const tabRow = h(doc, "div", { class: "tab-row", "data-ui": "inspector-tab-row" }, tabs, search.element);
 
+  // A run that did not finish well says so above the player, with the same message the Create tab shows.
+  const doneEvent = events.findLast((e) => e?.type === "done");
+  let outcomeBar = "";
+  if (exportRun && doneEvent && doneEvent.outcome !== "finished") {
+    let cost = null;
+    try {
+      cost = buildResultModel(exportRun).cost;
+    } catch {
+      cost = null;
+    }
+    outcomeBar = outcomeNotice({ doc, t, outcome: doneEvent.outcome, events, cost });
+  }
+
   const root = h(
     doc,
     "section",
     { class: "replay", "data-ui": "player", "aria-label": t("player.title", { title }) },
+    outcomeBar,
     h(
       doc,
       "div",

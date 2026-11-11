@@ -285,7 +285,9 @@ export function renderCreate(ctx) {
 
     const host = h(doc, "div", { class: "replay-host", "data-ui": "player-host" });
     const after = h(doc, "div", { class: "run-after", "data-ui": "run-after" });
-    root.replaceChildren(host, after);
+    // How the run ended is shown above the player, so it is the first thing seen when the run is over.
+    const outcomeSlot = h(doc, "div", { class: "run-outcome-slot", "data-ui": "run-outcome-slot" });
+    root.replaceChildren(outcomeSlot, host, after);
     const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: draft.pattern, recordedWith: { provider: "anthropic", model: firstModel.id }, t, doc, onStop: () => activeRun?.stop() });
     ctx.onLeave(live.destroy);
 
@@ -310,7 +312,8 @@ export function renderCreate(ctx) {
         const tip = showCenterTip({ doc, content: tipContent, sticky: done?.outcome !== "finished", closeLabel: t("about.close") });
         ctx.onLeave(tip.close);
       }
-      const children = [notice];
+      outcomeSlot.replaceChildren(notice);
+      const children = [];
       if (result.ok) children.push(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${id}` }, t("create.seeResult"))));
       else children.push(h(doc, "p", { class: "notice", role: "alert" }, t("create.saveFailed")), downloadButton(ctx, finalRecord));
       const again = h(doc, "button", { type: "button", class: "primary" }, t("create.newRun"));
