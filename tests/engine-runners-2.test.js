@@ -126,3 +126,49 @@ test("a debate that hits the token budget mid-round is stopped", async () => {
   assert.equal(result.outcome, "stopped_limit");
   assert.equal(result.reason, "tokens");
 });
+
+const callsJson = (...workers) => JSON.stringify({ action: "call", calls: workers.map((worker) => ({ worker, instruction: `do ${worker}` })) });
+
+test("parseSupervisorReply reads a call to several workers at once", () => {
+  assert.deepEqual(parseSupervisorReply(callsJson("a", "b")), {
+    action: "call",
+    calls: [{ worker: "a", instruction: "do a" }, { worker: "b", instruction: "do b" }],
+  });
+  assert.equal(parseSupervisorReply(JSON.stringify({ action: "call", calls: [] })), null);
+  assert.equal(parseSupervisorReply(JSON.stringify({ action: "call", calls: [{ instruction: "x" }] })), null);
+});
+
+test("the supervisor can call two workers at the same time and gets both results back", async () => {
+  const replies = [callsJson("researcher", "writer"), finishJson("BOTH DONE")];
+  let running = 0;
+  let mostAtOnce = 0;
+  const seen = [];
+  const call = async (body) => {
+    seen.push(structuredClone(body));
+    const system = JSON.stringify(body.system ?? "");
+    const isBoss = system.includes("You are the Supervisor");
+    if (isBoss) return text(replies.shift());
+    running += 1;
+    mostAtOnce = Math.max(mostAtOnce, running);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    running -= 1;
+    return text(`RESULT ${body.messages[0].content.includes("do researcher") ? "R" : "W"}`);
+  };
+  const { result, events } = await run(supervisorDesign(), call);
+  assert.equal(result.outcome, "finished");
+  assert.equal(result.finalText, "BOTH DONE");
+  assert.equal(mostAtOnce, 2);
+  const handoffs = events.filter((e) => e.type === "handoff").map((e) => `${e.from}>${e.to}`);
+  assert.deepEqual(handoffs.slice(0, 2), ["supervisor>researcher", "supervisor>writer"]);
+  assert.deepEqual(handoffs.slice(2).sort(), ["researcher>supervisor", "writer>supervisor"]);
+  const last = seen.at(-1).messages.at(-1).content;
+  assert.ok(last.includes("Result from researcher:\nRESULT R"));
+  assert.ok(last.includes("Result from writer:\nRESULT W"));
+});
+
+test("calling the same worker twice in one reply, or an unknown one, is an invalid reply", async () => {
+  const { call } = scripted([callsJson("writer", "writer"), callsJson("writer", "nobody")]);
+  const { result, events } = await run(supervisorDesign(), call);
+  assert.equal(result.outcome, "failed");
+  assert.ok(events.find((e) => e.type === "error").message.includes("supervisor.invalid"));
+});

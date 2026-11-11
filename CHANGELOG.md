@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- A Supervisor can now call several workers at once. They work at the same time, all their results go back to the Supervisor, and the Supervisor then decides what to do next. Calling one worker works as before, and recorded runs are not affected. The Supervisor is told about the new reply form in its instructions.
+
 - In the Replay diagram the word working blinks in the box of an agent that is working.
 
 - The Replay tab now draws the same diagram as the Create tab for every pattern: boxes coloured by state (waiting grey, working blue with a thick border, done green), arrows that are dashed grey until they carry data, solid afterwards and blue and blinking for about two and a half seconds when just used, turn arrows between debaters, and the Round n of N badge on the diagram. Clicking a box selects that agent. Runs without a recorded design keep the agent cards.

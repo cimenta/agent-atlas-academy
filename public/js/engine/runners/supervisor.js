@@ -1,4 +1,5 @@
-// Supervisor: one supervisor decides which worker works next and when to finish.
+// Supervisor: one supervisor decides which workers work next and when to finish. It may call several workers
+// at once; they then work at the same time and all their results go back to it.
 const NOTE_MAX = 2000;
 const isText = (v) => typeof v === "string" && v.length > 0;
 
@@ -23,6 +24,9 @@ export function parseSupervisorReply(text) {
       continue;
     }
     if (data === null || typeof data !== "object") continue;
+    if (data.action === "call" && Array.isArray(data.calls) && data.calls.length > 0 && data.calls.every((c) => c && typeof c === "object" && isText(c.worker))) {
+      return { action: "call", calls: data.calls.map((c) => ({ worker: c.worker, instruction: typeof c.instruction === "string" ? c.instruction : "" })) };
+    }
     if (data.action === "call" && isText(data.worker)) {
       return { action: "call", worker: data.worker, instruction: typeof data.instruction === "string" ? data.instruction : "" };
     }
@@ -40,7 +44,8 @@ export async function run({ design, task, agents, emit }) {
   for (;;) {
     const reply = await boss.run(input);
     const parsed = parseSupervisorReply(reply.text);
-    const usable = parsed && (parsed.action === "finish" || workerIds.includes(parsed.worker));
+    const calls = parsed?.action === "call" ? (parsed.calls ?? [{ worker: parsed.worker, instruction: parsed.instruction }]) : [];
+    const usable = parsed && (parsed.action === "finish" || (calls.every((c) => workerIds.includes(c.worker)) && new Set(calls.map((c) => c.worker)).size === calls.length));
     if (!usable) {
       invalidInARow += 1;
       if (invalidInARow >= 2) throw new Error("supervisor.invalid: the supervisor did not give a valid instruction twice in a row");
@@ -49,9 +54,15 @@ export async function run({ design, task, agents, emit }) {
     }
     invalidInARow = 0;
     if (parsed.action === "finish") return parsed.answer;
-    emit({ type: "handoff", from: supervisor.id, to: parsed.worker, note: parsed.instruction.slice(0, NOTE_MAX) });
-    const result = await agents.get(parsed.worker).run(`Task: ${task}\n\nInstruction from the supervisor:\n${parsed.instruction}`);
-    emit({ type: "handoff", from: parsed.worker, to: supervisor.id, note: result.text.slice(0, NOTE_MAX) });
-    input = `Result from ${parsed.worker}:\n${result.text}`;
+    for (const call of calls) emit({ type: "handoff", from: supervisor.id, to: call.worker, note: call.instruction.slice(0, NOTE_MAX) });
+    // The called workers work at the same time. Each result goes back to the supervisor as soon as it is ready.
+    const results = await Promise.all(
+      calls.map(async (call) => {
+        const result = await agents.get(call.worker).run(`Task: ${task}\n\nInstruction from the supervisor:\n${call.instruction}`);
+        emit({ type: "handoff", from: call.worker, to: supervisor.id, note: result.text.slice(0, NOTE_MAX) });
+        return { worker: call.worker, text: result.text };
+      }),
+    );
+    input = results.map((r) => `Result from ${r.worker}:\n${r.text}`).join("\n\n");
   }
 }
