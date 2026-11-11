@@ -589,7 +589,5 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 @keyframes flow-blink-b { 0%, 100% { opacity: 1; } 10%, 30%, 50%, 70%, 90% { opacity: 0.2; } 20%, 40%, 60%, 80% { opacity: 1; } }
 .flow.blink-a { animation: flow-blink-a 2.5s ease-in-out 1; }
 .flow.blink-b { animation: flow-blink-b 2.5s ease-in-out 1; }
-@media (prefers-reduced-motion: reduce) { .flow.blink-a, .flow.blink-b { animation: none; } }
 @keyframes working-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 .replay-diagram .rnode[data-status="working"] small { color: var(--accent); font-weight: 600; animation: working-blink 1.2s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { .replay-diagram .rnode[data-status="working"] small { animation: none; } }
