@@ -5,13 +5,8 @@ import { agentLabel } from "../engine/labels.js";
 import { AGENT_TYPES, MODELS } from "../engine/catalog.js";
 import { TOOLS } from "../engine/tools.js";
 import { roleText } from "../engine/prompts.js";
-import { layoutDesign } from "./editor-model.js";
+import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, extentOf, isTwoWay, straight, turnArrows, TWO_WAY_GAP } from "./diagram-geometry.js";
 
-const CELL_W = 160;
-const CELL_H = 96;
-const BOX_W = 132;
-const BOX_H = 60;
-const DEBATE_GUTTER = 40;
 const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -133,21 +128,11 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
   function diagramBlock(design) {
     // A chain reads top to bottom on a narrow screen and left to right when there is room.
     const wide = (doc.defaultView?.innerWidth ?? 0) >= 720;
-    const orientation = design.pattern === "sequential" && !wide ? "vertical" : "horizontal";
-    const auto = layoutDesign(design, { orientation });
     const stored = editor.positions();
-    const pos = new Map(); // id -> { x, y } top-left in px, updated live while dragging
-    const gutter = design.pattern === "debate" ? DEBATE_GUTTER : 0; // room left of the debaters for the next-round arrow
-    for (const node of design.nodes) {
-      const a = auto.nodes.find((n) => n.id === node.id);
-      pos.set(node.id, stored[node.id] ?? { x: a.x * CELL_W + (CELL_W - BOX_W) / 2 + gutter, y: a.y * CELL_H + (CELL_H - BOX_H) / 2 });
-    }
+    const pos = autoPositions(design, { wide }); // id -> { x, y } top-left in px, updated live while dragging
+    for (const node of design.nodes) if (stored[node.id]) pos.set(node.id, stored[node.id]);
     livePos = pos;
-    const extent = () => {
-      const xs = [...pos.values()].map((p) => p.x + BOX_W + 24);
-      const ys = [...pos.values()].map((p) => p.y + BOX_H + 24);
-      return { width: Math.max(CELL_W, ...xs), height: Math.max(CELL_H * 2, ...ys) };
-    };
+    const extent = () => extentOf(pos);
     const area = h(doc, "div", { class: "diagram", "data-ui": "diagram", role: "group", "aria-label": t("editor.diagram") });
     const wrap = h(doc, "div", { class: "diagram-wrap" }, area);
     const svg = doc.createElementNS(SVG_NS, "svg");
@@ -172,13 +157,8 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     svg.append(defs);
     area.append(svg);
 
-    const centerOf = (id) => ({ x: pos.get(id).x + BOX_W / 2, y: pos.get(id).y + BOX_H / 2 });
-    const clip = (from, to) => {
-      const dx = to.x - from.x;
-      const dy = to.y - from.y;
-      const scale = Math.min(dx === 0 ? Infinity : BOX_W / 2 / Math.abs(dx), dy === 0 ? Infinity : BOX_H / 2 / Math.abs(dy));
-      return { x: to.x - dx * scale, y: to.y - dy * scale };
-    };
+    const centerOf = (id) => geometryCenter(pos, id);
+    const clip = clipToBox;
     const setLine = (line, a, b) => {
       for (const [k, v] of Object.entries({ x1: a.x, y1: a.y, x2: b.x, y2: b.y })) line.setAttribute(k, String(v));
     };
@@ -193,32 +173,13 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     // In a debate the debaters answer each other in turn. The visitor connects each debater to the judge;
     // the turn arrows between the debaters are drawn for them and cannot be edited.
     function drawTurns() {
-      if (design.pattern !== "debate") return;
-      const ids = design.nodes.filter((n) => n.agent === "debater" && pos.has(n.id)).map((n) => n.id);
-      if (ids.length < 2) return;
-      const add = (el) => {
-        el.setAttribute("pointer-events", "none");
-        el.setAttribute("data-ui", "debate-turn");
-        svg.insertBefore(el, rubber);
-        edgeParts.push(el);
-      };
-      for (let i = 0; i + 1 < ids.length; i++) {
-        const a = centerOf(ids[i]);
-        const b = centerOf(ids[i + 1]);
-        const line = doc.createElementNS(SVG_NS, "line");
-        for (const [k, v] of Object.entries({ "marker-end": "url(#arrowhead)", "stroke-width": "2", stroke: "currentColor" })) line.setAttribute(k, v);
-        setLine(line, clip(b, a), clip(a, b));
-        add(line);
-      }
-      if ((design.rounds ?? 1) > 1) {
-        const first = pos.get(ids[0]);
-        const last = pos.get(ids.at(-1));
-        const left = Math.min(first.x, last.x);
-        const bend = Math.max(2, left - 36);
+      for (const arrow of turnArrows(design, pos)) {
         const path = doc.createElementNS(SVG_NS, "path");
-        const d = `M ${last.x} ${last.y + BOX_H / 2} Q ${bend} ${(first.y + last.y + BOX_H) / 2} ${first.x - 2} ${first.y + BOX_H / 2}`;
-        for (const [k, v] of Object.entries({ d, fill: "none", "marker-end": "url(#arrowhead)", "stroke-width": "2", stroke: "currentColor", "stroke-dasharray": "6 4" })) path.setAttribute(k, v);
-        add(path);
+        const attrs = { d: arrow.d, fill: "none", "marker-end": "url(#arrowhead)", "stroke-width": "2", stroke: "currentColor", "pointer-events": "none", "data-ui": "debate-turn" };
+        if (arrow.kind === "return") attrs["stroke-dasharray"] = "6 4";
+        for (const [k, v] of Object.entries(attrs)) path.setAttribute(k, v);
+        svg.insertBefore(path, rubber);
+        edgeParts.push(path);
       }
     }
 
@@ -233,9 +194,15 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         const end = clip(a, b);
         const key = `${edge.from}>${edge.to}`;
         const selected = selectedEdge === key;
-        const line = doc.createElementNS(SVG_NS, "line");
-        for (const [k, v] of Object.entries({ "marker-end": "url(#arrowhead)", "stroke-width": selected ? "4" : "2", stroke: selected ? "var(--accent)" : "currentColor" })) line.setAttribute(k, v);
-        setLine(line, start, end);
+        // Between a supervisor and a worker the data goes both ways: one connection, drawn with two arrows side by side.
+        const shown = isTwoWay(design) ? [[edge.from, edge.to], [edge.to, edge.from]] : [[edge.from, edge.to]];
+        const lines = shown.map(([from, to]) => {
+          const line = doc.createElementNS(SVG_NS, "line");
+          for (const [k, v] of Object.entries({ "marker-end": "url(#arrowhead)", "stroke-width": selected ? "4" : "2", stroke: selected ? "var(--accent)" : "currentColor" })) line.setAttribute(k, v);
+          const s2 = straight(pos, from, to, isTwoWay(design) ? -TWO_WAY_GAP : 0);
+          setLine(line, { x: s2.x1, y: s2.y1 }, { x: s2.x2, y: s2.y2 });
+          return line;
+        });
         const hit = doc.createElementNS(SVG_NS, "line");
         for (const [k, v] of Object.entries({ stroke: "transparent", "stroke-width": "22", class: "edge-hit" })) hit.setAttribute(k, v);
         setLine(hit, start, end);
@@ -244,9 +211,12 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
           selectedId = null;
           draw();
         });
-        svg.insertBefore(line, rubber);
+        for (const line of lines) {
+          svg.insertBefore(line, rubber);
+          edgeParts.push(line);
+        }
         svg.insertBefore(hit, rubber);
-        edgeParts.push(line, hit);
+        edgeParts.push(hit);
         if (selected) {
           const mid = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
           const remove = h(doc, "button", { type: "button", class: "edge-remove", "data-focus-key": `edge-x-${key}`, "aria-label": t("editor.removeConnection", { from: label(edge.from), to: label(edge.to) }) }, "×");

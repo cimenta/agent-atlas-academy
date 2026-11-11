@@ -13,6 +13,7 @@ import { stepDetail } from "./step-detail.js";
 import { createAboutPanel } from "./about.js";
 import { createRunMenu } from "./run-menu.js";
 import { runForExport } from "../run-export.js";
+import { createReplayDiagram } from "./diagram.js";
 
 const STATUS_KEY = {
   waiting: "player.statusWaiting",
@@ -185,7 +186,50 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     ui.round = null;
   }
 
+  // The diagram replaces the agent cards when the run recorded its design (the same picture as on the Create tab).
+  let diagram = null;
+  let diagramDesign = null;
+  function designOfRun() {
+    const d = events.find((e) => e.type === "run_start")?.design;
+    return d && Array.isArray(d.nodes) && Array.isArray(d.edges) && d.nodes.length > 0 ? d : null;
+  }
+  function renderDiagram() {
+    const design = designOfRun();
+    if (!design) return false;
+    if (!diagram || diagramDesign !== design) {
+      try {
+        const wide = (doc.defaultView?.innerWidth ?? 1024) >= 720;
+        diagram = createReplayDiagram({
+          doc,
+          design,
+          wide,
+          boxLabel: (id) => id,
+          statusText: (a) => `${t(STATUS_KEY[a.status])}${a.ms ? ` · ${fmt(a.ms)}` : ""}`,
+          onSelect: (id) => {
+            Object.assign(ui, { agent: id, follow: false, step: null, round: null });
+            render();
+          },
+        });
+        diagramDesign = design;
+        chips.replaceChildren(diagram.element);
+      } catch {
+        diagram = null;
+        return false;
+      }
+    }
+    const debate = debateProgress(events, player.cursor);
+    diagram.update({
+      events,
+      cursor: player.cursor,
+      state,
+      selectedId: currentAgent()?.id ?? null,
+      badgeText: debate ? (debate.verdict ? t("player.debateVerdict") : t("player.debateRound", { n: debate.round, total: debate.rounds })) : "",
+    });
+    return true;
+  }
+
   function renderChips() {
+    if (renderDiagram()) return;
     const agent = currentAgent();
     const nodes = [];
     state.order.forEach((id, i) => {
@@ -354,7 +398,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     if (player.finished) parts.push(t("player.finished"));
     const debate = debateProgress(events, player.cursor);
     const roundBadge = debate ? h(doc, "span", { class: "round-badge", "data-ui": "debate-round" }, debate.verdict ? t("player.debateVerdict") : t("player.debateRound", { n: debate.round, total: debate.rounds })) : "";
-    status.replaceChildren(...(debate ? [roundBadge] : []), parts.join(" · "));
+    // With a diagram the round badge sits on the diagram; without one it stays in the status line.
+    status.replaceChildren(...(debate && !designOfRun() ? [roundBadge] : []), parts.join(" · "));
     for (const b of tabButtons) b.setAttribute("aria-selected", String(b.getAttribute("data-tab") === ui.tab));
     renderBanners();
     renderChips();
