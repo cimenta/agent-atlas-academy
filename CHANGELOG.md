@@ -6,6 +6,10 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- A run in Your runs has a green background when it finished and a red one when it did not (stopped, failed, interrupted or stopped at a limit).
+
+
+
 - A row in Your runs shows the date and time of the run next to how it ended.
 
 

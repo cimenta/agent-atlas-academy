@@ -117,7 +117,7 @@ function runRow(ctx, item, menu) {
   return h(
     doc,
     "li",
-    { class: "run-row", "data-ui": "run-row" },
+    { class: "run-row", "data-ui": "run-row", "data-outcome": item.outcome },
     h(doc, "a", { href: `#/play/run/${item.id}`, class: "run-title" }, item.title),
     menu,
     runMeta(ctx, item),

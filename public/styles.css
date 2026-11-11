@@ -591,3 +591,9 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .flow.blink-b { animation: flow-blink-b 2.5s ease-in-out 1; }
 @keyframes working-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 .replay-diagram .rnode[data-status="working"] small { color: var(--accent); font-weight: 600; animation: working-blink 1.2s ease-in-out infinite; }
+
+/* A run in Your runs: green when it finished, red when it did not (stopped, failed, interrupted). */
+.library-pane .run-row[data-outcome="finished"] { background: var(--done-bg); }
+.library-pane .run-row[data-outcome="finished"] .run-meta { color: var(--done); }
+.library-pane .run-row[data-outcome]:not([data-outcome="finished"]) { background: var(--err-bg); }
+.library-pane .run-row[data-outcome]:not([data-outcome="finished"]) .run-meta { color: var(--err); }
