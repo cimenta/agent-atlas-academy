@@ -6,7 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
-- Player controls are small icon buttons in a column on the right of the diagram, with one button that cycles the speed. Settings has a choice of a slim bar under the diagram instead.
+- Player controls are small icon buttons on one slim bar under the diagram. Settings has a choice of a column on the right of the diagram instead, where one button cycles the speed.
 
 - The home page demo stops repeating by itself as soon as the visitor clicks in the player (pause, restart, step, a box).
 

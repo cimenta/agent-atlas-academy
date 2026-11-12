@@ -58,14 +58,14 @@ export function headingOf(run) {
   return line.length > 120 ? `${line.slice(0, 117)}…` : line;
 }
 
-export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "side" }) {
+export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "bar" }) {
   const validation = validateRun(run);
   if (!validation.ok) return mountError(container, doc, t, validation.errors);
   return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout });
 }
 
 // A player that shows a run while it is still arriving. Events are added with append(), end() closes it.
-export function mountLiveReplay(container, { title, pattern, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {}, layout = "side" }) {
+export function mountLiveReplay(container, { title, pattern, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar" }) {
   const view = mountView(container, { events: [], pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout });
   return {
     append: (event) => view.player.append(event),
@@ -74,7 +74,7 @@ export function mountLiveReplay(container, { title, pattern, recordedWith, t, do
   };
 }
 
-function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "side" }) {
+function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar" }) {
   const player = createPlayer({ events, clock, timeScale, live });
   const ui = { agent: null, tab: "steps", step: null, round: null, follow: true };
   const viewer = createViewer({ doc, t });
@@ -122,7 +122,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   const restartButton = iconButton({ class: "ib", "data-ui": "restart-button" }, GLYPH.restart, t("player.restart"));
   const previousButton = iconButton({ class: "ib", "data-ui": "previous-button" }, GLYPH.previous, t("player.previous"));
   const nextButton = iconButton({ class: "ib", "data-ui": "next-button" }, GLYPH.next, t("player.next"));
-  const sideLayout = layout !== "bar";
+  const sideLayout = layout === "side";
   // Side layout: one button that cycles through the speeds. Bar layout: a small button for every speed.
   const speedButtons = sideLayout ? [] : player.speeds.map((speed) => h(doc, "button", { type: "button", "data-speed": speed }, t("player.speedOption", { speed })));
   const speedGroup = sideLayout

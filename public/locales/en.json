@@ -79,7 +79,7 @@
   "settings.tooltipsOff": "Tooltips are turned off.",
   "settings.tooltipsOn": "Tooltips are turned on.",
   "settings.playerHeading": "Player controls",
-  "settings.playerIntro": "Where the replay buttons sit. The side layout puts small buttons in a column to the right of the diagram. The bar layout puts them on one slim line under it.",
+  "settings.playerIntro": "Where the replay buttons sit. The bar layout puts them on one slim line under the diagram. The side layout puts small buttons in a column to the right of it.",
   "settings.playerLabel": "Layout of the player controls",
   "settings.playerSide": "Column on the right",
   "settings.playerBar": "Slim bar under the diagram",
