@@ -1,6 +1,7 @@
 // The settings page: API key handling, default limits and local data.
 import { h } from "./dom.js";
 import { LIMIT_MAX } from "./engine/catalog.js";
+import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
 import { VaultError } from "./storage/key-vault.js";
 import { exportBackup, parseBackup, applyBackup } from "./storage/backup.js";
 
@@ -34,7 +35,8 @@ export function renderSettings(ctx) {
         : t("settings.keyNone");
     keyTag.hidden = !(available || vault.hasStoredKey());
     providerTag.hidden = keyTag.hidden;
-    lockedTag.hidden = !(vault.hasStoredKey() && !available);
+    lockedTag.hidden = !needsUnlock(vault);
+    markUnlockAlert(doc, vault, t);
     securityNone.hidden = vault.hasStoredKey();
     unlockForm.hidden = available || !vault.hasStoredKey();
     forgetButton.hidden = !vault.hasStoredKey();
@@ -247,7 +249,7 @@ export function renderSettings(ctx) {
   );
   const providerPanel = h(doc, "div", { class: "provider-panel", "data-ui": "provider-panel-anthropic" }, status, field("set-key", t("settings.keyLabel"), keyInput), h(doc, "div", { class: "field checkbox" }, rememberBox, h(doc, "label", { for: "set-remember" }, t("settings.rememberLabel"))), passBlock, saveButton);
   const securityNone = h(doc, "p", { class: "notice", "data-ui": "security-none" }, t("settings.securityNone"));
-  const lockedTag = h(doc, "span", { class: "tag-locked", "data-ui": "security-locked-tag", hidden: true }, t("settings.lockedTag"));
+  const lockedTag = h(doc, "span", { class: "tag-alert", "data-ui": "security-locked-tag", title: t("settings.unlockAlert"), hidden: true }, "!");
   // The six sections, in the order they were written: keys, limits, tooltips, player, data, security.
   const written = [
     h(

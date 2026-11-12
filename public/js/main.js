@@ -2,6 +2,7 @@ import { h } from "./dom.js";
 import { parseRoute } from "./router.js";
 import { loadVersion } from "./version.js";
 import { createVault } from "./storage/key-vault.js";
+import { markUnlockAlert } from "./unlock-alert.js";
 import { createSettingsStore } from "./storage/settings.js";
 import { createIndexedDbBackend, createMemoryBackend, createRunStore } from "./storage/runs-store.js";
 import { renderSettings } from "./settings-page.js";
@@ -103,6 +104,7 @@ function renderChrome(route) {
       ),
     ),
   );
+  markUnlockAlert(doc, vault, t);
   menuToggle.textContent = t("menu.toggle");
 
   switcher.replaceChildren(

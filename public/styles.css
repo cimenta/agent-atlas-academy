@@ -640,3 +640,8 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .provider-tabs .tab { display: flex; align-items: center; gap: 6px; }
 .provider-tabs .tab:disabled { opacity: 0.55; cursor: not-allowed; }
 .tag-soon, .tag-locked { font-size: 0.7rem; padding: 1px 8px; border-radius: 10px; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+
+/* The exclamation mark that says a saved key needs unlocking: on the Settings cog and on the Security tab. */
+.menu a { position: relative; }
+.menu-alert { position: absolute; top: 2px; right: 2px; min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px; background: var(--err); color: #fff; font-size: 0.7rem; font-weight: 700; line-height: 14px; text-align: center; }
+.tag-alert { min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--err); color: #fff; font-size: 0.75rem; font-weight: 700; line-height: 16px; text-align: center; }

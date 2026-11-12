@@ -1,5 +1,6 @@
 // The Create tab: task, pattern, diagram, review, then a live run in the player.
 import { h } from "../dom.js";
+import { markUnlockAlert } from "../unlock-alert.js";
 import { downloadFile } from "../download.js";
 import { outcomeNotice } from "../outcome-view.js";
 import { showCenterTip } from "../center-tip.js";
@@ -161,6 +162,7 @@ export function renderCreate(ctx) {
           unlock.addEventListener("click", async () => {
             try {
               await ctx.vault.unlock(pass.value);
+              markUnlockAlert(doc, ctx.vault, t);
               drawReview();
             } catch (error) {
               message.textContent = t(`settings.error.${error?.code ?? "storage"}`);

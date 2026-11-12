@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- When a saved API key is locked, the Settings cog in the menu and the Security tab show a red exclamation mark, and the cog explains where to go. The marks go away after the key is unlocked.
+
 - Settings: the first tab is API keys, with a sub-tab for each provider (Anthropic works, Gemini, OpenAI, Mistral and Llama are greyed out with a soon tag). Passphrase management (unlock, change, forget) moved to a Security tab at the end, which shows a locked tag when a saved key waits for its passphrase.
 
 - Settings uses tabs down the left (a row on a phone): API key, Limits, Player, Tooltips and Data. The API key tab shows a key saved tag when a key is available.
