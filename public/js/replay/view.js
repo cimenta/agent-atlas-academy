@@ -582,6 +582,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     }
   });
   keyApi.focusPlayer = () => focusZone("player");
+  keyApi.moveAgent = moveAgent;
   keyApi.focusLast = () => focusZone("output");
   // The zone that has the keyboard focus gets a ring, so it is clear which part the keys act on.
   const markZones = (el) => {

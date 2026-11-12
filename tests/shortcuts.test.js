@@ -198,3 +198,15 @@ test("q goes from the player to the library, and from the library back to the pl
   clearPageActions(actions);
   assert.equal(handle(key("q")), false);
 });
+
+test("W A S D move between the agents from anywhere, but not in the library list", () => {
+  const { handle, api } = setup();
+  const moves = [];
+  api.moveAgent = (dir) => moves.push(dir);
+  for (const k of ["w", "a", "s", "d", "W"]) assert.equal(handle(key(k)), true, k);
+  assert.deepEqual(moves, ["up", "left", "down", "right", "up"]);
+  const inLibrary = { tagName: "A", closest: (sel) => (sel === '[data-ui="library-pane"]' ? {} : null) };
+  assert.equal(handle(key("w", { target: inLibrary })), false);
+  assert.equal(handle(key("w", { target: { tagName: "INPUT" } })), false);
+  assert.equal(moves.length, 5);
+});

@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- W A S D move between the agents from anywhere on the page, like Space plays from anywhere; Enter then inspects the agent that has the focus, the same as a click.
+
 - The word Replay in the player heading blinks blue while a run is playing.
 
 - Keyboard in the player: Tab and Shift+Tab go round the player and its tabs (player, Steps, Messages, Output; Esc lets go) and the diagram gets a ring while it has the keys. The letter q swaps between the library and the player. In the library the up and down arrows move between runs (without a frame around the text), Enter opens one, Tab switches between Your runs and Library (without a flash), and the run that is open flashes twice when the keyboard enters the library with q. The player keys (Tab, arrows, W A S D) work wherever the focus is inside the player. On the Play page b shows or hides the library, i imports a JSON file and o loads the run you opened last. In the player the arrows or W A S D move between the agents and Enter inspects the one with the focus; in Steps and Messages the same keys move between steps and rounds. With nothing focused, Tab starts in the player.

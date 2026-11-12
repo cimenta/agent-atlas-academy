@@ -169,6 +169,14 @@ export function createKeyHandler({ isEnabled, go, showHelp, goKeys = () => DEFAU
     }
     if (!active) return false;
 
+    // W A S D move the focus between the agents from anywhere, like Space works from anywhere; Enter then acts as a click.
+    const wasd = { w: "up", a: "left", s: "down", d: "right" }[key.toLowerCase()];
+    if (wasd && key.length === 1) {
+      if (event.target?.closest?.('[data-ui="library-pane"]') || !active.moveAgent) return false;
+      active.moveAgent(wasd);
+      return true;
+    }
+
     switch (key) {
       case "Tab":
         // With nothing focused, Tab goes into the player (then Tab walks its parts).
