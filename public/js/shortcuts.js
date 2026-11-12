@@ -66,6 +66,9 @@ export const SHORTCUT_GROUPS = [
   {
     title: "shortcuts.groupLibrary",
     items: [
+      { label: "shortcuts.libToggle", combos: [["b"]] },
+      { label: "shortcuts.libImport", combos: [["i"]] },
+      { label: "shortcuts.libLast", combos: [["o"]] },
       { label: "shortcuts.libMove", combos: [["↑"], ["↓"]] },
       { label: "shortcuts.libOpen", combos: [["Enter"]] },
       { label: "shortcuts.libSwitch", combos: [["Tab"]] },
@@ -91,6 +94,14 @@ export function focusActivePlayer() {
   if (!active?.focusPlayer) return false;
   active.focusPlayer();
   return true;
+}
+// The Play page registers what b, i and o do there: show or hide the library, import a file, load the last opened run.
+let pageActions = null;
+export function setPageActions(api) {
+  pageActions = api;
+}
+export function clearPageActions(api) {
+  if (pageActions === api) pageActions = null;
 }
 export function clearActivePlayer(api) {
   if (active === api) active = null;
@@ -135,6 +146,11 @@ export function createKeyHandler({ isEnabled, go, showHelp, goKeys = () => DEFAU
       return true;
     }
     if (key === "/") return focusSearch() === true;
+    const pageAction = { b: "toggleLibrary", i: "importFile", o: "loadLast" }[key];
+    if (pageAction && pageActions?.[pageAction]) {
+      pageActions[pageAction]();
+      return true;
+    }
     if (!active) return false;
 
     switch (key) {

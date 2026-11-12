@@ -153,3 +153,18 @@ test("moving between agents picks the nearest box in the chosen direction", () =
   assert.equal(pickNeighbour(centers, 0, "up"), -1);
   assert.equal(pickNeighbour(centers, 1, "left"), -1);
 });
+
+import { clearPageActions, setPageActions } from "../public/js/shortcuts.js";
+
+test("b, i and o use the actions of the Play page, and do nothing elsewhere", () => {
+  const { handle } = setup();
+  const log = [];
+  const actions = { toggleLibrary: () => log.push("toggle"), importFile: () => log.push("import"), loadLast: () => log.push("last") };
+  setPageActions(actions);
+  assert.equal(handle(key("b")), true);
+  assert.equal(handle(key("i")), true);
+  assert.equal(handle(key("o")), true);
+  assert.deepEqual(log, ["toggle", "import", "last"]);
+  clearPageActions(actions);
+  assert.equal(handle(key("b")), false);
+});

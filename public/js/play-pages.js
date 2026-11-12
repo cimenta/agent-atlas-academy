@@ -12,7 +12,7 @@ import { openInCreate } from "./create/draft.js";
 import { downloadFile, safeFileName } from "./download.js";
 import { runForExport } from "./run-export.js";
 import { refreshResultTab } from "./tab-state.js";
-import { focusActivePlayer } from "./shortcuts.js";
+import { clearPageActions, focusActivePlayer, setPageActions } from "./shortcuts.js";
 
 const TABS = [
   { view: "replay", href: "#/play", key: "play.tab.replay" },
@@ -288,6 +288,18 @@ export async function renderReplayTab(ctx, requestedId) {
     await refreshResultTab(ctx);
     await draw();
   };
+
+  // The keys b, i and o do what the three buttons of this page do.
+  const pageActions = {
+    toggleLibrary: () => doc.querySelector('[data-ui="library-toggle"]')?.click(),
+    importFile: () => importButton.click(),
+    loadLast: () => {
+      const last = doc.querySelector('[data-ui="load-last"]');
+      if (last && !last.disabled) last.click();
+    },
+  };
+  setPageActions(pageActions);
+  ctx.onLeave(() => clearPageActions(pageActions));
 
   const draw = async () => {
     local = await listLocal();

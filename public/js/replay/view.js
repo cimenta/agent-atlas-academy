@@ -548,9 +548,14 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     };
     if (event.key === "Tab") {
       const at = ZONES.indexOf(zone);
-      if (event.shiftKey && at === 0) return;
       used();
       focusZone(ZONES[(at + (event.shiftKey ? -1 : 1) + ZONES.length) % ZONES.length]);
+      return;
+    }
+    // Escape lets go of the zones (during a live run it is the stop shortcut instead).
+    if (event.key === "Escape" && !player.live) {
+      used();
+      doc.activeElement?.blur?.();
       return;
     }
     const move = MOVES[event.key];
@@ -566,6 +571,15 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     }
   });
   keyApi.focusPlayer = () => focusZone("player");
+  // The zone that has the keyboard focus gets a ring, so it is clear which part the keys act on.
+  const markZones = (el) => {
+    chips.classList.toggle("zone-active", Boolean(el && chips.contains(el)));
+    const inInspector = Boolean(el && (body.contains(el) || body === el || tabRow.contains(el)));
+    body.classList.toggle("zone-active", inInspector);
+    tabRow.classList.toggle("zone-active", inInspector);
+  };
+  root.addEventListener("focusin", (event) => markZones(event.target));
+  root.addEventListener("focusout", (event) => markZones(event.relatedTarget));
   setActivePlayer(keyApi);
 
   const unsubscribe = player.subscribe(render);
