@@ -549,13 +549,10 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     if (event.key === "Tab") {
       const at = ZONES.indexOf(zone);
       used();
-      // The loop is library, player, Steps, Messages, Output and round again (the library only when it is on screen).
-      const next = at + (event.shiftKey ? -1 : 1);
-      if (next < 0 || next >= ZONES.length) {
-        if (!focusLibrary()) focusZone(ZONES[(next + ZONES.length) % ZONES.length]);
-      } else {
-        focusZone(ZONES[next]);
-      }
+      // Shift+Tab swaps between the player and the library (when the library is on screen).
+      if (event.shiftKey && focusLibrary()) return;
+      // Tab goes round the player and its tabs: player, Steps, Messages, Output and round again.
+      focusZone(ZONES[(at + (event.shiftKey ? -1 : 1) + ZONES.length) % ZONES.length]);
       return;
     }
     // Escape lets go of the zones (during a live run it is the stop shortcut instead).

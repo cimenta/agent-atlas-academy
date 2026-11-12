@@ -59,6 +59,7 @@ export const SHORTCUT_GROUPS = [
     title: "shortcuts.groupFocus",
     items: [
       { label: "shortcuts.focusTab", combos: [["Tab"]] },
+      { label: "shortcuts.focusLibrary", combos: [["Shift+Tab"]] },
       { label: "shortcuts.focusMove", combos: [["↑ ← ↓ →"], ["W A S D"]] },
       { label: "shortcuts.focusEnter", combos: [["Enter"]] },
     ],

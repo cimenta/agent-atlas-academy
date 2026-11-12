@@ -12,7 +12,7 @@ import { openInCreate } from "./create/draft.js";
 import { downloadFile, safeFileName } from "./download.js";
 import { runForExport } from "./run-export.js";
 import { refreshResultTab } from "./tab-state.js";
-import { clearPageActions, focusActiveLastZone, focusActivePlayer, setPageActions } from "./shortcuts.js";
+import { clearPageActions, focusActivePlayer, setPageActions } from "./shortcuts.js";
 
 const TABS = [
   { view: "replay", href: "#/play", key: "play.tab.replay" },
@@ -188,13 +188,9 @@ export async function renderReplayTab(ctx, requestedId) {
       focusList = true;
       redraw();
     } else if (event.key === "Tab" && !event.ctrlKey && !event.altKey && !event.metaKey && (at >= 0 || doc.activeElement?.getAttribute?.("role") === "tab")) {
-      // Tab leaves the library for the player (Shift+Tab for the last part of the player), as one loop.
+      // Tab and Shift+Tab leave the library for the player; Shift+Tab in the player comes back here.
       event.preventDefault();
-      if (event.shiftKey) {
-        if (!focusActiveLastZone()) host.focus();
-      } else if (!focusActivePlayer()) {
-        host.focus();
-      }
+      if (!focusActivePlayer()) host.focus();
     } else if (event.key === "Escape" && pane.contains(doc.activeElement)) {
       event.preventDefault();
       if (!focusActivePlayer()) host.focus();
