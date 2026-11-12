@@ -12,6 +12,7 @@ import { openInCreate } from "./create/draft.js";
 import { downloadFile, safeFileName } from "./download.js";
 import { runForExport } from "./run-export.js";
 import { refreshResultTab } from "./tab-state.js";
+import { focusActivePlayer } from "./shortcuts.js";
 
 const TABS = [
   { view: "replay", href: "#/play", key: "play.tab.replay" },
@@ -31,7 +32,7 @@ const paneOpen = () => {
 const lib = { query: "", open: paneOpen(), tab: null };
 
 // The tab bar lives in the site header, with the library search next to it.
-function tabBar(ctx, view, { onQuery, onToggle, intro, resultOpen = false } = {}) {
+function tabBar(ctx, view, { onQuery, onToggle, onFocusList, intro, resultOpen = false } = {}) {
   const { doc, t } = ctx;
   const slot = doc.getElementById("play-tabs");
   if (!slot) return;
@@ -76,6 +77,10 @@ function tabBar(ctx, view, { onQuery, onToggle, intro, resultOpen = false } = {}
   input.addEventListener("input", () => {
     lib.query = input.value;
     onQuery?.(lib.query);
+  });
+  // From the search box the arrow down moves into the list of runs.
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown" && onFocusList?.()) event.preventDefault();
   });
   slot.replaceChildren(...(intro?.length ? [h(doc, "div", { class: "play-intro", "data-ui": "play-intro" }, ...intro)] : []), nav, form);
   slot.hidden = false;
@@ -152,11 +157,40 @@ const rememberRun = (id) => {
 export async function renderReplayTab(ctx, requestedId) {
   const { doc, t } = ctx;
   setTitle(ctx, "");
-  const host = h(doc, "div", { class: "replay-host", "data-ui": "player-host" });
+  const host = h(doc, "div", { class: "replay-host", "data-ui": "player-host", tabindex: "-1" });
   const pane = h(doc, "aside", { class: "library-pane", "data-ui": "library-pane", "aria-label": t("play.library") });
   const layout = h(doc, "div", { class: "replay-layout", "data-ui": "replay-layout", "data-pane": lib.open ? "open" : "closed" }, pane, host);
   ctx.main.replaceChildren(layout);
   pane.hidden = !lib.open;
+
+  // Keyboard in the library: the arrows move between runs (Enter opens the focused one, it is a link),
+  // Tab switches between Your runs and Library, Escape goes back to the player.
+  let activePane = "mine";
+  let focusList = false;
+  const runLinks = () => [...pane.querySelectorAll(".run-list .run-title")];
+  const focusFirstRun = () => {
+    const first = runLinks()[0];
+    first?.focus();
+    return Boolean(first);
+  };
+  pane.addEventListener("keydown", (event) => {
+    const links = runLinks();
+    const at = links.indexOf(doc.activeElement);
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      if (links.length === 0) return;
+      event.preventDefault();
+      const next = at < 0 ? 0 : Math.min(links.length - 1, Math.max(0, at + (event.key === "ArrowDown" ? 1 : -1)));
+      links[next].focus();
+    } else if (event.key === "Tab" && !event.ctrlKey && !event.altKey && !event.metaKey && (at >= 0 || doc.activeElement?.getAttribute?.("role") === "tab")) {
+      event.preventDefault();
+      lib.tab = activePane === "mine" ? "library" : "mine";
+      focusList = true;
+      redraw();
+    } else if (event.key === "Escape" && pane.contains(doc.activeElement)) {
+      event.preventDefault();
+      if (!focusActivePlayer()) host.focus();
+    }
+  });
 
   let gallery = [];
   try {
@@ -180,6 +214,7 @@ export async function renderReplayTab(ctx, requestedId) {
   tabBar(ctx, requestedId ? "run" : "replay", {
     resultOpen: Boolean(requestedId),
     onQuery: () => redraw(),
+    onFocusList: focusFirstRun,
     onToggle: (open) => {
       pane.hidden = !open;
       layout.setAttribute("data-pane", open ? "open" : "closed");
@@ -214,7 +249,6 @@ export async function renderReplayTab(ctx, requestedId) {
       handle = mountReplay(host, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout });
       if (openAboutFor === currentId) handle.openAbout?.();
       openAboutFor = null;
-      handle.player?.seek(found.run.events.length);
       host.append(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${currentId}` }, t("play.tab.result"))));
     }
   }
@@ -298,6 +332,7 @@ export async function renderReplayTab(ctx, requestedId) {
     // Two tabs in the pane: your own runs and the library. The last choice is kept; the first time
     // the tab with something in it opens.
     const active = lib.tab ?? (built.mine.length > 0 ? "mine" : "library");
+    activePane = active;
     const tabButton = (name, key, count) => {
       const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-ui": `pane-tab-${name}`, "aria-selected": String(active === name) }, `${t(key)} (${count})`);
       button.addEventListener("click", () => {
@@ -316,6 +351,11 @@ export async function renderReplayTab(ctx, requestedId) {
           ]
         : [shown.length === 0 ? none("play.noMatches") : h(doc, "ul", { class: "run-list", "data-ui": "run-list-library" }, ...shown.map((item) => row(item)))]),
     );
+    // After Tab switched the list, the focus goes to its first run (or to the tab when it is empty).
+    if (focusList) {
+      focusList = false;
+      if (!focusFirstRun()) pane.querySelector('[role="tab"][aria-selected="true"]')?.focus();
+    }
   };
   redraw = draw;
   await draw();

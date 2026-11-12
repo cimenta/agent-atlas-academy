@@ -1,12 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { GO, SHORTCUT_GROUPS, SHORTCUTS_HASH, clearActivePlayer, createKeyHandler, setActivePlayer } from "../public/js/shortcuts.js";
+import { DEFAULT_GO_KEYS, DESTINATIONS, SHORTCUT_GROUPS, clearActivePlayer, createKeyHandler, setActivePlayer, validateGoKeys } from "../public/js/shortcuts.js";
 import { parseRoute } from "../public/js/router.js";
 import { createSettingsStore } from "../public/js/storage/settings.js";
 
 const key = (k, extra = {}) => ({ key: k, target: { tagName: "BODY" }, ...extra });
 
-function setup({ enabled = true, live = false, confirm = true, popup = false } = {}) {
+function setup({ enabled = true, live = false, confirm = true, popup = false, goKeys = DEFAULT_GO_KEYS } = {}) {
   const log = [];
   let clock = 0;
   const api = Object.fromEntries(["toggle", "prev", "next", "restart", "end", "slower", "faster", "stop"].map((n) => [n, () => log.push(n)]));
@@ -16,6 +16,8 @@ function setup({ enabled = true, live = false, confirm = true, popup = false } =
   const handle = createKeyHandler({
     isEnabled: () => enabled,
     go: (hash) => log.push(`go:${hash}`),
+    showHelp: () => log.push("help"),
+    goKeys: () => goKeys,
     focusSearch: () => {
       log.push("search");
       return true;
@@ -34,11 +36,11 @@ test("g then a letter goes to a page, and only within a moment", () => {
   const { handle, log, tick } = setup();
   assert.equal(handle(key("g")), true);
   assert.equal(handle(key("c")), true);
-  assert.deepEqual(log, [`go:${GO.c}`]);
+  assert.deepEqual(log, [`go:${DESTINATIONS.create}`]);
   handle(key("g"));
   tick(5000);
   assert.equal(handle(key("p")), false);
-  assert.deepEqual(log, [`go:${GO.c}`]);
+  assert.deepEqual(log, [`go:${DESTINATIONS.create}`]);
 });
 
 test("the player keys call the player, including the arrow up and down for restart and end", () => {
@@ -62,11 +64,11 @@ test("Space on a focused button is left to the button", () => {
   assert.deepEqual(log, []);
 });
 
-test("? opens the shortcuts tab and / focuses the search", () => {
+test("? asks for the shortcuts popup and / focuses the search", () => {
   const { handle, log } = setup();
   handle(key("?"));
   handle(key("/"));
-  assert.deepEqual(log, [`go:${SHORTCUTS_HASH}`, "search"]);
+  assert.deepEqual(log, ["help", "search"]);
 });
 
 test("Escape asks before stopping a live run, and does nothing for a finished run or an open pop-up", () => {
@@ -97,4 +99,57 @@ test("the shortcuts list has a label for every item, and the route and setting e
   assert.equal(settings.get().shortcuts, true);
   settings.setShortcuts(false);
   assert.equal(settings.get().shortcuts, false);
+});
+
+test("the letters after g can be changed, and invalid or repeated letters are refused", () => {
+  const custom = { ...DEFAULT_GO_KEYS, play: "x", create: "y" };
+  const { handle, log } = setup({ goKeys: custom });
+  handle(key("g"));
+  handle(key("x"));
+  handle(key("g"));
+  handle(key("p"));
+  assert.deepEqual(log, [`go:${DESTINATIONS.play}`]);
+  assert.equal(validateGoKeys({ ...DEFAULT_GO_KEYS, play: "c" }).reason, "duplicate");
+  assert.equal(validateGoKeys({ ...DEFAULT_GO_KEYS, play: "ab" }).reason, "format");
+  assert.equal(validateGoKeys({ ...DEFAULT_GO_KEYS, play: "?" }).reason, "format");
+  assert.equal(validateGoKeys({ ...DEFAULT_GO_KEYS, play: "X" }).keys.play, "x");
+  const data = new Map();
+  const settings = createSettingsStore({ getItem: (k) => data.get(k) ?? null, setItem: (k, v) => data.set(k, v) });
+  assert.deepEqual(settings.get().goKeys, DEFAULT_GO_KEYS);
+  assert.equal(settings.setGoKeys({ ...DEFAULT_GO_KEYS, play: "x" }), true);
+  assert.equal(settings.get().goKeys.play, "x");
+  assert.equal(settings.setGoKeys({ ...DEFAULT_GO_KEYS, play: "c" }), false);
+  assert.equal(settings.get().goKeys.play, "x");
+});
+
+test("inside the library list the arrow keys are not player keys, but other keys still are", () => {
+  const { handle, log } = setup();
+  const inPane = { tagName: "A", closest: (sel) => (sel === '[data-ui="library-pane"]' ? {} : null) };
+  assert.equal(handle(key("ArrowDown", { target: inPane })), false);
+  assert.equal(handle(key("ArrowUp", { target: inPane })), false);
+  assert.deepEqual(log, []);
+  assert.equal(handle(key("]", { target: inPane })), true);
+});
+
+import { pickNeighbour } from "../public/js/replay/spatial.js";
+
+test("with nothing focused, Tab puts the focus on the player", () => {
+  const { handle, api } = setup();
+  let focused = 0;
+  api.focusPlayer = () => (focused += 1);
+  assert.equal(handle(key("Tab")), true);
+  assert.equal(focused, 1);
+  assert.equal(handle(key("Tab", { target: { tagName: "BUTTON" } })), false);
+  assert.equal(handle(key("Tab", { shiftKey: true })), false);
+});
+
+test("moving between agents picks the nearest box in the chosen direction", () => {
+  // a supervisor on top, two workers below it, side by side
+  const centers = [{ x: 100, y: 0 }, { x: 40, y: 100 }, { x: 160, y: 100 }];
+  assert.equal(pickNeighbour(centers, 0, "down"), 1);
+  assert.equal(pickNeighbour(centers, 1, "right"), 2);
+  assert.equal(pickNeighbour(centers, 2, "left"), 1);
+  assert.equal(pickNeighbour(centers, 2, "up"), 0);
+  assert.equal(pickNeighbour(centers, 0, "up"), -1);
+  assert.equal(pickNeighbour(centers, 1, "left"), -1);
 });

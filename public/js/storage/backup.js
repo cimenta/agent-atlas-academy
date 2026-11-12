@@ -76,6 +76,7 @@ export async function applyBackup(backup, { runStore, settingsStore, vault, mode
   if (typeof backup.settings?.tooltips === "boolean") settingsStore.setTooltips(backup.settings.tooltips);
   if (backup.settings?.playerLayout === "bar" || backup.settings?.playerLayout === "side") settingsStore.setPlayerLayout(backup.settings.playerLayout);
   if (typeof backup.settings?.shortcuts === "boolean") settingsStore.setShortcuts(backup.settings.shortcuts);
+  if (isObject(backup.settings?.goKeys)) settingsStore.setGoKeys(backup.settings.goKeys);
   if (backup.vault && (mode === "replace" || !vault.hasStoredKey())) vault.importRecord(backup.vault);
   return { added, skipped, failed };
 }

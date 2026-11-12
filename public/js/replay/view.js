@@ -17,6 +17,7 @@ import { createReplayDiagram, ROUND_MARK } from "./diagram.js";
 import { outcomeNotice } from "../outcome-view.js";
 import { buildResultModel } from "../play-model.js";
 import { clearActivePlayer, setActivePlayer } from "../shortcuts.js";
+import { pickNeighbour } from "./spatial.js";
 
 const STATUS_KEY = {
   waiting: "player.statusWaiting",
@@ -143,7 +144,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     return button;
   });
   const tabs = h(doc, "div", { class: "tabs", "data-ui": "inspector-tabs", role: "tablist" }, ...tabButtons);
-  const body = h(doc, "div", { class: "inspect-body", "data-ui": "inspector-body" });
+  const body = h(doc, "div", { class: "inspect-body", "data-ui": "inspector-body", tabindex: "-1" });
   // One search box next to the tabs: it searches the text of the tab that is open.
   let drawBody = () => {};
   const search = searchBar({
@@ -479,6 +480,92 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     isLive: () => player.live,
     stop: () => onStop?.(),
   };
+  // Keyboard zones. Tab goes player, Steps, Messages, Output and round again (Shift+Tab goes back, and
+  // leaves from the player). In the player the arrows or W A S D move between the agents and Enter inspects
+  // the one that has the focus. In Steps and Messages the same keys move between steps or rounds.
+  const ZONES = ["player", "steps", "messages", "output"];
+  const MOVES = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", w: "up", s: "down", a: "left", d: "right" };
+  const isLetter = (key) => key.length === 1;
+  let lastG = 0;
+  const zoneOf = (target) => {
+    if (!target || !target.tagName || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return null;
+    if (chips.contains(target)) return "player";
+    if (body.contains(target) || body === target || tabRow.contains(target)) return ui.tab;
+    return null;
+  };
+  function focusZone(zone) {
+    if (zone === "player") {
+      (chips.querySelector('[aria-pressed="true"]') ?? chips.querySelector("button"))?.focus();
+      return;
+    }
+    ui.tab = zone;
+    ui.follow = false;
+    render();
+    const inside = zone === "steps" ? body.querySelector(".step.sel") ?? body.querySelector(".step") : zone === "messages" ? body.querySelector(".rounds .sel") ?? body.querySelector(".rounds button") : null;
+    (inside ?? body).focus();
+  }
+  function moveAgent(direction) {
+    const boxes = [...chips.querySelectorAll("button")];
+    const at = boxes.indexOf(doc.activeElement);
+    if (boxes.length === 0) return;
+    if (at < 0) return boxes[0].focus();
+    const centers = boxes.map((b) => {
+      const r = b.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    });
+    const next = pickNeighbour(centers, at, direction);
+    if (next >= 0) boxes[next].focus();
+  }
+  function moveInList(zone, forward) {
+    if (zone === "steps") {
+      const steps = [...body.querySelectorAll(".step")];
+      if (steps.length === 0) return;
+      const at = steps.includes(doc.activeElement) ? steps.indexOf(doc.activeElement) : steps.findIndex((s) => s.classList.contains("sel"));
+      const next = Math.min(steps.length - 1, Math.max(0, at + (forward ? 1 : -1)));
+      ui.step = next;
+      ui.follow = false;
+      render();
+      body.querySelectorAll(".step")[next]?.focus();
+    } else if (zone === "messages") {
+      const rounds = [...body.querySelectorAll(".rounds button")];
+      if (rounds.length === 0) return;
+      const at = rounds.includes(doc.activeElement) ? rounds.indexOf(doc.activeElement) : rounds.findIndex((r) => r.classList.contains("sel"));
+      const next = Math.min(rounds.length - 1, Math.max(0, at + (forward ? 1 : -1)));
+      ui.round = next;
+      ui.follow = false;
+      render();
+      body.querySelectorAll(".rounds button")[next]?.focus();
+    }
+  }
+  root.addEventListener("keydown", (event) => {
+    if (event.ctrlKey || event.altKey || event.metaKey) return;
+    if (event.key === "g") lastG = Date.now();
+    const zone = zoneOf(event.target);
+    if (zone === null) return;
+    const used = () => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    if (event.key === "Tab") {
+      const at = ZONES.indexOf(zone);
+      if (event.shiftKey && at === 0) return;
+      used();
+      focusZone(ZONES[(at + (event.shiftKey ? -1 : 1) + ZONES.length) % ZONES.length]);
+      return;
+    }
+    const move = MOVES[event.key];
+    if (!move) return;
+    // w a s d are letters: right after g they belong to the go-to shortcuts (g a, g s).
+    if (isLetter(event.key) && Date.now() - lastG < 1500) return;
+    if (zone === "player") {
+      used();
+      moveAgent(move);
+    } else if (zone === "steps" || zone === "messages") {
+      used();
+      moveInList(zone, move === "down" || move === "right");
+    }
+  });
+  keyApi.focusPlayer = () => focusZone("player");
   setActivePlayer(keyApi);
 
   const unsubscribe = player.subscribe(render);

@@ -2,7 +2,8 @@
 import { h } from "./dom.js";
 import { LIMIT_MAX } from "./engine/catalog.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
-import { SHORTCUT_GROUPS } from "./shortcuts.js";
+import { DEFAULT_GO_KEYS } from "./shortcuts.js";
+import { buildShortcutList } from "./shortcut-list.js";
 import { VaultError } from "./storage/key-vault.js";
 import { exportBackup, parseBackup, applyBackup } from "./storage/backup.js";
 
@@ -213,26 +214,32 @@ export function renderSettings(ctx) {
     settings.setShortcuts(shortcutsBox.checked);
     say(t(shortcutsBox.checked ? "shortcuts.on" : "shortcuts.off"));
   });
-  const keyCap = (label) => h(doc, "kbd", {}, label);
-  const comboCell = (item) =>
-    h(
-      doc,
-      "span",
-      { class: "kbd-keys" },
-      ...item.combos.flatMap((combo, i) => [
-        ...(i > 0 ? [" / "] : []),
-        ...combo.flatMap((label, j) => [...(j > 0 && item.sequence ? [` ${t("shortcuts.then")} `] : []), keyCap(label)]),
-      ]),
-    );
-  const shortcutList = h(
-    doc,
-    "div",
-    { class: "kbd-list", "data-ui": "shortcut-list" },
-    ...SHORTCUT_GROUPS.flatMap((group) => [
-      h(doc, "h3", {}, t(group.title)),
-      h(doc, "div", { class: "kbd-grid" }, ...group.items.map((item) => h(doc, "div", { class: "kbd-row" }, h(doc, "span", {}, t(item.label)), comboCell(item)))),
-    ]),
-  );
+  // The letter after g can be changed; a letter that is not valid or already used is refused.
+  let shortcutList = null;
+  const drawShortcuts = () => {
+    const next = buildShortcutList(doc, t, settings.get().goKeys, {
+      editable: true,
+      onEdit: (id, value, input) => {
+        const result = settings.setGoKeys({ ...settings.get().goKeys, [id]: value });
+        if (!result) {
+          input.value = settings.get().goKeys[id];
+          say(t("shortcuts.keyRefused"), true);
+          return;
+        }
+        say(t("shortcuts.keySaved"));
+        drawShortcuts();
+      },
+    });
+    shortcutList?.replaceWith(next);
+    shortcutList = next;
+  };
+  drawShortcuts();
+  const resetKeys = h(doc, "button", { type: "button", "data-ui": "shortcuts-reset" }, t("shortcuts.reset"));
+  resetKeys.addEventListener("click", () => {
+    settings.setGoKeys({ ...DEFAULT_GO_KEYS });
+    say(t("shortcuts.keySaved"));
+    drawShortcuts();
+  });
 
   // Local data: how many runs and roughly how much space they take.
   const dataStat = h(doc, "p", { class: "data-stat", "data-ui": "data-stat" });
@@ -377,7 +384,7 @@ export function renderSettings(ctx) {
       h(doc, "div", { class: "field checkbox" }, tipsBox, h(doc, "label", { for: "set-tooltips" }, t("settings.tooltipsLabel"))),
     ),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.playerHeading")), h(doc, "p", {}, t("settings.playerIntro")), field("set-player-layout", t("settings.playerLabel"), layoutSelect)),
-    h(doc, "section", { class: "settings-section", "data-ui": "shortcuts-section" }, h(doc, "h2", {}, t("shortcuts.heading")), h(doc, "p", {}, t("shortcuts.intro")), h(doc, "div", { class: "field checkbox" }, shortcutsBox, h(doc, "label", { for: "set-shortcuts" }, t("shortcuts.enable"))), shortcutList),
+    h(doc, "section", { class: "settings-section", "data-ui": "shortcuts-section" }, h(doc, "h2", {}, t("shortcuts.heading")), h(doc, "p", {}, t("shortcuts.intro")), h(doc, "div", { class: "field checkbox" }, shortcutsBox, h(doc, "label", { for: "set-shortcuts" }, t("shortcuts.enable"))), h(doc, "p", {}, t("shortcuts.changeHint")), shortcutList, resetKeys),
     h(
       doc,
       "section",

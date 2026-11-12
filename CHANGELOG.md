@@ -6,7 +6,11 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
-- Keyboard shortcuts: g then p, c, r, l, h, a, s or 0 goes to a page. Space plays or pauses, the arrows step (up restarts, down jumps to the end), Home and End do the same, [ and ] change the speed, 1 2 3 switch the inspector tabs, and Esc asks before stopping a live run. Slash searches the library and a question mark opens the new Shortcuts tab in Settings, where they can be turned off.
+- Keyboard in the player: Tab goes round player, Steps, Messages and Output (Shift+Tab goes back). In the player the arrows or W A S D move between the agents and Enter inspects the one with the focus; in Steps and Messages the same keys move between steps and rounds. With nothing focused, Tab starts in the player.
+
+- A run you open from the library now waits at the start instead of showing its end; press Play, or use the arrows or End, to move on.
+- In the library the arrow keys move between runs (also from the search box), Enter opens the focused run, Tab switches between Your runs and Library, and Esc goes back to the player.
+- Keyboard shortcuts: g then p, c, r, l, h, a, s or 0 goes to a page. Space plays or pauses, the arrows step (up restarts, down jumps to the end), Home and End do the same, [ and ] change the speed, 1 2 3 switch the inspector tabs, and Esc asks before stopping a live run. Slash searches the library and a question mark opens a small popup with the list. The Shortcuts tab in Settings turns them off and lets you change the letter after g.
 
 ### Changed
 

@@ -4,6 +4,7 @@ import { loadVersion } from "./version.js";
 import { createVault } from "./storage/key-vault.js";
 import { markUnlockAlert } from "./unlock-alert.js";
 import { createKeyHandler } from "./shortcuts.js";
+import { createShortcutsPopup } from "./shortcuts-popup.js";
 import { createSettingsStore } from "./storage/settings.js";
 import { createIndexedDbBackend, createMemoryBackend, createRunStore } from "./storage/runs-store.js";
 import { renderSettings } from "./settings-page.js";
@@ -234,8 +235,11 @@ menuToggle.addEventListener("click", () => {
 window.addEventListener("hashchange", () => renderRoute(true));
 
 // Keyboard shortcuts (they can be turned off in Settings).
+const shortcutsPopup = createShortcutsPopup({ doc, t, getGoKeys: () => settings.get().goKeys });
 const handleKey = createKeyHandler({
   isEnabled: () => settings.get().shortcuts,
+  goKeys: () => settings.get().goKeys,
+  showHelp: () => shortcutsPopup.toggle(),
   go: (hash) => {
     location.hash = hash;
   },
@@ -249,6 +253,8 @@ const handleKey = createKeyHandler({
   hasPopup: () => Boolean(doc.querySelector(".center-tip")),
 });
 doc.addEventListener("keydown", (event) => {
+  // While the popup is open only the question mark (which closes it) and Escape do anything.
+  if (shortcutsPopup.isOpen() && event.key !== "?") return;
   if (handleKey(event)) event.preventDefault();
 });
 
