@@ -171,6 +171,13 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     outcomeBar = outcomeNotice({ doc, t, outcome: doneEvent.outcome, events, cost });
   }
 
+  // The word before the title ("Replay:") is its own span, so it can blink blue while the run plays.
+  function headingParts() {
+    const full = t("player.title", { title });
+    const at = typeof title === "string" && title !== "" ? full.indexOf(title) : -1;
+    if (at <= 0) return [full];
+    return [h(doc, "span", { class: "replay-word", "data-ui": "replay-word" }, full.slice(0, at)), full.slice(at)];
+  }
   const root = h(
     doc,
     "section",
@@ -180,7 +187,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       doc,
       "div",
       { class: "player-head", "data-ui": "player-head" },
-      h(doc, "div", { class: "player-title" }, h(doc, "h2", {}, t("player.title", { title }), liveBadge), pattern ? h(doc, "span", { class: `type-chip type-${pattern}`, "data-ui": "player-pattern" }, t(`pattern.${pattern}`)) : ""),
+      h(doc, "div", { class: "player-title" }, h(doc, "h2", {}, ...headingParts(), liveBadge), pattern ? h(doc, "span", { class: `type-chip type-${pattern}`, "data-ui": "player-pattern" }, t(`pattern.${pattern}`)) : ""),
       exportButton,
     ),
     aboutPanel ? aboutPanel.element : "",
@@ -411,6 +418,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   function render() {
     state = deriveInspector(events, player.cursor);
     followPlayer();
+    root.classList?.toggle("is-playing", player.playing);
     const playName = player.playing ? t("player.pause") : t("player.play");
     playButton.textContent = player.playing ? GLYPH.pause : GLYPH.play;
     playButton.setAttribute("title", playName);

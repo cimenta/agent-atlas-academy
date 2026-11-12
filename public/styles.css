@@ -703,3 +703,7 @@ kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem;
 @keyframes run-flash { 0%, 100% { background: var(--accent-bg); } 50% { background: color-mix(in srgb, var(--accent-line) 45%, white); } }
 .library-pane .run-row.kbd-flash { animation: run-flash 0.5s ease-in-out 2; }
 .library-pane .run-row a:focus, .library-pane .run-row a:focus-visible { outline: none; }
+
+/* The word Replay blinks blue while the run is playing. */
+@keyframes replay-blink { 0%, 100% { color: inherit; } 50% { color: var(--accent-line); } }
+.replay.is-playing .replay-word { animation: replay-blink 1s ease-in-out infinite; }
