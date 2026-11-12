@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Settings uses tabs down the left (a row on a phone): API key, Limits, Player, Tooltips and Data. The API key tab shows a key saved tag when a key is available.
+
 - The import button moved to the far right of the Your runs and Library tabs; the extra heading above the list is gone.
 
 - The list beside the player has two tabs, Your runs and Library, instead of one long list. The last tab you used is kept.

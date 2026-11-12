@@ -618,3 +618,19 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 }
 
 .tabs .icon-button { margin-left: auto; flex: none; align-self: center; }
+
+/* Settings: tabs down the left, one section at a time; a row of tabs on a phone. */
+.settings-layout { display: flex; gap: 16px; align-items: flex-start; margin-top: 8px; }
+.settings-tabs { display: flex; flex-direction: column; gap: 2px; width: 11rem; flex: none; }
+.settings-tabs .tab { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: 0; text-align: left; border-bottom: 0; border-left: 3px solid transparent; }
+.settings-tabs .tab:hover { border-left-color: var(--border); }
+.settings-tabs .tab[aria-selected="true"] { border-left-color: var(--accent-line); background: var(--card); }
+.settings-body { flex: 1; min-width: 0; }
+.settings-body .settings-section { margin-top: 0; }
+.tag-saved { font-size: 0.7rem; padding: 1px 8px; border-radius: 10px; background: var(--done-bg); color: var(--done); font-weight: 600; white-space: nowrap; }
+@media (max-width: 640px) {
+  .settings-layout { flex-direction: column; }
+  .settings-tabs { flex-direction: row; width: auto; max-width: 100%; overflow-x: auto; }
+  .settings-tabs .tab { border-left: 0; border-bottom: 2px solid transparent; }
+  .settings-tabs .tab[aria-selected="true"] { border-bottom-color: var(--accent-line); background: none; }
+}

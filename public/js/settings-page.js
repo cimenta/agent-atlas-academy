@@ -31,6 +31,7 @@ export function renderSettings(ctx) {
       : vault.hasStoredKey()
         ? t("settings.keyLocked")
         : t("settings.keyNone");
+    keyTag.hidden = !(available || vault.hasStoredKey());
     unlockForm.hidden = available || !vault.hasStoredKey();
     forgetButton.hidden = !vault.hasStoredKey();
     changeForm.hidden = !vault.hasStoredKey();
@@ -231,9 +232,8 @@ export function renderSettings(ctx) {
   replaceButton.addEventListener("click", () => runImport("replace"));
   importChoice.append(h(doc, "p", {}, t("settings.importChoose")), mergeButton, replaceButton);
 
-  ctx.main.replaceChildren(
-    h(doc, "h1", {}, t("settings.title")),
-    message,
+  // The five sections, in the order they were written: key, limits, tooltips, player, data.
+  const written = [
     h(
       doc,
       "section",
@@ -267,6 +267,27 @@ export function renderSettings(ctx) {
     ),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.playerHeading")), h(doc, "p", {}, t("settings.playerIntro")), field("set-player-layout", t("settings.playerLabel"), layoutSelect)),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.dataHeading")), h(doc, "p", {}, t("settings.dataIntro")), deleteButton, confirmBox, h(doc, "h3", {}, t("settings.backupHeading")), h(doc, "p", {}, t("settings.backupIntro")), h(doc, "div", { class: "field checkbox" }, includeKey, h(doc, "label", { for: "set-include-key" }, t("settings.includeKey"))), exportButton, field("set-import", t("settings.importLabel"), importFile), importProblems, importChoice),
-  );
+  ];
+  const [keySection, limitsSection, tooltipsSection, playerSection, dataSection] = written;
+  // Tabs down the left (a row on a phone); one section is shown at a time.
+  const keyTag = h(doc, "span", { class: "tag-saved", "data-ui": "key-saved-tag", hidden: true }, t("settings.keySavedTag"));
+  const panels = [
+    ["key", "settings.keyHeading", keySection],
+    ["limits", "settings.limitsHeading", limitsSection],
+    ["player", "settings.playerHeading", playerSection],
+    ["tooltips", "settings.tooltipsHeading", tooltipsSection],
+    ["data", "settings.dataHeading", dataSection],
+  ];
+  const tabButtons = panels.map(([id, headingKey]) => h(doc, "button", { type: "button", class: "tab", role: "tab", "data-ui": `settings-tab-${id}`, "data-tab": id }, t(headingKey), ...(id === "key" ? [keyTag] : [])));
+  const showTab = (id) => {
+    panels.forEach(([panelId, , node]) => {
+      node.hidden = panelId !== id;
+    });
+    tabButtons.forEach((button) => button.setAttribute("aria-selected", String(button.getAttribute("data-tab") === id)));
+  };
+  tabButtons.forEach((button) => button.addEventListener("click", () => showTab(button.getAttribute("data-tab"))));
+  showTab("key");
+  const tabList = h(doc, "div", { class: "settings-tabs", role: "tablist", "data-ui": "settings-tabs" }, ...tabButtons);
+  ctx.main.replaceChildren(h(doc, "h1", {}, t("settings.title")), message, h(doc, "div", { class: "settings-layout", "data-ui": "settings-layout" }, tabList, h(doc, "div", { class: "settings-body" }, ...panels.map(([, , node]) => node))));
   refreshStatus();
 }

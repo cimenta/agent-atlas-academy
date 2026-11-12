@@ -78,6 +78,7 @@
   "settings.tooltipsLabel": "Turn off tooltips",
   "settings.tooltipsOff": "Tooltips are turned off.",
   "settings.tooltipsOn": "Tooltips are turned on.",
+  "settings.keySavedTag": "key saved",
   "settings.playerHeading": "Player controls",
   "settings.playerIntro": "Where the replay buttons sit. The bar layout puts them on one slim line under the diagram. The side layout puts small buttons in a column to the right of it.",
   "settings.playerLabel": "Layout of the player controls",
