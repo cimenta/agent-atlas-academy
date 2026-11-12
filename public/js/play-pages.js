@@ -28,7 +28,7 @@ const paneOpen = () => {
     return true;
   }
 };
-const lib = { query: "", open: paneOpen() };
+const lib = { query: "", open: paneOpen(), tab: null };
 
 // The tab bar lives in the site header, with the library search next to it.
 function tabBar(ctx, view, { onQuery, onToggle, intro, resultOpen = false } = {}) {
@@ -295,19 +295,27 @@ export async function renderReplayTab(ctx, requestedId) {
       if (item.id === currentId) li.setAttribute("aria-current", "true");
       return li;
     };
+    // Two tabs in the pane: your own runs and the library. The last choice is kept; the first time
+    // the tab with something in it opens.
+    const active = lib.tab ?? (built.mine.length > 0 ? "mine" : "library");
+    const tabButton = (name, key, count) => {
+      const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-ui": `pane-tab-${name}`, "aria-selected": String(active === name) }, `${t(key)} (${count})`);
+      button.addEventListener("click", () => {
+        lib.tab = name;
+        draw();
+      });
+      return button;
+    };
+    const paneTabs = h(doc, "div", { class: "tabs", role: "tablist", "data-ui": "pane-tabs" }, tabButton("mine", "play.mine", built.mine.length), tabButton("library", "play.library", built.gallery.length));
     pane.replaceChildren(
-      h(doc, "div", { class: "pane-head" }, h(doc, "h2", {}, t("play.mine")), importButton, fileInput),
-      importNote,
-      mine.length === 0
-        ? none(lib.query && built.mine.length > 0 ? "play.noMatches" : "play.empty")
-        : h(
-            doc,
-            "ul",
-            { class: "run-list", "data-ui": "run-list-mine" },
-            ...mine.map((item) => row(item)),
-          ),
-      h(doc, "div", { class: "pane-head" }, h(doc, "h2", {}, t("play.library"))),
-      shown.length === 0 ? none("play.noMatches") : h(doc, "ul", { class: "run-list", "data-ui": "run-list-library" }, ...shown.map((item) => row(item))),
+      paneTabs,
+      ...(active === "mine"
+        ? [
+            h(doc, "div", { class: "pane-head" }, h(doc, "h2", {}, t("play.mine")), importButton, fileInput),
+            importNote,
+            mine.length === 0 ? none(lib.query && built.mine.length > 0 ? "play.noMatches" : "play.empty") : h(doc, "ul", { class: "run-list", "data-ui": "run-list-mine" }, ...mine.map((item) => row(item))),
+          ]
+        : [shown.length === 0 ? none("play.noMatches") : h(doc, "ul", { class: "run-list", "data-ui": "run-list-library" }, ...shown.map((item) => row(item)))]),
     );
   };
   redraw = draw;
