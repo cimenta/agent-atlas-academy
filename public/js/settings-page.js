@@ -39,9 +39,14 @@ export function renderSettings(ctx) {
     lockedTag.hidden = !needsUnlock(vault);
     markUnlockAlert(doc, vault, t);
     securityNone.hidden = vault.hasStoredKey();
-    unlockForm.hidden = available || !vault.hasStoredKey();
-    forgetButton.hidden = !vault.hasStoredKey();
-    changeForm.hidden = !vault.hasStoredKey();
+    const stored = vault.hasStoredKey();
+    secMark.setAttribute("class", available ? "bang ok" : "bang no");
+    secMark.textContent = available ? "\u2713" : "!";
+    secText.textContent = t(available ? "settings.secUnlocked" : "settings.secLocked");
+    secLead.hidden = !stored;
+    secSteps.hidden = !stored;
+    secActions.hidden = !stored;
+    unlockForm.hidden = available || !stored;
   };
 
   // Save the key for this tab (and optionally remember it encrypted).
@@ -76,46 +81,94 @@ export function renderSettings(ctx) {
     refreshStatus();
   });
 
+  // Security: everything is inline. A note under each action says how it went.
+  const inlineNote = () => h(doc, "p", { class: "sec-note", role: "status", "aria-live": "polite" });
+  const setNote = (el, text, isError = false) => {
+    el.textContent = text;
+    el.setAttribute("class", isError ? "sec-note err" : "sec-note ok");
+  };
+
   // Unlock a remembered key.
   const unlockInput = h(doc, "input", { id: "set-unlock", type: "password", autocomplete: "current-password" });
   const unlockButton = h(doc, "button", { type: "button", class: "primary" }, t("settings.unlock"));
-  const unlockForm = h(doc, "div", { class: "unlock-form", hidden: true }, field("set-unlock", t("settings.unlockLabel"), unlockInput), unlockButton);
-  unlockButton.addEventListener("click", async () => {
+  const unlockNote = inlineNote();
+  const unlockForm = h(doc, "div", { class: "unlock-form", hidden: true }, h(doc, "div", { class: "sec-row" }, field("set-unlock", t("settings.unlockLabel"), unlockInput), unlockButton), unlockNote);
+  const doUnlock = async () => {
     try {
       await vault.unlock(unlockInput.value);
       unlockInput.value = "";
+      setNote(unlockNote, "");
       say(t("settings.unlocked"));
     } catch (error) {
-      say(errorText(error), true);
+      setNote(unlockNote, errorText(error), true);
     }
     refreshStatus();
+  };
+  unlockButton.addEventListener("click", doUnlock);
+  unlockInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") doUnlock();
   });
 
-  // Forget the remembered key and the key in memory.
-  const forgetButton = h(doc, "button", { type: "button" }, t("settings.forget"));
+  // Forget the remembered key and the key in memory (asks inline first).
+  const forgetButton = h(doc, "button", { type: "button", class: "danger", "data-ui": "forget-key" }, t("settings.forget"));
+  const forgetYes = h(doc, "button", { type: "button", class: "danger", "data-ui": "forget-yes" }, t("settings.forgetYes"));
+  const forgetNo = h(doc, "button", { type: "button" }, t("settings.deleteConfirmNo"));
+  const forgetPanel = h(doc, "div", { class: "sec-panel", hidden: true, "data-ui": "forget-panel" }, h(doc, "p", {}, t("settings.forgetConfirm")), h(doc, "div", { class: "sec-row" }, forgetYes, forgetNo));
   forgetButton.addEventListener("click", () => {
-    if (!doc.defaultView.confirm(t("settings.forgetConfirm"))) return;
+    forgetPanel.hidden = !forgetPanel.hidden;
+    changePanel.hidden = true;
+  });
+  forgetNo.addEventListener("click", () => {
+    forgetPanel.hidden = true;
+  });
+  forgetYes.addEventListener("click", () => {
     vault.forget();
     vault.clearSessionKey();
+    forgetPanel.hidden = true;
     say(t("settings.forgotten"));
     refreshStatus();
   });
 
-  // Change the passphrase.
+  // Change the passphrase: a small form that opens in place.
   const oldPass = h(doc, "input", { id: "set-old", type: "password", autocomplete: "current-password" });
   const newPass = h(doc, "input", { id: "set-new", type: "password", autocomplete: "new-password" });
-  const changeButton = h(doc, "button", { type: "button" }, t("settings.changePassphrase"));
-  const changeForm = h(doc, "div", { class: "change-form", hidden: true }, field("set-old", t("settings.oldPassphrase"), oldPass), field("set-new", t("settings.newPassphrase"), newPass), changeButton);
-  changeButton.addEventListener("click", async () => {
+  const changeOpen = h(doc, "button", { type: "button", "data-ui": "change-open" }, t("settings.changePassphrase"));
+  const changeGo = h(doc, "button", { type: "button", class: "primary", "data-ui": "change-go" }, t("settings.changeGo"));
+  const changeCancel = h(doc, "button", { type: "button" }, t("settings.deleteConfirmNo"));
+  const changeNote = inlineNote();
+  const changePanel = h(doc, "div", { class: "sec-panel", hidden: true, "data-ui": "change-panel" }, h(doc, "div", { class: "sec-row" }, field("set-old", t("settings.oldPassphrase"), oldPass), field("set-new", t("settings.newPassphrase"), newPass)), h(doc, "div", { class: "sec-row" }, changeGo, changeCancel), changeNote);
+  changeOpen.addEventListener("click", () => {
+    changePanel.hidden = !changePanel.hidden;
+    forgetPanel.hidden = true;
+  });
+  changeCancel.addEventListener("click", () => {
+    changePanel.hidden = true;
+    setNote(changeNote, "");
+  });
+  changeGo.addEventListener("click", async () => {
     try {
       await vault.changePassphrase(oldPass.value, newPass.value);
       oldPass.value = "";
       newPass.value = "";
+      changePanel.hidden = true;
+      setNote(changeNote, "");
       say(t("settings.passphraseChanged"));
     } catch (error) {
-      say(errorText(error), true);
+      setNote(changeNote, errorText(error), true);
     }
   });
+
+  // The explanation at the top of the tab.
+  const secMark = h(doc, "span", { class: "bang no", "data-ui": "security-mark", "aria-hidden": "true" }, "!");
+  const secText = h(doc, "span", {}, "");
+  const secLead = h(doc, "p", { class: "sec-lead", "data-ui": "security-lead" }, secMark, secText);
+  const secSteps = h(
+    doc,
+    "div",
+    { class: "sec-steps", "data-ui": "security-steps" },
+    ...[1, 2, 3].map((n) => h(doc, "div", { class: `sec-step s${n}` }, h(doc, "b", {}, t(`settings.secStep${n}Title`)), t(`settings.secStep${n}Text`))),
+  );
+  const secActions = h(doc, "div", { class: "sec-actions", "data-ui": "security-actions" }, h(doc, "div", { class: "sec-row" }, changeOpen, forgetButton), changePanel, forgetPanel);
 
   // Default limits.
   const current = settings.get().limits;
@@ -312,7 +365,7 @@ export function renderSettings(ctx) {
       h(doc, "div", { class: "danger-row", "data-ui": "data-danger" }, h(doc, "div", {}, h(doc, "h3", {}, t("settings.deleteRuns")), h(doc, "p", {}, t("settings.deleteText"))), deleteButton),
       confirmBox,
     ),
-    h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.securityHeading")), h(doc, "p", {}, t("settings.securityIntro")), securityNone, unlockForm, changeForm, forgetButton),
+    h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.securityHeading")), securityNone, secLead, secSteps, unlockForm, secActions),
   ];
   const [keySection, limitsSection, tooltipsSection, playerSection, dataSection, securitySection] = written;
   // Tabs down the left (a row on a phone); one section is shown at a time.

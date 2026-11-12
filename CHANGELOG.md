@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Settings, Security: an exclamation mark in front of the line that says the key must be unlocked, a three-step explanation in colours, unlock on the same page, and Change passphrase and Forget saved key open small forms in place (Forget no longer uses a browser pop-up).
+
 - Settings, Data on this device is more compact: a line with the number of runs and their size, Back up and Restore as two cards, and Delete all runs set apart in a red-bordered row.
 
 - When a saved API key is locked, the Settings cog in the menu and the Security tab show a red exclamation mark, and the cog explains where to go. The marks go away after the key is unlocked.

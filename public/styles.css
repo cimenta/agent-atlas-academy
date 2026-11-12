@@ -655,3 +655,22 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .data-card .field { margin: 4px 0; }
 .data-actions { display: flex; gap: 8px; margin-top: auto; flex-wrap: wrap; }
 .danger-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; padding: 0 12px 8px; border: 1px solid var(--err); border-radius: var(--radius); }
+
+/* Settings, Security: an explanation in colours, and unlock, change and forget in place. */
+.bang { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 0.8rem; font-weight: 700; flex: none; color: #fff; }
+.bang.no { background: var(--err); }
+.bang.ok { background: var(--done); }
+.sec-lead { display: flex; gap: 8px; align-items: center; margin: 8px 0 12px; }
+.sec-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 0 0 14px; }
+.sec-step { border-radius: var(--radius); padding: 10px 12px; font-size: 0.85rem; line-height: 1.5; }
+.sec-step b { display: block; margin-bottom: 2px; }
+.sec-step.s1 { background: var(--accent-bg); color: var(--accent); }
+.sec-step.s2 { background: var(--working-bg); color: var(--working); }
+.sec-step.s3 { background: var(--done-bg); color: var(--done); }
+.sec-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.sec-row .field { margin: 4px 0; }
+.sec-actions { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+.sec-panel { margin-top: 10px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); }
+.sec-note { margin: 4px 0 0; min-height: 1rem; font-size: 0.85rem; }
+.sec-note.err { color: var(--err); }
+.sec-note.ok { color: var(--done); }
