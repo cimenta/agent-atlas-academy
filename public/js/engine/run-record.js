@@ -3,6 +3,17 @@ import { MODELS } from "./catalog.js";
 
 const TITLE_MAX = 60;
 
+// The models a design uses, each once, in the order of its agents (for example "claude-haiku-5-5, claude-sonnet-5-5").
+// A design without agents gives the default model.
+export function modelsUsed(design) {
+  const ids = [];
+  for (const node of design?.nodes ?? []) {
+    const id = (MODELS.find((m) => m.key === node.model) ?? MODELS[0]).id;
+    if (!ids.includes(id)) ids.push(id);
+  }
+  return ids.length > 0 ? ids.join(", ") : MODELS[0].id;
+}
+
 export function titleFromTask(task) {
   const first = String(task ?? "").trim().split(/\r?\n/)[0].trim();
   if (first === "") return "Untitled run";
@@ -30,14 +41,13 @@ function sumUsage(events) {
 
 export function buildRunRecord({ id, design, task, events, limits, language, appVersion, startedAt, endedAt, client }) {
   const done = [...events].reverse().find((e) => e.type === "done");
-  const firstModel = MODELS.find((m) => m.key === design.nodes[0]?.model) ?? MODELS[0];
   return {
     schemaVersion: 1,
     id,
     title: titleFromTask(task),
     language,
     pattern: design.pattern,
-    recordedWith: { provider: "anthropic", model: firstModel.id },
+    recordedWith: { provider: "anthropic", model: modelsUsed(design) },
     appVersion,
     events: [...events],
     design,

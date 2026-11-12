@@ -7,7 +7,7 @@ import { showCenterTip } from "../center-tip.js";
 import { refreshResultTab } from "../tab-state.js";
 import { MODELS, TASK_MAX_CHARS, LIMIT_MAX } from "../engine/catalog.js";
 import { PATTERNS, clampLimits } from "../engine/patterns.js";
-import { buildRunRecord, makeRunId } from "../engine/run-record.js";
+import { buildRunRecord, makeRunId, modelsUsed } from "../engine/run-record.js";
 import { startRun, RunStartError } from "../run-client.js";
 import { mountLiveReplay } from "../replay/view.js";
 import { createBatchedSaver } from "../storage/runs-store.js";
@@ -268,7 +268,6 @@ export function renderCreate(ctx) {
 
     const id = makeRunId(Date.now());
     const events = [];
-    const firstModel = MODELS.find((m) => m.key === design.nodes[0]?.model) ?? MODELS[0];
     const startedAt = Date.now();
     let endedAt;
     const client = {
@@ -290,7 +289,7 @@ export function renderCreate(ctx) {
     // How the run ended is shown above the player, so it is the first thing seen when the run is over.
     const outcomeSlot = h(doc, "div", { class: "run-outcome-slot", "data-ui": "run-outcome-slot" });
     root.replaceChildren(outcomeSlot, host, after);
-    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: draft.pattern, recordedWith: { provider: "anthropic", model: firstModel.id }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout });
+    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: draft.pattern, recordedWith: { provider: "anthropic", model: modelsUsed(design) }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout });
     ctx.onLeave(live.destroy);
 
     let ended = false;

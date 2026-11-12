@@ -191,7 +191,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       exportButton,
     ),
     aboutPanel ? aboutPanel.element : "",
-    h(doc, "p", { class: "recorded" }, t("player.recordedWith", recordedWith)),
+    h(doc, "p", { class: "recorded" }, t("player.recordedWith", { provider: recordedWith.provider })),
     banners,
     // Side layout: the buttons form a narrow column to the right of the diagram, slider and status.
     // Bar layout: one slim line under the diagram holds buttons, slider and speed.
@@ -309,7 +309,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       });
       return button;
     });
-    const head = h(doc, "p", { class: "agenthead" }, `${t("insp.stepsOf")} `, h(doc, "b", {}, agent.label), agent.model ? h(doc, "span", { class: "badge" }, agent.model) : "", agent.ms != null ? h(doc, "span", { class: "badge time" }, t("insp.total", { time: fmt(agent.ms) })) : "");
+    const head = h(doc, "p", { class: "agenthead" }, `${t("insp.stepsOf")} `, h(doc, "b", {}, agent.label), agent.model ? h(doc, "span", { class: "badge" }, agent.model) : "");
     const left = h(doc, "div", { "data-ui": "step-list" }, head, ...list);
     if (agent.status === "working") left.append(h(doc, "div", { class: "working" }, t("insp.working")));
 

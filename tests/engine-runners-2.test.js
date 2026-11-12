@@ -172,3 +172,12 @@ test("calling the same worker twice in one reply, or an unknown one, is an inval
   assert.equal(result.outcome, "failed");
   assert.ok(events.find((e) => e.type === "error").message.includes("supervisor.invalid"));
 });
+
+import { modelsUsed } from "../public/js/engine/run-record.js";
+
+test("the recorded model lists every model the design uses, once, in agent order", () => {
+  const design = { nodes: [{ id: "a", model: "fast" }, { id: "b", model: "balanced" }, { id: "c", model: "fast" }, { id: "d", model: "strong" }] };
+  assert.equal(modelsUsed(design), "claude-haiku-5-5, claude-sonnet-5-5, claude-opus-5-5");
+  assert.equal(modelsUsed({ nodes: [{ id: "a", model: "balanced" }] }), "claude-sonnet-5-5");
+  assert.equal(modelsUsed({ nodes: [] }), "claude-haiku-5-5");
+});

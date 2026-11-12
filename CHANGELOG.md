@@ -18,6 +18,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- The "Recorded with" line shows only the AI provider; the model of an agent is shown when you click the agent. The run record now stores every model the design uses. The duplicate "for this agent" time on the Steps tab is gone (the time is on the agent box).
+
 - Settings, Security: an exclamation mark in front of the line that says the key must be unlocked, a three-step explanation in colours, unlock on the same page, and Change passphrase and Forget saved key open small forms in place (Forget no longer uses a browser pop-up).
 
 - Settings, Data on this device is more compact: a line with the number of runs and their size, Back up and Restore as two cards, and Delete all runs set apart in a red-bordered row.
