@@ -168,11 +168,19 @@ export async function renderReplayTab(ctx, requestedId) {
   let activePane = "mine";
   let focusList = false;
   const runLinks = () => [...pane.querySelectorAll(".run-list .run-title")];
-  const focusFirstRun = () => {
-    const first = runLinks()[0];
-    first?.focus();
-    return Boolean(first);
+  // The keyboard lands on the run that is open in this list (or the first); its row flashes twice.
+  const focusEntryRun = () => {
+    const links = runLinks();
+    const target = links.find((link) => link.closest("li")?.getAttribute("aria-current") === "true") ?? links[0];
+    if (!target) return false;
+    target.focus();
+    const row = target.closest("li");
+    row?.classList.remove("kbd-flash");
+    void row?.offsetWidth;
+    row?.classList.add("kbd-flash");
+    return true;
   };
+  const focusFirstRun = focusEntryRun;
   pane.addEventListener("keydown", (event) => {
     const links = runLinks();
     const at = links.indexOf(doc.activeElement);
@@ -188,9 +196,11 @@ export async function renderReplayTab(ctx, requestedId) {
       focusList = true;
       redraw();
     } else if (event.key === "Tab" && !event.ctrlKey && !event.altKey && !event.metaKey && (at >= 0 || doc.activeElement?.getAttribute?.("role") === "tab")) {
-      // Tab and Shift+Tab leave the library for the player; Shift+Tab in the player comes back here.
+      // Tab and Shift+Tab switch between Your runs and Library; q goes to the player.
       event.preventDefault();
-      if (!focusActivePlayer()) host.focus();
+      lib.tab = activePane === "mine" ? "library" : "mine";
+      focusList = true;
+      redraw();
     } else if (event.key === "Escape" && pane.contains(doc.activeElement)) {
       event.preventDefault();
       if (!focusActivePlayer()) host.focus();
@@ -296,15 +306,7 @@ export async function renderReplayTab(ctx, requestedId) {
 
   // The keys b, i and o do what the three buttons of this page do.
   const pageActions = {
-    focusLibrary: () => {
-      if (!lib.open) return false;
-      const links = runLinks();
-      const current = links.find((link) => link.closest("li")?.getAttribute("aria-current") === "true");
-      const target = current ?? links[0];
-      if (!target) return false;
-      target.focus();
-      return true;
-    },
+    focusLibrary: () => (lib.open ? focusEntryRun() : false),
     toggleLibrary: () => doc.querySelector('[data-ui="library-toggle"]')?.click(),
     importFile: () => importButton.click(),
     loadLast: () => {

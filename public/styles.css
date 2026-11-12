@@ -699,6 +699,7 @@ kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem;
 /* The part of the player that has the keyboard focus. */
 .chips.zone-active { outline: 2px solid var(--accent-line); outline-offset: 4px; border-radius: var(--radius); }
 
-/* A run that the keyboard focus lands on in the library flashes twice. */
+/* The run the keyboard lands on when the library becomes active flashes twice; no frame around the text. */
 @keyframes run-flash { 0%, 100% { background: var(--accent-bg); } 50% { background: color-mix(in srgb, var(--accent-line) 45%, white); } }
-.library-pane .run-row:focus-within { animation: run-flash 0.5s ease-in-out 2; }
+.library-pane .run-row.kbd-flash { animation: run-flash 0.5s ease-in-out 2; }
+.library-pane .run-row a:focus, .library-pane .run-row a:focus-visible { outline: none; }

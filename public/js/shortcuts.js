@@ -58,8 +58,8 @@ export const SHORTCUT_GROUPS = [
   {
     title: "shortcuts.groupFocus",
     items: [
-      { label: "shortcuts.focusTab", combos: [["Tab"]] },
-      { label: "shortcuts.focusLibrary", combos: [["Shift+Tab"]] },
+      { label: "shortcuts.focusTab", combos: [["Tab"], ["Shift+Tab"]] },
+      { label: "shortcuts.focusLibrary", combos: [["q"]] },
       { label: "shortcuts.focusMove", combos: [["↑ ← ↓ →"], ["W A S D"]] },
       { label: "shortcuts.focusEnter", combos: [["Enter"]] },
     ],
@@ -157,6 +157,11 @@ export function createKeyHandler({ isEnabled, go, showHelp, goKeys = () => DEFAU
       return true;
     }
     if (key === "/") return focusSearch() === true;
+    // q swaps between the library and the player.
+    if (key === "q") {
+      const inLibrary = Boolean(event.target?.closest?.('[data-ui="library-pane"]'));
+      return inLibrary ? focusActivePlayer() : focusLibrary();
+    }
     const pageAction = { b: "toggleLibrary", i: "importFile", o: "loadLast" }[key];
     if (pageAction && pageActions?.[pageAction]) {
       pageActions[pageAction]();

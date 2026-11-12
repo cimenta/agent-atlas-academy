@@ -16,7 +16,7 @@ import { runForExport } from "../run-export.js";
 import { createReplayDiagram, ROUND_MARK } from "./diagram.js";
 import { outcomeNotice } from "../outcome-view.js";
 import { buildResultModel } from "../play-model.js";
-import { clearActivePlayer, focusLibrary, setActivePlayer } from "../shortcuts.js";
+import { clearActivePlayer, setActivePlayer } from "../shortcuts.js";
 import { pickNeighbour } from "./spatial.js";
 
 const STATUS_KEY = {
@@ -549,9 +549,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     if (event.key === "Tab") {
       const at = ZONES.indexOf(zone);
       used();
-      // Shift+Tab swaps between the player and the library (when the library is on screen).
-      if (event.shiftKey && focusLibrary()) return;
-      // Tab goes round the player and its tabs: player, Steps, Messages, Output and round again.
+      // Tab goes round the player and its tabs: player, Steps, Messages, Output and round again; Shift+Tab goes back.
       focusZone(ZONES[(at + (event.shiftKey ? -1 : 1) + ZONES.length) % ZONES.length]);
       return;
     }

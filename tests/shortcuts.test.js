@@ -184,3 +184,17 @@ test("the library joins the Tab loop when it is on screen", () => {
   assert.equal(focusActiveLastZone(), true);
   assert.deepEqual(calls, ["lib", "last"]);
 });
+
+test("q goes from the player to the library, and from the library back to the player", () => {
+  const { handle, api } = setup();
+  const calls = [];
+  const actions = { focusLibrary: () => (calls.push("library"), true) };
+  setPageActions(actions);
+  api.focusPlayer = () => calls.push("player");
+  assert.equal(handle(key("q")), true);
+  const inLibrary = { tagName: "A", closest: (sel) => (sel === '[data-ui="library-pane"]' ? {} : null) };
+  assert.equal(handle(key("q", { target: inLibrary })), true);
+  assert.deepEqual(calls, ["library", "player"]);
+  clearPageActions(actions);
+  assert.equal(handle(key("q")), false);
+});
