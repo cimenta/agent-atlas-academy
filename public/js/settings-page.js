@@ -4,6 +4,7 @@ import { LIMIT_MAX } from "./engine/catalog.js";
 import { VaultError } from "./storage/key-vault.js";
 import { exportBackup, parseBackup, applyBackup } from "./storage/backup.js";
 
+const PROVIDERS_SOON = ["Gemini", "OpenAI", "Mistral", "Llama"];
 const LIMIT_FIELDS = [
   ["maxSteps", "settings.limitSteps"],
   ["maxTokens", "settings.limitTokens"],
@@ -32,6 +33,9 @@ export function renderSettings(ctx) {
         ? t("settings.keyLocked")
         : t("settings.keyNone");
     keyTag.hidden = !(available || vault.hasStoredKey());
+    providerTag.hidden = keyTag.hidden;
+    lockedTag.hidden = !(vault.hasStoredKey() && !available);
+    securityNone.hidden = vault.hasStoredKey();
     unlockForm.hidden = available || !vault.hasStoredKey();
     forgetButton.hidden = !vault.hasStoredKey();
     changeForm.hidden = !vault.hasStoredKey();
@@ -232,22 +236,28 @@ export function renderSettings(ctx) {
   replaceButton.addEventListener("click", () => runImport("replace"));
   importChoice.append(h(doc, "p", {}, t("settings.importChoose")), mergeButton, replaceButton);
 
-  // The five sections, in the order they were written: key, limits, tooltips, player, data.
+  // Providers: Anthropic works; the others are greyed out until they are built.
+  const providerTag = h(doc, "span", { class: "tag-saved", "data-ui": "provider-saved-tag", hidden: true }, t("settings.keySavedTag"));
+  const providerTabs = h(
+    doc,
+    "div",
+    { class: "provider-tabs", role: "tablist", "data-ui": "provider-tabs" },
+    h(doc, "button", { type: "button", class: "tab", role: "tab", "aria-selected": "true", "data-ui": "provider-tab-anthropic" }, "Anthropic", providerTag),
+    ...PROVIDERS_SOON.map((name) => h(doc, "button", { type: "button", class: "tab", role: "tab", disabled: true, "aria-disabled": "true", "data-ui": `provider-tab-${name.toLowerCase()}` }, name, h(doc, "span", { class: "tag-soon" }, t("settings.providerSoon")))),
+  );
+  const providerPanel = h(doc, "div", { class: "provider-panel", "data-ui": "provider-panel-anthropic" }, status, field("set-key", t("settings.keyLabel"), keyInput), h(doc, "div", { class: "field checkbox" }, rememberBox, h(doc, "label", { for: "set-remember" }, t("settings.rememberLabel"))), passBlock, saveButton);
+  const securityNone = h(doc, "p", { class: "notice", "data-ui": "security-none" }, t("settings.securityNone"));
+  const lockedTag = h(doc, "span", { class: "tag-locked", "data-ui": "security-locked-tag", hidden: true }, t("settings.lockedTag"));
+  // The six sections, in the order they were written: keys, limits, tooltips, player, data, security.
   const written = [
     h(
       doc,
       "section",
       { class: "settings-section" },
-      h(doc, "h2", {}, t("settings.keyHeading")),
+      h(doc, "h2", {}, t("settings.tabKeys")),
       h(doc, "p", {}, t("settings.keyIntro")),
-      status,
-      field("set-key", t("settings.keyLabel"), keyInput),
-      h(doc, "div", { class: "field checkbox" }, rememberBox, h(doc, "label", { for: "set-remember" }, t("settings.rememberLabel"))),
-      passBlock,
-      saveButton,
-      unlockForm,
-      changeForm,
-      forgetButton,
+      providerTabs,
+      providerPanel,
     ),
     h(
       doc,
@@ -267,18 +277,20 @@ export function renderSettings(ctx) {
     ),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.playerHeading")), h(doc, "p", {}, t("settings.playerIntro")), field("set-player-layout", t("settings.playerLabel"), layoutSelect)),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.dataHeading")), h(doc, "p", {}, t("settings.dataIntro")), deleteButton, confirmBox, h(doc, "h3", {}, t("settings.backupHeading")), h(doc, "p", {}, t("settings.backupIntro")), h(doc, "div", { class: "field checkbox" }, includeKey, h(doc, "label", { for: "set-include-key" }, t("settings.includeKey"))), exportButton, field("set-import", t("settings.importLabel"), importFile), importProblems, importChoice),
+    h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.securityHeading")), h(doc, "p", {}, t("settings.securityIntro")), securityNone, unlockForm, changeForm, forgetButton),
   ];
-  const [keySection, limitsSection, tooltipsSection, playerSection, dataSection] = written;
+  const [keySection, limitsSection, tooltipsSection, playerSection, dataSection, securitySection] = written;
   // Tabs down the left (a row on a phone); one section is shown at a time.
   const keyTag = h(doc, "span", { class: "tag-saved", "data-ui": "key-saved-tag", hidden: true }, t("settings.keySavedTag"));
   const panels = [
-    ["key", "settings.keyHeading", keySection],
+    ["key", "settings.tabKeys", keySection],
     ["limits", "settings.limitsHeading", limitsSection],
     ["player", "settings.playerHeading", playerSection],
     ["tooltips", "settings.tooltipsHeading", tooltipsSection],
     ["data", "settings.dataHeading", dataSection],
+    ["security", "settings.securityHeading", securitySection],
   ];
-  const tabButtons = panels.map(([id, headingKey]) => h(doc, "button", { type: "button", class: "tab", role: "tab", "data-ui": `settings-tab-${id}`, "data-tab": id }, t(headingKey), ...(id === "key" ? [keyTag] : [])));
+  const tabButtons = panels.map(([id, headingKey]) => h(doc, "button", { type: "button", class: "tab", role: "tab", "data-ui": `settings-tab-${id}`, "data-tab": id }, t(headingKey), ...(id === "key" ? [keyTag] : id === "security" ? [lockedTag] : [])));
   const showTab = (id) => {
     panels.forEach(([panelId, , node]) => {
       node.hidden = panelId !== id;

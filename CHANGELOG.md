@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Settings: the first tab is API keys, with a sub-tab for each provider (Anthropic works, Gemini, OpenAI, Mistral and Llama are greyed out with a soon tag). Passphrase management (unlock, change, forget) moved to a Security tab at the end, which shows a locked tag when a saved key waits for its passphrase.
+
 - Settings uses tabs down the left (a row on a phone): API key, Limits, Player, Tooltips and Data. The API key tab shows a key saved tag when a key is available.
 
 - The import button moved to the far right of the Your runs and Library tabs; the extra heading above the list is gone.
