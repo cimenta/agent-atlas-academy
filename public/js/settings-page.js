@@ -2,6 +2,7 @@
 import { h } from "./dom.js";
 import { LIMIT_MAX } from "./engine/catalog.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
+import { SHORTCUT_GROUPS } from "./shortcuts.js";
 import { VaultError } from "./storage/key-vault.js";
 import { exportBackup, parseBackup, applyBackup } from "./storage/backup.js";
 
@@ -205,6 +206,34 @@ export function renderSettings(ctx) {
     say(t("settings.playerSaved"));
   });
 
+  // Keyboard shortcuts: an on/off box and the list of keys.
+  const shortcutsBox = h(doc, "input", { id: "set-shortcuts", type: "checkbox" });
+  shortcutsBox.checked = settings.get().shortcuts;
+  shortcutsBox.addEventListener("change", () => {
+    settings.setShortcuts(shortcutsBox.checked);
+    say(t(shortcutsBox.checked ? "shortcuts.on" : "shortcuts.off"));
+  });
+  const keyCap = (label) => h(doc, "kbd", {}, label);
+  const comboCell = (item) =>
+    h(
+      doc,
+      "span",
+      { class: "kbd-keys" },
+      ...item.combos.flatMap((combo, i) => [
+        ...(i > 0 ? [" / "] : []),
+        ...combo.flatMap((label, j) => [...(j > 0 && item.sequence ? [` ${t("shortcuts.then")} `] : []), keyCap(label)]),
+      ]),
+    );
+  const shortcutList = h(
+    doc,
+    "div",
+    { class: "kbd-list", "data-ui": "shortcut-list" },
+    ...SHORTCUT_GROUPS.flatMap((group) => [
+      h(doc, "h3", {}, t(group.title)),
+      h(doc, "div", { class: "kbd-grid" }, ...group.items.map((item) => h(doc, "div", { class: "kbd-row" }, h(doc, "span", {}, t(item.label)), comboCell(item)))),
+    ]),
+  );
+
   // Local data: how many runs and roughly how much space they take.
   const dataStat = h(doc, "p", { class: "data-stat", "data-ui": "data-stat" });
   const refreshStat = async () => {
@@ -348,6 +377,7 @@ export function renderSettings(ctx) {
       h(doc, "div", { class: "field checkbox" }, tipsBox, h(doc, "label", { for: "set-tooltips" }, t("settings.tooltipsLabel"))),
     ),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.playerHeading")), h(doc, "p", {}, t("settings.playerIntro")), field("set-player-layout", t("settings.playerLabel"), layoutSelect)),
+    h(doc, "section", { class: "settings-section", "data-ui": "shortcuts-section" }, h(doc, "h2", {}, t("shortcuts.heading")), h(doc, "p", {}, t("shortcuts.intro")), h(doc, "div", { class: "field checkbox" }, shortcutsBox, h(doc, "label", { for: "set-shortcuts" }, t("shortcuts.enable"))), shortcutList),
     h(
       doc,
       "section",
@@ -367,7 +397,7 @@ export function renderSettings(ctx) {
     ),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.securityHeading")), securityNone, secLead, secSteps, unlockForm, secActions),
   ];
-  const [keySection, limitsSection, tooltipsSection, playerSection, dataSection, securitySection] = written;
+  const [keySection, limitsSection, tooltipsSection, playerSection, shortcutsSection, dataSection, securitySection] = written;
   // Tabs down the left (a row on a phone); one section is shown at a time.
   const keyTag = h(doc, "span", { class: "tag-saved", "data-ui": "key-saved-tag", hidden: true }, t("settings.keySavedTag"));
   const panels = [
@@ -376,6 +406,7 @@ export function renderSettings(ctx) {
     ["player", "settings.playerHeading", playerSection],
     ["tooltips", "settings.tooltipsHeading", tooltipsSection],
     ["data", "settings.dataHeading", dataSection],
+    ["shortcuts", "shortcuts.heading", shortcutsSection],
     ["security", "settings.securityHeading", securitySection],
   ];
   const tabButtons = panels.map(([id, headingKey]) => h(doc, "button", { type: "button", class: "tab", role: "tab", "data-ui": `settings-tab-${id}`, "data-tab": id }, t(headingKey), ...(id === "key" ? [keyTag] : id === "security" ? [lockedTag] : [])));
@@ -386,7 +417,7 @@ export function renderSettings(ctx) {
     tabButtons.forEach((button) => button.setAttribute("aria-selected", String(button.getAttribute("data-tab") === id)));
   };
   tabButtons.forEach((button) => button.addEventListener("click", () => showTab(button.getAttribute("data-tab"))));
-  showTab("key");
+  showTab(ctx.tab === "shortcuts" ? "shortcuts" : "key");
   const tabList = h(doc, "div", { class: "settings-tabs", role: "tablist", "data-ui": "settings-tabs" }, ...tabButtons);
   ctx.main.replaceChildren(h(doc, "h1", {}, t("settings.title")), message, h(doc, "div", { class: "settings-layout", "data-ui": "settings-layout" }, tabList, h(doc, "div", { class: "settings-body" }, ...panels.map(([, , node]) => node))));
   refreshStatus();

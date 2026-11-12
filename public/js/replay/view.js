@@ -16,6 +16,7 @@ import { runForExport } from "../run-export.js";
 import { createReplayDiagram, ROUND_MARK } from "./diagram.js";
 import { outcomeNotice } from "../outcome-view.js";
 import { buildResultModel } from "../play-model.js";
+import { clearActivePlayer, setActivePlayer } from "../shortcuts.js";
 
 const STATUS_KEY = {
   waiting: "player.statusWaiting",
@@ -457,6 +458,29 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   if (sideLayout) speedGroup.addEventListener("click", () => player.setSpeed(player.speeds[(player.speeds.indexOf(player.speed) + 1) % player.speeds.length]));
   range.addEventListener("input", follow(() => player.seek(Number(range.value))));
 
+  // What the keyboard shortcuts can do with this player.
+  const keyApi = {
+    toggle: follow(() => {
+      if (player.live) return;
+      if (player.playing) player.pause();
+      else player.play();
+    }),
+    prev: follow(() => player.prev()),
+    next: follow(() => player.next()),
+    restart: follow(() => player.restart()),
+    end: follow(() => player.seek(events.length)),
+    slower: () => player.setSpeed(player.speeds[Math.max(0, player.speeds.indexOf(player.speed) - 1)]),
+    faster: () => player.setSpeed(player.speeds[Math.min(player.speeds.length - 1, player.speeds.indexOf(player.speed) + 1)]),
+    tab: (name) => {
+      ui.tab = name;
+      ui.follow = false;
+      render();
+    },
+    isLive: () => player.live,
+    stop: () => onStop?.(),
+  };
+  setActivePlayer(keyApi);
+
   const unsubscribe = player.subscribe(render);
   render();
   if (autoStart) player.play();
@@ -465,6 +489,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     player,
     openAbout: () => aboutPanel?.open(),
     destroy() {
+      clearActivePlayer(keyApi);
       player.pause();
       unsubscribe();
       container.replaceChildren();

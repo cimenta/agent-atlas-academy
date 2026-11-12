@@ -14,6 +14,7 @@ export function parseRoute(hash) {
   if (first === "play") return parsePlay(second, third);
 
   if (third !== undefined) return NOT_FOUND;
+  if (first === "settings" && second === "shortcuts") return { name: "settings", params: { tab: "shortcuts" } };
   if (second === undefined) {
     if (["help", "about", "learn", "settings"].includes(first)) return { name: first, params: {} };
     return NOT_FOUND;

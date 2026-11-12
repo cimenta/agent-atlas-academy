@@ -3,6 +3,7 @@ import { parseRoute } from "./router.js";
 import { loadVersion } from "./version.js";
 import { createVault } from "./storage/key-vault.js";
 import { markUnlockAlert } from "./unlock-alert.js";
+import { createKeyHandler } from "./shortcuts.js";
 import { createSettingsStore } from "./storage/settings.js";
 import { createIndexedDbBackend, createMemoryBackend, createRunStore } from "./storage/runs-store.js";
 import { renderSettings } from "./settings-page.js";
@@ -164,6 +165,7 @@ async function renderRoute(isNavigation) {
     vault,
     settings,
     runStore,
+    tab: route.params?.tab,
     autoStart: !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches),
     isStale: () => mine !== token,
     onLeave: (fn) => cleanups.push(fn),
@@ -230,6 +232,25 @@ menuToggle.addEventListener("click", () => {
   menuToggle.setAttribute("aria-expanded", String(open));
 });
 window.addEventListener("hashchange", () => renderRoute(true));
+
+// Keyboard shortcuts (they can be turned off in Settings).
+const handleKey = createKeyHandler({
+  isEnabled: () => settings.get().shortcuts,
+  go: (hash) => {
+    location.hash = hash;
+  },
+  focusSearch: () => {
+    const field = doc.querySelector('[data-ui="library-search"]');
+    if (!field) return false;
+    field.focus();
+    return true;
+  },
+  confirmStop: () => window.confirm(t("shortcuts.stopConfirm")),
+  hasPopup: () => Boolean(doc.querySelector(".center-tip")),
+});
+doc.addEventListener("keydown", (event) => {
+  if (handleKey(event)) event.preventDefault();
+});
 
 englishDict = await loadDictionary("en", fetchFn);
 translator = createTranslator(lang === "en" ? englishDict : await loadDictionary(lang, fetchFn), englishDict);

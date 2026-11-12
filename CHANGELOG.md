@@ -4,6 +4,10 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ## [Unreleased]
 
+### Added
+
+- Keyboard shortcuts: g then p, c, r, l, h, a, s or 0 goes to a page. Space plays or pauses, the arrows step (up restarts, down jumps to the end), Home and End do the same, [ and ] change the speed, 1 2 3 switch the inspector tabs, and Esc asks before stopping a live run. Slash searches the library and a question mark opens the new Shortcuts tab in Settings, where they can be turned off.
+
 ### Changed
 
 - Settings, Security: an exclamation mark in front of the line that says the key must be unlocked, a three-step explanation in colours, unlock on the same page, and Change passphrase and Forget saved key open small forms in place (Forget no longer uses a browser pop-up).

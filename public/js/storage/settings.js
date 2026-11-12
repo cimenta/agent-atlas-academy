@@ -14,7 +14,7 @@ export function createSettingsStore(storage) {
     }
     // Tooltips are on unless the user turned them off.
     // The player controls sit on one slim bar ("bar") unless the user chose the side column ("side").
-    return { limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, playerLayout: stored?.playerLayout === "side" ? "side" : "bar" };
+    return { limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, playerLayout: stored?.playerLayout === "side" ? "side" : "bar", shortcuts: stored?.shortcuts !== false };
   }
   function save(next) {
     try {
@@ -30,6 +30,9 @@ export function createSettingsStore(storage) {
     },
     setTooltips(on) {
       save({ ...get(), tooltips: on !== false });
+    },
+    setShortcuts(on) {
+      save({ ...get(), shortcuts: on !== false });
     },
     setPlayerLayout(layout) {
       save({ ...get(), playerLayout: layout === "side" ? "side" : "bar" });
