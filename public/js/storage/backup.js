@@ -74,6 +74,7 @@ export async function applyBackup(backup, { runStore, settingsStore, vault, mode
   }
   if (isObject(backup.settings?.limits)) settingsStore.setLimits(backup.settings.limits);
   if (typeof backup.settings?.tooltips === "boolean") settingsStore.setTooltips(backup.settings.tooltips);
+  if (backup.settings?.playerLayout === "bar" || backup.settings?.playerLayout === "side") settingsStore.setPlayerLayout(backup.settings.playerLayout);
   if (backup.vault && (mode === "replace" || !vault.hasStoredKey())) vault.importRecord(backup.vault);
   return { added, skipped, failed };
 }

@@ -211,7 +211,7 @@ export async function renderReplayTab(ctx, requestedId) {
             }
           : null;
       const onDelete = found.source === "local" ? () => removeRun({ id: currentId, title: found.run.title }) : null;
-      handle = mountReplay(host, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete });
+      handle = mountReplay(host, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout });
       if (openAboutFor === currentId) handle.openAbout?.();
       openAboutFor = null;
       handle.player?.seek(found.run.events.length);

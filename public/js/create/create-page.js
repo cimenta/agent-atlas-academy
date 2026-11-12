@@ -288,7 +288,7 @@ export function renderCreate(ctx) {
     // How the run ended is shown above the player, so it is the first thing seen when the run is over.
     const outcomeSlot = h(doc, "div", { class: "run-outcome-slot", "data-ui": "run-outcome-slot" });
     root.replaceChildren(outcomeSlot, host, after);
-    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: draft.pattern, recordedWith: { provider: "anthropic", model: firstModel.id }, t, doc, onStop: () => activeRun?.stop() });
+    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: draft.pattern, recordedWith: { provider: "anthropic", model: firstModel.id }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout });
     ctx.onLeave(live.destroy);
 
     let ended = false;

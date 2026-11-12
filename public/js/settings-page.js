@@ -136,6 +136,14 @@ export function renderSettings(ctx) {
     say(t(tipsBox.checked ? "settings.tooltipsOff" : "settings.tooltipsOn"));
   });
 
+  // Where the player buttons sit.
+  const layoutSelect = h(doc, "select", { id: "set-player-layout", "data-ui": "player-layout-select" }, h(doc, "option", { value: "side" }, t("settings.playerSide")), h(doc, "option", { value: "bar" }, t("settings.playerBar")));
+  layoutSelect.value = settings.get().playerLayout;
+  layoutSelect.addEventListener("change", () => {
+    settings.setPlayerLayout(layoutSelect.value);
+    say(t("settings.playerSaved"));
+  });
+
   // Local data.
   const deleteButton = h(doc, "button", { type: "button" }, t("settings.deleteRuns"));
   const confirmBox = h(doc, "div", { class: "confirm", hidden: true });
@@ -257,6 +265,7 @@ export function renderSettings(ctx) {
       h(doc, "p", {}, t("settings.tooltipsIntro")),
       h(doc, "div", { class: "field checkbox" }, tipsBox, h(doc, "label", { for: "set-tooltips" }, t("settings.tooltipsLabel"))),
     ),
+    h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.playerHeading")), h(doc, "p", {}, t("settings.playerIntro")), field("set-player-layout", t("settings.playerLabel"), layoutSelect)),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.dataHeading")), h(doc, "p", {}, t("settings.dataIntro")), deleteButton, confirmBox, h(doc, "h3", {}, t("settings.backupHeading")), h(doc, "p", {}, t("settings.backupIntro")), h(doc, "div", { class: "field checkbox" }, includeKey, h(doc, "label", { for: "set-include-key" }, t("settings.includeKey"))), exportButton, field("set-import", t("settings.importLabel"), importFile), importProblems, importChoice),
   );
   refreshStatus();

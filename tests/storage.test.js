@@ -163,3 +163,16 @@ test("settings: does not throw when storage throws", () => {
   assert.deepEqual(settings.get().limits, LIMIT_DEFAULTS);
   assert.doesNotThrow(() => settings.setLimits({ maxSteps: 3 }));
 });
+
+test("settings: the player layout is the side column by default and can be switched to the bar", () => {
+  const data = new Map();
+  const storage = { getItem: (k) => data.get(k) ?? null, setItem: (k, v) => data.set(k, v) };
+  const settings = createSettingsStore(storage);
+  assert.equal(settings.get().playerLayout, "side");
+  settings.setPlayerLayout("bar");
+  assert.equal(settings.get().playerLayout, "bar");
+  settings.setTooltips(false);
+  assert.equal(settings.get().playerLayout, "bar");
+  settings.setPlayerLayout("nonsense");
+  assert.equal(settings.get().playerLayout, "side");
+});

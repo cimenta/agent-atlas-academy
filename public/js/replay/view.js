@@ -25,6 +25,9 @@ const STATUS_KEY = {
 };
 const KIND_KEY = { model: "kind.model", tool: "kind.tool", handoff: "kind.handoff", title: "kind.title" };
 
+// Glyphs of the small player buttons (plain text, so no icon font is needed).
+const GLYPH = { play: "▶", pause: "❚❚", stop: "■", restart: "↺", previous: "‹", next: "›" };
+
 const defaultClock = {
   setTimeout: (fn, ms) => globalThis.setTimeout(fn, ms),
   clearTimeout: (id) => globalThis.clearTimeout(id),
@@ -55,15 +58,15 @@ export function headingOf(run) {
   return line.length > 120 ? `${line.slice(0, 117)}…` : line;
 }
 
-export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null }) {
+export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "side" }) {
   const validation = validateRun(run);
   if (!validation.ok) return mountError(container, doc, t, validation.errors);
-  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete });
+  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout });
 }
 
 // A player that shows a run while it is still arriving. Events are added with append(), end() closes it.
-export function mountLiveReplay(container, { title, pattern, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {} }) {
-  const view = mountView(container, { events: [], pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop });
+export function mountLiveReplay(container, { title, pattern, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {}, layout = "side" }) {
+  const view = mountView(container, { events: [], pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout });
   return {
     append: (event) => view.player.append(event),
     end: () => view.player.endLive(),
@@ -71,7 +74,7 @@ export function mountLiveReplay(container, { title, pattern, recordedWith, t, do
   };
 }
 
-function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null }) {
+function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "side" }) {
   const player = createPlayer({ events, clock, timeScale, live });
   const ui = { agent: null, tab: "steps", step: null, round: null, follow: true };
   const viewer = createViewer({ doc, t });
@@ -111,16 +114,20 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       })
     : null;
   const exportButton = runMenu ? runMenu.element : "";
-  const playButton = h(doc, "button", { type: "button", class: "primary", "data-ui": "play-button" });
+  // Small icon buttons; the full name is the tooltip and the accessible label.
+  const iconButton = (attrs, glyph, name) => h(doc, "button", { type: "button", title: name, "aria-label": name, ...attrs }, glyph);
+  const playButton = iconButton({ class: "ib primary", "data-ui": "play-button" }, GLYPH.play, t("player.play"));
   const liveBadge = h(doc, "span", { class: "live-badge", "data-ui": "live-badge" }, t("player.live"));
-  const stopButton = h(doc, "button", { type: "button", class: "danger", "data-ui": "stop-button" }, t("player.stop"));
-  const restartButton = h(doc, "button", { type: "button", "data-ui": "restart-button" }, t("player.restart"));
-  const previousButton = h(doc, "button", { type: "button", "data-ui": "previous-button" }, t("player.previous"));
-  const nextButton = h(doc, "button", { type: "button", "data-ui": "next-button" }, t("player.next"));
-  const speedButtons = player.speeds.map((speed) =>
-    h(doc, "button", { type: "button", "data-speed": speed }, t("player.speedOption", { speed })),
-  );
-  const speedGroup = h(doc, "div", { class: "speed", "data-ui": "speed-buttons", role: "group", "aria-label": t("player.speedLabel") }, ...speedButtons);
+  const stopButton = iconButton({ class: "ib danger", "data-ui": "stop-button" }, GLYPH.stop, t("player.stop"));
+  const restartButton = iconButton({ class: "ib", "data-ui": "restart-button" }, GLYPH.restart, t("player.restart"));
+  const previousButton = iconButton({ class: "ib", "data-ui": "previous-button" }, GLYPH.previous, t("player.previous"));
+  const nextButton = iconButton({ class: "ib", "data-ui": "next-button" }, GLYPH.next, t("player.next"));
+  const sideLayout = layout !== "bar";
+  // Side layout: one button that cycles through the speeds. Bar layout: a small button for every speed.
+  const speedButtons = sideLayout ? [] : player.speeds.map((speed) => h(doc, "button", { type: "button", "data-speed": speed }, t("player.speedOption", { speed })));
+  const speedGroup = sideLayout
+    ? iconButton({ class: "ib speed-cycle", "data-ui": "speed-cycle" }, "", t("player.speedLabel"))
+    : h(doc, "div", { class: "speed", "data-ui": "speed-buttons", role: "group", "aria-label": t("player.speedLabel") }, ...speedButtons);
   const range = h(doc, "input", { type: "range", "data-ui": "player-slider", min: 0, max: events.length, step: 1, value: 0, "aria-label": t("player.progress") });
   const status = h(doc, "div", { class: "status", "data-ui": "player-status", "aria-live": "polite" });
   const banners = h(doc, "div", { class: "banners", "data-ui": "run-banners" });
@@ -176,11 +183,12 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     ),
     aboutPanel ? aboutPanel.element : "",
     h(doc, "p", { class: "recorded" }, t("player.recordedWith", recordedWith)),
-    h(doc, "div", { class: "controls", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, speedGroup),
-    range,
-    status,
     banners,
-    chips,
+    // Side layout: the buttons form a narrow column to the right of the diagram, slider and status.
+    // Bar layout: one slim line under the diagram holds buttons, slider and speed.
+    ...(sideLayout
+      ? [h(doc, "div", { class: "player-row", "data-ui": "player-row" }, h(doc, "div", { class: "player-stage" }, chips, range, status), h(doc, "div", { class: "controls controls-col", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, speedGroup))]
+      : [chips, h(doc, "div", { class: "controls controls-bar", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, range, speedGroup), status]),
     tabRow,
     body,
   );
@@ -401,7 +409,11 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   function render() {
     state = deriveInspector(events, player.cursor);
     followPlayer();
-    playButton.textContent = player.playing ? t("player.pause") : t("player.play");
+    const playName = player.playing ? t("player.pause") : t("player.play");
+    playButton.textContent = player.playing ? GLYPH.pause : GLYPH.play;
+    playButton.setAttribute("title", playName);
+    playButton.setAttribute("aria-label", playName);
+    if (sideLayout) speedGroup.textContent = t("player.speedOption", { speed: player.speed });
     previousButton.disabled = player.cursor === 0;
     nextButton.disabled = player.cursor >= events.length;
     for (const button of speedButtons) button.setAttribute("aria-pressed", String(Number(button.getAttribute("data-speed")) === player.speed));
@@ -442,6 +454,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   previousButton.addEventListener("click", follow(() => player.prev()));
   nextButton.addEventListener("click", follow(() => player.next()));
   for (const button of speedButtons) button.addEventListener("click", () => player.setSpeed(Number(button.getAttribute("data-speed"))));
+  if (sideLayout) speedGroup.addEventListener("click", () => player.setSpeed(player.speeds[(player.speeds.indexOf(player.speed) + 1) % player.speeds.length]));
   range.addEventListener("input", follow(() => player.seek(Number(range.value))));
 
   const unsubscribe = player.subscribe(render);

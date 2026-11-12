@@ -75,7 +75,7 @@ export async function renderLanding(ctx) {
       taskBar.replaceChildren(h(doc, "span", { class: "lb" }, `${t("landing.task")}: `), task);
       taskBar.hidden = false;
     }
-    const handle = mountReplay(host, { run, explanations, t, doc, autoStart: ctx.autoStart, timeScale: first.timeScale });
+    const handle = mountReplay(host, { run, explanations, t, doc, autoStart: ctx.autoStart, timeScale: first.timeScale, layout: ctx.settings?.get().playerLayout });
     ctx.onLeave(handle.destroy);
     // The demo plays again by itself, a few seconds after it has finished.
     // Any click in the player (pause, restart, step, a box) means the visitor takes over: no more repeats.

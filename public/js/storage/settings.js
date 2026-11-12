@@ -13,7 +13,8 @@ export function createSettingsStore(storage) {
       stored = {};
     }
     // Tooltips are on unless the user turned them off.
-    return { limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false };
+    // The player controls sit in a column on the right ("side") unless the user chose a slim bar ("bar").
+    return { limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, playerLayout: stored?.playerLayout === "bar" ? "bar" : "side" };
   }
   function save(next) {
     try {
@@ -29,6 +30,9 @@ export function createSettingsStore(storage) {
     },
     setTooltips(on) {
       save({ ...get(), tooltips: on !== false });
+    },
+    setPlayerLayout(layout) {
+      save({ ...get(), playerLayout: layout === "bar" ? "bar" : "side" });
     },
   };
 }

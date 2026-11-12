@@ -603,3 +603,18 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 
 @keyframes round-flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
 .round-badge .round-no { display: inline-block; animation: round-flash 1s ease-in-out infinite; }
+
+/* Player controls: small icon buttons, in a column beside the diagram (side) or on one slim line (bar). */
+.ib { width: 30px; height: 30px; min-height: 0; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; line-height: 1; }
+.ib.speed-cycle { font-size: 0.75rem; }
+.player-row { display: flex; gap: 10px; align-items: flex-start; margin-top: 8px; }
+.player-stage { flex: 1; min-width: 0; }
+.controls-col { flex-direction: column; flex-wrap: nowrap; gap: 4px; margin: 0; }
+.controls-bar { flex-wrap: nowrap; gap: 6px; margin: 8px 0 0; }
+.controls-bar input[type="range"] { flex: 1; min-width: 0; }
+.controls-bar .speed { flex-wrap: nowrap; margin-left: 0; }
+.controls-bar .speed button { padding: 4px 8px; font-size: 0.75rem; }
+@media (max-width: 560px) {
+  .player-row { flex-direction: column-reverse; }
+  .controls-col { flex-direction: row; flex-wrap: wrap; }
+}
