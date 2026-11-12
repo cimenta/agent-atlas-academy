@@ -645,3 +645,13 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .menu a { position: relative; }
 .menu-alert { position: absolute; top: 2px; right: 2px; min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px; background: var(--err); color: #fff; font-size: 0.7rem; font-weight: 700; line-height: 14px; text-align: center; }
 .tag-alert { min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--err); color: #fff; font-size: 0.75rem; font-weight: 700; line-height: 16px; text-align: center; }
+
+/* Settings, Data: two cards (back up, restore) and a separate delete row. */
+.data-stat { color: var(--muted); font-size: 0.9rem; margin: 0 0 8px; }
+.data-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.data-card { display: flex; flex-direction: column; gap: 4px; padding: 4px 12px 12px; border: 1px solid var(--border); border-radius: var(--radius); }
+.data-card h3, .danger-row h3 { margin: 8px 0 2px; font-size: 1rem; }
+.data-card p, .danger-row p { margin: 0 0 6px; color: var(--muted); font-size: 0.9rem; }
+.data-card .field { margin: 4px 0; }
+.data-actions { display: flex; gap: 8px; margin-top: auto; flex-wrap: wrap; }
+.danger-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; padding: 0 12px 8px; border: 1px solid var(--err); border-radius: var(--radius); }

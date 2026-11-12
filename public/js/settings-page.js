@@ -5,6 +5,7 @@ import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
 import { VaultError } from "./storage/key-vault.js";
 import { exportBackup, parseBackup, applyBackup } from "./storage/backup.js";
 
+const formatSize = (bytes) => (bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1048576).toFixed(1)} MB`);
 const PROVIDERS_SOON = ["Gemini", "OpenAI", "Mistral", "Llama"];
 const LIMIT_FIELDS = [
   ["maxSteps", "settings.limitSteps"],
@@ -151,8 +152,20 @@ export function renderSettings(ctx) {
     say(t("settings.playerSaved"));
   });
 
-  // Local data.
-  const deleteButton = h(doc, "button", { type: "button" }, t("settings.deleteRuns"));
+  // Local data: how many runs and roughly how much space they take.
+  const dataStat = h(doc, "p", { class: "data-stat", "data-ui": "data-stat" });
+  const refreshStat = async () => {
+    try {
+      const items = await runStore.list();
+      let bytes = 0;
+      for (const item of items) bytes += JSON.stringify((await runStore.get(item.id)) ?? "").length;
+      dataStat.textContent = t("settings.dataStat", { n: items.length, size: formatSize(bytes) });
+    } catch {
+      dataStat.textContent = "";
+    }
+  };
+  refreshStat();
+  const deleteButton = h(doc, "button", { type: "button", class: "danger" }, t("settings.deleteRuns"));
   const confirmBox = h(doc, "div", { class: "confirm", hidden: true });
   const confirmYes = h(doc, "button", { type: "button", class: "danger" }, t("settings.deleteConfirmYes"));
   const confirmNo = h(doc, "button", { type: "button" }, t("settings.deleteConfirmNo"));
@@ -167,6 +180,7 @@ export function renderSettings(ctx) {
     try {
       await runStore.clear();
       say(t("settings.runsDeleted"));
+      refreshStat();
     } catch {
       say(t("settings.error.storage"), true);
     }
@@ -200,7 +214,9 @@ export function renderSettings(ctx) {
       say(t("settings.error.storage"), true);
     }
   });
-  const importFile = h(doc, "input", { id: "set-import", type: "file", accept: "application/json,.json" });
+  const importFile = h(doc, "input", { id: "set-import", type: "file", accept: "application/json,.json", hidden: true });
+  const chooseFileButton = h(doc, "button", { type: "button", "data-ui": "import-choose" }, t("settings.chooseFile"));
+  chooseFileButton.addEventListener("click", () => importFile.click());
   const importChoice = h(doc, "div", { class: "confirm", hidden: true });
   const importProblems = h(doc, "ul", { class: "reasons", hidden: true });
   let pending = null;
@@ -224,6 +240,7 @@ export function renderSettings(ctx) {
     try {
       const result = await applyBackup(pending, { runStore, settingsStore: settings, vault, mode });
       say(t("settings.imported", result));
+      refreshStat();
     } catch {
       say(t("settings.error.storage"), true);
     }
@@ -278,7 +295,23 @@ export function renderSettings(ctx) {
       h(doc, "div", { class: "field checkbox" }, tipsBox, h(doc, "label", { for: "set-tooltips" }, t("settings.tooltipsLabel"))),
     ),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.playerHeading")), h(doc, "p", {}, t("settings.playerIntro")), field("set-player-layout", t("settings.playerLabel"), layoutSelect)),
-    h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.dataHeading")), h(doc, "p", {}, t("settings.dataIntro")), deleteButton, confirmBox, h(doc, "h3", {}, t("settings.backupHeading")), h(doc, "p", {}, t("settings.backupIntro")), h(doc, "div", { class: "field checkbox" }, includeKey, h(doc, "label", { for: "set-include-key" }, t("settings.includeKey"))), exportButton, field("set-import", t("settings.importLabel"), importFile), importProblems, importChoice),
+    h(
+      doc,
+      "section",
+      { class: "settings-section" },
+      h(doc, "h2", {}, t("settings.dataHeading")),
+      h(doc, "p", {}, t("settings.dataIntro")),
+      dataStat,
+      h(
+        doc,
+        "div",
+        { class: "data-cards", "data-ui": "data-cards" },
+        h(doc, "div", { class: "data-card", "data-ui": "data-backup" }, h(doc, "h3", {}, t("settings.backupTitle")), h(doc, "p", {}, t("settings.backupText")), h(doc, "div", { class: "field checkbox" }, includeKey, h(doc, "label", { for: "set-include-key" }, t("settings.includeKey"))), h(doc, "div", { class: "data-actions" }, exportButton)),
+        h(doc, "div", { class: "data-card", "data-ui": "data-restore" }, h(doc, "h3", {}, t("settings.restoreTitle")), h(doc, "p", {}, t("settings.restoreText")), importProblems, importChoice, h(doc, "div", { class: "data-actions" }, chooseFileButton, importFile)),
+      ),
+      h(doc, "div", { class: "danger-row", "data-ui": "data-danger" }, h(doc, "div", {}, h(doc, "h3", {}, t("settings.deleteRuns")), h(doc, "p", {}, t("settings.deleteText"))), deleteButton),
+      confirmBox,
+    ),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.securityHeading")), h(doc, "p", {}, t("settings.securityIntro")), securityNone, unlockForm, changeForm, forgetButton),
   ];
   const [keySection, limitsSection, tooltipsSection, playerSection, dataSection, securitySection] = written;
