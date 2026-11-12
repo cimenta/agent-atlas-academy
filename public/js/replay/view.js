@@ -491,6 +491,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     if (!target || !target.tagName || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return null;
     if (chips.contains(target)) return "player";
     if (body.contains(target) || body === target || tabRow.contains(target)) return ui.tab;
+    // Anywhere else in the player (the buttons, the slider, the heading) the player keys are active too.
+    if (root.contains(target)) return "player";
     return null;
   };
   function focusZone(zone) {
@@ -508,7 +510,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     const boxes = [...chips.querySelectorAll("button")];
     const at = boxes.indexOf(doc.activeElement);
     if (boxes.length === 0) return;
-    if (at < 0) return boxes[0].focus();
+    if (at < 0) return (chips.querySelector('[aria-pressed="true"]') ?? boxes[0]).focus();
     const centers = boxes.map((b) => {
       const r = b.getBoundingClientRect();
       return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
@@ -575,7 +577,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   keyApi.focusLast = () => focusZone("output");
   // The zone that has the keyboard focus gets a ring, so it is clear which part the keys act on.
   const markZones = (el) => {
-    chips.classList.toggle("zone-active", Boolean(el && chips.contains(el)));
+    const inInspector = Boolean(el && (body.contains(el) || body === el || tabRow.contains(el)));
+    chips.classList.toggle("zone-active", Boolean(el && root.contains(el) && !inInspector));
   };
   root.addEventListener("focusin", (event) => markZones(event.target));
   root.addEventListener("focusout", (event) => markZones(event.relatedTarget));

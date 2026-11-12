@@ -169,18 +169,20 @@ export async function renderReplayTab(ctx, requestedId) {
   let focusList = false;
   const runLinks = () => [...pane.querySelectorAll(".run-list .run-title")];
   // The keyboard lands on the run that is open in this list (or the first); its row flashes twice.
-  const focusEntryRun = () => {
+  const focusEntryRun = (flash = true) => {
     const links = runLinks();
     const target = links.find((link) => link.closest("li")?.getAttribute("aria-current") === "true") ?? links[0];
     if (!target) return false;
     target.focus();
     const row = target.closest("li");
     row?.classList.remove("kbd-flash");
-    void row?.offsetWidth;
-    row?.classList.add("kbd-flash");
+    if (flash) {
+      void row?.offsetWidth;
+      row?.classList.add("kbd-flash");
+    }
     return true;
   };
-  const focusFirstRun = focusEntryRun;
+  const focusFirstRun = () => focusEntryRun(true);
   pane.addEventListener("keydown", (event) => {
     const links = runLinks();
     const at = links.indexOf(doc.activeElement);
@@ -382,7 +384,8 @@ export async function renderReplayTab(ctx, requestedId) {
     // After Tab switched the list, the focus goes to its first run (or to the tab when it is empty).
     if (focusList) {
       focusList = false;
-      if (!focusFirstRun()) pane.querySelector('[role="tab"][aria-selected="true"]')?.focus();
+      // Switching lists with Tab moves the focus without the flash.
+      if (!focusEntryRun(false)) pane.querySelector('[role="tab"][aria-selected="true"]')?.focus();
     }
   };
   redraw = draw;
