@@ -469,8 +469,6 @@ body[data-show-ui] [data-ui]::after { content: attr(data-ui); position: absolute
 .run-menu-item.danger { color: var(--err); }
 .run-menu-empty { margin: 4px 8px; }
 .library-pane .run-row[aria-current="true"] { border-left: 3px solid var(--accent-line); }
-.pane-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.pane-head h2 { margin: 12px 0 8px; font-size: 1rem; }
 .icon-button { min-width: 36px; min-height: 36px; padding: 0 10px; }
 .pane-toggle[aria-pressed="true"] { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-line); }
 .type-chip { display: inline-block; padding: 1px 10px; font-size: 0.75rem; font-weight: 600; border-radius: 999px; background: var(--surface); color: var(--text); white-space: nowrap; }
@@ -618,3 +616,5 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
   .player-row { flex-direction: column-reverse; }
   .controls-col { flex-direction: row; flex-wrap: wrap; }
 }
+
+.tabs .icon-button { margin-left: auto; flex: none; align-self: center; }

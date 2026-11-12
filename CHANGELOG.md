@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- The import button moved to the far right of the Your runs and Library tabs; the extra heading above the list is gone.
+
 - The list beside the player has two tabs, Your runs and Library, instead of one long list. The last tab you used is kept.
 
 - Player controls are small icon buttons on one slim bar under the diagram. Settings has a choice of a column on the right of the diagram instead, where one button cycles the speed.

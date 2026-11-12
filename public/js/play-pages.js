@@ -306,13 +306,12 @@ export async function renderReplayTab(ctx, requestedId) {
       });
       return button;
     };
-    const paneTabs = h(doc, "div", { class: "tabs", role: "tablist", "data-ui": "pane-tabs" }, tabButton("mine", "play.mine", built.mine.length), tabButton("library", "play.library", built.gallery.length));
+    const paneTabs = h(doc, "div", { class: "tabs", role: "tablist", "data-ui": "pane-tabs" }, tabButton("mine", "play.mine", built.mine.length), tabButton("library", "play.library", built.gallery.length), importButton, fileInput);
     pane.replaceChildren(
       paneTabs,
+      importNote,
       ...(active === "mine"
         ? [
-            h(doc, "div", { class: "pane-head" }, h(doc, "h2", {}, t("play.mine")), importButton, fileInput),
-            importNote,
             mine.length === 0 ? none(lib.query && built.mine.length > 0 ? "play.noMatches" : "play.empty") : h(doc, "ul", { class: "run-list", "data-ui": "run-list-mine" }, ...mine.map((item) => row(item))),
           ]
         : [shown.length === 0 ? none("play.noMatches") : h(doc, "ul", { class: "run-list", "data-ui": "run-list-library" }, ...shown.map((item) => row(item)))]),
