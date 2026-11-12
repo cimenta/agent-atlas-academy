@@ -78,13 +78,20 @@ export async function renderLanding(ctx) {
     const handle = mountReplay(host, { run, explanations, t, doc, autoStart: ctx.autoStart, timeScale: first.timeScale });
     ctx.onLeave(handle.destroy);
     // The demo plays again by itself, a few seconds after it has finished.
+    // Any click in the player (pause, restart, step, a box) means the visitor takes over: no more repeats.
     if (ctx.autoStart && handle.player) {
       let timer;
+      let stopped = false;
+      host.addEventListener?.("click", () => {
+        stopped = true;
+        clearTimeout(timer);
+        timer = undefined;
+      });
       const unsubscribe = handle.player.subscribe(() => {
-        if (!handle.player.finished || timer) return;
+        if (stopped || !handle.player.finished || timer) return;
         timer = setTimeout(() => {
           timer = undefined;
-          if (handle.player.finished) handle.player.play();
+          if (!stopped && handle.player.finished) handle.player.play();
         }, LOOP_WAIT_MS);
       });
       ctx.onLeave(() => {

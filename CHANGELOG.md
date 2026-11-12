@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- The home page demo stops repeating by itself as soon as the visitor clicks in the player (pause, restart, step, a box).
+
 - In the Replay diagram of a debate the number of the current round flashes in the Round n of N badge.
 
 
