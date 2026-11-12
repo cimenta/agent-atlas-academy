@@ -12,7 +12,7 @@ import { openInCreate } from "./create/draft.js";
 import { downloadFile, safeFileName } from "./download.js";
 import { runForExport } from "./run-export.js";
 import { refreshResultTab } from "./tab-state.js";
-import { clearPageActions, focusActivePlayer, setPageActions } from "./shortcuts.js";
+import { clearPageActions, focusActiveLastZone, focusActivePlayer, setPageActions } from "./shortcuts.js";
 
 const TABS = [
   { view: "replay", href: "#/play", key: "play.tab.replay" },
@@ -181,11 +181,20 @@ export async function renderReplayTab(ctx, requestedId) {
       event.preventDefault();
       const next = at < 0 ? 0 : Math.min(links.length - 1, Math.max(0, at + (event.key === "ArrowDown" ? 1 : -1)));
       links[next].focus();
-    } else if (event.key === "Tab" && !event.ctrlKey && !event.altKey && !event.metaKey && (at >= 0 || doc.activeElement?.getAttribute?.("role") === "tab")) {
+    } else if ((event.key === "ArrowLeft" || event.key === "ArrowRight") && (at >= 0 || doc.activeElement?.getAttribute?.("role") === "tab")) {
+      // The left and right arrows switch between Your runs and Library.
       event.preventDefault();
       lib.tab = activePane === "mine" ? "library" : "mine";
       focusList = true;
       redraw();
+    } else if (event.key === "Tab" && !event.ctrlKey && !event.altKey && !event.metaKey && (at >= 0 || doc.activeElement?.getAttribute?.("role") === "tab")) {
+      // Tab leaves the library for the player (Shift+Tab for the last part of the player), as one loop.
+      event.preventDefault();
+      if (event.shiftKey) {
+        if (!focusActiveLastZone()) host.focus();
+      } else if (!focusActivePlayer()) {
+        host.focus();
+      }
     } else if (event.key === "Escape" && pane.contains(doc.activeElement)) {
       event.preventDefault();
       if (!focusActivePlayer()) host.focus();
@@ -291,6 +300,15 @@ export async function renderReplayTab(ctx, requestedId) {
 
   // The keys b, i and o do what the three buttons of this page do.
   const pageActions = {
+    focusLibrary: () => {
+      if (!lib.open) return false;
+      const links = runLinks();
+      const current = links.find((link) => link.closest("li")?.getAttribute("aria-current") === "true");
+      const target = current ?? links[0];
+      if (!target) return false;
+      target.focus();
+      return true;
+    },
     toggleLibrary: () => doc.querySelector('[data-ui="library-toggle"]')?.click(),
     importFile: () => importButton.click(),
     loadLast: () => {

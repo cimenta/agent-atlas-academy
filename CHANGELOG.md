@@ -6,7 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
-- Keyboard in the player: Tab goes round player, Steps, Messages and Output (Shift+Tab goes the other way, Esc lets go), and the part that has the keys gets a ring. On the Play page b shows or hides the library, i imports a JSON file and o loads the run you opened last. In the player the arrows or W A S D move between the agents and Enter inspects the one with the focus; in Steps and Messages the same keys move between steps and rounds. With nothing focused, Tab starts in the player.
+- Keyboard in the player: Tab goes round in a loop: library, player, Steps, Messages and Output (Shift+Tab goes the other way, Esc lets go), and the diagram gets a ring while it has the keys. In the library the left and right arrows switch between Your runs and Library. On the Play page b shows or hides the library, i imports a JSON file and o loads the run you opened last. In the player the arrows or W A S D move between the agents and Enter inspects the one with the focus; in Steps and Messages the same keys move between steps and rounds. With nothing focused, Tab starts in the player.
 
 - A run you open from the library now waits at the start instead of showing its end; press Play, or use the arrows or End, to move on.
 - In the library the arrow keys move between runs (also from the search box), Enter opens the focused run, Tab switches between Your runs and Library, and Esc goes back to the player.

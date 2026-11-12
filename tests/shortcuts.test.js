@@ -168,3 +168,19 @@ test("b, i and o use the actions of the Play page, and do nothing elsewhere", ()
   clearPageActions(actions);
   assert.equal(handle(key("b")), false);
 });
+
+import { focusActiveLastZone, focusLibrary } from "../public/js/shortcuts.js";
+
+test("the library joins the Tab loop when it is on screen", () => {
+  assert.equal(focusLibrary(), false);
+  const calls = [];
+  const actions = { focusLibrary: () => (calls.push("lib"), true) };
+  setPageActions(actions);
+  assert.equal(focusLibrary(), true);
+  clearPageActions(actions);
+  const { api } = setup();
+  assert.equal(focusActiveLastZone(), false);
+  api.focusLast = () => calls.push("last");
+  assert.equal(focusActiveLastZone(), true);
+  assert.deepEqual(calls, ["lib", "last"]);
+});

@@ -697,5 +697,4 @@ kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem;
 .inspect-body:focus { outline: none; }
 
 /* The part of the player that has the keyboard focus. */
-.chips.zone-active, .inspect-body.zone-active { outline: 2px solid var(--accent-line); outline-offset: 4px; border-radius: var(--radius); }
-.tab-row.zone-active { border-bottom-color: var(--accent-line); }
+.chips.zone-active { outline: 2px solid var(--accent-line); outline-offset: 4px; border-radius: var(--radius); }

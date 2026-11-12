@@ -71,7 +71,7 @@ export const SHORTCUT_GROUPS = [
       { label: "shortcuts.libLast", combos: [["o"]] },
       { label: "shortcuts.libMove", combos: [["↑"], ["↓"]] },
       { label: "shortcuts.libOpen", combos: [["Enter"]] },
-      { label: "shortcuts.libSwitch", combos: [["Tab"]] },
+      { label: "shortcuts.libSwitch", combos: [["←"], ["→"]] },
       { label: "shortcuts.libLeave", combos: [["Esc"]] },
     ],
   },
@@ -100,8 +100,18 @@ let pageActions = null;
 export function setPageActions(api) {
   pageActions = api;
 }
+// Puts the focus in the library list of the Play page; false when there is none (or it is hidden).
+export function focusLibrary() {
+  return pageActions?.focusLibrary ? pageActions.focusLibrary() === true : false;
+}
 export function clearPageActions(api) {
   if (pageActions === api) pageActions = null;
+}
+// Puts the focus on the last part of the player (the Output tab).
+export function focusActiveLastZone() {
+  if (!active?.focusLast) return false;
+  active.focusLast();
+  return true;
 }
 export function clearActivePlayer(api) {
   if (active === api) active = null;

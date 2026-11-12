@@ -16,7 +16,7 @@ import { runForExport } from "../run-export.js";
 import { createReplayDiagram, ROUND_MARK } from "./diagram.js";
 import { outcomeNotice } from "../outcome-view.js";
 import { buildResultModel } from "../play-model.js";
-import { clearActivePlayer, setActivePlayer } from "../shortcuts.js";
+import { clearActivePlayer, focusLibrary, setActivePlayer } from "../shortcuts.js";
 import { pickNeighbour } from "./spatial.js";
 
 const STATUS_KEY = {
@@ -549,7 +549,13 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     if (event.key === "Tab") {
       const at = ZONES.indexOf(zone);
       used();
-      focusZone(ZONES[(at + (event.shiftKey ? -1 : 1) + ZONES.length) % ZONES.length]);
+      // The loop is library, player, Steps, Messages, Output and round again (the library only when it is on screen).
+      const next = at + (event.shiftKey ? -1 : 1);
+      if (next < 0 || next >= ZONES.length) {
+        if (!focusLibrary()) focusZone(ZONES[(next + ZONES.length) % ZONES.length]);
+      } else {
+        focusZone(ZONES[next]);
+      }
       return;
     }
     // Escape lets go of the zones (during a live run it is the stop shortcut instead).
@@ -571,12 +577,10 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     }
   });
   keyApi.focusPlayer = () => focusZone("player");
+  keyApi.focusLast = () => focusZone("output");
   // The zone that has the keyboard focus gets a ring, so it is clear which part the keys act on.
   const markZones = (el) => {
     chips.classList.toggle("zone-active", Boolean(el && chips.contains(el)));
-    const inInspector = Boolean(el && (body.contains(el) || body === el || tabRow.contains(el)));
-    body.classList.toggle("zone-active", inInspector);
-    tabRow.classList.toggle("zone-active", inInspector);
   };
   root.addEventListener("focusin", (event) => markZones(event.target));
   root.addEventListener("focusout", (event) => markZones(event.relatedTarget));
