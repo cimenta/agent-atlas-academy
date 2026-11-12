@@ -17,11 +17,9 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 - Keyboard shortcuts: g then p, c, r, l, h, a, s or 0 goes to a page. Space plays or pauses, the arrows step (up restarts, down jumps to the end), Home and End do the same, [ and ] change the speed, 1 2 3 switch the inspector tabs, and Esc asks before stopping a live run. Slash searches the library and a question mark opens a small popup with the list. The Shortcuts tab in Settings turns them off and lets you change the letter after g.
 
 ### Changed
-
+- The model name in the Steps header sits whole on its own line.
 - The "Recorded with" line shows only the AI provider; the model of an agent is shown when you click the agent. The run record now stores every model the design uses. The duplicate "for this agent" time on the Steps tab is gone (the time is on the agent box).
-
-- Settings, Security: an exclamation mark in front of the line that says the key must be unlocked, a three-step explanation in colours, unlock on the same page, and Change passphrase and Forget saved key open small forms in place (Forget no longer uses a browser pop-up).
-
+- Settings, Security: an exclamation mark in front of the line that says the key needs to be unlocked, three coloured steps that explain why, and inline unlock, change passphrase and forget forms.
 - Settings, Data on this device is more compact: a line with the number of runs and their size, Back up and Restore as two cards, and Delete all runs set apart in a red-bordered row.
 
 - When a saved API key is locked, the Settings cog in the menu and the Security tab show a red exclamation mark, and the cog explains where to go. The marks go away after the key is unlocked.

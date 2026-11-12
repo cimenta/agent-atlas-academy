@@ -707,3 +707,6 @@ kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem;
 /* The word Replay blinks blue while the run is playing. */
 @keyframes replay-blink { 0%, 100% { color: inherit; } 50% { color: var(--accent-line); } }
 .replay.is-playing .replay-word { animation: replay-blink 1s ease-in-out infinite; }
+
+/* The model name of the agent sits whole on its own line under the title. */
+.agenthead .agent-model { display: block; width: fit-content; margin-top: 4px; white-space: nowrap; }

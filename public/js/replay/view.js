@@ -309,7 +309,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       });
       return button;
     });
-    const head = h(doc, "p", { class: "agenthead" }, `${t("insp.stepsOf")} `, h(doc, "b", {}, agent.label), agent.model ? h(doc, "span", { class: "badge" }, agent.model) : "");
+    const head = h(doc, "p", { class: "agenthead" }, `${t("insp.stepsOf")} `, h(doc, "b", {}, agent.label), agent.model ? h(doc, "span", { class: "badge agent-model" }, agent.model) : "");
     const left = h(doc, "div", { "data-ui": "step-list" }, head, ...list);
     if (agent.status === "working") left.append(h(doc, "div", { class: "working" }, t("insp.working")));
 
