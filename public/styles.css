@@ -799,3 +799,10 @@ kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem;
 .article-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border); }
 .article-nav a { text-decoration: none; font-weight: 600; }
 .article-nav a:hover { text-decoration: underline; }
+
+/* Help: the title with the search on the right, then the same topic list and content as Learn. */
+.help-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-bottom: 14px; }
+.help-head h1 { margin: 0; }
+.help-head .learn-search { width: 100%; max-width: 280px; margin: 0; }
+.help-topic h2 { margin-top: 0; font-size: 1.15rem; }
+.help-topic + .help-topic { margin-top: 20px; }

@@ -25,6 +25,7 @@ import {
   renderTextPage,
   setTitle,
 } from "./pages.js";
+import { renderHelp } from "./help-page.js";
 
 const doc = document;
 const fetchFn = (url) => fetch(url);
@@ -190,7 +191,7 @@ async function renderRoute(isNavigation) {
         await renderArticle(ctx, route.params.slug);
         break;
       case "help":
-        renderTextPage(ctx, "help.title", "help.body");
+        renderHelp(ctx);
         break;
       case "about":
         renderTextPage(ctx, "about.title", "about.body");
