@@ -19,6 +19,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 ### Changed
 
 
+- The exclamation marks that say a saved key needs unlocking (Settings menu item, Security tab and text) are yellow, like the dot of a locked key.
 - Create: the provider is chosen with a tile for each provider instead of a dropdown. A dot says what the key is doing: green when it is loaded and can be used, yellow when it is saved but locked, none when there is no key. Settings uses the same dots on the provider tabs and the API keys tab, and the text key saved is gone.
 - Enter works in the API key and passphrase boxes: it saves the key, unlocks a saved key or confirms a passphrase change.
 - The tooltip in the middle of the screen has a coloured bar at the top that says Drag to move; drag it aside to read what is behind it.

@@ -855,3 +855,5 @@ a.art-pill:hover { text-decoration: underline; }
 .pv-lg { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
 .pv-lg.green { background: #2e9d4f; }
 .pv-lg.yellow { background: #ef9f27; }
+/* The exclamation marks that say a key needs unlocking are yellow, like the yellow key dot. */
+.menu-alert, .tag-alert, .bang.no { background: #ef9f27; color: #412402; }
