@@ -17,6 +17,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 - Keyboard shortcuts: g then p, c, r, l, h, a, s or 0 goes to a page. Space plays or pauses, the arrows step (up restarts, down jumps to the end), Home and End do the same, [ and ] change the speed, 1 2 3 switch the inspector tabs, and Esc asks before stopping a live run. Slash searches the library and a question mark opens a small popup with the list. The Shortcuts tab in Settings turns them off and lets you change the letter after g.
 
 ### Changed
+- Home page: the About section is more compact. The Watch, Compare and Try boxes have a soft colour of the site and an icon in the top right corner, the texts take at most two lines, and Compare now names debate too.
 - Phones: the home page has a small decorative replay above the headline: three agents wake up one after the other, a cog spins on the one that works.
 - Phones: the language switcher and a hamburger button share the title line (hamburger on the right), the player has the slider on top with one row of equal buttons and a single speed button that cycles 0.25x, 0.5x, 1x, 2x, and the model name sits next to the agent name. Recorded with is next to the type chip and the provider has a capital letter (Anthropic).
 - The model name in the Steps header sits whole on its own line.

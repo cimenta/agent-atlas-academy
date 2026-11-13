@@ -60,7 +60,9 @@ export async function renderLanding(ctx) {
       doc,
       "div",
       { class: "about-cols", "data-ui": "home-about-boxes" },
-      ...["watch", "compare", "try"].map((key) => h(doc, "div", { class: "about-box" }, h(doc, "b", {}, t(`landing.${key}.title`)), t(`landing.${key}.text`))),
+      ...[["watch", "▶"], ["compare", "⇄"], ["try", "⚗"]].map(([key, icon]) =>
+        h(doc, "div", { class: `about-box about-${key}` }, h(doc, "span", { class: "about-icon", "aria-hidden": "true" }, icon), h(doc, "b", {}, t(`landing.${key}.title`)), h(doc, "span", { class: "about-text" }, t(`landing.${key}.text`))),
+      ),
     ),
   );
   // On a phone a small decorative replay sits above the headline (hidden on wide screens).

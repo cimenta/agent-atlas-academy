@@ -507,9 +507,7 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .about { margin: 8px 0 20px; }
 .about h2 { margin: 0 0 6px; font-size: 1.25rem; }
 .about p { max-width: 46rem; }
-.about-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-top: 12px; }
-.about-box { padding: 12px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
-.about-box b { display: block; margin-bottom: 4px; }
+.about-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 10px; }
 .home-task { margin: 0 0 8px; padding: 8px 12px; background: var(--surface); border-radius: 8px; font-size: 0.95rem; }
 .home-task .lb { font-weight: 600; }
 .player-title { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-width: 0; }
@@ -753,3 +751,12 @@ kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem;
   .mini-fill { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.5s; }
 }
 @keyframes mini-spin { to { transform: rotate(360deg); } }
+
+/* The three boxes on the home page: a soft colour of the site each, and an icon in the top right corner. */
+.about-box { position: relative; padding: 12px 16px 14px; border-radius: 12px; line-height: 1.45; }
+.about-box b { display: block; margin-bottom: 3px; padding-right: 36px; font-size: 1.05rem; }
+.about-box .about-text { display: block; color: var(--text); }
+.about-icon { position: absolute; top: 10px; right: 14px; font-size: 1.5rem; line-height: 1; }
+.about-watch { background: var(--accent-bg); color: var(--accent); }
+.about-compare { background: var(--done-bg); color: var(--done); }
+.about-try { background: var(--working-bg); color: var(--working); }
