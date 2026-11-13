@@ -761,3 +761,26 @@ kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem;
 .about-compare { background: var(--done-bg); color: var(--done); }
 .about-try { background: var(--working-bg); color: var(--working); }
 .lead.lead-wide { max-width: none; }
+
+/* Learn: the search on top, the sections on the left (chips on a phone), compact rows on the right. */
+.learn-search { width: 100%; box-sizing: border-box; margin: 4px 0 14px; padding: 8px 12px; font-size: 1rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); }
+.learn-search:focus { outline: 2px solid var(--accent-line); outline-offset: 1px; }
+.learn-cols { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 20px; align-items: start; }
+.learn-side { position: sticky; top: 8px; display: flex; flex-direction: column; gap: 2px; }
+.learn-section { display: flex; justify-content: space-between; gap: 8px; width: 100%; min-height: 0; padding: 6px 10px; text-align: left; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 0.9rem; }
+.learn-section:hover { background: var(--surface); color: var(--text); }
+.learn-section.on { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+.learn-section .count { font-size: 0.8rem; opacity: 0.8; }
+.learn-list { list-style: none; margin: 0; padding: 0; }
+.learn-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.learn-row a { font-weight: 600; text-decoration: none; }
+.learn-row a:hover { text-decoration: underline; }
+.learn-row .summary { flex: 1 1 260px; color: var(--muted); font-size: 0.9rem; }
+.learn-row .snippet { flex: 1 1 100%; color: var(--muted); font-size: 0.85rem; font-style: italic; }
+.learn-note { margin: 0 0 4px; color: var(--muted); font-size: 0.9rem; }
+@media (max-width: 719px) {
+  .learn-cols { grid-template-columns: 1fr; gap: 10px; }
+  .learn-side { position: static; flex-direction: row; flex-wrap: wrap; gap: 6px; }
+  .learn-section { width: auto; border-radius: 999px; background: var(--surface); padding: 4px 12px; }
+  .learn-section .count { display: none; }
+}

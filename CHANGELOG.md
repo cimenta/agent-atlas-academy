@@ -17,6 +17,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 - Keyboard shortcuts: g then p, c, r, l, h, a, s or 0 goes to a page. Space plays or pauses, the arrows step (up restarts, down jumps to the end), Home and End do the same, [ and ] change the speed, 1 2 3 switch the inspector tabs, and Esc asks before stopping a live run. Slash searches the library and a question mark opens a small popup with the list. The Shortcuts tab in Settings turns them off and lets you change the letter after g.
 
 ### Changed
+- Learn: a search box on top that looks inside every article and shows a short snippet, the sections on the left with article counts (chips on a phone), and compact rows instead of long lists.
 - Home page: the "What is Agent Atlas?" heading and text are gone, and the intro under the title now says you can watch a recorded run or create your own runs.
 - Home page: the About section is more compact. The Watch, Compare and Try boxes have a soft colour of the site and an icon in the top right corner, the texts take at most two lines, and Compare now names debate too.
 - Phones: the home page has a small decorative replay above the headline: three agents wake up one after the other, a cog spins on the one that works.

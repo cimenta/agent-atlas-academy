@@ -4,6 +4,8 @@ import { pickHomeRun } from "./play-model.js";
 import { renderBlocks } from "./render.js";
 import { SECTION_ORDER, loadArticle, loadArticleIndex, loadPage } from "./content.js";
 import { mountReplay } from "./replay/view.js";
+import { blocksToText, searchArticles } from "./learn-search.js";
+import { markText } from "./text-search.js";
 import { createMiniReplay } from "./mini-replay.js";
 
 const RUN_ID = /^[a-z0-9-]+$/;
@@ -113,27 +115,85 @@ export async function renderLearn(ctx) {
   setTitle(ctx, t("learn.title"));
   const { items, fallbackSlugs } = await loadArticleIndex(ctx.lang, ctx.fetchFn);
   if (ctx.isStale()) return;
-  const nodes = [h(doc, "h1", {}, t("learn.title")), h(doc, "p", {}, t("learn.intro"))];
-  if (items.length === 0) nodes.push(h(doc, "p", { class: "notice", role: "alert" }, t("error.loadFailed")));
-  for (const section of SECTION_ORDER) {
-    const inSection = items.filter((item) => item.section === section);
-    if (inSection.length === 0) continue;
-    const list = h(doc, "ul", { class: "learn-list" });
-    for (const item of inSection) {
-      const entry = h(
-        doc,
-        "li",
-        {},
-        h(doc, "a", { href: `#/learn/${item.slug}` }, item.title),
-        h(doc, "span", { class: "summary" }, ` ${item.summary}`),
-      );
-      if (item.coming) entry.append(h(doc, "span", { class: "tag coming", "data-ui": "learn-coming" }, ` ${t("learn.coming")}`));
-      if (fallbackSlugs.has(item.slug)) entry.append(h(doc, "span", { class: "tag" }, ` (${t("lang.en")})`));
-      list.append(entry);
-    }
-    nodes.push(h(doc, "h2", {}, t(`learn.section.${section}`)), list);
+  if (items.length === 0) {
+    show(ctx, h(doc, "h1", {}, t("learn.title")), h(doc, "p", { class: "notice", role: "alert" }, t("error.loadFailed")));
+    return;
   }
-  show(ctx, ...nodes);
+  const sections = SECTION_ORDER.filter((section) => items.some((item) => item.section === section));
+  const state = { query: "", section: "all" };
+  let texts = null;
+  let loading = false;
+
+  const search = h(doc, "input", { class: "learn-search", type: "search", "data-ui": "learn-search", placeholder: t("learn.search"), "aria-label": t("learn.search"), autocomplete: "off" });
+  const side = h(doc, "div", { class: "learn-side", "data-ui": "learn-sections", role: "group", "aria-label": t("learn.sections") });
+  const main = h(doc, "div", { class: "learn-main", "data-ui": "learn-results" });
+
+  const row = (item, snippet) => {
+    const entry = h(doc, "li", { class: "learn-row" }, h(doc, "a", { href: `#/learn/${item.slug}` }, item.title), h(doc, "span", { class: "summary" }, item.summary));
+    if (snippet) entry.append(h(doc, "span", { class: "snippet" }, snippet));
+    if (item.coming) entry.append(h(doc, "span", { class: "tag coming", "data-ui": "learn-coming" }, t("learn.coming")));
+    if (fallbackSlugs.has(item.slug)) entry.append(h(doc, "span", { class: "tag" }, `(${t("lang.en")})`));
+    return entry;
+  };
+
+  // Searching a word looks in every article, so the first letter typed loads the texts of all of them.
+  async function loadTexts() {
+    if (texts || loading) return;
+    loading = true;
+    const loaded = {};
+    await Promise.all(
+      items.map(async (item) => {
+        try {
+          const article = await loadArticle(ctx.lang, item.slug, ctx.fetchFn);
+          if (article) loaded[item.slug] = blocksToText(article.blocks);
+        } catch {
+          // an article that does not load is searched by its title and summary only
+        }
+      }),
+    );
+    texts = loaded;
+    loading = false;
+    if (!ctx.isStale() && state.query.trim()) draw();
+  }
+
+  function draw() {
+    const query = state.query.trim();
+    side.replaceChildren(
+      ...["all", ...sections].map((section) => {
+        const count = section === "all" ? items.length : items.filter((item) => item.section === section).length;
+        const label = section === "all" ? t("learn.all") : t(`learn.section.${section}`);
+        const on = !query && state.section === section;
+        const button = h(doc, "button", { type: "button", class: `learn-section${on ? " on" : ""}`, "data-section": section, "aria-pressed": String(on) }, label, h(doc, "span", { class: "count" }, String(count)));
+        button.addEventListener("click", () => {
+          state.section = section;
+          search.value = "";
+          state.query = "";
+          draw();
+        });
+        return button;
+      }),
+    );
+    let list;
+    let note = "";
+    if (query) {
+      const found = searchArticles(items, texts, query);
+      note = found.length ? t("learn.results", { n: found.length }) : t("learn.noResults");
+      list = h(doc, "ul", { class: "learn-list" }, ...found.map(({ item, snippet }) => row(item, snippet)));
+    } else {
+      const shown = state.section === "all" ? items : items.filter((item) => item.section === state.section);
+      list = h(doc, "ul", { class: "learn-list" }, ...shown.map((item) => row(item, "")));
+    }
+    main.replaceChildren(...(note ? [h(doc, "p", { class: "learn-note", "aria-live": "polite" }, note)] : []), list);
+    if (query) markText(doc, list, query);
+  }
+
+  search.addEventListener("input", () => {
+    state.query = search.value;
+    if (state.query.trim()) loadTexts();
+    draw();
+  });
+  draw();
+  show(ctx, h(doc, "h1", {}, t("learn.title")), search, h(doc, "div", { class: "learn-cols" }, side, main));
 }
 
 export async function renderArticle(ctx, slug) {
