@@ -818,3 +818,7 @@ a.art-pill:hover { text-decoration: underline; }
 .sec-switch .chip[aria-pressed="true"] { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-line); }
 .key-dot { background: #2e9d4f; }
 .sec-switch .chip { padding: 4px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--card); color: var(--text); min-height: 32px; }
+
+/* A saved key: the form is hidden until Replace key is pressed, then a warm note says what saving does. */
+.key-form[hidden], .replace-note[hidden] { display: none; }
+.replace-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 12px; padding: 8px 12px; border-radius: 8px; background: var(--working-bg); color: var(--working); font-size: 0.9rem; }

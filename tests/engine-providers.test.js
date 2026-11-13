@@ -77,12 +77,16 @@ test("the server checks a Google key and calls the Google function", async () =>
   assert.ok(calls.length > 0 && calls[0].model.startsWith("gemini-") && calls[0].apiKey === GOOGLE_KEY);
 });
 
-test("a Google key must look like a Google key", async () => {
+test("an Anthropic key is refused as a Google key, and the newer AQ. Google keys are accepted", async () => {
   const handler = createRunHandler({ rateLimitImpl: () => true });
   const res = fakeResponse();
   await handler(request({ provider: "google", apiKey: "sk-ant-" + "x".repeat(40), task: "t", design: design() }), res);
   assert.equal(res.statusCode, 400);
   assert.match(res.chunks.join(""), /bad_key/);
+  const ok = fakeResponse();
+  const h2 = createRunHandler({ callGoogle: async () => ({ content: [{ type: "text", text: "x" }], stop_reason: "end_turn", usage: {} }), rateLimitImpl: () => true });
+  await h2(request({ provider: "google", apiKey: "AQ." + "x".repeat(50), task: "t", design: design("fast"), limits: {} }), ok);
+  assert.equal(ok.statusCode, 200);
 });
 
 test("an unknown provider is refused", async () => {

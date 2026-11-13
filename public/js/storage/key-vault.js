@@ -94,6 +94,22 @@ export function createVault({ storage, cryptoImpl = globalThis.crypto, iteration
       if (!others.has(id)) others.set(id, createVault({ storage, cryptoImpl, iterations, storageKey: `aa.vault.${id}` }));
       return others.get(id);
     },
+    // One passphrase opens every saved key it fits. A key saved with another passphrase stays locked;
+    // it is an error only when nothing could be opened.
+    async unlockAll(passphrase) {
+      let opened = 0;
+      for (const id of ["anthropic", ...others.keys(), "google"].filter((v, i, a) => a.indexOf(v) === i)) {
+        const v = self.forProvider(id);
+        if (!v.hasStoredKey() || v.getSessionKey() !== null) continue;
+        try {
+          await v.unlock(passphrase);
+          opened += 1;
+        } catch {
+          // another passphrase
+        }
+      }
+      if (opened === 0) throw new VaultError("wrong");
+    },
     setSessionKey(key) {
       sessionKey = typeof key === "string" && key !== "" ? key : null;
     },

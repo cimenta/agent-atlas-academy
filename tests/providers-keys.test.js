@@ -91,3 +91,28 @@ test("a backup can carry the Google key record and the free tier choice", async 
   assert.equal(target.forProvider("google").hasStoredKey(), true);
   assert.equal(settingsStore.get().freeTier.google, true);
 });
+
+test("unlockAll unlocks every saved key with the same passphrase", async () => {
+  const storage = memoryStorage();
+  const first = vaultOn(storage);
+  await first.remember(ANTHROPIC, PASS);
+  await first.forProvider("google").remember(GOOGLE, PASS);
+  const second = vaultOn(storage);
+  assert.equal(needsUnlock(second), true);
+  await second.unlockAll(PASS);
+  assert.equal(second.getSessionKey(), ANTHROPIC);
+  assert.equal(second.forProvider("google").getSessionKey(), GOOGLE);
+  assert.equal(needsUnlock(second), false);
+});
+
+test("unlockAll keeps a key with another passphrase locked, and fails when nothing opens", async () => {
+  const storage = memoryStorage();
+  const first = vaultOn(storage);
+  await first.remember(ANTHROPIC, PASS);
+  await first.forProvider("google").remember(GOOGLE, "another passphrase");
+  const second = vaultOn(storage);
+  await second.unlockAll(PASS);
+  assert.equal(second.getSessionKey(), ANTHROPIC);
+  assert.equal(second.forProvider("google").getSessionKey(), null);
+  await assert.rejects(vaultOn(storage).unlockAll("nothing like it"), (e) => e.code === "wrong");
+});

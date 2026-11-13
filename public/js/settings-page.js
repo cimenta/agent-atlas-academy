@@ -34,6 +34,7 @@ export function renderSettings(ctx) {
   const keyPanels = {};
   const buildKeyPanel = (id) => {
     const v = vaultOf(id);
+    let replacing = false; // a key is saved and the visitor chose to replace it
     const sfx = id === "anthropic" ? "" : `-${id}`;
     const status = h(doc, "p", { class: "key-status" });
     const keyInput = h(doc, "input", { id: `set-key${sfx}`, type: "password", autocomplete: "off", spellcheck: "false" });
@@ -61,6 +62,7 @@ export function renderSettings(ctx) {
         v.setSessionKey(key);
         say(errorText(error), true);
       }
+      replacing = false;
       refreshStatus();
     });
     const entry = [field(`set-key${sfx}`, t(id === "google" ? "settings.googleKeyLabel" : "settings.keyLabel"), keyInput)];
@@ -72,8 +74,25 @@ export function renderSettings(ctx) {
       );
     }
     entry.push(h(doc, "div", { class: "field checkbox" }, rememberBox, h(doc, "label", { for: `set-remember${sfx}` }, t("settings.rememberLabel"))), passBlock, saveButton);
-    const node = h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, status, ...entry);
+    // With a key saved the form is hidden, so it cannot be overwritten by accident; Replace key opens it.
+    const cancelReplace = h(doc, "button", { type: "button", "data-ui": `replace-cancel-${id}` }, t("settings.replaceCancel"));
+    const replaceNote = h(doc, "div", { class: "replace-note", "data-ui": `replace-note-${id}` }, h(doc, "span", {}, t("settings.replaceNote")), cancelReplace);
+    const form = h(doc, "div", { class: "key-form" }, replaceNote, ...entry);
+    const replaceButton = h(doc, "button", { type: "button", "data-ui": `replace-key-${id}` }, t("settings.replaceKey"));
+    replaceButton.addEventListener("click", () => {
+      replacing = true;
+      refreshStatus();
+    });
+    cancelReplace.addEventListener("click", () => {
+      replacing = false;
+      refreshStatus();
+    });
+    const node = h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, status, replaceButton, form);
     const refresh = () => {
+      const saved = v.getSessionKey() !== null || v.hasStoredKey();
+      form.hidden = saved && !replacing;
+      replaceButton.hidden = !saved || replacing;
+      replaceNote.hidden = !(saved && replacing);
       const available = v.getSessionKey() !== null;
       const text = available ? t(v.hasStoredKey() ? "settings.keyAvailableSaved" : "settings.keyAvailable") : v.hasStoredKey() ? t("settings.keyLocked") : t("settings.keyNone");
       const tier = id === "google" && (available || v.hasStoredKey()) ? ` · ${t(settings.get().freeTier.google ? "settings.freeTierTag" : "settings.paidTierTag")}` : "";
@@ -121,7 +140,7 @@ export function renderSettings(ctx) {
   const unlockForm = h(doc, "div", { class: "unlock-form", hidden: true }, h(doc, "div", { class: "sec-row" }, field("set-unlock", t("settings.unlockLabel"), unlockInput), unlockButton), unlockNote);
   const doUnlock = async () => {
     try {
-      await sv().unlock(unlockInput.value);
+      await (vault.unlockAll ? vault.unlockAll(unlockInput.value) : sv().unlock(unlockInput.value));
       unlockInput.value = "";
       setNote(unlockNote, "");
       say(t("settings.unlocked"));

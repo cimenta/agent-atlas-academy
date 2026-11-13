@@ -181,7 +181,7 @@ export function renderCreate(ctx) {
           const message = h(doc, "p", { class: "notice", role: "alert", hidden: true });
           unlock.addEventListener("click", async () => {
             try {
-              await pv.unlock(pass.value);
+              await (ctx.vault.unlockAll ? ctx.vault.unlockAll(pass.value) : pv.unlock(pass.value));
               markUnlockAlert(doc, ctx.vault, t);
               drawReview();
             } catch (error) {
