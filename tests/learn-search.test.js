@@ -48,3 +48,13 @@ test("snippetAround cuts a short piece with ellipses", () => {
   assert.ok(snippet.includes("needle"));
   assert.equal(snippetAround("nothing", "zzz"), "");
 });
+
+import { readingMinutes } from "../public/js/learn-search.js";
+
+test("reading time is at least one minute and grows with the number of words", () => {
+  const para = (n) => [{ type: "paragraph", inlines: [{ type: "text", text: "word ".repeat(n) }] }];
+  assert.equal(readingMinutes(para(5)), 1);
+  assert.equal(readingMinutes(para(200)), 1);
+  assert.equal(readingMinutes(para(201)), 2);
+  assert.equal(readingMinutes([]), 1);
+});

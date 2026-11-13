@@ -4,7 +4,7 @@ import { pickHomeRun } from "./play-model.js";
 import { renderBlocks } from "./render.js";
 import { SECTION_ORDER, loadArticle, loadArticleIndex, loadPage } from "./content.js";
 import { mountReplay } from "./replay/view.js";
-import { blocksToText, searchArticles } from "./learn-search.js";
+import { blocksToText, readingMinutes, searchArticles } from "./learn-search.js";
 import { markText } from "./text-search.js";
 import { createMiniReplay } from "./mini-replay.js";
 
@@ -201,21 +201,56 @@ export async function renderArticle(ctx, slug) {
   const article = await loadArticle(ctx.lang, slug, ctx.fetchFn);
   if (ctx.isStale()) return;
   if (!article) return renderNotFound(ctx);
+  const { items } = await loadArticleIndex(ctx.lang, ctx.fetchFn);
+  if (ctx.isStale()) return;
   const title = article.meta.title || slug;
   setTitle(ctx, title);
-  const nodes = [h(doc, "p", {}, h(doc, "a", { href: "#/learn" }, `← ${t("learn.back")}`)), h(doc, "h1", {}, title)];
+  const current = items.find((item) => item.slug === slug);
+  const section = current?.section ?? article.meta.section;
+  const summary = current?.summary || article.meta.summary || "";
+  const sectionName = section && SECTION_ORDER.includes(section) ? t(`learn.section.${section}`) : "";
+
+  const nodes = [
+    h(doc, "p", { class: "article-crumb", "data-ui": "article-crumb" }, h(doc, "a", { href: "#/learn" }, t("learn.title")), sectionName ? ` / ${sectionName}` : ""),
+    h(doc, "h1", {}, title),
+  ];
+  if (summary) nodes.push(h(doc, "p", { class: "article-lead", "data-ui": "article-lead" }, summary));
+  const meta = h(doc, "p", { class: "article-meta", "data-ui": "article-meta" });
+  if (sectionName) meta.append(h(doc, "span", { class: "art-pill" }, sectionName));
+  meta.append(h(doc, "span", { class: "art-pill art-pill-muted" }, t("learn.readTime", { n: readingMinutes(article.blocks) })));
+  nodes.push(meta);
   if (article.meta?.coming === "true") nodes.push(h(doc, "p", { class: "notice coming", "data-ui": "learn-coming-notice" }, t("learn.comingNotice")));
   if (article.isFallback) nodes.push(h(doc, "p", { class: "notice" }, t("learn.fallbackNotice")));
   nodes.push(h(doc, "article", { class: "article" }, renderBlocks(article.blocks, doc)));
-  const related = Array.isArray(article.meta.related) ? article.meta.related : [];
+
+  const bySlug = new Map(items.map((item) => [item.slug, item]));
+  const related = (Array.isArray(article.meta.related) ? article.meta.related : []).filter((r) => bySlug.has(r));
   if (related.length > 0) {
-    const { items } = await loadArticleIndex(ctx.lang, ctx.fetchFn);
-    const titles = new Map(items.map((item) => [item.slug, item.title]));
-    const list = h(doc, "ul", {});
-    for (const rel of related.filter((r) => titles.has(r))) {
-      list.append(h(doc, "li", {}, h(doc, "a", { href: `#/learn/${rel}` }, titles.get(rel))));
-    }
-    if (list.children.length > 0) nodes.push(h(doc, "h2", {}, t("learn.related")), list);
+    nodes.push(
+      h(doc, "h2", {}, t("learn.related")),
+      h(
+        doc,
+        "div",
+        { class: "rel-cards", "data-ui": "related-articles" },
+        ...related.map((rel) => h(doc, "a", { class: "rel-card", href: `#/learn/${rel}` }, h(doc, "b", {}, bySlug.get(rel).title), h(doc, "span", {}, bySlug.get(rel).summary ?? ""))),
+      ),
+    );
+  }
+  // The articles before and after this one in its section.
+  const inSection = items.filter((item) => item.section === section);
+  const at = inSection.findIndex((item) => item.slug === slug);
+  if (at >= 0 && inSection.length > 1) {
+    const before = inSection[at - 1];
+    const after = inSection[at + 1];
+    nodes.push(
+      h(
+        doc,
+        "nav",
+        { class: "article-nav", "data-ui": "article-nav", "aria-label": t("learn.sections") },
+        before ? h(doc, "a", { href: `#/learn/${before.slug}`, class: "prev" }, `\u2190 ${before.title}`) : h(doc, "span", {}),
+        after ? h(doc, "a", { href: `#/learn/${after.slug}`, class: "next" }, `${after.title} \u2192`) : h(doc, "span", {}),
+      ),
+    );
   }
   if (ctx.isStale()) return;
   show(ctx, ...nodes);

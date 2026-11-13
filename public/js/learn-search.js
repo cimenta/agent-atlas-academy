@@ -14,6 +14,12 @@ export function blocksToText(blocks) {
   return parts.join(" ").replace(/\s+/g, " ").trim();
 }
 
+// How long an article takes to read, in whole minutes (at least one), at about 200 words a minute.
+export function readingMinutes(blocks) {
+  const words = blocksToText(blocks).split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200));
+}
+
 // A short piece of the text around the first match, with ellipses where it was cut.
 export function snippetAround(text, query, radius = 60) {
   const [first] = findMatches(text, query);

@@ -50,6 +50,7 @@
   "learn.all": "All articles",
   "learn.results": "{n} articles found",
   "learn.noResults": "No article matches.",
+  "learn.readTime": "{n} min read",
   "learn.section.basics": "Basics",
   "learn.section.orchestration": "Orchestration patterns",
   "learn.section.memory": "Memory",
