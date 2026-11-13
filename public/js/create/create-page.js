@@ -65,6 +65,11 @@ function downloadButton(ctx, run) {
 
 export function renderCreate(ctx) {
   const vaultFor = (id) => (ctx.vault.forProvider ? ctx.vault.forProvider(id) : ctx.vault);
+  // The provider is the first one that has a key, until the visitor chooses another. The agents' models follow it.
+  const currentProvider = () => {
+    if (!PROVIDER_IDS.includes(draft.provider)) draft.provider = PROVIDER_IDS.find((id) => vaultFor(id).getSessionKey() !== null || vaultFor(id).hasStoredKey()) ?? "anthropic";
+    return draft.provider;
+  };
   const { doc, t } = ctx;
   if (draft.limits === null) draft.limits = { ...ctx.settings.get().limits };
   const root = ctx.main;
@@ -121,9 +126,7 @@ export function renderCreate(ctx) {
     function drawReview() {
       const design = draft.editor.design();
       const limits = clampLimits(draft.limits);
-      // The provider is the first one that has a key, until the visitor chooses another.
-      if (!PROVIDER_IDS.includes(draft.provider)) draft.provider = PROVIDER_IDS.find((id) => vaultFor(id).getSessionKey() !== null || vaultFor(id).hasStoredKey()) ?? "anthropic";
-      const provider = draft.provider;
+      const provider = currentProvider();
       const pv = vaultFor(provider);
       const catalog = providerCatalog(provider);
       const summary = reviewSummary({ design, limits, provider });
@@ -171,6 +174,7 @@ export function renderCreate(ctx) {
       providerSelect.value = provider;
       providerSelect.addEventListener("change", () => {
         draft.provider = providerSelect.value;
+        editorHandle.refresh();
         drawReview();
       });
       const keyParts = [h(doc, "div", { class: "field" }, h(doc, "label", { for: "cr-provider" }, t("create.providerLabel")), providerSelect)];
@@ -274,7 +278,13 @@ export function renderCreate(ctx) {
       editorHost,
       reviewHost,
     );
-    editorHandle = mountEditor(editorHost, { editor: draft.editor, t, doc, onChange: drawReview });
+    editorHandle = mountEditor(editorHost, { editor: draft.editor, t, doc, onChange: drawReview, getModels: (node) => {
+      // With a key marked as free tier only the free models are offered (a model already chosen stays visible).
+      const provider = currentProvider();
+      const all = providerCatalog(provider).models;
+      const freeOnly = provider === "google" && ctx.settings.get().freeTier.google === true;
+      return freeOnly ? all.filter((m) => m.freeTier !== false || m.key === node?.model) : all;
+    } });
     ctx.onLeave(() => editorHandle.destroy());
     drawPatterns();
     drawReview();

@@ -19,6 +19,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 ### Changed
 
 
+- Create: with a Gemini key marked as free tier, the model list of an agent offers only the models that have a free tier.
+- Create: the model list of an agent shows the models of the chosen provider (Gemini ids when Gemini is chosen), not always the Claude ones.
 - Settings, API keys: with a key saved the form is hidden and a Replace key button opens it, with a warm note that saving replaces the saved key, so a key cannot be overwritten by accident. One passphrase now unlocks every saved key.- Google (Gemini) is a second provider: Gemini tab in Settings with its own key, a free-tier tick and a green dot on tabs with a saved key; Create lets you choose the provider and shows free for a free-tier key. Not yet tried against the real Google service.
 - Article page: the section and the reading time are above the title, and the summary is a highlighted "In short" box under it.
 - Help: the topics are listed on the left and one is shown at a time, with a search next to the title that looks in all of them. The help now covers the Settings tabs and the keyboard shortcuts.

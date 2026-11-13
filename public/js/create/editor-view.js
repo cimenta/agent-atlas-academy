@@ -10,7 +10,7 @@ import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, ext
 const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-export function mountEditor(container, { editor, t, doc = document, onChange = () => {} }) {
+export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, getModels = (node) => MODELS }) {
   let selectedId = null;
   let connectFrom = null;
   let notice = "";
@@ -323,7 +323,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         "button",
         { type: "button", class: "dnode-body", "data-focus-key": `node-${node.id}`, "aria-pressed": String(selectedId === node.id), "aria-label": t("editor.selectNode", { name: nodeLabel(node) }) },
         h(doc, "strong", {}, nodeLabel(node)),
-        h(doc, "small", {}, MODELS.find((m) => m.key === node.model)?.label ?? ""),
+        h(doc, "small", {}, getModels(node).find((m) => m.key === node.model)?.label ?? ""),
       );
       body.addEventListener("click", () => {
         if (suppressClick) return;
@@ -419,7 +419,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     if (!node) return h(doc, "p", { class: "hint" }, t("editor.pickNode"));
     const type = AGENT_TYPES[node.agent];
     const field = (id, label, input) => h(doc, "div", { class: "field" }, h(doc, "label", { for: id }, label), input);
-    const model = h(doc, "select", { id: "ed-model" }, ...MODELS.map((m) => h(doc, "option", { value: m.key, selected: m.key === node.model }, `${m.label} (${m.id})`)));
+    const model = h(doc, "select", { id: "ed-model" }, ...getModels(node).map((m) => h(doc, "option", { value: m.key, selected: m.key === node.model }, `${m.label} (${m.id})`)));
     model.addEventListener("change", () => {
       editor.setNode(node.id, { model: model.value });
       changed();
