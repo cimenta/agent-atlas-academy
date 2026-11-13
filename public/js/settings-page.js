@@ -1,6 +1,6 @@
 // The settings page: API key handling, default limits and local data.
 import { h } from "./dom.js";
-import { LIMIT_MAX } from "./engine/catalog.js";
+import { LIMIT_MAX, PROVIDER_IDS, PRICING_URLS, providerCatalog } from "./engine/catalog.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
 import { DEFAULT_GO_KEYS } from "./shortcuts.js";
 import { buildShortcutList } from "./shortcut-list.js";
@@ -8,7 +8,7 @@ import { VaultError } from "./storage/key-vault.js";
 import { exportBackup, parseBackup, applyBackup } from "./storage/backup.js";
 
 const formatSize = (bytes) => (bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1048576).toFixed(1)} MB`);
-const PROVIDERS_SOON = ["Gemini", "OpenAI", "Mistral", "Llama"];
+const PROVIDERS_SOON = ["OpenAI", "Mistral", "Llama"];
 const LIMIT_FIELDS = [
   ["maxSteps", "settings.limitSteps"],
   ["maxTokens", "settings.limitTokens"],
@@ -28,20 +28,75 @@ export function renderSettings(ctx) {
   };
   const errorText = (error) => t(`settings.error.${error instanceof VaultError ? error.code : "storage"}`);
 
-  const status = h(doc, "p", { class: "key-status" });
+  // One key panel per provider: where the key is now, and the form that saves a new one.
+  const vaultOf = (id) => (vault.forProvider ? vault.forProvider(id) : vault);
+  const GOOGLE_KEY_URL = "https://aistudio.google.com/apikey";
+  const keyPanels = {};
+  const buildKeyPanel = (id) => {
+    const v = vaultOf(id);
+    const sfx = id === "anthropic" ? "" : `-${id}`;
+    const status = h(doc, "p", { class: "key-status" });
+    const keyInput = h(doc, "input", { id: `set-key${sfx}`, type: "password", autocomplete: "off", spellcheck: "false" });
+    const rememberBox = h(doc, "input", { id: `set-remember${sfx}`, type: "checkbox" });
+    const passInput = h(doc, "input", { id: `set-pass${sfx}`, type: "password", autocomplete: "new-password" });
+    const passBlock = h(doc, "div", { class: "pass-block", hidden: true }, field(`set-pass${sfx}`, t("settings.passphraseLabel"), passInput), h(doc, "p", { class: "notice" }, t("settings.passphraseWarning")));
+    const saveButton = h(doc, "button", { type: "button", class: "primary" }, t("settings.keySave"));
+    const freeBox = id === "google" ? h(doc, "input", { id: "set-free-google", type: "checkbox", "data-ui": "free-tier-box" }) : null;
+    if (freeBox) freeBox.checked = settings.get().freeTier.google;
+    rememberBox.addEventListener("change", () => {
+      passBlock.hidden = !rememberBox.checked;
+      saveButton.textContent = t(rememberBox.checked ? "settings.keySaveDevice" : "settings.keySave");
+    });
+    saveButton.addEventListener("click", async () => {
+      const key = keyInput.value.trim();
+      if (key === "") return say(t("settings.error.emptyKey"), true);
+      if (freeBox) settings.setFreeTier(id, freeBox.checked);
+      try {
+        if (rememberBox.checked) await v.remember(key, passInput.value);
+        else v.setSessionKey(key);
+        keyInput.value = "";
+        passInput.value = "";
+        say(t(rememberBox.checked ? "settings.keyRemembered" : "settings.keySaved"));
+      } catch (error) {
+        v.setSessionKey(key);
+        say(errorText(error), true);
+      }
+      refreshStatus();
+    });
+    const entry = [field(`set-key${sfx}`, t(id === "google" ? "settings.googleKeyLabel" : "settings.keyLabel"), keyInput)];
+    if (id === "google") {
+      entry.push(
+        h(doc, "p", { class: "provider-links" }, h(doc, "a", { href: GOOGLE_KEY_URL, target: "_blank", rel: "noopener noreferrer", "data-ui": "google-key-link" }, t("settings.googleKeyLink")), " · ", h(doc, "a", { href: PRICING_URLS.google, target: "_blank", rel: "noopener noreferrer", "data-ui": "google-pricing-link" }, t("settings.googlePricingLink"))),
+        h(doc, "div", { class: "field checkbox" }, freeBox, h(doc, "label", { for: "set-free-google" }, t("settings.freeTierLabel"))),
+        h(doc, "p", { class: "notice", "data-ui": "free-tier-warning" }, t("settings.freeTierWarning")),
+      );
+    }
+    entry.push(h(doc, "div", { class: "field checkbox" }, rememberBox, h(doc, "label", { for: `set-remember${sfx}` }, t("settings.rememberLabel"))), passBlock, saveButton);
+    const node = h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, status, ...entry);
+    const refresh = () => {
+      const available = v.getSessionKey() !== null;
+      const text = available ? t(v.hasStoredKey() ? "settings.keyAvailableSaved" : "settings.keyAvailable") : v.hasStoredKey() ? t("settings.keyLocked") : t("settings.keyNone");
+      const tier = id === "google" && (available || v.hasStoredKey()) ? ` · ${t(settings.get().freeTier.google ? "settings.freeTierTag" : "settings.paidTierTag")}` : "";
+      status.textContent = text + tier;
+    };
+    return { id, node, refresh, has: () => v.getSessionKey() !== null || v.hasStoredKey() };
+  };
+  for (const id of PROVIDER_IDS) keyPanels[id] = buildKeyPanel(id);
+
+  // The provider whose key the Security tab works on.
+  let secProvider = "anthropic";
+  const sv = () => vaultOf(secProvider);
   const refreshStatus = () => {
-    const available = vault.getSessionKey() !== null;
-    status.textContent = available
-      ? t(vault.hasStoredKey() ? "settings.keyAvailableSaved" : "settings.keyAvailable")
-      : vault.hasStoredKey()
-        ? t("settings.keyLocked")
-        : t("settings.keyNone");
-    keyTag.hidden = !(available || vault.hasStoredKey());
-    providerTag.hidden = keyTag.hidden;
+    for (const id of PROVIDER_IDS) {
+      keyPanels[id].refresh();
+      providerDots[id].hidden = !keyPanels[id].has();
+    }
+    keyTag.hidden = !PROVIDER_IDS.some((id) => keyPanels[id].has());
     lockedTag.hidden = !needsUnlock(vault);
     markUnlockAlert(doc, vault, t);
-    securityNone.hidden = vault.hasStoredKey();
-    const stored = vault.hasStoredKey();
+    const stored = sv().hasStoredKey();
+    const available = sv().getSessionKey() !== null;
+    securityNone.hidden = stored;
     secMark.setAttribute("class", available ? "bang ok" : "bang no");
     secMark.textContent = available ? "\u2713" : "!";
     secText.textContent = t(available ? "settings.secUnlocked" : "settings.secLocked");
@@ -49,39 +104,8 @@ export function renderSettings(ctx) {
     secSteps.hidden = !stored;
     secActions.hidden = !stored;
     unlockForm.hidden = available || !stored;
+    secSwitch.forEach((b) => b.setAttribute("aria-pressed", String(b.getAttribute("data-provider") === secProvider)));
   };
-
-  // Save the key for this tab (and optionally remember it encrypted).
-  const keyInput = h(doc, "input", { id: "set-key", type: "password", autocomplete: "off", spellcheck: "false" });
-  const rememberBox = h(doc, "input", { id: "set-remember", type: "checkbox" });
-  const passInput = h(doc, "input", { id: "set-pass", type: "password", autocomplete: "new-password" });
-  const passBlock = h(
-    doc,
-    "div",
-    { class: "pass-block", hidden: true },
-    field("set-pass", t("settings.passphraseLabel"), passInput),
-    h(doc, "p", { class: "notice" }, t("settings.passphraseWarning")),
-  );
-  const saveButton = h(doc, "button", { type: "button", class: "primary" }, t("settings.keySave"));
-  rememberBox.addEventListener("change", () => {
-    passBlock.hidden = !rememberBox.checked;
-    saveButton.textContent = t(rememberBox.checked ? "settings.keySaveDevice" : "settings.keySave");
-  });
-  saveButton.addEventListener("click", async () => {
-    const key = keyInput.value.trim();
-    if (key === "") return say(t("settings.error.emptyKey"), true);
-    try {
-      if (rememberBox.checked) await vault.remember(key, passInput.value);
-      else vault.setSessionKey(key);
-      keyInput.value = "";
-      passInput.value = "";
-      say(t(rememberBox.checked ? "settings.keyRemembered" : "settings.keySaved"));
-    } catch (error) {
-      vault.setSessionKey(key);
-      say(errorText(error), true);
-    }
-    refreshStatus();
-  });
 
   // Security: everything is inline. A note under each action says how it went.
   const inlineNote = () => h(doc, "p", { class: "sec-note", role: "status", "aria-live": "polite" });
@@ -97,7 +121,7 @@ export function renderSettings(ctx) {
   const unlockForm = h(doc, "div", { class: "unlock-form", hidden: true }, h(doc, "div", { class: "sec-row" }, field("set-unlock", t("settings.unlockLabel"), unlockInput), unlockButton), unlockNote);
   const doUnlock = async () => {
     try {
-      await vault.unlock(unlockInput.value);
+      await sv().unlock(unlockInput.value);
       unlockInput.value = "";
       setNote(unlockNote, "");
       say(t("settings.unlocked"));
@@ -124,8 +148,8 @@ export function renderSettings(ctx) {
     forgetPanel.hidden = true;
   });
   forgetYes.addEventListener("click", () => {
-    vault.forget();
-    vault.clearSessionKey();
+    sv().forget();
+    sv().clearSessionKey();
     forgetPanel.hidden = true;
     say(t("settings.forgotten"));
     refreshStatus();
@@ -149,7 +173,7 @@ export function renderSettings(ctx) {
   });
   changeGo.addEventListener("click", async () => {
     try {
-      await vault.changePassphrase(oldPass.value, newPass.value);
+      await sv().changePassphrase(oldPass.value, newPass.value);
       oldPass.value = "";
       newPass.value = "";
       changePanel.hidden = true;
@@ -288,6 +312,7 @@ export function renderSettings(ctx) {
         runs: runs.filter(Boolean),
         settings: settings.get(),
         vaultRecord: vault.exportRecord(),
+        googleRecord: vaultOf("google").exportRecord(),
         includeKey: includeKey.checked,
         appVersion: ctx.version,
       });
@@ -344,16 +369,35 @@ export function renderSettings(ctx) {
   replaceButton.addEventListener("click", () => runImport("replace"));
   importChoice.append(h(doc, "p", {}, t("settings.importChoose")), mergeButton, replaceButton);
 
-  // Providers: Anthropic works; the others are greyed out until they are built.
-  const providerTag = h(doc, "span", { class: "tag-saved", "data-ui": "provider-saved-tag", hidden: true }, t("settings.keySavedTag"));
+  // Providers: one tab each; a green dot in the upper right corner of a tab says a key is saved for it.
+  const providerDots = {};
+  const showProvider = (id) => {
+    for (const other of PROVIDER_IDS) keyPanels[other].node.hidden = other !== id;
+    providerButtons.forEach((b) => b.setAttribute("aria-selected", String(b.getAttribute("data-provider") === id)));
+  };
+  const providerButtons = PROVIDER_IDS.map((id) => {
+    providerDots[id] = h(doc, "span", { class: "key-dot", "data-ui": `provider-dot-${id}`, title: t("settings.keySavedTag"), role: "img", "aria-label": t("settings.keySavedTag"), hidden: true });
+    const button = h(doc, "button", { type: "button", class: "tab provider-tab", role: "tab", "data-provider": id, "data-ui": `provider-tab-${id}` }, id === "google" ? "Gemini" : providerCatalog(id).label, providerDots[id]);
+    button.addEventListener("click", () => showProvider(id));
+    return button;
+  });
   const providerTabs = h(
     doc,
     "div",
     { class: "provider-tabs", role: "tablist", "data-ui": "provider-tabs" },
-    h(doc, "button", { type: "button", class: "tab", role: "tab", "aria-selected": "true", "data-ui": "provider-tab-anthropic" }, "Anthropic", providerTag),
+    ...providerButtons,
     ...PROVIDERS_SOON.map((name) => h(doc, "button", { type: "button", class: "tab", role: "tab", disabled: true, "aria-disabled": "true", "data-ui": `provider-tab-${name.toLowerCase()}` }, name, h(doc, "span", { class: "tag-soon" }, t("settings.providerSoon")))),
   );
-  const providerPanel = h(doc, "div", { class: "provider-panel", "data-ui": "provider-panel-anthropic" }, status, field("set-key", t("settings.keyLabel"), keyInput), h(doc, "div", { class: "field checkbox" }, rememberBox, h(doc, "label", { for: "set-remember" }, t("settings.rememberLabel"))), passBlock, saveButton);
+  showProvider("anthropic");
+  const providerPanel = h(doc, "div", { class: "provider-panels" }, ...PROVIDER_IDS.map((id) => keyPanels[id].node));
+  const secSwitch = PROVIDER_IDS.map((id) => {
+    const b = h(doc, "button", { type: "button", class: "chip", "data-provider": id, "data-ui": `sec-provider-${id}`, "aria-pressed": "false" }, id === "google" ? "Gemini" : providerCatalog(id).label);
+    b.addEventListener("click", () => {
+      secProvider = id;
+      refreshStatus();
+    });
+    return b;
+  });
   const securityNone = h(doc, "p", { class: "notice", "data-ui": "security-none" }, t("settings.securityNone"));
   const lockedTag = h(doc, "span", { class: "tag-alert", "data-ui": "security-locked-tag", title: t("settings.unlockAlert"), hidden: true }, "!");
   // The six sections, in the order they were written: keys, limits, tooltips, player, data, security.
@@ -402,7 +446,7 @@ export function renderSettings(ctx) {
       h(doc, "div", { class: "danger-row", "data-ui": "data-danger" }, h(doc, "div", {}, h(doc, "h3", {}, t("settings.deleteRuns")), h(doc, "p", {}, t("settings.deleteText"))), deleteButton),
       confirmBox,
     ),
-    h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.securityHeading")), securityNone, secLead, secSteps, unlockForm, secActions),
+    h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.securityHeading")), h(doc, "div", { class: "sec-switch", "data-ui": "sec-switch", role: "group", "aria-label": t("settings.secProvider") }, ...secSwitch), securityNone, secLead, secSteps, unlockForm, secActions),
   ];
   const [keySection, limitsSection, tooltipsSection, playerSection, shortcutsSection, dataSection, securitySection] = written;
   // Tabs down the left (a row on a phone); one section is shown at a time.

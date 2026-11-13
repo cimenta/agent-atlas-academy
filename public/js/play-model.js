@@ -1,5 +1,5 @@
 // Pure helpers for the Play tabs: the list of runs to replay and the numbers on the Result tab.
-import { MODELS, SEARCH_PRICE_USD } from "./engine/catalog.js";
+import { providerCatalog, paidOnlyModelUsed } from "./engine/catalog.js";
 import { deriveInspector } from "./replay/inspect-model.js";
 import { validateRun } from "./run-schema.js";
 
@@ -41,12 +41,16 @@ export function buildResultModel(run) {
     ? { input: done.usage.input ?? 0, output: done.usage.output ?? 0, searches: done.usage.searches ?? 0 }
     : summed;
 
+  // Prices are the ones of the provider the run was recorded with; a key on the free tier makes the run free.
+  const provider = run?.recordedWith?.provider;
+  const catalog = providerCatalog(provider);
+  const free = run?.recordedWith?.freeTier === true && Array.isArray(run?.design?.nodes) && !paidOnlyModelUsed(run.design, provider);
   let cost = null;
   if (run?.design && Array.isArray(run.design.nodes)) {
-    cost = usage.searches * SEARCH_PRICE_USD;
+    cost = usage.searches * catalog.searchPriceUsd;
     for (const a of perAgent) {
       const node = run.design.nodes.find((n) => n.id === a.agent);
-      const model = MODELS.find((m) => m.key === node?.model) ?? MODELS[0];
+      const model = catalog.models.find((m) => m.key === node?.model) ?? catalog.models[0];
       cost += (a.input * model.inputPerMTok + a.output * model.outputPerMTok) / 1e6;
     }
   }
@@ -57,6 +61,7 @@ export function buildResultModel(run) {
     usage,
     perAgent,
     cost,
+    free,
   };
 }
 
@@ -98,6 +103,7 @@ export function buildStatistics(run) {
   return {
     status: base.status,
     cost: base.cost,
+    free: base.free,
     usage: base.usage,
     totalMs,
     startedAt: run?.startedAt ?? null,

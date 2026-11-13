@@ -1,5 +1,5 @@
 // One agent in a run: keeps its own conversation, calls the model, reports events.
-import { MODELS, AGENT_TYPES } from "./catalog.js";
+import { providerCatalog, AGENT_TYPES } from "./catalog.js";
 import { systemPromptFor } from "./prompts.js";
 import { toolsFor } from "./tools.js";
 import { AnthropicError, redact } from "./anthropic.js";
@@ -21,8 +21,9 @@ function searchOutput(content) {
 // A copy is taken so later changes to the conversation cannot reach an event already sent.
 const copy = (value) => structuredClone(value);
 
-export function createAgent({ node, design = null, call, emit, budget, signal, language = "en", sleep = defaultSleep }) {
-  const model = (MODELS.find((m) => m.key === node.model) ?? MODELS[0]).id;
+export function createAgent({ node, design = null, call, emit, budget, signal, language = "en", sleep = defaultSleep, provider = "anthropic" }) {
+  const models = providerCatalog(provider).models;
+  const model = (models.find((m) => m.key === node.model) ?? models[0]).id;
   const system = systemPromptFor(node, { language });
   const label = agentLabel(node, design, AGENT_TYPES[node.agent]?.label ?? node.agent);
   const messages = [];

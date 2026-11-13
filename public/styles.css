@@ -808,3 +808,13 @@ kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem;
 
 .article-lead b { font-weight: 600; }
 a.art-pill:hover { text-decoration: underline; }
+
+/* Providers: a green dot in the upper right corner of a tab whose key is saved. */
+.provider-tab { position: relative; padding-right: 20px; }
+.key-dot { position: absolute; top: 6px; right: 6px; width: 9px; height: 9px; border-radius: 50%; background: var(--done); box-shadow: 0 0 0 2px var(--bg); }
+.key-dot[hidden] { display: none; }
+.provider-links { margin: 4px 0 10px; font-size: 0.9rem; }
+.sec-switch { display: flex; gap: 6px; margin: 0 0 12px; }
+.sec-switch .chip[aria-pressed="true"] { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-line); }
+.key-dot { background: #2e9d4f; }
+.sec-switch .chip { padding: 4px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--card); color: var(--text); min-height: 32px; }

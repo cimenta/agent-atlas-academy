@@ -16,7 +16,7 @@ const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 529]);
 export function redact(text, apiKey) {
   let out = String(text ?? "");
   if (typeof apiKey === "string" && apiKey.length >= 8) out = out.split(apiKey).join("[redacted]");
-  return out.replace(/sk-ant-[A-Za-z0-9_-]+/g, "[redacted]");
+  return out.replace(/sk-ant-[A-Za-z0-9_-]+/g, "[redacted]").replace(/AIza[A-Za-z0-9_-]{20,}/g, "[redacted]");
 }
 
 export async function callAnthropic(body, { apiKey, fetchImpl = fetch, signal, timeoutMs = 60000 } = {}) {

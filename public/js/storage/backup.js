@@ -17,7 +17,9 @@ export function isVaultRecord(record) {
   );
 }
 
-export function exportBackup({ runs, settings, vaultRecord = null, includeKey = false, appVersion }) {
+const plainRecord = (r) => ({ v: r.v, kdf: r.kdf, iterations: r.iterations, salt: r.salt, iv: r.iv, ciphertext: r.ciphertext });
+
+export function exportBackup({ runs, settings, vaultRecord = null, googleRecord = null, includeKey = false, appVersion }) {
   const backup = { backupVersion: BACKUP_VERSION, appVersion, exportedAt: new Date().toISOString(), settings: settings ?? {}, runs };
   if (includeKey && isVaultRecord(vaultRecord)) {
     backup.vault = {
@@ -29,6 +31,7 @@ export function exportBackup({ runs, settings, vaultRecord = null, includeKey = 
       ciphertext: vaultRecord.ciphertext,
     };
   }
+  if (includeKey && isVaultRecord(googleRecord)) backup.vaultGoogle = plainRecord(googleRecord);
   return backup;
 }
 
@@ -45,6 +48,8 @@ export function parseBackup(text) {
   if (!Array.isArray(data.runs)) return { ok: false, errors: ["The backup has no list of runs."] };
   if (data.settings !== undefined && !isObject(data.settings)) return { ok: false, errors: ["The settings in the backup are not valid."] };
   if (data.vault !== undefined && !isVaultRecord(data.vault)) return { ok: false, errors: ["The saved key in the backup is not valid."] };
+
+  if (data.vaultGoogle !== undefined && !isVaultRecord(data.vaultGoogle)) return { ok: false, errors: ["The saved Gemini key in the backup is not valid."] };
 
   const errors = [];
   data.runs.forEach((run, index) => {
@@ -78,5 +83,8 @@ export async function applyBackup(backup, { runStore, settingsStore, vault, mode
   if (typeof backup.settings?.shortcuts === "boolean") settingsStore.setShortcuts(backup.settings.shortcuts);
   if (isObject(backup.settings?.goKeys)) settingsStore.setGoKeys(backup.settings.goKeys);
   if (backup.vault && (mode === "replace" || !vault.hasStoredKey())) vault.importRecord(backup.vault);
+  if (typeof backup.settings?.freeTier?.google === "boolean") settingsStore.setFreeTier("google", backup.settings.freeTier.google);
+  const google = vault.forProvider?.("google");
+  if (google && backup.vaultGoogle && (mode === "replace" || !google.hasStoredKey())) google.importRecord(backup.vaultGoogle);
   return { added, skipped, failed };
 }

@@ -5,7 +5,7 @@ import { downloadFile } from "../download.js";
 import { outcomeNotice } from "../outcome-view.js";
 import { showCenterTip } from "../center-tip.js";
 import { refreshResultTab } from "../tab-state.js";
-import { MODELS, TASK_MAX_CHARS, LIMIT_MAX } from "../engine/catalog.js";
+import { TASK_MAX_CHARS, LIMIT_MAX, PROVIDER_IDS, PRICING_URLS, providerCatalog, paidOnlyModelUsed } from "../engine/catalog.js";
 import { PATTERNS, clampLimits } from "../engine/patterns.js";
 import { buildRunRecord, makeRunId, modelsUsed } from "../engine/run-record.js";
 import { startRun, RunStartError } from "../run-client.js";
@@ -64,6 +64,7 @@ function downloadButton(ctx, run) {
 }
 
 export function renderCreate(ctx) {
+  const vaultFor = (id) => (ctx.vault.forProvider ? ctx.vault.forProvider(id) : ctx.vault);
   const { doc, t } = ctx;
   if (draft.limits === null) draft.limits = { ...ctx.settings.get().limits };
   const root = ctx.main;
@@ -120,9 +121,18 @@ export function renderCreate(ctx) {
     function drawReview() {
       const design = draft.editor.design();
       const limits = clampLimits(draft.limits);
-      const summary = reviewSummary({ design, limits });
-      const apiKey = ctx.vault.getSessionKey();
-      const verdict = canRun({ task: taskInput.value, apiKey, editorErrors: draft.editor.errors(), keyLocked: apiKey === null && ctx.vault.hasStoredKey() });
+      // The provider is the first one that has a key, until the visitor chooses another.
+      if (!PROVIDER_IDS.includes(draft.provider)) draft.provider = PROVIDER_IDS.find((id) => vaultFor(id).getSessionKey() !== null || vaultFor(id).hasStoredKey()) ?? "anthropic";
+      const provider = draft.provider;
+      const pv = vaultFor(provider);
+      const catalog = providerCatalog(provider);
+      const summary = reviewSummary({ design, limits, provider });
+      const apiKey = pv.getSessionKey();
+      const verdict = canRun({ task: taskInput.value, apiKey, editorErrors: draft.editor.errors(), keyLocked: apiKey === null && pv.hasStoredKey() });
+      // A key the visitor marked as being on Google's free tier makes the run free, unless a model without a free tier is used.
+      const marked = provider === "google" && ctx.settings.get().freeTier.google === true;
+      const paidOnly = paidOnlyModelUsed(design, provider);
+      const isFree = marked && !paidOnly;
 
       const limitInputs = LIMIT_FIELDS.map(([key, labelKey]) => {
         const input = h(doc, "input", { id: `cr-${key}`, type: "number", min: key === "maxSearches" ? 0 : 1, max: LIMIT_MAX[key], step: 1, value: limits[key] });
@@ -139,7 +149,7 @@ export function renderCreate(ctx) {
             "ul",
             {},
             ...summary.agents.map((a) => {
-              const modelLabel = MODELS.find((m) => m.key === a.model)?.label ?? a.model;
+              const modelLabel = catalog.models.find((m) => m.key === a.model)?.label ?? a.model;
               return h(doc, "li", {}, `${a.label} — ${modelLabel}${a.search ? `, ${t("create.withSearch")}` : ""}`);
             }),
           )
@@ -147,21 +157,31 @@ export function renderCreate(ctx) {
 
       const est = summary.estimate;
       const estimateLines = [
-        h(doc, "p", {}, h(doc, "strong", {}, t("create.estimate", { usd: est.costUsd.toFixed(3), date: est.pricesAsOf }))),
+        h(doc, "p", {}, h(doc, "strong", { "data-ui": isFree ? "estimate-free" : "estimate-cost" }, isFree ? t("create.estimateFree") : t("create.estimate", { usd: est.costUsd.toFixed(3), date: est.pricesAsOf }))),
         h(doc, "p", { class: "hint" }, t("create.estimateDetail", { tokens: est.tokensUpper, turns: est.activations })),
       ];
-      if (summary.hasSearch) estimateLines.push(h(doc, "p", { class: "notice" }, t("create.estimateSearch", { usd: est.searchCostUsd.toFixed(2) })), h(doc, "p", { class: "notice" }, t("editor.searchFee")));
+      if (marked && paidOnly) estimateLines.push(h(doc, "p", { class: "notice", "data-ui": "free-tier-no-strong" }, t("create.freeTierNoStrong")));
+      if (summary.hasSearch && !isFree) {
+        estimateLines.push(h(doc, "p", { class: "notice" }, t(provider === "google" ? "create.estimateSearchGoogle" : "create.estimateSearch", { usd: est.searchCostUsd.toFixed(2) })));
+        estimateLines.push(h(doc, "p", { class: "notice" }, t(provider === "google" ? "editor.searchFeeGoogle" : "editor.searchFee")));
+      }
 
       // Key.
-      const keyParts = [];
+      const providerSelect = h(doc, "select", { id: "cr-provider", "data-ui": "provider-select" }, ...PROVIDER_IDS.map((id) => h(doc, "option", { value: id }, id === "google" ? "Gemini" : providerCatalog(id).label)));
+      providerSelect.value = provider;
+      providerSelect.addEventListener("change", () => {
+        draft.provider = providerSelect.value;
+        drawReview();
+      });
+      const keyParts = [h(doc, "div", { class: "field" }, h(doc, "label", { for: "cr-provider" }, t("create.providerLabel")), providerSelect)];
       if (apiKey === null) {
-        if (ctx.vault.hasStoredKey()) {
+        if (pv.hasStoredKey()) {
           const pass = h(doc, "input", { id: "cr-unlock", type: "password", autocomplete: "current-password" });
           const unlock = h(doc, "button", { type: "button" }, t("settings.unlock"));
           const message = h(doc, "p", { class: "notice", role: "alert", hidden: true });
           unlock.addEventListener("click", async () => {
             try {
-              await ctx.vault.unlock(pass.value);
+              await pv.unlock(pass.value);
               markUnlockAlert(doc, ctx.vault, t);
               drawReview();
             } catch (error) {
@@ -175,13 +195,14 @@ export function renderCreate(ctx) {
           const save = h(doc, "button", { type: "button" }, t("settings.keySave"));
           save.addEventListener("click", () => {
             if (keyInput.value.trim() === "") return;
-            ctx.vault.setSessionKey(keyInput.value.trim());
+            pv.setSessionKey(keyInput.value.trim());
             drawReview();
           });
-          keyParts.push(h(doc, "div", { class: "field" }, h(doc, "label", { for: "cr-key" }, t("create.keyInline")), keyInput), save, h(doc, "p", { class: "hint" }, h(doc, "a", { href: "#/settings" }, t("create.keySettingsLink"))));
+          keyParts.push(h(doc, "div", { class: "field" }, h(doc, "label", { for: "cr-key" }, t(provider === "google" ? "create.keyInlineGoogle" : "create.keyInline")), keyInput), save, h(doc, "p", { class: "hint" }, h(doc, "a", { href: "#/settings" }, t("create.keySettingsLink"))));
         }
       } else {
         keyParts.push(h(doc, "p", {}, t("settings.keyAvailable")));
+        if (provider === "google") keyParts.push(h(doc, "p", { class: "hint" }, h(doc, "a", { href: PRICING_URLS.google, target: "_blank", rel: "noopener noreferrer" }, t("settings.googlePricingLink"))));
       }
 
       const run = h(doc, "button", { type: "button", class: "primary run-button", disabled: !verdict.ok }, t("create.run"));
@@ -196,7 +217,7 @@ export function renderCreate(ctx) {
         ...limitInputs,
         h(doc, "h4", {}, t("create.estimateHeading")),
         ...estimateLines,
-        h(doc, "p", { class: "notice" }, t("create.dataNotice")),
+        h(doc, "p", { class: "notice" }, t(provider === "google" ? "create.dataNoticeGoogle" : "create.dataNotice")),
         h(doc, "h4", {}, t("create.keyHeading")),
         ...keyParts,
         reasons,
@@ -262,7 +283,9 @@ export function renderCreate(ctx) {
   function beginRun() {
     const design = draft.editor.design();
     const limits = clampLimits(draft.limits);
-    const apiKey = ctx.vault.getSessionKey();
+    const provider = PROVIDER_IDS.includes(draft.provider) ? draft.provider : "anthropic";
+    const apiKey = vaultFor(provider).getSessionKey();
+    const freeTier = provider === "google" && ctx.settings.get().freeTier.google === true;
     const task = draft.task.trim();
     if (!canRun({ task, apiKey, editorErrors: draft.editor.errors() }).ok) return;
 
@@ -281,7 +304,7 @@ export function renderCreate(ctx) {
       })(),
       userAgent: typeof navigator === "undefined" ? undefined : navigator.userAgent,
     };
-    const record = () => buildRunRecord({ id, design, task, events, limits, language: ctx.lang, appVersion: ctx.version, startedAt, endedAt, client });
+    const record = () => buildRunRecord({ id, design, task, events, limits, language: ctx.lang, appVersion: ctx.version, startedAt, endedAt, client, provider, freeTier });
     const saver = createBatchedSaver(ctx.runStore);
 
     const host = h(doc, "div", { class: "replay-host", "data-ui": "player-host" });
@@ -289,7 +312,7 @@ export function renderCreate(ctx) {
     // How the run ended is shown above the player, so it is the first thing seen when the run is over.
     const outcomeSlot = h(doc, "div", { class: "run-outcome-slot", "data-ui": "run-outcome-slot" });
     root.replaceChildren(outcomeSlot, host, after);
-    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: draft.pattern, recordedWith: { provider: "anthropic", model: modelsUsed(design) }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout });
+    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: draft.pattern, recordedWith: { provider, model: modelsUsed(design, provider) }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout });
     ctx.onLeave(live.destroy);
 
     let ended = false;
@@ -303,11 +326,12 @@ export function renderCreate(ctx) {
       const result = await ctx.runStore.save(finalRecord);
       activeRun = null;
       const done = events.at(-1);
-      const notice = outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: buildResultModel(finalRecord).cost });
+      const finalModel = buildResultModel(finalRecord);
+      const notice = outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: finalModel.cost, free: finalModel.free });
       notice.id = "run-outcome";
       if (result.ok) refreshResultTab(ctx);
       if (ctx.settings.get().tooltips) {
-        const tipNotice = outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: buildResultModel(finalRecord).cost });
+        const tipNotice = outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: finalModel.cost, free: finalModel.free });
         const tipContent = result.ok ? h(doc, "div", {}, tipNotice, h(doc, "p", { class: "center-tip-link" }, h(doc, "a", { href: `#/play/result/${id}`, "data-ui": "tip-see-result" }, t("create.seeResult")))) : tipNotice;
         // A run that did not finish well keeps its tooltip on the screen until the visitor closes it.
         const tip = showCenterTip({ doc, content: tipContent, sticky: done?.outcome !== "finished", closeLabel: t("about.close") });
@@ -332,6 +356,7 @@ export function renderCreate(ctx) {
       limits,
       language: ctx.lang,
       apiKey,
+      provider,
       onEvent: (event) => {
         events.push(event);
         live.append(event);

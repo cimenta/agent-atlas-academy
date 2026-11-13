@@ -15,7 +15,8 @@ export function createSettingsStore(storage) {
     }
     // Tooltips are on unless the user turned them off.
     // The player controls sit on one slim bar ("bar") unless the user chose the side column ("side").
-    return { limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, playerLayout: stored?.playerLayout === "side" ? "side" : "bar", shortcuts: stored?.shortcuts !== false, goKeys: mergeGoKeys(stored?.goKeys) };
+    const free = stored?.freeTier;
+    return { freeTier: { google: free?.google === true }, limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, playerLayout: stored?.playerLayout === "side" ? "side" : "bar", shortcuts: stored?.shortcuts !== false, goKeys: mergeGoKeys(stored?.goKeys) };
   }
   function save(next) {
     try {
@@ -28,6 +29,11 @@ export function createSettingsStore(storage) {
     get,
     setLimits(limits) {
       save({ ...get(), limits: clampLimits(limits) });
+    },
+    // Whether the key of a provider is on the provider's free tier (the visitor ticks it when the key is entered).
+    setFreeTier(provider, on) {
+      if (provider !== "google") return;
+      save({ ...get(), freeTier: { ...get().freeTier, [provider]: on === true } });
     },
     setTooltips(on) {
       save({ ...get(), tooltips: on !== false });

@@ -2,12 +2,12 @@
 import { h } from "./dom.js";
 import { describeOutcome, formatDuration, formatUsd, runOutcomeMessageKey } from "./create/create-model.js";
 
-export function outcomeNotice({ doc, t, outcome, events, cost, durationMs }) {
+export function outcomeNotice({ doc, t, outcome, events, cost, durationMs, free = false }) {
   const info = describeOutcome({ outcome, events, cost });
   const took = typeof durationMs === "number" ? durationMs : info.durationMs;
   const meta = [];
   if (took !== null) meta.push(t("run.outcome.took", { time: formatDuration(took) }));
-  if (info.cost !== null) meta.push(t("run.outcome.cost", { usd: formatUsd(info.cost) }));
+  if (info.cost !== null) meta.push(free ? t("run.outcome.costFree") : t("run.outcome.cost", { usd: formatUsd(info.cost) }));
   const reason = Array.isArray(events) ? events.findLast?.((e) => e?.type === "done")?.reason : undefined;
   const notice = h(
     doc,

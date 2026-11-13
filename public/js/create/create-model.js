@@ -1,5 +1,5 @@
 // Pure helpers for the Create page: may the run start, and what is shown in the review box.
-import { AGENT_TYPES, TASK_MAX_CHARS } from "../engine/catalog.js";
+import { AGENT_TYPES, TASK_MAX_CHARS, pricesFor } from "../engine/catalog.js";
 import { estimateRun } from "../engine/estimate.js";
 import { TOOLS } from "../engine/tools.js";
 
@@ -14,10 +14,10 @@ export function canRun({ task, apiKey, editorErrors, keyLocked = false }) {
   return { ok: reasons.length === 0, reasons };
 }
 
-export function reviewSummary({ design, limits }) {
+export function reviewSummary({ design, limits, provider = "anthropic" }) {
   return {
     agents: design.nodes.map((n) => ({ id: n.id, label: n.name || AGENT_TYPES[n.agent]?.label || n.agent, model: n.model, search: n.search })),
-    estimate: estimateRun(design, limits),
+    estimate: estimateRun(design, limits, pricesFor(provider)),
     hasSearch: design.nodes.some((n) => n.search === true && TOOLS.web_search.extraFee === true),
   };
 }

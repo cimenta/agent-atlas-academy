@@ -25,7 +25,7 @@ export function renderResult(ctx, run) {
   const ui = { tab: "answer", view: "formatted", q: "" };
 
   const head = h(doc, "div", { class: "result-head" }, h(doc, "h2", {}, t("result.title", { title: run.title })));
-  const outcome = outcomeNotice({ doc, t, outcome: model.status, events: run.events, cost: model.cost, durationMs: stats.totalMs });
+  const outcome = outcomeNotice({ doc, t, outcome: model.status, events: run.events, cost: model.cost, free: model.free, durationMs: stats.totalMs });
   outcome.append(h(doc, "a", { href: `#/play/run/${run.id}`, class: "outcome-link" }, t("result.watch")));
   const tabs = h(doc, "div", { class: "result-tabs", role: "tablist", "data-ui": "result-tabs" });
   const body = h(doc, "div", { class: "result-body", "data-ui": "result-body" });
@@ -120,7 +120,7 @@ export function renderResult(ctx, run) {
       "div",
       { class: "stats", "data-ui": "stats-tiles" },
       tile(stats.totalMs === null ? "—" : formatDuration(stats.totalMs), t("stats.time")),
-      tile(stats.cost === null ? "—" : `≈ $${formatUsd(stats.cost)}`, t("stats.cost")),
+      tile(stats.cost === null ? "—" : stats.free ? t("stats.free") : `≈ $${formatUsd(stats.cost)}`, t("stats.cost")),
       tile(num(stats.usage.input), t("stats.inputTokens")),
       tile(num(stats.usage.output), t("stats.outputTokens")),
       tile(num(stats.usage.searches), t("stats.searches")),

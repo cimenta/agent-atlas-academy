@@ -8,7 +8,6 @@ export class VaultError extends Error {
   }
 }
 
-const STORAGE_KEY = "aa.vault";
 const MIN_PASSPHRASE = 8;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -20,7 +19,11 @@ const toBase64 = (bytes) => {
 };
 const fromBase64 = (text) => Uint8Array.from(atob(text), (c) => c.charCodeAt(0));
 
-export function createVault({ storage, cryptoImpl = globalThis.crypto, iterations = 600000 }) {
+// The first provider (Anthropic) keeps its record under "aa.vault", as before; every other provider has its own
+// record, "aa.vault.<provider>", with its own passphrase and its own key in memory.
+export function createVault({ storage, cryptoImpl = globalThis.crypto, iterations = 600000, storageKey = "aa.vault" }) {
+  const STORAGE_KEY = storageKey;
+  const others = new Map();
   let sessionKey = null;
   const subtle = cryptoImpl.subtle;
 
@@ -85,7 +88,12 @@ export function createVault({ storage, cryptoImpl = globalThis.crypto, iteration
     }
   }
 
-  return {
+  const self = {
+    forProvider(id) {
+      if (id === "anthropic") return self;
+      if (!others.has(id)) others.set(id, createVault({ storage, cryptoImpl, iterations, storageKey: `aa.vault.${id}` }));
+      return others.get(id);
+    },
     setSessionKey(key) {
       sessionKey = typeof key === "string" && key !== "" ? key : null;
     },
@@ -137,4 +145,5 @@ export function createVault({ storage, cryptoImpl = globalThis.crypto, iteration
       await save(key, newPassphrase);
     },
   };
+  return self;
 }
