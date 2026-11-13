@@ -48,6 +48,12 @@ export function renderSettings(ctx) {
       passBlock.hidden = !rememberBox.checked;
       saveButton.textContent = t(rememberBox.checked ? "settings.keySaveDevice" : "settings.keySave");
     });
+    // Enter in the key or the passphrase box saves the key.
+    for (const input of [keyInput, passInput]) {
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") saveButton.click();
+      });
+    }
     saveButton.addEventListener("click", async () => {
       const key = keyInput.value.trim();
       if (key === "") return say(t("settings.error.emptyKey"), true);
@@ -190,6 +196,11 @@ export function renderSettings(ctx) {
     changePanel.hidden = true;
     setNote(changeNote, "");
   });
+  for (const input of [oldPass, newPass]) {
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") changeGo.click();
+    });
+  }
   changeGo.addEventListener("click", async () => {
     try {
       await sv().changePassphrase(oldPass.value, newPass.value);

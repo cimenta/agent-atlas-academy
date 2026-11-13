@@ -187,6 +187,9 @@ export function renderCreate(ctx) {
           const pass = h(doc, "input", { id: "cr-unlock", type: "password", autocomplete: "current-password" });
           const unlock = h(doc, "button", { type: "button" }, t("settings.unlock"));
           const message = h(doc, "p", { class: "notice", role: "alert", hidden: true });
+          pass.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") unlock.click();
+          });
           unlock.addEventListener("click", async () => {
             try {
               await (ctx.vault.unlockAll ? ctx.vault.unlockAll(pass.value) : pv.unlock(pass.value));
@@ -201,6 +204,9 @@ export function renderCreate(ctx) {
         } else {
           const keyInput = h(doc, "input", { id: "cr-key", type: "password", autocomplete: "off", spellcheck: "false" });
           const save = h(doc, "button", { type: "button" }, t("settings.keySave"));
+          keyInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") save.click();
+          });
           save.addEventListener("click", () => {
             if (keyInput.value.trim() === "") return;
             pv.setSessionKey(keyInput.value.trim());
@@ -349,7 +355,7 @@ export function renderCreate(ctx) {
         const tipNotice = outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: finalModel.cost, free: finalModel.free });
         const tipContent = result.ok ? h(doc, "div", {}, tipNotice, h(doc, "p", { class: "center-tip-link" }, h(doc, "a", { href: `#/play/result/${id}`, "data-ui": "tip-see-result" }, t("create.seeResult")))) : tipNotice;
         // A run that did not finish well keeps its tooltip on the screen until the visitor closes it.
-        const tip = showCenterTip({ doc, content: tipContent, sticky: done?.outcome !== "finished", closeLabel: t("about.close") });
+        const tip = showCenterTip({ doc, content: tipContent, sticky: done?.outcome !== "finished", closeLabel: t("about.close"), moveLabel: t("about.move") });
         ctx.onLeave(tip.close);
       }
       outcomeSlot.replaceChildren(notice);

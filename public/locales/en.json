@@ -548,6 +548,7 @@
   "about.empty": "There is nothing about this run yet. Press Edit to add a title, author, link and description.",
   "about.emptyReadonly": "This run has no information about it.",
   "about.edit": "Edit",
+  "about.move": "Drag to move",
   "about.close": "Close",
   "about.save": "Save",
   "about.cancel": "Cancel",

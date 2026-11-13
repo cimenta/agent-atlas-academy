@@ -13,10 +13,10 @@ export function dragPosition({ pointer, grab, size, viewport }) {
   return { left: clamp(pointer.x - grab.x, viewport.width - size.width), top: clamp(pointer.y - grab.y, viewport.height - size.height) };
 }
 
-export function showCenterTip({ doc, content, ms = CENTER_TIP_MS, sticky = false, closeLabel = "Close", setTimer = setTimeout, clearTimer = clearTimeout }) {
+export function showCenterTip({ doc, content, ms = CENTER_TIP_MS, sticky = false, closeLabel = "Close", moveLabel = "Drag to move", setTimer = setTimeout, clearTimer = clearTimeout }) {
   const closeButton = sticky ? h(doc, "button", { type: "button", class: "center-tip-close", "data-ui": "center-tip-close" }, closeLabel) : "";
   // The grip at the top moves the tip aside, so what is behind it can be read.
-  const grip = h(doc, "div", { class: "center-tip-grip", "data-ui": "center-tip-grip", "aria-hidden": "true" });
+  const grip = h(doc, "div", { class: "center-tip-grip", "data-ui": "center-tip-grip", title: moveLabel, "aria-hidden": "true" }, h(doc, "span", { class: "center-tip-dots" }, "\u22EE\u22EE"), moveLabel);
   const tip = h(doc, "div", { class: sticky ? "center-tip sticky" : "center-tip", "data-ui": "center-tip" }, grip, content, closeButton);
   let drag = null;
   grip.addEventListener("pointerdown", (event) => {

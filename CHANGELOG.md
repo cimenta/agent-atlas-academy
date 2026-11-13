@@ -19,7 +19,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 ### Changed
 
 
-- The tooltip in the middle of the screen has a grip at the top; drag it aside to read what is behind it.
+- Enter works in the API key and passphrase boxes: it saves the key, unlocks a saved key or confirms a passphrase change.
+- The tooltip in the middle of the screen has a coloured bar at the top that says Drag to move; drag it aside to read what is behind it.
 - Create, Gemini: a free-tier key with web search switched on shows a note that Google may not include search in the free tier, and a quota error from a search agent starts with a bold line that says to turn web search off.
 - Create: the provider is chosen above the agents, before the diagram is built.
 - Create: with a Gemini key marked as free tier, the model list of an agent offers only the models that have a free tier.
