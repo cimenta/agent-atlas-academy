@@ -822,3 +822,10 @@ a.art-pill:hover { text-decoration: underline; }
 /* A saved key: the form is hidden until Replace key is pressed, then a warm note says what saving does. */
 .key-form[hidden], .replace-note[hidden] { display: none; }
 .replace-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 12px; padding: 8px 12px; border-radius: 8px; background: var(--working-bg); color: var(--working); font-size: 0.9rem; }
+
+/* The tip can be dragged by its grip, so what is behind it can be read. */
+.center-tip-grip { height: 14px; cursor: grab; touch-action: none; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
+.center-tip-grip::before { content: ""; width: 36px; height: 4px; border-radius: 2px; background: var(--border); }
+.center-tip-grip:active { cursor: grabbing; }
+.center-tip.moved { transform: none; }
+.banner-fix { display: block; margin-bottom: 6px; font-weight: 700; }

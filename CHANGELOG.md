@@ -19,7 +19,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 ### Changed
 
 
-- Create, Gemini: a free-tier key with web search switched on shows a note that Google may not include search in the free tier, and a quota error from a search agent says so.
+- The tooltip in the middle of the screen has a grip at the top; drag it aside to read what is behind it.
+- Create, Gemini: a free-tier key with web search switched on shows a note that Google may not include search in the free tier, and a quota error from a search agent starts with a bold line that says to turn web search off.
 - Create: the provider is chosen above the agents, before the diagram is built.
 - Create: with a Gemini key marked as free tier, the model list of an agent offers only the models that have a free tier.
 - Create: the model list of an agent shows the models of the chosen provider (Gemini ids when Gemini is chosen), not always the Claude ones.

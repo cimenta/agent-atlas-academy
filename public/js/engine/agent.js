@@ -50,7 +50,7 @@ export function createAgent({ node, design = null, call, emit, budget, signal, l
       return await request();
     } catch (error) {
       if (!(error instanceof AnthropicError) || !error.retryable) throw error;
-      emit({ type: "warning", agent: node.id, message: `The provider was busy (${redact(error.message)}). Trying once more.` });
+      emit({ type: "warning", agent: node.id, message: `The provider was busy (${redact(error.message.split("\n\n").at(-1))}). Trying once more.` });
       await sleep(RETRY_DELAY_MS);
       return request();
     }

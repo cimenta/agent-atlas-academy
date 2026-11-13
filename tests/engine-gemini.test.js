@@ -107,3 +107,15 @@ test("a missing key is refused before any request", async () => {
 test("redact also hides anything shaped like a Google key", () => {
   assert.equal(redact(`oops ${KEY} here`), "oops [redacted] here");
 });
+
+test("a quota error from a request with web search puts the way out first", async () => {
+  const body = { model: "m", messages: [], tools: [{ type: "web_search_20250305", name: "web_search" }] };
+  await assert.rejects(
+    callGemini(body, { apiKey: KEY, fetchImpl: async () => errResponse(429, "You exceeded your current quota") }),
+    (e) => /^This agent uses web search/.test(e.message) && e.message.includes("\n\nYou exceeded your current quota"),
+  );
+  await assert.rejects(
+    callGemini({ model: "m", messages: [] }, { apiKey: KEY, fetchImpl: async () => errResponse(429, "You exceeded your current quota") }),
+    (e) => e.message === "You exceeded your current quota",
+  );
+});

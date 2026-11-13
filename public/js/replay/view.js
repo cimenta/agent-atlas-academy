@@ -414,7 +414,11 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
 
   function renderBanners() {
     const items = [];
-    if (state.error) items.push(h(doc, "div", { class: "banner" }, state.error));
+    if (state.error) {
+      // A message that starts with the way out (then a blank line and the provider's own text) shows it first, in bold.
+      const [first, ...rest] = state.error.split("\n\n");
+      items.push(h(doc, "div", { class: "banner" }, ...(rest.length ? [h(doc, "strong", { class: "banner-fix" }, first), rest.join("\n\n")] : [first])));
+    }
     for (const w of state.warnings) items.push(h(doc, "div", { class: "banner warn" }, `⚠ ${w}`));
     banners.replaceChildren(...items);
   }

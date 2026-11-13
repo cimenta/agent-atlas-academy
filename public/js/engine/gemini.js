@@ -85,7 +85,7 @@ export async function callGemini(body, { apiKey, fetchImpl = fetch, signal, time
   if (!response.ok) {
     let message = redact(data?.error?.message, apiKey) || `Google answered with status ${response.status}`;
     // On the free tier the quota of Google Search grounding can be zero, which looks like a plain quota error.
-    if (response.status === 429 && /quota/i.test(message) && Array.isArray(body.tools) && body.tools.length > 0) message += " (This agent uses web search; on the free tier its quota may be zero. Turn web search off and try again.)";
+    if (response.status === 429 && /quota/i.test(message) && Array.isArray(body.tools) && body.tools.length > 0) message = `This agent uses web search. On the free tier its quota may be zero: turn web search off for this agent and try again.\n\n${message}`;
     throw new AnthropicError(message, { status: response.status, retryable: RETRYABLE_STATUS.has(response.status) });
   }
   const answer = fromGeminiResponse(data);
