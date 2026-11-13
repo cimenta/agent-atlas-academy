@@ -1,6 +1,7 @@
 // The Create tab: task, pattern, diagram, review, then a live run in the player.
 import { h } from "../dom.js";
 import { markUnlockAlert } from "../unlock-alert.js";
+import { keyState } from "../key-state.js";
 import { downloadFile } from "../download.js";
 import { outcomeNotice } from "../outcome-view.js";
 import { showCenterTip } from "../center-tip.js";
@@ -118,14 +119,40 @@ export function renderCreate(ctx) {
     };
 
     // Provider: chosen before the agents, because the models of the agents are the models of the provider.
-    const providerSelect = h(doc, "select", { id: "cr-provider", "data-ui": "provider-select" }, ...PROVIDER_IDS.map((id) => h(doc, "option", { value: id }, id === "google" ? "Gemini" : providerCatalog(id).label)));
-    providerSelect.value = currentProvider();
-    providerSelect.addEventListener("change", () => {
-      draft.provider = providerSelect.value;
-      editorHandle.refresh();
-      drawReview();
-    });
-    const providerField = h(doc, "div", { class: "field provider-field", "data-ui": "provider-field" }, h(doc, "label", { for: "cr-provider" }, t("create.providerLabel")), providerSelect, h(doc, "p", { class: "hint" }, t("create.providerHint")));
+    // One tile for each provider: its mark, its name and a dot (green: key loaded, yellow: key saved but locked, none: no key).
+    const providerTiles = h(doc, "div", { class: "provider-tiles", role: "radiogroup", "aria-label": t("create.providerLabel"), "data-ui": "provider-tiles" });
+    const MARKS = { anthropic: "A", google: "G" };
+    const drawProviderTiles = () => {
+      const chosen = currentProvider();
+      providerTiles.replaceChildren(
+        ...PROVIDER_IDS.map((id) => {
+          const state = keyState(vaultFor(id));
+          const selected = id === chosen;
+          const name = id === "google" ? "Gemini" : providerCatalog(id).label;
+          const noKey = state === "none" && !selected;
+          const free = id === "google" && state !== "none" && ctx.settings.get().freeTier.google === true;
+          const sub = noKey ? t("create.providerAddKey") : free ? t("create.providerFree") : "";
+          const dotText = t(state === "locked" ? "settings.dotLocked" : "settings.dotLoaded");
+          const parts = [
+            h(doc, "span", { class: `pv-mark pv-${id}`, "aria-hidden": "true" }, MARKS[id]),
+            h(doc, "span", { class: "pv-text" }, h(doc, "span", { class: "pv-name" }, name), ...(sub ? [h(doc, "span", { class: "pv-sub" }, sub)] : [])),
+            ...(state === "none" ? [] : [h(doc, "span", { class: `pv-dot ${state === "locked" ? "yellow" : "green"}`, role: "img", "aria-label": dotText, title: dotText })]),
+          ];
+          // A provider without a key is a link to Settings, unless it is the one chosen (its key is entered below).
+          if (noKey) return h(doc, "a", { class: "provider-tile dim", href: "#/settings", "data-ui": `provider-tile-${id}`, title: t("create.providerAddKey") }, ...parts);
+          const tile = h(doc, "button", { type: "button", class: `provider-tile${selected ? " on" : ""}`, role: "radio", "aria-checked": String(selected), "data-ui": `provider-tile-${id}` }, ...parts);
+          tile.addEventListener("click", () => {
+            draft.provider = id;
+            editorHandle.refresh();
+            drawReview();
+          });
+          return tile;
+        }),
+      );
+    };
+    const legendItem = (cls, text) => h(doc, "span", {}, ...(cls ? [h(doc, "i", { class: `pv-lg ${cls}` })] : []), text);
+    const providerLegend = h(doc, "div", { class: "pv-legend", "data-ui": "provider-legend" }, legendItem("green", t("create.legendLoaded")), legendItem("yellow", t("create.legendLocked")), legendItem("", t("create.legendNone")));
+    const providerField = h(doc, "div", { class: "field provider-field", "data-ui": "provider-field" }, h(doc, "p", { class: "pv-title" }, t("create.providerLabel")), providerTiles, providerLegend, h(doc, "p", { class: "hint" }, t("create.providerHint")));
 
     // Editor.
     const editorHost = h(doc, "div", { class: "editor-host", "data-ui": "editor" });
@@ -137,6 +164,7 @@ export function renderCreate(ctx) {
       const design = draft.editor.design();
       const limits = clampLimits(draft.limits);
       const provider = currentProvider();
+      drawProviderTiles();
       const pv = vaultFor(provider);
       const catalog = providerCatalog(provider);
       const summary = reviewSummary({ design, limits, provider });

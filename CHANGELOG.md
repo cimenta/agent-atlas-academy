@@ -19,6 +19,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 ### Changed
 
 
+- Create: the provider is chosen with a tile for each provider instead of a dropdown. A dot says what the key is doing: green when it is loaded and can be used, yellow when it is saved but locked, none when there is no key. Settings uses the same dots on the provider tabs and the API keys tab, and the text key saved is gone.
 - Enter works in the API key and passphrase boxes: it saves the key, unlocks a saved key or confirms a passphrase change.
 - The tooltip in the middle of the screen has a coloured bar at the top that says Drag to move; drag it aside to read what is behind it.
 - Create, Gemini: a free-tier key with web search switched on shows a note that Google may not include search in the free tier, and a quota error from a search agent starts with a bold line that says to turn web search off.

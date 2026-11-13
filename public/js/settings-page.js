@@ -2,6 +2,7 @@
 import { h } from "./dom.js";
 import { LIMIT_MAX, PROVIDER_IDS, PRICING_URLS, providerCatalog } from "./engine/catalog.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
+import { keyState, overallKeyState } from "./key-state.js";
 import { DEFAULT_GO_KEYS } from "./shortcuts.js";
 import { buildShortcutList } from "./shortcut-list.js";
 import { VaultError } from "./storage/key-vault.js";
@@ -111,12 +112,21 @@ export function renderSettings(ctx) {
   // The provider whose key the Security tab works on.
   let secProvider = "anthropic";
   const sv = () => vaultOf(secProvider);
+  // The dot of a key: green when it is loaded, yellow when it is saved but needs unlocking, hidden when there is no key.
+  const setDot = (dot, state, base) => {
+    dot.hidden = state === "none";
+    dot.setAttribute("class", `${base}${state === "locked" ? " locked" : ""}`);
+    const text = t(state === "locked" ? "settings.dotLocked" : "settings.dotLoaded");
+    dot.setAttribute("title", text);
+    dot.setAttribute("aria-label", text);
+  };
   const refreshStatus = () => {
-    for (const id of PROVIDER_IDS) {
+    const states = PROVIDER_IDS.map((id) => keyState(vaultOf(id)));
+    PROVIDER_IDS.forEach((id, i) => {
       keyPanels[id].refresh();
-      providerDots[id].hidden = !keyPanels[id].has();
-    }
-    keyTag.hidden = !PROVIDER_IDS.some((id) => keyPanels[id].has());
+      setDot(providerDots[id], states[i], "key-dot");
+    });
+    setDot(keyTag, overallKeyState(states), "key-dot key-dot-inline");
     lockedTag.hidden = !needsUnlock(vault);
     markUnlockAlert(doc, vault, t);
     const stored = sv().hasStoredKey();
@@ -406,7 +416,7 @@ export function renderSettings(ctx) {
     providerButtons.forEach((b) => b.setAttribute("aria-selected", String(b.getAttribute("data-provider") === id)));
   };
   const providerButtons = PROVIDER_IDS.map((id) => {
-    providerDots[id] = h(doc, "span", { class: "key-dot", "data-ui": `provider-dot-${id}`, title: t("settings.keySavedTag"), role: "img", "aria-label": t("settings.keySavedTag"), hidden: true });
+    providerDots[id] = h(doc, "span", { class: "key-dot", "data-ui": `provider-dot-${id}`, role: "img", hidden: true });
     const button = h(doc, "button", { type: "button", class: "tab provider-tab", role: "tab", "data-provider": id, "data-ui": `provider-tab-${id}` }, id === "google" ? "Gemini" : providerCatalog(id).label, providerDots[id]);
     button.addEventListener("click", () => showProvider(id));
     return button;
@@ -480,7 +490,7 @@ export function renderSettings(ctx) {
   ];
   const [keySection, limitsSection, tooltipsSection, playerSection, shortcutsSection, dataSection, securitySection] = written;
   // Tabs down the left (a row on a phone); one section is shown at a time.
-  const keyTag = h(doc, "span", { class: "tag-saved", "data-ui": "key-saved-tag", hidden: true }, t("settings.keySavedTag"));
+  const keyTag = h(doc, "span", { class: "key-dot key-dot-inline", "data-ui": "key-saved-tag", role: "img", hidden: true });
   const panels = [
     ["key", "settings.tabKeys", keySection],
     ["limits", "settings.limitsHeading", limitsSection],
