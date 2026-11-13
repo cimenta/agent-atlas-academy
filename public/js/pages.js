@@ -66,7 +66,7 @@ export async function renderLanding(ctx) {
   // On a phone a small decorative replay sits above the headline (hidden on wide screens).
   const mini = createMiniReplay({ doc, t, h });
   ctx.onLeave(mini.destroy);
-  show(ctx, mini.element, h(doc, "h1", {}, t("landing.title")), h(doc, "p", { class: "lead" }, t("landing.intro")), about, taskBar, host);
+  show(ctx, mini.element, h(doc, "h1", {}, t("landing.title")), h(doc, "p", { class: "lead lead-wide" }, t("landing.intro")), about, taskBar, host);
   try {
     const index = await getJson(ctx, "/runs/index.json");
     const first = pickHomeRun(index.runs);

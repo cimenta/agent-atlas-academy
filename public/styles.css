@@ -760,3 +760,4 @@ kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem;
 .about-watch { background: var(--accent-bg); color: var(--accent); }
 .about-compare { background: var(--done-bg); color: var(--done); }
 .about-try { background: var(--working-bg); color: var(--working); }
+.lead.lead-wide { max-width: none; }
