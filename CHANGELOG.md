@@ -17,6 +17,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 - Keyboard shortcuts: g then p, c, r, l, h, a, s or 0 goes to a page. Space plays or pauses, the arrows step (up restarts, down jumps to the end), Home and End do the same, [ and ] change the speed, 1 2 3 switch the inspector tabs, and Esc asks before stopping a live run. Slash searches the library and a question mark opens a small popup with the list. The Shortcuts tab in Settings turns them off and lets you change the letter after g.
 
 ### Changed
+- Article page: the section and the reading time are above the title, and the summary is a highlighted "In short" box under it.
 - Help: the topics are listed on the left and one is shown at a time, with a search next to the title that looks in all of them. The help now covers the Settings tabs and the keyboard shortcuts.
 - Learn, article page: a breadcrumb, the summary, the section and the reading time on top, related articles as cards with a short description, and links to the previous and next article of the section at the bottom.
 - Learn: a search box on top that looks inside every article and shows a short snippet, the sections on the left with article counts (chips on a phone), and compact rows instead of long lists.

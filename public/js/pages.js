@@ -210,15 +210,12 @@ export async function renderArticle(ctx, slug) {
   const summary = current?.summary || article.meta.summary || "";
   const sectionName = section && SECTION_ORDER.includes(section) ? t(`learn.section.${section}`) : "";
 
-  const nodes = [
-    h(doc, "p", { class: "article-crumb", "data-ui": "article-crumb" }, h(doc, "a", { href: "#/learn" }, t("learn.title")), sectionName ? ` / ${sectionName}` : ""),
-    h(doc, "h1", {}, title),
-  ];
-  if (summary) nodes.push(h(doc, "p", { class: "article-lead", "data-ui": "article-lead" }, summary));
+  // The section (a link back to Learn) and the reading time sit above the title; the summary is a box under it.
   const meta = h(doc, "p", { class: "article-meta", "data-ui": "article-meta" });
-  if (sectionName) meta.append(h(doc, "span", { class: "art-pill" }, sectionName));
+  if (sectionName) meta.append(h(doc, "a", { class: "art-pill", href: "#/learn", title: t("learn.back") }, sectionName));
   meta.append(h(doc, "span", { class: "art-pill art-pill-muted" }, t("learn.readTime", { n: readingMinutes(article.blocks) })));
-  nodes.push(meta);
+  const nodes = [meta, h(doc, "h1", {}, title)];
+  if (summary) nodes.push(h(doc, "p", { class: "article-lead", "data-ui": "article-lead" }, h(doc, "b", {}, t("learn.inShort")), ` ${summary}`));
   if (article.meta?.coming === "true") nodes.push(h(doc, "p", { class: "notice coming", "data-ui": "learn-coming-notice" }, t("learn.comingNotice")));
   if (article.isFallback) nodes.push(h(doc, "p", { class: "notice" }, t("learn.fallbackNotice")));
   nodes.push(h(doc, "article", { class: "article" }, renderBlocks(article.blocks, doc)));

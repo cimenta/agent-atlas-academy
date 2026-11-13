@@ -51,6 +51,7 @@
   "learn.results": "Nalezeno článků: {n}",
   "learn.noResults": "Žádný článek neodpovídá.",
   "learn.readTime": "{n} min čtení",
+  "learn.inShort": "Ve zkratce.",
   "learn.section.basics": "Základy",
   "learn.section.orchestration": "Vzory orchestrace",
   "learn.section.memory": "Paměť",

@@ -786,10 +786,9 @@ kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem;
 }
 
 /* Article page: breadcrumb, summary, section and reading time, related cards, previous and next. */
-.article-crumb { margin: 0 0 6px; font-size: 0.85rem; color: var(--muted); }
-.article-lead { margin: 0 0 10px; color: var(--muted); font-size: 1.05rem; }
-.article-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
-.art-pill { padding: 1px 10px; font-size: 0.75rem; font-weight: 600; border-radius: 999px; background: var(--accent-bg); color: var(--accent); }
+.article-lead { margin: 10px 0 14px; padding: 8px 12px; color: var(--text); border-left: 3px solid var(--accent-line); background: var(--accent-bg); border-radius: 0 10px 10px 0; }
+.article-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 6px; }
+.art-pill { padding: 1px 10px; font-size: 0.75rem; font-weight: 600; border-radius: 999px; background: var(--accent-bg); color: var(--accent); text-decoration: none; }
 .art-pill.art-pill-muted { background: var(--surface); color: var(--muted); font-weight: 400; }
 .rel-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
 .rel-card { display: block; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text); background: var(--card); }
@@ -806,3 +805,6 @@ kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem;
 .help-head .learn-search { width: 100%; max-width: 280px; margin: 0; }
 .help-topic h2 { margin-top: 0; font-size: 1.15rem; }
 .help-topic + .help-topic { margin-top: 20px; }
+
+.article-lead b { font-weight: 600; }
+a.art-pill:hover { text-decoration: underline; }

@@ -51,6 +51,7 @@
   "learn.results": "{n} articles found",
   "learn.noResults": "No article matches.",
   "learn.readTime": "{n} min read",
+  "learn.inShort": "In short.",
   "learn.section.basics": "Basics",
   "learn.section.orchestration": "Orchestration patterns",
   "learn.section.memory": "Memory",
