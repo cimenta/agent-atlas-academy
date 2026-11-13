@@ -4,6 +4,7 @@ import { pickHomeRun } from "./play-model.js";
 import { renderBlocks } from "./render.js";
 import { SECTION_ORDER, loadArticle, loadArticleIndex, loadPage } from "./content.js";
 import { mountReplay } from "./replay/view.js";
+import { createMiniReplay } from "./mini-replay.js";
 
 const RUN_ID = /^[a-z0-9-]+$/;
 const LOOP_WAIT_MS = 5000;
@@ -62,7 +63,10 @@ export async function renderLanding(ctx) {
       ...["watch", "compare", "try"].map((key) => h(doc, "div", { class: "about-box" }, h(doc, "b", {}, t(`landing.${key}.title`)), t(`landing.${key}.text`))),
     ),
   );
-  show(ctx, h(doc, "h1", {}, t("landing.title")), h(doc, "p", { class: "lead" }, t("landing.intro")), about, taskBar, host);
+  // On a phone a small decorative replay sits above the headline (hidden on wide screens).
+  const mini = createMiniReplay({ doc, t, h });
+  ctx.onLeave(mini.destroy);
+  show(ctx, mini.element, h(doc, "h1", {}, t("landing.title")), h(doc, "p", { class: "lead" }, t("landing.intro")), about, taskBar, host);
   try {
     const index = await getJson(ctx, "/runs/index.json");
     const first = pickHomeRun(index.runs);
