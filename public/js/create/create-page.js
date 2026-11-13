@@ -173,6 +173,7 @@ export function renderCreate(ctx) {
         h(doc, "p", {}, h(doc, "strong", { "data-ui": isFree ? "estimate-free" : "estimate-cost" }, isFree ? t("create.estimateFree") : t("create.estimate", { usd: est.costUsd.toFixed(3), date: est.pricesAsOf }))),
         h(doc, "p", { class: "hint" }, t("create.estimateDetail", { tokens: est.tokensUpper, turns: est.activations })),
       ];
+      if (marked && summary.hasSearch) estimateLines.push(h(doc, "p", { class: "notice", "data-ui": "free-tier-search" }, t("create.freeTierSearch")));
       if (marked && paidOnly) estimateLines.push(h(doc, "p", { class: "notice", "data-ui": "free-tier-no-strong" }, t("create.freeTierNoStrong")));
       if (summary.hasSearch && !isFree) {
         estimateLines.push(h(doc, "p", { class: "notice" }, t(provider === "google" ? "create.estimateSearchGoogle" : "create.estimateSearch", { usd: est.searchCostUsd.toFixed(2) })));
