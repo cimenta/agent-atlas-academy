@@ -35,6 +35,9 @@ const defaultClock = {
   clearTimeout: (id) => globalThis.clearTimeout(id),
 };
 
+// The provider as it is written in a sentence: anthropic becomes Anthropic.
+const PROVIDER_NAMES = { anthropic: "Anthropic", openai: "OpenAI", gemini: "Gemini", google: "Google" };
+const providerName = (id) => PROVIDER_NAMES[id] ?? (typeof id === "string" && id !== "" ? id[0].toUpperCase() + id.slice(1) : "");
 const fmt = (ms) => (ms == null ? "" : ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`);
 
 function mountError(container, doc, t, errors) {
@@ -130,6 +133,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   const speedGroup = sideLayout
     ? iconButton({ class: "ib speed-cycle", "data-ui": "speed-cycle" }, "", t("player.speedLabel"))
     : h(doc, "div", { class: "speed", "data-ui": "speed-buttons", role: "group", "aria-label": t("player.speedLabel") }, ...speedButtons);
+  // On a narrow screen the bar shows one button that cycles through the speeds instead of one for each.
+  const speedMobile = sideLayout ? null : iconButton({ class: "ib speed-mobile", "data-ui": "speed-cycle-mobile" }, "", t("player.speedLabel"));
   const range = h(doc, "input", { type: "range", "data-ui": "player-slider", min: 0, max: events.length, step: 1, value: 0, "aria-label": t("player.progress") });
   const status = h(doc, "div", { class: "status", "data-ui": "player-status", "aria-live": "polite" });
   const banners = h(doc, "div", { class: "banners", "data-ui": "run-banners" });
@@ -187,17 +192,16 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       doc,
       "div",
       { class: "player-head", "data-ui": "player-head" },
-      h(doc, "div", { class: "player-title" }, h(doc, "h2", {}, ...headingParts(), liveBadge), pattern ? h(doc, "span", { class: `type-chip type-${pattern}`, "data-ui": "player-pattern" }, t(`pattern.${pattern}`)) : ""),
+      h(doc, "div", { class: "player-title" }, h(doc, "h2", {}, ...headingParts(), liveBadge), pattern ? h(doc, "span", { class: `type-chip type-${pattern}`, "data-ui": "player-pattern" }, t(`pattern.${pattern}`)) : "", h(doc, "span", { class: "recorded", "data-ui": "recorded-with" }, t("player.recordedWith", { provider: providerName(recordedWith.provider) }))),
       exportButton,
     ),
     aboutPanel ? aboutPanel.element : "",
-    h(doc, "p", { class: "recorded" }, t("player.recordedWith", { provider: recordedWith.provider })),
     banners,
     // Side layout: the buttons form a narrow column to the right of the diagram, slider and status.
     // Bar layout: one slim line under the diagram holds buttons, slider and speed.
     ...(sideLayout
       ? [h(doc, "div", { class: "player-row", "data-ui": "player-row" }, h(doc, "div", { class: "player-stage" }, chips, range, status), h(doc, "div", { class: "controls controls-col", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, speedGroup))]
-      : [chips, h(doc, "div", { class: "controls controls-bar", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, range, speedGroup), status]),
+      : [chips, h(doc, "div", { class: "controls controls-bar", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, range, speedGroup, speedMobile), status]),
     tabRow,
     body,
   );
@@ -424,6 +428,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     playButton.setAttribute("title", playName);
     playButton.setAttribute("aria-label", playName);
     if (sideLayout) speedGroup.textContent = t("player.speedOption", { speed: player.speed });
+    else speedMobile.textContent = t("player.speedOption", { speed: player.speed });
     previousButton.disabled = player.cursor === 0;
     nextButton.disabled = player.cursor >= events.length;
     for (const button of speedButtons) button.setAttribute("aria-pressed", String(Number(button.getAttribute("data-speed")) === player.speed));
@@ -464,7 +469,9 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   previousButton.addEventListener("click", follow(() => player.prev()));
   nextButton.addEventListener("click", follow(() => player.next()));
   for (const button of speedButtons) button.addEventListener("click", () => player.setSpeed(Number(button.getAttribute("data-speed"))));
-  if (sideLayout) speedGroup.addEventListener("click", () => player.setSpeed(player.speeds[(player.speeds.indexOf(player.speed) + 1) % player.speeds.length]));
+  const nextSpeed = () => player.setSpeed(player.speeds[(player.speeds.indexOf(player.speed) + 1) % player.speeds.length]);
+  if (sideLayout) speedGroup.addEventListener("click", nextSpeed);
+  else speedMobile.addEventListener("click", nextSpeed);
   range.addEventListener("input", follow(() => player.seek(Number(range.value))));
 
   // What the keyboard shortcuts can do with this player.

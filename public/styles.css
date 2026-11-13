@@ -710,3 +710,26 @@ kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem;
 
 /* The model name of the agent sits whole on its own line under the title. */
 .agenthead .agent-model { display: block; width: fit-content; margin-top: 4px; white-space: nowrap; }
+
+/* Phones, header: the language switcher and the hamburger sit on the title line, the switcher to the left of the hamburger. */
+@media (max-width: 719px) {
+  .brand-block { display: contents; }
+  .brand-row { margin-right: auto; }
+  .language-switcher { order: 1; }
+  .menu-toggle { order: 2; min-height: 32px; padding: 0 10px; font-size: 1.1rem; line-height: 1; }
+  .tagline { order: 3; flex-basis: 100%; }
+  .menu { order: 4; }
+  .language-switcher button { min-height: 32px; min-width: 34px; padding: 0 8px; font-size: 0.8rem; }
+}
+/* The line under the title: the type chip and who recorded the run. */
+.replay .recorded { margin: 0; font-size: 0.9rem; color: var(--muted); }
+/* Phones, player: slider on top, then one row of equal buttons with a single speed button. */
+.controls-bar .speed-mobile { display: none; }
+@media (max-width: 559px) {
+  .controls-bar { flex-wrap: wrap; row-gap: 12px; }
+  .controls-bar input[type="range"] { order: -1; flex: 0 0 100%; }
+  .controls-bar .ib { flex: 1; width: auto; height: 34px; }
+  .controls-bar .speed { display: none; }
+  .controls-bar .speed-mobile { display: inline-flex; background: var(--accent-bg); color: var(--accent); font-size: 0.75rem; }
+  .agenthead .agent-model { display: inline-block; margin-top: 0; }
+}

@@ -107,7 +107,8 @@ function renderChrome(route) {
     ),
   );
   markUnlockAlert(doc, vault, t);
-  menuToggle.textContent = t("menu.toggle");
+  menuToggle.textContent = "\u2630";
+  menuToggle.setAttribute("aria-label", t("menu.toggle"));
 
   switcher.replaceChildren(
     ...SUPPORTED_LANGUAGES.map((code) => {
