@@ -350,6 +350,7 @@
   "run.outcome.costFree": "cena zdarma",
   "stats.free": "zdarma",
   "create.dataNoticeGoogle": "Po stisknutí Spustit se váš úkol a zprávy agentů odešlou přes náš server společnosti Google (Gemini), s použitím vašeho klíče. Neukládáme je. Klíč se na serveru neukládá ani nezapisuje do protokolů.",
+  "create.providerHint": "Agenti níže použijí modely tohoto poskytovatele a váš klíč k němu.",
   "create.keyHeading": "Váš klíč API",
   "create.keyInline": "Vložte svůj klíč Anthropic API (zůstane jen v této kartě)",
   "create.keySettingsLink": "Zapamatovat v tomto zařízení v Nastavení",

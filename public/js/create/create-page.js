@@ -117,6 +117,16 @@ export function renderCreate(ctx) {
       );
     };
 
+    // Provider: chosen before the agents, because the models of the agents are the models of the provider.
+    const providerSelect = h(doc, "select", { id: "cr-provider", "data-ui": "provider-select" }, ...PROVIDER_IDS.map((id) => h(doc, "option", { value: id }, id === "google" ? "Gemini" : providerCatalog(id).label)));
+    providerSelect.value = currentProvider();
+    providerSelect.addEventListener("change", () => {
+      draft.provider = providerSelect.value;
+      editorHandle.refresh();
+      drawReview();
+    });
+    const providerField = h(doc, "div", { class: "field provider-field", "data-ui": "provider-field" }, h(doc, "label", { for: "cr-provider" }, t("create.providerLabel")), providerSelect, h(doc, "p", { class: "hint" }, t("create.providerHint")));
+
     // Editor.
     const editorHost = h(doc, "div", { class: "editor-host", "data-ui": "editor" });
     const reviewHost = h(doc, "section", { class: "review", "data-ui": "run-review", "aria-label": t("create.reviewHeading") });
@@ -170,14 +180,7 @@ export function renderCreate(ctx) {
       }
 
       // Key.
-      const providerSelect = h(doc, "select", { id: "cr-provider", "data-ui": "provider-select" }, ...PROVIDER_IDS.map((id) => h(doc, "option", { value: id }, id === "google" ? "Gemini" : providerCatalog(id).label)));
-      providerSelect.value = provider;
-      providerSelect.addEventListener("change", () => {
-        draft.provider = providerSelect.value;
-        editorHandle.refresh();
-        drawReview();
-      });
-      const keyParts = [h(doc, "div", { class: "field" }, h(doc, "label", { for: "cr-provider" }, t("create.providerLabel")), providerSelect)];
+      const keyParts = [];
       if (apiKey === null) {
         if (pv.hasStoredKey()) {
           const pass = h(doc, "input", { id: "cr-unlock", type: "password", autocomplete: "current-password" });
@@ -274,6 +277,7 @@ export function renderCreate(ctx) {
       h(doc, "p", { class: "hint" }, t("create.patternHelp")),
       patternGroup,
       patternNotice,
+      providerField,
       h(doc, "h3", {}, t("create.designHeading")),
       editorHost,
       reviewHost,

@@ -350,6 +350,7 @@
   "run.outcome.costFree": "cost free",
   "stats.free": "free",
   "create.dataNoticeGoogle": "When you press Run, your task and the agents' messages are sent to Google (Gemini) through our server, using your key. We do not store them. The key is not stored or logged on the server.",
+  "create.providerHint": "The agents below use this provider's models, and your key for it.",
   "create.keyHeading": "Your API key",
   "create.keyInline": "Paste your Anthropic API key (kept in this tab only)",
   "create.keySettingsLink": "Remember it on this device in Settings",
