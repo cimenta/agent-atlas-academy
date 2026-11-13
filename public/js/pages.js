@@ -54,8 +54,6 @@ export async function renderLanding(ctx) {
     doc,
     "section",
     { class: "about", "data-ui": "home-about" },
-    h(doc, "h2", {}, t("landing.aboutTitle")),
-    h(doc, "p", {}, t("landing.aboutText")),
     h(
       doc,
       "div",
