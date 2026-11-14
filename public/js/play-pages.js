@@ -8,7 +8,7 @@ import { renderResult } from "./result-page.js";
 import { renderCreate } from "./create/create-page.js";
 import { createRunMenu } from "./replay/run-menu.js";
 import { definitionFromRun } from "./create/definition.js";
-import { openInCreate } from "./create/draft.js";
+import { draft, openInCreate } from "./create/draft.js";
 import { downloadFile, safeFileName } from "./download.js";
 import { runForExport } from "./run-export.js";
 import { refreshResultTab } from "./tab-state.js";
@@ -263,7 +263,15 @@ export async function renderReplayTab(ctx, requestedId) {
             }
           : null;
       const onDelete = found.source === "local" ? () => removeRun({ id: currentId, title: found.run.title }) : null;
-      handle = mountReplay(host, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors });
+      // A run of the visitor's own that failed can be carried on from the agent that failed.
+      const onRetry =
+        found.source === "local" && found.run.outcome === "failed"
+          ? () => {
+              draft.retry = found.run;
+              doc.defaultView.location.hash = "#/play/create";
+            }
+          : null;
+      handle = mountReplay(host, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors, onRetry });
       if (openAboutFor === currentId) handle.openAbout?.();
       openAboutFor = null;
       host.append(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${currentId}` }, t("play.tab.result"))));

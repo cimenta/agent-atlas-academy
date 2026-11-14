@@ -14,11 +14,12 @@ import { startRun, RunStartError } from "../run-client.js";
 import { mountLiveReplay } from "../replay/view.js";
 import { createBatchedSaver } from "../storage/runs-store.js";
 import { createEditor } from "./editor-model.js";
-import { draft } from "./draft.js";
+import { draft, useDefinition } from "./draft.js";
+import { deriveInspector } from "../replay/inspect-model.js";
 import { mountEditor } from "./editor-view.js";
 import { canRun, reviewSummary } from "./create-model.js";
 import { buildResultModel } from "../play-model.js";
-import { loadDefinition } from "./definition.js";
+import { loadDefinition, definitionFromRun } from "./definition.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const LIMIT_FIELDS = [
@@ -271,12 +272,17 @@ export function renderCreate(ctx) {
       }
 
       // Key: one block for each key slot the agents use.
+      const lockedSlots = used.filter((s) => vaultFor(s).getSessionKey() === null && vaultFor(s).hasStoredKey());
       const keyBlock = (slot, index) => {
       const pv = vaultFor(slot);
       const provider = slotProvider(slot);
       const apiKey = pv.getSessionKey();
       const sfx = index === 0 ? "" : `-${slot}`;
-      const keyParts = used.length > 1 ? [h(doc, "p", { class: "key-slot-name" }, h(doc, "strong", {}, slotName(slot)))] : [];
+      // One passphrase unlocks every saved key, so the locked slots share one unlock form (the first locked slot shows it).
+      const isLocked = apiKey === null && pv.hasStoredKey();
+      if (isLocked && lockedSlots[0] !== slot) return [];
+      const heading = isLocked ? lockedSlots.map(slotName).join(" + ") : slotName(slot);
+      const keyParts = used.length > 1 ? [h(doc, "p", { class: "key-slot-name" }, h(doc, "strong", {}, heading))] : [];
       if (apiKey === null) {
         if (pv.hasStoredKey()) {
           const pass = h(doc, "input", { id: `cr-unlock${sfx}`, type: "password", autocomplete: "current-password" });
@@ -408,21 +414,51 @@ export function renderCreate(ctx) {
     drawReview();
   }
 
-  function beginRun() {
-    const design = draft.editor.design();
-    const limits = clampLimits(draft.limits);
-    // Every agent names its key slot; the run gets the key of each slot in use.
-    const used = usedSlots(design);
-    const provider = slotProvider(used[0]);
-    const keys = Object.fromEntries(used.map((s) => [s, vaultFor(s).getSessionKey()]));
-    const apiKey = keys[used[0]];
-    const freeTier = used.every(slotIsFree);
-    const task = draft.task.trim();
-    if (!canRun({ task, apiKey: Object.values(keys).every((k) => k !== null) ? apiKey : null, editorErrors: draft.editor.errors() }).ok) return;
+  // The key slot of a recorded run whose agents name none (a run from before agents had slots).
+  const legacySlot = (run) => (String(run?.recordedWith?.provider ?? "").split("+")[0] === "google" ? (run.recordedWith.freeTier === true ? "google-free" : "google") : "anthropic");
 
-    const id = makeRunId(Date.now());
-    const events = [];
-    const startedAt = Date.now();
+  // The keys a recorded run needs again. Null for a key that is not available (not entered, or still locked).
+  function keysForRun(run) {
+    const fallback = legacySlot(run);
+    const slots = [];
+    for (const n of run.design.nodes) {
+      const s = isSlot(n.slot) ? n.slot : fallback;
+      if (!slots.includes(s)) slots.push(s);
+    }
+    const keys = Object.fromEntries(slots.map((s) => [s, vaultFor(s).getSessionKey()]));
+    const slotless = run.design.nodes.some((n) => !isSlot(n.slot));
+    const first = slotless ? fallback : slots[0];
+    return { keys, apiKey: keys[first], provider: slotProvider(first), ready: Object.values(keys).every((k) => k !== null) };
+  }
+
+  // Carries on a run that failed: the agents that finished keep their answers, the failed agent and the rest run again.
+  // The new events are added to the same saved run. resume is the run record.
+  function beginRun({ resume = null } = {}) {
+    const design = resume ? structuredClone(resume.design) : draft.editor.design();
+    const limits = clampLimits(resume ? resume.limits : draft.limits);
+    // Every agent names its key slot; the run gets the key of each slot in use.
+    const used = resume ? [] : usedSlots(design);
+    const own = resume ? keysForRun(resume) : null;
+    const provider = resume ? own.provider : slotProvider(used[0]);
+    const keys = resume ? own.keys : Object.fromEntries(used.map((s) => [s, vaultFor(s).getSessionKey()]));
+    const apiKey = resume ? own.apiKey : keys[used[0]];
+    const freeTier = resume ? resume.recordedWith?.freeTier === true : used.every(slotIsFree);
+    const task = resume ? resume.task : draft.task.trim();
+    if (!canRun({ task, apiKey: Object.values(keys).every((k) => k !== null) ? apiKey : null, editorErrors: resume ? [] : draft.editor.errors() }).ok) return;
+
+    // What the earlier try left: its events without the ending (the error and the done), and the answers of the finished agents.
+    const base = resume ? resume.events.filter((e) => e.type !== "done" && e.type !== "error") : [];
+    const answers = base.filter((e) => e.type === "agent_output").map((e) => ({ agent: e.agent, text: e.text, tokens: e.tokens }));
+    const earlier = resume ? deriveInspector(resume.events) : null;
+    const failedIds = earlier ? earlier.order.filter((a) => earlier.agents[a].status === "error") : [];
+    const offset = base.length > 0 ? (base.at(-1).t ?? 0) + 1000 : 0;
+    const seenHandoffs = new Set(base.filter((e) => e.type === "handoff").map((e) => `${e.from}>${e.to}>${e.note}`));
+
+    const id = resume ? resume.id : makeRunId(Date.now());
+    const events = [...base];
+    if (resume) events.push({ type: "warning", agent: failedIds[0], message: t("run.retrying", { agent: failedIds.join(", ") }), t: offset - 500 });
+    // The clock of a carried-on run continues from the earlier try, so the times of all events fit together.
+    const startedAt = Date.now() - offset;
     let endedAt;
     const client = {
       language: typeof navigator === "undefined" ? undefined : navigator.language,
@@ -443,16 +479,30 @@ export function renderCreate(ctx) {
     // How the run ended is shown above the player, so it is the first thing seen when the run is over.
     const outcomeSlot = h(doc, "div", { class: "run-outcome-slot", "data-ui": "run-outcome-slot" });
     root.replaceChildren(outcomeSlot, host, after);
-    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: draft.pattern, recordedWith: { provider: providersOf(design, provider).join("+"), model: modelsUsed(design, provider) }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout, providerColors: ctx.settings.get().providerColors });
-    ctx.onLeave(live.destroy);
-
     let ended = false;
+    let finalRecordNow = null;
+    // A failed agent offers Retry once the run is over: the run carries on from it.
+    const retryNow = () => {
+      if (!ended || finalRecordNow === null) return;
+      const record2 = finalRecordNow;
+      if (!keysForRun(record2).ready) {
+        outcomeSlot.append(h(doc, "p", { class: "notice", role: "alert" }, t("create.retryNeedsKey")));
+        return;
+      }
+      live.destroy();
+      beginRun({ resume: record2 });
+    };
+    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: resume ? resume.pattern : draft.pattern, recordedWith: { provider: providersOf(design, provider).join("+"), model: modelsUsed(design, provider) }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout, providerColors: ctx.settings.get().providerColors, onRetry: retryNow });
+    ctx.onLeave(live.destroy);
+    for (const e of base) live.append(e);
+    if (resume) live.append(events[base.length]);
     const finish = async () => {
       if (ended) return;
       ended = true;
       endedAt = Date.now();
       live.end();
       const finalRecord = record();
+      finalRecordNow = finalRecord;
       await saver.flush();
       const result = await ctx.runStore.save(finalRecord);
       activeRun = null;
@@ -488,10 +538,14 @@ export function renderCreate(ctx) {
       language: ctx.lang,
       apiKey,
       keys,
+      resume: answers,
       provider,
       onEvent: (event) => {
-        events.push(event);
-        live.append(event);
+        // Carried on: the clock continues from the earlier try, and a handoff the earlier try already has is not shown twice.
+        if (resume && event.type === "handoff" && seenHandoffs.has(`${event.from}>${event.to}>${event.note}`)) return;
+        const next = resume ? { ...event, t: (event.t ?? 0) + offset } : event;
+        events.push(next);
+        live.append(next);
         saver.update(record());
       },
     });
@@ -504,5 +558,17 @@ export function renderCreate(ctx) {
   }
 
   ctx.doc.title = `${t("create.title")} · ${t("site.name")}`;
+  // A failed run opened from the player (Play or Result) asks to be carried on: start it here.
+  const pending = draft.retry;
+  draft.retry = null;
+  if (pending) {
+    if (keysForRun(pending).ready) beginRun({ resume: pending });
+    else {
+      const definition = definitionFromRun(pending);
+      if (definition) useDefinition(definition);
+      showForm(t("create.retryNeedsKey"));
+    }
+    return;
+  }
   showForm();
 }

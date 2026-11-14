@@ -18,7 +18,8 @@ export const HOLD_MS = 2500;
 export const ROUND_MARK = "\u0001"; // where the round number goes in the badge text
 const realClock = { setTimeout: (fn, ms) => globalThis.setTimeout(fn, ms), clearTimeout: (id) => globalThis.clearTimeout(id) };
 
-export function createReplayDiagram({ doc, design, wide, onSelect, statusText, boxLabel, clock = realClock, now = () => Date.now() }) {
+// onRetry(id): when given, an agent that failed gets a Retry button (retryLabel is its text).
+export function createReplayDiagram({ doc, design, wide, onSelect, statusText, boxLabel, onRetry = null, retryLabel = "Retry", clock = realClock, now = () => Date.now() }) {
   const pos = autoPositions(design, { wide });
   const { width, height } = extentOf(pos);
   const area = h(doc, "div", { class: "diagram replay-diagram", "data-ui": "replay-diagram" });
@@ -54,8 +55,17 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
     box.style.width = `${BOX_W}px`;
     box.style.height = `${BOX_H}px`;
     box.addEventListener("click", () => onSelect(node.id));
-    boxes.set(node.id, { box, name, status });
+    // The button sits on the box, not in it (a button cannot hold a button); it shows only while the agent has failed.
+    let retry = null;
+    if (onRetry) {
+      retry = h(doc, "button", { type: "button", class: "rnode-retry", "data-ui": `diagram-retry-${node.id}`, hidden: true }, retryLabel);
+      retry.style.left = `${pos.get(node.id).x + BOX_W - 64}px`;
+      retry.style.top = `${pos.get(node.id).y + BOX_H - 26}px`;
+      retry.addEventListener("click", () => onRetry(node.id));
+    }
+    boxes.set(node.id, { box, name, status, retry });
     area.append(box);
+    if (retry) area.append(retry);
   }
   const badge = h(doc, "span", { class: "round-badge diagram-badge", "data-ui": "debate-round", hidden: true });
   wrap.append(badge); // shown above the boxes, so it never covers one
@@ -77,6 +87,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       parts.box.setAttribute("aria-pressed", String(selectedId === id));
       parts.name.textContent = agent?.label ?? boxLabel(id);
       parts.status.textContent = statusText(agent ?? { status: "waiting", ms: null });
+      if (parts.retry) parts.retry.hidden = status !== "error";
     }
     const { used, latest } = flowState(events, cursor, design);
     const time = now();

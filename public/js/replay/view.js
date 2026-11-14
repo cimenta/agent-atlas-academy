@@ -66,15 +66,15 @@ export function headingOf(run) {
   return line.length > 120 ? `${line.slice(0, 117)}…` : line;
 }
 
-export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "bar", providerColors }) {
+export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null }) {
   const validation = validateRun(run);
   if (!validation.ok) return mountError(container, doc, t, validation.errors);
-  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout, providerColors });
+  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout, providerColors, onRetry });
 }
 
 // A player that shows a run while it is still arriving. Events are added with append(), end() closes it.
-export function mountLiveReplay(container, { title, pattern, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar", providerColors }) {
-  const view = mountView(container, { events: [], pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout, providerColors });
+export function mountLiveReplay(container, { title, pattern, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar", providerColors, onRetry = null }) {
+  const view = mountView(container, { events: [], pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout, providerColors, onRetry });
   return {
     append: (event) => view.player.append(event),
     end: () => view.player.endLive(),
@@ -82,7 +82,7 @@ export function mountLiveReplay(container, { title, pattern, recordedWith, t, do
   };
 }
 
-function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors }) {
+function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null }) {
   const player = createPlayer({ events, clock, timeScale, live });
   const ui = { agent: null, tab: "steps", step: null, round: null, follow: true };
   const viewer = createViewer({ doc, t });
@@ -245,6 +245,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
           wide,
           boxLabel: (id) => designLabel(design, id),
           statusText: (a) => `${t(STATUS_KEY[a.status])}${a.ms ? ` · ${fmt(a.ms)}` : ""}`,
+          onRetry,
+          retryLabel: t("player.retry"),
           onSelect: (id) => {
             Object.assign(ui, { agent: id, follow: false, step: null, round: null });
             render();

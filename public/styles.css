@@ -878,3 +878,10 @@ a.art-pill:hover { text-decoration: underline; }
 .color-sample-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .color-row > .hint:last-child { flex-basis: 100%; }
 .key-slot-name { margin: 8px 0 2px; }
+
+/* A failed agent blinks red and carries a Retry button; the run carries on from that agent. */
+@keyframes failed-blink { 0%, 100% { background: var(--err-bg); border-color: var(--err); } 50% { background: var(--card); border-color: #d93025; } }
+.replay-diagram .rnode[data-status="error"] { border: 2px solid var(--err); padding: 3px 7px; background: var(--err-bg); color: var(--err); animation: failed-blink 1s ease-in-out infinite; }
+.replay-diagram .rnode[data-status="error"] small { color: var(--err); font-weight: 600; }
+.replay-diagram .rnode-retry { position: absolute; z-index: 2; width: 58px; height: 22px; min-height: 0; min-width: 0; padding: 0; font-size: 0.8rem; line-height: 1; border: 1px solid var(--err); border-radius: 6px; background: var(--card); color: var(--err); }
+@media (prefers-reduced-motion: reduce) { .replay-diagram .rnode[data-status="error"] { animation: none; } }

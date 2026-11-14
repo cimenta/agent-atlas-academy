@@ -21,7 +21,9 @@ function searchOutput(content) {
 // A copy is taken so later changes to the conversation cannot reach an event already sent.
 const copy = (value) => structuredClone(value);
 
-export function createAgent({ node, design = null, call, emit, budget, signal, language = "en", sleep = defaultSleep, provider = "anthropic" }) {
+export function createAgent({ node, design = null, call, emit, budget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [] }) {
+  // Answers from an earlier try of the run: used up first, in order, before the provider is called again.
+  const answers = [...cached];
   const model = nodeModel(node, provider).id;
   const system = systemPromptFor(node, { language });
   const label = agentLabel(node, design, AGENT_TYPES[node.agent]?.label ?? node.agent);
@@ -58,6 +60,15 @@ export function createAgent({ node, design = null, call, emit, budget, signal, l
   return {
     id: node.id,
     async run(input) {
+      const earlier = answers.shift();
+      if (earlier) {
+        // Nothing is sent or emitted: the caller already holds this agent's events. The agent just remembers the exchange.
+        budget.chargeStep();
+        budget.chargeUsage({ input: earlier.tokens?.input, output: earlier.tokens?.output });
+        messages.push({ role: "user", content: input }, { role: "assistant", content: [{ type: "text", text: earlier.text }] });
+        sent = messages.length;
+        return { text: earlier.text, usage: { input: Number(earlier.tokens?.input) || 0, output: Number(earlier.tokens?.output) || 0, searches: 0 } };
+      }
       emit({
         type: "agent_start",
         agent: node.id,
