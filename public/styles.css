@@ -891,6 +891,18 @@ a.art-pill:hover { text-decoration: underline; }
 @keyframes failed-blink { 0%, 100% { background: var(--err-bg); border-color: var(--err); } 50% { background: var(--card); border-color: #d93025; } }
 .replay-diagram .rnode[data-status="error"] { border: 2px solid var(--err); padding: 3px 7px; background: var(--err-bg); color: var(--err); animation: failed-blink 1s ease-in-out infinite; }
 .replay-diagram .rnode[data-status="error"] small { color: var(--err); font-weight: 600; }
-.replay-diagram .rnode-retry { position: absolute; z-index: 2; width: 58px; height: 22px; min-height: 0; min-width: 0; padding: 0; font-size: 0.8rem; line-height: 1; border: 1px solid #8f1d1d; border-radius: 6px; background: #c62828; color: #ffffff; font-weight: 600; }
-.replay-diagram .rnode-retry:hover { background: #a61e1e; }
+.replay-diagram .rnode-retry-group { position: absolute; z-index: 2; display: flex; height: 22px; }
+.replay-diagram .rnode-retry-group[hidden] { display: none; }
+.replay-diagram .rnode-retry, .replay-diagram .rnode-retry-arrow { height: 22px; min-height: 0; min-width: 0; padding: 0; font-size: 0.8rem; line-height: 1; border: 1px solid #8f1d1d; background: #c62828; color: #ffffff; font-weight: 600; }
+.replay-diagram .rnode-retry { width: 58px; border-radius: 6px; }
+.replay-diagram .rnode-retry-arrow { width: 22px; border-left-color: rgba(255, 255, 255, 0.45); border-radius: 0 6px 6px 0; }
+.replay-diagram .rnode-retry-group .rnode-retry:not(:only-child) { border-radius: 6px 0 0 6px; border-right: 0; }
+.replay-diagram .rnode-retry:hover, .replay-diagram .rnode-retry-arrow:hover { background: #a61e1e; }
+.retry-menu { position: fixed; z-index: 60; width: 250px; padding: 5px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); }
+.retry-menu p { margin: 0; padding: 4px 8px 2px; font-size: 0.75rem; color: var(--muted); }
+.retry-menu .retry-menu-title { font-weight: 600; color: var(--text); }
+.retry-menu-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; min-height: 32px; padding: 4px 8px; border: 0; border-radius: 6px; background: transparent; text-align: left; font-size: 0.85rem; }
+.retry-menu-item:hover, .retry-menu-item:focus-visible { background: var(--border); }
+.retry-menu-item small { font-size: 0.7rem; color: var(--muted); }
+.retry-menu-item.current small { padding: 0 6px; border-radius: 999px; background: var(--err-bg); color: var(--err); }
 @media (prefers-reduced-motion: reduce) { .replay-diagram .rnode[data-status="error"] { animation: none; } }

@@ -19,7 +19,9 @@ export const ROUND_MARK = "\u0001"; // where the round number goes in the badge 
 const realClock = { setTimeout: (fn, ms) => globalThis.setTimeout(fn, ms), clearTimeout: (id) => globalThis.clearTimeout(id) };
 
 // onRetry(id): when given, an agent that failed gets a Retry button (retryLabel is its text).
-export function createReplayDiagram({ doc, design, wide, onSelect, statusText, boxLabel, onRetry = null, retryLabel = "Retry", clock = realClock, now = () => Date.now() }) {
+// retryMenu: { arrowLabel, title, providerName(provider), tagText(choice), choicesOf(id) }; when given, the Retry button has an
+// arrow that opens a list of models, and a pick calls onRetry(id, choice.value).
+export function createReplayDiagram({ doc, design, wide, onSelect, statusText, boxLabel, onRetry = null, retryLabel = "Retry", retryMenu = null, clock = realClock, now = () => Date.now() }) {
   const pos = autoPositions(design, { wide });
   const { width, height } = extentOf(pos);
   const area = h(doc, "div", { class: "diagram replay-diagram", "data-ui": "replay-diagram" });
@@ -45,6 +47,59 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
     lines.set(arrow.key, path);
   }
 
+  // The list of models under the arrow of a Retry button. It sits on the page (fixed), so the diagram's own scrolling cannot cut it off.
+  let menu = null;
+  let menuCleanup = null;
+  function closeMenu() {
+    if (menu) menu.remove();
+    menu = null;
+    if (menuCleanup) menuCleanup();
+    menuCleanup = null;
+  }
+  function openMenu(id, arrow) {
+    const wasOpenHere = menu !== null && menu.getAttribute("data-for") === id;
+    closeMenu();
+    arrow.setAttribute("aria-expanded", "false");
+    if (wasOpenHere || !retryMenu) return;
+    const list = h(doc, "div", { class: "retry-menu", role: "menu", "data-ui": "retry-menu", "data-for": id }, h(doc, "p", { class: "retry-menu-title" }, retryMenu.title));
+    let lastProvider = null;
+    for (const choice of retryMenu.choicesOf(id)) {
+      if (choice.provider !== lastProvider) {
+        lastProvider = choice.provider;
+        list.append(h(doc, "p", { class: "retry-menu-group" }, retryMenu.providerName(choice.provider)));
+      }
+      const item = h(doc, "button", { type: "button", role: "menuitem", class: `retry-menu-item${choice.current ? " current" : ""}`, "data-ui": "retry-choice", "data-model": choice.id }, h(doc, "span", {}, choice.id), h(doc, "small", {}, retryMenu.tagText(choice)));
+      item.addEventListener("click", () => {
+        closeMenu();
+        onRetry(id, choice.value);
+      });
+      list.append(item);
+    }
+    const rect = arrow.getBoundingClientRect?.();
+    if (rect && list.style) {
+      const width = 250;
+      list.style.left = `${Math.max(8, Math.min(rect.right - width, (doc.defaultView?.innerWidth ?? 1024) - width - 8))}px`;
+      list.style.top = `${rect.bottom + 4}px`;
+    }
+    (doc.body ?? area).append(list);
+    arrow.setAttribute("aria-expanded", "true");
+    menu = list;
+    const outside = (event) => {
+      if (!list.contains(event.target) && event.target !== arrow) closeMenu();
+    };
+    const escape = (event) => {
+      if (event.key === "Escape") closeMenu();
+    };
+    doc.addEventListener("pointerdown", outside, true);
+    doc.addEventListener("keydown", escape);
+    wrap.addEventListener?.("scroll", closeMenu);
+    menuCleanup = () => {
+      doc.removeEventListener("pointerdown", outside, true);
+      doc.removeEventListener("keydown", escape);
+      arrow.setAttribute("aria-expanded", "false");
+    };
+  }
+
   const boxes = new Map();
   for (const node of design.nodes) {
     const name = h(doc, "strong", {}, "");
@@ -58,10 +113,19 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
     // The button sits on the box, not in it (a button cannot hold a button); it shows only while the agent has failed.
     let retry = null;
     if (onRetry) {
-      retry = h(doc, "button", { type: "button", class: "rnode-retry", "data-ui": `diagram-retry-${node.id}`, hidden: true }, retryLabel);
-      retry.style.left = `${pos.get(node.id).x + BOX_W - 64}px`;
+      const main = h(doc, "button", { type: "button", class: "rnode-retry", "data-ui": `diagram-retry-${node.id}` }, retryLabel);
+      main.addEventListener("click", () => {
+        closeMenu();
+        onRetry(node.id);
+      });
+      retry = h(doc, "span", { class: "rnode-retry-group", hidden: true }, main);
+      if (retryMenu) {
+        const arrow = h(doc, "button", { type: "button", class: "rnode-retry-arrow", "aria-haspopup": "menu", "aria-expanded": "false", "aria-label": retryMenu.arrowLabel, title: retryMenu.arrowLabel, "data-ui": `diagram-retry-menu-${node.id}` }, "▾");
+        arrow.addEventListener("click", () => openMenu(node.id, arrow));
+        retry.append(arrow);
+      }
+      retry.style.left = `${pos.get(node.id).x + BOX_W - (retryMenu ? 86 : 64)}px`;
       retry.style.top = `${pos.get(node.id).y + BOX_H - 26}px`;
-      retry.addEventListener("click", () => onRetry(node.id));
     }
     boxes.set(node.id, { box, name, status, retry });
     area.append(box);
@@ -89,7 +153,10 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       parts.box.setAttribute("aria-pressed", String(selectedId === id));
       parts.name.textContent = agent?.label ?? boxLabel(id);
       parts.status.textContent = statusText(agent ?? { status: "waiting", ms: null });
-      if (parts.retry) parts.retry.hidden = status !== "error";
+      if (parts.retry) {
+        parts.retry.hidden = status !== "error";
+        if (status !== "error" && menu?.getAttribute("data-for") === id) closeMenu();
+      }
     }
     const { used, latest } = flowState(events, cursor, design);
     const time = now();
@@ -126,5 +193,5 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
     }
   }
 
-  return { element: wrap, update, destroy: () => { if (timer !== null) clock.clearTimeout(timer); timer = null; } };
+  return { element: wrap, update, destroy: () => { if (timer !== null) clock.clearTimeout(timer); timer = null; closeMenu(); } };
 }

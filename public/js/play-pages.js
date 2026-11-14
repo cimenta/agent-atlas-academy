@@ -2,6 +2,7 @@
 import { h } from "./dom.js";
 import { mountReplay } from "./replay/view.js";
 import { providerChips } from "./provider-colors.js";
+import { withRetryChoice } from "./replay/retry-choice.js";
 import { getJson, loadExplanations, renderNotFound, setTitle } from "./pages.js";
 import { buildReplayList, filterLibrary, formatRunWhen, prepareImport } from "./play-model.js";
 import { makeRunId } from "./engine/run-record.js";
@@ -287,8 +288,8 @@ export async function renderReplayTab(ctx, requestedId) {
       // A run of the visitor's own that failed can be carried on from the agent that failed.
       const onRetry =
         found.source === "local" && found.run.outcome === "failed"
-          ? () => {
-              draft.retry = found.run;
+          ? (agentId, choice) => {
+              draft.retry = choice ? withRetryChoice(found.run, agentId, choice) : found.run;
               doc.defaultView.location.hash = "#/play/create";
             }
           : null;

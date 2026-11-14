@@ -4,6 +4,7 @@ import { markUnlockAlert } from "../unlock-alert.js";
 import { keyState } from "../key-state.js";
 import { downloadFile } from "../download.js";
 import { outcomeNotice } from "../outcome-view.js";
+import { withRetryChoice } from "../replay/retry-choice.js";
 import { showCenterTip } from "../center-tip.js";
 import { refreshResultTab } from "../tab-state.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "../key-slots.js";
@@ -504,9 +505,9 @@ export function renderCreate(ctx) {
     let ended = false;
     let finalRecordNow = null;
     // A failed agent offers Retry once the run is over: the run carries on from it.
-    const retryNow = () => {
+    const retryNow = (agentId, choice) => {
       if (!ended || finalRecordNow === null) return;
-      const record2 = finalRecordNow;
+      const record2 = choice ? withRetryChoice(finalRecordNow, agentId, choice) : finalRecordNow;
       if (!keysForRun(record2).ready) {
         outcomeSlot.append(h(doc, "p", { class: "notice", role: "alert" }, t("create.retryNeedsKeyLive")));
         importantTip(t("create.retryNeedsKeyLive"));

@@ -13,6 +13,7 @@ import { stepDetail } from "./step-detail.js";
 import { paintModelTag } from "../provider-colors.js";
 import { createAboutPanel } from "./about.js";
 import { createRunMenu } from "./run-menu.js";
+import { retryChoices } from "./retry-choice.js";
 import { runForExport } from "../run-export.js";
 import { createReplayDiagram, ROUND_MARK } from "./diagram.js";
 import { outcomeNotice } from "../outcome-view.js";
@@ -256,6 +257,15 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
           statusText: (a) => `${t(STATUS_KEY[a.status])}${a.ms ? ` · ${fmt(a.ms)}` : ""}`,
           onRetry,
           retryLabel: t("player.retry"),
+          retryMenu: onRetry
+            ? {
+                arrowLabel: t("player.retryMenu"),
+                title: t("player.retryMenuTitle"),
+                providerName: (p) => (p === "google" ? "Gemini" : "Anthropic"),
+                tagText: (c) => (c.current ? t("player.retryTagFailed") : c.provider === "google" ? t(c.free ? "player.retryTagFree" : "player.retryTagPaid") : t("player.retryTagPaid")),
+                choicesOf: (id) => retryChoices(design, id, String(recordedWith?.provider ?? "anthropic").split("+")[0]),
+              }
+            : null,
           onSelect: (id) => {
             Object.assign(ui, { agent: id, follow: false, step: null, round: null });
             render();
