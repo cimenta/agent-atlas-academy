@@ -3,6 +3,7 @@
 import { validateDesign } from "./patterns.js";
 import { createBudget, LimitError } from "./budget.js";
 import { createAgent } from "./agent.js";
+import { nodeProvider } from "./catalog.js";
 import { redact } from "./anthropic.js";
 import * as sequential from "./runners/sequential.js";
 import * as parallel from "./runners/parallel.js";
@@ -16,7 +17,8 @@ export const RUNNERS = {
   debate: debate.run,
 };
 
-export async function runDesign({ design, task, limits, language = "en", call, emit, signal, now = Date.now, provider = "anthropic" }) {
+// callFor(node) gives the provider call of an agent that names its own key slot; without it every agent uses `call`.
+export async function runDesign({ design, task, limits, language = "en", call, callFor, emit, signal, now = Date.now, provider = "anthropic" }) {
   const startedAt = now();
   const send = (event) => emit({ ...event, t: now() - startedAt });
 
@@ -35,7 +37,7 @@ export async function runDesign({ design, task, limits, language = "en", call, e
   else signal?.addEventListener("abort", onAbort, { once: true });
 
   const agents = new Map(
-    design.nodes.map((node) => [node.id, createAgent({ node, design, call, emit: send, budget, signal: control.signal, language, provider })]),
+    design.nodes.map((node) => [node.id, createAgent({ node, design, call: callFor?.(node) ?? call, emit: send, budget, signal: control.signal, language, provider: nodeProvider(node, provider) })]),
   );
   send({ type: "run_start", task, pattern: design.pattern, design });
 

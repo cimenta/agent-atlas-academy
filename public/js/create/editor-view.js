@@ -10,7 +10,7 @@ import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, ext
 const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, getModels = (node) => MODELS }) {
+export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, getModels = (node) => MODELS, modelUi = null }) {
   let selectedId = null;
   let connectFrom = null;
   let notice = "";
@@ -323,7 +323,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         "button",
         { type: "button", class: "dnode-body", "data-focus-key": `node-${node.id}`, "aria-pressed": String(selectedId === node.id), "aria-label": t("editor.selectNode", { name: nodeLabel(node) }) },
         h(doc, "strong", {}, nodeLabel(node)),
-        h(doc, "small", {}, getModels(node).find((m) => m.key === node.model)?.label ?? ""),
+        h(doc, "small", {}, modelUi ? modelUi.label(node) : (getModels(node).find((m) => m.key === node.model)?.label ?? "")),
       );
       body.addEventListener("click", () => {
         if (suppressClick) return;
@@ -419,9 +419,13 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     if (!node) return h(doc, "p", { class: "hint" }, t("editor.pickNode"));
     const type = AGENT_TYPES[node.agent];
     const field = (id, label, input) => h(doc, "div", { class: "field" }, h(doc, "label", { for: id }, label), input);
-    const model = h(doc, "select", { id: "ed-model" }, ...getModels(node).map((m) => h(doc, "option", { value: m.key, selected: m.key === node.model }, `${m.label} (${m.id})`)));
+    // With modelUi the choices are grouped by key slot and the first one follows the default model; without it, one list of models.
+    const model = modelUi
+      ? h(doc, "select", { id: "ed-model", "data-ui": "agent-model" }, h(doc, "option", { value: "", selected: node.custom !== true }, modelUi.defaultOption()), ...modelUi.groups().map((g) => h(doc, "optgroup", { label: g.label }, ...g.options.map((o) => h(doc, "option", { value: o.value, selected: node.custom === true && o.value === modelUi.valueOf(node) }, o.label)))))
+      : h(doc, "select", { id: "ed-model" }, ...getModels(node).map((m) => h(doc, "option", { value: m.key, selected: m.key === node.model }, `${m.label} (${m.id})`)));
     model.addEventListener("change", () => {
-      editor.setNode(node.id, { model: model.value });
+      if (modelUi) modelUi.pick(node.id, model.value);
+      else editor.setNode(node.id, { model: model.value });
       changed();
     });
     const search = h(doc, "input", { id: "ed-search", type: "checkbox", checked: node.search });

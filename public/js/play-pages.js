@@ -263,7 +263,7 @@ export async function renderReplayTab(ctx, requestedId) {
             }
           : null;
       const onDelete = found.source === "local" ? () => removeRun({ id: currentId, title: found.run.title }) : null;
-      handle = mountReplay(host, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout });
+      handle = mountReplay(host, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors });
       if (openAboutFor === currentId) handle.openAbout?.();
       openAboutFor = null;
       host.append(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${currentId}` }, t("play.tab.result"))));

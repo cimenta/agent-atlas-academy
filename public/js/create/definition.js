@@ -3,6 +3,7 @@
 // then looks exactly as if the user had built it. Pure: no DOM.
 import { MODELS, DEFAULT_MODEL, TASK_MAX_CHARS } from "../engine/catalog.js";
 import { PATTERNS } from "../engine/patterns.js";
+import { isSlot } from "../key-slots.js";
 import { createEditor } from "./editor-model.js";
 
 export const DEFINITION_FORMAT = "agent-atlas-run-definition";
@@ -66,6 +67,10 @@ export function loadDefinition(text) {
         overrides.model = DEFAULT_MODEL;
         if (!notes.includes("model")) notes.push("model");
       }
+    }
+    if (isSlot(node.slot)) {
+      overrides.slot = node.slot;
+      if (node.custom === true) overrides.custom = true;
     }
     if (typeof node.search === "boolean") overrides.search = node.search;
     if (node.addToPrevious === true) overrides.addToPrevious = true;

@@ -1,6 +1,7 @@
 // The settings page: API key handling, default limits and local data.
 import { h } from "./dom.js";
-import { LIMIT_MAX, PROVIDER_IDS, PRICING_URLS, providerCatalog } from "./engine/catalog.js";
+import { LIMIT_MAX, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
+import { COLOR_CHOICES, paintModelTag } from "./provider-colors.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "./key-slots.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
 import { keyState, overallKeyState } from "./key-state.js";
@@ -34,6 +35,38 @@ export function renderSettings(ctx) {
   const vaultOf = (id) => (vault.forProvider ? vault.forProvider(id) : vault);
   const GOOGLE_KEY_URL = "https://aistudio.google.com/apikey";
   const keyPanels = {};
+  // The color of a provider: its model tags in replays use it (a stronger model gets a darker shade).
+  const colorPainters = {};
+  const colorRow = (provider) => {
+    const input = h(doc, "input", { type: "color", class: "color-input", "aria-label": t("settings.colorLabel"), "data-ui": `provider-color-${provider}` });
+    const swatches = COLOR_CHOICES.map((color) => {
+      const b = h(doc, "button", { type: "button", class: "swatch", "aria-label": color, "data-color": color });
+      b.style.background = color;
+      b.addEventListener("click", () => choose(color));
+      return b;
+    });
+    const sample = h(doc, "span", { class: "color-sample-tags", "data-ui": `provider-color-sample-${provider}` });
+    const choose = (color) => {
+      settings.setProviderColor(provider, color);
+      // Gemini has two key panels; both rows show the same color.
+      for (const repaint of colorPainters[provider]) repaint();
+    };
+    const paint = () => {
+      const color = settings.get().providerColors[provider];
+      input.value = color;
+      swatches.forEach((b) => b.setAttribute("aria-pressed", String(b.getAttribute("data-color") === color)));
+      const ids = (provider === "google" ? GOOGLE_MODELS : MODELS).map((m) => m.id);
+      sample.replaceChildren(...ids.map((modelId) => {
+        const tag = h(doc, "span", { class: "badge agent-model" }, modelId);
+        paintModelTag(tag, modelId, settings.get().providerColors);
+        return tag;
+      }));
+    };
+    input.addEventListener("input", () => choose(input.value));
+    (colorPainters[provider] ??= []).push(paint);
+    paint();
+    return h(doc, "div", { class: "color-row", "data-ui": `provider-color-row-${provider}` }, h(doc, "span", { class: "hint" }, t("settings.colorLabel")), ...swatches, input, h(doc, "div", { class: "color-sample" }, sample), h(doc, "p", { class: "hint" }, t("settings.colorHint")));
+  };
   const buildKeyPanel = (id) => {
     const v = vaultOf(id);
     let replacing = false; // a key is saved and the visitor chose to replace it
@@ -90,7 +123,7 @@ export function renderSettings(ctx) {
       replacing = false;
       refreshStatus();
     });
-    const node = h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, status, replaceButton, form);
+    const node = h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, status, colorRow(slotProvider(id)), replaceButton, form);
     const refresh = () => {
       const saved = v.getSessionKey() !== null || v.hasStoredKey();
       form.hidden = saved && !replacing;

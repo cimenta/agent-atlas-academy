@@ -7,7 +7,7 @@ import { outcomeNotice } from "../outcome-view.js";
 import { showCenterTip } from "../center-tip.js";
 import { refreshResultTab } from "../tab-state.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "../key-slots.js";
-import { TASK_MAX_CHARS, LIMIT_MAX, PRICING_URLS, providerCatalog, paidOnlyModelUsed } from "../engine/catalog.js";
+import { TASK_MAX_CHARS, LIMIT_MAX, PRICING_URLS, DEFAULT_MODEL, providerCatalog, paidOnlyModelUsed, providersOf } from "../engine/catalog.js";
 import { PATTERNS, clampLimits } from "../engine/patterns.js";
 import { buildRunRecord, makeRunId, modelsUsed } from "../engine/run-record.js";
 import { startRun, RunStartError } from "../run-client.js";
@@ -67,13 +67,46 @@ function downloadButton(ctx, run) {
 
 export function renderCreate(ctx) {
   const vaultFor = (id) => (ctx.vault.forProvider ? ctx.vault.forProvider(id) : ctx.vault);
-  // The provider is the first one that has a key, until the visitor chooses another. The agents' models follow it.
-  // draft.provider holds a key slot: Claude, Gemini free or Gemini paid.
-  const currentSlot = () => {
-    if (!isSlot(draft.provider)) draft.provider = SLOT_IDS.find((id) => vaultFor(id).getSessionKey() !== null || vaultFor(id).hasStoredKey()) ?? "anthropic";
-    return draft.provider;
-  };
   const { doc, t } = ctx;
+  const hasKey = (id) => vaultFor(id).getSessionKey() !== null || vaultFor(id).hasStoredKey();
+  // The visitor may choose several key slots (Claude, Gemini free, Gemini paid). Until a choice is made it is the first one with a key.
+  const chosenSlots = () => {
+    if (!Array.isArray(draft.slots) || draft.slots.length === 0 || !draft.slots.every(isSlot)) draft.slots = [SLOT_IDS.find(hasKey) ?? "anthropic"];
+    return draft.slots;
+  };
+  const slotName = (id) => (slotProvider(id) === "google" ? t(slotIsFree(id) ? "create.geminiFree" : "create.geminiPaid") : providerCatalog(slotProvider(id)).label);
+  // The models a slot offers: a free Gemini key offers only the models that have a free tier.
+  const modelsOfSlot = (slot) => {
+    const all = providerCatalog(slotProvider(slot)).models;
+    return slotIsFree(slot) ? all.filter((m) => m.freeTier !== false) : all;
+  };
+  const choiceValue = (slot, key) => `${slot}|${key}`;
+  const parseChoice = (value) => {
+    const [slot, model] = String(value).split("|");
+    return isSlot(slot) && modelsOfSlot(slot).some((m) => m.key === model) ? { slot, model } : null;
+  };
+  const choiceGroups = () => chosenSlots().map((slot) => ({ label: slotName(slot), options: modelsOfSlot(slot).map((m) => ({ value: choiceValue(slot, m.key), label: `${m.label} (${m.id})` })) }));
+  const choiceLabel = (slot, key) => {
+    const m = providerCatalog(slotProvider(slot)).models.find((x) => x.key === key);
+    return m ? `${m.label} (${m.id})` : key;
+  };
+  // The default model must be one of the chosen slots' models; agents whose choice is gone return to it.
+  const keepModels = () => {
+    const current = draft.editor.defaultModel();
+    const ok = current && chosenSlots().includes(current.slot) && modelsOfSlot(current.slot).some((m) => m.key === current.model);
+    if (!ok) {
+      const slot = chosenSlots()[0];
+      const list = modelsOfSlot(slot);
+      draft.editor.setDefaultModel({ slot, model: (list.find((m) => m.key === DEFAULT_MODEL) ?? list[0]).key });
+    }
+    draft.editor.keepSlots((node) => chosenSlots().includes(node.slot) && modelsOfSlot(node.slot).some((m) => m.key === node.model));
+  };
+  // The slots the agents use (the chosen ones while the diagram is empty), each once.
+  const usedSlots = (design) => {
+    const slots = [];
+    for (const n of design.nodes) if (isSlot(n.slot) && !slots.includes(n.slot)) slots.push(n.slot);
+    return slots.length > 0 ? slots : [chosenSlots()[0]];
+  };
   if (draft.limits === null) draft.limits = { ...ctx.settings.get().limits };
   const root = ctx.main;
   let activeRun = null;
@@ -122,16 +155,30 @@ export function renderCreate(ctx) {
 
     // Provider: chosen before the agents, because the models of the agents are the models of the provider.
     // One tile for each provider: its mark, its name and a dot (green: key loaded, yellow: key saved but locked, none: no key).
-    const providerTiles = h(doc, "div", { class: "provider-tiles", role: "radiogroup", "aria-label": t("create.providerLabel"), "data-ui": "provider-tiles" });
+    const providerTiles = h(doc, "div", { class: "provider-tiles", role: "group", "aria-label": t("create.providerLabel"), "data-ui": "provider-tiles" });
     const MARKS = { anthropic: "A", google: "G" };
+    // The default model: a list of the models of the chosen providers. Agents without a model of their own use it.
+    const defaultHost = h(doc, "div", { class: "field default-model", "data-ui": "default-model-field" });
+    const drawDefaultModel = () => {
+      const current = draft.editor.defaultModel();
+      const select = h(doc, "select", { id: "cr-default-model", "data-ui": "default-model" }, ...choiceGroups().map((g) => h(doc, "optgroup", { label: g.label }, ...g.options.map((o) => h(doc, "option", { value: o.value, selected: current !== null && o.value === choiceValue(current.slot, current.model) }, o.label)))));
+      select.addEventListener("change", () => {
+        const choice = parseChoice(select.value);
+        if (!choice) return;
+        draft.editor.setDefaultModel(choice);
+        editorHandle.refresh();
+        drawReview();
+      });
+      defaultHost.replaceChildren(h(doc, "label", { for: "cr-default-model" }, t("create.defaultModel")), select, h(doc, "p", { class: "hint" }, t("create.defaultModelHint")));
+    };
     const drawProviderTiles = () => {
-      const chosen = currentSlot();
+      const chosen = chosenSlots();
       providerTiles.replaceChildren(
         ...SLOT_IDS.map((id) => {
           const state = keyState(vaultFor(id));
-          const selected = id === chosen;
+          const selected = chosen.includes(id);
           const kind = slotProvider(id);
-          const name = kind === "google" ? (slotIsFree(id) ? t("create.geminiFree") : t("create.geminiPaid")) : providerCatalog(kind).label;
+          const name = slotName(id);
           const noKey = state === "none" && !selected;
           const sub = noKey ? t("create.providerAddKey") : kind === "google" ? t(slotIsFree(id) ? "create.providerFree" : "create.providerPaid") : "";
           const dotText = t(state === "locked" ? "settings.dotLocked" : "settings.dotLoaded");
@@ -139,22 +186,34 @@ export function renderCreate(ctx) {
             h(doc, "span", { class: `pv-mark pv-${kind}`, "aria-hidden": "true" }, MARKS[kind]),
             h(doc, "span", { class: "pv-text" }, h(doc, "span", { class: "pv-name" }, name), ...(sub ? [h(doc, "span", { class: "pv-sub" }, sub)] : [])),
             ...(state === "none" ? [] : [h(doc, "span", { class: `pv-dot ${state === "locked" ? "yellow" : "green"}`, role: "img", "aria-label": dotText, title: dotText })]),
+            ...(noKey ? [] : [h(doc, "span", { class: "pv-check", "aria-hidden": "true" }, selected ? "✓" : "")]),
           ];
           // A provider without a key is a link to Settings, unless it is the one chosen (its key is entered below).
           if (noKey) return h(doc, "a", { class: "provider-tile dim", href: `#/settings/key/${id}`, "data-ui": `provider-tile-${id}`, title: t("create.providerAddKey") }, ...parts);
-          const tile = h(doc, "button", { type: "button", class: `provider-tile${selected ? " on" : ""}`, role: "radio", "aria-checked": String(selected), "data-ui": `provider-tile-${id}` }, ...parts);
+          const tile = h(doc, "button", { type: "button", class: `provider-tile${selected ? " on" : ""}`, role: "checkbox", "aria-checked": String(selected), "data-ui": `provider-tile-${id}` }, ...parts);
           tile.addEventListener("click", () => {
-            draft.provider = id;
+            // Any number of providers may be chosen, but one stays.
+            if (selected && chosen.length === 1) return;
+            draft.slots = SLOT_IDS.filter((s) => (s === id ? !selected : chosen.includes(s)));
+            keepModels();
             editorHandle.refresh();
             drawReview();
           });
           return tile;
         }),
       );
+      drawDefaultModel();
     };
     const legendItem = (cls, text) => h(doc, "span", {}, ...(cls ? [h(doc, "i", { class: `pv-lg ${cls}` })] : []), text);
     const providerLegend = h(doc, "div", { class: "pv-legend", "data-ui": "provider-legend" }, legendItem("green", t("create.legendLoaded")), legendItem("yellow", t("create.legendLocked")), legendItem("", t("create.legendNone")));
-    const providerField = h(doc, "div", { class: "field provider-field", "data-ui": "provider-field" }, h(doc, "p", { class: "pv-title" }, t("create.providerLabel")), providerTiles, providerLegend, h(doc, "p", { class: "hint" }, t("create.providerHint")));
+    const providerField = h(doc, "div", { class: "field provider-field", "data-ui": "provider-field" }, h(doc, "p", { class: "pv-title" }, t("create.providerLabel")), providerTiles, providerLegend, h(doc, "p", { class: "hint" }, t("create.providerHint")), defaultHost);
+
+    // The model of an agent: its level (Fast, Balanced, Strong), and the provider when more than one is chosen.
+    const nodeModelLabel = (node) => {
+      const slot = isSlot(node?.slot) ? node.slot : chosenSlots()[0];
+      const level = providerCatalog(slotProvider(slot)).models.find((m) => m.key === node?.model)?.label ?? "";
+      return chosenSlots().length > 1 ? `${level} · ${slotName(slot)}` : level;
+    };
 
     // Editor.
     const editorHost = h(doc, "div", { class: "editor-host", "data-ui": "editor" });
@@ -163,18 +222,18 @@ export function renderCreate(ctx) {
 
     // Review.
     function drawReview() {
+      keepModels();
       const design = draft.editor.design();
       const limits = clampLimits(draft.limits);
-      const slot = currentSlot();
-      const provider = slotProvider(slot);
+      const used = usedSlots(design);
+      const provider = slotProvider(used[0]);
       drawProviderTiles();
-      const pv = vaultFor(slot);
-      const catalog = providerCatalog(provider);
       const summary = reviewSummary({ design, limits, provider });
-      const apiKey = pv.getSessionKey();
-      const verdict = canRun({ task: taskInput.value, apiKey, editorErrors: draft.editor.errors(), keyLocked: apiKey === null && pv.hasStoredKey() });
-      // A key the visitor marked as being on Google's free tier makes the run free, unless a model without a free tier is used.
-      const marked = slotIsFree(slot);
+      // Every provider the agents use needs its key.
+      const missing = used.filter((s) => vaultFor(s).getSessionKey() === null);
+      const verdict = canRun({ task: taskInput.value, apiKey: missing.length === 0 ? "set" : null, editorErrors: draft.editor.errors(), keyLocked: missing.some((s) => vaultFor(s).hasStoredKey()) });
+      // Keys the visitor saved as being on Google's free tier make the run free, unless a model without a free tier is used.
+      const marked = used.every(slotIsFree);
       const paidOnly = paidOnlyModelUsed(design, provider);
       const isFree = marked && !paidOnly;
 
@@ -193,8 +252,8 @@ export function renderCreate(ctx) {
             "ul",
             {},
             ...summary.agents.map((a) => {
-              const modelLabel = catalog.models.find((m) => m.key === a.model)?.label ?? a.model;
-              return h(doc, "li", {}, `${a.label} — ${modelLabel}${a.search ? `, ${t("create.withSearch")}` : ""}`);
+              const node = design.nodes.find((n) => n.id === a.id);
+              return h(doc, "li", {}, `${a.label} — ${nodeModelLabel(node)}${a.search ? `, ${t("create.withSearch")}` : ""}`);
             }),
           )
         : h(doc, "p", { class: "hint" }, t("editor.empty"));
@@ -211,11 +270,16 @@ export function renderCreate(ctx) {
         estimateLines.push(h(doc, "p", { class: "notice" }, t(provider === "google" ? "editor.searchFeeGoogle" : "editor.searchFee")));
       }
 
-      // Key.
-      const keyParts = [];
+      // Key: one block for each key slot the agents use.
+      const keyBlock = (slot, index) => {
+      const pv = vaultFor(slot);
+      const provider = slotProvider(slot);
+      const apiKey = pv.getSessionKey();
+      const sfx = index === 0 ? "" : `-${slot}`;
+      const keyParts = used.length > 1 ? [h(doc, "p", { class: "key-slot-name" }, h(doc, "strong", {}, slotName(slot)))] : [];
       if (apiKey === null) {
         if (pv.hasStoredKey()) {
-          const pass = h(doc, "input", { id: "cr-unlock", type: "password", autocomplete: "current-password" });
+          const pass = h(doc, "input", { id: `cr-unlock${sfx}`, type: "password", autocomplete: "current-password" });
           const unlock = h(doc, "button", { type: "button" }, t("settings.unlock"));
           const message = h(doc, "p", { class: "notice", role: "alert", hidden: true });
           pass.addEventListener("keydown", (event) => {
@@ -231,9 +295,9 @@ export function renderCreate(ctx) {
               message.hidden = false;
             }
           });
-          keyParts.push(h(doc, "div", { class: "field" }, h(doc, "label", { for: "cr-unlock" }, t("create.unlockLabel")), pass), unlock, message);
+          keyParts.push(h(doc, "div", { class: "field" }, h(doc, "label", { for: `cr-unlock${sfx}` }, t("create.unlockLabel")), pass), unlock, message);
         } else {
-          const keyInput = h(doc, "input", { id: "cr-key", type: "password", autocomplete: "off", spellcheck: "false" });
+          const keyInput = h(doc, "input", { id: `cr-key${sfx}`, type: "password", autocomplete: "off", spellcheck: "false" });
           const save = h(doc, "button", { type: "button" }, t("settings.keySave"));
           keyInput.addEventListener("keydown", (event) => {
             if (event.key === "Enter") save.click();
@@ -243,12 +307,15 @@ export function renderCreate(ctx) {
             pv.setSessionKey(keyInput.value.trim());
             drawReview();
           });
-          keyParts.push(h(doc, "div", { class: "field" }, h(doc, "label", { for: "cr-key" }, t(provider === "google" ? "create.keyInlineGoogle" : "create.keyInline")), keyInput), save, h(doc, "p", { class: "hint" }, h(doc, "a", { href: "#/settings" }, t("create.keySettingsLink"))));
+          keyParts.push(h(doc, "div", { class: "field" }, h(doc, "label", { for: `cr-key${sfx}` }, t(provider === "google" ? "create.keyInlineGoogle" : "create.keyInline")), keyInput), save, h(doc, "p", { class: "hint" }, h(doc, "a", { href: `#/settings/key/${slot}` }, t("create.keySettingsLink"))));
         }
       } else {
         keyParts.push(h(doc, "p", {}, t("settings.keyAvailable")));
         if (provider === "google") keyParts.push(h(doc, "p", { class: "hint" }, h(doc, "a", { href: PRICING_URLS.google, target: "_blank", rel: "noopener noreferrer" }, t("settings.googlePricingLink"))));
       }
+      return keyParts;
+      };
+      const keyParts = used.flatMap((slot, index) => keyBlock(slot, index));
 
       const run = h(doc, "button", { type: "button", class: "primary run-button", disabled: !verdict.ok }, t("create.run"));
       run.addEventListener("click", () => beginRun());
@@ -262,7 +329,7 @@ export function renderCreate(ctx) {
         ...limitInputs,
         h(doc, "h4", {}, t("create.estimateHeading")),
         ...estimateLines,
-        h(doc, "p", { class: "notice" }, t(provider === "google" ? "create.dataNoticeGoogle" : "create.dataNotice")),
+        ...providersOf(design, provider).map((p) => h(doc, "p", { class: "notice" }, t(p === "google" ? "create.dataNoticeGoogle" : "create.dataNotice"))),
         h(doc, "h4", {}, t("create.keyHeading")),
         ...keyParts,
         reasons,
@@ -320,13 +387,22 @@ export function renderCreate(ctx) {
       editorHost,
       reviewHost,
     );
-    editorHandle = mountEditor(editorHost, { editor: draft.editor, t, doc, onChange: drawReview, getModels: (node) => {
-      // With a key marked as free tier only the free models are offered (a model already chosen stays visible).
-      const slot = currentSlot();
-      const all = providerCatalog(slotProvider(slot)).models;
-      const freeOnly = slotIsFree(slot);
-      return freeOnly ? all.filter((m) => m.freeTier !== false || m.key === node?.model) : all;
-    } });
+    keepModels();
+    const modelUi = {
+      groups: choiceGroups,
+      defaultOption: () => {
+        const d = draft.editor.defaultModel();
+        return t("create.modelDefault", { model: d ? `${choiceLabel(d.slot, d.model)}${chosenSlots().length > 1 ? ` · ${slotName(d.slot)}` : ""}` : "" });
+      },
+      label: nodeModelLabel,
+      valueOf: (node) => choiceValue(node.slot, node.model),
+      pick: (id, value) => {
+        const choice = value === "" ? null : parseChoice(value);
+        if (value !== "" && !choice) return;
+        draft.editor.setNodeModel(id, choice);
+      },
+    };
+    editorHandle = mountEditor(editorHost, { editor: draft.editor, t, doc, onChange: drawReview, modelUi });
     ctx.onLeave(() => editorHandle.destroy());
     drawPatterns();
     drawReview();
@@ -335,12 +411,14 @@ export function renderCreate(ctx) {
   function beginRun() {
     const design = draft.editor.design();
     const limits = clampLimits(draft.limits);
-    const slot = isSlot(draft.provider) ? draft.provider : "anthropic";
-    const provider = slotProvider(slot);
-    const apiKey = vaultFor(slot).getSessionKey();
-    const freeTier = slotIsFree(slot);
+    // Every agent names its key slot; the run gets the key of each slot in use.
+    const used = usedSlots(design);
+    const provider = slotProvider(used[0]);
+    const keys = Object.fromEntries(used.map((s) => [s, vaultFor(s).getSessionKey()]));
+    const apiKey = keys[used[0]];
+    const freeTier = used.every(slotIsFree);
     const task = draft.task.trim();
-    if (!canRun({ task, apiKey, editorErrors: draft.editor.errors() }).ok) return;
+    if (!canRun({ task, apiKey: Object.values(keys).every((k) => k !== null) ? apiKey : null, editorErrors: draft.editor.errors() }).ok) return;
 
     const id = makeRunId(Date.now());
     const events = [];
@@ -365,7 +443,7 @@ export function renderCreate(ctx) {
     // How the run ended is shown above the player, so it is the first thing seen when the run is over.
     const outcomeSlot = h(doc, "div", { class: "run-outcome-slot", "data-ui": "run-outcome-slot" });
     root.replaceChildren(outcomeSlot, host, after);
-    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: draft.pattern, recordedWith: { provider, model: modelsUsed(design, provider) }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout });
+    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: draft.pattern, recordedWith: { provider: providersOf(design, provider).join("+"), model: modelsUsed(design, provider) }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout, providerColors: ctx.settings.get().providerColors });
     ctx.onLeave(live.destroy);
 
     let ended = false;
@@ -409,6 +487,7 @@ export function renderCreate(ctx) {
       limits,
       language: ctx.lang,
       apiKey,
+      keys,
       provider,
       onEvent: (event) => {
         events.push(event);

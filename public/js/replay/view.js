@@ -10,6 +10,7 @@ import { definitionFromRun } from "../create/definition.js";
 import { openInCreate } from "../create/draft.js";
 import { downloadFile, safeFileName } from "../download.js";
 import { stepDetail } from "./step-detail.js";
+import { paintModelTag } from "../provider-colors.js";
 import { createAboutPanel } from "./about.js";
 import { createRunMenu } from "./run-menu.js";
 import { runForExport } from "../run-export.js";
@@ -37,7 +38,9 @@ const defaultClock = {
 
 // The provider as it is written in a sentence: anthropic becomes Anthropic.
 const PROVIDER_NAMES = { anthropic: "Anthropic", openai: "OpenAI", gemini: "Gemini", google: "Google" };
-const providerName = (id) => PROVIDER_NAMES[id] ?? (typeof id === "string" && id !== "" ? id[0].toUpperCase() + id.slice(1) : "");
+const oneProviderName = (id) => PROVIDER_NAMES[id] ?? (typeof id === "string" && id !== "" ? id[0].toUpperCase() + id.slice(1) : "");
+// A run that mixed providers has them joined with a plus sign.
+const providerName = (id) => (typeof id === "string" ? id.split("+").map(oneProviderName).join(" + ") : "");
 const fmt = (ms) => (ms == null ? "" : ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`);
 
 function mountError(container, doc, t, errors) {
@@ -63,15 +66,15 @@ export function headingOf(run) {
   return line.length > 120 ? `${line.slice(0, 117)}…` : line;
 }
 
-export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "bar" }) {
+export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "bar", providerColors }) {
   const validation = validateRun(run);
   if (!validation.ok) return mountError(container, doc, t, validation.errors);
-  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout });
+  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout, providerColors });
 }
 
 // A player that shows a run while it is still arriving. Events are added with append(), end() closes it.
-export function mountLiveReplay(container, { title, pattern, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar" }) {
-  const view = mountView(container, { events: [], pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout });
+export function mountLiveReplay(container, { title, pattern, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar", providerColors }) {
+  const view = mountView(container, { events: [], pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout, providerColors });
   return {
     append: (event) => view.player.append(event),
     end: () => view.player.endLive(),
@@ -79,7 +82,7 @@ export function mountLiveReplay(container, { title, pattern, recordedWith, t, do
   };
 }
 
-function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar" }) {
+function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors }) {
   const player = createPlayer({ events, clock, timeScale, live });
   const ui = { agent: null, tab: "steps", step: null, round: null, follow: true };
   const viewer = createViewer({ doc, t });
@@ -313,7 +316,9 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       });
       return button;
     });
-    const head = h(doc, "p", { class: "agenthead" }, `${t("insp.stepsOf")} `, h(doc, "b", {}, agent.label), agent.model ? h(doc, "span", { class: "badge agent-model" }, agent.model) : "");
+    const modelTag = agent.model ? h(doc, "span", { class: "badge agent-model" }, agent.model) : "";
+    if (modelTag) paintModelTag(modelTag, agent.model, providerColors);
+    const head = h(doc, "p", { class: "agenthead" }, `${t("insp.stepsOf")} `, h(doc, "b", {}, agent.label), modelTag);
     const left = h(doc, "div", { "data-ui": "step-list" }, head, ...list);
     if (agent.status === "working") left.append(h(doc, "div", { class: "working" }, t("insp.working")));
 

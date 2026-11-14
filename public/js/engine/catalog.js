@@ -1,5 +1,6 @@
 // What a design may contain: models, agent types and the hard numbers.
 // Pure data, shared by the browser and the server function.
+import { isSlot, slotProvider } from "../key-slots.js";
 
 // Prices are US dollars per million tokens. They are the figures of the current
 // published tiers and are shown to the visitor only as an estimate.
@@ -40,11 +41,24 @@ export const pricesFor = (provider) => {
   const c = providerCatalog(provider);
   return { models: c.models, search: c.searchPriceUsd, pricesAsOf: c.pricesAsOf };
 };
-// True when the design uses a model that has no free tier at the provider.
-export const paidOnlyModelUsed = (design, provider) => {
-  const models = providerCatalog(provider).models;
-  return (design?.nodes ?? []).some((n) => models.find((m) => m.key === n.model)?.freeTier === false);
+// An agent may name its own key slot (and so its provider); one without a slot uses the provider of the whole run.
+export const nodeProvider = (node, fallback = "anthropic") => (isSlot(node?.slot) ? slotProvider(node.slot) : fallback);
+export const nodeModel = (node, fallback = "anthropic") => {
+  const models = providerCatalog(nodeProvider(node, fallback)).models;
+  return models.find((m) => m.key === node?.model) ?? models[0];
 };
+// The providers a design uses, each once, in the order of its agents.
+export const providersOf = (design, fallback = "anthropic") => {
+  const out = [];
+  for (const node of design?.nodes ?? []) {
+    const p = nodeProvider(node, fallback);
+    if (!out.includes(p)) out.push(p);
+  }
+  return out.length > 0 ? out : [fallback];
+};
+// True when the design uses a model that has no free tier at the provider.
+export const paidOnlyModelUsed = (design, provider) =>
+  (design?.nodes ?? []).some((n) => providerCatalog(nodeProvider(n, provider)).models.find((m) => m.key === n.model)?.freeTier === false);
 
 const GENERAL = ["sequential", "parallel", "supervisor"];
 

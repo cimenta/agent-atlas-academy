@@ -3,7 +3,8 @@
 import { createEditor } from "./editor-model.js";
 import { loadDefinition } from "./definition.js";
 
-export const draft = { task: "", pattern: "sequential", editor: createEditor("sequential"), limits: null };
+// slots: the key slots chosen on the Create tab (one or more); null until the tab is first opened.
+export const draft = { task: "", pattern: "sequential", editor: createEditor("sequential"), limits: null, slots: null };
 
 export function draftHasWork() {
   return draft.task.trim() !== "" || draft.editor.design().nodes.length > 0;

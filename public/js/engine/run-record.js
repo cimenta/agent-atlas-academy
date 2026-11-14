@@ -1,18 +1,17 @@
 // Turns the events of a live run into a stored run: schema v1 plus a few optional fields.
-import { providerCatalog } from "./catalog.js";
+import { providerCatalog, nodeModel, providersOf } from "./catalog.js";
 
 const TITLE_MAX = 60;
 
 // The models a design uses, each once, in the order of its agents (for example "claude-haiku-5-5, claude-sonnet-5-5").
 // A design without agents gives the default model.
 export function modelsUsed(design, provider = "anthropic") {
-  const models = providerCatalog(provider).models;
   const ids = [];
   for (const node of design?.nodes ?? []) {
-    const id = (models.find((m) => m.key === node.model) ?? models[0]).id;
+    const id = nodeModel(node, provider).id;
     if (!ids.includes(id)) ids.push(id);
   }
-  return ids.length > 0 ? ids.join(", ") : models[0].id;
+  return ids.length > 0 ? ids.join(", ") : providerCatalog(provider).models[0].id;
 }
 
 export function titleFromTask(task) {
@@ -48,7 +47,8 @@ export function buildRunRecord({ id, design, task, events, limits, language, app
     title: titleFromTask(task),
     language,
     pattern: design.pattern,
-    recordedWith: { provider, model: modelsUsed(design, provider), ...(freeTier === true ? { freeTier: true } : {}) },
+    // A run that mixes providers names them all, joined with a plus sign.
+    recordedWith: { provider: providersOf(design, provider).join("+"), model: modelsUsed(design, provider), ...(freeTier === true ? { freeTier: true } : {}) },
     appVersion,
     events: [...events],
     design,

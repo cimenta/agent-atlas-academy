@@ -7,6 +7,7 @@ import { copyText, downloadFile, safeFileName } from "./download.js";
 import { formatDuration, formatUsd } from "./create/create-model.js";
 import { outcomeNotice } from "./outcome-view.js";
 import { markText, searchBar } from "./text-search.js";
+import { paintModelTag } from "./provider-colors.js";
 
 const PAGE_CSS = "body{font:16px/1.6 system-ui,Segoe UI,sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem;color:#1f2328}h1,h2,h3{line-height:1.25}pre{background:#f3f3f1;padding:12px;overflow:auto}code{background:#f3f3f1;padding:0 4px}";
 
@@ -143,12 +144,14 @@ export function renderResult(ctx, run) {
         ...stats.perAgent.map((a) => {
           const pct = Math.round(a.share * 100);
           const bar = h(doc, "span", { class: "share-bar", role: "img", "aria-label": `${pct} %` }, h(doc, "i", { class: `w${Math.round(pct / 5) * 5}` }));
+          const modelCell = h(doc, "span", { class: "badge agent-model" }, a.model || "—");
+          paintModelTag(modelCell, a.model, ctx.settings?.get().providerColors);
           return h(
             doc,
             "tr",
             {},
             h(doc, "th", { scope: "row" }, a.label),
-            h(doc, "td", {}, a.model || "—"),
+            h(doc, "td", {}, modelCell),
             h(doc, "td", {}, a.ms === null ? "—" : formatDuration(a.ms)),
             h(doc, "td", {}, num(a.input)),
             h(doc, "td", {}, num(a.output)),

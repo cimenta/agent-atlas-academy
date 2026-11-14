@@ -1,5 +1,5 @@
 // Pure helpers for the Play tabs: the list of runs to replay and the numbers on the Result tab.
-import { providerCatalog, paidOnlyModelUsed } from "./engine/catalog.js";
+import { providerCatalog, paidOnlyModelUsed, nodeModel } from "./engine/catalog.js";
 import { deriveInspector } from "./replay/inspect-model.js";
 import { validateRun } from "./run-schema.js";
 
@@ -42,7 +42,8 @@ export function buildResultModel(run) {
     : summed;
 
   // Prices are the ones of the provider the run was recorded with; a key on the free tier makes the run free.
-  const provider = run?.recordedWith?.provider;
+  // A run that mixed providers has them joined with a plus sign; each agent is then priced by its own slot.
+  const provider = String(run?.recordedWith?.provider ?? "").split("+")[0];
   const catalog = providerCatalog(provider);
   const free = run?.recordedWith?.freeTier === true && Array.isArray(run?.design?.nodes) && !paidOnlyModelUsed(run.design, provider);
   let cost = null;
@@ -50,7 +51,7 @@ export function buildResultModel(run) {
     cost = usage.searches * catalog.searchPriceUsd;
     for (const a of perAgent) {
       const node = run.design.nodes.find((n) => n.id === a.agent);
-      const model = catalog.models.find((m) => m.key === node?.model) ?? catalog.models[0];
+      const model = nodeModel(node, provider);
       cost += (a.input * model.inputPerMTok + a.output * model.outputPerMTok) / 1e6;
     }
   }

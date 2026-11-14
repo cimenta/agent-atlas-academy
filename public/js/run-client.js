@@ -34,7 +34,7 @@ function parseBlock(block) {
   return null;
 }
 
-export function startRun({ design, task, limits, language, apiKey, provider = "anthropic", fetchFn = fetch, onEvent }) {
+export function startRun({ design, task, limits, language, apiKey, keys, provider = "anthropic", fetchFn = fetch, onEvent }) {
   const controller = new AbortController();
   const events = [];
   let stopped = false;
@@ -52,7 +52,7 @@ export function startRun({ design, task, limits, language, apiKey, provider = "a
       response = await fetchFn("/api/run", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ design, task, limits, language, apiKey, provider }),
+        body: JSON.stringify({ design, task, limits, language, apiKey, ...(keys ? { keys } : {}), provider }),
         signal: controller.signal,
       });
     } catch (error) {

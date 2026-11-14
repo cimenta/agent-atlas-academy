@@ -4,7 +4,7 @@ import { AGENT_TYPES, DEFAULT_MODEL, NODE_MAX } from "../engine/catalog.js";
 import { validateDesign } from "../engine/patterns.js";
 
 const ONCE_ONLY = new Set(["supervisor", "combiner", "judge"]);
-const EDITABLE = ["model", "search", "name", "instructions", "stance", "addToPrevious"];
+const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious"];
 const DEFAULT_ROUNDS = 2;
 
 export function createEditor(initialPattern) {
@@ -13,6 +13,9 @@ export function createEditor(initialPattern) {
   let edges = [];
   let rounds = DEFAULT_ROUNDS;
   let positions = {};
+  // The default model: { slot, model }. A new agent starts with it, and so does every agent that has not been
+  // given a model of its own (custom is not true).
+  let defaultModel = null;
 
   const find = (id) => nodes.find((n) => n.id === id);
   const hasEdge = (from, to) => edges.some((e) => e.from === from && e.to === to);
@@ -48,7 +51,8 @@ export function createEditor(initialPattern) {
       if (!type.patterns.includes(pattern)) return { ok: false, code: "node.agentNotAllowed" };
       if (nodes.length >= NODE_MAX) return { ok: false, code: "node.count" };
       if (ONCE_ONLY.has(agent) && nodes.some((n) => n.agent === agent)) return { ok: false, code: "node.duplicate" };
-      const node = { id: nextId(agent), agent, model: DEFAULT_MODEL, search: type.searchDefault };
+      const node = { id: nextId(agent), agent, model: defaultModel?.model ?? DEFAULT_MODEL, search: type.searchDefault };
+      if (defaultModel) node.slot = defaultModel.slot;
       if (type.free) {
         node.name = "";
         node.instructions = "";
@@ -68,6 +72,52 @@ export function createEditor(initialPattern) {
       const node = find(id);
       if (!node) return;
       for (const key of EDITABLE) if (key in patch) node[key] = patch[key];
+    },
+
+    defaultModel() {
+      return defaultModel ? { ...defaultModel } : null;
+    },
+
+    // Sets the default model and gives it to every agent without a model of its own.
+    setDefaultModel(choice) {
+      defaultModel = { slot: choice.slot, model: choice.model };
+      for (const node of nodes) {
+        if (node.custom === true) continue;
+        node.slot = choice.slot;
+        node.model = choice.model;
+      }
+    },
+
+    // The model of one agent: a choice of its own, or null to follow the default again.
+    setNodeModel(id, choice) {
+      const node = find(id);
+      if (!node) return;
+      if (choice === null && defaultModel) {
+        node.slot = defaultModel.slot;
+        node.model = defaultModel.model;
+        delete node.custom;
+      } else if (choice) {
+        node.slot = choice.slot;
+        node.model = choice.model;
+        node.custom = true;
+      }
+    },
+
+    // Agents whose choice is not allowed go back to the default. An agent with no slot yet (from a saved definition)
+    // gets the default's slot, keeps its model, and counts as having a model of its own.
+    keepSlots(allowed) {
+      if (!defaultModel) return;
+      for (const node of nodes) {
+        if (node.slot === undefined) {
+          node.slot = defaultModel.slot;
+          node.custom = true;
+        }
+        if (!allowed(node)) {
+          node.slot = defaultModel.slot;
+          node.model = defaultModel.model;
+          delete node.custom;
+        }
+      }
     },
 
     canConnect(from, to) {

@@ -19,6 +19,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 ### Changed
 
 - Gemini has two key slots, a free key and a paid key, so both can be saved at once. Settings has a Free key / Paid key switch in the Gemini tab (the free tier checkbox is gone), and Create has two tiles, Gemini free (free models only) and Gemini paid (all models). A Gemini key saved before this change moves to the free slot if it was marked as free tier. Backups carry both keys.
+- Create: more than one provider can be chosen. A Default model list under the provider tiles (grouped by provider) sets the model of every agent, and the model of one agent can be changed in its settings (or set back to Default). A run may mix providers; each agent uses the key of its provider, and the cost estimate and the run record cover all of them.
+- Settings: each provider has a color. Model tags in replays and in the Statistics table use it, a cheaper model gets a paler shade and a stronger model a darker one.
 
 
 - The exclamation marks that say a saved key needs unlocking (Settings menu item, Security tab and text) are yellow, like the dot of a locked key.
