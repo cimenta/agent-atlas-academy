@@ -343,6 +343,15 @@ export function renderCreate(ctx) {
       );
     }
 
+    // A failed run waits for its key: this button carries it on from the agent that failed.
+    const carryOnButton = h(doc, "button", { type: "button", class: "primary", "data-ui": "carry-on" }, t("create.carryOn"));
+    carryOnButton.addEventListener("click", () => {
+      const run = draft.retry;
+      if (!run) return;
+      if (!keysForRun(run).ready) return showForm(t("create.retryNeedsKey"));
+      draft.retry = null;
+      beginRun({ resume: run });
+    });
     const definitionFile = h(doc, "input", { type: "file", accept: ".json,application/json", hidden: true, "data-ui": "definition-file" });
     const loadButton = h(doc, "button", { type: "button", "data-ui": "load-definition", title: t("create.loadDefinitionHint") }, t("create.loadDefinition"));
     loadButton.addEventListener("click", () => definitionFile.click());
@@ -350,6 +359,7 @@ export function renderCreate(ctx) {
     clearButton.addEventListener("click", () => {
       const hasWork = draft.task.trim() !== "" || draft.editor.design().nodes.length > 0;
       if (hasWork && !doc.defaultView.confirm(t("create.clearConfirm"))) return;
+      draft.retry = null;
       draft.task = "";
       draft.pattern = "sequential";
       draft.editor = createEditor("sequential");
@@ -383,6 +393,7 @@ export function renderCreate(ctx) {
     root.replaceChildren(
       h(doc, "div", { class: "create-head" }, h(doc, "h2", {}, t("create.title")), loadButton, clearButton, definitionFile),
       startNotice ? h(doc, "p", { class: "notice", role: noticeRole }, startNotice) : "",
+      draft.retry ? carryOnButton : "",
       h(doc, "div", { class: "field wide" }, h(doc, "label", { for: "cr-task" }, t("create.taskLabel")), taskInput, counter),
       h(doc, "h3", {}, t("create.patternHeading")),
       h(doc, "p", { class: "hint" }, t("create.patternHelp")),
@@ -560,13 +571,20 @@ export function renderCreate(ctx) {
   ctx.doc.title = `${t("create.title")} · ${t("site.name")}`;
   // A failed run opened from the player (Play or Result) asks to be carried on: start it here.
   const pending = draft.retry;
-  draft.retry = null;
+  ctx.onLeave(() => {
+    draft.retry = null;
+  });
   if (pending) {
-    if (keysForRun(pending).ready) beginRun({ resume: pending });
-    else {
+    if (keysForRun(pending).ready) {
+      draft.retry = null;
+      beginRun({ resume: pending });
+    } else {
+      // The key is missing (not entered, or locked): show the form with the key fields of the run, and a button that carries on once the key is in.
       const definition = definitionFromRun(pending);
       if (definition) useDefinition(definition);
+      draft.slots = Object.keys(keysForRun(pending).keys);
       showForm(t("create.retryNeedsKey"));
+      doc.defaultView.scrollTo?.(0, 0);
     }
     return;
   }
