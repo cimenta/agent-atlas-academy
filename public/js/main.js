@@ -194,7 +194,7 @@ async function renderRoute(isNavigation) {
         await renderArticle(ctx, route.params.slug);
         break;
       case "help":
-        renderHelp(ctx);
+        renderHelp(ctx, route.params.topic);
         break;
       case "about":
         renderTextPage(ctx, "about.title", "about.body");
@@ -245,8 +245,10 @@ const handleKey = createKeyHandler({
   isEnabled: () => settings.get().shortcuts,
   goKeys: () => settings.get().goKeys,
   showHelp: () => shortcutsPopup.toggle(),
-  go: (hash) => {
-    location.hash = hash;
+  go: (target) => {
+    // GitHub pages open in a new tab; the pages of the site change the hash.
+    if (/^https:/.test(target)) window.open(target, "_blank", "noopener,noreferrer");
+    else location.hash = target;
   },
   focusSearch: () => {
     const field = doc.querySelector('[data-ui="library-search"]');

@@ -20,6 +20,7 @@ export function parseRoute(hash) {
     if (["help", "about", "learn", "settings"].includes(first)) return { name: first, params: {} };
     return NOT_FOUND;
   }
+  if (first === "help" && SLUG.test(second)) return { name: "help", params: { topic: second } };
   if (first === "learn" && SLUG.test(second)) return { name: "article", params: { slug: second } };
   if (first === "page" && LEGAL_PAGES.has(second)) return { name: "page", params: { name: second } };
   return NOT_FOUND;

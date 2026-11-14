@@ -3,8 +3,14 @@
 
 export const SHORTCUTS_HASH = "#/settings/shortcuts";
 // Where each "go to" shortcut leads, and the letter that is its default. The visitor can change the letters.
-export const DESTINATIONS = { play: "#/play", create: "#/play/create", result: "#/play/result", learn: "#/learn", help: "#/help", about: "#/about", settings: "#/settings", home: "#/" };
-export const DEFAULT_GO_KEYS = { play: "p", create: "c", result: "r", learn: "l", help: "h", about: "a", settings: "s", home: "0" };
+export const GITHUB_URL = "https://github.com/cimenta/agent-atlas-academy";
+export const DESTINATIONS = {
+  play: "#/play", create: "#/play/create", result: "#/play/result", learn: "#/learn", help: "#/help", about: "#/about", settings: "#/settings", home: "#/",
+  // These three open GitHub in a new tab.
+  bug: `${GITHUB_URL}/issues/new?template=bug_report.md`, idea: `${GITHUB_URL}/issues/new?template=feature_request.md`, issues: `${GITHUB_URL}/issues`,
+};
+export const DEFAULT_GO_KEYS = { play: "p", create: "c", result: "r", learn: "l", help: "h", about: "a", settings: "s", home: "0", bug: "b", idea: "f", issues: "i" };
+const SPARE_KEYS = "bfijkmntuvwxyz123456789".split("");
 
 // A set of letters is valid when every destination has one, each is a single letter or digit, and no two are the same.
 export function validateGoKeys(map) {
@@ -22,8 +28,20 @@ export function validateGoKeys(map) {
 }
 
 // What was stored, or the defaults when it is missing or not valid.
+// A destination added after the letters were saved gets its default letter, or a spare one when the visitor already uses that letter.
 export function mergeGoKeys(stored) {
-  const merged = validateGoKeys({ ...DEFAULT_GO_KEYS, ...(stored && typeof stored === "object" ? stored : {}) });
+  const own = stored && typeof stored === "object" ? stored : {};
+  const next = { ...DEFAULT_GO_KEYS, ...own };
+  const used = new Set(Object.keys(DEFAULT_GO_KEYS).filter((id) => typeof own[id] === "string").map((id) => own[id].toLowerCase()));
+  for (const id of Object.keys(DEFAULT_GO_KEYS)) {
+    if (typeof own[id] === "string") continue;
+    const pick = [DEFAULT_GO_KEYS[id], ...SPARE_KEYS].find((k) => !used.has(k));
+    if (pick) {
+      next[id] = pick;
+      used.add(pick);
+    }
+  }
+  const merged = validateGoKeys(next);
   return merged.ok ? merged.keys : { ...DEFAULT_GO_KEYS };
 }
 const SEQUENCE_MS = 1500;
@@ -41,6 +59,9 @@ export const SHORTCUT_GROUPS = [
       { label: "shortcuts.goAbout", go: "about", combos: [["g", "a"]], sequence: true },
       { label: "shortcuts.goSettings", go: "settings", combos: [["g", "s"]], sequence: true },
       { label: "shortcuts.goHome", go: "home", combos: [["g", "0"]], sequence: true },
+      { label: "shortcuts.goBug", go: "bug", combos: [["g", "b"]], sequence: true },
+      { label: "shortcuts.goIdea", go: "idea", combos: [["g", "f"]], sequence: true },
+      { label: "shortcuts.goIssues", go: "issues", combos: [["g", "i"]], sequence: true },
     ],
   },
   {

@@ -10,11 +10,12 @@ import { markText, findMatches } from "./text-search.js";
 export function splitTopics(markdown) {
   const topics = [];
   for (const line of String(markdown ?? "").replace(/\r\n/g, "\n").split("\n")) {
-    const heading = /^##\s+(.+?)\s*$/.exec(line);
-    if (heading) topics.push({ title: heading[1], lines: [] });
+    // A heading may end with {#name}, which a link such as #/help/name uses to open that topic.
+    const heading = /^##\s+(.+?)\s*(?:\{#([a-z0-9-]+)\})?\s*$/.exec(line);
+    if (heading) topics.push({ title: heading[1], id: heading[2], lines: [] });
     else if (topics.length > 0) topics[topics.length - 1].lines.push(line);
   }
-  return topics.map(({ title, lines }) => ({ title, text: lines.join("\n").trim() }));
+  return topics.map(({ title, id, lines }) => ({ title, id, text: lines.join("\n").trim() }));
 }
 
 // The topics whose title or text contains the query (all of them when the query is empty).
@@ -24,11 +25,11 @@ export function filterTopics(topics, query) {
   return topics.filter((topic) => findMatches(topic.title, q).length > 0 || findMatches(topic.text, q).length > 0);
 }
 
-export function renderHelp(ctx) {
+export function renderHelp(ctx, topicId) {
   const { doc, t } = ctx;
   setTitle(ctx, t("help.title"));
   const topics = splitTopics(t("help.body"));
-  const state = { query: "", index: 0 };
+  const state = { query: "", index: Math.max(0, topics.findIndex((topic) => topic.id === topicId)) };
 
   const search = h(doc, "input", { class: "learn-search", type: "search", "data-ui": "help-search", placeholder: t("help.search"), "aria-label": t("help.search"), autocomplete: "off" });
   const side = h(doc, "div", { class: "learn-side", "data-ui": "help-topics", role: "group", "aria-label": t("help.topics") });

@@ -26,3 +26,31 @@ test("a warning keeps the clock time it happened at", () => {
   assert.deepEqual(state.warnings, ["busy", "older run"]);
   assert.deepEqual(state.warningTimes, [1700000000000, null]);
 });
+
+import { mergeGoKeys, DEFAULT_GO_KEYS, DESTINATIONS, createKeyHandler } from "../public/js/shortcuts.js";
+import { splitTopics } from "../public/js/help-page.js";
+
+test("new GitHub shortcuts get free letters even when old saved letters use theirs", () => {
+  const old = { play: "p", create: "c", result: "r", learn: "l", help: "h", about: "a", settings: "s", home: "0" };
+  assert.deepEqual(mergeGoKeys(old).bug, "b");
+  const clash = { ...old, learn: "b" };
+  const merged = mergeGoKeys(clash);
+  assert.equal(merged.learn, "b");
+  assert.notEqual(merged.bug, "b");
+  assert.equal(new Set(Object.values(merged)).size, Object.keys(DEFAULT_GO_KEYS).length);
+});
+
+test("g then b hands the GitHub bug form to go", () => {
+  const seen = [];
+  const handle = createKeyHandler({ isEnabled: () => true, go: (x) => seen.push(x), showHelp() {}, focusSearch() {}, confirmStop() {} });
+  const press = (key) => handle({ key, target: { tagName: "BODY" } });
+  press("g");
+  press("b");
+  assert.deepEqual(seen, [DESTINATIONS.bug]);
+  assert.match(DESTINATIONS.bug, /^https:\/\/github\.com\/.+template=bug_report\.md$/);
+});
+
+test("a help topic can name itself with {#id}", () => {
+  const topics = splitTopics("## One\n\na\n\n## Bugs and ideas {#bugs}\n\nb");
+  assert.deepEqual(topics.map((t) => [t.title, t.id]), [["One", undefined], ["Bugs and ideas", "bugs"]]);
+});

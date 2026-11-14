@@ -57,7 +57,8 @@ test("anything unexpected is not found", () => {
     "#/learn/a/b",
     "#/learn/a/b/c",
     "#/play/x",
-    "#/help/x",
+    "#/help/Bad_Slug",
+    "#/help/a/b",
     "#/page",
     "#//",
     undefined,
@@ -67,4 +68,8 @@ test("anything unexpected is not found", () => {
     const expected = hash === undefined || hash === null || hash === 42 ? "home" : "notfound";
     assert.equal(parseRoute(hash).name, expected, String(hash));
   }
+});
+
+test("a help topic can be linked", () => {
+  assert.deepEqual(parseRoute("#/help/bugs"), { name: "help", params: { topic: "bugs" } });
 });
