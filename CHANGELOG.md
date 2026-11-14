@@ -18,6 +18,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Library: a run card shows how the run ended as a colored round icon next to the cog, and the providers it used as chips in their Settings colors.
+
 - Gemini has two key slots, a free key and a paid key, so both can be saved at once. Settings has a Free key / Paid key switch in the Gemini tab (the free tier checkbox is gone), and Create has two tiles, Gemini free (free models only) and Gemini paid (all models). A Gemini key saved before this change moves to the free slot if it was marked as free tier. Backups carry both keys.
 - Create: more than one provider can be chosen. A Default model list under the provider tiles (grouped by provider) sets the model of every agent, and the model of one agent can be changed in its settings (or set back to Default). A run may mix providers; each agent uses the key of its provider, and the cost estimate and the run record cover all of them.
 - A failed agent blinks red in the diagram and has a Retry button (in Create right after the run, and when you open the failed run from Play or Result). The run carries on from that agent: the agents that finished keep their answers and are not paid for again, and the new events are added to the same saved run.

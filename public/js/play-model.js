@@ -14,7 +14,7 @@ export function buildReplayList(gallery, local) {
     gallery: gallery.map((r) => ({ id: r.id, title: r.title, pattern: r.pattern, source: "gallery" })),
     mine: [...local]
       .sort((a, b) => b.createdAt - a.createdAt)
-      .map((r) => ({ id: r.id, title: r.title, pattern: r.pattern, outcome: r.outcome, createdAt: r.createdAt, source: "local" })),
+      .map((r) => ({ id: r.id, title: r.title, pattern: r.pattern, outcome: r.outcome, provider: r.provider, createdAt: r.createdAt, source: "local" })),
   };
 }
 

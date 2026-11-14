@@ -229,6 +229,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   // The diagram replaces the agent cards when the run recorded its design (the same picture as on the Create tab).
   let diagram = null;
   let diagramDesign = null;
+  let failedAtEnd = null;
   function designOfRun() {
     const d = events.find((e) => e.type === "run_start")?.design;
     return d && Array.isArray(d.nodes) && Array.isArray(d.edges) && d.nodes.length > 0 ? d : null;
@@ -260,10 +261,16 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       }
     }
     const debate = debateProgress(events, player.cursor);
+    // In a recorded (not live) run, the agents that failed at its end are marked from the start.
+    if (!live && failedAtEnd === null) {
+      const whole = deriveInspector(events);
+      failedAtEnd = new Set(whole.order.filter((id) => whole.agents[id].status === "error"));
+    }
     diagram.update({
       events,
       cursor: player.cursor,
       state,
+      failed: live ? null : failedAtEnd,
       selectedId: currentAgent()?.id ?? null,
       badgeText: debate ? (debate.verdict ? t("player.debateVerdict") : t("player.debateRound", { n: ROUND_MARK, total: debate.rounds })) : "",
       badgeNumber: debate && !debate.verdict ? debate.round : undefined,

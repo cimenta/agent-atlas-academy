@@ -462,9 +462,16 @@ body[data-show-ui] [data-ui]::after { content: attr(data-ui); position: absolute
 .library-pane .run-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 8px 12px; }
 .library-pane .run-row .run-title { grid-column: 1; }
 .library-pane .run-row .run-title { grid-row: 1; }
-.library-pane .run-row .run-menu { grid-column: 2; grid-row: 1; justify-self: end; }
-.library-pane .run-row .run-meta { grid-column: 1; grid-row: 2; font-size: 0.8rem; align-self: center; }
-.library-pane .run-row .type-chip { grid-column: 2; grid-row: 2; justify-self: end; align-self: center; }
+.library-pane .run-row .run-tools { grid-column: 2; grid-row: 1; justify-self: end; display: flex; align-items: center; gap: 6px; }
+.library-pane .run-row .run-meta { grid-column: 1 / -1; grid-row: 2; font-size: 0.8rem; align-self: center; }
+.library-pane .run-row .run-providers { grid-column: 1; grid-row: 3; align-self: center; }
+.library-pane .run-row .type-chip { grid-column: 2; grid-row: 3; justify-self: end; align-self: center; }
+.run-providers { display: flex; flex-wrap: wrap; gap: 4px; }
+.provider-chip { display: inline-block; padding: 1px 9px; font-size: 0.72rem; font-weight: 600; border-radius: 999px; white-space: nowrap; }
+.outcome-icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; color: #fff; font-size: 0.8rem; font-weight: 700; flex: none; }
+.outcome-icon.ok { background: #2e8b4a; }
+.outcome-icon.warn { background: #c97a00; }
+.outcome-icon.fail { background: #c62828; }
 .library-pane .run-row .cog-button { min-height: 32px; min-width: 32px; }
 .run-menu-item.danger { color: var(--err); }
 .run-menu-empty { margin: 4px 8px; }

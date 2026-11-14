@@ -72,7 +72,7 @@ export function createRunStore(backend, { now = Date.now } = {}) {
     async list() {
       const all = await backend.getAll();
       return all
-        .map(({ id, createdAt, run }) => ({ id, title: run.title, pattern: run.pattern, outcome: run.outcome ?? "finished", createdAt }))
+        .map(({ id, createdAt, run }) => ({ id, title: run.title, pattern: run.pattern, outcome: run.outcome ?? "finished", provider: run.recordedWith?.provider, createdAt }))
         .sort((a, b) => b.createdAt - a.createdAt);
     },
     async get(id) {

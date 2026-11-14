@@ -1,6 +1,7 @@
 // The Play section: sub-tabs Re-play, Create and Result.
 import { h } from "./dom.js";
 import { mountReplay } from "./replay/view.js";
+import { providerChips } from "./provider-colors.js";
 import { getJson, loadExplanations, renderNotFound, setTitle } from "./pages.js";
 import { buildReplayList, filterLibrary, formatRunWhen, prepareImport } from "./play-model.js";
 import { makeRunId } from "./engine/run-record.js";
@@ -108,18 +109,37 @@ export async function renderPlay(ctx, route = { params: { view: "replay" } }) {
 }
 
 // The line under the title: how the run ended and when it was made (your own runs).
-function runMeta({ doc, t, lang }, item) {
-  const parts = [];
-  if (item.outcome) {
-    const level = item.outcome === "finished" ? "ok" : item.outcome === "stopped_user" || item.outcome === "stopped_limit" ? "warn" : "fail";
-    parts.push(h(doc, "span", { class: `outcome-chip ${level}`, "data-ui": "run-outcome-chip", "data-outcome": item.outcome }, t(`result.status.${item.outcome}`)));
-  }
+function runMeta({ doc, lang }, item) {
   const when = formatRunWhen(item.createdAt, lang);
-  if (when) parts.push(h(doc, "span", { class: "run-when-text", "data-ui": "run-when" }, when));
-  return parts.length ? h(doc, "span", { class: "run-meta" }, ...parts) : "";
+  return when ? h(doc, "span", { class: "run-meta" }, h(doc, "span", { class: "run-when-text", "data-ui": "run-when" }, when)) : "";
 }
 
-// A row of the library: the title and the cog on top, the outcome and the pattern tag below.
+// How the run ended, as a round icon: a check, a stop mark or a cross on a green, amber or red background.
+const OUTCOME_ICONS = { ok: "✓", warn: "■", fail: "✕" };
+function outcomeIcon({ doc, t }, item) {
+  if (!item.outcome) return "";
+  const level = item.outcome === "finished" ? "ok" : item.outcome === "stopped_user" || item.outcome === "stopped_limit" ? "warn" : "fail";
+  const label = t(`result.status.${item.outcome}`);
+  return h(doc, "span", { class: `outcome-icon ${level}`, role: "img", "aria-label": label, title: label, "data-ui": "run-outcome-chip", "data-outcome": item.outcome }, OUTCOME_ICONS[level]);
+}
+
+// The providers a run used, each a chip in its color from Settings.
+function providerRow({ doc, settings }, item) {
+  const chips = providerChips(item.provider, settings?.get().providerColors);
+  if (!chips.length) return "";
+  const out = h(doc, "span", { class: "run-providers", "data-ui": "run-providers" });
+  for (const c of chips) {
+    const chip = h(doc, "span", { class: "provider-chip", "data-provider": c.id }, c.name);
+    if (chip.style) {
+      chip.style.background = c.background;
+      chip.style.color = c.color;
+    }
+    out.append(chip);
+  }
+  return out;
+}
+
+// A row of the library: the title with the outcome icon and the cog on top, the time below, then the providers and the pattern tag.
 function runRow(ctx, item, menu) {
   const { doc, t } = ctx;
   return h(
@@ -127,8 +147,9 @@ function runRow(ctx, item, menu) {
     "li",
     { class: "run-row", "data-ui": "run-row" },
     h(doc, "a", { href: `#/play/run/${item.id}`, class: "run-title" }, item.title),
-    menu,
+    h(doc, "span", { class: "run-tools" }, outcomeIcon(ctx, item), menu),
     runMeta(ctx, item),
+    providerRow(ctx, item),
     h(doc, "span", { class: `type-chip type-${item.pattern}`, "data-ui": "run-type" }, t(`pattern.${item.pattern}`)),
   );
 }

@@ -48,6 +48,20 @@ export function modelTagColors(modelId, colors) {
   return { background, color: luminance(background) > 0.4 ? "#1f1f1f" : "#ffffff" };
 }
 
+const CHIP_NAMES = { anthropic: "Anthropic", google: "Gemini", gemini: "Gemini" };
+
+// The chips for the providers of a run ("anthropic+google" is a run that mixed two): name and colors of each.
+// A provider with no chosen color gets a neutral grey chip.
+export function providerChips(provider, colors) {
+  if (typeof provider !== "string" || provider === "") return [];
+  const merged = mergeProviderColors(colors);
+  return provider.split("+").filter(Boolean).map((id) => {
+    const key = id === "gemini" ? "google" : id;
+    const background = merged[key] ?? "#6b6b66";
+    return { id, name: CHIP_NAMES[id] ?? id[0].toUpperCase() + id.slice(1), background, color: luminance(background) > 0.4 ? "#1f1f1f" : "#ffffff" };
+  });
+}
+
 // Colors a tag element in place (set through the style object, which the page security policy allows).
 export function paintModelTag(element, modelId, colors) {
   const painted = modelTagColors(modelId, colors);

@@ -40,7 +40,7 @@ test("list is newest first and has the summary fields", async () => {
   await s.save(makeRun("local-2", { task: "Second" }));
   const list = await s.list();
   assert.deepEqual(list.map((r) => r.id), ["local-2", "local-1"]);
-  assert.deepEqual(Object.keys(list[0]).sort(), ["createdAt", "id", "outcome", "pattern", "title"]);
+  assert.deepEqual(Object.keys(list[0]).sort(), ["createdAt", "id", "outcome", "pattern", "provider", "title"]);
   assert.equal(typeof list[0].createdAt, "number");
   assert.equal(list[0].title, "Second");
 });
