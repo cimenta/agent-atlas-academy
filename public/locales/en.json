@@ -375,6 +375,7 @@
   "run.retrying": "Trying again from {agent}. The agents that finished keep their answers.",
   "create.retryNeedsKey": "Your key is needed to carry on this run. Add or unlock it in the key section below, then press Carry on.",
   "create.carryOn": "Carry on the failed run",
+  "create.retryNeedsKeyLive": "Your key is needed to carry on this run. Add or unlock it in Settings, then press Retry on the agent again.",
   "create.keyHeading": "Your API key",
   "create.keyInline": "Paste your Anthropic API key (kept in this tab only)",
   "create.keySettingsLink": "Remember it on this device in Settings",

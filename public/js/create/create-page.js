@@ -112,6 +112,13 @@ export function renderCreate(ctx) {
   const root = ctx.main;
   let activeRun = null;
   ctx.onLeave(() => activeRun?.stop());
+  // An important message also goes into a tooltip in the middle of the screen, which stays until the visitor closes it.
+  // The same message is on the page too.
+  function importantTip(message) {
+    const tip = showCenterTip({ doc, content: h(doc, "p", {}, message), sticky: true, closeLabel: t("about.close"), moveLabel: t("about.move") });
+    ctx.onLeave(tip.close);
+    return tip;
+  }
 
   function showForm(startNotice = "", noticeRole = "alert") {
     // Task.
@@ -348,7 +355,11 @@ export function renderCreate(ctx) {
     carryOnButton.addEventListener("click", () => {
       const run = draft.retry;
       if (!run) return;
-      if (!keysForRun(run).ready) return showForm(t("create.retryNeedsKey"));
+      if (!keysForRun(run).ready) {
+        showForm(t("create.retryNeedsKey"));
+        importantTip(t("create.retryNeedsKey"));
+        return;
+      }
       draft.retry = null;
       beginRun({ resume: run });
     });
@@ -497,7 +508,8 @@ export function renderCreate(ctx) {
       if (!ended || finalRecordNow === null) return;
       const record2 = finalRecordNow;
       if (!keysForRun(record2).ready) {
-        outcomeSlot.append(h(doc, "p", { class: "notice", role: "alert" }, t("create.retryNeedsKey")));
+        outcomeSlot.append(h(doc, "p", { class: "notice", role: "alert" }, t("create.retryNeedsKeyLive")));
+        importantTip(t("create.retryNeedsKeyLive"));
         return;
       }
       live.destroy();
@@ -565,6 +577,7 @@ export function renderCreate(ctx) {
       live.destroy();
       const code = error instanceof RunStartError ? error.code : "server";
       showForm(t(`run.error.${code}`));
+      importantTip(t(`run.error.${code}`));
     });
   }
 
@@ -585,6 +598,7 @@ export function renderCreate(ctx) {
       draft.slots = Object.keys(keysForRun(pending).keys);
       showForm(t("create.retryNeedsKey"));
       doc.defaultView.scrollTo?.(0, 0);
+      importantTip(t("create.retryNeedsKey"));
     }
     return;
   }

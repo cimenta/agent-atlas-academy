@@ -375,6 +375,7 @@
   "run.retrying": "Zkouším to znovu od agenta {agent}. Agenti, kteří skončili, si ponechají své odpovědi.",
   "create.retryNeedsKey": "K pokračování běhu je potřeba váš klíč. Přidejte nebo odemkněte ho v sekci klíče níže a pak stiskněte Pokračovat.",
   "create.carryOn": "Pokračovat v selhaném běhu",
+  "create.retryNeedsKeyLive": "K pokračování běhu je potřeba váš klíč. Přidejte nebo odemkněte ho v Nastavení a pak znovu stiskněte Znovu u agenta.",
   "create.keyHeading": "Váš klíč API",
   "create.keyInline": "Vložte svůj klíč Anthropic API (zůstane jen v této kartě)",
   "create.keySettingsLink": "Zapamatovat v tomto zařízení v Nastavení",
