@@ -24,6 +24,8 @@ export function submitRun(doc, t, run) {
   downloadFile(doc, file, JSON.stringify(runForExport(run), null, 2), "application/json");
   const link = doc.createElement("a");
   link.setAttribute("href", submitLink(t, run, file));
+  link.setAttribute("target", "_blank"); // a new tab, so the site stays where it is
+  link.setAttribute("rel", "noopener noreferrer");
   doc.body.append(link);
   link.click();
   link.remove();
