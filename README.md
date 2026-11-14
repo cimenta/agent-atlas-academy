@@ -6,6 +6,8 @@ Agent Atlas is an educational project. It is not meant for real work.
 
 Site: https://agentatlas.academy
 
+Source: https://github.com/cimenta/agent-atlas-academy
+
 ## Run it
 
 Requires Node.js 20 or newer. There are no dependencies to install.
@@ -28,13 +30,15 @@ Writes `public/version.json` and the article indexes (generated, not committed).
 
 ## Live runs
 
-Visitors can run their own experiment with their own Anthropic API key: describe a task, pick a pattern (sequential, parallel, supervisor, debate), build a diagram of agents and watch it run in the player.
+Visitors can run their own experiment with their own API key: describe a task, pick a pattern (sequential, parallel, supervisor, debate), pick one or more providers (Anthropic, Gemini free, Gemini paid), build a diagram of agents and watch it run in the player. A Default model sets the model of every agent and one agent can have its own, so a run may mix providers.
 
 - **Try it without a key:** `npm run build && node scripts/serve.js --mock` answers `/api/run` with fake agents. Any key text of 20 or more characters works and nothing is sent to Anthropic. The flag is refused when `VERCEL` is set.
-- **Endpoint:** `POST /api/run` (`api/run.js`, logic in `lib/run-handler.js`) takes `{ design, task, limits, language, apiKey }` and streams the run as server-sent events. The key is used only for the call to Anthropic and is never logged or stored. There is a per-address limit of 10 runs an hour (`RUNS_PER_HOUR` changes it) and the function may run for five minutes.
+- **Endpoint:** `POST /api/run` (`api/run.js`, logic in `lib/run-handler.js`) takes `{ design, task, limits, language, keys, timeoutSec, resume }` and streams the run as server-sent events. `keys` holds one key for each key slot the agents use (`anthropic`, `google-free`, `google`; an older single `apiKey` still works). Keys are used only for the calls to the providers and are never logged or stored. `timeoutSec` (30 to 120, default 60) is how long one request to a model waits. `resume` holds the answers of agents that finished in an earlier try, which is how Retry carries a failed run on. There is a per-address limit of 10 runs an hour (`RUNS_PER_HOUR` changes it) and the function may run for five minutes.
+- **Retry:** a failed agent shows a red Retry button with an arrow that offers another model for that agent. The run carries on from it in the same saved record; the agents that finished are not called again (`resume`). The result message shows the cost of that try and of the whole run, and an agent on a free Gemini key counts as free.
+- **Library cards:** an icon (check, square, cross) shows how a run ended and colored chips name its providers; the colors are chosen in Settings.
 - **Shared engine:** the pattern rules, runners, limits and cost estimate live in `public/js/engine/` and are used by both the browser and the function, so the editor and the server always agree.
 - **Limits:** a task is at most 1000 characters; a design has at most 8 agents; defaults are 20 steps, 40000 tokens and 3 web searches, and the hard maxima are 60, 150000 and 10. A run also stops after 270 seconds.
-- **Storage in the browser:** `aa.lang` (language), `aa.settings` (default limits), `aa.vault` (the API key, only if the visitor chose to remember it, encrypted with a password), and the IndexedDB database `aa` with a `runs` store (every run). Settings has a backup export and import.
+- **Storage in the browser:** `aa.lang` (language), `aa.settings` (default limits, request timeout, provider colors, player layout, shortcuts), `aa.vault` (the API keys, only if the visitor chose to remember them, encrypted with one password), and the IndexedDB database `aa` with a `runs` store (every run). Settings has a backup export and import.
 - **Before it goes public:** model prices and the web-search tool type in `public/js/engine/catalog.js` and `tools.js` must be checked against Anthropic's current documentation.
 
 ## Releases

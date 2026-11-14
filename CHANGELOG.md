@@ -18,6 +18,10 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Help and the README describe providers, the Default model, Retry, the request timeout and the library cards. About links to the source code on GitHub.
+- Settings, Default limits: how long a request to a model waits for an answer, a slider from 30 to 120 seconds (60 by default) with quick choices of 30, 60 and 120. A request that gets no answer in time ends with a message that says it is a timeout, which provider did not answer and what to do.
+- Retry: the arrow next to a failed agent's Retry button lists the models of Anthropic and Gemini, the failed one marked; picking one retries the agent with it. After a Retry the result message shows what that try took and cost, then the whole run; an agent on a free Gemini key is counted as free in every cost.
+- Warning messages in a replay show the date and time they happened.
 - Library: a run card shows how the run ended as a colored round icon next to the cog, and the providers it used as chips in their Settings colors.
 
 - Gemini has two key slots, a free key and a paid key, so both can be saved at once. Settings has a Free key / Paid key switch in the Gemini tab (the free tier checkbox is gone), and Create has two tiles, Gemini free (free models only) and Gemini paid (all models). A Gemini key saved before this change moves to the free slot if it was marked as free tier. Backups carry both keys.
