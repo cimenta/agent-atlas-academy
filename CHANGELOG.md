@@ -18,6 +18,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- About: a Bugs and ideas section with links to report a bug, suggest a feature and see the open issues on GitHub; the repository has issue templates for a bug report and a feature request.
 - Help and the README describe providers, the Default model, Retry, the request timeout and the library cards. About links to the source code on GitHub.
 - Settings, Default limits: how long a request to a model waits for an answer, a slider from 30 to 120 seconds (60 by default) with quick choices of 30, 60 and 120. A request that gets no answer in time ends with a message that says it is a timeout, which provider did not answer and what to do.
 - Retry: the arrow next to a failed agent's Retry button lists the models of Anthropic and Gemini, the failed one marked; picking one retries the agent with it. After a Retry the result message shows what that try took and cost, then the whole run; an agent on a free Gemini key is counted as free in every cost.
