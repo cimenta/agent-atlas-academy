@@ -14,6 +14,7 @@ import { paintModelTag } from "../provider-colors.js";
 import { createAboutPanel } from "./about.js";
 import { createRunMenu } from "./run-menu.js";
 import { retryChoices } from "./retry-choice.js";
+import { canSubmit, submitRun } from "../submit-run.js";
 import { runForExport } from "../run-export.js";
 import { createReplayDiagram, ROUND_MARK } from "./diagram.js";
 import { outcomeNotice } from "../outcome-view.js";
@@ -126,6 +127,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
           { ui: "export-json", label: t("player.export"), hint: t("player.exportHint"), onClick: () => downloadFile(doc, `${safeFileName(exportRun.id)}.json`, JSON.stringify(runForExport(exportRun), null, 2), "application/json") },
           ...(definition ? [{ ui: "use-in-create", label: t("player.useInCreate"), hint: t("player.useInCreateHint"), onClick: () => openInCreate(doc, t, definition) }] : []),
           ...(definition ? [{ ui: "export-definition", label: t("player.exportDefinition"), hint: t("player.exportDefinitionHint"), onClick: () => downloadFile(doc, `${safeFileName(exportRun.id)}-definition.json`, JSON.stringify(definition, null, 2), "application/json") }] : []),
+          ...(typeof onDelete === "function" && canSubmit(exportRun) ? [{ ui: "submit-run", label: t("player.submit"), hint: t("player.submitHint"), onClick: () => submitRun(doc, t, exportRun) }] : []),
           ...(typeof onDelete === "function" ? [{ ui: "run-delete", label: t("play.delete"), hint: t("player.deleteHint"), danger: true, onClick: () => onDelete() }] : []),
         ],
       })

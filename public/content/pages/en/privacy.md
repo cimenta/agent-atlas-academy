@@ -25,6 +25,10 @@ By default your API key is kept only in the memory of the open tab and is gone w
 
 When you press Run, your task, the agents' instructions and messages, and your API key are sent to our server only so that the request can be forwarded to Anthropic. The server does not store them and does not write them to logs. Anthropic then processes them under its own terms and privacy policy. The cost of the run is billed by Anthropic to your own account. If web search is switched on, search queries are handled by Anthropic as well. Do not put personal or confidential data in a task.
 
+## If you submit a run to the library
+
+If you choose Submit to library in the run menu, the site saves the run as a file on your computer and opens your mail program. The site itself sends nothing. If you send the message, we receive it at submit-run@agentatlas.academy together with your e-mail address, the attached run and whatever you write. We use it only to review the run and to answer you. If the run is not added to the library, we delete the message and the file; we also delete them if you ask. A run that is added is published under CC BY 4.0, with the name you gave or without a name.
+
 ## Hosting logs
 
 The site is hosted by Vercel Inc., a company in the United States. Like any web host, the provider keeps server logs, including IP addresses, for security and operation. We do not have access to a profile of you and do not combine these logs with anything else. Retention period: as set by the hosting provider's own policy. Legal basis: legitimate interest under GDPR Article 6(1)(f), to keep the site secure and running.

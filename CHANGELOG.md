@@ -18,6 +18,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Run menu: Submit to library on your own finished runs. It saves the run as a file and opens an e-mail to submit-run@agentatlas.academy that asks to attach it; the site sends nothing. Help and the privacy policy describe it.
 - Help: a Bugs and ideas topic with links to report a bug, suggest a feature and see the open issues on GitHub; About links to it (a help topic can be linked as #/help/name). The shortcuts g then b, f and i open those three GitHub pages in a new tab (the letters can be changed in Settings). The repository has issue templates for a bug report and a feature request.
 - Help and the README describe providers, the Default model, Retry, the request timeout and the library cards. About links to the source code on GitHub.
 - Settings, Default limits: how long a request to a model waits for an answer, a slider from 30 to 120 seconds (60 by default) with quick choices of 30, 60 and 120. A request that gets no answer in time ends with a message that says it is a timeout, which provider did not answer and what to do.

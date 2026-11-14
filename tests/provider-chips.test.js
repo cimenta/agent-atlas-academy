@@ -54,3 +54,19 @@ test("a help topic can name itself with {#id}", () => {
   const topics = splitTopics("## One\n\na\n\n## Bugs and ideas {#bugs}\n\nb");
   assert.deepEqual(topics.map((t) => [t.title, t.id]), [["One", undefined], ["Bugs and ideas", "bugs"]]);
 });
+
+import { submitLink, canSubmit, SUBMIT_EMAIL } from "../public/js/submit-run.js";
+
+test("the submit mail goes to the contact address and names the file to attach", () => {
+  const t = (key, p = {}) => ({ "submit.subject": `Subject ${p.title}`, "submit.body": `Attach ${p.file}\nThanks` })[key];
+  const link = submitLink(t, { title: "Sky & light" }, "run-1.json");
+  assert.ok(link.startsWith(`mailto:${SUBMIT_EMAIL}?subject=`));
+  assert.ok(link.includes(encodeURIComponent("Subject Sky & light")));
+  assert.ok(link.includes(encodeURIComponent("Attach run-1.json\r\nThanks")));
+});
+
+test("only a finished run with events can be submitted", () => {
+  assert.equal(canSubmit({ outcome: "finished", events: [{}] }), true);
+  assert.equal(canSubmit({ outcome: "failed", events: [{}] }), false);
+  assert.equal(canSubmit({ outcome: "finished", events: [] }), false);
+});

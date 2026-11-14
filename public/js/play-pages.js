@@ -3,6 +3,7 @@ import { h } from "./dom.js";
 import { mountReplay } from "./replay/view.js";
 import { providerChips } from "./provider-colors.js";
 import { withRetryChoice } from "./replay/retry-choice.js";
+import { canSubmit, submitRun } from "./submit-run.js";
 import { getJson, loadExplanations, renderNotFound, setTitle } from "./pages.js";
 import { buildReplayList, filterLibrary, formatRunWhen, prepareImport } from "./play-model.js";
 import { makeRunId } from "./engine/run-record.js";
@@ -380,6 +381,7 @@ export async function renderReplayTab(ctx, requestedId) {
             { ui: "export-json", label: t("player.export"), hint: t("player.exportHint"), onClick: () => downloadFile(doc, `${safeFileName(run.id)}.json`, JSON.stringify(runForExport(run), null, 2), "application/json") },
             ...(definition ? [{ ui: "use-in-create", label: t("player.useInCreate"), hint: t("player.useInCreateHint"), onClick: () => openInCreate(doc, t, definition) }] : []),
             ...(definition ? [{ ui: "export-definition", label: t("player.exportDefinition"), hint: t("player.exportDefinitionHint"), onClick: () => downloadFile(doc, `${safeFileName(run.id)}-definition.json`, JSON.stringify(definition, null, 2), "application/json") }] : []),
+            ...(found.source === "local" && canSubmit(run) ? [{ ui: "submit-run", label: t("player.submit"), hint: t("player.submitHint"), onClick: () => submitRun(doc, t, run) }] : []),
             ...(found.source === "local" ? [{ ui: "run-delete", label: t("play.delete"), hint: t("player.deleteHint"), danger: true, onClick: () => removeRun(item) }] : []),
           ];
         },
