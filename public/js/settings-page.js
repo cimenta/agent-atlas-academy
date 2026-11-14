@@ -1,6 +1,7 @@
 // The settings page: API key handling, default limits and local data.
 import { h } from "./dom.js";
 import { LIMIT_MAX, PROVIDER_IDS, PRICING_URLS, providerCatalog } from "./engine/catalog.js";
+import { SLOT_IDS, slotProvider, slotIsFree } from "./key-slots.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
 import { keyState, overallKeyState } from "./key-state.js";
 import { DEFAULT_GO_KEYS } from "./shortcuts.js";
@@ -43,8 +44,7 @@ export function renderSettings(ctx) {
     const passInput = h(doc, "input", { id: `set-pass${sfx}`, type: "password", autocomplete: "new-password" });
     const passBlock = h(doc, "div", { class: "pass-block", hidden: true }, field(`set-pass${sfx}`, t("settings.passphraseLabel"), passInput), h(doc, "p", { class: "notice" }, t("settings.passphraseWarning")));
     const saveButton = h(doc, "button", { type: "button", class: "primary" }, t("settings.keySave"));
-    const freeBox = id === "google" ? h(doc, "input", { id: "set-free-google", type: "checkbox", "data-ui": "free-tier-box" }) : null;
-    if (freeBox) freeBox.checked = settings.get().freeTier.google;
+    const isGoogle = slotProvider(id) === "google";
     rememberBox.addEventListener("change", () => {
       passBlock.hidden = !rememberBox.checked;
       saveButton.textContent = t(rememberBox.checked ? "settings.keySaveDevice" : "settings.keySave");
@@ -58,7 +58,6 @@ export function renderSettings(ctx) {
     saveButton.addEventListener("click", async () => {
       const key = keyInput.value.trim();
       if (key === "") return say(t("settings.error.emptyKey"), true);
-      if (freeBox) settings.setFreeTier(id, freeBox.checked);
       try {
         if (rememberBox.checked) await v.remember(key, passInput.value);
         else v.setSessionKey(key);
@@ -72,13 +71,10 @@ export function renderSettings(ctx) {
       replacing = false;
       refreshStatus();
     });
-    const entry = [field(`set-key${sfx}`, t(id === "google" ? "settings.googleKeyLabel" : "settings.keyLabel"), keyInput)];
-    if (id === "google") {
-      entry.push(
-        h(doc, "p", { class: "provider-links" }, h(doc, "a", { href: GOOGLE_KEY_URL, target: "_blank", rel: "noopener noreferrer", "data-ui": "google-key-link" }, t("settings.googleKeyLink")), " · ", h(doc, "a", { href: PRICING_URLS.google, target: "_blank", rel: "noopener noreferrer", "data-ui": "google-pricing-link" }, t("settings.googlePricingLink"))),
-        h(doc, "div", { class: "field checkbox" }, freeBox, h(doc, "label", { for: "set-free-google" }, t("settings.freeTierLabel"))),
-        h(doc, "p", { class: "notice", "data-ui": "free-tier-warning" }, t("settings.freeTierWarning")),
-      );
+    const entry = [field(`set-key${sfx}`, t(isGoogle ? "settings.googleKeyLabel" : "settings.keyLabel"), keyInput)];
+    if (isGoogle) {
+      entry.push(h(doc, "p", { class: "provider-links" }, h(doc, "a", { href: GOOGLE_KEY_URL, target: "_blank", rel: "noopener noreferrer", "data-ui": "google-key-link" }, t("settings.googleKeyLink")), " · ", h(doc, "a", { href: PRICING_URLS.google, target: "_blank", rel: "noopener noreferrer", "data-ui": "google-pricing-link" }, t("settings.googlePricingLink"))));
+      if (slotIsFree(id)) entry.push(h(doc, "p", { class: "notice", "data-ui": "free-tier-warning" }, t("settings.freeTierWarning")));
     }
     entry.push(h(doc, "div", { class: "field checkbox" }, rememberBox, h(doc, "label", { for: `set-remember${sfx}` }, t("settings.rememberLabel"))), passBlock, saveButton);
     // With a key saved the form is hidden, so it cannot be overwritten by accident; Replace key opens it.
@@ -102,12 +98,14 @@ export function renderSettings(ctx) {
       replaceNote.hidden = !(saved && replacing);
       const available = v.getSessionKey() !== null;
       const text = available ? t(v.hasStoredKey() ? "settings.keyAvailableSaved" : "settings.keyAvailable") : v.hasStoredKey() ? t("settings.keyLocked") : t("settings.keyNone");
-      const tier = id === "google" && (available || v.hasStoredKey()) ? ` · ${t(settings.get().freeTier.google ? "settings.freeTierTag" : "settings.paidTierTag")}` : "";
+      const tier = isGoogle && (available || v.hasStoredKey()) ? ` · ${t(slotIsFree(id) ? "settings.freeTierTag" : "settings.paidTierTag")}` : "";
       status.textContent = text + tier;
     };
     return { id, node, refresh, has: () => v.getSessionKey() !== null || v.hasStoredKey() };
   };
-  for (const id of PROVIDER_IDS) keyPanels[id] = buildKeyPanel(id);
+  for (const id of SLOT_IDS) keyPanels[id] = buildKeyPanel(id);
+  const slotLabel = (id) => (slotProvider(id) === "google" ? t(slotIsFree(id) ? "create.geminiFree" : "create.geminiPaid") : providerCatalog(slotProvider(id)).label);
+  const slotsOf = (provider) => SLOT_IDS.filter((id) => slotProvider(id) === provider);
 
   // The provider whose key the Security tab works on.
   let secProvider = "anthropic";
@@ -121,12 +119,13 @@ export function renderSettings(ctx) {
     dot.setAttribute("aria-label", text);
   };
   const refreshStatus = () => {
-    const states = PROVIDER_IDS.map((id) => keyState(vaultOf(id)));
-    PROVIDER_IDS.forEach((id, i) => {
+    const slotStates = Object.fromEntries(SLOT_IDS.map((id) => [id, keyState(vaultOf(id))]));
+    for (const id of SLOT_IDS) {
       keyPanels[id].refresh();
-      setDot(providerDots[id], states[i], "key-dot");
-    });
-    setDot(keyTag, overallKeyState(states), "key-dot key-dot-inline");
+      if (slotDots[id]) setDot(slotDots[id], slotStates[id], "key-dot key-dot-inline");
+    }
+    for (const id of PROVIDER_IDS) setDot(providerDots[id], overallKeyState(slotsOf(id).map((s) => slotStates[s])), "key-dot");
+    setDot(keyTag, overallKeyState(Object.values(slotStates)), "key-dot key-dot-inline");
     lockedTag.hidden = !needsUnlock(vault);
     markUnlockAlert(doc, vault, t);
     const stored = sv().hasStoredKey();
@@ -353,6 +352,7 @@ export function renderSettings(ctx) {
         settings: settings.get(),
         vaultRecord: vault.exportRecord(),
         googleRecord: vaultOf("google").exportRecord(),
+        googleFreeRecord: vaultOf("google-free").exportRecord(),
         includeKey: includeKey.checked,
         appVersion: ctx.version,
       });
@@ -411,8 +411,24 @@ export function renderSettings(ctx) {
 
   // Providers: one tab each; a green dot in the upper right corner of a tab says a key is saved for it.
   const providerDots = {};
+  const slotDots = {};
+  // Gemini has two keys, a free one and a paid one; a switch shows one at a time.
+  let geminiSlot = "google-free";
+  const showGeminiSlot = (slot) => {
+    geminiSlot = slot;
+    for (const id of slotsOf("google")) keyPanels[id].node.hidden = id !== slot;
+    geminiSwitch.forEach((b) => b.setAttribute("aria-pressed", String(b.getAttribute("data-slot") === slot)));
+  };
+  const geminiSwitch = slotsOf("google").map((id) => {
+    slotDots[id] = h(doc, "span", { class: "key-dot key-dot-inline", "data-ui": `slot-dot-${id}`, role: "img", hidden: true });
+    const b = h(doc, "button", { type: "button", class: "chip", "data-slot": id, "data-ui": `gemini-slot-${id}`, "aria-pressed": "false" }, slotDots[id], t(slotIsFree(id) ? "settings.slotFree" : "settings.slotPaid"));
+    b.addEventListener("click", () => showGeminiSlot(id));
+    return b;
+  });
+  const geminiNode = h(doc, "div", { class: "provider-panel gemini-panel", "data-ui": "provider-panel-google" }, h(doc, "div", { class: "slot-switch", "data-ui": "gemini-switch" }, ...geminiSwitch), ...slotsOf("google").map((id) => keyPanels[id].node));
+  const nodeOf = (id) => (id === "google" ? geminiNode : keyPanels[id].node);
   const showProvider = (id) => {
-    for (const other of PROVIDER_IDS) keyPanels[other].node.hidden = other !== id;
+    for (const other of PROVIDER_IDS) nodeOf(other).hidden = other !== id;
     providerButtons.forEach((b) => b.setAttribute("aria-selected", String(b.getAttribute("data-provider") === id)));
   };
   const providerButtons = PROVIDER_IDS.map((id) => {
@@ -429,9 +445,10 @@ export function renderSettings(ctx) {
     ...PROVIDERS_SOON.map((name) => h(doc, "button", { type: "button", class: "tab", role: "tab", disabled: true, "aria-disabled": "true", "data-ui": `provider-tab-${name.toLowerCase()}` }, name, h(doc, "span", { class: "tag-soon" }, t("settings.providerSoon")))),
   );
   showProvider("anthropic");
-  const providerPanel = h(doc, "div", { class: "provider-panels" }, ...PROVIDER_IDS.map((id) => keyPanels[id].node));
-  const secSwitch = PROVIDER_IDS.map((id) => {
-    const b = h(doc, "button", { type: "button", class: "chip", "data-provider": id, "data-ui": `sec-provider-${id}`, "aria-pressed": "false" }, id === "google" ? "Gemini" : providerCatalog(id).label);
+  showGeminiSlot(geminiSlot);
+  const providerPanel = h(doc, "div", { class: "provider-panels" }, ...PROVIDER_IDS.map((id) => nodeOf(id)));
+  const secSwitch = SLOT_IDS.map((id) => {
+    const b = h(doc, "button", { type: "button", class: "chip", "data-provider": id, "data-ui": `sec-provider-${id}`, "aria-pressed": "false" }, slotLabel(id));
     b.addEventListener("click", () => {
       secProvider = id;
       refreshStatus();

@@ -98,7 +98,7 @@ export function createVault({ storage, cryptoImpl = globalThis.crypto, iteration
     // it is an error only when nothing could be opened.
     async unlockAll(passphrase) {
       let opened = 0;
-      for (const id of ["anthropic", ...others.keys(), "google"].filter((v, i, a) => a.indexOf(v) === i)) {
+      for (const id of ["anthropic", ...others.keys(), "google-free", "google"].filter((v, i, a) => a.indexOf(v) === i)) {
         const v = self.forProvider(id);
         if (!v.hasStoredKey() || v.getSessionKey() !== null) continue;
         try {

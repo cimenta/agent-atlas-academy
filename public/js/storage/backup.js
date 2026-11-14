@@ -19,7 +19,7 @@ export function isVaultRecord(record) {
 
 const plainRecord = (r) => ({ v: r.v, kdf: r.kdf, iterations: r.iterations, salt: r.salt, iv: r.iv, ciphertext: r.ciphertext });
 
-export function exportBackup({ runs, settings, vaultRecord = null, googleRecord = null, includeKey = false, appVersion }) {
+export function exportBackup({ runs, settings, vaultRecord = null, googleRecord = null, googleFreeRecord = null, includeKey = false, appVersion }) {
   const backup = { backupVersion: BACKUP_VERSION, appVersion, exportedAt: new Date().toISOString(), settings: settings ?? {}, runs };
   if (includeKey && isVaultRecord(vaultRecord)) {
     backup.vault = {
@@ -32,6 +32,7 @@ export function exportBackup({ runs, settings, vaultRecord = null, googleRecord 
     };
   }
   if (includeKey && isVaultRecord(googleRecord)) backup.vaultGoogle = plainRecord(googleRecord);
+  if (includeKey && isVaultRecord(googleFreeRecord)) backup.vaultGoogleFree = plainRecord(googleFreeRecord);
   return backup;
 }
 
@@ -50,6 +51,7 @@ export function parseBackup(text) {
   if (data.vault !== undefined && !isVaultRecord(data.vault)) return { ok: false, errors: ["The saved key in the backup is not valid."] };
 
   if (data.vaultGoogle !== undefined && !isVaultRecord(data.vaultGoogle)) return { ok: false, errors: ["The saved Gemini key in the backup is not valid."] };
+  if (data.vaultGoogleFree !== undefined && !isVaultRecord(data.vaultGoogleFree)) return { ok: false, errors: ["The saved free Gemini key in the backup is not valid."] };
 
   const errors = [];
   data.runs.forEach((run, index) => {
@@ -83,8 +85,13 @@ export async function applyBackup(backup, { runStore, settingsStore, vault, mode
   if (typeof backup.settings?.shortcuts === "boolean") settingsStore.setShortcuts(backup.settings.shortcuts);
   if (isObject(backup.settings?.goKeys)) settingsStore.setGoKeys(backup.settings.goKeys);
   if (backup.vault && (mode === "replace" || !vault.hasStoredKey())) vault.importRecord(backup.vault);
-  if (typeof backup.settings?.freeTier?.google === "boolean") settingsStore.setFreeTier("google", backup.settings.freeTier.google);
-  const google = vault.forProvider?.("google");
-  if (google && backup.vaultGoogle && (mode === "replace" || !google.hasStoredKey())) google.importRecord(backup.vaultGoogle);
+  // An older backup marked its one Gemini key as free with a setting; that key goes to the free slot.
+  const legacyFree = backup.settings?.freeTier?.google === true && !backup.vaultGoogleFree;
+  const restore = (slot, record) => {
+    const target = vault.forProvider?.(slot);
+    if (target && record && (mode === "replace" || !target.hasStoredKey())) target.importRecord(record);
+  };
+  restore(legacyFree ? "google-free" : "google", backup.vaultGoogle);
+  restore("google-free", backup.vaultGoogleFree);
   return { added, skipped, failed };
 }

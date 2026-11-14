@@ -6,7 +6,8 @@ import { downloadFile } from "../download.js";
 import { outcomeNotice } from "../outcome-view.js";
 import { showCenterTip } from "../center-tip.js";
 import { refreshResultTab } from "../tab-state.js";
-import { TASK_MAX_CHARS, LIMIT_MAX, PROVIDER_IDS, PRICING_URLS, providerCatalog, paidOnlyModelUsed } from "../engine/catalog.js";
+import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "../key-slots.js";
+import { TASK_MAX_CHARS, LIMIT_MAX, PRICING_URLS, providerCatalog, paidOnlyModelUsed } from "../engine/catalog.js";
 import { PATTERNS, clampLimits } from "../engine/patterns.js";
 import { buildRunRecord, makeRunId, modelsUsed } from "../engine/run-record.js";
 import { startRun, RunStartError } from "../run-client.js";
@@ -67,8 +68,9 @@ function downloadButton(ctx, run) {
 export function renderCreate(ctx) {
   const vaultFor = (id) => (ctx.vault.forProvider ? ctx.vault.forProvider(id) : ctx.vault);
   // The provider is the first one that has a key, until the visitor chooses another. The agents' models follow it.
-  const currentProvider = () => {
-    if (!PROVIDER_IDS.includes(draft.provider)) draft.provider = PROVIDER_IDS.find((id) => vaultFor(id).getSessionKey() !== null || vaultFor(id).hasStoredKey()) ?? "anthropic";
+  // draft.provider holds a key slot: Claude, Gemini free or Gemini paid.
+  const currentSlot = () => {
+    if (!isSlot(draft.provider)) draft.provider = SLOT_IDS.find((id) => vaultFor(id).getSessionKey() !== null || vaultFor(id).hasStoredKey()) ?? "anthropic";
     return draft.provider;
   };
   const { doc, t } = ctx;
@@ -123,18 +125,18 @@ export function renderCreate(ctx) {
     const providerTiles = h(doc, "div", { class: "provider-tiles", role: "radiogroup", "aria-label": t("create.providerLabel"), "data-ui": "provider-tiles" });
     const MARKS = { anthropic: "A", google: "G" };
     const drawProviderTiles = () => {
-      const chosen = currentProvider();
+      const chosen = currentSlot();
       providerTiles.replaceChildren(
-        ...PROVIDER_IDS.map((id) => {
+        ...SLOT_IDS.map((id) => {
           const state = keyState(vaultFor(id));
           const selected = id === chosen;
-          const name = id === "google" ? "Gemini" : providerCatalog(id).label;
+          const kind = slotProvider(id);
+          const name = kind === "google" ? (slotIsFree(id) ? t("create.geminiFree") : t("create.geminiPaid")) : providerCatalog(kind).label;
           const noKey = state === "none" && !selected;
-          const free = id === "google" && state !== "none" && ctx.settings.get().freeTier.google === true;
-          const sub = noKey ? t("create.providerAddKey") : free ? t("create.providerFree") : "";
+          const sub = noKey ? t("create.providerAddKey") : kind === "google" ? t(slotIsFree(id) ? "create.providerFree" : "create.providerPaid") : "";
           const dotText = t(state === "locked" ? "settings.dotLocked" : "settings.dotLoaded");
           const parts = [
-            h(doc, "span", { class: `pv-mark pv-${id}`, "aria-hidden": "true" }, MARKS[id]),
+            h(doc, "span", { class: `pv-mark pv-${kind}`, "aria-hidden": "true" }, MARKS[kind]),
             h(doc, "span", { class: "pv-text" }, h(doc, "span", { class: "pv-name" }, name), ...(sub ? [h(doc, "span", { class: "pv-sub" }, sub)] : [])),
             ...(state === "none" ? [] : [h(doc, "span", { class: `pv-dot ${state === "locked" ? "yellow" : "green"}`, role: "img", "aria-label": dotText, title: dotText })]),
           ];
@@ -163,15 +165,16 @@ export function renderCreate(ctx) {
     function drawReview() {
       const design = draft.editor.design();
       const limits = clampLimits(draft.limits);
-      const provider = currentProvider();
+      const slot = currentSlot();
+      const provider = slotProvider(slot);
       drawProviderTiles();
-      const pv = vaultFor(provider);
+      const pv = vaultFor(slot);
       const catalog = providerCatalog(provider);
       const summary = reviewSummary({ design, limits, provider });
       const apiKey = pv.getSessionKey();
       const verdict = canRun({ task: taskInput.value, apiKey, editorErrors: draft.editor.errors(), keyLocked: apiKey === null && pv.hasStoredKey() });
       // A key the visitor marked as being on Google's free tier makes the run free, unless a model without a free tier is used.
-      const marked = provider === "google" && ctx.settings.get().freeTier.google === true;
+      const marked = slotIsFree(slot);
       const paidOnly = paidOnlyModelUsed(design, provider);
       const isFree = marked && !paidOnly;
 
@@ -319,9 +322,9 @@ export function renderCreate(ctx) {
     );
     editorHandle = mountEditor(editorHost, { editor: draft.editor, t, doc, onChange: drawReview, getModels: (node) => {
       // With a key marked as free tier only the free models are offered (a model already chosen stays visible).
-      const provider = currentProvider();
-      const all = providerCatalog(provider).models;
-      const freeOnly = provider === "google" && ctx.settings.get().freeTier.google === true;
+      const slot = currentSlot();
+      const all = providerCatalog(slotProvider(slot)).models;
+      const freeOnly = slotIsFree(slot);
       return freeOnly ? all.filter((m) => m.freeTier !== false || m.key === node?.model) : all;
     } });
     ctx.onLeave(() => editorHandle.destroy());
@@ -332,9 +335,10 @@ export function renderCreate(ctx) {
   function beginRun() {
     const design = draft.editor.design();
     const limits = clampLimits(draft.limits);
-    const provider = PROVIDER_IDS.includes(draft.provider) ? draft.provider : "anthropic";
-    const apiKey = vaultFor(provider).getSessionKey();
-    const freeTier = provider === "google" && ctx.settings.get().freeTier.google === true;
+    const slot = isSlot(draft.provider) ? draft.provider : "anthropic";
+    const provider = slotProvider(slot);
+    const apiKey = vaultFor(slot).getSessionKey();
+    const freeTier = slotIsFree(slot);
     const task = draft.task.trim();
     if (!canRun({ task, apiKey, editorErrors: draft.editor.errors() }).ok) return;
 

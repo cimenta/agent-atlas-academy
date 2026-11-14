@@ -18,6 +18,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Gemini has two key slots, a free key and a paid key, so both can be saved at once. Settings has a Free key / Paid key switch in the Gemini tab (the free tier checkbox is gone), and Create has two tiles, Gemini free (free models only) and Gemini paid (all models). A Gemini key saved before this change moves to the free slot if it was marked as free tier. Backups carry both keys.
+
 
 - The exclamation marks that say a saved key needs unlocking (Settings menu item, Security tab and text) are yellow, like the dot of a locked key.
 - Create: the provider is chosen with a tile for each provider instead of a dropdown. A dot says what the key is doing: green when it is loaded and can be used, yellow when it is saved but locked, none when there is no key. Settings uses the same dots on the provider tabs and the API keys tab, and the text key saved is gone.

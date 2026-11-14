@@ -1,4 +1,4 @@
-import { PROVIDER_IDS } from "./engine/catalog.js";
+import { SLOT_IDS } from "./key-slots.js";
 
 // A key saved on this device is locked until the passphrase is typed. While it is, the Settings
 // cog in the menu shows an exclamation mark (and so does the Security tab), so the visitor knows where to go.
@@ -6,7 +6,7 @@ const locked = (v) => v.hasStoredKey() && v.getSessionKey() === null;
 
 // True when the key of any provider is saved but not unlocked.
 export function needsUnlock(vault) {
-  return locked(vault) || PROVIDER_IDS.some((id) => id !== "anthropic" && vault.forProvider && locked(vault.forProvider(id)));
+  return locked(vault) || SLOT_IDS.some((id) => id !== "anthropic" && vault.forProvider && locked(vault.forProvider(id)));
 }
 
 const CLASS = "menu-alert";
