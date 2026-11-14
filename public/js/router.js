@@ -13,6 +13,7 @@ export function parseRoute(hash) {
 
   if (first === "play") return parsePlay(second, third);
 
+  if (first === "settings" && second === "key" && third !== undefined && SLUG.test(third)) return { name: "settings", params: { slot: third } };
   if (third !== undefined) return NOT_FOUND;
   if (first === "settings" && second === "shortcuts") return { name: "settings", params: { tab: "shortcuts" } };
   if (second === undefined) {

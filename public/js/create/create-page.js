@@ -141,7 +141,7 @@ export function renderCreate(ctx) {
             ...(state === "none" ? [] : [h(doc, "span", { class: `pv-dot ${state === "locked" ? "yellow" : "green"}`, role: "img", "aria-label": dotText, title: dotText })]),
           ];
           // A provider without a key is a link to Settings, unless it is the one chosen (its key is entered below).
-          if (noKey) return h(doc, "a", { class: "provider-tile dim", href: "#/settings", "data-ui": `provider-tile-${id}`, title: t("create.providerAddKey") }, ...parts);
+          if (noKey) return h(doc, "a", { class: "provider-tile dim", href: `#/settings/key/${id}`, "data-ui": `provider-tile-${id}`, title: t("create.providerAddKey") }, ...parts);
           const tile = h(doc, "button", { type: "button", class: `provider-tile${selected ? " on" : ""}`, role: "radio", "aria-checked": String(selected), "data-ui": `provider-tile-${id}` }, ...parts);
           tile.addEventListener("click", () => {
             draft.provider = id;

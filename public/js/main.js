@@ -171,6 +171,7 @@ async function renderRoute(isNavigation) {
     settings,
     runStore,
     tab: route.params?.tab,
+    slot: route.params?.slot,
     autoStart: !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches),
     isStale: () => mine !== token,
     onLeave: (fn) => cleanups.push(fn),

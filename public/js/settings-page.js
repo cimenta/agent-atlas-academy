@@ -1,7 +1,7 @@
 // The settings page: API key handling, default limits and local data.
 import { h } from "./dom.js";
 import { LIMIT_MAX, PROVIDER_IDS, PRICING_URLS, providerCatalog } from "./engine/catalog.js";
-import { SLOT_IDS, slotProvider, slotIsFree } from "./key-slots.js";
+import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "./key-slots.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
 import { keyState, overallKeyState } from "./key-state.js";
 import { DEFAULT_GO_KEYS } from "./shortcuts.js";
@@ -444,8 +444,10 @@ export function renderSettings(ctx) {
     ...providerButtons,
     ...PROVIDERS_SOON.map((name) => h(doc, "button", { type: "button", class: "tab", role: "tab", disabled: true, "aria-disabled": "true", "data-ui": `provider-tab-${name.toLowerCase()}` }, name, h(doc, "span", { class: "tag-soon" }, t("settings.providerSoon")))),
   );
-  showProvider("anthropic");
-  showGeminiSlot(geminiSlot);
+  // A link such as #/settings/key/google opens that key slot directly.
+  const wanted = isSlot(ctx.slot) ? ctx.slot : null;
+  showProvider(wanted ? slotProvider(wanted) : "anthropic");
+  showGeminiSlot(wanted && slotProvider(wanted) === "google" ? wanted : geminiSlot);
   const providerPanel = h(doc, "div", { class: "provider-panels" }, ...PROVIDER_IDS.map((id) => nodeOf(id)));
   const secSwitch = SLOT_IDS.map((id) => {
     const b = h(doc, "button", { type: "button", class: "chip", "data-provider": id, "data-ui": `sec-provider-${id}`, "aria-pressed": "false" }, slotLabel(id));
