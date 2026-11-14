@@ -2,12 +2,17 @@
 import { h } from "./dom.js";
 import { describeOutcome, formatDuration, formatUsd, runOutcomeMessageKey } from "./create/create-model.js";
 
-export function outcomeNotice({ doc, t, outcome, events, cost, durationMs, free = false }) {
+// tryCost: for a run carried on after a failure, what this try alone cost (cost is then the whole run), so a retry of one
+// free agent does not read as if it cost what the earlier agents did.
+export function outcomeNotice({ doc, t, outcome, events, cost, durationMs, free = false, tryCost = null }) {
   const info = describeOutcome({ outcome, events, cost });
   const took = typeof durationMs === "number" ? durationMs : info.durationMs;
   const meta = [];
   if (took !== null) meta.push(t("run.outcome.took", { time: formatDuration(took) }));
-  if (info.cost !== null) meta.push(free ? t("run.outcome.costFree") : t("run.outcome.cost", { usd: formatUsd(info.cost) }));
+  if (typeof tryCost === "number" && info.cost !== null) {
+    meta.push(tryCost < 0.00005 ? t("run.outcome.tryFree") : t("run.outcome.tryCost", { usd: formatUsd(tryCost) }));
+    if (info.cost >= 0.00005) meta.push(t("run.outcome.wholeCost", { usd: formatUsd(info.cost) }));
+  } else if (info.cost !== null) meta.push(free ? t("run.outcome.costFree") : t("run.outcome.cost", { usd: formatUsd(info.cost) }));
   const reason = Array.isArray(events) ? events.findLast?.((e) => e?.type === "done")?.reason : undefined;
   const notice = h(
     doc,

@@ -478,7 +478,7 @@ export function renderCreate(ctx) {
 
     const id = resume ? resume.id : makeRunId(Date.now());
     const events = [...base];
-    if (resume) events.push({ type: "warning", agent: failedIds[0], message: t("run.retrying", { agent: failedIds.join(", ") }), t: offset - 500 });
+    if (resume) events.push({ type: "warning", agent: failedIds[0], message: t("run.retrying", { agent: failedIds.join(", ") }), t: offset - 500, at: Date.now() });
     // The clock of a carried-on run continues from the earlier try, so the times of all events fit together.
     const startedAt = Date.now() - offset;
     let endedAt;
@@ -531,11 +531,15 @@ export function renderCreate(ctx) {
       activeRun = null;
       const done = events.at(-1);
       const finalModel = buildResultModel(finalRecord);
-      const notice = outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: finalModel.cost, free: finalModel.free });
+      // A carried-on run shows what this try took and cost, not only the whole run.
+      const tryNumbers = resume && finalModel.cost !== null
+        ? { tryCost: Math.max(0, finalModel.cost - (buildResultModel(resume).cost ?? 0)), durationMs: Math.max(0, (events.at(-1)?.t ?? 0) - (offset - 1000)) }
+        : {};
+      const notice = outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: finalModel.cost, free: finalModel.free, ...tryNumbers });
       notice.id = "run-outcome";
       if (result.ok) refreshResultTab(ctx);
       if (ctx.settings.get().tooltips) {
-        const tipNotice = outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: finalModel.cost, free: finalModel.free });
+        const tipNotice = outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: finalModel.cost, free: finalModel.free, ...tryNumbers });
         const tipContent = result.ok ? h(doc, "div", {}, tipNotice, h(doc, "p", { class: "center-tip-link" }, h(doc, "a", { href: `#/play/result/${id}`, "data-ui": "tip-see-result" }, t("create.seeResult")))) : tipNotice;
         // A run that did not finish well keeps its tooltip on the screen until the visitor closes it.
         const tip = showCenterTip({ doc, content: tipContent, sticky: done?.outcome !== "finished", closeLabel: t("about.close"), moveLabel: t("about.move") });
@@ -566,7 +570,9 @@ export function renderCreate(ctx) {
       onEvent: (event) => {
         // Carried on: the clock continues from the earlier try, and a handoff the earlier try already has is not shown twice.
         if (resume && event.type === "handoff" && seenHandoffs.has(`${event.from}>${event.to}>${event.note}`)) return;
-        const next = resume ? { ...event, t: (event.t ?? 0) + offset } : event;
+        const shifted = resume ? { ...event, t: (event.t ?? 0) + offset } : event;
+        // A warning keeps the clock time it happened at, so a later look at the run shows which came from which try.
+        const next = event.type === "warning" ? { ...shifted, at: Date.now() } : shifted;
         events.push(next);
         live.append(next);
         saver.update(record());

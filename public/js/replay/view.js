@@ -41,6 +41,14 @@ const PROVIDER_NAMES = { anthropic: "Anthropic", openai: "OpenAI", gemini: "Gemi
 const oneProviderName = (id) => PROVIDER_NAMES[id] ?? (typeof id === "string" && id !== "" ? id[0].toUpperCase() + id.slice(1) : "");
 // A run that mixed providers has them joined with a plus sign.
 const providerName = (id) => (typeof id === "string" ? id.split("+").map(oneProviderName).join(" + ") : "");
+// The date and time a message happened, to the second.
+function clockTime(ms) {
+  try {
+    return new Date(ms).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  } catch {
+    return "";
+  }
+}
 const fmt = (ms) => (ms == null ? "" : ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`);
 
 function mountError(container, doc, t, errors) {
@@ -433,7 +441,11 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       const [first, ...rest] = state.error.split("\n\n");
       items.push(h(doc, "div", { class: "banner" }, ...(rest.length ? [h(doc, "strong", { class: "banner-fix" }, first), rest.join("\n\n")] : [first])));
     }
-    for (const w of state.warnings) items.push(h(doc, "div", { class: "banner warn" }, `⚠ ${w}`));
+    state.warnings.forEach((w, i) => {
+      const at = state.warningTimes[i];
+      const time = typeof at === "number" ? clockTime(at) : "";
+      items.push(h(doc, "div", { class: "banner warn" }, ...(time ? [h(doc, "time", { class: "banner-time", "data-ui": "banner-time", datetime: new Date(at).toISOString() }, time), " "] : []), `⚠ ${w}`));
+    });
     banners.replaceChildren(...items);
   }
 

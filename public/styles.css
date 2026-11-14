@@ -269,6 +269,7 @@ button.danger:hover { background: var(--err-bg); }
 .banners:empty { display: none; }
 .banner { margin: 8px 0; padding: 8px 12px; border-radius: var(--radius); background: var(--err-bg); color: var(--err); }
 .banner.warn { background: var(--working-bg); color: var(--working); }
+.banner-time { font-size: 0.8rem; font-weight: 600; margin-right: 4px; white-space: nowrap; }
 .chips { display: flex; gap: 6px; align-items: stretch; margin: 12px 0; }
 .chips .arrow { align-self: center; color: var(--muted); }
 button.ag { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; height: auto; padding: 10px 12px; text-align: left; border-radius: var(--radius-lg); background: var(--card); }
