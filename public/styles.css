@@ -883,5 +883,6 @@ a.art-pill:hover { text-decoration: underline; }
 @keyframes failed-blink { 0%, 100% { background: var(--err-bg); border-color: var(--err); } 50% { background: var(--card); border-color: #d93025; } }
 .replay-diagram .rnode[data-status="error"] { border: 2px solid var(--err); padding: 3px 7px; background: var(--err-bg); color: var(--err); animation: failed-blink 1s ease-in-out infinite; }
 .replay-diagram .rnode[data-status="error"] small { color: var(--err); font-weight: 600; }
-.replay-diagram .rnode-retry { position: absolute; z-index: 2; width: 58px; height: 22px; min-height: 0; min-width: 0; padding: 0; font-size: 0.8rem; line-height: 1; border: 1px solid var(--err); border-radius: 6px; background: var(--card); color: var(--err); }
+.replay-diagram .rnode-retry { position: absolute; z-index: 2; width: 58px; height: 22px; min-height: 0; min-width: 0; padding: 0; font-size: 0.8rem; line-height: 1; border: 1px solid #8f1d1d; border-radius: 6px; background: #c62828; color: #ffffff; font-weight: 600; }
+.replay-diagram .rnode-retry:hover { background: #a61e1e; }
 @media (prefers-reduced-motion: reduce) { .replay-diagram .rnode[data-status="error"] { animation: none; } }
