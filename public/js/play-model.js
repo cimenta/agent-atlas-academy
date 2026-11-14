@@ -1,5 +1,6 @@
 // Pure helpers for the Play tabs: the list of runs to replay and the numbers on the Result tab.
 import { providerCatalog, paidOnlyModelUsed, nodeModel } from "./engine/catalog.js";
+import { slotIsFree } from "./key-slots.js";
 import { deriveInspector } from "./replay/inspect-model.js";
 import { validateRun } from "./run-schema.js";
 
@@ -51,6 +52,8 @@ export function buildResultModel(run) {
     cost = usage.searches * catalog.searchPriceUsd;
     for (const a of perAgent) {
       const node = run.design.nodes.find((n) => n.id === a.agent);
+      // An agent that ran on a key of the free tier cost nothing, whatever the list price of its model.
+      if (slotIsFree(node?.slot)) continue;
       const model = nodeModel(node, provider);
       cost += (a.input * model.inputPerMTok + a.output * model.outputPerMTok) / 1e6;
     }

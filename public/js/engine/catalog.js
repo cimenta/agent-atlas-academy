@@ -74,6 +74,13 @@ export const AGENT_TYPES = {
   free: { label: "Free agent", patterns: GENERAL, searchDefault: false, free: true },
 };
 
+// How long a request to a model may wait for an answer, in seconds. The visitor can change it in Settings.
+export const TIMEOUT_SEC = { min: 30, max: 120, step: 10, default: 60 };
+export const clampTimeoutSec = (value) => {
+  const n = Math.round(Number(value));
+  return Number.isFinite(n) ? Math.min(TIMEOUT_SEC.max, Math.max(TIMEOUT_SEC.min, n)) : TIMEOUT_SEC.default;
+};
+
 export const LIMIT_DEFAULTS = { maxSteps: 20, maxTokens: 40000, maxSearches: 3 };
 export const LIMIT_MAX = { maxSteps: 60, maxTokens: 150000, maxSearches: 10 };
 

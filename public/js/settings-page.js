@@ -1,6 +1,6 @@
 // The settings page: API key handling, default limits and local data.
 import { h } from "./dom.js";
-import { LIMIT_MAX, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
+import { LIMIT_MAX, TIMEOUT_SEC, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
 import { COLOR_CHOICES, paintModelTag } from "./provider-colors.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "./key-slots.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
@@ -287,6 +287,31 @@ export function renderSettings(ctx) {
     return input;
   });
 
+  // How long a request to a model waits for an answer: a slider from 30 to 120 seconds and three quick choices.
+  const timeoutNow = settings.get().requestTimeoutSec;
+  const timeoutSlider = h(doc, "input", { id: "set-timeout", type: "range", min: TIMEOUT_SEC.min, max: TIMEOUT_SEC.max, step: TIMEOUT_SEC.step, value: timeoutNow, "data-ui": "timeout-slider" });
+  const timeoutValue = h(doc, "output", { class: "timeout-value", for: "set-timeout", "data-ui": "timeout-value" }, "");
+  const timeoutQuick = [TIMEOUT_SEC.min, TIMEOUT_SEC.default, TIMEOUT_SEC.max].map((sec) => {
+    const chip = h(doc, "button", { type: "button", class: "chip", "data-ui": `timeout-${sec}`, "aria-pressed": "false" }, t(sec === TIMEOUT_SEC.default ? "settings.timeoutDefault" : "settings.timeoutSeconds", { seconds: sec }));
+    chip.addEventListener("click", () => setTimeoutSec(sec, true));
+    return { sec, chip };
+  });
+  function showTimeout(sec) {
+    timeoutSlider.value = String(sec);
+    timeoutValue.textContent = t("settings.timeoutSeconds", { seconds: sec });
+    for (const { sec: s, chip } of timeoutQuick) chip.setAttribute("aria-pressed", String(s === sec));
+  }
+  function setTimeoutSec(sec, announce) {
+    settings.setRequestTimeout(sec);
+    const saved = settings.get().requestTimeoutSec;
+    showTimeout(saved);
+    if (announce) say(t("settings.timeoutSaved", { seconds: saved }));
+  }
+  timeoutSlider.addEventListener("input", () => showTimeout(Number(timeoutSlider.value)));
+  timeoutSlider.addEventListener("change", () => setTimeoutSec(Number(timeoutSlider.value), true));
+  showTimeout(timeoutNow);
+  const timeoutField = h(doc, "div", { class: "field timeout-field", "data-ui": "timeout-field" }, h(doc, "label", { for: "set-timeout" }, t("settings.timeoutLabel")), h(doc, "p", { class: "hint" }, t("settings.timeoutIntro")), h(doc, "div", { class: "timeout-row" }, timeoutSlider, timeoutValue), h(doc, "div", { class: "chips timeout-chips" }, ...timeoutQuick.map((q) => q.chip)), h(doc, "p", { class: "hint" }, t("settings.timeoutHint")));
+
   // Tooltips.
   const tipsBox = h(doc, "input", { id: "set-tooltips", type: "checkbox" });
   tipsBox.checked = !settings.get().tooltips;
@@ -510,6 +535,7 @@ export function renderSettings(ctx) {
       h(doc, "h2", {}, t("settings.limitsHeading")),
       h(doc, "p", {}, t("settings.limitsIntro")),
       ...limitInputs.map((input) => field(input.id, t(input.labelKey), input)),
+      timeoutField,
     ),
     h(
       doc,

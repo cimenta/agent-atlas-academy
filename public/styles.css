@@ -379,6 +379,12 @@ body[data-show-ui] [data-ui]::after { content: attr(data-ui); position: absolute
 .io-mark { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; font-size: 0.75rem; background: var(--surface); }
 .io p { margin: 4px 0; }
 .query q { padding: 2px 8px; border-radius: 6px; background: var(--accent-bg); color: var(--accent); font-weight: 600; quotes: "“" "”"; }
+.timeout-row { display: flex; align-items: center; gap: 12px; max-width: 480px; }
+.timeout-row input[type="range"] { flex: 1; min-width: 0; }
+.timeout-value { min-width: 4rem; text-align: right; font-weight: 600; }
+.timeout-chips { display: flex; gap: 6px; margin: 8px 0; }
+.timeout-chips .chip { padding: 4px 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); min-height: 32px; }
+.timeout-chips .chip[aria-pressed="true"] { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-line); font-weight: 600; }
 .chip { display: inline-block; padding: 1px 8px; font-size: 0.75rem; border-radius: 999px; background: var(--surface); color: var(--text); }
 .route { display: flex; align-items: center; gap: 8px; }
 .results { margin: 4px 0 0; padding-left: 20px; }

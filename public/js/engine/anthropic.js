@@ -36,7 +36,7 @@ export async function callAnthropic(body, { apiKey, fetchImpl = fetch, signal, t
     });
   } catch (error) {
     if (signal?.aborted) throw new AnthropicError("The request was cancelled");
-    if (timeout.aborted) throw new AnthropicError(`The request timed out after ${timeoutMs} ms`);
+    if (timeout.aborted) throw new AnthropicError(`Timeout: Anthropic did not answer within ${Math.round(timeoutMs / 1000)} seconds.\n\nThe model may be busy. Press Retry, or pick another model with the arrow next to Retry.`);
     throw new AnthropicError(redact(error?.message, apiKey) || "Network error", { retryable: true });
   }
 
