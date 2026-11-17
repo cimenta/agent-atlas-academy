@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Settings, Harness: the Adjustable harness is split into the pages Limits, Retries, Cost and Guards (next to Fixed harness), with one Save and one Reset for all of them, and every setting has a ? button that opens a popup that explains it, in English and Czech.
+
 - Settings, Harness: Repeated answers stops a run when the same agent gives the same answer (ignoring capitals and spacing) 2 to 4 times in a row; it is on by default at 3 and can be turned off. Size of a handoff cuts what one agent passes on to the next (off by default, 2,000 to 20,000 characters); the next agent is told, a warning shows in the replay, and the replay keeps the whole answer.
 
 - Settings, Harness: an optional cost cap (off by default, or $0.10 to $5.00). A run stops with the reason cost when its estimated cost, added up after each answer by the catalog prices, passes the cap; agents on a free Gemini key cost nothing. The Statistics tab gets a Cost column in the Limits table. Create shows a yellow warning under the estimate when a design will probably need more steps or tokens than the limits give.

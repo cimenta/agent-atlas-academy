@@ -1,5 +1,6 @@
 // The settings page: API key handling, the harness (limits and fixed rules) and local data.
 import { h } from "./dom.js";
+import { openHelpPopup } from "./help-popup.js";
 import { LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, RETRIES, RETRY_DELAY_SEC, COST_CAP_USD, REPEAT_STOP, HANDOFF_CHARS, PROFILES, matchProfile, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
 import { COLOR_CHOICES, paintModelTag } from "./provider-colors.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "./key-slots.js";
@@ -281,6 +282,12 @@ export function renderSettings(ctx) {
   harnessSpecs.push({ id: "repeat", min: 1, max: REPEAT_STOP.max, step: 1, value: harnessNow.repeatStop || 1, def: REPEAT_STOP.default, show: (n) => (n < REPEAT_STOP.min ? t("harness.costOff") : t("harness.repeatTimes", { n })) });
   harnessSpecs.push({ id: "handoff", min: 0, max: HANDOFF_CHARS.max, step: HANDOFF_CHARS.step, value: harnessNow.handoffChars, def: HANDOFF_CHARS.default, show: (n) => (n > 0 ? harnessFormat(n) : t("harness.costOff")) });
   const PROFILE_ROWS = Object.keys(PROFILES.balanced);
+  // The ? button of a setting: it opens a popup that explains it.
+  const helpButton = (id, name) => {
+    const button = h(doc, "button", { type: "button", class: "help-icon", "data-ui": `help-${id}`, "aria-label": t("harness.help.open", { name }), title: t("harness.help.open", { name }) }, "?");
+    button.addEventListener("click", () => openHelpPopup({ doc, t, title: name, body: t(`harness.help.${id}`) }));
+    return button;
+  };
   const harnessRows = harnessSpecs.map((spec) => {
     const slider = h(doc, "input", { id: `set-harness-${spec.id}`, type: "range", min: spec.min, max: spec.max, step: spec.step, value: spec.value, "data-ui": `harness-${spec.id}` });
     const shown = h(doc, "output", { class: "harness-value", for: slider.id, "data-ui": `harness-${spec.id}-value` }, spec.show(spec.value));
@@ -293,7 +300,7 @@ export function renderSettings(ctx) {
       shown.textContent = spec.show(Number(slider.value));
       markProfile();
     };
-    const label = h(doc, "div", { class: "harness-label" }, h(doc, "label", { for: slider.id }, t(`harness.limit.${spec.id}.label`)), h(doc, "span", { class: "harness-hint" }, t(`harness.limit.${spec.id}.hint`)));
+    const label = h(doc, "div", { class: "harness-label" }, h(doc, "span", { class: "harness-label-top" }, h(doc, "label", { for: slider.id }, t(`harness.limit.${spec.id}.label`)), helpButton(spec.id, t(`harness.limit.${spec.id}.label`))), h(doc, "span", { class: "harness-hint" }, t(`harness.limit.${spec.id}.hint`)));
     return { spec, slider, set, node: h(doc, "div", { class: "harness-row" }, label, slider, shown) };
   });
   const harnessRow = (id) => harnessRows.find((r) => r.spec.id === id);
@@ -362,26 +369,34 @@ export function renderSettings(ctx) {
     chip.addEventListener("click", () => harnessRow("handoff").set(n));
     return chip;
   });
-  const harnessAdjustable = h(
-    doc,
-    "div",
-    { class: "harness-panel", role: "tabpanel", "data-ui": "harness-adjustable" },
-    h(doc, "h3", {}, t("harness.adjustableHeading")),
-    h(doc, "p", { class: "hint" }, t("harness.adjustableIntro")),
-    h(doc, "h4", {}, t("harness.profileHeading")),
+  const rowsOf = (...ids) => ids.map((id) => harnessRow(id).node);
+  const page = (id, ...children) => h(doc, "div", { class: "harness-panel", role: "tabpanel", "data-ui": `harness-${id}` }, ...children);
+  const harnessLimits = page(
+    "limits",
+    h(doc, "h4", {}, t("harness.profileHeading"), helpButton("profile", t("harness.profileHeading"))),
     h(doc, "p", { class: "hint" }, t("harness.profileIntro")),
     h(doc, "div", { class: "profile-choices", "data-ui": "harness-profiles" }, ...profileButtons.map(([, b]) => b)),
     h(doc, "h4", {}, t("harness.limitsHeading")),
-    ...harnessRows.filter((r) => !["retries", "retryDelay", "cost", "repeat", "handoff"].includes(r.spec.id)).map((r) => r.node),
+    ...rowsOf("steps", "tokens", "searches", "output", "timeout"),
+    h(doc, "div", { class: "harness-actions" }, ...harnessQuick),
+  );
+  const harnessRetries = page(
+    "retries",
     h(doc, "h4", {}, t("harness.retriesHeading")),
     h(doc, "p", { class: "hint" }, t("harness.retriesIntro")),
-    ...harnessRows.filter((r) => ["retries", "retryDelay"].includes(r.spec.id)).map((r) => r.node),
+    ...rowsOf("retries", "retryDelay"),
     h(doc, "p", { class: "hint" }, t("harness.retriesNote")),
+  );
+  const harnessCost = page(
+    "cost",
     h(doc, "h4", {}, t("harness.costHeading")),
     h(doc, "p", { class: "hint" }, t("harness.costIntro")),
     harnessRow("cost").node,
     h(doc, "div", { class: "harness-actions", "data-ui": "cost-quick" }, ...costQuick),
     h(doc, "p", { class: "hint" }, t("harness.costNote")),
+  );
+  const harnessGuards = page(
+    "guards",
     h(doc, "h4", {}, t("harness.repeatHeading")),
     h(doc, "p", { class: "hint" }, t("harness.repeatIntro")),
     harnessRow("repeat").node,
@@ -392,8 +407,9 @@ export function renderSettings(ctx) {
     harnessRow("handoff").node,
     h(doc, "div", { class: "harness-actions", "data-ui": "handoff-quick" }, ...handoffQuick),
     h(doc, "p", { class: "hint" }, t("harness.handoffNote")),
-    h(doc, "div", { class: "harness-actions" }, ...harnessQuick, h(doc, "span", { class: "harness-spacer" }), harnessReset, harnessSave),
   );
+  // One Save for every page of the adjustable harness.
+  const harnessBar = h(doc, "div", { class: "harness-bar", "data-ui": "harness-bar" }, h(doc, "p", { class: "hint" }, t("harness.adjustableIntro")), h(doc, "div", { class: "harness-actions" }, h(doc, "span", { class: "harness-spacer" }), harnessReset, harnessSave));
   const harnessFixed = h(
     doc,
     "div",
@@ -403,7 +419,10 @@ export function renderSettings(ctx) {
     ...fixedRules().map((rule) => h(doc, "div", { class: "harness-fixed-row", "data-ui": `harness-fixed-${rule.id}` }, h(doc, "div", { class: "harness-label" }, h(doc, "span", {}, t(`harness.fixed.${rule.id}.label`)), h(doc, "span", { class: "harness-hint" }, t(`harness.fixed.${rule.id}.hint`))), h(doc, "b", { class: "harness-fixed-value" }, t(`harness.fixed.${rule.id}.value`, Object.fromEntries(Object.entries(rule.params).map(([k, v]) => [k, harnessFormat(v)])))))),
   );
   const harnessSubs = [
-    ["adjustable", "harness.tabAdjustable", harnessAdjustable],
+    ["limits", "harness.tabLimits", harnessLimits],
+    ["retries", "harness.tabRetries", harnessRetries],
+    ["cost", "harness.tabCost", harnessCost],
+    ["guards", "harness.tabGuards", harnessGuards],
     ["fixed", "harness.tabFixed", harnessFixed],
   ];
   const harnessSubButtons = harnessSubs.map(([id, labelKey]) => h(doc, "button", { type: "button", class: "tab provider-tab", role: "tab", "data-ui": `harness-tab-${id}`, "data-sub": id }, t(labelKey)));
@@ -412,9 +431,10 @@ export function renderSettings(ctx) {
       node.hidden = subId !== id;
     });
     harnessSubButtons.forEach((b) => b.setAttribute("aria-selected", String(b.getAttribute("data-sub") === id)));
+    harnessBar.hidden = id === "fixed";
   };
   harnessSubButtons.forEach((b) => b.addEventListener("click", () => showHarnessSub(b.getAttribute("data-sub"))));
-  showHarnessSub("adjustable");
+  showHarnessSub("limits");
   const harnessSubTabs = h(doc, "div", { class: "provider-tabs", role: "tablist", "data-ui": "harness-tabs" }, ...harnessSubButtons);
 
   // Tooltips.
@@ -633,7 +653,7 @@ export function renderSettings(ctx) {
       providerTabs,
       providerPanel,
     ),
-    h(doc, "section", { class: "settings-section", "data-ui": "harness-section" }, h(doc, "h2", {}, t("harness.title")), h(doc, "p", {}, t("harness.intro")), harnessSubTabs, harnessAdjustable, harnessFixed),
+    h(doc, "section", { class: "settings-section", "data-ui": "harness-section" }, h(doc, "h2", {}, t("harness.title")), h(doc, "p", {}, t("harness.intro")), harnessSubTabs, harnessLimits, harnessRetries, harnessCost, harnessGuards, harnessBar, harnessFixed),
     h(
       doc,
       "section",

@@ -971,3 +971,11 @@ a.art-pill:hover { text-decoration: underline; }
 .limit-warning { margin: 10px 0; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--warn-line, #d9b36a); background: var(--warn-bg, #fbf1dc); color: var(--warn-text, #6b4a0a); font-size: 0.9rem; }
 .limit-warning b { display: block; margin-bottom: 2px; }
 .limit-warning a { color: inherit; text-decoration: underline; }
+
+/* Harness: the ? button of a setting, its popup and the shared Save bar. */
+.harness-label-top { display: flex; align-items: center; gap: 6px; }
+.help-icon { min-width: 22px; min-height: 22px; width: 22px; height: 22px; padding: 0; border-radius: 50%; font-size: 0.78rem; font-weight: 700; line-height: 1; color: var(--accent); background: var(--accent-bg); border: 1px solid var(--accent-line); }
+.profile-heading-help, .harness-panel h4 .help-icon { margin-left: 8px; vertical-align: middle; }
+.help-card { max-width: 480px; }
+.help-card p { margin: 0 0 10px; line-height: 1.5; }
+.harness-bar { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); }
