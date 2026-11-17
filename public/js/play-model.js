@@ -142,6 +142,7 @@ export function limitRows(stats) {
         tokens: cell((stats?.usage?.input ?? 0) + (stats?.usage?.output ?? 0), run?.maxTokens ?? null, "run", stats?.runHit === "tokens"),
         searches: cell(stats?.usage?.searches ?? 0, run?.maxSearches ?? null, "run", stats?.runHit === "searches"),
         time: cell(seconds, TIME_LIMIT_MS / 1000, "run", stats?.runHit === "time"),
+        ...(run?.maxCostUsd ? { cost: cell(stats?.cost ?? 0, run.maxCostUsd, "run", stats?.runHit === "cost") } : {}),
       },
     },
   ];

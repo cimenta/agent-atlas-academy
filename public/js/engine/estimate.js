@@ -32,3 +32,15 @@ export function estimateRun(design, limits, prices = { models: MODELS, search: S
   const searchCostUsd = searchers.length > 0 ? clamped.maxSearches * Math.max(...searchers.map((n) => pricesOf(n).search)) : 0;
   return { activations, tokensUpper, costUsd, searchCostUsd, totalUsd: costUsd + searchCostUsd, pricesAsOf: prices.pricesAsOf ?? PRICES_AS_OF };
 }
+
+// A design that will probably reach a limit of the run: the turns or tokens it needs are more than the limits allow.
+// Returns null when it should fit, else what it needs and what the limits are.
+export function limitWarning(design, limits) {
+  const clamped = clampLimits(limits);
+  const turns = activationsOf(design, { ...clamped, maxSteps: 1e9 });
+  const tokens = turns * TOKENS_PER_ACTIVATION;
+  const steps = turns > clamped.maxSteps;
+  const over = tokens > clamped.maxTokens;
+  if (!steps && !over) return null;
+  return { turns, tokens, maxSteps: clamped.maxSteps, maxTokens: clamped.maxTokens, steps, tokensOver: over };
+}

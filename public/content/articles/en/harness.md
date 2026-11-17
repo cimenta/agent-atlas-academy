@@ -24,7 +24,7 @@ Why it matters comes down to two things. The first is **safety**: a model that l
 
 Agent Atlas is a small harness around the Claude and Gemini models. You can see it in **Settings, Harness**, which has two tabs:
 
-- **Adjustable harness**: the limits you can change, such as the maximum steps, the tokens of a run, the web searches, the tokens of one reply and how long to wait for the model, plus how many times a failed call is tried again and how long to wait between tries. Three profiles (Careful, Balanced, Generous) set the main limits in one click. Your choice is kept in your browser.
+- **Adjustable harness**: the limits you can change, such as the maximum steps, the tokens of a run, the web searches, the tokens of one reply and how long to wait for the model, plus how many times a failed call is tried again and how long to wait between tries. Three profiles (Careful, Balanced, Generous) set the main limits in one click, and an optional cost cap stops a run when its estimated cost passes an amount you choose. Create warns you before a run when a design will probably reach a limit. Your choice is kept in your browser.
 - **Fixed harness**: the rules that never change, such as the 270 second total time, at most 8 agents in a design, and the fact that your key stays in your browser. They are fixed because safety or the hosting depends on them.
 
 Limits can also belong to a single agent. In Create you can give one agent its own maximum steps, tokens or searches, so a chatty agent cannot use up the whole budget, and choose whether the run stops there or the agent passes on what it wrote. The lower of the agent's limit and the run's limit always wins.

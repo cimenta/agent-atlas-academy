@@ -1,6 +1,6 @@
 // Pure helpers for the Create page: may the run start, and what is shown in the review box.
 import { AGENT_TYPES, TASK_MAX_CHARS, pricesFor } from "../engine/catalog.js";
-import { estimateRun } from "../engine/estimate.js";
+import { estimateRun, limitWarning } from "../engine/estimate.js";
 import { TOOLS } from "../engine/tools.js";
 
 // keyLocked: a key is saved on this computer but not unlocked yet, so the reason says to unlock it.
@@ -18,13 +18,14 @@ export function reviewSummary({ design, limits, provider = "anthropic" }) {
   return {
     agents: design.nodes.map((n) => ({ id: n.id, label: n.name || AGENT_TYPES[n.agent]?.label || n.agent, model: n.model, search: n.search })),
     estimate: estimateRun(design, limits, pricesFor(provider)),
+    warning: limitWarning(design, limits),
     hasSearch: design.nodes.some((n) => n.search === true && TOOLS.web_search.extraFee === true),
   };
 }
 
 const OUTCOMES = new Set(["finished", "stopped_user", "stopped_limit", "interrupted", "failed"]);
 
-const LIMIT_REASONS = new Set(["time", "steps", "tokens", "searches", "agent_steps", "agent_tokens", "agent_searches"]);
+const LIMIT_REASONS = new Set(["time", "steps", "tokens", "searches", "cost", "agent_steps", "agent_tokens", "agent_searches"]);
 
 // A run stopped at a limit says which one when the done event recorded it; older runs keep the general message.
 export function runOutcomeMessageKey(outcome, reason) {

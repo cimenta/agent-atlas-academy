@@ -29,6 +29,7 @@ export function createBudget(limits, { now = Date.now, timeLimitMs = TIME_LIMIT_
   const max = clampLimits(limits);
   const startedAt = now();
   const used = { input: 0, output: 0, searches: 0, steps: 0 };
+  let spentUsd = 0; // estimated cost so far; kept apart from usage() so the numbers of a run record stay as they were
 
   const elapsed = () => now() - startedAt;
   const exceeded = () => {
@@ -36,6 +37,7 @@ export function createBudget(limits, { now = Date.now, timeLimitMs = TIME_LIMIT_
     if (used.steps > max.maxSteps) return "steps";
     if (used.input + used.output > max.maxTokens) return "tokens";
     if (used.searches > max.maxSearches) return "searches";
+    if (max.maxCostUsd && spentUsd > max.maxCostUsd) return "cost";
     return null;
   };
   const check = () => {
@@ -48,7 +50,8 @@ export function createBudget(limits, { now = Date.now, timeLimitMs = TIME_LIMIT_
       used.steps += 1;
       check();
     },
-    chargeUsage({ input, output, searches } = {}) {
+    chargeUsage({ input, output, searches, cost } = {}) {
+      spentUsd += amount(cost);
       used.input += amount(input);
       used.output += amount(output);
       used.searches += amount(searches);
@@ -58,6 +61,7 @@ export function createBudget(limits, { now = Date.now, timeLimitMs = TIME_LIMIT_
     remainingSearches: () => Math.max(0, max.maxSearches - used.searches),
     remainingMs: () => Math.max(0, timeLimitMs - elapsed()),
     usage: () => ({ ...used }),
+    spentUsd: () => spentUsd,
     check,
 
     // The budget of one agent: it charges the run too, and also counts what this agent used against its own limits

@@ -966,3 +966,8 @@ a.art-pill:hover { text-decoration: underline; }
 .profile-choice.custom { border-style: dashed; cursor: default; }
 .profile-choice[aria-pressed="true"] { background: var(--accent-bg); border: 2px solid var(--accent-line); padding: 9px 11px; color: var(--accent); }
 .profile-choice[aria-pressed="true"] span { color: var(--accent); }
+
+/* Warning before a run: the design will probably reach a limit. */
+.limit-warning { margin: 10px 0; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--warn-line, #d9b36a); background: var(--warn-bg, #fbf1dc); color: var(--warn-text, #6b4a0a); font-size: 0.9rem; }
+.limit-warning b { display: block; margin-bottom: 2px; }
+.limit-warning a { color: inherit; text-decoration: underline; }

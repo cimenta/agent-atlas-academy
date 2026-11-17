@@ -24,7 +24,7 @@ Proč na tom záleží, se dá říct dvěma slovy. První je **bezpečnost**: m
 
 Agent Atlas je malý harness kolem modelů Claude a Gemini. Uvidíte ho v **Nastavení, Harness**, které má dvě záložky:
 
-- **Nastavitelný harness**: limity, které můžete změnit, například nejvíce kroků, tokeny běhu, vyhledávání na webu, tokeny jedné odpovědi a jak dlouho čekat na model, a také kolikrát se selhané volání zkusí znovu a jak dlouho se čeká mezi pokusy. Tři profily (Opatrný, Vyvážený, Štědrý) nastaví hlavní limity jedním kliknutím. Vaše volba se ukládá ve vašem prohlížeči.
+- **Nastavitelný harness**: limity, které můžete změnit, například nejvíce kroků, tokeny běhu, vyhledávání na webu, tokeny jedné odpovědi a jak dlouho čekat na model, a také kolikrát se selhané volání zkusí znovu a jak dlouho se čeká mezi pokusy. Tři profily (Opatrný, Vyvážený, Štědrý) nastaví hlavní limity jedním kliknutím a volitelný strop ceny zastaví běh, když jeho odhadovaná cena překročí částku, kterou zvolíte. Create vás před během varuje, když návrh pravděpodobně narazí na limit. Vaše volba se ukládá ve vašem prohlížeči.
 - **Pevný harness**: pravidla, která se nemění, například celkový čas 270 sekund, nejvýše 8 agentů v návrhu a to, že váš klíč zůstává v prohlížeči. Jsou pevná, protože na nich stojí bezpečnost nebo hosting.
 
 Limity může mít i jeden agent. V Create můžete jednomu agentovi dát vlastní nejvíce kroků, tokenů nebo vyhledávání, aby upovídaný agent nespotřeboval celý rozpočet, a vybrat, jestli se tam celý běh zastaví, nebo agent předá dál, co už napsal. Nižší z limitu agenta a limitu běhu platí vždy.

@@ -6,6 +6,7 @@ import { AnthropicError, redact } from "./anthropic.js";
 import { agentLabel } from "./labels.js";
 import { AgentLimitError, LimitError } from "./budget.js";
 import { agentPassMessage } from "./harness.js";
+import { usageCostUsd } from "./cost.js";
 
 const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -20,7 +21,7 @@ function searchOutput(content) {
 // A copy is taken so later changes to the conversation cannot reach an event already sent.
 const copy = (value) => structuredClone(value);
 
-export function createAgent({ node, design = null, call, emit, budget: runBudget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default, retries = RETRIES.default, retryDelaySec = RETRY_DELAY_SEC.default }) {
+export function createAgent({ node, design = null, call, emit, budget: runBudget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default, retries = RETRIES.default, retryDelaySec = RETRY_DELAY_SEC.default, freeTier = false }) {
   const retryLimit = clampRetries(retries);
   const retryDelayMs = clampRetryDelaySec(retryDelaySec) * 1000;
   // The agent counts against its own limits too (node.limits); the limits of the run still apply.
@@ -34,6 +35,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
   const label = agentLabel(node, design, AGENT_TYPES[node.agent]?.label ?? node.agent);
   const limitValue = { agent_steps: node.limits?.maxSteps, agent_tokens: node.limits?.maxTokens, agent_searches: node.limits?.maxSearches };
   const stopRun = (reason) => new LimitError(`agent_${reason}`, { agent: node.id, label, value: limitValue[`agent_${reason}`] });
+  const costOf = (usage) => usageCostUsd(usage, node, { provider, freeTier });
   const messages = [];
   let lastRequest = null;
   let sent = 0; // how many messages earlier requests already carried
@@ -74,7 +76,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
         // Nothing is sent or emitted: the caller already holds this agent's events. The agent just remembers the exchange.
         try {
           budget.chargeStep();
-          budget.chargeUsage({ input: earlier.tokens?.input, output: earlier.tokens?.output });
+          budget.chargeUsage({ input: earlier.tokens?.input, output: earlier.tokens?.output, cost: costOf({ input: earlier.tokens?.input, output: earlier.tokens?.output }) });
         } catch (error) {
           // The answer is already there; with pass it is kept, with stop the run ends as it would have the first time.
           if (!(error instanceof AgentLimitError)) throw error;
@@ -160,7 +162,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
         messages.push({ role: "assistant", content: response.content ?? [] });
         texts.push(textOf(response.content ?? []));
         try {
-          budget.chargeUsage(charge);
+          budget.chargeUsage({ ...charge, cost: costOf(charge) });
         } catch (error) {
           if (!(error instanceof AgentLimitError)) throw error;
           return endAtLimit(error.reason);

@@ -123,3 +123,11 @@ export const PROFILES = {
 };
 // The profile whose values are exactly these ones, or "custom".
 export const matchProfile = (values) => Object.keys(PROFILES).find((id) => Object.keys(PROFILES[id]).every((k) => Number(values?.[k]) === PROFILES[id][k])) ?? "custom";
+
+// The cost cap: a run stops when its estimated cost passes this amount (US dollars). 0 means off.
+export const COST_CAP_USD = { min: 0.1, max: 5, step: 0.1, default: 0 };
+export const clampCostCap = (value) => {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return COST_CAP_USD.default;
+  return Math.min(COST_CAP_USD.max, Math.max(COST_CAP_USD.min, Math.round(n * 100) / 100));
+};

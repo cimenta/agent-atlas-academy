@@ -2,7 +2,7 @@
 // editor in the browser and again by the server, which never trusts the browser.
 import { isSlot } from "../key-slots.js";
 import { validNodeLimits, ON_LIMIT } from "./agent-limits.js";
-import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, LIMIT_MAX, NODE_MAX, NAME_MAX, INSTRUCTIONS_MAX } from "./catalog.js";
+import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, LIMIT_MAX, clampCostCap, NODE_MAX, NAME_MAX, INSTRUCTIONS_MAX } from "./catalog.js";
 
 export const PATTERNS = ["sequential", "parallel", "supervisor", "debate"];
 
@@ -186,5 +186,6 @@ export function clampLimits(limits) {
     if (typeof value !== "number" || !Number.isFinite(value) || value < minimum) return LIMIT_DEFAULTS[key];
     return Math.min(Math.floor(value), LIMIT_MAX[key]);
   };
-  return { maxSteps: pick("maxSteps", 1), maxTokens: pick("maxTokens", 1), maxSearches: pick("maxSearches", 0) };
+  const cap = clampCostCap(source.maxCostUsd);
+  return { maxSteps: pick("maxSteps", 1), maxTokens: pick("maxTokens", 1), maxSearches: pick("maxSearches", 0), ...(cap > 0 ? { maxCostUsd: cap } : {}) };
 }

@@ -272,6 +272,10 @@ export function renderCreate(ctx) {
         h(doc, "p", {}, h(doc, "strong", { "data-ui": isFree ? "estimate-free" : "estimate-cost" }, isFree ? t("create.estimateFree") : t("create.estimate", { usd: est.costUsd.toFixed(3), date: est.pricesAsOf }))),
         h(doc, "p", { class: "hint" }, t("create.estimateDetail", { tokens: est.tokensUpper, turns: est.activations })),
       ];
+      if (summary.warning) {
+        const w = summary.warning;
+        estimateLines.push(h(doc, "div", { class: "limit-warning", role: "status", "data-ui": "limit-warning" }, h(doc, "b", {}, t("create.limitWarning.title")), t("create.limitWarning.body", { turns: w.turns, tokens: w.tokens.toLocaleString(ctx.lang === "cs" ? "cs-CZ" : "en-US"), steps: w.maxSteps, maxTokens: w.maxTokens.toLocaleString(ctx.lang === "cs" ? "cs-CZ" : "en-US") }), " ", h(doc, "a", { href: "#/settings" }, t("create.limitWarning.link"))));
+      }
       if (marked && summary.hasSearch) estimateLines.push(h(doc, "p", { class: "notice", "data-ui": "free-tier-search" }, t("create.freeTierSearch")));
       if (marked && paidOnly) estimateLines.push(h(doc, "p", { class: "notice", "data-ui": "free-tier-no-strong" }, t("create.freeTierNoStrong")));
       if (summary.hasSearch && !isFree) {
@@ -567,6 +571,7 @@ export function renderCreate(ctx) {
       outputTokens: ctx.settings.get().maxOutputTokens,
       retries: ctx.settings.get().retries,
       retryDelaySec: ctx.settings.get().retryDelaySec,
+      freeTier,
       language: ctx.lang,
       apiKey,
       keys,

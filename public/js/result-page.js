@@ -169,16 +169,18 @@ export function renderResult(ctx, run) {
       const bar = c.limit ? h(doc, "span", { class: `share-bar limit-bar${c.hit ? " hot" : ""}`, role: "img", "aria-label": `${pct} %` }, h(doc, "i", { class: `w${Math.round(pct / 5) * 5}` })) : "";
       return h(doc, "td", { class: c.hit ? "limit-hit" : "" }, h(doc, "span", {}, text), source, c.hit ? h(doc, "span", { class: "limit-reached" }, ` · ${t("stats.limits.reached")}`) : "", bar);
     };
+    const hasCost = limitRows(stats)[0]?.cells.cost !== undefined;
+    const money = (c) => h(doc, "td", { class: c.hit ? "limit-hit" : "" }, h(doc, "span", {}, `$${c.used.toFixed(2)} / $${c.limit.toFixed(2)}`), c.hit ? h(doc, "span", { class: "limit-reached" }, ` · ${t("stats.limits.reached")}`) : "", h(doc, "span", { class: `share-bar limit-bar${c.hit ? " hot" : ""}`, role: "img", "aria-label": `${Math.min(100, Math.round((c.used / c.limit) * 100))} %` }, h(doc, "i", { class: `w${Math.round(Math.min(100, (c.used / c.limit) * 100) / 5) * 5}` })));
     const limitTable = h(
       doc,
       "table",
       { class: "result-table stats-table limits-table", "data-ui": "stats-limits" },
-      h(doc, "thead", {}, h(doc, "tr", {}, ...["stats.limits.agent", "stats.limits.steps", "stats.limits.tokens", "stats.limits.searches", "stats.limits.time"].map((key) => h(doc, "th", { scope: "col" }, t(key))))),
+      h(doc, "thead", {}, h(doc, "tr", {}, ...["stats.limits.agent", "stats.limits.steps", "stats.limits.tokens", "stats.limits.searches", "stats.limits.time", ...(hasCost ? ["stats.limits.cost"] : [])].map((key) => h(doc, "th", { scope: "col" }, t(key))))),
       h(
         doc,
         "tbody",
         {},
-        ...limitRows(stats).map((row) => h(doc, "tr", { "data-ui": `limits-row-${row.id}` }, h(doc, "th", { scope: "row" }, row.id === "run" ? t("stats.limits.run") : row.label, row.id !== "run" && !row.own ? h(doc, "span", { class: "limit-source" }, ` · ${t("stats.limits.none")}`) : ""), used(row.cells.steps), used(row.cells.tokens), used(row.cells.searches), row.cells.time ? h(doc, "td", {}, row.cells.time.used === null ? "—" : `${num(row.cells.time.used)} / ${num(row.cells.time.limit)} s`) : h(doc, "td", {}, "—"))),
+        ...limitRows(stats).map((row) => h(doc, "tr", { "data-ui": `limits-row-${row.id}` }, h(doc, "th", { scope: "row" }, row.id === "run" ? t("stats.limits.run") : row.label, row.id !== "run" && !row.own ? h(doc, "span", { class: "limit-source" }, ` · ${t("stats.limits.none")}`) : ""), used(row.cells.steps), used(row.cells.tokens), used(row.cells.searches), row.cells.time ? h(doc, "td", {}, row.cells.time.used === null ? "—" : `${num(row.cells.time.used)} / ${num(row.cells.time.limit)} s`) : h(doc, "td", {}, "—"), ...(hasCost ? [row.cells.cost ? money(row.cells.cost) : h(doc, "td", {}, "—")] : []))),
       ),
     );
     const limitsSection = stats.perAgent.length ? h(doc, "section", { class: "stats-limits", "data-ui": "stats-limits-section" }, h(doc, "h3", {}, t("stats.limits.title")), h(doc, "p", { class: "hint" }, t("stats.limits.intro")), limitTable) : "";

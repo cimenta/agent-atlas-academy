@@ -1,6 +1,6 @@
 // The settings page: API key handling, the harness (limits and fixed rules) and local data.
 import { h } from "./dom.js";
-import { LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, RETRIES, RETRY_DELAY_SEC, PROFILES, matchProfile, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
+import { LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, RETRIES, RETRY_DELAY_SEC, COST_CAP_USD, PROFILES, matchProfile, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
 import { COLOR_CHOICES, paintModelTag } from "./provider-colors.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "./key-slots.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
@@ -276,6 +276,8 @@ export function renderSettings(ctx) {
     { id: "retries", min: RETRIES.min, max: RETRIES.max, step: RETRIES.step, value: harnessNow.retries, def: RETRIES.default, show: (n) => String(n) },
     { id: "retryDelay", min: RETRY_DELAY_SEC.min, max: RETRY_DELAY_SEC.max, step: RETRY_DELAY_SEC.step, value: harnessNow.retryDelaySec, def: RETRY_DELAY_SEC.default, show: (n) => t("settings.timeoutSeconds", { seconds: harnessFormat(n) }) },
   ];
+  const money = (n) => `$${n.toLocaleString(ctx.lang === "cs" ? "cs-CZ" : "en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  harnessSpecs.push({ id: "cost", min: 0, max: COST_CAP_USD.max, step: COST_CAP_USD.step, value: harnessNow.limits.maxCostUsd ?? 0, def: 0, show: (n) => (n > 0 ? money(n) : t("harness.costOff")) });
   const PROFILE_ROWS = Object.keys(PROFILES.balanced);
   const harnessRows = harnessSpecs.map((spec) => {
     const slider = h(doc, "input", { id: `set-harness-${spec.id}`, type: "range", min: spec.min, max: spec.max, step: spec.step, value: spec.value, "data-ui": `harness-${spec.id}` });
@@ -313,7 +315,7 @@ export function renderSettings(ctx) {
   const harnessSave = h(doc, "button", { type: "button", class: "primary", "data-ui": "harness-save" }, t("harness.save"));
   harnessSave.addEventListener("click", () => {
     const value = (id) => Number(harnessRow(id).slider.value);
-    settings.setLimits({ maxSteps: value("steps"), maxTokens: value("tokens"), maxSearches: value("searches") });
+    settings.setLimits({ maxSteps: value("steps"), maxTokens: value("tokens"), maxSearches: value("searches"), maxCostUsd: value("cost") });
     settings.setMaxOutputTokens(value("output"));
     settings.setRequestTimeout(value("timeout"));
     settings.setRetries(value("retries"), value("retryDelay"));
@@ -323,6 +325,7 @@ export function renderSettings(ctx) {
     harnessRow("searches").set(saved.limits.maxSearches);
     harnessRow("output").set(saved.maxOutputTokens);
     harnessRow("timeout").set(saved.requestTimeoutSec);
+    harnessRow("cost").set(saved.limits.maxCostUsd ?? 0);
     harnessRow("retries").set(saved.retries);
     harnessRow("retryDelay").set(saved.retryDelaySec);
     say(t("harness.saved"));
@@ -338,6 +341,11 @@ export function renderSettings(ctx) {
     chip.addEventListener("click", () => harnessRow("timeout").set(sec));
     return chip;
   });
+  const costQuick = [0, 0.5, 1, 2].map((usd) => {
+    const chip = h(doc, "button", { type: "button", "data-ui": `cost-${usd}` }, usd === 0 ? t("harness.costOff") : money(usd));
+    chip.addEventListener("click", () => harnessRow("cost").set(usd));
+    return chip;
+  });
   const harnessAdjustable = h(
     doc,
     "div",
@@ -348,11 +356,16 @@ export function renderSettings(ctx) {
     h(doc, "p", { class: "hint" }, t("harness.profileIntro")),
     h(doc, "div", { class: "profile-choices", "data-ui": "harness-profiles" }, ...profileButtons.map(([, b]) => b)),
     h(doc, "h4", {}, t("harness.limitsHeading")),
-    ...harnessRows.filter((r) => !["retries", "retryDelay"].includes(r.spec.id)).map((r) => r.node),
+    ...harnessRows.filter((r) => !["retries", "retryDelay", "cost"].includes(r.spec.id)).map((r) => r.node),
     h(doc, "h4", {}, t("harness.retriesHeading")),
     h(doc, "p", { class: "hint" }, t("harness.retriesIntro")),
     ...harnessRows.filter((r) => ["retries", "retryDelay"].includes(r.spec.id)).map((r) => r.node),
     h(doc, "p", { class: "hint" }, t("harness.retriesNote")),
+    h(doc, "h4", {}, t("harness.costHeading")),
+    h(doc, "p", { class: "hint" }, t("harness.costIntro")),
+    harnessRow("cost").node,
+    h(doc, "div", { class: "harness-actions", "data-ui": "cost-quick" }, ...costQuick),
+    h(doc, "p", { class: "hint" }, t("harness.costNote")),
     h(doc, "div", { class: "harness-actions" }, ...harnessQuick, h(doc, "span", { class: "harness-spacer" }), harnessReset, harnessSave),
   );
   const harnessFixed = h(

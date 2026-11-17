@@ -28,7 +28,7 @@ export function agentPassMessage(reason, { label, value }) {
 // The warning a replay holds when a limit stopped the run (English, like the other messages of the engine).
 // extra: for the limit of one agent, its label and the value it had.
 export function limitMessage(reason, limits, extra = {}) {
-  const { maxSteps, maxTokens, maxSearches } = limits ?? {};
+  const { maxSteps, maxTokens, maxSearches, maxCostUsd } = limits ?? {};
   const agentPart = AGENT_PART[reason];
   if (agentPart) return `Limit reached: ${agentPart} of agent ${extra.label} (${extra.value} per agent). The run was stopped before it could finish. Raise the limit of this agent in the editor, and run again.`;
   switch (reason) {
@@ -38,6 +38,8 @@ export function limitMessage(reason, limits, extra = {}) {
       return `Limit reached: tokens (${maxTokens} per run). The run was stopped before it could finish. Raise the limit in Settings, Harness, and run again.`;
     case "searches":
       return `Limit reached: web searches (${maxSearches} per run). The run was stopped before it could finish. Raise the limit in Settings, Harness, and run again.`;
+    case "cost":
+      return `Limit reached: estimated cost of the run ($${Number(maxCostUsd).toFixed(2)}, by the prices in the catalog). The run was stopped before it could finish. Raise the cost cap in Settings, Harness, and run again.`;
     case "time":
       return `Limit reached: time (${TIME_LIMIT_MS / 1000} seconds per run). This limit is fixed. The run was stopped before it could finish.`;
     default:
