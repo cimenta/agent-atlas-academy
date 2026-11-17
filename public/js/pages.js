@@ -181,7 +181,10 @@ export async function renderLearn(ctx) {
       list = h(doc, "ul", { class: "learn-list" }, ...found.map(({ item, snippet }) => row(item, snippet)));
     } else {
       const shown = state.section === "all" ? items : items.filter((item) => item.section === state.section);
-      list = h(doc, "ul", { class: "learn-list" }, ...shown.map((item) => row(item, "")));
+      // The Harness lab is not an article: it sits first in All and in the section of the article about the harness.
+      const labHere = state.section === "all" || state.section === items.find((item) => item.slug === "harness")?.section;
+      const lab = h(doc, "li", { class: "learn-row learn-lab", "data-ui": "learn-lab" }, h(doc, "a", { href: "#/learn/lab" }, t("lab.title")), h(doc, "span", { class: "summary" }, t("learn.labSummary")), h(doc, "span", { class: "tag", "data-ui": "learn-lab-tag" }, t("learn.labTag")));
+      list = h(doc, "ul", { class: "learn-list" }, ...(labHere ? [lab] : []), ...shown.map((item) => row(item, "")));
     }
     main.replaceChildren(...(note ? [h(doc, "p", { class: "learn-note", "aria-live": "polite" }, note)] : []), list);
     if (query) markText(doc, list, query);

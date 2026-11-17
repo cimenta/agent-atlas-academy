@@ -194,7 +194,7 @@ async function renderRoute(isNavigation) {
         await renderLearn(ctx);
         break;
       case "lab":
-        await renderLab(ctx);
+        await renderLab(ctx, route.params);
         break;
       case "article":
         await renderArticle(ctx, route.params.slug);

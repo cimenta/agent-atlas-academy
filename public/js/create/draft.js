@@ -4,7 +4,9 @@ import { createEditor } from "./editor-model.js";
 import { loadDefinition } from "./definition.js";
 
 // slots: the key slots chosen on the Create tab (one or more); null until the tab is first opened.
-export const draft = { task: "", pattern: "sequential", editor: createEditor("sequential"), limits: null, slots: null, retry: null, approve: false };
+export const draft = { task: "", pattern: "sequential", editor: createEditor("sequential"), limits: null, limitsEdited: false, slots: null, retry: null, approve: false, retryUseCurrent: true };
+// limitsEdited: the visitor changed the limits of this run by hand; otherwise they are read from Settings each time Create opens.
+// retryUseCurrent: Retry carries on with the limits of Settings (true) or with the limits the run had (false).
 // retry: a failed or paused run (its record) that the Create tab should carry on when it opens.
 // approve: the run waits for approval and the visitor approved it, so it carries on past the agents that waited.
 

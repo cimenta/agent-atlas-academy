@@ -15,6 +15,7 @@ import { paintModelTag } from "../provider-colors.js";
 import { createAboutPanel } from "./about.js";
 import { createRunMenu } from "./run-menu.js";
 import { retryChoices } from "./retry-choice.js";
+import { limitsChoice } from "./limits-choice.js";
 import { canSubmit, submitRun } from "../submit-run.js";
 import { runForExport } from "../run-export.js";
 import { createReplayDiagram, ROUND_MARK } from "./diagram.js";
@@ -27,6 +28,7 @@ const STATUS_KEY = {
   waiting: "player.statusWaiting",
   idle: "player.statusIdle",
   unreached: "player.statusUnreached",
+  stopped: "player.statusStopped",
   working: "player.statusWorking",
   done: "player.statusDone",
   error: "player.statusError",
@@ -79,15 +81,15 @@ export function headingOf(run) {
   return line.length > 120 ? `${line.slice(0, 117)}…` : line;
 }
 
-export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false }) {
+export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null }) {
   const validation = validateRun(run);
   if (!validation.ok) return mountError(container, doc, t, validation.errors);
-  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout, providerColors, onRetry, suggestFallback });
+  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout, providerColors, onRetry, suggestFallback, limitsInfo });
 }
 
 // A player that shows a run while it is still arriving. Events are added with append(), end() closes it.
-export function mountLiveReplay(container, { title, pattern, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar", providerColors, onRetry = null, suggestFallback = false }) {
-  const view = mountView(container, { events: [], pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout, providerColors, onRetry, suggestFallback });
+export function mountLiveReplay(container, { title, pattern, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null }) {
+  const view = mountView(container, { events: [], pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout, providerColors, onRetry, suggestFallback, limitsInfo });
   return {
     append: (event) => view.player.append(event),
     end: () => view.player.endLive(),
@@ -95,7 +97,7 @@ export function mountLiveReplay(container, { title, pattern, recordedWith, t, do
   };
 }
 
-function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false }) {
+function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null }) {
   const player = createPlayer({ events, clock, timeScale, live });
   const ui = { agent: null, tab: "steps", step: null, round: null, follow: true };
   const viewer = createViewer({ doc, t });
@@ -233,6 +235,13 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
 
   const label = (value) => (typeof value === "string" ? value : value ? t(value.key, value.params) : "");
 
+  // The status of an agent that was cut off: which limit (or you) stopped it.
+  function stoppedText(a) {
+    const key = `player.stopReason.${a.stopReason}`;
+    const reason = t(key);
+    return t("player.statusStopped", { reason: reason === key ? t("player.stopReason.limit") : reason });
+  }
+
   // What an agent that never started shows once the run is over: not called (the run finished without it, as in a
   // supervisor run) or not reached (the run stopped before it). While the run goes on, or waits for approval, it is waiting.
   function idleStatus() {
@@ -273,7 +282,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
           design,
           wide,
           boxLabel: (id) => designLabel(design, id),
-          statusText: (a) => `${t(STATUS_KEY[a.status])}${a.ms ? ` · ${fmt(a.ms)}` : ""}`,
+          statusText: (a) => (a.status === "stopped" ? stoppedText(a) : `${t(STATUS_KEY[a.status])}${a.ms ? ` · ${fmt(a.ms)}` : ""}`),
           onRetry,
           retryLabel: t("player.retry"),
           retryMenu: onRetry
@@ -283,6 +292,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
                 providerName: (p) => (p === "google" ? "Gemini" : "Anthropic"),
                 tagText: (c) => (c.suggested ? `${t("player.retrySuggested")} · ` : "") + (c.current ? t("player.retryTagFailed") : c.provider === "google" ? t(c.free ? "player.retryTagFree" : "player.retryTagPaid") : t("player.retryTagPaid")),
                 choicesOf: (id) => retryChoices(design, id, String(recordedWith?.provider ?? "anthropic").split("+")[0], { suggest: suggestFallback }),
+                extra: limitsInfo ? () => limitsChoice({ doc, t, ...limitsInfo() }) : null,
               }
             : null,
           onSelect: (id) => {
@@ -333,7 +343,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
         { type: "button", class: `ag${agent && agent.id === id ? " sel" : ""}`, "data-ui": `agent-card-${id}`, role: "listitem", "data-status": a.status, "aria-pressed": String(agent?.id === id) },
         h(doc, "span", { class: "n" }, a.label),
         h(doc, "span", { class: "tl" }, tools),
-        h(doc, "span", { class: `st ${a.status}` }, `${t(STATUS_KEY[a.status])}${a.ms ? ` · ${fmt(a.ms)}` : ""}`),
+        h(doc, "span", { class: `st ${a.status}` }, a.status === "stopped" ? stoppedText(a) : `${t(STATUS_KEY[a.status])}${a.ms ? ` · ${fmt(a.ms)}` : ""}`),
       );
       chip.addEventListener("click", () => {
         Object.assign(ui, { agent: id, follow: false, step: null, round: null });

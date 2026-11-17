@@ -585,6 +585,8 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .replay-diagram .rnode[data-status="waiting"] small, .replay-diagram .rnode[data-status="idle"] small, .replay-diagram .rnode[data-status="unreached"] small { color: var(--text); }
 .replay-diagram .rnode[data-status="done"] { background: var(--done-bg); border-color: var(--done); }
 .replay-diagram .rnode[data-status="working"] { background: var(--accent-bg); border: 3px solid var(--accent-line); padding: 2px 6px; }
+.replay-diagram .rnode[data-status="stopped"] { background: var(--warn-bg, #fbf1dc); border: 2px solid var(--warn-line, #d9b36a); padding: 3px 7px; color: var(--warn-text, #6b4a0a); }
+.replay-diagram .rnode[data-status="stopped"] small { color: var(--warn-text, #6b4a0a); font-weight: 600; }
 .replay-diagram .rnode[data-status="error"] { background: var(--working-bg); border-color: var(--working); }
 .replay-diagram .rnode[aria-pressed="true"] { outline: 3px solid var(--accent); outline-offset: 1px; }
 .replay-diagram-wrap { display: flex; flex-direction: column; }
@@ -904,7 +906,7 @@ a.art-pill:hover { text-decoration: underline; }
 .replay-diagram .rnode-retry-arrow { width: 22px; border-left-color: rgba(255, 255, 255, 0.45); border-radius: 0 6px 6px 0; }
 .replay-diagram .rnode-retry-group .rnode-retry:not(:only-child) { border-radius: 6px 0 0 6px; border-right: 0; }
 .replay-diagram .rnode-retry:hover, .replay-diagram .rnode-retry-arrow:hover { background: #a61e1e; }
-.retry-menu { position: fixed; z-index: 60; width: 250px; padding: 5px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); }
+.retry-menu { position: fixed; z-index: 60; width: 300px; padding: 5px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); }
 .retry-menu p { margin: 0; padding: 4px 8px 2px; font-size: 0.75rem; color: var(--muted); }
 .retry-menu .retry-menu-title { font-weight: 600; color: var(--text); }
 .retry-menu-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; min-height: 32px; padding: 4px 8px; border: 0; border-radius: 6px; background: transparent; text-align: left; font-size: 0.85rem; }
@@ -1043,3 +1045,20 @@ a.art-pill:hover { text-decoration: underline; }
 .lab-verdict[data-outcome="stopped"]{color:#a32d2d}
 .lab-verdict[data-outcome="finished"]{color:#2c6b1b}
 .lab-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0}
+
+/* The limits row of the Retry menu and of Carry on the failed run. */
+.retry-menu-rule { margin: 6px 0; border: 0; border-top: 1px solid var(--border); }
+.limits-choice { padding: 2px 4px; font-size: 0.85rem; }
+.limits-row { display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 6px; }
+.limits-row.differs { background: var(--warn-bg, #fbf1dc); border: 1px solid var(--warn-line, #d9b36a); color: var(--warn-text, #6b4a0a); }
+.limits-row label { cursor: pointer; }
+.limits-spacer { flex: 1; }
+.limits-toggle { white-space: nowrap; color: inherit; }
+.limits-details { margin-top: 6px; }
+.limits-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.limits-table th, .limits-table td { padding: 3px 6px; text-align: left; border-bottom: 1px solid var(--border); }
+.limits-table tr.diff td { background: var(--warn-bg, #fbf1dc); font-weight: 700; }
+.limits-mark { font-weight: 400; color: var(--warn-text, #6b4a0a); white-space: nowrap; }
+.limits-choice .hint { margin: 4px 2px; font-size: 0.75rem; }
+.limits-predict { margin-top: 6px; padding: 8px; border: 1px solid #c0392b; border-radius: 6px; background: rgba(192, 57, 43, 0.1); font-size: 0.8rem; }
+.limits-predict button { margin-top: 6px; }

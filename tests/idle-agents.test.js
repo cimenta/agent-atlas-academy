@@ -26,3 +26,16 @@ test("the player source maps the new states and the library note links to the la
   assert.match(view, /unreached: "player\.statusUnreached"/);
   assert.match(read("../public/js/play-pages.js"), /recording-note/);
 });
+
+test("an agent that was working when a limit stopped the run is stopped, with the reason", () => {
+  const events = [{ type: "run_start", task: "t", t: 0 }, { type: "agent_start", agent: "a", t: 1 }, { type: "done", outcome: "stopped_limit", reason: "steps", t: 2 }];
+  const state = deriveInspector(events);
+  assert.equal(state.agents.a.status, "stopped");
+  assert.equal(state.agents.a.stopReason, "steps");
+  assert.equal(deriveInspector(events, 2).agents.a.status, "working", "still working before the end of the replay");
+  const byUser = deriveInspector([{ type: "agent_start", agent: "a", t: 1 }, { type: "done", outcome: "stopped_user", t: 2 }]);
+  assert.equal(byUser.agents.a.stopReason, "user");
+  const failed = deriveInspector([{ type: "agent_start", agent: "a", t: 1 }, { type: "error", message: "x", t: 2 }, { type: "done", outcome: "failed", t: 3 }]);
+  assert.equal(failed.agents.a.status, "error");
+  for (const [lang, locale] of [["en", en], ["cs", cs]]) for (const k of ["player.statusStopped", "player.stopReason.limit", "player.stopReason.steps", "player.stopReason.tokens", "player.stopReason.user", "player.stopReason.agent_steps"]) assert.ok(locale[k], `${lang} ${k}`);
+});

@@ -63,6 +63,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
     if (wasOpenHere || !retryMenu) return;
     const list = h(doc, "div", { class: "retry-menu", role: "menu", "data-ui": "retry-menu", "data-for": id }, h(doc, "p", { class: "retry-menu-title" }, retryMenu.title));
     let lastProvider = null;
+    const extra = retryMenu.extra ? retryMenu.extra(id) : null;
     for (const choice of retryMenu.choicesOf(id)) {
       if (choice.provider !== lastProvider) {
         lastProvider = choice.provider;
@@ -71,13 +72,14 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       const item = h(doc, "button", { type: "button", role: "menuitem", class: `retry-menu-item${choice.current ? " current" : ""}`, "data-ui": "retry-choice", "data-model": choice.id }, h(doc, "span", {}, choice.id), h(doc, "small", {}, retryMenu.tagText(choice)));
       item.addEventListener("click", () => {
         closeMenu();
-        onRetry(id, choice.value);
+        onRetry(id, choice.value, { useCurrentLimits: extra ? extra.useCurrent() : true });
       });
       list.append(item);
     }
+    if (extra) list.append(h(doc, "hr", { class: "retry-menu-rule" }), extra.element);
     const rect = arrow.getBoundingClientRect?.();
     if (rect && list.style) {
-      const width = 250;
+      const width = 300;
       list.style.left = `${Math.max(8, Math.min(rect.right - width, (doc.defaultView?.innerWidth ?? 1024) - width - 8))}px`;
       list.style.top = `${rect.bottom + 4}px`;
     }
@@ -116,7 +118,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       const main = h(doc, "button", { type: "button", class: "rnode-retry", "data-ui": `diagram-retry-${node.id}` }, retryLabel);
       main.addEventListener("click", () => {
         closeMenu();
-        onRetry(node.id);
+        onRetry(node.id, undefined, { useCurrentLimits: true });
       });
       retry = h(doc, "span", { class: "rnode-retry-group", hidden: true }, main);
       if (retryMenu) {

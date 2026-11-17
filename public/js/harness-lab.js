@@ -6,7 +6,8 @@ import { REPEAT_STOP } from "./engine/catalog.js";
 
 const clip = (text, n) => (text.length > n ? `${text.slice(0, n - 1)}…` : text);
 
-export async function renderLab(ctx) {
+// params: { run, steps, tokens, repeat } from the address; a run of the visitor's own is added to the list and chosen, with the limits preset.
+export async function renderLab(ctx, params = {}) {
   const { doc, t } = ctx;
   setTitle(ctx, t("lab.title"));
   const root = h(doc, "div", { class: "lab", "data-ui": "harness-lab" });
@@ -25,12 +26,24 @@ export async function renderLab(ctx) {
   }
 
   const cache = new Map();
+  // A run of the visitor's own (kept in this browser), when the address names one.
+  let own = null;
+  if (params.run && !index.some((r) => r.id === params.run)) {
+    try {
+      own = (await ctx.runStore?.get(params.run)) ?? null;
+    } catch {
+      own = null;
+    }
+    if (ctx.isStale()) return;
+    if (own) cache.set(own.id, labSteps(own));
+  }
   const loadSteps = async (id) => {
     if (!cache.has(id)) cache.set(id, labSteps(await getJson(ctx, `/runs/${id}.json`)));
     return cache.get(id);
   };
 
   const runSelect = h(doc, "select", { id: "lab-run", "data-ui": "lab-run" });
+  if (own) runSelect.append(h(doc, "option", { value: own.id }, t("lab.yourRun", { title: clip(String(own.title ?? own.task ?? own.id).split(/\r?\n/)[0], 60) })));
   for (const r of index) runSelect.append(h(doc, "option", { value: r.id }, `${t(`pattern.${r.pattern}`)}: ${clip(r.title, 60)}`));
   const runInfo = h(doc, "p", { class: "hint", "data-ui": "lab-run-info" });
 
@@ -97,6 +110,12 @@ export async function renderLab(ctx) {
     repeatSelect.value = String(fromSettings && mine ? mine.repeatStop : REPEAT_STOP.default);
   }
 
+  // The limits of the address (kept inside the range of each slider) replace the ones Settings give, once.
+  let preset = params.steps !== undefined || params.tokens !== undefined || params.repeat !== undefined ? params : null;
+  const place = (slider, name, wanted) => {
+    const r = ranges[name];
+    slider.input.value = String(Math.min(r.max, Math.max(r.min, Math.round(wanted / r.step) * r.step)));
+  };
   async function choose(id) {
     steps = await loadSteps(id);
     if (ctx.isStale()) return;
@@ -104,6 +123,12 @@ export async function renderLab(ctx) {
     runInfo.textContent = t("lab.runInfo", { steps: totals.steps, tokens: totals.tokens.toLocaleString(ctx.lang), time: totals.sec });
     ranges = labRanges(steps);
     setRanges(true);
+    if (preset) {
+      if (preset.steps !== undefined) place(stepsSlider, "steps", preset.steps);
+      if (preset.tokens !== undefined) place(tokensSlider, "tokens", preset.tokens);
+      if ([0, 2, 3, 4].includes(preset.repeat)) repeatSelect.value = String(preset.repeat);
+      preset = null;
+    }
     draw();
   }
 
@@ -139,5 +164,7 @@ export async function renderLab(ctx) {
     h(doc, "p", { class: "hint" }, t("lab.goal")),
     h(doc, "p", {}, h(doc, "a", { href: "#/learn/harness" }, t("lab.back"))),
   );
+  if (own) runSelect.value = own.id;
+  else if (params.run && index.some((r) => r.id === params.run)) runSelect.value = params.run;
   await choose(runSelect.value);
 }

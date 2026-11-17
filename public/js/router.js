@@ -7,6 +7,9 @@ const HOME = { name: "home", params: {} };
 // A missing or non-string hash means "no route chosen yet", which opens the home page.
 export function parseRoute(hash) {
   if (typeof hash !== "string" || hash === "" || hash === "#" || hash === "#/") return HOME;
+  // The Harness lab may be opened with a run and limits: #/learn/lab?run=<id>&steps=5&tokens=20000&repeat=3
+  const lab = /^#\/learn\/lab(?:\?(.*))?$/.exec(hash);
+  if (lab) return { name: "lab", params: labParams(lab[1]) };
   const match = /^#\/([^/]+)(?:\/([^/]+))?(?:\/([^/]+))?$/.exec(hash);
   if (!match) return NOT_FOUND;
   const [, first, second, third] = match;
@@ -36,4 +39,18 @@ function parsePlay(second, third) {
   }
   if (second === "run" && third !== undefined && SLUG.test(third)) return { name: "play", params: { view: "run", id: third } };
   return NOT_FOUND;
+}
+
+// The run and the limits a link to the Harness lab carries; anything else in the query is ignored.
+function labParams(query) {
+  const params = {};
+  if (!query) return params;
+  const q = new URLSearchParams(query);
+  const run = q.get("run");
+  if (run && /^[A-Za-z0-9_-]{1,80}$/.test(run)) params.run = run;
+  for (const key of ["steps", "tokens", "repeat"]) {
+    const n = Number(q.get(key));
+    if (q.get(key) !== null && Number.isInteger(n) && n >= 0) params[key] = n;
+  }
+  return params;
 }

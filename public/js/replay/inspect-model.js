@@ -69,7 +69,7 @@ export function deriveInspector(events, cursor = events.length) {
   const agents = {};
   const order = agentIds(events);
   for (const id of order) agents[id] = emptyAgent(id);
-  const state = { task: "", order, agents, warnings: [], warningTimes: [], warningHelps: [], error: null, finished: false, outcome: null, tokens: { input: 0, output: 0 } };
+  const state = { task: "", order, agents, warnings: [], warningTimes: [], warningHelps: [], error: null, finished: false, outcome: null, reason: null, tokens: { input: 0, output: 0 } };
 
   applied.forEach((event, index) => {
     const agent = typeof event.agent === "string" ? agents[event.agent] : null;
@@ -187,6 +187,15 @@ export function deriveInspector(events, cursor = events.length) {
       case "done":
         state.finished = true;
         state.outcome = typeof event.outcome === "string" ? event.outcome : null;
+        state.reason = typeof event.reason === "string" ? event.reason : null;
+        // An agent that was working when a limit or you stopped the run is stopped, not still working.
+        if (state.outcome === "stopped_limit" || state.outcome === "stopped_user") {
+          for (const a of Object.values(agents)) {
+            if (a.status !== "working") continue;
+            a.status = "stopped";
+            a.stopReason = state.outcome === "stopped_user" ? "user" : (state.reason ?? "limit");
+          }
+        }
         break;
       case "error":
         state.error = typeof event.message === "string" ? event.message : "error";

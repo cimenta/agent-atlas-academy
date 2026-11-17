@@ -6,6 +6,8 @@ import { keyState } from "../key-state.js";
 import { downloadFile } from "../download.js";
 import { outcomeNotice } from "../outcome-view.js";
 import { withRetryChoice } from "../replay/retry-choice.js";
+import { limitsChoice } from "../replay/limits-choice.js";
+import { withCurrentLimits } from "../replay/limits-compare.js";
 import { showCenterTip } from "../center-tip.js";
 import { refreshResultTab } from "../tab-state.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "../key-slots.js";
@@ -114,7 +116,9 @@ export function renderCreate(ctx) {
     for (const n of design.nodes) if (isSlot(n.slot) && !slots.includes(n.slot)) slots.push(n.slot);
     return slots.length > 0 ? slots : [chosenSlots()[0]];
   };
-  if (draft.limits === null) draft.limits = { ...ctx.settings.get().limits };
+  // Retry carries on with the limits of Settings when the box is checked, else with the limits the run had.
+  const withLimitChoice = (record, useCurrent) => (useCurrent ? withCurrentLimits(record, ctx.settings.get().limits) : record);
+  if (draft.limits === null || !draft.limitsEdited) draft.limits = { ...ctx.settings.get().limits };
   const root = ctx.main;
   let activeRun = null;
   ctx.onLeave(() => activeRun?.stop());
@@ -255,6 +259,7 @@ export function renderCreate(ctx) {
         const input = h(doc, "input", { id: `cr-${key}`, type: "number", min: key === "maxSearches" ? 0 : 1, max: LIMIT_MAX[key], step: 1, value: limits[key] });
         input.addEventListener("change", () => {
           draft.limits = clampLimits({ ...draft.limits, [key]: Number(input.value) });
+          draft.limitsEdited = true;
           drawReview();
         });
         return h(doc, "div", { class: "field" }, h(doc, "label", { for: `cr-${key}` }, t(labelKey)), input);
@@ -362,8 +367,9 @@ export function renderCreate(ctx) {
 
     // A failed run waits for its key: this button carries it on from the agent that failed.
     const carryOnButton = h(doc, "button", { type: "button", class: "primary", "data-ui": "carry-on" }, t("create.carryOn"));
+    const carryLimits = draft.retry && draft.approve !== true ? limitsChoice({ doc, t, current: ctx.settings.get().limits, original: draft.retry.limits, record: draft.retry, repeatStop: ctx.settings.get().repeatStop, initial: draft.retryUseCurrent, onChange: (v) => (draft.retryUseCurrent = v) }) : null;
     carryOnButton.addEventListener("click", () => {
-      const run = draft.retry;
+      const run = draft.retry ? (draft.approve === true ? draft.retry : withLimitChoice(draft.retry, draft.retryUseCurrent)) : null;
       if (!run) return;
       if (!keysForRun(run).ready) {
         showForm(t("create.retryNeedsKey"));
@@ -416,6 +422,7 @@ export function renderCreate(ctx) {
     root.replaceChildren(
       h(doc, "div", { class: "create-head" }, h(doc, "h2", {}, t("create.title")), loadButton, clearButton, definitionFile),
       startNotice ? h(doc, "p", { class: "notice", role: noticeRole }, startNotice) : "",
+      carryLimits ? carryLimits.element : "",
       draft.retry ? carryOnButton : "",
       h(doc, "div", { class: "field wide" }, h(doc, "label", { for: "cr-task" }, t("create.taskLabel"), help("create-task", t("create.taskLabel"))), taskInput, counter),
       h(doc, "h3", {}, t("create.patternHeading"), help("create-pattern", t("create.patternHeading"))),
@@ -521,9 +528,10 @@ export function renderCreate(ctx) {
     let ended = false;
     let finalRecordNow = null;
     // A failed agent offers Retry once the run is over: the run carries on from it.
-    const retryNow = (agentId, choice) => {
+    const retryNow = (agentId, choice, options = {}) => {
       if (!ended || finalRecordNow === null) return;
-      const record2 = choice ? withRetryChoice(finalRecordNow, agentId, choice) : finalRecordNow;
+      const chosen = choice ? withRetryChoice(finalRecordNow, agentId, choice) : finalRecordNow;
+      const record2 = withLimitChoice(chosen, options.useCurrentLimits !== false);
       if (!keysForRun(record2).ready) {
         outcomeSlot.append(h(doc, "p", { class: "notice", role: "alert" }, t("create.retryNeedsKeyLive")));
         importantTip(t("create.retryNeedsKeyLive"));
@@ -532,7 +540,7 @@ export function renderCreate(ctx) {
       live.destroy();
       beginRun({ resume: record2 });
     };
-    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: resume ? resume.pattern : draft.pattern, recordedWith: { provider: providersOf(design, provider).join("+"), model: modelsUsed(design, provider) }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout, providerColors: ctx.settings.get().providerColors, onRetry: retryNow, suggestFallback: ctx.settings.get().fallback !== "off" });
+    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: resume ? resume.pattern : draft.pattern, recordedWith: { provider: providersOf(design, provider).join("+"), model: modelsUsed(design, provider) }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout, providerColors: ctx.settings.get().providerColors, onRetry: retryNow, suggestFallback: ctx.settings.get().fallback !== "off", limitsInfo: () => ({ current: ctx.settings.get().limits, original: finalRecordNow?.limits ?? ctx.settings.get().limits, record: finalRecordNow, repeatStop: ctx.settings.get().repeatStop }) });
     ctx.onLeave(live.destroy);
     for (const e of base) live.append(e);
     if (resume && !approve) live.append(events[base.length]);
@@ -648,12 +656,15 @@ export function renderCreate(ctx) {
   ctx.onLeave(() => {
     draft.retry = null;
     draft.approve = false;
+    draft.retryUseCurrent = true;
   });
   if (pending) {
     if (keysForRun(pending).ready) {
+      const useCurrent = draft.retryUseCurrent;
       draft.retry = null;
       draft.approve = false;
-      beginRun({ resume: pending, approve: pendingApprove });
+      draft.retryUseCurrent = true;
+      beginRun({ resume: pendingApprove ? pending : withLimitChoice(pending, useCurrent), approve: pendingApprove });
     } else {
       // The key is missing (not entered, or locked): show the form with the key fields of the run, and a button that carries on once the key is in.
       const definition = definitionFromRun(pending);

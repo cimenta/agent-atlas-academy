@@ -291,12 +291,13 @@ export async function renderReplayTab(ctx, requestedId) {
       // A run of the visitor's own that failed can be carried on from the agent that failed.
       const onRetry =
         found.source === "local" && found.run.outcome === "failed"
-          ? (agentId, choice) => {
+          ? (agentId, choice, options = {}) => {
               draft.retry = choice ? withRetryChoice(found.run, agentId, choice) : found.run;
+              draft.retryUseCurrent = options.useCurrentLimits !== false;
               doc.defaultView.location.hash = "#/play/create";
             }
           : null;
-      handle = mountReplay(host, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors, onRetry, suggestFallback: ctx.settings?.get().fallback !== "off" });
+      handle = mountReplay(host, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors, onRetry, suggestFallback: ctx.settings?.get().fallback !== "off", limitsInfo: () => ({ current: ctx.settings.get().limits, original: found.run.limits, record: found.run, repeatStop: ctx.settings.get().repeatStop }) });
       // A run that waits for approval shows what the next agent will receive, with Approve and Stop here.
       if (found.source === "local" && found.run.outcome === "waiting_approval") {
         const panel = approvalPanel({
