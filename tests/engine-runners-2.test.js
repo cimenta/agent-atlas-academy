@@ -97,7 +97,9 @@ test("finishing without calling any worker is valid", async () => {
 });
 
 test("a supervisor that never finishes stops at the step limit", async () => {
-  const call = async (body) => (/^Role: supervisor/.test(body.system) ? text(callJson("researcher")) : text("more facts"));
+  // Every answer is different, so the repeated-answer stop does not end the run first.
+  let turn = 0;
+  const call = async (body) => (/^Role: supervisor/.test(body.system) ? text(callJson("researcher").replace("}", `, "n": ${turn++}}`)) : text(`more facts ${turn++}`));
   const { result } = await run(supervisorDesign(), call, { ...LIMIT_DEFAULTS, maxSteps: 6 });
   assert.equal(result.outcome, "stopped_limit");
   assert.equal(result.reason, "steps");

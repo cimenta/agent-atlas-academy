@@ -1,6 +1,6 @@
 // The settings page: API key handling, the harness (limits and fixed rules) and local data.
 import { h } from "./dom.js";
-import { LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, RETRIES, RETRY_DELAY_SEC, COST_CAP_USD, PROFILES, matchProfile, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
+import { LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, RETRIES, RETRY_DELAY_SEC, COST_CAP_USD, REPEAT_STOP, HANDOFF_CHARS, PROFILES, matchProfile, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
 import { COLOR_CHOICES, paintModelTag } from "./provider-colors.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "./key-slots.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
@@ -278,6 +278,8 @@ export function renderSettings(ctx) {
   ];
   const money = (n) => `$${n.toLocaleString(ctx.lang === "cs" ? "cs-CZ" : "en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   harnessSpecs.push({ id: "cost", min: 0, max: COST_CAP_USD.max, step: COST_CAP_USD.step, value: harnessNow.limits.maxCostUsd ?? 0, def: 0, show: (n) => (n > 0 ? money(n) : t("harness.costOff")) });
+  harnessSpecs.push({ id: "repeat", min: 1, max: REPEAT_STOP.max, step: 1, value: harnessNow.repeatStop || 1, def: REPEAT_STOP.default, show: (n) => (n < REPEAT_STOP.min ? t("harness.costOff") : t("harness.repeatTimes", { n })) });
+  harnessSpecs.push({ id: "handoff", min: 0, max: HANDOFF_CHARS.max, step: HANDOFF_CHARS.step, value: harnessNow.handoffChars, def: HANDOFF_CHARS.default, show: (n) => (n > 0 ? harnessFormat(n) : t("harness.costOff")) });
   const PROFILE_ROWS = Object.keys(PROFILES.balanced);
   const harnessRows = harnessSpecs.map((spec) => {
     const slider = h(doc, "input", { id: `set-harness-${spec.id}`, type: "range", min: spec.min, max: spec.max, step: spec.step, value: spec.value, "data-ui": `harness-${spec.id}` });
@@ -319,6 +321,8 @@ export function renderSettings(ctx) {
     settings.setMaxOutputTokens(value("output"));
     settings.setRequestTimeout(value("timeout"));
     settings.setRetries(value("retries"), value("retryDelay"));
+    settings.setRepeatStop(value("repeat"));
+    settings.setHandoffChars(value("handoff"));
     const saved = settings.get();
     harnessRow("steps").set(saved.limits.maxSteps);
     harnessRow("tokens").set(saved.limits.maxTokens);
@@ -326,6 +330,8 @@ export function renderSettings(ctx) {
     harnessRow("output").set(saved.maxOutputTokens);
     harnessRow("timeout").set(saved.requestTimeoutSec);
     harnessRow("cost").set(saved.limits.maxCostUsd ?? 0);
+    harnessRow("repeat").set(saved.repeatStop || 1);
+    harnessRow("handoff").set(saved.handoffChars);
     harnessRow("retries").set(saved.retries);
     harnessRow("retryDelay").set(saved.retryDelaySec);
     say(t("harness.saved"));
@@ -346,6 +352,16 @@ export function renderSettings(ctx) {
     chip.addEventListener("click", () => harnessRow("cost").set(usd));
     return chip;
   });
+  const repeatQuick = [1, 2, 3, 4].map((n) => {
+    const chip = h(doc, "button", { type: "button", "data-ui": `repeat-${n}` }, n === 1 ? t("harness.costOff") : String(n));
+    chip.addEventListener("click", () => harnessRow("repeat").set(n));
+    return chip;
+  });
+  const handoffQuick = [0, 4000, 8000, 16000].map((n) => {
+    const chip = h(doc, "button", { type: "button", "data-ui": `handoff-${n}` }, n === 0 ? t("harness.costOff") : harnessFormat(n));
+    chip.addEventListener("click", () => harnessRow("handoff").set(n));
+    return chip;
+  });
   const harnessAdjustable = h(
     doc,
     "div",
@@ -356,7 +372,7 @@ export function renderSettings(ctx) {
     h(doc, "p", { class: "hint" }, t("harness.profileIntro")),
     h(doc, "div", { class: "profile-choices", "data-ui": "harness-profiles" }, ...profileButtons.map(([, b]) => b)),
     h(doc, "h4", {}, t("harness.limitsHeading")),
-    ...harnessRows.filter((r) => !["retries", "retryDelay", "cost"].includes(r.spec.id)).map((r) => r.node),
+    ...harnessRows.filter((r) => !["retries", "retryDelay", "cost", "repeat", "handoff"].includes(r.spec.id)).map((r) => r.node),
     h(doc, "h4", {}, t("harness.retriesHeading")),
     h(doc, "p", { class: "hint" }, t("harness.retriesIntro")),
     ...harnessRows.filter((r) => ["retries", "retryDelay"].includes(r.spec.id)).map((r) => r.node),
@@ -366,6 +382,16 @@ export function renderSettings(ctx) {
     harnessRow("cost").node,
     h(doc, "div", { class: "harness-actions", "data-ui": "cost-quick" }, ...costQuick),
     h(doc, "p", { class: "hint" }, t("harness.costNote")),
+    h(doc, "h4", {}, t("harness.repeatHeading")),
+    h(doc, "p", { class: "hint" }, t("harness.repeatIntro")),
+    harnessRow("repeat").node,
+    h(doc, "div", { class: "harness-actions", "data-ui": "repeat-quick" }, ...repeatQuick),
+    h(doc, "p", { class: "hint" }, t("harness.repeatNote")),
+    h(doc, "h4", {}, t("harness.handoffHeading")),
+    h(doc, "p", { class: "hint" }, t("harness.handoffIntro")),
+    harnessRow("handoff").node,
+    h(doc, "div", { class: "harness-actions", "data-ui": "handoff-quick" }, ...handoffQuick),
+    h(doc, "p", { class: "hint" }, t("harness.handoffNote")),
     h(doc, "div", { class: "harness-actions" }, ...harnessQuick, h(doc, "span", { class: "harness-spacer" }), harnessReset, harnessSave),
   );
   const harnessFixed = h(

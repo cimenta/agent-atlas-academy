@@ -3,12 +3,12 @@ import { orderOf } from "../patterns.js";
 
 const NOTE_MAX = 2000;
 
-export async function run({ design, task, agents, emit }) {
+export async function run({ design, task, agents, emit, passOn = (text) => text }) {
   let previous = null;
   for (const id of orderOf(design)) {
     if (previous) emit({ type: "handoff", from: previous.id, to: id, note: previous.text.slice(0, NOTE_MAX) });
     const input = previous
-      ? `Task: ${task}\n\nThe previous agent (${previous.id}) wrote:\n${previous.text}`
+      ? `Task: ${task}\n\nThe previous agent (${previous.id}) wrote:\n${passOn(previous.text, previous.id)}`
       : `Task: ${task}`;
     const result = await agents.get(id).run(input);
     // A critic can add its notes to what the agent before it wrote, so the next agent gets both.

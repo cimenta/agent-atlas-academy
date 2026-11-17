@@ -4,7 +4,7 @@ import { parallelParts } from "../patterns.js";
 
 const NOTE_MAX = 2000;
 
-export async function run({ design, task, agents, emit }) {
+export async function run({ design, task, agents, emit, passOn = (text) => text }) {
   const { hub: combiner, workers, followers } = parallelParts(design.nodes, design.edges);
   const results = await Promise.all(
     workers.map(async (worker) => {
@@ -15,7 +15,7 @@ export async function run({ design, task, agents, emit }) {
   for (const result of results) {
     emit({ type: "handoff", from: result.id, to: combiner.id, note: result.text.slice(0, NOTE_MAX) });
   }
-  const input = `Task: ${task}\n\nResults from the agents:\n${results.map((r) => `--- ${r.id} ---\n${r.text}`).join("\n\n")}`;
+  const input = `Task: ${task}\n\nResults from the agents:\n${results.map((r) => `--- ${r.id} ---\n${passOn(r.text, r.id)}`).join("\n\n")}`;
   const merged = await agents.get(combiner.id).run(input);
   let previous = { id: combiner.id, text: merged.text };
   for (const id of followers) {
@@ -23,8 +23,8 @@ export async function run({ design, task, agents, emit }) {
     // Every agent in the line sees the combined answer, so a critic's notes do not replace it for the next agent.
     const seen =
       previous.id === combiner.id
-        ? `The combined answer:\n${previous.text}`
-        : `The combined answer:\n${merged.text}\n\nThe previous agent (${previous.id}) wrote:\n${previous.text}`;
+        ? `The combined answer:\n${passOn(previous.text, previous.id)}`
+        : `The combined answer:\n${passOn(merged.text, combiner.id)}\n\nThe previous agent (${previous.id}) wrote:\n${passOn(previous.text, previous.id)}`;
     const result = await agents.get(id).run(`Task: ${task}\n\n${seen}`);
     // A critic can add its notes to what the agent before it wrote, so the next agent gets both.
     const adds = design.nodes.find((n) => n.id === id)?.addToPrevious === true;

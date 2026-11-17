@@ -131,3 +131,20 @@ export const clampCostCap = (value) => {
   if (!Number.isFinite(n) || n <= 0) return COST_CAP_USD.default;
   return Math.min(COST_CAP_USD.max, Math.max(COST_CAP_USD.min, Math.round(n * 100) / 100));
 };
+
+// Loop detection: a run stops when one agent gives the same answer this many times in a row. 0 means off.
+export const REPEAT_STOP = { min: 2, max: 4, default: 3 };
+export const clampRepeatStop = (value) => {
+  if (value === undefined || value === null || value === "") return REPEAT_STOP.default;
+  const n = Math.round(Number(value));
+  if (!Number.isFinite(n)) return REPEAT_STOP.default;
+  return n < REPEAT_STOP.min ? 0 : Math.min(REPEAT_STOP.max, n);
+};
+
+// The most characters one agent passes on to the next. 0 means no cut.
+export const HANDOFF_CHARS = { min: 2000, max: 20000, step: 2000, default: 0 };
+export const clampHandoffChars = (value) => {
+  const n = Math.round(Number(value));
+  if (!Number.isFinite(n) || n <= 0) return HANDOFF_CHARS.default;
+  return Math.min(HANDOFF_CHARS.max, Math.max(HANDOFF_CHARS.min, n));
+};

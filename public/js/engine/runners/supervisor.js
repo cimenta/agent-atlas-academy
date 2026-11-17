@@ -35,7 +35,7 @@ export function parseSupervisorReply(text) {
   return null;
 }
 
-export async function run({ design, task, agents, emit }) {
+export async function run({ design, task, agents, emit, passOn = (text) => text }) {
   const supervisor = design.nodes.find((n) => n.agent === "supervisor");
   const workerIds = design.nodes.filter((n) => n.agent !== "supervisor").map((n) => n.id);
   const boss = agents.get(supervisor.id);
@@ -63,6 +63,6 @@ export async function run({ design, task, agents, emit }) {
         return { worker: call.worker, text: result.text };
       }),
     );
-    input = results.map((r) => `Result from ${r.worker}:\n${r.text}`).join("\n\n");
+    input = results.map((r) => `Result from ${r.worker}:\n${passOn(r.text, r.worker)}`).join("\n\n");
   }
 }

@@ -572,6 +572,8 @@ export function renderCreate(ctx) {
       retries: ctx.settings.get().retries,
       retryDelaySec: ctx.settings.get().retryDelaySec,
       freeTier,
+      repeatStop: ctx.settings.get().repeatStop,
+      handoffChars: ctx.settings.get().handoffChars,
       language: ctx.lang,
       apiKey,
       keys,

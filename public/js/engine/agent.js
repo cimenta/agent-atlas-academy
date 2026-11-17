@@ -1,5 +1,5 @@
 // One agent in a run: keeps its own conversation, calls the model, reports events.
-import { nodeModel, AGENT_TYPES, OUTPUT_TOKENS, RETRIES, RETRY_DELAY_SEC, MAX_PAUSES, clampOutputTokens, clampRetries, clampRetryDelaySec } from "./catalog.js";
+import { nodeModel, AGENT_TYPES, OUTPUT_TOKENS, RETRIES, RETRY_DELAY_SEC, REPEAT_STOP, MAX_PAUSES, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop } from "./catalog.js";
 import { systemPromptFor } from "./prompts.js";
 import { toolsFor } from "./tools.js";
 import { AnthropicError, redact } from "./anthropic.js";
@@ -21,7 +21,7 @@ function searchOutput(content) {
 // A copy is taken so later changes to the conversation cannot reach an event already sent.
 const copy = (value) => structuredClone(value);
 
-export function createAgent({ node, design = null, call, emit, budget: runBudget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default, retries = RETRIES.default, retryDelaySec = RETRY_DELAY_SEC.default, freeTier = false }) {
+export function createAgent({ node, design = null, call, emit, budget: runBudget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default, retries = RETRIES.default, retryDelaySec = RETRY_DELAY_SEC.default, freeTier = false, repeatStop = REPEAT_STOP.default }) {
   const retryLimit = clampRetries(retries);
   const retryDelayMs = clampRetryDelaySec(retryDelaySec) * 1000;
   // The agent counts against its own limits too (node.limits); the limits of the run still apply.
@@ -35,6 +35,17 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
   const label = agentLabel(node, design, AGENT_TYPES[node.agent]?.label ?? node.agent);
   const limitValue = { agent_steps: node.limits?.maxSteps, agent_tokens: node.limits?.maxTokens, agent_searches: node.limits?.maxSearches };
   const stopRun = (reason) => new LimitError(`agent_${reason}`, { agent: node.id, label, value: limitValue[`agent_${reason}`] });
+  const repeatLimit = clampRepeatStop(repeatStop);
+  const same = (text) => String(text ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+  let lastSame = null;
+  let sameInARow = 0;
+  // After an answer: the run stops when this agent has given the same answer repeatLimit times in a row.
+  const checkRepeat = (text) => {
+    const now = same(text);
+    sameInARow = now !== "" && now === lastSame ? sameInARow + 1 : 1;
+    lastSame = now;
+    if (repeatLimit > 0 && now !== "" && sameInARow >= repeatLimit) throw new LimitError("repeat", { agent: node.id, label, value: sameInARow });
+  };
   const costOf = (usage) => usageCostUsd(usage, node, { provider, freeTier });
   const messages = [];
   let lastRequest = null;
@@ -179,6 +190,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
       }
       const text = texts.filter(Boolean).join("\n").trim();
       emit({ type: "agent_output", agent: node.id, text, tokens: { input: total.input, output: total.output } });
+      checkRepeat(text);
       return { text, usage: total };
     },
   };
