@@ -396,9 +396,14 @@ export function renderSettings(ctx) {
     h(doc, "p", { class: "hint" }, t("harness.retriesIntro")),
     ...rowsOf("retries", "retryDelay"),
     h(doc, "p", { class: "hint" }, t("harness.retriesNote")),
+
+  );
+  const harnessFallback = page(
+    "fallback",
     h(doc, "h4", {}, t("harness.fallbackHeading"), help("harness-fallback", t("harness.fallbackHeading"))),
     h(doc, "p", { class: "hint" }, t("harness.fallbackIntro")),
     fallbackOptions,
+    h(doc, "p", { class: "hint" }, t("harness.fallbackNote")),
   );
   const harnessCost = page(
     "cost",
@@ -448,6 +453,7 @@ export function renderSettings(ctx) {
   const harnessSubs = [
     ["limits", "harness.tabLimits", harnessLimits],
     ["retries", "harness.tabRetries", harnessRetries],
+    ["fallback", "harness.tabFallback", harnessFallback],
     ["cost", "harness.tabCost", harnessCost],
     ["guards", "harness.tabGuards", harnessGuards],
     ["tools", "harness.tabTools", harnessTools],
@@ -690,7 +696,7 @@ export function renderSettings(ctx) {
       providerTabs,
       providerPanel,
     ),
-    h(doc, "section", { class: "settings-section", "data-ui": "harness-section" }, h(doc, "h2", {}, t("harness.title")), h(doc, "p", {}, t("harness.intro")), harnessSubTabs, harnessLimits, harnessRetries, harnessCost, harnessGuards, harnessTools, harnessBar, harnessFixed),
+    h(doc, "section", { class: "settings-section", "data-ui": "harness-section" }, h(doc, "h2", {}, t("harness.title")), h(doc, "p", {}, t("harness.intro")), harnessSubTabs, harnessLimits, harnessRetries, harnessFallback, harnessCost, harnessGuards, harnessTools, harnessBar, harnessFixed),
     h(
       doc,
       "section",
