@@ -1,6 +1,7 @@
 // The diagram editor on screen: palette, diagram with arrows, settings for one agent, and the
 // list of rules the design still breaks. All rules live in editor-model.js; this file only draws.
 import { h } from "../dom.js";
+import { helpIcon } from "../help-popup.js";
 import { agentLabel } from "../engine/labels.js";
 import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, OUTPUT_TOKENS } from "../engine/catalog.js";
 import { AGENT_LIMIT_KEYS, agentLimitRange } from "../engine/agent-limits.js";
@@ -11,7 +12,7 @@ import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, ext
 const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, getModels = (node) => MODELS, modelUi = null, runLimits = () => ({ ...LIMIT_DEFAULTS, maxOutputTokens: OUTPUT_TOKENS.default }) }) {
+export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, getModels = (node) => MODELS, modelUi = null, webSearchAllowed = () => true, runLimits = () => ({ ...LIMIT_DEFAULTS, maxOutputTokens: OUTPUT_TOKENS.default }) }) {
   let selectedId = null;
   let limitsOpen = false; // the Limits of this agent block stays open while the visitor works on it
   let connectFrom = null;
@@ -518,8 +519,12 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     });
     const parts = [h(doc, "h4", {}, t("editor.settings", { name: nodeLabel(node) })), field("ed-model", t("editor.model"), model)];
     const searchRow = h(doc, "div", { class: "field checkbox" }, search, h(doc, "label", { for: "ed-search" }, t("editor.search")));
+    // Tools: an agent gets only the tools it needs.
+    parts.push(h(doc, "h4", { class: "editor-tools-heading" }, t("editor.toolsHeading"), helpIcon({ doc, t, id: "create-tools", name: t("editor.toolsHeading") })));
     parts.push(searchRow);
     if (TOOLS.web_search?.extraFee) parts.push(h(doc, "p", { class: "notice" }, t("editor.searchFee")));
+    parts.push(h(doc, "p", { class: "hint" }, t("editor.toolsNote")));
+    if (node.search === true && !webSearchAllowed()) parts.push(h(doc, "p", { class: "limit-warning", "data-ui": "search-off-warning" }, t("editor.searchOffInSettings")));
     parts.push(limitsBlock(node));
     if (type.free) {
       const name = h(doc, "input", { id: "ed-name", type: "text", maxlength: 40, value: node.name ?? "" });

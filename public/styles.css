@@ -1000,3 +1000,9 @@ a.art-pill:hover { text-decoration: underline; }
 .help-icon { margin-left: 8px; vertical-align: middle; }
 .tabs .help-icon, .stat .help-icon { margin-left: 6px; }
 .stat .help-icon { width: 18px; min-width: 18px; height: 18px; min-height: 0; font-size: 11px; }
+
+/* Web content is data: a label on search results, a fixed switch in Settings, and a heading for the tools of an agent. */
+.tag-untrusted { display: inline-block; font-size: 0.75rem; padding: 1px 8px; border-radius: 999px; border: 1px dashed var(--warn-line, #d9b36a); background: var(--warn-bg, #fbf1dc); color: var(--warn-text, #6b4a0a); }
+.untrusted { margin: 0 0 6px; }
+.tag-always { margin-left: 8px; font-size: 0.75rem; padding: 1px 8px; border-radius: 999px; background: var(--accent-bg); color: var(--accent); }
+.editor-tools-heading { margin-top: 12px; }

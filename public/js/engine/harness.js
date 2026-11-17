@@ -14,6 +14,7 @@ export function fixedRules() {
     { id: "request", params: { a: REQUEST_MAX_BYTES / 1024, b: RESUME_MAX_BYTES / 1024 } },
     { id: "pauses", params: { n: MAX_PAUSES } },
     { id: "rate", params: { n: DEFAULT_RUNS_PER_HOUR } },
+    { id: "webdata", params: {} },
     { id: "keys", params: {} },
   ];
 }

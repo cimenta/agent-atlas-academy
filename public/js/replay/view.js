@@ -393,7 +393,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     if (b.type === "web_search_tool_result") return Array.isArray(b.content) ? b.content.map((r) => `${r.title} – ${r.url}`).join("\n") : JSON.stringify(b.content);
     return JSON.stringify(b);
   };
-  const blockEl = (b) => h(doc, "div", { class: "bl" }, h(doc, "span", { class: "bt" }, b.type), blockText(b));
+  const blockEl = (b) => h(doc, "div", { class: "bl" }, h(doc, "span", { class: "bt" }, b.type), b.type === "web_search_tool_result" ? h(doc, "span", { class: "tag-untrusted" }, t("insp.untrusted")) : "", blockText(b));
   const messageEl = (m, isNew, tag) => {
     const blocks = typeof m.content === "string" ? [{ type: "text", text: m.content }] : m.content;
     return h(

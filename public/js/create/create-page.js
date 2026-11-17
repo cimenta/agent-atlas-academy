@@ -438,7 +438,7 @@ export function renderCreate(ctx) {
         draft.editor.setNodeModel(id, choice);
       },
     };
-    editorHandle = mountEditor(editorHost, { editor: draft.editor, t, doc, onChange: drawReview, modelUi, runLimits: () => ({ ...clampLimits(draft.limits), maxOutputTokens: ctx.settings.get().maxOutputTokens }) });
+    editorHandle = mountEditor(editorHost, { editor: draft.editor, t, doc, onChange: drawReview, webSearchAllowed: () => ctx.settings.get().webSearch, modelUi, runLimits: () => ({ ...clampLimits(draft.limits), maxOutputTokens: ctx.settings.get().maxOutputTokens }) });
     ctx.onLeave(() => editorHandle.destroy());
     drawPatterns();
     drawReview();
@@ -577,6 +577,7 @@ export function renderCreate(ctx) {
       freeTier,
       repeatStop: ctx.settings.get().repeatStop,
       handoffChars: ctx.settings.get().handoffChars,
+      webSearch: ctx.settings.get().webSearch,
       language: ctx.lang,
       apiKey,
       keys,

@@ -18,4 +18,6 @@ The cause is simple: to a language model, instructions and data are both just te
 - Require human approval for risky actions.
 - Do not let untrusted text flow into the instructions of other agents.
 
+In Agent Atlas, an agent that can search the web is told that text from the web is data, not instructions, and the replay marks search results as untrusted web content. A model can still be fooled, so this is a reminder and not a wall. You can also forbid web search for all your runs in Settings, Harness, Tools.
+
 No single measure is enough. A **recorded** demonstration of prompt injection, using a harmless page, is coming to the library. Agent Atlas will never attack anything live.

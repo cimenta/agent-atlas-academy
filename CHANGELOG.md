@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Settings, Harness, Tools: a master switch for web search in your runs (on by default; a run with it off says so in the replay). In Create the search switch of an agent is now under Tools, with a ? button and a notice when search is off in Settings. Agents that can search are told that text from the web is data, not instructions; this is a fixed rule listed on the Fixed harness page, and the replay marks search results as untrusted web content.
+
 - Play: a ? button at the replay speed, at the Steps, Messages and Output tabs, at each warning of a replay (it opens the Harness section of the setting that caused it), and at How it ended, Estimated cost, Tokens per agent and Limits on the Result page. Warnings for a retry and for a cut answer now say so in the run record. The ? buttons can still be hidden in Settings, General.
 
 - Settings and Create: a ? button next to every Settings section and every Create step, with the text taken from Help. A new Settings tab, General, holds the Tooltips option (moved from its own tab) and Hide the ? help buttons, which hides every ? on the site.

@@ -94,7 +94,7 @@ test("the limit message names the limit and its value", () => {
 test("the fixed rules read the real constants", () => {
   assert.equal(NODE_MAX, 8);
   const rules = Object.fromEntries(fixedRules().map((r) => [r.id, r.params]));
-  assert.deepEqual(Object.keys(rules), ["time", "agents", "task", "request", "pauses", "rate", "keys"]);
+  assert.deepEqual(Object.keys(rules), ["time", "agents", "task", "request", "pauses", "rate", "webdata", "keys"]);
   assert.equal(rules.time.n, TIME_LIMIT_MS / 1000);
   assert.equal(rules.agents.n, NODE_MAX);
   assert.equal(rules.task.n, TASK_MAX_CHARS);

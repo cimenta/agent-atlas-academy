@@ -25,7 +25,7 @@ export const RUNNERS = {
 // resume: the answers of agents that already finished in an earlier try of this run, in order ({ agent, text, tokens }).
 // An agent's first activations are answered from them without calling the provider, so the run goes through the
 // same steps and carries on live where it failed. No run_start event is sent then: the caller already has it.
-export async function runDesign({ design, task, limits, language = "en", call, callFor, emit, signal, now = Date.now, provider = "anthropic", resume = [], maxOutputTokens, retries, retryDelaySec, freeTier = false, repeatStop, handoffChars = 0 }) {
+export async function runDesign({ design, task, limits, language = "en", call, callFor, emit, signal, now = Date.now, provider = "anthropic", resume = [], maxOutputTokens, retries, retryDelaySec, freeTier = false, repeatStop, handoffChars = 0, allowSearch = true }) {
   const startedAt = now();
   const send = (event) => emit({ ...event, t: now() - startedAt });
 
@@ -37,7 +37,12 @@ export async function runDesign({ design, task, limits, language = "en", call, c
     return { outcome: "failed", finalText: "", usage };
   }
 
-  const budget = createBudget(limits, { now });
+  // The visitor can forbid web search for the whole run: the budget then has no searches, so no agent is given the tool.
+  const searchOff = allowSearch === false;
+  const budget = createBudget(searchOff ? { ...limits, maxSearches: 0 } : limits, { now });
+  if (searchOff && design.nodes.some((node) => node.search === true)) {
+    send({ type: "warning", webSearchOff: true, message: "Web search is turned off in Settings, Harness, Tools. No agent searched." });
+  }
   const control = new AbortController();
   const onAbort = () => control.abort();
   if (signal?.aborted) control.abort();

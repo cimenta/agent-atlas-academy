@@ -328,6 +328,7 @@ export function renderSettings(ctx) {
     settings.setRetries(value("retries"), value("retryDelay"));
     settings.setRepeatStop(value("repeat"));
     settings.setHandoffChars(value("handoff"));
+    settings.setWebSearch(webBox.checked);
     const saved = settings.get();
     harnessRow("steps").set(saved.limits.maxSteps);
     harnessRow("tokens").set(saved.limits.maxTokens);
@@ -344,6 +345,7 @@ export function renderSettings(ctx) {
   const harnessReset = h(doc, "button", { type: "button", "data-ui": "harness-reset" }, t("harness.reset"));
   harnessReset.addEventListener("click", () => {
     harnessRows.forEach((row) => row.set(row.spec.def));
+    webBox.checked = true;
     say(t("harness.resetDone"));
   });
   // Three quick choices for how long a request waits for an answer.
@@ -406,6 +408,20 @@ export function renderSettings(ctx) {
     h(doc, "div", { class: "harness-actions", "data-ui": "handoff-quick" }, ...handoffQuick),
     h(doc, "p", { class: "hint" }, t("harness.handoffNote")),
   );
+  // Tools: the master switch for web search, and the rule about web content that cannot be changed.
+  const webBox = h(doc, "input", { id: "set-web-search", type: "checkbox", "data-ui": "set-web-search" });
+  webBox.checked = harnessNow.webSearch;
+  const webFixed = h(doc, "input", { id: "set-web-data", type: "checkbox", disabled: true, "data-ui": "set-web-data" });
+  webFixed.checked = true;
+  const harnessTools = page(
+    "tools",
+    h(doc, "h4", {}, t("harness.toolsHeading"), help("harness-web-search", t("harness.toolsHeading"))),
+    h(doc, "p", { class: "hint" }, t("harness.toolsIntro")),
+    h(doc, "div", { class: "field checkbox" }, webBox, h(doc, "label", { for: "set-web-search" }, t("harness.webSearchLabel"))),
+    h(doc, "h4", {}, t("harness.webContentHeading"), help("harness-web-content", t("harness.webContentHeading"))),
+    h(doc, "div", { class: "field checkbox" }, webFixed, h(doc, "label", { for: "set-web-data" }, t("harness.webContentLabel")), h(doc, "span", { class: "tag-always" }, t("harness.alwaysOn"))),
+    h(doc, "p", { class: "hint" }, t("harness.webContentNote")),
+  );
   // One Save for every page of the adjustable harness.
   const harnessBar = h(doc, "div", { class: "harness-bar", "data-ui": "harness-bar" }, h(doc, "p", { class: "hint" }, t("harness.adjustableIntro")), h(doc, "div", { class: "harness-actions" }, h(doc, "span", { class: "harness-spacer" }), harnessReset, harnessSave));
   const harnessFixed = h(
@@ -421,6 +437,7 @@ export function renderSettings(ctx) {
     ["retries", "harness.tabRetries", harnessRetries],
     ["cost", "harness.tabCost", harnessCost],
     ["guards", "harness.tabGuards", harnessGuards],
+    ["tools", "harness.tabTools", harnessTools],
     ["fixed", "harness.tabFixed", harnessFixed],
   ];
   const harnessSubButtons = harnessSubs.map(([id, labelKey]) => h(doc, "button", { type: "button", class: "tab provider-tab", role: "tab", "data-ui": `harness-tab-${id}`, "data-sub": id }, t(labelKey)));
@@ -660,7 +677,7 @@ export function renderSettings(ctx) {
       providerTabs,
       providerPanel,
     ),
-    h(doc, "section", { class: "settings-section", "data-ui": "harness-section" }, h(doc, "h2", {}, t("harness.title")), h(doc, "p", {}, t("harness.intro")), harnessSubTabs, harnessLimits, harnessRetries, harnessCost, harnessGuards, harnessBar, harnessFixed),
+    h(doc, "section", { class: "settings-section", "data-ui": "harness-section" }, h(doc, "h2", {}, t("harness.title")), h(doc, "p", {}, t("harness.intro")), harnessSubTabs, harnessLimits, harnessRetries, harnessCost, harnessGuards, harnessTools, harnessBar, harnessFixed),
     h(
       doc,
       "section",

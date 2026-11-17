@@ -1,6 +1,7 @@
 // The grey box next to the step list: what the step is, and its input and output drawn for the
 // kind of step it is (search query and results, model reply, handoff), not as raw text.
 import { h } from "../dom.js";
+import { helpIcon } from "../help-popup.js";
 import { parseMarkdown, isSafeHref } from "../markdown.js";
 import { renderBlocks } from "../render.js";
 
@@ -73,7 +74,7 @@ export function stepDetail({ doc, t, step, why, viewer, viewerId, fmt, onShowMes
           h(doc, "li", {}, h(doc, "strong", {}, r.title), h(doc, "br"), isSafeHref(r.url) ? h(doc, "a", { href: r.url, target: "_blank", rel: "noopener noreferrer" }, hostOf(r.url)) : h(doc, "span", {}, r.url)),
         ),
       );
-      root.append(section("out", t("insp.output"), h(doc, "p", { class: "hint" }, t("insp.resultsCount", { n: results.length })), list));
+      root.append(section("out", t("insp.output"), h(doc, "p", { class: "untrusted", "data-ui": "untrusted-web" }, h(doc, "span", { class: "tag-untrusted" }, t("insp.untrusted")), helpIcon({ doc, t, id: "replay-web-content", name: t("insp.untrusted") })), h(doc, "p", { class: "hint" }, t("insp.resultsCount", { n: results.length })), list));
     }
   } else if (step.kind === "model") {
     const parts = [];
