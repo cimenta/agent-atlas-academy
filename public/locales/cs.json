@@ -802,5 +802,6 @@
   "lab.goal": "Cíl: najít limity, které zastaví vymknutý běh, ale nechají dokončit dobrý.",
   "lab.loadFailed": "Zaznamenané běhy se nepodařilo načíst.",
   "lab.back": "Zpět na článek Co je harness?",
-  "lab.openLink": "Otevřít laboratoř harnessu"
+  "lab.openLink": "Otevřít laboratoř harnessu",
+  "lab.fromSettings": "Posuvníky začínají na vašich limitech z Nastavení, Harness. Obnovit je otevře dokořán, aby běh mohl doběhnout."
 }

@@ -81,15 +81,20 @@ export async function renderLab(ctx) {
     saved.textContent = "";
   }
 
-  function setRanges() {
+  // fromSettings: the sliders start at the limits of Settings, Harness (kept inside the range of the slider); otherwise wide open.
+  // The time of a whole run cannot be set in Settings, so it always starts wide open.
+  function setRanges(fromSettings = false) {
+    const mine = ctx.settings?.get();
+    const start = { steps: mine?.limits?.maxSteps, tokens: mine?.limits?.maxTokens };
     for (const [name, s] of [["steps", stepsSlider], ["tokens", tokensSlider], ["time", timeSlider]]) {
       const r = ranges[name];
       s.input.min = String(r.min);
       s.input.max = String(r.max);
       s.input.step = String(r.step);
-      s.input.value = String(r.max);
+      const wanted = fromSettings && Number.isFinite(start[name]) ? Math.round(start[name] / r.step) * r.step : r.max;
+      s.input.value = String(Math.min(r.max, Math.max(r.min, wanted)));
     }
-    repeatSelect.value = String(REPEAT_STOP.default);
+    repeatSelect.value = String(fromSettings && mine ? mine.repeatStop : REPEAT_STOP.default);
   }
 
   async function choose(id) {
@@ -98,7 +103,7 @@ export async function renderLab(ctx) {
     const totals = labTotals(steps);
     runInfo.textContent = t("lab.runInfo", { steps: totals.steps, tokens: totals.tokens.toLocaleString(ctx.lang), time: totals.sec });
     ranges = labRanges(steps);
-    setRanges();
+    setRanges(true);
     draw();
   }
 
@@ -127,7 +132,7 @@ export async function renderLab(ctx) {
       doc,
       "div",
       { class: "lab-cols" },
-      h(doc, "section", { class: "lab-card" }, h(doc, "h2", {}, t("lab.setLimits")), stepsSlider.row, tokensSlider.row, timeSlider.row, h(doc, "div", { class: "lab-row" }, h(doc, "label", { for: "lab-repeat" }, t("lab.repeat")), repeatSelect), h(doc, "p", { class: "hint" }, t("lab.note"))),
+      h(doc, "section", { class: "lab-card" }, h(doc, "h2", {}, t("lab.setLimits")), stepsSlider.row, tokensSlider.row, timeSlider.row, h(doc, "div", { class: "lab-row" }, h(doc, "label", { for: "lab-repeat" }, t("lab.repeat")), repeatSelect), h(doc, "p", { class: "hint", "data-ui": "lab-from-settings" }, t("lab.fromSettings")), h(doc, "p", { class: "hint" }, t("lab.note"))),
       h(doc, "section", { class: "lab-card" }, h(doc, "h2", {}, t("lab.seeStop")), stepList, meter(t("lab.tokens"), tokenBar, tokenText), meter(t("lab.time"), timeBar, timeText), verdict),
     ),
     h(doc, "div", { class: "lab-actions" }, useButton, resetButton, saved),

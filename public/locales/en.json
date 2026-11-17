@@ -802,5 +802,6 @@
   "lab.goal": "Goal: find limits that stop a runaway run but let a good one finish.",
   "lab.loadFailed": "The recorded runs could not be loaded.",
   "lab.back": "Back to the article What is a harness?",
-  "lab.openLink": "Open the Harness lab"
+  "lab.openLink": "Open the Harness lab",
+  "lab.fromSettings": "The sliders start at your limits from Settings, Harness. Reset opens them wide, so the run can finish."
 }

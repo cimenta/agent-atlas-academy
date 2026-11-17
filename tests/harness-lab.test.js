@@ -79,6 +79,6 @@ test("the lab has a route and its texts in both languages", () => {
   assert.deepEqual(parseRoute("#/learn/lab"), { name: "lab", params: {} });
   assert.equal(parseRoute("#/learn/harness").name, "article");
   for (const [lang, locale] of [["en", en], ["cs", cs]]) {
-    for (const k of ["lab.title", "lab.intro", "lab.run", "lab.runInfo", "lab.setLimits", "lab.seeStop", "lab.steps", "lab.tokens", "lab.time", "lab.repeat", "lab.repeatOff", "lab.repeatTimes", "lab.note", "lab.stepTokens", "lab.stepTime", "lab.finished", "lab.stopped", "lab.why.steps", "lab.why.tokens", "lab.why.time", "lab.why.repeat", "lab.use", "lab.used", "lab.reset", "lab.goal", "lab.loadFailed", "lab.openLink"]) assert.ok(locale[k], `${lang} ${k}`);
+    for (const k of ["lab.title", "lab.intro", "lab.run", "lab.runInfo", "lab.setLimits", "lab.seeStop", "lab.steps", "lab.tokens", "lab.time", "lab.repeat", "lab.repeatOff", "lab.repeatTimes", "lab.note", "lab.fromSettings", "lab.stepTokens", "lab.stepTime", "lab.finished", "lab.stopped", "lab.why.steps", "lab.why.tokens", "lab.why.time", "lab.why.repeat", "lab.use", "lab.used", "lab.reset", "lab.goal", "lab.loadFailed", "lab.openLink"]) assert.ok(locale[k], `${lang} ${k}`);
   }
 });
