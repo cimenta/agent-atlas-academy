@@ -25,6 +25,8 @@ import { pickNeighbour } from "./spatial.js";
 
 const STATUS_KEY = {
   waiting: "player.statusWaiting",
+  idle: "player.statusIdle",
+  unreached: "player.statusUnreached",
   working: "player.statusWorking",
   done: "player.statusDone",
   error: "player.statusError",
@@ -231,6 +233,13 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
 
   const label = (value) => (typeof value === "string" ? value : value ? t(value.key, value.params) : "");
 
+  // What an agent that never started shows once the run is over: not called (the run finished without it, as in a
+  // supervisor run) or not reached (the run stopped before it). While the run goes on, or waits for approval, it is waiting.
+  function idleStatus() {
+    if (!state.finished || state.outcome === "waiting_approval") return "waiting";
+    return state.outcome === "finished" ? "idle" : "unreached";
+  }
+
   function currentAgent() {
     if (ui.agent && state.agents[ui.agent]) return state.agents[ui.agent];
     return state.agents[state.order[0]] ?? null;
@@ -295,6 +304,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       failedAtEnd = new Set(whole.order.filter((id) => whole.agents[id].status === "error"));
     }
     diagram.update({
+      idleStatus: idleStatus(),
       events,
       cursor: player.cursor,
       state,
@@ -499,6 +509,12 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     renderChips();
     drawBody = () => {
       const agent = currentAgent();
+      // A card of an agent that never started: say why, and where to read the decision.
+      const idle = ui.agent && !state.agents[ui.agent] ? idleStatus() : "waiting";
+      if (idle !== "waiting") {
+        body.replaceChildren(h(doc, "p", { class: "doc", "data-ui": "idle-agent" }, t(`insp.${idle}`)));
+        return;
+      }
       if (!agent) {
         body.replaceChildren(h(doc, "p", { class: "doc" }, t("insp.waiting")));
         return;

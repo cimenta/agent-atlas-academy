@@ -143,16 +143,16 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
   // events: all events of the run; cursor: how many are applied; state: the inspector state; selectedId: the agent shown below.
   function update(args) {
     lastArgs = args;
-    const { events, cursor, state, selectedId, badgeText, badgeNumber, failed } = args;
+    const { events, cursor, state, selectedId, badgeText, badgeNumber, failed, idleStatus = "waiting" } = args;
     for (const [id, parts] of boxes) {
       // An agent that failed in a recorded run shows as failed from the start, before the replay reaches the failure.
       const isFailed = failed?.has(id) === true;
       const agent = isFailed ? { ...(state.agents[id] ?? { ms: null }), status: "error" } : state.agents[id];
-      const status = agent?.status ?? "waiting";
+      const status = agent?.status ?? idleStatus;
       parts.box.setAttribute("data-status", status);
       parts.box.setAttribute("aria-pressed", String(selectedId === id));
       parts.name.textContent = agent?.label ?? boxLabel(id);
-      parts.status.textContent = statusText(agent ?? { status: "waiting", ms: null });
+      parts.status.textContent = statusText(agent ?? { status: idleStatus, ms: null });
       if (parts.retry) {
         parts.retry.hidden = status !== "error";
         if (status !== "error" && menu?.getAttribute("data-for") === id) closeMenu();

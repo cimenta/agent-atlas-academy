@@ -4,6 +4,10 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ## [Unreleased]
 
+### Changed
+
+- Play: when a replay ends, an agent that never ran says not called (a supervisor chose not to use it) or not reached (the run stopped before it) instead of waiting, and selecting its card explains it and where to read the decision. A run from the library now has a note under the player: it is a recording made with its own limits, and your limits from Settings apply to new runs, with a link to the Harness lab.
+
 ### Added
 
 - Learn, Harness lab (`#/learn/lab`, linked from the article What is a harness?): pick one of the recorded runs of the library, set the steps, tokens, time and repeated answers, and see which step the run would stop at and which limit did it, with meters for tokens and time. Nothing is sent to a provider and nothing costs money. The sliders start at your own limits from Settings, Harness (Reset opens them wide so the run can finish). A button copies the step and token limits and the repeat setting to Settings, Harness (the time of a whole run is fixed at 270 s, so it is not copied).

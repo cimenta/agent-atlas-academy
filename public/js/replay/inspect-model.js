@@ -69,7 +69,7 @@ export function deriveInspector(events, cursor = events.length) {
   const agents = {};
   const order = agentIds(events);
   for (const id of order) agents[id] = emptyAgent(id);
-  const state = { task: "", order, agents, warnings: [], warningTimes: [], warningHelps: [], error: null, finished: false, tokens: { input: 0, output: 0 } };
+  const state = { task: "", order, agents, warnings: [], warningTimes: [], warningHelps: [], error: null, finished: false, outcome: null, tokens: { input: 0, output: 0 } };
 
   applied.forEach((event, index) => {
     const agent = typeof event.agent === "string" ? agents[event.agent] : null;
@@ -186,6 +186,7 @@ export function deriveInspector(events, cursor = events.length) {
         break;
       case "done":
         state.finished = true;
+        state.outcome = typeof event.outcome === "string" ? event.outcome : null;
         break;
       case "error":
         state.error = typeof event.message === "string" ? event.message : "error";

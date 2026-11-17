@@ -319,6 +319,8 @@ export async function renderReplayTab(ctx, requestedId) {
       }
       if (openAboutFor === currentId) handle.openAbout?.();
       openAboutFor = null;
+      // A run from the library is a recording made with its own limits: the limits of Settings apply only to new runs.
+      if (found.source === "gallery") host.append(h(doc, "p", { class: "notice recording-note", "data-ui": "recording-note" }, t("play.recordingNote"), " ", h(doc, "a", { href: "#/learn/lab" }, t("play.recordingNoteLink"))));
       host.append(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${currentId}` }, t("play.tab.result"))));
     }
   }
