@@ -1,5 +1,5 @@
 // One agent in a run: keeps its own conversation, calls the model, reports events.
-import { nodeModel, AGENT_TYPES, OUTPUT_TOKENS, MAX_PAUSES, clampOutputTokens } from "./catalog.js";
+import { nodeModel, AGENT_TYPES, OUTPUT_TOKENS, RETRIES, RETRY_DELAY_SEC, MAX_PAUSES, clampOutputTokens, clampRetries, clampRetryDelaySec } from "./catalog.js";
 import { systemPromptFor } from "./prompts.js";
 import { toolsFor } from "./tools.js";
 import { AnthropicError, redact } from "./anthropic.js";
@@ -7,7 +7,6 @@ import { agentLabel } from "./labels.js";
 import { AgentLimitError, LimitError } from "./budget.js";
 import { agentPassMessage } from "./harness.js";
 
-const RETRY_DELAY_MS = 1500;
 const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const textOf = (content) => content.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
@@ -21,7 +20,9 @@ function searchOutput(content) {
 // A copy is taken so later changes to the conversation cannot reach an event already sent.
 const copy = (value) => structuredClone(value);
 
-export function createAgent({ node, design = null, call, emit, budget: runBudget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default }) {
+export function createAgent({ node, design = null, call, emit, budget: runBudget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default, retries = RETRIES.default, retryDelaySec = RETRY_DELAY_SEC.default }) {
+  const retryLimit = clampRetries(retries);
+  const retryDelayMs = clampRetryDelaySec(retryDelaySec) * 1000;
   // The agent counts against its own limits too (node.limits); the limits of the run still apply.
   const budget = runBudget.forAgent ? runBudget.forAgent(node.limits) : runBudget;
   const onLimit = node.onLimit === "pass" ? "pass" : "stop";
@@ -53,13 +54,15 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
   }
 
   async function requestWithRetry() {
-    try {
-      return await request();
-    } catch (error) {
-      if (!(error instanceof AnthropicError) || !error.retryable) throw error;
-      emit({ type: "warning", agent: node.id, message: `The provider was busy (${redact(error.message.split("\n\n").at(-1))}). Trying once more.` });
-      await sleep(RETRY_DELAY_MS);
-      return request();
+    for (let tried = 0; ; tried++) {
+      try {
+        return await request();
+      } catch (error) {
+        if (!(error instanceof AnthropicError) || !error.retryable || tried >= retryLimit) throw error;
+        const left = retryLimit - tried;
+        emit({ type: "warning", agent: node.id, message: `The provider was busy (${redact(error.message.split("\n\n").at(-1))}). Trying again (${left === 1 ? "last try" : `${left} tries left`}).` });
+        await sleep(retryDelayMs);
+      }
     }
   }
 

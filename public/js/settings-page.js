@@ -1,6 +1,6 @@
 // The settings page: API key handling, the harness (limits and fixed rules) and local data.
 import { h } from "./dom.js";
-import { LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
+import { LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, RETRIES, RETRY_DELAY_SEC, PROFILES, matchProfile, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
 import { COLOR_CHOICES, paintModelTag } from "./provider-colors.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "./key-slots.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
@@ -273,33 +273,58 @@ export function renderSettings(ctx) {
     { id: "searches", min: 0, max: LIMIT_MAX.maxSearches, step: 1, value: harnessNow.limits.maxSearches, def: LIMIT_DEFAULTS.maxSearches, show: (n) => String(n) },
     { id: "output", min: OUTPUT_TOKENS.min, max: OUTPUT_TOKENS.max, step: OUTPUT_TOKENS.step, value: harnessNow.maxOutputTokens, def: OUTPUT_TOKENS.default, show: harnessFormat },
     { id: "timeout", min: TIMEOUT_SEC.min, max: TIMEOUT_SEC.max, step: TIMEOUT_SEC.step, value: harnessNow.requestTimeoutSec, def: TIMEOUT_SEC.default, show: (n) => t("settings.timeoutSeconds", { seconds: n }) },
+    { id: "retries", min: RETRIES.min, max: RETRIES.max, step: RETRIES.step, value: harnessNow.retries, def: RETRIES.default, show: (n) => String(n) },
+    { id: "retryDelay", min: RETRY_DELAY_SEC.min, max: RETRY_DELAY_SEC.max, step: RETRY_DELAY_SEC.step, value: harnessNow.retryDelaySec, def: RETRY_DELAY_SEC.default, show: (n) => t("settings.timeoutSeconds", { seconds: harnessFormat(n) }) },
   ];
+  const PROFILE_ROWS = Object.keys(PROFILES.balanced);
   const harnessRows = harnessSpecs.map((spec) => {
     const slider = h(doc, "input", { id: `set-harness-${spec.id}`, type: "range", min: spec.min, max: spec.max, step: spec.step, value: spec.value, "data-ui": `harness-${spec.id}` });
     const shown = h(doc, "output", { class: "harness-value", for: slider.id, "data-ui": `harness-${spec.id}-value` }, spec.show(spec.value));
     slider.addEventListener("input", () => {
       shown.textContent = spec.show(Number(slider.value));
+      markProfile();
     });
     const set = (n) => {
       slider.value = String(n);
       shown.textContent = spec.show(Number(slider.value));
+      markProfile();
     };
     const label = h(doc, "div", { class: "harness-label" }, h(doc, "label", { for: slider.id }, t(`harness.limit.${spec.id}.label`)), h(doc, "span", { class: "harness-hint" }, t(`harness.limit.${spec.id}.hint`)));
     return { spec, slider, set, node: h(doc, "div", { class: "harness-row" }, label, slider, shown) };
   });
   const harnessRow = (id) => harnessRows.find((r) => r.spec.id === id);
+  // The profile buttons show which profile the sliders match, or Custom.
+  const profileButtons = [...Object.keys(PROFILES), "custom"].map((id) => {
+    const button = h(doc, "button", { type: "button", class: "profile-choice", "data-ui": `harness-profile-${id}`, "aria-pressed": "false" }, h(doc, "b", {}, t(`harness.profile.${id}`)), h(doc, "span", {}, t(`harness.profile.${id}.hint`)));
+    if (id === "custom") button.classList.add("custom");
+    else
+      button.addEventListener("click", () => {
+        PROFILE_ROWS.forEach((key) => harnessRow(key).set(PROFILES[id][key]));
+        say(t("harness.profileDone", { name: t(`harness.profile.${id}`) }));
+      });
+    return [id, button];
+  });
+  function markProfile() {
+    if (harnessRows.length < harnessSpecs.length) return;
+    const now = matchProfile(Object.fromEntries(PROFILE_ROWS.map((key) => [key, Number(harnessRow(key).slider.value)])));
+    profileButtons.forEach(([id, button]) => button.setAttribute("aria-pressed", String(id === now)));
+  }
+  markProfile();
   const harnessSave = h(doc, "button", { type: "button", class: "primary", "data-ui": "harness-save" }, t("harness.save"));
   harnessSave.addEventListener("click", () => {
     const value = (id) => Number(harnessRow(id).slider.value);
     settings.setLimits({ maxSteps: value("steps"), maxTokens: value("tokens"), maxSearches: value("searches") });
     settings.setMaxOutputTokens(value("output"));
     settings.setRequestTimeout(value("timeout"));
+    settings.setRetries(value("retries"), value("retryDelay"));
     const saved = settings.get();
     harnessRow("steps").set(saved.limits.maxSteps);
     harnessRow("tokens").set(saved.limits.maxTokens);
     harnessRow("searches").set(saved.limits.maxSearches);
     harnessRow("output").set(saved.maxOutputTokens);
     harnessRow("timeout").set(saved.requestTimeoutSec);
+    harnessRow("retries").set(saved.retries);
+    harnessRow("retryDelay").set(saved.retryDelaySec);
     say(t("harness.saved"));
   });
   const harnessReset = h(doc, "button", { type: "button", "data-ui": "harness-reset" }, t("harness.reset"));
@@ -319,7 +344,15 @@ export function renderSettings(ctx) {
     { class: "harness-panel", role: "tabpanel", "data-ui": "harness-adjustable" },
     h(doc, "h3", {}, t("harness.adjustableHeading")),
     h(doc, "p", { class: "hint" }, t("harness.adjustableIntro")),
-    ...harnessRows.map((r) => r.node),
+    h(doc, "h4", {}, t("harness.profileHeading")),
+    h(doc, "p", { class: "hint" }, t("harness.profileIntro")),
+    h(doc, "div", { class: "profile-choices", "data-ui": "harness-profiles" }, ...profileButtons.map(([, b]) => b)),
+    h(doc, "h4", {}, t("harness.limitsHeading")),
+    ...harnessRows.filter((r) => !["retries", "retryDelay"].includes(r.spec.id)).map((r) => r.node),
+    h(doc, "h4", {}, t("harness.retriesHeading")),
+    h(doc, "p", { class: "hint" }, t("harness.retriesIntro")),
+    ...harnessRows.filter((r) => ["retries", "retryDelay"].includes(r.spec.id)).map((r) => r.node),
+    h(doc, "p", { class: "hint" }, t("harness.retriesNote")),
     h(doc, "div", { class: "harness-actions" }, ...harnessQuick, h(doc, "span", { class: "harness-spacer" }), harnessReset, harnessSave),
   );
   const harnessFixed = h(

@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Settings, Harness: three profiles (Careful, Balanced, Generous, and Custom when the values match none) that set the five adjustable limits at once, and a Retries section with the number of tries after a failure (0 to 3, default 1) and the wait before each try (1 to 10 seconds, default 1.5). Every try costs a step; the server clips both values. The retry warning in the replay says how many tries are left.
+
 - Create: limits for each agent. An agent panel has a Limits of this agent block with the maximum steps, tokens, tokens of one reply and web searches of that agent (an empty box means the limit of the run applies, and the lower one always wins) and a choice of what happens when it reaches one: stop the whole run, or pass on what it wrote and go on. The limits are part of the design, so they are saved with a run, a definition and an export. A run that an agent limit stops ends with its own message. The Statistics tab of a result has a new Limits table: what the whole run and each agent used of their limits, with a reached limit marked. Help describes it, in English and Czech.
 
 - Learn: a new article, What is a harness?, for beginners, in English and Czech. It explains what surrounds a model, why it matters for safety and reliability, and where to see the harness of Agent Atlas in Settings. It is linked from Budgets and stop conditions and from Retries and errors.

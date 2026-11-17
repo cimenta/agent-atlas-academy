@@ -22,11 +22,11 @@ function scripted(replies) {
   return { call, calls };
 }
 
-function setup({ replies, nodeExtra, limits = LIMIT_DEFAULTS, sleep = async () => {}, signal } = {}) {
+function setup({ replies, nodeExtra, limits = LIMIT_DEFAULTS, sleep = async () => {}, signal, retries, retryDelaySec } = {}) {
   const { call, calls } = scripted(replies);
   const events = [];
   const budget = createBudget(limits);
-  const agent = createAgent({ node: node(nodeExtra), call, emit: (e) => events.push(e), budget, signal, language: "en", sleep });
+  const agent = createAgent({ node: node(nodeExtra), call, emit: (e) => events.push(e), budget, signal, language: "en", sleep, retries, retryDelaySec });
   return { agent, calls, events, budget };
 }
 
@@ -236,4 +236,38 @@ test("the HTTP details of the provider's answer are recorded when the call suppl
   const agent = createAgent({ node: node(), call: async () => response, emit: (e) => events.push(e), budget: createBudget(LIMIT_DEFAULTS), language: "en", sleep: async () => {} });
   await agent.run("t");
   assert.deepEqual(events.find((e) => e.type === "round").raw.http, { status: 200, requestId: "req_9", headers: { "request-id": "req_9" }, ms: 123 });
+});
+
+test("the number of retries and the delay come from the settings", async () => {
+  const err = () => new AnthropicError("overloaded", { status: 529, retryable: true });
+  const sleeps = [];
+  const { agent, events, calls } = setup({ replies: [err(), err(), err(), reply(text("ok"))], sleep: async (ms) => sleeps.push(ms), retries: 3, retryDelaySec: 4 });
+  const result = await agent.run("t");
+  assert.equal(result.text, "ok");
+  assert.deepEqual(sleeps, [4000, 4000, 4000]);
+  assert.equal(calls.length, 4);
+  assert.equal(events.filter((e) => e.type === "warning").length, 3);
+});
+
+test("with no retries a retryable error throws at once", async () => {
+  const sleeps = [];
+  const { agent, calls } = setup({ replies: [new AnthropicError("overloaded", { status: 529, retryable: true }), reply(text("ok"))], sleep: async (ms) => sleeps.push(ms), retries: 0 });
+  await assert.rejects(agent.run("t"), (e) => e instanceof AnthropicError);
+  assert.equal(calls.length, 1);
+  assert.deepEqual(sleeps, []);
+});
+
+test("out of range retries and delays are clipped", async () => {
+  const err = () => new AnthropicError("overloaded", { status: 529, retryable: true });
+  const sleeps = [];
+  const { agent, calls } = setup({ replies: [err(), err(), err(), err(), err()], sleep: async (ms) => sleeps.push(ms), retries: 99, retryDelaySec: 500 });
+  await assert.rejects(agent.run("t"));
+  assert.equal(calls.length, 4);
+  assert.deepEqual(sleeps, [10000, 10000, 10000]);
+});
+
+test("every retry costs a step, so the step limit still ends a run of retries", async () => {
+  const err = () => new AnthropicError("overloaded", { status: 529, retryable: true });
+  const { agent } = setup({ replies: [err(), err(), err()], limits: { ...LIMIT_DEFAULTS, maxSteps: 2 }, retries: 3 });
+  await assert.rejects(agent.run("t"), (e) => e.reason === "steps" || /step/i.test(e.message));
 });

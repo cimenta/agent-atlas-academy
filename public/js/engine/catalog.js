@@ -88,6 +88,18 @@ export const clampOutputTokens = (value) => {
   return Number.isFinite(n) ? Math.min(OUTPUT_TOKENS.max, Math.max(OUTPUT_TOKENS.min, n)) : OUTPUT_TOKENS.default;
 };
 
+// How a failed provider call is tried again: how many more tries, and how long to wait before each.
+export const RETRIES = { min: 0, max: 3, step: 1, default: 1 };
+export const RETRY_DELAY_SEC = { min: 1, max: 10, step: 0.5, default: 1.5 };
+export const clampRetries = (value) => {
+  const n = Math.round(Number(value));
+  return Number.isFinite(n) ? Math.min(RETRIES.max, Math.max(RETRIES.min, n)) : RETRIES.default;
+};
+export const clampRetryDelaySec = (value) => {
+  const n = Math.round(Number(value) * 2) / 2;
+  return Number.isFinite(n) && value !== null && value !== "" ? Math.min(RETRY_DELAY_SEC.max, Math.max(RETRY_DELAY_SEC.min, n)) : RETRY_DELAY_SEC.default;
+};
+
 // The fixed rules of the harness: the visitor cannot change them (see the Harness tab in Settings).
 export const MAX_PAUSES = 4; // pauses of the model in one agent turn
 export const REQUEST_MAX_BYTES = 65536; // a request to start a run
@@ -102,3 +114,12 @@ export const TASK_MAX_CHARS = 1000;
 export const NODE_MAX = 8;
 export const NAME_MAX = 40;
 export const INSTRUCTIONS_MAX = 2000;
+
+// Profiles: one choice that sets the five adjustable limits at once. Balanced is the default set.
+export const PROFILES = {
+  careful: { steps: 10, tokens: 20000, searches: 1, output: 2000, timeout: 30 },
+  balanced: { steps: LIMIT_DEFAULTS.maxSteps, tokens: LIMIT_DEFAULTS.maxTokens, searches: LIMIT_DEFAULTS.maxSearches, output: OUTPUT_TOKENS.default, timeout: TIMEOUT_SEC.default },
+  generous: { steps: 40, tokens: 100000, searches: 6, output: OUTPUT_TOKENS.max, timeout: TIMEOUT_SEC.max },
+};
+// The profile whose values are exactly these ones, or "custom".
+export const matchProfile = (values) => Object.keys(PROFILES).find((id) => Object.keys(PROFILES[id]).every((k) => Number(values?.[k]) === PROFILES[id][k])) ?? "custom";
