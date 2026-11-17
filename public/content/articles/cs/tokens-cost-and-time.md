@@ -16,3 +16,5 @@ Začátečníky překvapují dvě věci:
 Agent Atlas ukazuje tokeny a čas u každého kroku, takže vidíte, kde je běh spotřeboval. S vlastním API klíčem vám cenu účtuje váš poskytovatel, a proto má každý běh limity.
 
 Paralelní agenti skončí dřív, ale nespotřebují méně tokenů.
+
+Před během ukazuje Vytvořit odhad toho, co běh nejvíc pravděpodobně bude stát, spočítaný z počtu agentů, vašich limitů a cen vybraných modelů. Je to strop, ne příslib: běh obvykle stojí méně. Po běhu ukazuje karta Výsledek, co spotřeboval každý agent, a agent na bezplatném klíči Gemini se počítá jako zdarma. V Nastavení, Harness můžete také nastavit **strop ceny**, aby se běh zastavil, když jeho odhadnutá cena překročí částku.

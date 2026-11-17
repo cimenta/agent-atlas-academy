@@ -16,3 +16,5 @@ Two things surprise newcomers:
 Agent Atlas shows tokens and time for every step, so you can see where a run spent them. With your own API key, the cost is billed by your provider to you, which is why every run has limits.
 
 Parallel agents finish sooner but do not use fewer tokens.
+
+Before a run, Create shows an estimate of the most it is likely to cost, worked out from the number of agents, your limits and the prices of the chosen models. It is a ceiling, not a promise: a run usually costs less. After a run, the Result tab shows what each agent used, and an agent on a free Gemini key counts as free. You can also set a **cost cap** in Settings, Harness, so a run stops when its estimated cost passes an amount.

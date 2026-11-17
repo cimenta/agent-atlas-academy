@@ -6,6 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Learn and Help brought up to date: Human approval is now a full article (it is no longer marked as coming), and the articles on reading a replay, budgets, retries, tools, tokens and cost, supervisors, guardrails and prompt injection describe what Agent Atlas does today (the diagram arrows, the stopped, not called and not reached states, per-agent limits, the cost cap, the Retry menu with Use current limits from Settings, the search switches, approval). New article: Debate. Help, How it ended, now names waiting for approval.
 - Retry: the Retry menu has a checkbox, Use current limits from Settings, checked by default, so a retry runs with the limits you have in Settings now instead of the ones the run had. A limit details link opens a small table of both sets with the differing row marked; when the Settings limits would probably stop the run before it finishes (worked out from the steps recorded so far), a button opens the Harness lab with this run and those limits. The same checkbox is on the Carry on the failed run screen in Create. The choice applies to that one Retry.
 - Harness lab: opens with a run of your own and preset limits (`#/learn/lab?run=<id>&steps=5&tokens=20000`), listed as Your run.
 - Create: the limits of the run are read from Settings each time Create opens, unless you changed them by hand.

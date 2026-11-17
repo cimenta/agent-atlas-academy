@@ -21,3 +21,5 @@ In this pattern one agent, the **supervisor**, does not do the detailed work. It
 - It is harder to predict than a chain.
 
 That is why a supervisor always needs limits: a maximum number of rounds, tokens and time.
+
+In a replay of a supervisor run, a worker the supervisor never used says **not called** when the run ends. That is a decision, not an error: read the supervisor's messages to see why it did not need that worker.

@@ -18,3 +18,5 @@ How it works:
 The model never runs anything itself. It can only ask, and the application decides whether and how to carry it out. An agent is limited to the tools it is given.
 
 Tool results are **data from outside** the agent. A web page may be wrong, outdated or even written to mislead. Agent Atlas offers only a read-only web search, so nothing in a run can change anything outside the app. A tool that fetches a page is coming.
+
+In Create each agent has its own search switch under Tools, so only the agents that need the web get it. Settings, Harness, Tools has a master switch: when it is off, no agent searches, even one whose own switch is on, and the replay says so.

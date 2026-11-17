@@ -18,6 +18,6 @@ Příčina je jednoduchá: pro jazykový model jsou pokyny i data jen text. Nedo
 - Pro riskantní akce vyžadujte schválení člověkem.
 - Nenechte nedůvěryhodný text proniknout do pokynů jiných agentů.
 
-V Agent Atlas se agentovi, který umí hledat na webu, řekne, že text z webu jsou data, ne pokyny, a replay označí výsledky hledání jako nedůvěryhodný obsah z webu. Model se i tak může nechat oklamat, takže je to připomenutí, ne zeď. Hledání na webu můžete také zakázat pro všechny své běhy v Nastavení, Harness, Nástroje.
+V Agent Atlas se agentovi, který umí hledat na webu, řekne, že text z webu jsou data, ne pokyny, a replay označí výsledky hledání jako nedůvěryhodný obsah z webu. Model se i tak může nechat oklamat, takže je to připomenutí, ne zeď. Hledání na webu můžete také zakázat pro všechny své běhy v Nastavení, Harness, Nástroje, a pro agenta, který jedná podle toho, co přečetl, zapnout **Zeptat se mě, než tento agent poběží**, abyste jeho vstup viděli dřív, než poběží.
 
 Žádné jednotlivé opatření nestačí. **Nahraná** ukázka prompt injection s neškodnou stránkou se připravuje do knihovny. Agent Atlas nikdy na nic nezaútočí naživo.

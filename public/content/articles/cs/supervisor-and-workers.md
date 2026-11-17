@@ -21,3 +21,5 @@ V tomto vzoru jeden agent, **supervizor**, nedělá detailní práci. Přečte �
 - Hůř se předvídá než řetězec.
 
 Proto supervizor vždy potřebuje limity: nejvyšší počet kol, tokenů a času.
+
+V přehrávání běhu se supervizorem má pracovník, kterého supervizor nikdy nepoužil, na konci běhu stav **nezavolán**. Je to rozhodnutí, ne chyba: ve zprávách supervizora si přečtete, proč tohoto pracovníka nepotřeboval.

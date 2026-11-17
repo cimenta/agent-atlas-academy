@@ -3,7 +3,7 @@ title: Evaluator loop
 section: orchestration
 order: 10
 summary: Generate, critique, revise. Repeat until the result is good enough or a limit is reached.
-related: [self-critique, budgets-and-stop-conditions, supervisor-and-workers]
+related: [self-critique, budgets-and-stop-conditions, supervisor-and-workers, debate]
 coming: true
 ---
 

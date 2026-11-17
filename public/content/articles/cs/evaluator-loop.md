@@ -3,7 +3,7 @@ title: Smyčka s hodnotitelem
 section: orchestration
 order: 10
 summary: Vytvořit, zkritizovat, přepracovat. Opakovat, dokud výsledek není dost dobrý nebo nepadne limit.
-related: [self-critique, budgets-and-stop-conditions, supervisor-and-workers]
+related: [self-critique, budgets-and-stop-conditions, supervisor-and-workers, debate]
 coming: true
 ---
 

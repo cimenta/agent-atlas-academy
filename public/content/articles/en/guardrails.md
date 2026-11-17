@@ -19,3 +19,5 @@ Kinds of check:
 A guardrail can block the output, send it back for repair, or stop the run.
 
 Guardrails are useful but not perfect. A rule can be too strict and block good work, or too loose and miss a problem. A reviewing model can be fooled in the same way as the first one. So guardrails are layered with other measures, such as limited tools, rather than trusted alone.
+
+Agent Atlas has a few guards inside the harness. **Repeated answers** stops a run when one agent keeps giving the same answer, and **size of a handoff** cuts what one agent passes to the next. The agent's own limits and the **Ask me before this agent runs** switch are guards too. Checks of the format of an answer and a reviewing model are not part of Agent Atlas yet.

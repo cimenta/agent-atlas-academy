@@ -20,3 +20,5 @@ Záleží na dvou pravidlech. Zaprvé, každá smyčka opakování potřebuje li
 Harness může také přejít na jiný model, když jeden stále selhává. V Agent Atlas je to nastavení Záložní model: může pro Znovu navrhnout jiný model téhož poskytovatele, nebo na něj jednou automaticky přepnout. Záložní model je vždy model, pro který máte klíč, a replay ukáže, kdy k tomu došlo.
 
 V přehrávání se varování a chyby objevují jako samostatné kroky, takže přesně vidíte, kde běh narazil na potíže.
+
+Ve vašich vlastních bězích má agent, který selhal, červené tlačítko **Znovu**. Znovu pokračuje v běhu od tohoto agenta: agenti, kteří doběhli, si nechají odpovědi a neplatí se znovu. Šipka vedle něj nabízí seznam modelů, takže můžete zkusit jiný, když je model vytížený. Pod seznamem rozhoduje **Použít aktuální limity z Nastavení**, jestli pokus běží s limity, které máte v Nastavení teď (výchozí), nebo s limity, které běh měl. **podrobnosti limitů** ukazují obojí vedle sebe a varují, když by se běh s limity z Nastavení pravděpodobně zastavil dřív, než skončí.

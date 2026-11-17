@@ -18,3 +18,5 @@ Jak to funguje:
 Model sám nikdy nic nespouští. Může jen požádat a aplikace rozhodne, zda a jak žádost provede. Agent je omezen na nástroje, které dostal.
 
 Výsledky nástrojů jsou **data zvenčí**. Webová stránka může být nesprávná, zastaralá nebo dokonce napsaná tak, aby klamala. Agent Atlas nabízí jen vyhledávání na webu pouze pro čtení, takže nic v běhu nemůže změnit nic mimo aplikaci. Nástroj pro stažení stránky se připravuje.
+
+Ve Vytvořit má každý agent pod Nástroje vlastní přepínač hledání, takže web dostanou jen agenti, kteří ho potřebují. Nastavení, Harness, Nástroje má hlavní vypínač: když je vypnutý, nehledá žádný agent, ani ten, který má svůj přepínač zapnutý, a přehrávání to říká.
