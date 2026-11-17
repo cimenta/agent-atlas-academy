@@ -7,6 +7,7 @@ import { agentLabel } from "./labels.js";
 import { AgentLimitError, LimitError } from "./budget.js";
 import { agentPassMessage } from "./harness.js";
 import { usageCostUsd } from "./cost.js";
+import { ApprovalPause, APPROVAL_INPUT_MAX } from "./approval.js";
 
 const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -21,7 +22,7 @@ function searchOutput(content) {
 // A copy is taken so later changes to the conversation cannot reach an event already sent.
 const copy = (value) => structuredClone(value);
 
-export function createAgent({ node, design = null, call, emit, budget: runBudget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default, retries = RETRIES.default, retryDelaySec = RETRY_DELAY_SEC.default, freeTier = false, repeatStop = REPEAT_STOP.default, fallback = "off" }) {
+export function createAgent({ node, design = null, call, emit, budget: runBudget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default, retries = RETRIES.default, retryDelaySec = RETRY_DELAY_SEC.default, freeTier = false, repeatStop = REPEAT_STOP.default, fallback = "off", askFirst = false }) {
   const retryLimit = clampRetries(retries);
   const retryDelayMs = clampRetryDelaySec(retryDelaySec) * 1000;
   // The agent counts against its own limits too (node.limits); the limits of the run still apply.
@@ -110,6 +111,11 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
         messages.push({ role: "user", content: input }, { role: "assistant", content: [{ type: "text", text: earlier.text }] });
         sent = messages.length;
         return { text: earlier.text, usage: { input: Number(earlier.tokens?.input) || 0, output: Number(earlier.tokens?.output) || 0, searches: 0 } };
+      }
+      // Marked for human approval and not approved yet: say what the agent would receive, and end the run here.
+      if (askFirst) {
+        emit({ type: "approval", agent: node.id, role: label, input: String(input).slice(0, APPROVAL_INPUT_MAX), inputChars: String(input).length });
+        throw new ApprovalPause(node.id);
       }
       emit({
         type: "agent_start",

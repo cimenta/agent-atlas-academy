@@ -1012,3 +1012,12 @@ a.art-pill:hover { text-decoration: underline; }
 .fallback-option { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
 .fallback-option:has(input:checked) { border-color: var(--accent); background: var(--accent-bg); }
 .fallback-option .hint { display: block; margin: 2px 0 0; }
+
+/* Human approval: the panel of a paused run */
+.approval-panel{border:2px solid var(--warn,#d9a400);border-radius:10px;padding:12px 14px;margin:0 0 14px;background:var(--surface,transparent)}
+.approval-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.approval-head h3{margin:0}
+.tag-paused{font-size:.75rem;padding:2px 8px;border-radius:10px;background:#fdf1cf;color:#6b4e00}
+.approval-input{white-space:pre-wrap;word-break:break-word;max-height:14rem;overflow:auto;padding:8px 10px;border-radius:8px;background:rgba(127,127,127,.12);font-size:.85rem}
+.approval-actions{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.editor-approval-heading .help-icon{margin-left:8px}

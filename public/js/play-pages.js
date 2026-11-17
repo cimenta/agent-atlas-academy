@@ -9,6 +9,8 @@ import { buildReplayList, filterLibrary, formatRunWhen, prepareImport } from "./
 import { makeRunId } from "./engine/run-record.js";
 import { renderResult } from "./result-page.js";
 import { renderCreate } from "./create/create-page.js";
+import { approvalPanel } from "./approval-panel.js";
+import { pendingApprovals } from "./engine/approval.js";
 import { createRunMenu } from "./replay/run-menu.js";
 import { definitionFromRun } from "./create/definition.js";
 import { draft, openInCreate } from "./create/draft.js";
@@ -120,7 +122,7 @@ function runMeta({ doc, lang }, item) {
 const OUTCOME_ICONS = { ok: "✓", warn: "■", fail: "✕" };
 function outcomeIcon({ doc, t }, item) {
   if (!item.outcome) return "";
-  const level = item.outcome === "finished" ? "ok" : item.outcome === "stopped_user" || item.outcome === "stopped_limit" ? "warn" : "fail";
+  const level = item.outcome === "finished" ? "ok" : item.outcome === "stopped_user" || item.outcome === "stopped_limit" || item.outcome === "waiting_approval" ? "warn" : "fail";
   const label = t(`result.status.${item.outcome}`);
   return h(doc, "span", { class: `outcome-icon ${level}`, role: "img", "aria-label": label, title: label, "data-ui": "run-outcome-chip", "data-outcome": item.outcome }, OUTCOME_ICONS[level]);
 }
@@ -295,6 +297,26 @@ export async function renderReplayTab(ctx, requestedId) {
             }
           : null;
       handle = mountReplay(host, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors, onRetry, suggestFallback: ctx.settings?.get().fallback !== "off" });
+      // A run that waits for approval shows what the next agent will receive, with Approve and Stop here.
+      if (found.source === "local" && found.run.outcome === "waiting_approval") {
+        const panel = approvalPanel({
+          doc,
+          t,
+          pending: pendingApprovals(found.run.events),
+          onApprove: () => {
+            draft.retry = found.run;
+            draft.approve = true;
+            doc.defaultView.location.hash = "#/play/create";
+          },
+          onStop: async () => {
+            const events = found.run.events.map((e) => (e.type === "done" ? { ...e, outcome: "stopped_user" } : e));
+            await ctx.runStore.save({ ...found.run, events, outcome: "stopped_user" });
+            handle?.destroy();
+            return renderReplayTab(ctx, currentId);
+          },
+        });
+        host.prepend(panel);
+      }
       if (openAboutFor === currentId) handle.openAbout?.();
       openAboutFor = null;
       host.append(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${currentId}` }, t("play.tab.result"))));

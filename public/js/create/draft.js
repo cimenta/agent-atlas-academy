@@ -4,8 +4,9 @@ import { createEditor } from "./editor-model.js";
 import { loadDefinition } from "./definition.js";
 
 // slots: the key slots chosen on the Create tab (one or more); null until the tab is first opened.
-export const draft = { task: "", pattern: "sequential", editor: createEditor("sequential"), limits: null, slots: null, retry: null };
-// retry: a failed run (its record) that the Create tab should carry on when it opens.
+export const draft = { task: "", pattern: "sequential", editor: createEditor("sequential"), limits: null, slots: null, retry: null, approve: false };
+// retry: a failed or paused run (its record) that the Create tab should carry on when it opens.
+// approve: the run waits for approval and the visitor approved it, so it carries on past the agents that waited.
 
 export function draftHasWork() {
   return draft.task.trim() !== "" || draft.editor.design().nodes.length > 0;

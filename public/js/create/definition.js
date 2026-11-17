@@ -76,6 +76,7 @@ export function loadDefinition(text) {
     if (node.addToPrevious === true) overrides.addToPrevious = true;
     if (isObject(node.limits)) overrides.limits = node.limits;
     if (node.onLimit === "pass") overrides.onLimit = "pass";
+    if (node.approve === true) overrides.approve = true;
     for (const key of ["name", "instructions", "stance"]) if (typeof node[key] === "string") overrides[key] = node[key];
     const added = editor.addNode(node.agent, overrides);
     if (!added.ok) return fail("invalid", [{ code: added.code }]);

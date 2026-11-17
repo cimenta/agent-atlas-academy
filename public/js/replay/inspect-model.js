@@ -162,6 +162,10 @@ export function deriveInspector(events, cursor = events.length) {
         }
         break;
       }
+      case "approved":
+        // You approved this agent: the run waited for your click before it ran.
+        if (agent) agent.steps.push({ kind: "approval", tool: "approval", at: event.t, title: { key: "insp.approved", params: {} }, ms: null, input: "", output: { key: "insp.approvedOut", params: {} }, eventIndex: index });
+        break;
       case "title":
         if (agent) agent.steps.push({ kind: "title", tool: "title", at: event.t, title: { key: "insp.title", params: {} }, ms: null, input: "", output: typeof event.text === "string" ? event.text : "", eventIndex: index });
         break;

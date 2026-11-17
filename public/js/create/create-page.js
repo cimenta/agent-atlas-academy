@@ -13,6 +13,8 @@ import { TASK_MAX_CHARS, LIMIT_MAX, PRICING_URLS, DEFAULT_MODEL, providerCatalog
 import { PATTERNS, clampLimits } from "../engine/patterns.js";
 import { buildRunRecord, makeRunId, modelsUsed } from "../engine/run-record.js";
 import { startRun, RunStartError } from "../run-client.js";
+import { approvalPanel } from "../approval-panel.js";
+import { pendingApprovals, approvedAgents } from "../engine/approval.js";
 import { mountLiveReplay } from "../replay/view.js";
 import { createBatchedSaver } from "../storage/runs-store.js";
 import { createEditor } from "./editor-model.js";
@@ -368,8 +370,10 @@ export function renderCreate(ctx) {
         importantTip(t("create.retryNeedsKey"));
         return;
       }
+      const approve = draft.approve === true;
       draft.retry = null;
-      beginRun({ resume: run });
+      draft.approve = false;
+      beginRun({ resume: run, approve });
     });
     const definitionFile = h(doc, "input", { type: "file", accept: ".json,application/json", hidden: true, "data-ui": "definition-file" });
     const loadButton = h(doc, "button", { type: "button", "data-ui": "load-definition", title: t("create.loadDefinitionHint") }, t("create.loadDefinition"));
@@ -463,7 +467,7 @@ export function renderCreate(ctx) {
 
   // Carries on a run that failed: the agents that finished keep their answers, the failed agent and the rest run again.
   // The new events are added to the same saved run. resume is the run record.
-  function beginRun({ resume = null } = {}) {
+  function beginRun({ resume = null, approve = false } = {}) {
     const design = resume ? structuredClone(resume.design) : draft.editor.design();
     const limits = clampLimits(resume ? resume.limits : draft.limits);
     // Every agent names its key slot; the run gets the key of each slot in use.
@@ -478,6 +482,11 @@ export function renderCreate(ctx) {
 
     // What the earlier try left: its events without the ending (the error and the done), and the answers of the finished agents.
     const base = resume ? resume.events.filter((e) => e.type !== "done" && e.type !== "error") : [];
+    // Approve: every agent that waited is marked approved, so the run does not stop on it again.
+    if (approve) {
+      const when = (base.at(-1)?.t ?? 0) + 500;
+      for (const waiting of pendingApprovals(base)) base.push({ type: "approved", agent: waiting.agent, t: when, at: Date.now() });
+    }
     const answers = base.filter((e) => e.type === "agent_output").map((e) => ({ agent: e.agent, text: e.text, tokens: e.tokens }));
     const earlier = resume ? deriveInspector(resume.events) : null;
     const failedIds = earlier ? earlier.order.filter((a) => earlier.agents[a].status === "error") : [];
@@ -486,7 +495,7 @@ export function renderCreate(ctx) {
 
     const id = resume ? resume.id : makeRunId(Date.now());
     const events = [...base];
-    if (resume) events.push({ type: "warning", agent: failedIds[0], message: t("run.retrying", { agent: failedIds.join(", ") }), t: offset - 500, at: Date.now() });
+    if (resume && !approve) events.push({ type: "warning", agent: failedIds[0], message: t("run.retrying", { agent: failedIds.join(", ") }), t: offset - 500, at: Date.now() });
     // The clock of a carried-on run continues from the earlier try, so the times of all events fit together.
     const startedAt = Date.now() - offset;
     let endedAt;
@@ -526,7 +535,7 @@ export function renderCreate(ctx) {
     const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: resume ? resume.pattern : draft.pattern, recordedWith: { provider: providersOf(design, provider).join("+"), model: modelsUsed(design, provider) }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout, providerColors: ctx.settings.get().providerColors, onRetry: retryNow, suggestFallback: ctx.settings.get().fallback !== "off" });
     ctx.onLeave(live.destroy);
     for (const e of base) live.append(e);
-    if (resume) live.append(events[base.length]);
+    if (resume && !approve) live.append(events[base.length]);
     const finish = async () => {
       if (ended) return;
       ended = true;
@@ -546,7 +555,8 @@ export function renderCreate(ctx) {
       const notice = outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: finalModel.cost, free: finalModel.free, ...tryNumbers });
       notice.id = "run-outcome";
       if (result.ok) refreshResultTab(ctx);
-      if (ctx.settings.get().tooltips) {
+      // A paused run shows its own panel with the choices, so it gets no tooltip on top of it.
+      if (ctx.settings.get().tooltips && done?.outcome !== "waiting_approval") {
         const tipNotice = outcomeNotice({ doc, t, outcome: done?.outcome, events, cost: finalModel.cost, free: finalModel.free, ...tryNumbers });
         const tipContent = result.ok ? h(doc, "div", {}, tipNotice, h(doc, "p", { class: "center-tip-link" }, h(doc, "a", { href: `#/play/result/${id}`, "data-ui": "tip-see-result" }, t("create.seeResult")))) : tipNotice;
         // A run that did not finish well keeps its tooltip on the screen until the visitor closes it.
@@ -554,6 +564,32 @@ export function renderCreate(ctx) {
         ctx.onLeave(tip.close);
       }
       outcomeSlot.replaceChildren(notice);
+      if (done?.outcome === "waiting_approval") {
+        const pendingNow = pendingApprovals(events);
+        const panel = approvalPanel({
+          doc,
+          t,
+          pending: pendingNow,
+          onApprove: () => {
+            if (!keysForRun(finalRecordNow).ready) {
+              outcomeSlot.append(h(doc, "p", { class: "notice", role: "alert" }, t("create.retryNeedsKeyLive")));
+              importantTip(t("create.retryNeedsKeyLive"));
+              return;
+            }
+            live.destroy();
+            beginRun({ resume: finalRecordNow, approve: true });
+          },
+          onStop: async () => {
+            // Stop here: the run ends as stopped by you. What happened so far stays saved.
+            events[events.length - 1] = { ...events.at(-1), outcome: "stopped_user" };
+            finalRecordNow = record();
+            await ctx.runStore.save(finalRecordNow);
+            refreshResultTab(ctx);
+            outcomeSlot.replaceChildren(outcomeNotice({ doc, t, outcome: "stopped_user", events, cost: finalModel.cost, free: finalModel.free }));
+          },
+        });
+        outcomeSlot.append(panel);
+      }
       const children = [];
       if (result.ok) children.push(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${id}` }, t("create.seeResult"))));
       else children.push(h(doc, "p", { class: "notice", role: "alert" }, t("create.saveFailed")), downloadButton(ctx, finalRecord));
@@ -583,6 +619,7 @@ export function renderCreate(ctx) {
       apiKey,
       keys,
       resume: answers,
+      approved: approvedAgents(base),
       provider,
       onEvent: (event) => {
         // Carried on: the clock continues from the earlier try, and a handoff the earlier try already has is not shown twice.
@@ -607,13 +644,16 @@ export function renderCreate(ctx) {
   ctx.doc.title = `${t("create.title")} · ${t("site.name")}`;
   // A failed run opened from the player (Play or Result) asks to be carried on: start it here.
   const pending = draft.retry;
+  const pendingApprove = draft.approve === true;
   ctx.onLeave(() => {
     draft.retry = null;
+    draft.approve = false;
   });
   if (pending) {
     if (keysForRun(pending).ready) {
       draft.retry = null;
-      beginRun({ resume: pending });
+      draft.approve = false;
+      beginRun({ resume: pending, approve: pendingApprove });
     } else {
       // The key is missing (not entered, or locked): show the form with the key fields of the run, and a button that carries on once the key is in.
       const definition = definitionFromRun(pending);

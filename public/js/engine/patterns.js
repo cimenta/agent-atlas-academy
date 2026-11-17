@@ -58,6 +58,7 @@ export function validateDesign(design) {
     if (typeof node.search !== "boolean") add("node.search", { id: node.id });
     if (node.limits !== undefined && !validNodeLimits(node.limits)) add("node.limits", { id: node.id });
     if (node.onLimit !== undefined && !ON_LIMIT.includes(node.onLimit)) add("node.onLimit", { id: node.id });
+    if (node.approve !== undefined && node.approve !== true) add("node.approve", { id: node.id });
     if (node.stance !== undefined && node.stance !== "for" && node.stance !== "against") add("node.stance", { id: node.id });
     // Only a critic in a chain can add its notes to the output of the agent before it.
     if (node.addToPrevious !== undefined && !(node.addToPrevious === true && node.agent === "critic" && (pattern === "sequential" || pattern === "parallel"))) add("node.addToPrevious", { id: node.id });

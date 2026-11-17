@@ -12,6 +12,8 @@ export const EVENT_TYPES = [
   "agent_output",
   "done",
   "error",
+  "approval",
+  "approved",
 ];
 
 const isText = (value) => typeof value === "string" && value.length > 0;
@@ -102,7 +104,8 @@ export function validateRun(run) {
     errors.push("events must be a non-empty list");
   } else {
     const agents = new Set(
-      run.events.filter((e) => isObject(e) && e.type === "agent_start" && isText(e.agent)).map((e) => e.agent),
+      // An agent that waited for approval and was stopped there never started, but it is part of the run.
+      run.events.filter((e) => isObject(e) && (e.type === "agent_start" || e.type === "approval") && isText(e.agent)).map((e) => e.agent),
     );
     let previousT = null;
     run.events.forEach((event, index) => {

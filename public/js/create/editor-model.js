@@ -5,7 +5,7 @@ import { validateDesign } from "../engine/patterns.js";
 import { cleanNodeLimits } from "../engine/agent-limits.js";
 
 const ONCE_ONLY = new Set(["supervisor", "combiner", "judge"]);
-const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit"];
+const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve"];
 const DEFAULT_ROUNDS = 2;
 
 // A node carries limits and onLimit only when they are set: the limits are cleaned, and an onLimit of stop (the default) is left out.
@@ -14,6 +14,7 @@ function tidyLimits(node) {
   if (limits) node.limits = limits;
   else delete node.limits;
   if (node.onLimit !== "pass") delete node.onLimit;
+  if (node.approve !== true) delete node.approve;
 }
 
 export function createEditor(initialPattern) {

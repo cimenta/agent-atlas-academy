@@ -23,7 +23,7 @@ export function reviewSummary({ design, limits, provider = "anthropic" }) {
   };
 }
 
-const OUTCOMES = new Set(["finished", "stopped_user", "stopped_limit", "interrupted", "failed"]);
+const OUTCOMES = new Set(["finished", "stopped_user", "stopped_limit", "interrupted", "failed", "waiting_approval"]);
 
 const LIMIT_REASONS = new Set(["time", "steps", "tokens", "searches", "cost", "repeat", "agent_steps", "agent_tokens", "agent_searches"]);
 
@@ -48,7 +48,7 @@ export function formatUsd(usd) {
 // What the notice under a finished run shows next to its message: pass or fail, time and cost.
 // Finished is a pass, a stop you asked for or a limit you set is a warning, anything else failed.
 export function describeOutcome({ outcome, events, cost }) {
-  const level = outcome === "finished" ? "ok" : outcome === "stopped_user" || outcome === "stopped_limit" ? "warn" : "fail";
+  const level = outcome === "finished" ? "ok" : outcome === "stopped_user" || outcome === "stopped_limit" || outcome === "waiting_approval" ? "warn" : "fail";
   const lastT = Array.isArray(events) ? events.at(-1)?.t : undefined;
   return {
     level,

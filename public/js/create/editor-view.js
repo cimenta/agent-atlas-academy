@@ -525,6 +525,15 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     if (TOOLS.web_search?.extraFee) parts.push(h(doc, "p", { class: "notice" }, t("editor.searchFee")));
     parts.push(h(doc, "p", { class: "hint" }, t("editor.toolsNote")));
     if (node.search === true && !webSearchAllowed()) parts.push(h(doc, "p", { class: "limit-warning", "data-ui": "search-off-warning" }, t("editor.searchOffInSettings")));
+    // Approval: the run stops before this agent and waits for a click.
+    const approve = h(doc, "input", { id: "ed-approve", type: "checkbox", checked: node.approve === true, "data-ui": "agent-approve" });
+    approve.addEventListener("change", () => {
+      editor.setNode(node.id, { approve: approve.checked });
+      changed();
+    });
+    parts.push(h(doc, "h4", { class: "editor-approval-heading" }, t("editor.approvalHeading"), helpIcon({ doc, t, id: "create-approval", name: t("editor.approvalHeading") })));
+    parts.push(h(doc, "div", { class: "field checkbox" }, approve, h(doc, "label", { for: "ed-approve" }, t("editor.approve"))));
+    parts.push(h(doc, "p", { class: "hint" }, t("editor.approveNote")));
     parts.push(limitsBlock(node));
     if (type.free) {
       const name = h(doc, "input", { id: "ed-name", type: "text", maxlength: 40, value: node.name ?? "" });
