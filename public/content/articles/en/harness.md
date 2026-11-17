@@ -35,4 +35,6 @@ When a limit stops a run, nothing is lost. The replay keeps everything that happ
 
 Try it: in Settings, Harness, set the maximum steps to 2 and start a run with three agents. It stops early, and the replay shows which limit did it. Then raise the limit again and compare.
 
+Try it without spending anything: the [Harness lab](#/learn/lab) plays a recorded run against limits you set and shows where it stops.
+
 A harness does not make a model smarter. It makes the run bounded, visible and recoverable, and that is what lets you trust an agent with real work.

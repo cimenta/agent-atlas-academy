@@ -10,6 +10,7 @@ import { migrateGeminiKey } from "./storage/gemini-slots.js";
 import { createIndexedDbBackend, createMemoryBackend, createRunStore } from "./storage/runs-store.js";
 import { renderSettings } from "./settings-page.js";
 import { renderPlay } from "./play-pages.js";
+import { renderLab } from "./harness-lab.js";
 import {
   SUPPORTED_LANGUAGES,
   createLanguageStore,
@@ -88,7 +89,7 @@ const MENU = [
 ];
 
 function menuRouteFor(route) {
-  if (route.name === "article") return "learn";
+  if (route.name === "article" || route.name === "lab") return "learn";
   return route.name;
 }
 
@@ -191,6 +192,9 @@ async function renderRoute(isNavigation) {
         break;
       case "learn":
         await renderLearn(ctx);
+        break;
+      case "lab":
+        await renderLab(ctx);
         break;
       case "article":
         await renderArticle(ctx, route.params.slug);

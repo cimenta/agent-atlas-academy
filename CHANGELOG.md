@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Learn, Harness lab (`#/learn/lab`, linked from the article What is a harness?): pick one of the recorded runs of the library, set the steps, tokens, time and repeated answers, and see which step the run would stop at and which limit did it, with meters for tokens and time. Nothing is sent to a provider and nothing costs money. A button copies the step and token limits and the repeat setting to Settings, Harness (the time of a whole run is fixed at 270 s, so it is not copied).
+
 - Human approval: in Create an agent has an Approval group with Ask me before this agent runs. The run then stops before that agent and shows what it would receive, with Approve and continue and Stop here. Nothing runs and nothing is paid while it waits, the wait does not count toward the time limit, and the paused run is saved with your runs, so it can also be approved from Play. Approve carries the run on with the answers it already has (the same way Retry does); the replay shows Approved by you on the step. Stop here ends the run as stopped by you. New help sections Approval and Waiting for approval.
 
 - Settings, Harness, Fallback model (its own page): Fallback model. Off, Suggest (the default) or Switch automatically. When an agent is out of tries, Suggest marks a model in the Retry menu, and Switch automatically gives the agent one more try with another model of the same provider (Fast to Balanced, Balanced to Fast, Strong to Balanced). The replay warns when it switches, the cost is worked out for the model that answered, and a free Gemini key is never moved to a paid-only model.

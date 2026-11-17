@@ -35,4 +35,6 @@ Když limit běh zastaví, nic se neztratí. Přehrávač si pamatuje všechno, 
 
 Zkuste to: v Nastavení, Harness nastavte nejvíce kroků na 2 a spusťte běh se třemi agenty. Zastaví se dřív a přehrávač ukáže, který limit to způsobil. Potom limit zase zvyšte a porovnejte.
 
+Vyzkoušejte si to, aniž byste cokoli platili: [Laboratoř harnessu](#/learn/lab) přehraje zaznamenaný běh proti limitům, které nastavíte, a ukáže, kde se zastaví.
+
 Harness model nezchytří. Udělá z běhu něco omezeného, viditelného a obnovitelného, a právě proto můžete agentovi svěřit skutečnou práci.

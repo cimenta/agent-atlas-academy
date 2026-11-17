@@ -1021,3 +1021,25 @@ a.art-pill:hover { text-decoration: underline; }
 .approval-input{white-space:pre-wrap;word-break:break-word;max-height:14rem;overflow:auto;padding:8px 10px;border-radius:8px;background:rgba(127,127,127,.12);font-size:.85rem}
 .approval-actions{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
 .editor-approval-heading .help-icon{margin-left:8px}
+
+/* Harness lab */
+.lab-pick{display:flex;align-items:center;gap:10px;margin:10px 0 4px}
+.lab-pick select{flex:1;min-width:0}
+.lab-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;margin:12px 0}
+@media (max-width:640px){.lab-cols{grid-template-columns:minmax(0,1fr)}}
+.lab-card{border:1px solid var(--line,rgba(127,127,127,.35));border-radius:10px;padding:10px 14px}
+.lab-card h2{font-size:1rem;margin:0 0 6px}
+.lab-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+.lab-row>label,.lab-label{width:96px;flex:none}
+.lab-row input[type=range],.lab-row select{flex:1;min-width:0}
+.lab-value{width:72px;text-align:right;font-weight:600}
+.lab-bar{flex:1;height:8px;border-radius:4px;background:rgba(127,127,127,.2);overflow:hidden}
+.lab-bar i{display:block;height:100%;background:var(--accent,#2563a8)}
+.lab-step{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;font-size:.9rem}
+.lab-step .lab-agent{flex:1}
+.lab-step.stop{background:#fbe3e1;color:#8a1f17}
+.lab-step.after{opacity:.45;text-decoration:line-through}
+.lab-verdict{margin:8px 0 0;font-weight:600}
+.lab-verdict[data-outcome="stopped"]{color:#a32d2d}
+.lab-verdict[data-outcome="finished"]{color:#2c6b1b}
+.lab-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0}
