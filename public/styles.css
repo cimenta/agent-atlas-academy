@@ -973,7 +973,7 @@ a.art-pill:hover { text-decoration: underline; }
 .limit-warning a { color: inherit; text-decoration: underline; }
 
 /* Harness: the ? button of a setting, its popup and the shared Save bar. */
-.harness-label-top { display: flex; align-items: center; gap: 6px; }
+.harness-label-top { display: flex; align-items: center; gap: 0; }
 .help-icon { min-width: 22px; min-height: 22px; width: 22px; height: 22px; padding: 0; border-radius: 50%; font-size: 0.78rem; font-weight: 700; line-height: 1; color: var(--accent); background: var(--accent-bg); border: 1px solid var(--accent-line); }
 .profile-heading-help, .harness-panel h4 .help-icon { margin-left: 8px; vertical-align: middle; }
 .help-card { max-width: 480px; }
@@ -994,4 +994,9 @@ a.art-pill:hover { text-decoration: underline; }
 .help-inline { margin-left: 8px; vertical-align: middle; }
 
 /* The ? beside a player tab is small so the tabs still fit. */
-.tabs .help-icon { width: 18px; min-width: 18px; height: 18px; min-height: 0; padding: 0; font-size: 11px; margin: 0 4px 0 -4px; flex: none; }
+.tabs .help-icon { width: 18px; min-width: 18px; height: 18px; min-height: 0; padding: 0; font-size: 11px; margin: 0 4px 0 6px; flex: none; }
+
+/* The gap between a ? and the text before it: 8 px, 6 px on the small ones. */
+.help-icon { margin-left: 8px; vertical-align: middle; }
+.tabs .help-icon, .stat .help-icon { margin-left: 6px; }
+.stat .help-icon { width: 18px; min-width: 18px; height: 18px; min-height: 0; font-size: 11px; }
