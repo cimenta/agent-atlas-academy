@@ -1,5 +1,6 @@
 import { agentLabel, numberRepeatedLabels } from "../engine/labels.js";
 import { AGENT_TYPES } from "../engine/catalog.js";
+import { warningHelp } from "../help-ids.js";
 // Turns a run's events into what the inspector shows: one entry per agent, with its steps
 // (model calls, tool calls, handoffs), the messages of each model round and its output.
 // Pure: no DOM.
@@ -68,7 +69,7 @@ export function deriveInspector(events, cursor = events.length) {
   const agents = {};
   const order = agentIds(events);
   for (const id of order) agents[id] = emptyAgent(id);
-  const state = { task: "", order, agents, warnings: [], warningTimes: [], error: null, finished: false, tokens: { input: 0, output: 0 } };
+  const state = { task: "", order, agents, warnings: [], warningTimes: [], warningHelps: [], error: null, finished: false, tokens: { input: 0, output: 0 } };
 
   applied.forEach((event, index) => {
     const agent = typeof event.agent === "string" ? agents[event.agent] : null;
@@ -176,6 +177,7 @@ export function deriveInspector(events, cursor = events.length) {
         break;
       case "warning":
         state.warnings.push(`${agent ? `${agent.label}: ` : ""}${event.message ?? ""}`);
+        state.warningHelps.push(warningHelp(event));
         state.warningTimes.push(typeof event.at === "number" ? event.at : null); // when it happened (clock time), if the run recorded it
         break;
       case "done":

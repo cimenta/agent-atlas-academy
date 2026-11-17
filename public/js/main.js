@@ -53,6 +53,8 @@ const store = createLanguageStore(safeStorage());
 const vault = createVault({ storage });
 const settings = createSettingsStore(storage);
 migrateGeminiKey({ storage, settings });
+// The ? help buttons are hidden by a rule in the style sheet when this says off.
+document.documentElement.setAttribute("data-help", settings.get().helpButtons ? "on" : "off");
 const runStore = createRunStore(typeof indexedDB === "undefined" ? createMemoryBackend() : createIndexedDbBackend());
 const menu = doc.getElementById("menu");
 const menuToggle = doc.getElementById("menu-toggle");

@@ -1,5 +1,6 @@
 // The Result tab: how the run ended, the final answer (formatted or raw, copy, export) and statistics.
 import { h } from "./dom.js";
+import { helpIcon } from "./help-popup.js";
 import { parseMarkdown } from "./markdown.js";
 import { renderBlocks } from "./render.js";
 import { buildResultModel, buildStatistics, limitRows } from "./play-model.js";
@@ -24,10 +25,11 @@ export function renderResult(ctx, run) {
   const stats = buildStatistics(run);
   const answer = model.finalText || "";
   const ui = { tab: "answer", view: "formatted", q: "" };
+  const help = (id, name) => helpIcon({ doc, t, id, name });
 
   const head = h(doc, "div", { class: "result-head" }, h(doc, "h2", {}, t("result.title", { title: run.title })));
   const outcome = outcomeNotice({ doc, t, outcome: model.status, events: run.events, cost: model.cost, free: model.free, durationMs: stats.totalMs });
-  outcome.append(h(doc, "a", { href: `#/play/run/${run.id}`, class: "outcome-link" }, t("result.watch")));
+  outcome.append(h(doc, "a", { href: `#/play/run/${run.id}`, class: "outcome-link" }, t("result.watch")), help("result-outcome", t("result.status")));
   const tabs = h(doc, "div", { class: "result-tabs", role: "tablist", "data-ui": "result-tabs" });
   const body = h(doc, "div", { class: "result-body", "data-ui": "result-body" });
 
@@ -114,14 +116,14 @@ export function renderResult(ctx, run) {
   };
 
   const statsView = () => {
-    const tile = (value, label) => h(doc, "div", { class: "stat" }, h(doc, "b", {}, value), h(doc, "span", {}, label));
+    const tile = (value, label, helpId) => h(doc, "div", { class: "stat" }, h(doc, "b", {}, value), h(doc, "span", {}, label, helpId ? help(helpId, label) : ""));
     const num = (n) => new Intl.NumberFormat(ctx.lang).format(n);
     const tiles = h(
       doc,
       "div",
       { class: "stats", "data-ui": "stats-tiles" },
       tile(stats.totalMs === null ? "—" : formatDuration(stats.totalMs), t("stats.time")),
-      tile(stats.cost === null ? "—" : stats.free ? t("stats.free") : `≈ $${formatUsd(stats.cost)}`, t("stats.cost")),
+      tile(stats.cost === null ? "—" : stats.free ? t("stats.free") : `≈ $${formatUsd(stats.cost)}`, t("stats.cost"), "result-cost"),
       tile(num(stats.usage.input), t("stats.inputTokens")),
       tile(num(stats.usage.output), t("stats.outputTokens")),
       tile(num(stats.usage.searches), t("stats.searches")),
@@ -183,7 +185,7 @@ export function renderResult(ctx, run) {
         ...limitRows(stats).map((row) => h(doc, "tr", { "data-ui": `limits-row-${row.id}` }, h(doc, "th", { scope: "row" }, row.id === "run" ? t("stats.limits.run") : row.label, row.id !== "run" && !row.own ? h(doc, "span", { class: "limit-source" }, ` · ${t("stats.limits.none")}`) : ""), used(row.cells.steps), used(row.cells.tokens), used(row.cells.searches), row.cells.time ? h(doc, "td", {}, row.cells.time.used === null ? "—" : `${num(row.cells.time.used)} / ${num(row.cells.time.limit)} s`) : h(doc, "td", {}, "—"), ...(hasCost ? [row.cells.cost ? money(row.cells.cost) : h(doc, "td", {}, "—")] : []))),
       ),
     );
-    const limitsSection = stats.perAgent.length ? h(doc, "section", { class: "stats-limits", "data-ui": "stats-limits-section" }, h(doc, "h3", {}, t("stats.limits.title")), h(doc, "p", { class: "hint" }, t("stats.limits.intro")), limitTable) : "";
+    const limitsSection = stats.perAgent.length ? h(doc, "section", { class: "stats-limits", "data-ui": "stats-limits-section" }, h(doc, "h3", {}, t("stats.limits.title"), help("result-limits", t("stats.limits.title"))), h(doc, "p", { class: "hint" }, t("stats.limits.intro")), limitTable) : "";
     const when = [];
     if (stats.startedAt) when.push(t("stats.started", { time: formatWhen(stats.startedAt, ctx.lang) }));
     if (stats.endedAt) when.push(t("stats.ended", { time: formatWhen(stats.endedAt, ctx.lang) }));
@@ -193,6 +195,7 @@ export function renderResult(ctx, run) {
       "div",
       { class: "stats-wrap" },
       tiles,
+      stats.perAgent.length ? h(doc, "h3", {}, t("result.perAgent"), help("result-agents", t("result.perAgent"))) : "",
       stats.perAgent.length ? table : "",
       limitsSection,
       when.length ? h(doc, "p", { class: "stats-note" }, when.join(" · ")) : "",

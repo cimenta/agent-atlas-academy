@@ -1,5 +1,6 @@
 // The Create tab: task, pattern, diagram, review, then a live run in the player.
 import { h } from "../dom.js";
+import { helpIcon } from "../help-popup.js";
 import { markUnlockAlert } from "../unlock-alert.js";
 import { keyState } from "../key-state.js";
 import { downloadFile } from "../download.js";
@@ -70,6 +71,8 @@ function downloadButton(ctx, run) {
 export function renderCreate(ctx) {
   const vaultFor = (id) => (ctx.vault.forProvider ? ctx.vault.forProvider(id) : ctx.vault);
   const { doc, t } = ctx;
+  // A ? next to a heading: it opens that section of Help.
+  const help = (id, name) => helpIcon({ doc, t, id, name });
   const hasKey = (id) => vaultFor(id).getSessionKey() !== null || vaultFor(id).hasStoredKey();
   // The visitor may choose several key slots (Claude, Gemini free, Gemini paid). Until a choice is made it is the first one with a key.
   const chosenSlots = () => {
@@ -340,12 +343,12 @@ export function renderCreate(ctx) {
       const reasons = verdict.ok ? "" : h(doc, "ul", { class: "reasons", role: "status" }, ...verdict.reasons.map((r) => h(doc, "li", {}, t(`create.reason.${r}`))));
 
       reviewHost.replaceChildren(
-        h(doc, "h3", {}, t("create.reviewHeading")),
+        h(doc, "h3", {}, t("create.reviewHeading"), help("create-run", t("create.reviewHeading"))),
         h(doc, "h4", {}, t("create.reviewAgents")),
         agents,
-        h(doc, "h4", {}, t("create.limitsHeading")),
+        h(doc, "h4", {}, t("create.limitsHeading"), help("create-limits", t("create.limitsHeading"))),
         ...limitInputs,
-        h(doc, "h4", {}, t("create.estimateHeading")),
+        h(doc, "h4", {}, t("create.estimateHeading"), help("create-estimate", t("create.estimateHeading"))),
         ...estimateLines,
         ...providersOf(design, provider).map((p) => h(doc, "p", { class: "notice" }, t(p === "google" ? "create.dataNoticeGoogle" : "create.dataNotice"))),
         h(doc, "h4", {}, t("create.keyHeading")),
@@ -410,13 +413,13 @@ export function renderCreate(ctx) {
       h(doc, "div", { class: "create-head" }, h(doc, "h2", {}, t("create.title")), loadButton, clearButton, definitionFile),
       startNotice ? h(doc, "p", { class: "notice", role: noticeRole }, startNotice) : "",
       draft.retry ? carryOnButton : "",
-      h(doc, "div", { class: "field wide" }, h(doc, "label", { for: "cr-task" }, t("create.taskLabel")), taskInput, counter),
-      h(doc, "h3", {}, t("create.patternHeading")),
+      h(doc, "div", { class: "field wide" }, h(doc, "label", { for: "cr-task" }, t("create.taskLabel"), help("create-task", t("create.taskLabel"))), taskInput, counter),
+      h(doc, "h3", {}, t("create.patternHeading"), help("create-pattern", t("create.patternHeading"))),
       h(doc, "p", { class: "hint" }, t("create.patternHelp")),
       patternGroup,
       patternNotice,
       providerField,
-      h(doc, "h3", {}, t("create.designHeading")),
+      h(doc, "h3", {}, t("create.designHeading"), help("create-diagram", t("create.designHeading"))),
       editorHost,
       reviewHost,
     );

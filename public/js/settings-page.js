@@ -1,6 +1,6 @@
 // The settings page: API key handling, the harness (limits and fixed rules) and local data.
 import { h } from "./dom.js";
-import { openHelpPopup } from "./help-popup.js";
+import { helpIcon } from "./help-popup.js";
 import { LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, RETRIES, RETRY_DELAY_SEC, COST_CAP_USD, REPEAT_STOP, HANDOFF_CHARS, PROFILES, matchProfile, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
 import { COLOR_CHOICES, paintModelTag } from "./provider-colors.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "./key-slots.js";
@@ -282,12 +282,10 @@ export function renderSettings(ctx) {
   harnessSpecs.push({ id: "repeat", min: 1, max: REPEAT_STOP.max, step: 1, value: harnessNow.repeatStop || 1, def: REPEAT_STOP.default, show: (n) => (n < REPEAT_STOP.min ? t("harness.costOff") : t("harness.repeatTimes", { n })) });
   harnessSpecs.push({ id: "handoff", min: 0, max: HANDOFF_CHARS.max, step: HANDOFF_CHARS.step, value: harnessNow.handoffChars, def: HANDOFF_CHARS.default, show: (n) => (n > 0 ? harnessFormat(n) : t("harness.costOff")) });
   const PROFILE_ROWS = Object.keys(PROFILES.balanced);
-  // The ? button of a setting: it opens a popup that explains it.
-  const helpButton = (id, name) => {
-    const button = h(doc, "button", { type: "button", class: "help-icon", "data-ui": `help-${id}`, "aria-label": t("harness.help.open", { name }), title: t("harness.help.open", { name }) }, "?");
-    button.addEventListener("click", () => openHelpPopup({ doc, t, title: name, body: t(`harness.help.${id}`) }));
-    return button;
-  };
+  // A ? next to a heading: it opens that section of Help.
+  const help = (id, name) => helpIcon({ doc, t, id, name });
+  // The ? button of a setting: it opens its section of Help.
+  const helpButton = (id, name) => helpIcon({ doc, t, id: `harness-${id.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`, name });
   const harnessRows = harnessSpecs.map((spec) => {
     const slider = h(doc, "input", { id: `set-harness-${spec.id}`, type: "range", min: spec.min, max: spec.max, step: spec.step, value: spec.value, "data-ui": `harness-${spec.id}` });
     const shown = h(doc, "output", { class: "harness-value", for: slider.id, "data-ui": `harness-${spec.id}-value` }, spec.show(spec.value));
@@ -443,6 +441,15 @@ export function renderSettings(ctx) {
   tipsBox.addEventListener("change", () => {
     settings.setTooltips(!tipsBox.checked);
     say(t(tipsBox.checked ? "settings.tooltipsOff" : "settings.tooltipsOn"));
+  });
+
+  // The ? help buttons.
+  const helpBox = h(doc, "input", { id: "set-help-buttons", type: "checkbox", "data-ui": "set-help-buttons" });
+  helpBox.checked = !settings.get().helpButtons;
+  helpBox.addEventListener("change", () => {
+    settings.setHelpButtons(!helpBox.checked);
+    doc.documentElement.setAttribute("data-help", helpBox.checked ? "off" : "on");
+    say(t(helpBox.checked ? "settings.helpButtonsOff" : "settings.helpButtonsOn"));
   });
 
   // Where the player buttons sit.
@@ -648,7 +655,7 @@ export function renderSettings(ctx) {
       doc,
       "section",
       { class: "settings-section" },
-      h(doc, "h2", {}, t("settings.tabKeys")),
+      h(doc, "h2", {}, t("settings.tabKeys"), help("settings-keys", t("settings.tabKeys"))),
       h(doc, "p", {}, t("settings.keyIntro")),
       providerTabs,
       providerPanel,
@@ -658,17 +665,21 @@ export function renderSettings(ctx) {
       doc,
       "section",
       { class: "settings-section" },
-      h(doc, "h2", {}, t("settings.tooltipsHeading")),
+      h(doc, "h2", {}, t("settings.tabGeneral"), help("settings-general", t("settings.tabGeneral"))),
+      h(doc, "h3", {}, t("settings.tooltipsHeading"), help("settings-tooltips", t("settings.tooltipsHeading"))),
       h(doc, "p", {}, t("settings.tooltipsIntro")),
       h(doc, "div", { class: "field checkbox" }, tipsBox, h(doc, "label", { for: "set-tooltips" }, t("settings.tooltipsLabel"))),
+      h(doc, "h3", {}, t("settings.helpButtonsHeading"), help("settings-help-buttons", t("settings.helpButtonsHeading"))),
+      h(doc, "p", {}, t("settings.helpButtonsIntro")),
+      h(doc, "div", { class: "field checkbox" }, helpBox, h(doc, "label", { for: "set-help-buttons" }, t("settings.helpButtonsLabel"))),
     ),
-    h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.playerHeading")), h(doc, "p", {}, t("settings.playerIntro")), field("set-player-layout", t("settings.playerLabel"), layoutSelect)),
-    h(doc, "section", { class: "settings-section", "data-ui": "shortcuts-section" }, h(doc, "h2", {}, t("shortcuts.heading")), h(doc, "p", {}, t("shortcuts.intro")), h(doc, "div", { class: "field checkbox" }, shortcutsBox, h(doc, "label", { for: "set-shortcuts" }, t("shortcuts.enable"))), h(doc, "p", {}, t("shortcuts.changeHint")), shortcutList, resetKeys),
+    h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.playerHeading"), help("settings-player", t("settings.playerHeading"))), h(doc, "p", {}, t("settings.playerIntro")), field("set-player-layout", t("settings.playerLabel"), layoutSelect)),
+    h(doc, "section", { class: "settings-section", "data-ui": "shortcuts-section" }, h(doc, "h2", {}, t("shortcuts.heading"), help("settings-shortcuts", t("shortcuts.heading"))), h(doc, "p", {}, t("shortcuts.intro")), h(doc, "div", { class: "field checkbox" }, shortcutsBox, h(doc, "label", { for: "set-shortcuts" }, t("shortcuts.enable"))), h(doc, "p", {}, t("shortcuts.changeHint")), shortcutList, resetKeys),
     h(
       doc,
       "section",
       { class: "settings-section" },
-      h(doc, "h2", {}, t("settings.dataHeading")),
+      h(doc, "h2", {}, t("settings.dataHeading"), help("settings-data", t("settings.dataHeading"))),
       h(doc, "p", {}, t("settings.dataIntro")),
       dataStat,
       h(
@@ -681,7 +692,7 @@ export function renderSettings(ctx) {
       h(doc, "div", { class: "danger-row", "data-ui": "data-danger" }, h(doc, "div", {}, h(doc, "h3", {}, t("settings.deleteRuns")), h(doc, "p", {}, t("settings.deleteText"))), deleteButton),
       confirmBox,
     ),
-    h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.securityHeading")), h(doc, "div", { class: "sec-switch", "data-ui": "sec-switch", role: "group", "aria-label": t("settings.secProvider") }, ...secSwitch), securityNone, secLead, secSteps, unlockForm, secActions),
+    h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.securityHeading"), help("settings-security", t("settings.securityHeading"))), h(doc, "div", { class: "sec-switch", "data-ui": "sec-switch", role: "group", "aria-label": t("settings.secProvider") }, ...secSwitch), securityNone, secLead, secSteps, unlockForm, secActions),
   ];
   const [keySection, harnessSection, tooltipsSection, playerSection, shortcutsSection, dataSection, securitySection] = written;
   // Tabs down the left (a row on a phone); one section is shown at a time.
@@ -690,7 +701,7 @@ export function renderSettings(ctx) {
     ["key", "settings.tabKeys", keySection],
     ["harness", "harness.title", harnessSection],
     ["player", "settings.playerHeading", playerSection],
-    ["tooltips", "settings.tooltipsHeading", tooltipsSection],
+    ["general", "settings.tabGeneral", tooltipsSection],
     ["data", "settings.dataHeading", dataSection],
     ["shortcuts", "shortcuts.heading", shortcutsSection],
     ["security", "settings.securityHeading", securitySection],

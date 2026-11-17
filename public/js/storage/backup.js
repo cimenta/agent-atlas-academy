@@ -86,6 +86,7 @@ export async function applyBackup(backup, { runStore, settingsStore, vault, mode
   if (backup.settings?.repeatStop !== undefined) settingsStore.setRepeatStop(backup.settings.repeatStop);
   if (backup.settings?.handoffChars !== undefined) settingsStore.setHandoffChars(backup.settings.handoffChars);
   if (typeof backup.settings?.tooltips === "boolean") settingsStore.setTooltips(backup.settings.tooltips);
+  if (typeof backup.settings?.helpButtons === "boolean") settingsStore.setHelpButtons(backup.settings.helpButtons);
   if (backup.settings?.playerLayout === "bar" || backup.settings?.playerLayout === "side") settingsStore.setPlayerLayout(backup.settings.playerLayout);
   if (typeof backup.settings?.shortcuts === "boolean") settingsStore.setShortcuts(backup.settings.shortcuts);
   if (isObject(backup.settings?.goKeys)) settingsStore.setGoKeys(backup.settings.goKeys);

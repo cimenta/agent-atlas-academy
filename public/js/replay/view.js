@@ -1,6 +1,7 @@
 // The run inspector: agent cards, then Steps / Messages / Output for the chosen agent.
 // A slim player on top decides how much of the run is revealed (replay), the rest is inspection.
 import { h } from "../dom.js";
+import { helpIcon } from "../help-popup.js";
 import { validateRun } from "../run-schema.js";
 import { createPlayer } from "./player.js";
 import { debateProgress, deriveInspector, designLabel } from "./inspect-model.js";
@@ -142,6 +143,9 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   const previousButton = iconButton({ class: "ib", "data-ui": "previous-button" }, GLYPH.previous, t("player.previous"));
   const nextButton = iconButton({ class: "ib", "data-ui": "next-button" }, GLYPH.next, t("player.next"));
   const sideLayout = layout === "side";
+  // A ? that opens a section of Help.
+  const help = (id, name) => helpIcon({ doc, t, id, name });
+  const speedHelp = help("replay-speed", t("player.speedLabel"));
   // Side layout: one button that cycles through the speeds. Bar layout: a small button for every speed.
   const speedButtons = sideLayout ? [] : player.speeds.map((speed) => h(doc, "button", { type: "button", "data-speed": speed }, t("player.speedOption", { speed })));
   const speedGroup = sideLayout
@@ -162,7 +166,11 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     });
     return button;
   });
-  const tabs = h(doc, "div", { class: "tabs", "data-ui": "inspector-tabs", role: "tablist" }, ...tabButtons);
+  const tabHelpNames = { steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput" };
+  const tabs = h(doc, "div", { class: "tabs", "data-ui": "inspector-tabs", role: "tablist" }, ...tabButtons.flatMap((button) => {
+    const name = button.getAttribute("data-tab");
+    return [button, help(`replay-${name}`, t(tabHelpNames[name]))];
+  }));
   const body = h(doc, "div", { class: "inspect-body", "data-ui": "inspector-body", tabindex: "-1" });
   // One search box next to the tabs: it searches the text of the tab that is open.
   let drawBody = () => {};
@@ -214,8 +222,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     // Side layout: the buttons form a narrow column to the right of the diagram, slider and status.
     // Bar layout: one slim line under the diagram holds buttons, slider and speed.
     ...(sideLayout
-      ? [h(doc, "div", { class: "player-row", "data-ui": "player-row" }, h(doc, "div", { class: "player-stage" }, chips, range, status), h(doc, "div", { class: "controls controls-col", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, speedGroup))]
-      : [chips, h(doc, "div", { class: "controls controls-bar", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, range, speedGroup, speedMobile), status]),
+      ? [h(doc, "div", { class: "player-row", "data-ui": "player-row" }, h(doc, "div", { class: "player-stage" }, chips, range, status), h(doc, "div", { class: "controls controls-col", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, speedGroup, speedHelp))]
+      : [chips, h(doc, "div", { class: "controls controls-bar", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, range, speedGroup, speedMobile, speedHelp), status]),
     tabRow,
     body,
   );
@@ -456,7 +464,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     state.warnings.forEach((w, i) => {
       const at = state.warningTimes[i];
       const time = typeof at === "number" ? clockTime(at) : "";
-      items.push(h(doc, "div", { class: "banner warn" }, ...(time ? [h(doc, "time", { class: "banner-time", "data-ui": "banner-time", datetime: new Date(at).toISOString() }, time), " "] : []), `⚠ ${w}`));
+      items.push(h(doc, "div", { class: "banner warn" }, ...(time ? [h(doc, "time", { class: "banner-time", "data-ui": "banner-time", datetime: new Date(at).toISOString() }, time), " "] : []), `⚠ ${w}`, " ", help(state.warningHelps[i] ?? "replay-warnings", t("replay.warningHelp"))));
     });
     banners.replaceChildren(...items);
   }

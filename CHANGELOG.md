@@ -6,7 +6,11 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
-- Settings, Harness: the Adjustable harness is split into the pages Limits, Retries, Cost and Guards (next to Fixed harness), with one Save and one Reset for all of them, and every setting has a ? button that opens a popup that explains it, in English and Czech.
+- Play: a ? button at the replay speed, at the Steps, Messages and Output tabs, at each warning of a replay (it opens the Harness section of the setting that caused it), and at How it ended, Estimated cost, Tokens per agent and Limits on the Result page. Warnings for a retry and for a cut answer now say so in the run record. The ? buttons can still be hidden in Settings, General.
+
+- Settings and Create: a ? button next to every Settings section and every Create step, with the text taken from Help. A new Settings tab, General, holds the Tooltips option (moved from its own tab) and Hide the ? help buttons, which hides every ? on the site.
+
+- Settings, Harness: the Adjustable harness is split into the pages Limits, Retries, Cost and Guards (next to Fixed harness), with one Save and one Reset for all of them, and every setting has a ? button that opens a popup with the matching section of Help (with related settings and a link to the whole topic). Help topics can have small sections with addresses such as #/help/harness-steps, listed under the open topic. The words are written once, in Help, in English and Czech.
 
 - Settings, Harness: Repeated answers stops a run when the same agent gives the same answer (ignoring capitals and spacing) 2 to 4 times in a row; it is on by default at 3 and can be turned off. Size of a handoff cuts what one agent passes on to the next (off by default, 2,000 to 20,000 characters); the next agent is told, a warning shows in the replay, and the replay keeps the whole answer.
 

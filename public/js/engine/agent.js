@@ -73,7 +73,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
       } catch (error) {
         if (!(error instanceof AnthropicError) || !error.retryable || tried >= retryLimit) throw error;
         const left = retryLimit - tried;
-        emit({ type: "warning", agent: node.id, message: `The provider was busy (${redact(error.message.split("\n\n").at(-1))}). Trying again (${left === 1 ? "last try" : `${left} tries left`}).` });
+        emit({ type: "warning", agent: node.id, retry: true, message: `The provider was busy (${redact(error.message.split("\n\n").at(-1))}). Trying again (${left === 1 ? "last try" : `${left} tries left`}).` });
         await sleep(retryDelayMs);
       }
     }
@@ -184,7 +184,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
           continue;
         }
         if (response.stop_reason === "max_tokens") {
-          emit({ type: "warning", agent: node.id, message: "The answer was cut because it reached the token limit for one reply." });
+          emit({ type: "warning", agent: node.id, truncated: true, message: "The answer was cut because it reached the token limit for one reply." });
         }
         break;
       }
