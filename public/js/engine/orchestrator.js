@@ -25,7 +25,7 @@ export const RUNNERS = {
 // resume: the answers of agents that already finished in an earlier try of this run, in order ({ agent, text, tokens }).
 // An agent's first activations are answered from them without calling the provider, so the run goes through the
 // same steps and carries on live where it failed. No run_start event is sent then: the caller already has it.
-export async function runDesign({ design, task, limits, language = "en", call, callFor, emit, signal, now = Date.now, provider = "anthropic", resume = [], maxOutputTokens, retries, retryDelaySec, freeTier = false, repeatStop, handoffChars = 0, allowSearch = true }) {
+export async function runDesign({ design, task, limits, language = "en", call, callFor, emit, signal, now = Date.now, provider = "anthropic", resume = [], maxOutputTokens, retries, retryDelaySec, freeTier = false, repeatStop, handoffChars = 0, allowSearch = true, fallback = "off" }) {
   const startedAt = now();
   const send = (event) => emit({ ...event, t: now() - startedAt });
 
@@ -51,7 +51,7 @@ export async function runDesign({ design, task, limits, language = "en", call, c
   const agents = new Map(
     design.nodes.map((node) => [
       node.id,
-      createAgent({ node, design, call: callFor?.(node) ?? call, emit: send, budget, signal: control.signal, language, provider: nodeProvider(node, provider), maxOutputTokens, retries, retryDelaySec, freeTier, repeatStop, cached: resume.filter((r) => r.agent === node.id) }),
+      createAgent({ node, design, call: callFor?.(node) ?? call, emit: send, budget, signal: control.signal, language, provider: nodeProvider(node, provider), maxOutputTokens, retries, retryDelaySec, freeTier, repeatStop, fallback, cached: resume.filter((r) => r.agent === node.id) }),
     ]),
   );
   const passOn = createPassOn({ chars: clampHandoffChars(handoffChars), emit: send });

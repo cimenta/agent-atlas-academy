@@ -1,6 +1,6 @@
 // Small settings kept in the browser. Never throws: a blocked or broken storage just gives the defaults.
 import { clampLimits } from "../engine/patterns.js";
-import { clampTimeoutSec, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop, clampHandoffChars } from "../engine/catalog.js";
+import { clampTimeoutSec, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop, clampHandoffChars, clampFallback } from "../engine/catalog.js";
 import { mergeGoKeys, validateGoKeys } from "../shortcuts.js";
 import { DEFAULT_PROVIDER_COLORS, isColor, mergeProviderColors } from "../provider-colors.js";
 
@@ -18,7 +18,7 @@ export function createSettingsStore(storage) {
     // Tooltips are on unless the user turned them off.
     // The player controls sit on one slim bar ("bar") unless the user chose the side column ("side").
     const free = stored?.freeTier;
-    return { freeTier: { google: free?.google === true }, limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, helpButtons: stored?.helpButtons !== false, webSearch: stored?.webSearch !== false, playerLayout: stored?.playerLayout === "side" ? "side" : "bar", shortcuts: stored?.shortcuts !== false, goKeys: mergeGoKeys(stored?.goKeys), providerColors: mergeProviderColors(stored?.providerColors), requestTimeoutSec: clampTimeoutSec(stored?.requestTimeoutSec), maxOutputTokens: clampOutputTokens(stored?.maxOutputTokens), retries: clampRetries(stored?.retries ?? undefined), retryDelaySec: clampRetryDelaySec(stored?.retryDelaySec), repeatStop: clampRepeatStop(stored?.repeatStop), handoffChars: clampHandoffChars(stored?.handoffChars) };
+    return { freeTier: { google: free?.google === true }, limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, helpButtons: stored?.helpButtons !== false, webSearch: stored?.webSearch !== false, fallback: clampFallback(stored?.fallback), playerLayout: stored?.playerLayout === "side" ? "side" : "bar", shortcuts: stored?.shortcuts !== false, goKeys: mergeGoKeys(stored?.goKeys), providerColors: mergeProviderColors(stored?.providerColors), requestTimeoutSec: clampTimeoutSec(stored?.requestTimeoutSec), maxOutputTokens: clampOutputTokens(stored?.maxOutputTokens), retries: clampRetries(stored?.retries ?? undefined), retryDelaySec: clampRetryDelaySec(stored?.retryDelaySec), repeatStop: clampRepeatStop(stored?.repeatStop), handoffChars: clampHandoffChars(stored?.handoffChars) };
   }
   function save(next) {
     try {
@@ -50,6 +50,9 @@ export function createSettingsStore(storage) {
     },
     setRetries(tries, delaySec) {
       save({ ...get(), retries: clampRetries(tries), retryDelaySec: clampRetryDelaySec(delaySec) });
+    },
+    setFallback(mode) {
+      save({ ...get(), fallback: clampFallback(mode) });
     },
     setRepeatStop(times) {
       save({ ...get(), repeatStop: clampRepeatStop(times) });

@@ -1006,3 +1006,9 @@ a.art-pill:hover { text-decoration: underline; }
 .untrusted { margin: 0 0 6px; }
 .tag-always { margin-left: 8px; font-size: 0.75rem; padding: 1px 8px; border-radius: 999px; background: var(--accent-bg); color: var(--accent); }
 .editor-tools-heading { margin-top: 12px; }
+
+/* Fallback model: three choices, each with a line of explanation. */
+.fallback-options { display: grid; gap: 8px; margin: 8px 0; }
+.fallback-option { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
+.fallback-option:has(input:checked) { border-color: var(--accent); background: var(--accent-bg); }
+.fallback-option .hint { display: block; margin: 2px 0 0; }

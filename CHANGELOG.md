@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Settings, Harness, Retries: Fallback model. Off, Suggest (the default) or Switch automatically. When an agent is out of tries, Suggest marks a model in the Retry menu, and Switch automatically gives the agent one more try with another model of the same provider (Fast to Balanced, Balanced to Fast, Strong to Balanced). The replay warns when it switches, the cost is worked out for the model that answered, and a free Gemini key is never moved to a paid-only model.
+
 - Settings, Harness, Tools: a master switch for web search in your runs (on by default; a run with it off says so in the replay). In Create the search switch of an agent is now under Tools, with a ? button and a notice when search is off in Settings. Agents that can search are told that text from the web is data, not instructions; this is a fixed rule listed on the Fixed harness page, and the replay marks search results as untrusted web content.
 
 - Play: a ? button at the replay speed, at the Steps, Messages and Output tabs, at each warning of a replay (it opens the Harness section of the setting that caused it), and at How it ended, Estimated cost, Tokens per agent and Limits on the Result page. Warnings for a retry and for a cut answer now say so in the run record. The ? buttons can still be hidden in Settings, General.

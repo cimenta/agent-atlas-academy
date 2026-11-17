@@ -1,5 +1,5 @@
 // Retry with another model: the models a failed agent can be retried with, and a run with that choice applied.
-import { providerCatalog, nodeModel, nodeProvider } from "../engine/catalog.js";
+import { providerCatalog, nodeModel, nodeProvider, fallbackModelFor } from "../engine/catalog.js";
 import { isSlot, slotIsFree, slotProvider } from "../key-slots.js";
 
 const PROVIDERS = ["anthropic", "google"];
@@ -13,11 +13,13 @@ function slotFor(provider, model, node) {
 }
 
 // [{ provider, id, tier, value: { slot, model }, current, free }] for every model, the one that failed marked current.
-export function retryChoices(design, nodeId, fallback = "anthropic") {
+// suggest: mark the model the fallback would pick (the same provider, see fallbackModelFor) as suggested.
+export function retryChoices(design, nodeId, fallback = "anthropic", { suggest = false } = {}) {
   const node = design?.nodes?.find((n) => n.id === nodeId);
   const now = nodeModel(node, fallback);
   const nowProvider = nodeProvider(node, fallback);
   const out = [];
+  const suggested = suggest ? fallbackModelFor(node, fallback) : null;
   for (const provider of PROVIDERS) {
     for (const model of providerCatalog(provider).models) {
       out.push({
@@ -27,6 +29,7 @@ export function retryChoices(design, nodeId, fallback = "anthropic") {
         value: { slot: slotFor(provider, model, node), model: model.key },
         current: provider === nowProvider && model.id === now.id,
         free: provider === "google" && model.freeTier !== false,
+        suggested: suggested !== null && provider === nowProvider && model.id === suggested.id,
       });
     }
   }

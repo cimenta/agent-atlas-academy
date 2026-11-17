@@ -294,7 +294,7 @@ export async function renderReplayTab(ctx, requestedId) {
               doc.defaultView.location.hash = "#/play/create";
             }
           : null;
-      handle = mountReplay(host, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors, onRetry });
+      handle = mountReplay(host, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors, onRetry, suggestFallback: ctx.settings?.get().fallback !== "off" });
       if (openAboutFor === currentId) handle.openAbout?.();
       openAboutFor = null;
       host.append(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${currentId}` }, t("play.tab.result"))));

@@ -1,7 +1,7 @@
 // The settings page: API key handling, the harness (limits and fixed rules) and local data.
 import { h } from "./dom.js";
 import { helpIcon } from "./help-popup.js";
-import { LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, RETRIES, RETRY_DELAY_SEC, COST_CAP_USD, REPEAT_STOP, HANDOFF_CHARS, PROFILES, matchProfile, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
+import { LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, RETRIES, RETRY_DELAY_SEC, COST_CAP_USD, REPEAT_STOP, HANDOFF_CHARS, PROFILES, matchProfile, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS, FALLBACK_MODES, FALLBACK_DEFAULT } from "./engine/catalog.js";
 import { COLOR_CHOICES, paintModelTag } from "./provider-colors.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "./key-slots.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
@@ -329,6 +329,7 @@ export function renderSettings(ctx) {
     settings.setRepeatStop(value("repeat"));
     settings.setHandoffChars(value("handoff"));
     settings.setWebSearch(webBox.checked);
+    settings.setFallback(chosenFallback());
     const saved = settings.get();
     harnessRow("steps").set(saved.limits.maxSteps);
     harnessRow("tokens").set(saved.limits.maxTokens);
@@ -346,6 +347,7 @@ export function renderSettings(ctx) {
   harnessReset.addEventListener("click", () => {
     harnessRows.forEach((row) => row.set(row.spec.def));
     webBox.checked = true;
+    fallbackRadios.suggest.checked = true;
     say(t("harness.resetDone"));
   });
   // Three quick choices for how long a request waits for an answer.
@@ -380,12 +382,23 @@ export function renderSettings(ctx) {
     ...rowsOf("steps", "tokens", "searches", "output", "timeout"),
     h(doc, "div", { class: "harness-actions" }, ...harnessQuick),
   );
+  // Fallback model: what happens when an agent still fails after all its tries.
+  const fallbackRadios = Object.fromEntries(FALLBACK_MODES.map((mode) => {
+    const input = h(doc, "input", { type: "radio", name: "set-fallback", id: `set-fallback-${mode}`, value: mode, "data-ui": `fallback-${mode}` });
+    input.checked = harnessNow.fallback === mode;
+    return [mode, input];
+  }));
+  const chosenFallback = () => FALLBACK_MODES.find((mode) => fallbackRadios[mode].checked) ?? FALLBACK_DEFAULT;
+  const fallbackOptions = h(doc, "div", { class: "fallback-options", role: "radiogroup", "aria-label": t("harness.fallbackHeading") }, ...FALLBACK_MODES.map((mode) => h(doc, "label", { class: "fallback-option", for: `set-fallback-${mode}` }, fallbackRadios[mode], h(doc, "span", {}, h(doc, "b", {}, t(`harness.fallback.${mode}`), mode === FALLBACK_DEFAULT ? h(doc, "span", { class: "tag-always" }, t("harness.fallbackDefault")) : ""), h(doc, "span", { class: "hint" }, t(`harness.fallback.${mode}Hint`))))));
   const harnessRetries = page(
     "retries",
     h(doc, "h4", {}, t("harness.retriesHeading")),
     h(doc, "p", { class: "hint" }, t("harness.retriesIntro")),
     ...rowsOf("retries", "retryDelay"),
     h(doc, "p", { class: "hint" }, t("harness.retriesNote")),
+    h(doc, "h4", {}, t("harness.fallbackHeading"), help("harness-fallback", t("harness.fallbackHeading"))),
+    h(doc, "p", { class: "hint" }, t("harness.fallbackIntro")),
+    fallbackOptions,
   );
   const harnessCost = page(
     "cost",

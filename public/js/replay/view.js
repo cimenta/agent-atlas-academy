@@ -77,15 +77,15 @@ export function headingOf(run) {
   return line.length > 120 ? `${line.slice(0, 117)}…` : line;
 }
 
-export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null }) {
+export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false }) {
   const validation = validateRun(run);
   if (!validation.ok) return mountError(container, doc, t, validation.errors);
-  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout, providerColors, onRetry });
+  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout, providerColors, onRetry, suggestFallback });
 }
 
 // A player that shows a run while it is still arriving. Events are added with append(), end() closes it.
-export function mountLiveReplay(container, { title, pattern, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar", providerColors, onRetry = null }) {
-  const view = mountView(container, { events: [], pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout, providerColors, onRetry });
+export function mountLiveReplay(container, { title, pattern, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar", providerColors, onRetry = null, suggestFallback = false }) {
+  const view = mountView(container, { events: [], pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout, providerColors, onRetry, suggestFallback });
   return {
     append: (event) => view.player.append(event),
     end: () => view.player.endLive(),
@@ -93,7 +93,7 @@ export function mountLiveReplay(container, { title, pattern, recordedWith, t, do
   };
 }
 
-function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null }) {
+function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false }) {
   const player = createPlayer({ events, clock, timeScale, live });
   const ui = { agent: null, tab: "steps", step: null, round: null, follow: true };
   const viewer = createViewer({ doc, t });
@@ -272,8 +272,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
                 arrowLabel: t("player.retryMenu"),
                 title: t("player.retryMenuTitle"),
                 providerName: (p) => (p === "google" ? "Gemini" : "Anthropic"),
-                tagText: (c) => (c.current ? t("player.retryTagFailed") : c.provider === "google" ? t(c.free ? "player.retryTagFree" : "player.retryTagPaid") : t("player.retryTagPaid")),
-                choicesOf: (id) => retryChoices(design, id, String(recordedWith?.provider ?? "anthropic").split("+")[0]),
+                tagText: (c) => (c.suggested ? `${t("player.retrySuggested")} · ` : "") + (c.current ? t("player.retryTagFailed") : c.provider === "google" ? t(c.free ? "player.retryTagFree" : "player.retryTagPaid") : t("player.retryTagPaid")),
+                choicesOf: (id) => retryChoices(design, id, String(recordedWith?.provider ?? "anthropic").split("+")[0], { suggest: suggestFallback }),
               }
             : null,
           onSelect: (id) => {

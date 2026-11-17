@@ -17,4 +17,6 @@ Běžné reakce:
 
 Záleží na dvou pravidlech. Zaprvé, každá smyčka opakování potřebuje limit, jinak se z jednoho selhání může stát nekonečná a drahá smyčka. Zadruhé, chyby mají být vidět. Tichá opakování skrývají, proč byl běh pomalý nebo drahý.
 
+Harness může také přejít na jiný model, když jeden stále selhává. V Agent Atlas je to nastavení Záložní model: může pro Znovu navrhnout jiný model téhož poskytovatele, nebo na něj jednou automaticky přepnout. Záložní model je vždy model, pro který máte klíč, a replay ukáže, kdy k tomu došlo.
+
 V přehrávání se varování a chyby objevují jako samostatné kroky, takže přesně vidíte, kde běh narazil na potíže.

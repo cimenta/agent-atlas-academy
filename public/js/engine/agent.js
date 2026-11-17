@@ -1,5 +1,5 @@
 // One agent in a run: keeps its own conversation, calls the model, reports events.
-import { nodeModel, AGENT_TYPES, OUTPUT_TOKENS, RETRIES, RETRY_DELAY_SEC, REPEAT_STOP, MAX_PAUSES, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop } from "./catalog.js";
+import { nodeModel, AGENT_TYPES, OUTPUT_TOKENS, RETRIES, RETRY_DELAY_SEC, REPEAT_STOP, MAX_PAUSES, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop, fallbackModelFor } from "./catalog.js";
 import { systemPromptFor } from "./prompts.js";
 import { toolsFor } from "./tools.js";
 import { AnthropicError, redact } from "./anthropic.js";
@@ -21,7 +21,7 @@ function searchOutput(content) {
 // A copy is taken so later changes to the conversation cannot reach an event already sent.
 const copy = (value) => structuredClone(value);
 
-export function createAgent({ node, design = null, call, emit, budget: runBudget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default, retries = RETRIES.default, retryDelaySec = RETRY_DELAY_SEC.default, freeTier = false, repeatStop = REPEAT_STOP.default }) {
+export function createAgent({ node, design = null, call, emit, budget: runBudget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default, retries = RETRIES.default, retryDelaySec = RETRY_DELAY_SEC.default, freeTier = false, repeatStop = REPEAT_STOP.default, fallback = "off" }) {
   const retryLimit = clampRetries(retries);
   const retryDelayMs = clampRetryDelaySec(retryDelaySec) * 1000;
   // The agent counts against its own limits too (node.limits); the limits of the run still apply.
@@ -46,7 +46,9 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
     lastSame = now;
     if (repeatLimit > 0 && now !== "" && sameInARow >= repeatLimit) throw new LimitError("repeat", { agent: node.id, label, value: sameInARow });
   };
-  const costOf = (usage) => usageCostUsd(usage, node, { provider, freeTier });
+  // After the fallback switch the agent runs on another model; the cost follows it.
+  let active = nodeModel(node, provider);
+  const costOf = (usage) => usageCostUsd(usage, { ...node, model: active.key }, { provider, freeTier });
   const messages = [];
   let lastRequest = null;
   let sent = 0; // how many messages earlier requests already carried
@@ -56,7 +58,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
     budget.chargeStep();
     const tools = toolsFor(node, budget);
     const body = {
-      model,
+      model: active.id,
       max_tokens: Math.max(1, Math.min(outputCap, budget.remainingTokens())),
       system,
       messages,
@@ -67,11 +69,23 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
   }
 
   async function requestWithRetry() {
+    let switched = false;
     for (let tried = 0; ; tried++) {
       try {
         return await request();
       } catch (error) {
-        if (!(error instanceof AnthropicError) || !error.retryable || tried >= retryLimit) throw error;
+        if (!(error instanceof AnthropicError) || !error.retryable) throw error;
+        if (tried >= retryLimit) {
+          // Out of tries. With the automatic fallback, one more try with another model of the same provider.
+          const next = !switched && fallback === "auto" ? fallbackModelFor(node, provider, freeTier) : null;
+          if (!next) throw error;
+          switched = true;
+          emit({ type: "warning", agent: node.id, fallback: { from: active.id, to: next.id }, message: `The provider stayed busy (${redact(error.message.split("\n\n").at(-1))}). Trying once more with ${next.label} (${next.id}) instead of ${active.label} (${active.id}).` });
+          active = next;
+          await sleep(retryDelayMs);
+          tried = retryLimit - 1; // the loop adds one: this is the last try
+          continue;
+        }
         const left = retryLimit - tried;
         emit({ type: "warning", agent: node.id, retry: true, message: `The provider was busy (${redact(error.message.split("\n\n").at(-1))}). Trying again (${left === 1 ? "last try" : `${left} tries left`}).` });
         await sleep(retryDelayMs);

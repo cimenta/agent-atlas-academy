@@ -148,3 +148,21 @@ export const clampHandoffChars = (value) => {
   if (!Number.isFinite(n) || n <= 0) return HANDOFF_CHARS.default;
   return Math.min(HANDOFF_CHARS.max, Math.max(HANDOFF_CHARS.min, n));
 };
+
+// What to do when an agent still fails after all its tries: nothing (off), suggest a model for Retry (suggest, the default),
+// or try once more with another model of the same provider (auto).
+export const FALLBACK_MODES = ["off", "suggest", "auto"];
+export const FALLBACK_DEFAULT = "suggest";
+export const clampFallback = (value) => (FALLBACK_MODES.includes(value) ? value : FALLBACK_DEFAULT);
+
+// The model to fall back to: the same provider and key, never a costlier tier than Balanced, so a busy model is swapped for a calmer one.
+const FALLBACK_TIER = { fast: "balanced", balanced: "fast", strong: "balanced" };
+// null when there is none: no such model, the same model, or a model the free Gemini key cannot use.
+export function fallbackModelFor(node, provider = "anthropic", freeTier = false) {
+  const models = providerCatalog(nodeProvider(node, provider)).models;
+  const now = nodeModel(node, provider);
+  const target = models.find((m) => m.key === FALLBACK_TIER[now.key]);
+  if (!target || target.id === now.id) return null;
+  if (target.freeTier === false && (freeTier || node?.slot === "google-free")) return null;
+  return target;
+}
