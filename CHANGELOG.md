@@ -16,6 +16,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Learn: three new articles, The agent loop, Agent instructions (both in Basics) and The context window (in Memory), in English and Czech, linked from What is an AI agent? and What each agent sees.
 - Learn: the Harness lab is listed first on the Learn page (in All and in the section of the harness article), with an interactive tag.
 - Learn, Harness lab (`#/learn/lab`, linked from the article What is a harness?): pick one of the recorded runs of the library, set the steps, tokens, time and repeated answers, and see which step the run would stop at and which limit did it, with meters for tokens and time. Nothing is sent to a provider and nothing costs money. The sliders start at your own limits from Settings, Harness (Reset opens them wide so the run can finish). A button copies the step and token limits and the repeat setting to Settings, Harness (the time of a whole run is fixed at 270 s, so it is not copied).
 

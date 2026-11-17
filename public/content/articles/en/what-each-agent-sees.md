@@ -3,7 +3,7 @@ title: What each agent sees
 section: memory
 order: 11
 summary: An agent can only use the information it is given. Choosing what to give is a key design decision.
-related: [memory-none, memory-shared-conversation, memory-summaries, information-leaking-between-agents]
+related: [context-window, memory-none, memory-shared-conversation, memory-summaries, information-leaking-between-agents]
 ---
 
 An agent knows nothing that is not in its input. So a central question in orchestration is: **what does each agent get to see?**

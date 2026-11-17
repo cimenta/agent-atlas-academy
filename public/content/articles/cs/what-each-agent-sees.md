@@ -3,7 +3,7 @@ title: Co který agent vidí
 section: memory
 order: 11
 summary: Agent může využít jen informace, které dostal. Výběr toho, co mu dát, je klíčové rozhodnutí návrhu.
-related: [memory-none, memory-shared-conversation, memory-summaries, information-leaking-between-agents]
+related: [context-window, memory-none, memory-shared-conversation, memory-summaries, information-leaking-between-agents]
 ---
 
 Agent neví nic, co není v jeho vstupu. Proto je ústřední otázkou orchestrace: **co smí každý agent vidět?**

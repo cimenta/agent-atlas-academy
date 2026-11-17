@@ -3,7 +3,7 @@ title: Co je AI agent?
 section: basics
 order: 1
 summary: Jazykový model s rolí, cílem a nástroji, který pracuje ve smyčce.
-related: [what-is-orchestration, tools, how-agents-communicate]
+related: [what-is-orchestration, agent-loop, agent-instructions, tools, how-agents-communicate]
 ---
 
 Jazykový model sám o sobě jen mění text na text. **Agent** je jazykový model zapojený do smyčky, aby mohl pracovat směrem k cíli.

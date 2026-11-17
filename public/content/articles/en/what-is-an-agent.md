@@ -3,7 +3,7 @@ title: What is an AI agent?
 section: basics
 order: 1
 summary: A language model with a role, a goal and tools, working in a loop.
-related: [what-is-orchestration, tools, how-agents-communicate]
+related: [what-is-orchestration, agent-loop, agent-instructions, tools, how-agents-communicate]
 ---
 
 A language model on its own only turns text into text. An **agent** is a language model placed in a loop so it can work toward a goal.
