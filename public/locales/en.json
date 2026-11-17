@@ -337,6 +337,8 @@
   "editor.rounds": "Rounds of debate (1 to 4)",
   "editor.limits.title": "Limits of this agent",
   "editor.limits.count": "{n} set",
+  "editor.limits.open": "Click to edit",
+  "editor.limits.close": "Click to close",
   "editor.limits.help": "An empty box means this agent has no limit of its own and the limit of the run applies. A limit of an agent never goes above the limit of the run: the lower one wins.",
   "editor.limits.fromRun": "from the run",
   "editor.limits.steps.label": "Maximum steps",

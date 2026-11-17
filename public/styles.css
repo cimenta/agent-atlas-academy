@@ -943,3 +943,17 @@ a.art-pill:hover { text-decoration: underline; }
 .limit-bar { margin-top: 3px; min-width: 80px; }
 .limit-bar.hot { background: var(--err-bg); }
 .limit-bar.hot i { background: var(--err); }
+
+/* Limits block: the header looks like a button, with a chevron and a hint. */
+.agent-limits summary { list-style: none; padding: 10px 12px; margin: 0 -12px; background: var(--accent-bg); color: var(--accent); border-radius: 7px; }
+.agent-limits summary::-webkit-details-marker { display: none; }
+.agent-limits[open] summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.agent-limits summary:hover { filter: brightness(0.97); }
+.agent-limits summary .limit-count { border-color: currentColor; color: inherit; }
+.limit-spacer { flex: 1; }
+.limit-icon { flex: none; }
+.limit-hint-open, .limit-hint-close { font-size: 0.8rem; font-weight: 400; }
+.limit-hint-close, .agent-limits[open] .limit-hint-open { display: none; }
+.agent-limits[open] .limit-hint-close { display: inline; }
+.limit-chevron { width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); margin: 0 3px 3px 2px; transition: transform 0.15s; }
+.agent-limits[open] .limit-chevron { transform: rotate(-135deg); margin-bottom: 0; margin-top: 4px; }

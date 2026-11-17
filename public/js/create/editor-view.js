@@ -423,6 +423,32 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     ["maxOutputTokens", "output"],
     ["maxSearches", "searches"],
   ];
+  function limitsIcon() {
+    const svg = doc.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("width", "16");
+    svg.setAttribute("height", "16");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("class", "limit-icon");
+    for (const [d] of [["M2 4h12"], ["M2 8h12"], ["M2 12h12"]]) {
+      const line = doc.createElementNS(SVG_NS, "path");
+      line.setAttribute("d", d);
+      line.setAttribute("stroke", "currentColor");
+      line.setAttribute("stroke-width", "1.5");
+      line.setAttribute("fill", "none");
+      svg.append(line);
+    }
+    for (const [cx, cy] of [[10, 4], [5, 8], [11, 12]]) {
+      const dot = doc.createElementNS(SVG_NS, "circle");
+      dot.setAttribute("cx", String(cx));
+      dot.setAttribute("cy", String(cy));
+      dot.setAttribute("r", "2");
+      dot.setAttribute("fill", "currentColor");
+      svg.append(dot);
+    }
+    return svg;
+  }
+
   function limitsBlock(node) {
     const run = runLimits();
     const shown = LIMIT_FIELDS.filter(([key]) => key !== "maxSearches" || node.search === true);
@@ -460,7 +486,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       doc,
       "details",
       { class: "agent-limits", "data-ui": "agent-limits", open: limitsOpen || count > 0 },
-      h(doc, "summary", {}, t("editor.limits.title"), count > 0 ? h(doc, "span", { class: "limit-count", "data-ui": "agent-limits-count" }, t("editor.limits.count", { n: count })) : ""),
+      h(doc, "summary", {}, limitsIcon(), h(doc, "span", {}, t("editor.limits.title")), count > 0 ? h(doc, "span", { class: "limit-count", "data-ui": "agent-limits-count" }, t("editor.limits.count", { n: count })) : "", h(doc, "span", { class: "limit-spacer" }), h(doc, "span", { class: "limit-hint-open", "data-ui": "agent-limits-hint-open" }, t("editor.limits.open")), h(doc, "span", { class: "limit-hint-close", "data-ui": "agent-limits-hint-close" }, t("editor.limits.close")), h(doc, "span", { class: "limit-chevron", "aria-hidden": "true" })),
       h(doc, "p", { class: "hint" }, t("editor.limits.help")),
       ...rows,
       h(doc, "div", { class: "field" }, h(doc, "label", { for: "ed-on-limit" }, t("editor.limits.onLimit.label")), onLimit),

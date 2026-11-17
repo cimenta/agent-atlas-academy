@@ -337,6 +337,8 @@
   "editor.rounds": "Kol debaty (1 až 4)",
   "editor.limits.title": "Limity tohoto agenta",
   "editor.limits.count": "{n} nastaveno",
+  "editor.limits.open": "Klikněte pro úpravu",
+  "editor.limits.close": "Klikněte pro zavření",
   "editor.limits.help": "Prázdné pole znamená, že agent nemá vlastní limit a platí limit běhu. Limit agenta nikdy nepřekročí limit běhu: platí nižší z nich.",
   "editor.limits.fromRun": "z běhu",
   "editor.limits.steps.label": "Nejvíce kroků",
