@@ -80,6 +80,8 @@ export async function applyBackup(backup, { runStore, settingsStore, vault, mode
     else failed += 1;
   }
   if (isObject(backup.settings?.limits)) settingsStore.setLimits(backup.settings.limits);
+  if (backup.settings?.requestTimeoutSec !== undefined) settingsStore.setRequestTimeout(backup.settings.requestTimeoutSec);
+  if (backup.settings?.maxOutputTokens !== undefined) settingsStore.setMaxOutputTokens(backup.settings.maxOutputTokens);
   if (typeof backup.settings?.tooltips === "boolean") settingsStore.setTooltips(backup.settings.tooltips);
   if (backup.settings?.playerLayout === "bar" || backup.settings?.playerLayout === "side") settingsStore.setPlayerLayout(backup.settings.playerLayout);
   if (typeof backup.settings?.shortcuts === "boolean") settingsStore.setShortcuts(backup.settings.shortcuts);

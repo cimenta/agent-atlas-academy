@@ -6,6 +6,10 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Learn: a new article, What is a harness?, for beginners, in English and Czech. It explains what surrounds a model, why it matters for safety and reliability, and where to see the harness of Agent Atlas in Settings. It is linked from Budgets and stop conditions and from Retries and errors.
+
+- Settings, Harness: the Default limits tab is now Harness, with two tabs. Adjustable harness has sliders for the maximum steps, tokens per run, web searches, tokens of one reply (new, 1000 to 4000, 4000 by default) and how long a request waits, with Reset to defaults and Save. Fixed harness lists what cannot be changed: the 270 second time of a run, 8 agents in a design, 1000 characters for the task, the size of a request, the pauses of the model, the runs per hour and the key handling. When a limit stops a run, the replay holds a warning that names the limit. Help has a The harness topic, in English and Czech.
+
 - W A S D move between the agents from anywhere on the page, like Space plays from anywhere; Enter then inspects the agent that has the focus, the same as a click.
 
 - The word Replay in the player heading blinks blue while a run is playing.

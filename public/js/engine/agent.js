@@ -1,12 +1,10 @@
 // One agent in a run: keeps its own conversation, calls the model, reports events.
-import { nodeModel, AGENT_TYPES } from "./catalog.js";
+import { nodeModel, AGENT_TYPES, OUTPUT_TOKENS, MAX_PAUSES, clampOutputTokens } from "./catalog.js";
 import { systemPromptFor } from "./prompts.js";
 import { toolsFor } from "./tools.js";
 import { AnthropicError, redact } from "./anthropic.js";
 import { agentLabel } from "./labels.js";
 
-const MAX_OUTPUT_TOKENS = 4000;
-const MAX_PAUSES = 4;
 const RETRY_DELAY_MS = 1500;
 const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -21,7 +19,8 @@ function searchOutput(content) {
 // A copy is taken so later changes to the conversation cannot reach an event already sent.
 const copy = (value) => structuredClone(value);
 
-export function createAgent({ node, design = null, call, emit, budget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [] }) {
+export function createAgent({ node, design = null, call, emit, budget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default }) {
+  const outputCap = clampOutputTokens(maxOutputTokens);
   // Answers from an earlier try of the run: used up first, in order, before the provider is called again.
   const answers = [...cached];
   const model = nodeModel(node, provider).id;
@@ -37,7 +36,7 @@ export function createAgent({ node, design = null, call, emit, budget, signal, l
     const tools = toolsFor(node, budget);
     const body = {
       model,
-      max_tokens: Math.max(1, Math.min(MAX_OUTPUT_TOKENS, budget.remainingTokens())),
+      max_tokens: Math.max(1, Math.min(outputCap, budget.remainingTokens())),
       system,
       messages,
       ...(tools.length > 0 ? { tools } : {}),

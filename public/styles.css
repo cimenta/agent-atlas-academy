@@ -912,3 +912,15 @@ a.art-pill:hover { text-decoration: underline; }
 .retry-menu-item small { font-size: 0.7rem; color: var(--muted); }
 .retry-menu-item.current small { padding: 0 6px; border-radius: 999px; background: var(--err-bg); color: var(--err); }
 @media (prefers-reduced-motion: reduce) { .replay-diagram .rnode[data-status="error"] { animation: none; } }
+
+/* Settings, Harness tab: the sliders you can set and the rules that stay fixed. */
+.harness-row, .harness-fixed-row { display: grid; grid-template-columns: minmax(0, 1fr) 190px 72px; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--border); }
+.harness-fixed-row { grid-template-columns: minmax(0, 1fr) 120px; }
+.harness-label { display: flex; flex-direction: column; gap: 2px; }
+.harness-hint { color: var(--muted); font-size: 0.8rem; }
+.harness-row input[type="range"] { width: 100%; min-width: 0; }
+.harness-value { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.harness-fixed-value { text-align: right; font-weight: 600; color: var(--muted); }
+.harness-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+.harness-spacer { flex: 1; }
+@media (max-width: 640px) { .harness-row, .harness-fixed-row { grid-template-columns: minmax(0, 1fr) auto; } .harness-row input[type="range"] { grid-column: 1 / -1; grid-row: 2; } }

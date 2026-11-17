@@ -5,6 +5,8 @@ import { createBudget, LimitError } from "./budget.js";
 import { createAgent } from "./agent.js";
 import { nodeProvider } from "./catalog.js";
 import { redact } from "./anthropic.js";
+import { limitMessage } from "./harness.js";
+import { clampLimits } from "./patterns.js";
 import * as sequential from "./runners/sequential.js";
 import * as parallel from "./runners/parallel.js";
 import * as supervisor from "./runners/supervisor.js";
@@ -21,7 +23,7 @@ export const RUNNERS = {
 // resume: the answers of agents that already finished in an earlier try of this run, in order ({ agent, text, tokens }).
 // An agent's first activations are answered from them without calling the provider, so the run goes through the
 // same steps and carries on live where it failed. No run_start event is sent then: the caller already has it.
-export async function runDesign({ design, task, limits, language = "en", call, callFor, emit, signal, now = Date.now, provider = "anthropic", resume = [] }) {
+export async function runDesign({ design, task, limits, language = "en", call, callFor, emit, signal, now = Date.now, provider = "anthropic", resume = [], maxOutputTokens }) {
   const startedAt = now();
   const send = (event) => emit({ ...event, t: now() - startedAt });
 
@@ -42,7 +44,7 @@ export async function runDesign({ design, task, limits, language = "en", call, c
   const agents = new Map(
     design.nodes.map((node) => [
       node.id,
-      createAgent({ node, design, call: callFor?.(node) ?? call, emit: send, budget, signal: control.signal, language, provider: nodeProvider(node, provider), cached: resume.filter((r) => r.agent === node.id) }),
+      createAgent({ node, design, call: callFor?.(node) ?? call, emit: send, budget, signal: control.signal, language, provider: nodeProvider(node, provider), maxOutputTokens, cached: resume.filter((r) => r.agent === node.id) }),
     ]),
   );
   if (resume.length === 0) send({ type: "run_start", task, pattern: design.pattern, design });
@@ -57,6 +59,8 @@ export async function runDesign({ design, task, limits, language = "en", call, c
     if (error instanceof LimitError) {
       outcome = "stopped_limit";
       reason = error.reason;
+      // The replay keeps a line that says which limit of the harness stopped the run.
+      send({ type: "warning", limit: reason, message: limitMessage(reason, clampLimits(limits)) });
     } else if (signal?.aborted) {
       outcome = "stopped_user";
     } else {

@@ -81,6 +81,20 @@ export const clampTimeoutSec = (value) => {
   return Number.isFinite(n) ? Math.min(TIMEOUT_SEC.max, Math.max(TIMEOUT_SEC.min, n)) : TIMEOUT_SEC.default;
 };
 
+// How many tokens one reply of one agent may have. The visitor can lower it in Settings; it never goes above the maximum.
+export const OUTPUT_TOKENS = { min: 1000, max: 4000, step: 500, default: 4000 };
+export const clampOutputTokens = (value) => {
+  const n = Math.round(Number(value));
+  return Number.isFinite(n) ? Math.min(OUTPUT_TOKENS.max, Math.max(OUTPUT_TOKENS.min, n)) : OUTPUT_TOKENS.default;
+};
+
+// The fixed rules of the harness: the visitor cannot change them (see the Harness tab in Settings).
+export const MAX_PAUSES = 4; // pauses of the model in one agent turn
+export const REQUEST_MAX_BYTES = 65536; // a request to start a run
+export const RESUME_MAX_BYTES = 262144; // a run that is carried on also sends the answers of the agents that finished
+export const DEFAULT_RUNS_PER_HOUR = 10; // runs one address may start in an hour (the site operator can change it)
+export const RUN_STORE_MAX_BYTES = 2 * 1024 * 1024; // one saved run
+
 export const LIMIT_DEFAULTS = { maxSteps: 20, maxTokens: 40000, maxSearches: 3 };
 export const LIMIT_MAX = { maxSteps: 60, maxTokens: 150000, maxSearches: 10 };
 

@@ -1,7 +1,7 @@
 // Every run the visitor makes is kept in this browser (IndexedDB). Nothing here is sent anywhere.
 import { validateRun } from "../run-schema.js";
+import { RUN_STORE_MAX_BYTES as MAX_BYTES } from "../engine/catalog.js";
 
-const MAX_BYTES = 2 * 1024 * 1024;
 const DB_NAME = "aa";
 const STORE = "runs";
 

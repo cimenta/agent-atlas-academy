@@ -3,7 +3,7 @@ title: Rozpočty a podmínky zastavení
 section: control-and-cost
 order: 21
 summary: Limity, které ukončí běh dřív, než promarní čas nebo peníze.
-related: [evaluator-loop, supervisor-and-workers, tokens-cost-and-time, retries-and-errors]
+related: [evaluator-loop, supervisor-and-workers, tokens-cost-and-time, retries-and-errors, harness]
 ---
 
 Smyčka agenta si sama rozhoduje, kdy je hotová, a někdy se nerozhodne nikdy. **Podmínka zastavení** ukončí běh z důvodu, který nezávisí na úsudku agenta.

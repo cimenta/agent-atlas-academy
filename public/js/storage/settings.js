@@ -1,6 +1,6 @@
 // Small settings kept in the browser. Never throws: a blocked or broken storage just gives the defaults.
 import { clampLimits } from "../engine/patterns.js";
-import { clampTimeoutSec } from "../engine/catalog.js";
+import { clampTimeoutSec, clampOutputTokens } from "../engine/catalog.js";
 import { mergeGoKeys, validateGoKeys } from "../shortcuts.js";
 import { DEFAULT_PROVIDER_COLORS, isColor, mergeProviderColors } from "../provider-colors.js";
 
@@ -18,7 +18,7 @@ export function createSettingsStore(storage) {
     // Tooltips are on unless the user turned them off.
     // The player controls sit on one slim bar ("bar") unless the user chose the side column ("side").
     const free = stored?.freeTier;
-    return { freeTier: { google: free?.google === true }, limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, playerLayout: stored?.playerLayout === "side" ? "side" : "bar", shortcuts: stored?.shortcuts !== false, goKeys: mergeGoKeys(stored?.goKeys), providerColors: mergeProviderColors(stored?.providerColors), requestTimeoutSec: clampTimeoutSec(stored?.requestTimeoutSec) };
+    return { freeTier: { google: free?.google === true }, limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, playerLayout: stored?.playerLayout === "side" ? "side" : "bar", shortcuts: stored?.shortcuts !== false, goKeys: mergeGoKeys(stored?.goKeys), providerColors: mergeProviderColors(stored?.providerColors), requestTimeoutSec: clampTimeoutSec(stored?.requestTimeoutSec), maxOutputTokens: clampOutputTokens(stored?.maxOutputTokens) };
   }
   function save(next) {
     try {
@@ -44,6 +44,9 @@ export function createSettingsStore(storage) {
     },
     setRequestTimeout(seconds) {
       save({ ...get(), requestTimeoutSec: clampTimeoutSec(seconds) });
+    },
+    setMaxOutputTokens(tokens) {
+      save({ ...get(), maxOutputTokens: clampOutputTokens(tokens) });
     },
     setTooltips(on) {
       save({ ...get(), tooltips: on !== false });

@@ -3,7 +3,7 @@ title: Budgets and stop conditions
 section: control-and-cost
 order: 21
 summary: Limits that end a run before it wastes time or money.
-related: [evaluator-loop, supervisor-and-workers, tokens-cost-and-time, retries-and-errors]
+related: [evaluator-loop, supervisor-and-workers, tokens-cost-and-time, retries-and-errors, harness]
 ---
 
 An agent loop decides for itself when it is finished, and sometimes it never decides. A **stop condition** ends the run for a reason that does not depend on the agent's judgment.

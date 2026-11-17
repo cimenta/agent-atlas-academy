@@ -564,6 +564,7 @@ export function renderCreate(ctx) {
       task,
       limits,
       timeoutSec: ctx.settings.get().requestTimeoutSec,
+      outputTokens: ctx.settings.get().maxOutputTokens,
       language: ctx.lang,
       apiKey,
       keys,

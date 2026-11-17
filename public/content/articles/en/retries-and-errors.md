@@ -3,7 +3,7 @@ title: Retries and errors
 section: control-and-cost
 order: 23
 summary: Calls fail. Good orchestration plans for it.
-related: [budgets-and-stop-conditions, structured-output, parallel-fan-out-fan-in]
+related: [budgets-and-stop-conditions, structured-output, parallel-fan-out-fan-in, harness]
 ---
 
 Many things can go wrong in a run: a provider is busy, the network drops, a request times out, a tool fails, or the model returns an answer in the wrong format.

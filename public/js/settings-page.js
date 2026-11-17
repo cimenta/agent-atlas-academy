@@ -1,22 +1,18 @@
-// The settings page: API key handling, default limits and local data.
+// The settings page: API key handling, the harness (limits and fixed rules) and local data.
 import { h } from "./dom.js";
-import { LIMIT_MAX, TIMEOUT_SEC, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
+import { LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, PROVIDER_IDS, PRICING_URLS, providerCatalog, MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
 import { COLOR_CHOICES, paintModelTag } from "./provider-colors.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "./key-slots.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
 import { keyState, overallKeyState } from "./key-state.js";
 import { DEFAULT_GO_KEYS } from "./shortcuts.js";
 import { buildShortcutList } from "./shortcut-list.js";
+import { fixedRules } from "./engine/harness.js";
 import { VaultError } from "./storage/key-vault.js";
 import { exportBackup, parseBackup, applyBackup } from "./storage/backup.js";
 
 const formatSize = (bytes) => (bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1048576).toFixed(1)} MB`);
 const PROVIDERS_SOON = ["OpenAI", "Mistral", "Llama"];
-const LIMIT_FIELDS = [
-  ["maxSteps", "settings.limitSteps"],
-  ["maxTokens", "settings.limitTokens"],
-  ["maxSearches", "settings.limitSearches"],
-];
 
 export function renderSettings(ctx) {
   const { doc, t, vault, settings, runStore } = ctx;
@@ -268,49 +264,86 @@ export function renderSettings(ctx) {
   );
   const secActions = h(doc, "div", { class: "sec-actions", "data-ui": "security-actions" }, h(doc, "div", { class: "sec-row" }, changeOpen, forgetButton), changePanel, forgetPanel);
 
-  // Default limits.
-  const current = settings.get().limits;
-  const limitInputs = LIMIT_FIELDS.map(([key, labelKey]) => {
-    const input = h(doc, "input", { id: `set-${key}`, type: "number", min: key === "maxSearches" ? 0 : 1, max: LIMIT_MAX[key], step: 1, value: current[key] });
-    input.addEventListener("change", () => {
-      settings.setLimits(Object.fromEntries(LIMIT_FIELDS.map(([k], i) => [k, Number(limitInputs[i].value)])));
-      const clamped = settings.get().limits;
-      limitInputs.forEach((el, i) => {
-        el.value = String(clamped[LIMIT_FIELDS[i][0]]);
-      });
-      say(t("settings.limitsSaved"));
+  // Harness: the limits and waits the visitor can set (one tab), and the rules that stay fixed (the other tab).
+  const harnessNow = settings.get();
+  const harnessFormat = (n) => n.toLocaleString(ctx.lang === "cs" ? "cs-CZ" : "en-US");
+  const harnessSpecs = [
+    { id: "steps", min: 1, max: LIMIT_MAX.maxSteps, step: 1, value: harnessNow.limits.maxSteps, def: LIMIT_DEFAULTS.maxSteps, show: (n) => String(n) },
+    { id: "tokens", min: 5000, max: LIMIT_MAX.maxTokens, step: 5000, value: harnessNow.limits.maxTokens, def: LIMIT_DEFAULTS.maxTokens, show: harnessFormat },
+    { id: "searches", min: 0, max: LIMIT_MAX.maxSearches, step: 1, value: harnessNow.limits.maxSearches, def: LIMIT_DEFAULTS.maxSearches, show: (n) => String(n) },
+    { id: "output", min: OUTPUT_TOKENS.min, max: OUTPUT_TOKENS.max, step: OUTPUT_TOKENS.step, value: harnessNow.maxOutputTokens, def: OUTPUT_TOKENS.default, show: harnessFormat },
+    { id: "timeout", min: TIMEOUT_SEC.min, max: TIMEOUT_SEC.max, step: TIMEOUT_SEC.step, value: harnessNow.requestTimeoutSec, def: TIMEOUT_SEC.default, show: (n) => t("settings.timeoutSeconds", { seconds: n }) },
+  ];
+  const harnessRows = harnessSpecs.map((spec) => {
+    const slider = h(doc, "input", { id: `set-harness-${spec.id}`, type: "range", min: spec.min, max: spec.max, step: spec.step, value: spec.value, "data-ui": `harness-${spec.id}` });
+    const shown = h(doc, "output", { class: "harness-value", for: slider.id, "data-ui": `harness-${spec.id}-value` }, spec.show(spec.value));
+    slider.addEventListener("input", () => {
+      shown.textContent = spec.show(Number(slider.value));
     });
-    return { key, labelKey, input };
-  }).map(({ key, labelKey, input }) => {
-    input.dataset.key = key;
-    input.labelKey = labelKey;
-    return input;
+    const set = (n) => {
+      slider.value = String(n);
+      shown.textContent = spec.show(Number(slider.value));
+    };
+    const label = h(doc, "div", { class: "harness-label" }, h(doc, "label", { for: slider.id }, t(`harness.limit.${spec.id}.label`)), h(doc, "span", { class: "harness-hint" }, t(`harness.limit.${spec.id}.hint`)));
+    return { spec, slider, set, node: h(doc, "div", { class: "harness-row" }, label, slider, shown) };
   });
-
-  // How long a request to a model waits for an answer: a slider from 30 to 120 seconds and three quick choices.
-  const timeoutNow = settings.get().requestTimeoutSec;
-  const timeoutSlider = h(doc, "input", { id: "set-timeout", type: "range", min: TIMEOUT_SEC.min, max: TIMEOUT_SEC.max, step: TIMEOUT_SEC.step, value: timeoutNow, "data-ui": "timeout-slider" });
-  const timeoutValue = h(doc, "output", { class: "timeout-value", for: "set-timeout", "data-ui": "timeout-value" }, "");
-  const timeoutQuick = [TIMEOUT_SEC.min, TIMEOUT_SEC.default, TIMEOUT_SEC.max].map((sec) => {
-    const chip = h(doc, "button", { type: "button", class: "chip", "data-ui": `timeout-${sec}`, "aria-pressed": "false" }, t(sec === TIMEOUT_SEC.default ? "settings.timeoutDefault" : "settings.timeoutSeconds", { seconds: sec }));
-    chip.addEventListener("click", () => setTimeoutSec(sec, true));
-    return { sec, chip };
+  const harnessRow = (id) => harnessRows.find((r) => r.spec.id === id);
+  const harnessSave = h(doc, "button", { type: "button", class: "primary", "data-ui": "harness-save" }, t("harness.save"));
+  harnessSave.addEventListener("click", () => {
+    const value = (id) => Number(harnessRow(id).slider.value);
+    settings.setLimits({ maxSteps: value("steps"), maxTokens: value("tokens"), maxSearches: value("searches") });
+    settings.setMaxOutputTokens(value("output"));
+    settings.setRequestTimeout(value("timeout"));
+    const saved = settings.get();
+    harnessRow("steps").set(saved.limits.maxSteps);
+    harnessRow("tokens").set(saved.limits.maxTokens);
+    harnessRow("searches").set(saved.limits.maxSearches);
+    harnessRow("output").set(saved.maxOutputTokens);
+    harnessRow("timeout").set(saved.requestTimeoutSec);
+    say(t("harness.saved"));
   });
-  function showTimeout(sec) {
-    timeoutSlider.value = String(sec);
-    timeoutValue.textContent = t("settings.timeoutSeconds", { seconds: sec });
-    for (const { sec: s, chip } of timeoutQuick) chip.setAttribute("aria-pressed", String(s === sec));
-  }
-  function setTimeoutSec(sec, announce) {
-    settings.setRequestTimeout(sec);
-    const saved = settings.get().requestTimeoutSec;
-    showTimeout(saved);
-    if (announce) say(t("settings.timeoutSaved", { seconds: saved }));
-  }
-  timeoutSlider.addEventListener("input", () => showTimeout(Number(timeoutSlider.value)));
-  timeoutSlider.addEventListener("change", () => setTimeoutSec(Number(timeoutSlider.value), true));
-  showTimeout(timeoutNow);
-  const timeoutField = h(doc, "div", { class: "field timeout-field", "data-ui": "timeout-field" }, h(doc, "label", { for: "set-timeout" }, t("settings.timeoutLabel")), h(doc, "p", { class: "hint" }, t("settings.timeoutIntro")), h(doc, "div", { class: "timeout-row" }, timeoutSlider, timeoutValue), h(doc, "div", { class: "chips timeout-chips" }, ...timeoutQuick.map((q) => q.chip)), h(doc, "p", { class: "hint" }, t("settings.timeoutHint")));
+  const harnessReset = h(doc, "button", { type: "button", "data-ui": "harness-reset" }, t("harness.reset"));
+  harnessReset.addEventListener("click", () => {
+    harnessRows.forEach((row) => row.set(row.spec.def));
+    say(t("harness.resetDone"));
+  });
+  // Three quick choices for how long a request waits for an answer.
+  const harnessQuick = [TIMEOUT_SEC.min, TIMEOUT_SEC.default, TIMEOUT_SEC.max].map((sec) => {
+    const chip = h(doc, "button", { type: "button", "data-ui": `timeout-${sec}` }, t("settings.timeoutSeconds", { seconds: sec }));
+    chip.addEventListener("click", () => harnessRow("timeout").set(sec));
+    return chip;
+  });
+  const harnessAdjustable = h(
+    doc,
+    "div",
+    { class: "harness-panel", role: "tabpanel", "data-ui": "harness-adjustable" },
+    h(doc, "h3", {}, t("harness.adjustableHeading")),
+    h(doc, "p", { class: "hint" }, t("harness.adjustableIntro")),
+    ...harnessRows.map((r) => r.node),
+    h(doc, "div", { class: "harness-actions" }, ...harnessQuick, h(doc, "span", { class: "harness-spacer" }), harnessReset, harnessSave),
+  );
+  const harnessFixed = h(
+    doc,
+    "div",
+    { class: "harness-panel", role: "tabpanel", "data-ui": "harness-fixed" },
+    h(doc, "h3", {}, t("harness.fixedHeading")),
+    h(doc, "p", { class: "hint" }, t("harness.fixedIntro")),
+    ...fixedRules().map((rule) => h(doc, "div", { class: "harness-fixed-row", "data-ui": `harness-fixed-${rule.id}` }, h(doc, "div", { class: "harness-label" }, h(doc, "span", {}, t(`harness.fixed.${rule.id}.label`)), h(doc, "span", { class: "harness-hint" }, t(`harness.fixed.${rule.id}.hint`))), h(doc, "b", { class: "harness-fixed-value" }, t(`harness.fixed.${rule.id}.value`, Object.fromEntries(Object.entries(rule.params).map(([k, v]) => [k, harnessFormat(v)])))))),
+  );
+  const harnessSubs = [
+    ["adjustable", "harness.tabAdjustable", harnessAdjustable],
+    ["fixed", "harness.tabFixed", harnessFixed],
+  ];
+  const harnessSubButtons = harnessSubs.map(([id, labelKey]) => h(doc, "button", { type: "button", class: "tab provider-tab", role: "tab", "data-ui": `harness-tab-${id}`, "data-sub": id }, t(labelKey)));
+  const showHarnessSub = (id) => {
+    harnessSubs.forEach(([subId, , node]) => {
+      node.hidden = subId !== id;
+    });
+    harnessSubButtons.forEach((b) => b.setAttribute("aria-selected", String(b.getAttribute("data-sub") === id)));
+  };
+  harnessSubButtons.forEach((b) => b.addEventListener("click", () => showHarnessSub(b.getAttribute("data-sub"))));
+  showHarnessSub("adjustable");
+  const harnessSubTabs = h(doc, "div", { class: "provider-tabs", role: "tablist", "data-ui": "harness-tabs" }, ...harnessSubButtons);
 
   // Tooltips.
   const tipsBox = h(doc, "input", { id: "set-tooltips", type: "checkbox" });
@@ -517,7 +550,7 @@ export function renderSettings(ctx) {
   });
   const securityNone = h(doc, "p", { class: "notice", "data-ui": "security-none" }, t("settings.securityNone"));
   const lockedTag = h(doc, "span", { class: "tag-alert", "data-ui": "security-locked-tag", title: t("settings.unlockAlert"), hidden: true }, "!");
-  // The six sections, in the order they were written: keys, limits, tooltips, player, data, security.
+  // The sections, in the order they were written: keys, harness, tooltips, player, data, security.
   const written = [
     h(
       doc,
@@ -528,15 +561,7 @@ export function renderSettings(ctx) {
       providerTabs,
       providerPanel,
     ),
-    h(
-      doc,
-      "section",
-      { class: "settings-section" },
-      h(doc, "h2", {}, t("settings.limitsHeading")),
-      h(doc, "p", {}, t("settings.limitsIntro")),
-      ...limitInputs.map((input) => field(input.id, t(input.labelKey), input)),
-      timeoutField,
-    ),
+    h(doc, "section", { class: "settings-section", "data-ui": "harness-section" }, h(doc, "h2", {}, t("harness.title")), h(doc, "p", {}, t("harness.intro")), harnessSubTabs, harnessAdjustable, harnessFixed),
     h(
       doc,
       "section",
@@ -566,12 +591,12 @@ export function renderSettings(ctx) {
     ),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.securityHeading")), h(doc, "div", { class: "sec-switch", "data-ui": "sec-switch", role: "group", "aria-label": t("settings.secProvider") }, ...secSwitch), securityNone, secLead, secSteps, unlockForm, secActions),
   ];
-  const [keySection, limitsSection, tooltipsSection, playerSection, shortcutsSection, dataSection, securitySection] = written;
+  const [keySection, harnessSection, tooltipsSection, playerSection, shortcutsSection, dataSection, securitySection] = written;
   // Tabs down the left (a row on a phone); one section is shown at a time.
   const keyTag = h(doc, "span", { class: "key-dot key-dot-inline", "data-ui": "key-saved-tag", role: "img", hidden: true });
   const panels = [
     ["key", "settings.tabKeys", keySection],
-    ["limits", "settings.limitsHeading", limitsSection],
+    ["harness", "harness.title", harnessSection],
     ["player", "settings.playerHeading", playerSection],
     ["tooltips", "settings.tooltipsHeading", tooltipsSection],
     ["data", "settings.dataHeading", dataSection],

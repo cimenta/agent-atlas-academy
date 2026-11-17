@@ -3,7 +3,7 @@ title: Opakování a chyby
 section: control-and-cost
 order: 23
 summary: Volání selhávají. Dobrá orchestrace s tím počítá.
-related: [budgets-and-stop-conditions, structured-output, parallel-fan-out-fan-in]
+related: [budgets-and-stop-conditions, structured-output, parallel-fan-out-fan-in, harness]
 ---
 
 V běhu se může pokazit mnoho věcí: poskytovatel je vytížený, spadne síť, vyprší čas požadavku, selže nástroj nebo model vrátí odpověď ve špatném formátu.
