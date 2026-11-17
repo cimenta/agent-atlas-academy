@@ -29,6 +29,9 @@ export function openInCreate(doc, t, definition) {
   const win = doc.defaultView;
   if (draftHasWork() && !win.confirm(t("create.loadConfirm"))) return false;
   if (!useDefinition(definition)) return false;
+  // A new run starts from the limits of Settings; limits changed by hand for an earlier run are dropped.
+  draft.limits = null;
+  draft.limitsEdited = false;
   win.location.hash = "#/play/create";
   return true;
 }

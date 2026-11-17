@@ -73,3 +73,27 @@ test("the Harness lab page and its address handling load without a syntax error"
   const lab = await import("../public/js/harness-lab.js");
   assert.equal(typeof lab.renderLab, "function");
 });
+
+test("Use in Create fills the task and design and drops limits changed by hand for an earlier run", async () => {
+  const { draft, openInCreate } = await import("../public/js/create/draft.js");
+  const { definitionFromRun } = await import("../public/js/create/definition.js");
+  const definition = definitionFromRun(JSON.parse(read("../public/runs/sequential-simple.json")));
+  draft.limits = { maxSteps: 7, maxTokens: 9000, maxSearches: 1 };
+  draft.limitsEdited = true;
+  const doc = { defaultView: { confirm: () => true, location: { hash: "" } } };
+  const ok = openInCreate(doc, (k) => k, definition);
+  assert.equal(ok, true);
+  assert.equal(draft.limits, null);
+  assert.equal(draft.limitsEdited, false);
+  assert.equal(doc.defaultView.location.hash, "#/play/create");
+});
+
+test("a failed load of the definition keeps the limits changed by hand", async () => {
+  const { draft, openInCreate } = await import("../public/js/create/draft.js");
+  draft.limits = { maxSteps: 7, maxTokens: 9000, maxSearches: 1 };
+  draft.limitsEdited = true;
+  const doc = { defaultView: { confirm: () => true, location: { hash: "" } } };
+  assert.equal(openInCreate(doc, (k) => k, { nonsense: true }), false);
+  assert.equal(draft.limitsEdited, true);
+  assert.equal(draft.limits.maxSteps, 7);
+});
