@@ -924,3 +924,22 @@ a.art-pill:hover { text-decoration: underline; }
 .harness-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
 .harness-spacer { flex: 1; }
 @media (max-width: 640px) { .harness-row, .harness-fixed-row { grid-template-columns: minmax(0, 1fr) auto; } .harness-row input[type="range"] { grid-column: 1 / -1; grid-row: 2; } }
+
+/* Limits of one agent, in the agent panel of the editor. */
+.agent-limits { margin: 10px 0; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.agent-limits summary { cursor: pointer; padding: 9px 0; font-weight: 600; display: flex; gap: 8px; align-items: center; }
+.limit-count { font-size: 0.75rem; font-weight: 400; padding: 1px 8px; border: 1px solid var(--border); border-radius: 10px; color: var(--muted); }
+.limit-row { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 10px; align-items: center; padding: 7px 0; border-top: 1px solid var(--border); }
+.limit-label { display: flex; flex-direction: column; gap: 2px; }
+.limit-hint { color: var(--muted); font-size: 0.8rem; }
+.limit-row input { width: 100%; text-align: right; }
+.agent-limits > .field { padding: 8px 0 12px; border-top: 1px solid var(--border); }
+
+/* Statistics tab: what each agent used of its limits. */
+.stats-limits { margin-top: 18px; }
+.limits-table td { white-space: nowrap; }
+.limit-source { color: var(--muted); font-size: 0.8rem; font-weight: 400; }
+.limit-reached { color: var(--err); font-size: 0.8rem; }
+.limit-bar { margin-top: 3px; min-width: 80px; }
+.limit-bar.hot { background: var(--err-bg); }
+.limit-bar.hot i { background: var(--err); }

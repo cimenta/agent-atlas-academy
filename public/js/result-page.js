@@ -2,7 +2,7 @@
 import { h } from "./dom.js";
 import { parseMarkdown } from "./markdown.js";
 import { renderBlocks } from "./render.js";
-import { buildResultModel, buildStatistics } from "./play-model.js";
+import { buildResultModel, buildStatistics, limitRows } from "./play-model.js";
 import { copyText, downloadFile, safeFileName } from "./download.js";
 import { formatDuration, formatUsd } from "./create/create-model.js";
 import { outcomeNotice } from "./outcome-view.js";
@@ -160,6 +160,28 @@ export function renderResult(ctx, run) {
         }),
       ),
     );
+    // What each agent used of its limits (and the run of its own).
+    const used = (c) => {
+      if (c === undefined) return h(doc, "td", {}, "—");
+      const pct = c.limit ? Math.min(100, Math.round((c.used / c.limit) * 100)) : 0;
+      const text = c.limit === null ? num(c.used ?? 0) : `${num(c.used ?? 0)} / ${num(c.limit)}`;
+      const source = c.limit === null ? "" : h(doc, "span", { class: "limit-source" }, ` (${t(c.from === "agent" ? "stats.limits.ofAgent" : "stats.limits.ofRun")})`);
+      const bar = c.limit ? h(doc, "span", { class: `share-bar limit-bar${c.hit ? " hot" : ""}`, role: "img", "aria-label": `${pct} %` }, h(doc, "i", { class: `w${Math.round(pct / 5) * 5}` })) : "";
+      return h(doc, "td", { class: c.hit ? "limit-hit" : "" }, h(doc, "span", {}, text), source, c.hit ? h(doc, "span", { class: "limit-reached" }, ` · ${t("stats.limits.reached")}`) : "", bar);
+    };
+    const limitTable = h(
+      doc,
+      "table",
+      { class: "result-table stats-table limits-table", "data-ui": "stats-limits" },
+      h(doc, "thead", {}, h(doc, "tr", {}, ...["stats.limits.agent", "stats.limits.steps", "stats.limits.tokens", "stats.limits.searches", "stats.limits.time"].map((key) => h(doc, "th", { scope: "col" }, t(key))))),
+      h(
+        doc,
+        "tbody",
+        {},
+        ...limitRows(stats).map((row) => h(doc, "tr", { "data-ui": `limits-row-${row.id}` }, h(doc, "th", { scope: "row" }, row.id === "run" ? t("stats.limits.run") : row.label, row.id !== "run" && !row.own ? h(doc, "span", { class: "limit-source" }, ` · ${t("stats.limits.none")}`) : ""), used(row.cells.steps), used(row.cells.tokens), used(row.cells.searches), row.cells.time ? h(doc, "td", {}, row.cells.time.used === null ? "—" : `${num(row.cells.time.used)} / ${num(row.cells.time.limit)} s`) : h(doc, "td", {}, "—"))),
+      ),
+    );
+    const limitsSection = stats.perAgent.length ? h(doc, "section", { class: "stats-limits", "data-ui": "stats-limits-section" }, h(doc, "h3", {}, t("stats.limits.title")), h(doc, "p", { class: "hint" }, t("stats.limits.intro")), limitTable) : "";
     const when = [];
     if (stats.startedAt) when.push(t("stats.started", { time: formatWhen(stats.startedAt, ctx.lang) }));
     if (stats.endedAt) when.push(t("stats.ended", { time: formatWhen(stats.endedAt, ctx.lang) }));
@@ -170,6 +192,7 @@ export function renderResult(ctx, run) {
       { class: "stats-wrap" },
       tiles,
       stats.perAgent.length ? table : "",
+      limitsSection,
       when.length ? h(doc, "p", { class: "stats-note" }, when.join(" · ")) : "",
       h(doc, "p", { class: "stats-note" }, t("result.costNote")),
     );

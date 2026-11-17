@@ -27,6 +27,8 @@ Agent Atlas is a small harness around the Claude and Gemini models. You can see 
 - **Adjustable harness**: the limits you can change, such as the maximum steps, the tokens of a run, the web searches, the tokens of one reply and how long to wait for the model. Your choice is kept in your browser.
 - **Fixed harness**: the rules that never change, such as the 270 second total time, at most 8 agents in a design, and the fact that your key stays in your browser. They are fixed because safety or the hosting depends on them.
 
+Limits can also belong to a single agent. In Create you can give one agent its own maximum steps, tokens or searches, so a chatty agent cannot use up the whole budget, and choose whether the run stops there or the agent passes on what it wrote. The lower of the agent's limit and the run's limit always wins.
+
 Notice that even the adjustable limits have a ceiling. The server clips whatever it is sent, so a changed setting, or a request somebody made by hand, cannot go past it. A rule that the person being limited can switch off is not much of a rule.
 
 When a limit stops a run, nothing is lost. The replay keeps everything that happened and adds a warning that names the limit and its value, for example that the run used all 20 steps.

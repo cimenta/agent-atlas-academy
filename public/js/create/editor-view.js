@@ -2,7 +2,8 @@
 // list of rules the design still breaks. All rules live in editor-model.js; this file only draws.
 import { h } from "../dom.js";
 import { agentLabel } from "../engine/labels.js";
-import { AGENT_TYPES, MODELS } from "../engine/catalog.js";
+import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, OUTPUT_TOKENS } from "../engine/catalog.js";
+import { AGENT_LIMIT_KEYS, agentLimitRange } from "../engine/agent-limits.js";
 import { TOOLS } from "../engine/tools.js";
 import { roleText } from "../engine/prompts.js";
 import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, extentOf, isTwoWay, straight, turnArrows, TWO_WAY_GAP } from "./diagram-geometry.js";
@@ -10,8 +11,9 @@ import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, ext
 const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, getModels = (node) => MODELS, modelUi = null }) {
+export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, getModels = (node) => MODELS, modelUi = null, runLimits = () => ({ ...LIMIT_DEFAULTS, maxOutputTokens: OUTPUT_TOKENS.default }) }) {
   let selectedId = null;
+  let limitsOpen = false; // the Limits of this agent block stays open while the visitor works on it
   let connectFrom = null;
   let notice = "";
   let selectedEdge = null;
@@ -414,6 +416,61 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     );
   }
 
+  // Limits of one agent: empty means it has none of its own and the limits of the run apply; the lower of the two wins.
+  const LIMIT_FIELDS = [
+    ["maxSteps", "steps"],
+    ["maxTokens", "tokens"],
+    ["maxOutputTokens", "output"],
+    ["maxSearches", "searches"],
+  ];
+  function limitsBlock(node) {
+    const run = runLimits();
+    const shown = LIMIT_FIELDS.filter(([key]) => key !== "maxSearches" || node.search === true);
+    const inputs = new Map();
+    const read = () => {
+      const limits = {};
+      for (const [key] of shown) {
+        const raw = inputs.get(key).value.trim();
+        if (raw !== "") limits[key] = Number(raw);
+      }
+      // A search limit stays with the agent even while search is switched off.
+      if (node.search !== true && node.limits?.maxSearches !== undefined) limits.maxSearches = node.limits.maxSearches;
+      return limits;
+    };
+    const apply = () => {
+      editor.setNode(node.id, { limits: read() });
+      changed();
+    };
+    const rows = shown.map(([key, name]) => {
+      const range = agentLimitRange(key);
+      const input = h(doc, "input", { id: `ed-limit-${name}`, type: "number", min: range.min, max: range.max, step: 1, placeholder: t("editor.limits.fromRun"), "data-ui": `agent-limit-${name}` });
+      if (node.limits?.[key] !== undefined) input.value = String(node.limits[key]);
+      input.addEventListener("change", apply);
+      inputs.set(key, input);
+      const label = h(doc, "div", { class: "limit-label" }, h(doc, "label", { for: input.id }, t(`editor.limits.${name}.label`)), h(doc, "span", { class: "limit-hint" }, t(`editor.limits.${name}.hint`, { value: (run[key] ?? 0).toLocaleString("en-US") })));
+      return h(doc, "div", { class: "limit-row" }, label, input);
+    });
+    const count = Object.keys(node.limits ?? {}).length;
+    const onLimit = h(doc, "select", { id: "ed-on-limit", "data-ui": "agent-on-limit" }, ...["stop", "pass"].map((v) => h(doc, "option", { value: v, selected: (node.onLimit ?? "stop") === v }, t(`editor.limits.onLimit.${v}`))));
+    onLimit.addEventListener("change", () => {
+      editor.setNode(node.id, { onLimit: onLimit.value });
+      changed();
+    });
+    const details = h(
+      doc,
+      "details",
+      { class: "agent-limits", "data-ui": "agent-limits", open: limitsOpen || count > 0 },
+      h(doc, "summary", {}, t("editor.limits.title"), count > 0 ? h(doc, "span", { class: "limit-count", "data-ui": "agent-limits-count" }, t("editor.limits.count", { n: count })) : ""),
+      h(doc, "p", { class: "hint" }, t("editor.limits.help")),
+      ...rows,
+      h(doc, "div", { class: "field" }, h(doc, "label", { for: "ed-on-limit" }, t("editor.limits.onLimit.label")), onLimit),
+    );
+    details.addEventListener("toggle", () => {
+      limitsOpen = details.open;
+    });
+    return details;
+  }
+
   function settingsBlock(design) {
     const node = design.nodes.find((n) => n.id === selectedId);
     if (!node) return h(doc, "p", { class: "hint" }, t("editor.pickNode"));
@@ -437,6 +494,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     const searchRow = h(doc, "div", { class: "field checkbox" }, search, h(doc, "label", { for: "ed-search" }, t("editor.search")));
     parts.push(searchRow);
     if (TOOLS.web_search?.extraFee) parts.push(h(doc, "p", { class: "notice" }, t("editor.searchFee")));
+    parts.push(limitsBlock(node));
     if (type.free) {
       const name = h(doc, "input", { id: "ed-name", type: "text", maxlength: 40, value: node.name ?? "" });
       name.addEventListener("input", () => {

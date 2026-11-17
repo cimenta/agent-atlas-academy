@@ -24,7 +24,7 @@ export function reviewSummary({ design, limits, provider = "anthropic" }) {
 
 const OUTCOMES = new Set(["finished", "stopped_user", "stopped_limit", "interrupted", "failed"]);
 
-const LIMIT_REASONS = new Set(["time", "steps", "tokens", "searches"]);
+const LIMIT_REASONS = new Set(["time", "steps", "tokens", "searches", "agent_steps", "agent_tokens", "agent_searches"]);
 
 // A run stopped at a limit says which one when the done event recorded it; older runs keep the general message.
 export function runOutcomeMessageKey(outcome, reason) {

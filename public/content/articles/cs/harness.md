@@ -27,6 +27,8 @@ Agent Atlas je malý harness kolem modelů Claude a Gemini. Uvidíte ho v **Nast
 - **Nastavitelný harness**: limity, které můžete změnit, například nejvíce kroků, tokeny běhu, vyhledávání na webu, tokeny jedné odpovědi a jak dlouho čekat na model. Vaše volba se ukládá ve vašem prohlížeči.
 - **Pevný harness**: pravidla, která se nemění, například celkový čas 270 sekund, nejvýše 8 agentů v návrhu a to, že váš klíč zůstává v prohlížeči. Jsou pevná, protože na nich stojí bezpečnost nebo hosting.
 
+Limity může mít i jeden agent. V Create můžete jednomu agentovi dát vlastní nejvíce kroků, tokenů nebo vyhledávání, aby upovídaný agent nespotřeboval celý rozpočet, a vybrat, jestli se tam celý běh zastaví, nebo agent předá dál, co už napsal. Nižší z limitu agenta a limitu běhu platí vždy.
+
 Všimněte si, že i nastavitelné limity mají strop. Server ořízne všechno, co dostane, takže změněné nastavení ani požadavek, který někdo sestavil ručně, přes něj nepůjde. Pravidlo, které může ten, koho omezuje, sám vypnout, není moc pravidlo.
 
 Když limit běh zastaví, nic se neztratí. Přehrávač si pamatuje všechno, co se stalo, a přidá varování, které jmenuje limit a jeho hodnotu, například že běh vyčerpal všech 20 kroků.

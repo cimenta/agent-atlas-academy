@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Create: limits for each agent. An agent panel has a Limits of this agent block with the maximum steps, tokens, tokens of one reply and web searches of that agent (an empty box means the limit of the run applies, and the lower one always wins) and a choice of what happens when it reaches one: stop the whole run, or pass on what it wrote and go on. The limits are part of the design, so they are saved with a run, a definition and an export. A run that an agent limit stops ends with its own message. The Statistics tab of a result has a new Limits table: what the whole run and each agent used of their limits, with a reached limit marked. Help describes it, in English and Czech.
+
 - Learn: a new article, What is a harness?, for beginners, in English and Czech. It explains what surrounds a model, why it matters for safety and reliability, and where to see the harness of Agent Atlas in Settings. It is linked from Budgets and stop conditions and from Retries and errors.
 
 - Settings, Harness: the Default limits tab is now Harness, with two tabs. Adjustable harness has sliders for the maximum steps, tokens per run, web searches, tokens of one reply (new, 1000 to 4000, 4000 by default) and how long a request waits, with Reset to defaults and Save. Fixed harness lists what cannot be changed: the 270 second time of a run, 8 agents in a design, 1000 characters for the task, the size of a request, the pauses of the model, the runs per hour and the key handling. When a limit stops a run, the replay holds a warning that names the limit. Help has a The harness topic, in English and Czech.

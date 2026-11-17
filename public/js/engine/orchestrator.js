@@ -60,7 +60,7 @@ export async function runDesign({ design, task, limits, language = "en", call, c
       outcome = "stopped_limit";
       reason = error.reason;
       // The replay keeps a line that says which limit of the harness stopped the run.
-      send({ type: "warning", limit: reason, message: limitMessage(reason, clampLimits(limits)) });
+      send({ type: "warning", ...(error.agent ? { agent: error.agent } : {}), limit: reason, message: limitMessage(reason, clampLimits(limits), { label: error.label, value: error.value }) });
     } else if (signal?.aborted) {
       outcome = "stopped_user";
     } else {

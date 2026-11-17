@@ -18,9 +18,19 @@ export function fixedRules() {
   ];
 }
 
+const AGENT_PART = { agent_steps: "steps", agent_tokens: "tokens", agent_searches: "web searches" };
+
+// The warning of an agent that reached its own limit, handed on what it had written, and let the run go on.
+export function agentPassMessage(reason, { label, value }) {
+  return `Limit reached: ${AGENT_PART[reason]} of agent ${label} (${value} per agent). It passed on what it had written, and the run went on.`;
+}
+
 // The warning a replay holds when a limit stopped the run (English, like the other messages of the engine).
-export function limitMessage(reason, limits) {
+// extra: for the limit of one agent, its label and the value it had.
+export function limitMessage(reason, limits, extra = {}) {
   const { maxSteps, maxTokens, maxSearches } = limits ?? {};
+  const agentPart = AGENT_PART[reason];
+  if (agentPart) return `Limit reached: ${agentPart} of agent ${extra.label} (${extra.value} per agent). The run was stopped before it could finish. Raise the limit of this agent in the editor, and run again.`;
   switch (reason) {
     case "steps":
       return `Limit reached: steps (${maxSteps} per run). The run was stopped before it could finish. Raise the limit in Settings, Harness, and run again.`;

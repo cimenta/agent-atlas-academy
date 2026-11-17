@@ -1,6 +1,7 @@
 // The rules of the four orchestration patterns. validateDesign is used by the
 // editor in the browser and again by the server, which never trusts the browser.
 import { isSlot } from "../key-slots.js";
+import { validNodeLimits, ON_LIMIT } from "./agent-limits.js";
 import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, LIMIT_MAX, NODE_MAX, NAME_MAX, INSTRUCTIONS_MAX } from "./catalog.js";
 
 export const PATTERNS = ["sequential", "parallel", "supervisor", "debate"];
@@ -55,6 +56,8 @@ export function validateDesign(design) {
       if (!ok) add("node.instructions", { id: node.id });
     }
     if (typeof node.search !== "boolean") add("node.search", { id: node.id });
+    if (node.limits !== undefined && !validNodeLimits(node.limits)) add("node.limits", { id: node.id });
+    if (node.onLimit !== undefined && !ON_LIMIT.includes(node.onLimit)) add("node.onLimit", { id: node.id });
     if (node.stance !== undefined && node.stance !== "for" && node.stance !== "against") add("node.stance", { id: node.id });
     // Only a critic in a chain can add its notes to the output of the agent before it.
     if (node.addToPrevious !== undefined && !(node.addToPrevious === true && node.agent === "critic" && (pattern === "sequential" || pattern === "parallel"))) add("node.addToPrevious", { id: node.id });

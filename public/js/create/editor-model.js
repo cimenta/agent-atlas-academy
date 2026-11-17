@@ -2,10 +2,19 @@
 // the editor refuses a connection the server would refuse anyway, with the same error code.
 import { AGENT_TYPES, DEFAULT_MODEL, NODE_MAX } from "../engine/catalog.js";
 import { validateDesign } from "../engine/patterns.js";
+import { cleanNodeLimits } from "../engine/agent-limits.js";
 
 const ONCE_ONLY = new Set(["supervisor", "combiner", "judge"]);
-const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious"];
+const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit"];
 const DEFAULT_ROUNDS = 2;
+
+// A node carries limits and onLimit only when they are set: the limits are cleaned, and an onLimit of stop (the default) is left out.
+function tidyLimits(node) {
+  const limits = cleanNodeLimits(node.limits);
+  if (limits) node.limits = limits;
+  else delete node.limits;
+  if (node.onLimit !== "pass") delete node.onLimit;
+}
 
 export function createEditor(initialPattern) {
   let pattern = initialPattern;
@@ -58,6 +67,7 @@ export function createEditor(initialPattern) {
         node.instructions = "";
       }
       for (const key of EDITABLE) if (key in overrides) node[key] = overrides[key];
+      tidyLimits(node);
       nodes.push(node);
       return { ok: true, id: node.id };
     },
@@ -72,6 +82,7 @@ export function createEditor(initialPattern) {
       const node = find(id);
       if (!node) return;
       for (const key of EDITABLE) if (key in patch) node[key] = patch[key];
+      tidyLimits(node);
     },
 
     defaultModel() {

@@ -3,6 +3,8 @@ import { providerCatalog, paidOnlyModelUsed, nodeModel } from "./engine/catalog.
 import { slotIsFree } from "./key-slots.js";
 import { deriveInspector } from "./replay/inspect-model.js";
 import { validateRun } from "./run-schema.js";
+import { clampLimits } from "./engine/patterns.js";
+import { TIME_LIMIT_MS } from "./engine/budget.js";
 
 // The library run the home page plays: the one marked "home": true in runs/index.json, else the first.
 export function pickHomeRun(runs) {
@@ -93,6 +95,9 @@ export function buildStatistics(run) {
       const node = run?.design?.nodes?.find((n) => n.id === id);
       const tokens = base.perAgent.find((x) => x.agent === id);
       return {
+        limits: node?.limits && Object.keys(node.limits).length > 0 ? node.limits : null,
+        onLimit: node?.onLimit === "pass" ? "pass" : "stop",
+        hit: events.filter((e) => e.type === "warning" && e.agent === id && typeof e.limit === "string" && e.limit.startsWith("agent_")).map((e) => e.limit),
         agent: id,
         label: a.label,
         model: a.model || node?.model || "",
@@ -114,8 +119,50 @@ export function buildStatistics(run) {
     endedAt: run?.endedAt ?? null,
     appVersion: run?.appVersion ?? null,
     calls: perAgent.reduce((n, a) => n + a.calls, 0),
+    // The limits the run had, and the limit of the run (not of an agent) that stopped it, if one did.
+    runLimits: run?.limits !== null && typeof run?.limits === "object" && !Array.isArray(run.limits) ? clampLimits(run.limits) : null,
+    runHit: events.find((e) => e.type === "warning" && typeof e.limit === "string" && !e.limit.startsWith("agent_"))?.limit ?? null,
     perAgent,
   };
+}
+
+// The rows of the limits table: the whole run first, then each agent, with what was used, the limit it is held to
+// (its own, else the one of the run), where that limit comes from, and whether it was reached.
+export function limitRows(stats) {
+  const run = stats?.runLimits ?? null;
+  const cell = (used, limit, from, hit) => ({ used, limit, from, hit });
+  const seconds = typeof stats?.totalMs === "number" ? Math.round(stats.totalMs / 1000) : null;
+  const rows = [
+    {
+      id: "run",
+      label: "",
+      own: false,
+      cells: {
+        steps: cell(stats?.calls ?? 0, run?.maxSteps ?? null, "run", stats?.runHit === "steps"),
+        tokens: cell((stats?.usage?.input ?? 0) + (stats?.usage?.output ?? 0), run?.maxTokens ?? null, "run", stats?.runHit === "tokens"),
+        searches: cell(stats?.usage?.searches ?? 0, run?.maxSearches ?? null, "run", stats?.runHit === "searches"),
+        time: cell(seconds, TIME_LIMIT_MS / 1000, "run", stats?.runHit === "time"),
+      },
+    },
+  ];
+  for (const a of stats?.perAgent ?? []) {
+    const pick = (key, used, hitKey) => {
+      const own = a.limits?.[key];
+      return cell(used, own ?? run?.[key] ?? null, own !== undefined ? "agent" : "run", Array.isArray(a.hit) && a.hit.includes(hitKey));
+    };
+    rows.push({
+      id: a.agent,
+      label: a.label,
+      own: a.limits !== null && a.limits !== undefined,
+      onLimit: a.onLimit,
+      cells: {
+        steps: pick("maxSteps", a.calls, "agent_steps"),
+        tokens: pick("maxTokens", a.input + a.output, "agent_tokens"),
+        searches: pick("maxSearches", a.searches, "agent_searches"),
+      },
+    });
+  }
+  return rows;
 }
 
 // A run file chosen for import: it must be JSON that passes the run schema. It always gets a fresh
