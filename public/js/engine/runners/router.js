@@ -34,7 +34,7 @@ export async function run({ design, task, agents, emit }) {
   const describe = (id) => {
     const node = byId.get(id);
     const label = agentLabel(node, design, AGENT_TYPES[node.agent]?.label ?? node.agent);
-    const hint = node.agent === "free" && typeof node.instructions === "string" && node.instructions.trim() !== "" ? `: ${node.instructions.trim().slice(0, HINT_MAX)}` : "";
+    const hint = node.agent === "free" && typeof node.instructions === "string" && node.instructions.trim() !== "" ? `: ${node.instructions.trim().replace(/\s+/g, " ").replace(/,/g, ";").replace(/[()]/g, "").slice(0, HINT_MAX)}` : "";
     return `${id} (${label}${hint})`;
   };
   try {

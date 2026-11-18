@@ -558,7 +558,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       // A card of an agent that never started: say why, and where to read the decision.
       const idle = ui.agent && !state.agents[ui.agent] ? idleStatus() : "waiting";
       if (idle !== "waiting") {
-        body.replaceChildren(h(doc, "p", { class: "doc", "data-ui": "idle-agent" }, t(`insp.${idle}`)));
+        body.replaceChildren(h(doc, "p", { class: "doc", "data-ui": "idle-agent" }, t(idle === "idle" && designOfRun()?.pattern === "router" ? "insp.idleRouter" : `insp.${idle}`)));
         return;
       }
       if (!agent) {

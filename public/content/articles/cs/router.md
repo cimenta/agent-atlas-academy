@@ -20,9 +20,9 @@ related: [handoff, supervisor-and-workers, parallel-fan-out-fan-in, what-each-ag
 - Druhá šance není. Špatná cesta stejně dá odpověď a nic nepozná, že přišla od špatného specialisty.
 - Směrovač musí někoho vybrat. Skutečný systém přidává záložního specialistu, kontrolu, jak si je směrovač jistý, nebo kontrolu odpovědi.
 
-V Agent Atlas směrovač postavíte ve Vytvořit: jeden **Směrovač** (přidá se za vás) a dva až šest specialistů. Nakreslíte šipku od směrovače ke každému specialistovi, kterého smí vybrat. Směrovač odpovídá v pevném tvaru JSON s id specialisty a krátkým důvodem a odpověď čte program. Pokud není platná, směrovač se zeptá ještě jednou a druhá špatná odpověď běh ukončí chybou.
+V Agent Atlas směrovač postavíte ve Vytvořit: jeden **Směrovač** (přidá se za vás) a dva až šest specialistů. Nakreslíte šipku od směrovače ke každému specialistovi, kterého smí vybrat. Směrovač odpovídá v pevném tvaru JSON s id specialisty a krátkým důvodem a odpověď čte program. Pokud není platná, program se směrovače zeptá ještě jednou a druhá špatná odpověď běh ukončí chybou.
 
-**Specialista dostane jen zadání.** Směrovač předává volbu, ne poznámku. Přehrání ukáže důvod, který směrovač uvedl, a specialisté, kteří nebyli vybráni, mají stav „nevolán“.
+**Specialista dostane jen zadání.** Směrovač předává volbu, ne poznámku. Přehrání ukáže důvod, který směrovač uvedl, a specialisté, kteří nebyli vybráni, mají stav „nezavolán“.
 
 Běh skončí jedním ze tří způsobů: vybraný specialista **odpoví** (jeho odpověď je výsledek), **limit** zastaví běh dřív, než specialista odpoví (výsledek není), nebo běh **selže**.
 

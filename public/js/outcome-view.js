@@ -72,7 +72,7 @@ export function handoffNotice({ doc, t, design, outcome }) {
 // The notice that says how a router run ended: the chosen specialist answered, or a limit stopped it before that.
 // `end` is what routerEnd gives.
 export function routerNotice({ doc, t, design, end }) {
-  const parts = end.result === "answered" ? { level: "ok", icon: "✓", title: "router.answered", body: "router.answered.body" } : { level: "fail", icon: "■", title: "router.stopped", body: "router.stopped.body" };
+  const parts = end.result === "answered" ? { level: "ok", icon: "✓", title: "router.answered", body: "router.answered.body" } : { level: "fail", icon: "■", title: "router.stopped", body: end.to ? "router.stopped.body" : "router.stopped.early" };
   const params = { name: end.to ? designLabel(design, end.to) : "" };
   return h(
     doc,

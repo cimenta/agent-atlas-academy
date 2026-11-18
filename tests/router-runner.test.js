@@ -97,11 +97,27 @@ test("a carried-on run gives the same route and result", async () => {
   assert.equal(resumed.result.finalText, "Written answer");
 });
 
-test("a mock run ends with the first specialist, and the estimate is two", async () => {
+test("a mock run ends with the first specialist, and the estimate is three", async () => {
   const events = [];
   const result = await runDesign({ design: design(), task: "Explain it", limits: LIMIT_DEFAULTS, call: createMockCall(), emit: (e) => events.push(e) });
   assert.equal(result.outcome, "finished");
   assert.equal(events.find((e) => e.type === "handoff").to, "w");
-  assert.equal(activationsOf(design(), LIMIT_DEFAULTS), 2);
+  assert.equal(activationsOf(design(), LIMIT_DEFAULTS), 3);
   assert.equal(activationsOf(design(), { ...LIMIT_DEFAULTS, maxSteps: 1 }), 1);
+});
+
+// ---- found in the review ----
+test("an own limit with pass on the router still stops the run (its reply is a decision)", async () => {
+  const d = design({ nodes: [node("router", "router", { limits: { maxSteps: 1 }, onLimit: "pass" }), node("w", "writer"), node("r", "researcher")] });
+  const { result } = await runWith(d, ["nonsense", ROUTE, "A"]);
+  assert.equal(result.outcome, "stopped_limit");
+  assert.equal(result.reason, "agent_steps");
+});
+
+test("the instructions of a free agent are listed on one line, without commas or brackets breaking the list", async () => {
+  const d = design({ nodes: [node("router", "router"), node("w", "writer"), node("f", "free", { name: "Poet", instructions: "Line one,\nline two (x)\n\nend" })], edges: [{ from: "router", to: "w" }, { from: "router", to: "f" }] });
+  const { calls } = await runWith(d, ['{"route":"f","reason":"rhyme"}', "x"]);
+  const listed = lastUser(calls[0]).split("You may route to: ")[1];
+  assert.ok(!listed.includes("\n"));
+  assert.match(listed, /f \(Poet: Line one; line two x end\)$/);
 });
