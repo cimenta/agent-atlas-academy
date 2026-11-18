@@ -4,7 +4,7 @@ import { h } from "../dom.js";
 import { helpIcon } from "../help-popup.js";
 import { validateRun } from "../run-schema.js";
 import { createPlayer } from "./player.js";
-import { debateProgress, deriveInspector, designLabel } from "./inspect-model.js";
+import { debateProgress, deriveInspector, designLabel, evaluatorProgress, loopOutcome } from "./inspect-model.js";
 import { createViewer } from "./viewer.js";
 import { markText, searchBar } from "../text-search.js";
 import { definitionFromRun } from "../create/definition.js";
@@ -19,7 +19,7 @@ import { limitsChoice } from "./limits-choice.js";
 import { canSubmit, submitRun } from "../submit-run.js";
 import { runForExport } from "../run-export.js";
 import { createReplayDiagram, ROUND_MARK } from "./diagram.js";
-import { outcomeNotice } from "../outcome-view.js";
+import { outcomeNotice, loopNotice } from "../outcome-view.js";
 import { buildResultModel } from "../play-model.js";
 import { clearActivePlayer, setActivePlayer } from "../shortcuts.js";
 import { pickNeighbour } from "./spatial.js";
@@ -308,6 +308,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       }
     }
     const debate = debateProgress(events, player.cursor);
+    const evaluating = evaluatorProgress(events, player.cursor);
     // In a recorded (not live) run, the agents that failed at its end are marked from the start.
     if (!live && failedAtEnd === null) {
       const whole = deriveInspector(events);
@@ -320,8 +321,14 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       state,
       failed: live ? null : failedAtEnd,
       selectedId: currentAgent()?.id ?? null,
-      badgeText: debate ? (debate.verdict ? t("player.debateVerdict") : t("player.debateRound", { n: ROUND_MARK, total: debate.rounds })) : "",
-      badgeNumber: debate && !debate.verdict ? debate.round : undefined,
+      badgeText: debate
+        ? debate.verdict
+          ? t("player.debateVerdict")
+          : t("player.debateRound", { n: ROUND_MARK, total: debate.rounds })
+        : evaluating
+          ? t("player.debateRound", { n: ROUND_MARK, total: evaluating.rounds }) + (evaluating.phase === "judging" ? ` · ${t("player.evaluatorJudging")}` : "")
+          : "",
+      badgeNumber: debate ? (debate.verdict ? undefined : debate.round) : evaluating ? evaluating.round : undefined,
     });
     return true;
   }
@@ -486,6 +493,9 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       const time = typeof at === "number" ? clockTime(at) : "";
       items.push(h(doc, "div", { class: "banner warn" }, ...(time ? [h(doc, "time", { class: "banner-time", "data-ui": "banner-time", datetime: new Date(at).toISOString() }, time), " "] : []), `⚠ ${w}`, " ", help(state.warningHelps[i] ?? "replay-warnings", t("replay.warningHelp"))));
     });
+    // How an evaluator loop ended shows once the replay has reached that point.
+    const loop = loopOutcome(events);
+    if (loop && player.cursor > events.findIndex((e) => e.type === "loop_end")) items.push(loopNotice({ doc, t, loop }));
     banners.replaceChildren(...items);
   }
 

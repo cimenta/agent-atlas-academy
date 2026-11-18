@@ -6,7 +6,8 @@ import { renderBlocks } from "./render.js";
 import { buildResultModel, buildStatistics, limitRows } from "./play-model.js";
 import { copyText, downloadFile, safeFileName } from "./download.js";
 import { formatDuration, formatUsd } from "./create/create-model.js";
-import { outcomeNotice } from "./outcome-view.js";
+import { outcomeNotice, loopNotice } from "./outcome-view.js";
+import { loopOutcome } from "./replay/inspect-model.js";
 import { markText, searchBar } from "./text-search.js";
 import { paintModelTag } from "./provider-colors.js";
 
@@ -49,6 +50,7 @@ export function renderResult(ctx, run) {
     );
   };
 
+  const loop = loopOutcome(run.events);
   const answerView = () => {
     if (!answer) return h(doc, "p", { class: "notice" }, t("result.noText"));
     const cleanArticle = () => {
@@ -112,7 +114,7 @@ export function renderResult(ctx, run) {
     );
 
     search.run();
-    return h(doc, "div", { class: "answer-wrap" }, h(doc, "div", { class: "answer-toolbar noprint" }, segment, copy, copied, exports), search.element, holder);
+    return h(doc, "div", { class: "answer-wrap" }, loop ? loopNotice({ doc, t, loop }) : "", h(doc, "div", { class: "answer-toolbar noprint" }, segment, copy, copied, exports), search.element, holder);
   };
 
   const statsView = () => {
@@ -128,6 +130,7 @@ export function renderResult(ctx, run) {
       tile(num(stats.usage.output), t("stats.outputTokens")),
       tile(num(stats.usage.searches), t("stats.searches")),
       tile(num(stats.calls), t("stats.calls")),
+      ...(loop ? [tile(t(`stats.loop.${{ accepted: "accepted", not_accepted: "notAccepted", stopped: "stopped" }[loop.result]}`, { n: loop.round, total: loop.rounds }), t("stats.loop"))] : []),
     );
     const table = h(
       doc,

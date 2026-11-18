@@ -4,6 +4,10 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ## [Unreleased]
 
+### Added
+
+- Evaluator loop: a fifth pattern in Create. A writer drafts, an evaluator judges the draft against criteria that you write, and the writer revises, for 1 to 4 rounds. The evaluator accepts or sends feedback, and the program reads that verdict. A loop ends accepted, not accepted (the rounds ran out, the last draft is the result and is marked), or stopped by a limit. The replay shows the round and a notice at the end, the Result tab shows the notice and a Loop tile, and Create warns when no criteria are written. The Learn article Evaluator loop is written (English and Czech) and is no longer marked coming.
+
 ### Changed
 
 - Learn and Help brought up to date: Human approval is now a full article (it is no longer marked as coming), and the articles on reading a replay, budgets, retries, tools, tokens and cost, supervisors, guardrails and prompt injection describe what Agent Atlas does today (the diagram arrows, the stopped, not called and not reached states, per-agent limits, the cost cap, the Retry menu with Use current limits from Settings, the search switches, approval). New article: Debate. Help, How it ended, now names waiting for approval.

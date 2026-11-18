@@ -102,3 +102,11 @@ test("runOutcomeMessageKey names the limit a run stopped at and falls back when 
   assert.equal(runOutcomeMessageKey("stopped_limit", "bogus"), "run.outcome.stopped_limit");
   assert.equal(runOutcomeMessageKey("failed", "tokens"), "run.outcome.failed");
 });
+
+test("the review summary says when an evaluator loop has no criteria", async () => {
+  const { reviewSummary } = await import("../public/js/create/create-model.js");
+  const { LIMIT_DEFAULTS } = await import("../public/js/engine/catalog.js");
+  const design = (criteria) => ({ pattern: "evaluator", rounds: 3, criteria, nodes: [{ id: "writer", agent: "writer", model: "fast", search: false }, { id: "evaluator", agent: "evaluator", model: "fast", search: false }], edges: [{ from: "writer", to: "evaluator" }] });
+  assert.equal(reviewSummary({ design: design(""), limits: LIMIT_DEFAULTS }).emptyCriteria, true);
+  assert.equal(reviewSummary({ design: design("Short."), limits: LIMIT_DEFAULTS }).emptyCriteria, false);
+});

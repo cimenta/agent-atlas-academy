@@ -216,3 +216,52 @@ test("the size of a handoff shortens the draft the evaluator and the writer rece
   assert.ok(JSON.stringify(calls[1].messages).includes("[Cut:"));
   assert.ok(!JSON.stringify(calls[2].messages.at(-1)).includes("x".repeat(2500)));
 });
+
+// ---- found in the final review ----
+test("a run that fails after a draft still has the last draft as its result, not the evaluator's reply", async () => {
+  const { result } = await run(evaluatorDesign(), ["D1", "fine", "still fine"]);
+  assert.equal(result.outcome, "failed");
+  assert.equal(result.finalText, "D1");
+});
+
+test("a run stopped by the user has the last draft as its result", async () => {
+  const control = new AbortController();
+  const replies = ["D1", revise("a"), "D2"];
+  const events = [];
+  const result = await runDesign({
+    design: evaluatorDesign(),
+    task: "t",
+    limits: LIMIT_DEFAULTS,
+    signal: control.signal,
+    call: async (body) => {
+      const next = replies.shift();
+      if (next === "D2") {
+        control.abort();
+        throw new Error("The request was cancelled");
+      }
+      return text(next);
+    },
+    emit: (e) => events.push(e),
+  });
+  assert.equal(result.outcome, "stopped_user");
+  assert.equal(result.finalText, "D1");
+});
+
+test("a limit before any draft: loop_end stopped is not judged and the result is empty", async () => {
+  const events = [];
+  const result = await runDesign({ design: evaluatorDesign(), task: "t", limits: { ...LIMIT_DEFAULTS, maxTokens: 5 }, call: async () => text("D1"), emit: (e) => events.push(e) });
+  assert.equal(result.outcome, "stopped_limit");
+  assert.equal(result.finalText, "");
+  assert.equal(loopEnd(events)[0].judged, false);
+});
+
+test("a repeated feedback stop, which comes after the verdict was given, counts as judged", async () => {
+  const { events } = await runWith(evaluatorDesign({ rounds: 4 }), ["D1", revise("same"), "D2", revise("same")], { repeatStop: 2 });
+  const end = loopEnd(events)[0];
+  assert.deepEqual([end.result, end.round, end.judged], ["stopped", 2, true]);
+});
+
+test("the last round sends no feedback to the writer, which would never receive it", async () => {
+  const { events } = await run(evaluatorDesign({ rounds: 1 }), ["D1", revise()]);
+  assert.deepEqual(events.filter((e) => e.type === "handoff").map((e) => `${e.from}>${e.to}`), ["writer>evaluator"]);
+});

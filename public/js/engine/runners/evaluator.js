@@ -1,6 +1,7 @@
 // Evaluator loop: a writer drafts, an evaluator accepts or asks for a revision, until accepted or out of rounds.
 import { candidates } from "./supervisor.js";
 import { LimitError } from "../budget.js";
+import { ApprovalPause } from "../approval.js";
 
 // Reads the evaluator's reply. Returns null when it is not a valid verdict.
 export function parseVerdict(text) {
@@ -32,7 +33,7 @@ export async function run({ design, task, agents, emit, passOn = (text) => text 
   const criteria = typeof design.criteria === "string" && design.criteria.trim() !== "" ? design.criteria.trim() : "(none given)";
   let draft = "";
   let drafts = 0;
-  let judged = true;
+  let judged = false; // is the last draft judged? (no draft yet: nothing is judged)
   let feedback = "";
   try {
     for (let round = 1; round <= design.rounds; round++) {
@@ -55,13 +56,17 @@ export async function run({ design, task, agents, emit, passOn = (text) => text 
         return draft;
       }
       feedback = verdict.feedback;
-      emit({ type: "handoff", from: evaluator.id, to: writer.id, note: feedback.slice(0, NOTE_MAX) });
+      // The writer gets the feedback only when there is a next round.
+      if (round < design.rounds) emit({ type: "handoff", from: evaluator.id, to: writer.id, note: feedback.slice(0, NOTE_MAX) });
     }
   } catch (error) {
     if (error instanceof LimitError) {
-      emit({ type: "loop_end", result: "stopped", round: Math.max(1, drafts), judged });
-      error.partialText = draft;
+      // A limit of the evaluator that comes after its answer (repeated answers, its tokens) still leaves a verdict in the replay.
+      const afterVerdict = error.agent === evaluator.id && (error.reason === "repeat" || error.reason === "agent_tokens");
+      emit({ type: "loop_end", result: "stopped", round: Math.max(1, drafts), judged: drafts > 0 && (judged || afterVerdict) });
     }
+    // Whatever ends the run, the last draft is its result; a pause for approval is not an ending.
+    if (!(error instanceof ApprovalPause)) error.partialText = draft;
     throw error;
   }
   emit({ type: "loop_end", result: "not_accepted", round: design.rounds, judged: true });

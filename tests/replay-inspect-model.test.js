@@ -169,3 +169,33 @@ test("designLabel gives the name of a free agent that has not started, and numbe
   assert.equal(designLabel(design, "r2"), "Researcher 2");
   assert.equal(designLabel(design, "unknown"), "unknown");
 });
+
+// ---- evaluator loop ----
+import { evaluatorProgress, loopOutcome } from "../public/js/replay/inspect-model.js";
+
+const evalEvents = (rounds, ...rest) => [
+  { type: "run_start", t: 0, design: { pattern: "evaluator", rounds, criteria: "", nodes: [{ id: "writer", agent: "writer" }, { id: "evaluator", agent: "evaluator" }], edges: [{ from: "writer", to: "evaluator" }] } },
+  ...rest,
+];
+const start = (agent) => ({ type: "agent_start", agent, t: 1 });
+
+test("evaluatorProgress follows the drafts and the verdicts", () => {
+  const events = evalEvents(2, start("writer"), start("evaluator"), start("writer"), start("evaluator"));
+  assert.deepEqual(evaluatorProgress(events, 1), { round: 1, rounds: 2, phase: "writing" });
+  assert.deepEqual(evaluatorProgress(events, 3), { round: 1, rounds: 2, phase: "judging" });
+  assert.deepEqual(evaluatorProgress(events, 4), { round: 2, rounds: 2, phase: "writing" });
+  assert.deepEqual(evaluatorProgress(events, 5), { round: 2, rounds: 2, phase: "judging" });
+  assert.deepEqual(evaluatorProgress(events, 0), { round: 1, rounds: 2, phase: "writing" });
+});
+
+test("evaluatorProgress is null for other patterns", () => {
+  assert.equal(evaluatorProgress([{ type: "run_start", t: 0, design: { pattern: "debate", rounds: 2, nodes: [], edges: [] } }], 1), null);
+});
+
+test("loopOutcome reads the three endings and is null without a loop_end event", () => {
+  for (const [result, judged] of [["accepted", true], ["not_accepted", true], ["stopped", false]]) {
+    const events = evalEvents(3, { type: "loop_end", result, round: 2, judged, t: 5 });
+    assert.deepEqual(loopOutcome(events), { result, round: 2, judged, rounds: 3 });
+  }
+  assert.equal(loopOutcome(evalEvents(3, start("writer"))), null);
+});

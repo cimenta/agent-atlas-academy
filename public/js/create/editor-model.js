@@ -4,9 +4,11 @@ import { AGENT_TYPES, DEFAULT_MODEL, NODE_MAX } from "../engine/catalog.js";
 import { validateDesign } from "../engine/patterns.js";
 import { cleanNodeLimits } from "../engine/agent-limits.js";
 
-const ONCE_ONLY = new Set(["supervisor", "combiner", "judge"]);
+const ONCE_ONLY = new Set(["supervisor", "combiner", "judge", "evaluator"]);
 const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve"];
 const DEFAULT_ROUNDS = 2;
+const EVALUATOR_ROUNDS = 3;
+const roundsFor = (pattern) => (pattern === "evaluator" ? EVALUATOR_ROUNDS : DEFAULT_ROUNDS);
 
 // A node carries limits and onLimit only when they are set: the limits are cleaned, and an onLimit of stop (the default) is left out.
 function tidyLimits(node) {
@@ -21,13 +23,16 @@ export function createEditor(initialPattern) {
   let pattern = initialPattern;
   let nodes = [];
   let edges = [];
-  let rounds = DEFAULT_ROUNDS;
+  let rounds = roundsFor(pattern);
+  let criteria = "";
   let positions = {};
   // The default model: { slot, model }. A new agent starts with it, and so does every agent that has not been
   // given a model of its own (custom is not true).
   let defaultModel = null;
 
   const find = (id) => nodes.find((n) => n.id === id);
+  // An agent that can be added only once. In an evaluator loop that is also the writer.
+  const onceOnly = (agent) => ONCE_ONLY.has(agent) || (pattern === "evaluator" && agent === "writer");
   const hasEdge = (from, to) => edges.some((e) => e.from === from && e.to === to);
 
   function nextId(agent) {
@@ -52,6 +57,10 @@ export function createEditor(initialPattern) {
     design() {
       const copy = { pattern, nodes: structuredClone(nodes), edges: structuredClone(edges) };
       if (pattern === "debate") copy.rounds = rounds;
+      if (pattern === "evaluator") {
+        copy.rounds = rounds;
+        copy.criteria = criteria;
+      }
       return copy;
     },
 
@@ -60,7 +69,7 @@ export function createEditor(initialPattern) {
       if (!type) return { ok: false, code: "node.agent" };
       if (!type.patterns.includes(pattern)) return { ok: false, code: "node.agentNotAllowed" };
       if (nodes.length >= NODE_MAX) return { ok: false, code: "node.count" };
-      if (ONCE_ONLY.has(agent) && nodes.some((n) => n.agent === agent)) return { ok: false, code: "node.duplicate" };
+      if (onceOnly(agent) && nodes.some((n) => n.agent === agent)) return { ok: false, code: "node.duplicate" };
       const node = { id: nextId(agent), agent, model: defaultModel?.model ?? DEFAULT_MODEL, search: type.searchDefault };
       if (defaultModel) node.slot = defaultModel.slot;
       if (type.free) {
@@ -157,6 +166,8 @@ export function createEditor(initialPattern) {
         } else if (!(combiner && from === tail && !touched(to))) code = "par.edges";
       } else if (pattern === "supervisor") {
         if (!(a.agent === "supervisor" && b.agent !== "supervisor")) code = "sup.edges";
+      } else if (pattern === "evaluator") {
+        if (!(a.agent === "writer" && b.agent === "evaluator") || edges.length > 0) code = "eval.edges";
       } else if (!(a.agent === "debater" && b.agent === "judge")) {
         code = "deb.edges";
       }
@@ -190,7 +201,7 @@ export function createEditor(initialPattern) {
       return Object.entries(AGENT_TYPES).map(([agent, type]) => ({
         agent,
         label: type.label,
-        allowed: type.patterns.includes(pattern) && !(ONCE_ONLY.has(agent) && nodes.some((n) => n.agent === agent)),
+        allowed: type.patterns.includes(pattern) && !(onceOnly(agent) && nodes.some((n) => n.agent === agent)),
       }));
     },
 
@@ -202,12 +213,28 @@ export function createEditor(initialPattern) {
       if (Number.isInteger(n)) rounds = n;
     },
 
-    reset(nextPattern) {
+    setCriteria(text) {
+      if (typeof text === "string") criteria = text;
+    },
+
+    criteria() {
+      return criteria;
+    },
+
+    // Starts the pattern from nothing. An evaluator loop always has the same two agents and one edge, so it starts with
+    // them already in place, and with the example criteria the caller gives.
+    reset(nextPattern, { criteria: example = "" } = {}) {
       pattern = nextPattern;
       nodes = [];
       edges = [];
-      rounds = DEFAULT_ROUNDS;
+      rounds = roundsFor(nextPattern);
+      criteria = nextPattern === "evaluator" ? example : "";
       positions = {};
+      if (nextPattern === "evaluator") {
+        this.addNode("writer");
+        this.addNode("evaluator");
+        edges.push({ from: "writer", to: "evaluator" });
+      }
     },
   };
 }
@@ -228,7 +255,7 @@ export function layoutDesign(design, { orientation = "vertical" } = {}) {
       level = edges.filter((e) => level.includes(e.from) && !spots.has(e.to)).map((e) => e.to);
     }
   } else {
-    const hubAgent = { parallel: "combiner", supervisor: "supervisor", debate: "judge" }[pattern];
+    const hubAgent = { parallel: "combiner", supervisor: "supervisor", debate: "judge", evaluator: "evaluator" }[pattern];
     const hub = nodes.find((n) => n.agent === hubAgent && connected.has(n.id));
     const followers = [];
     if (pattern === "parallel" && hub) {

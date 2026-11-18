@@ -266,3 +266,24 @@ export function debateProgress(events, cursor) {
   const turns = seen.filter((e) => debaters.has(e.agent)).length;
   return { verdict: false, round: Math.min(design.rounds, Math.max(1, Math.ceil(turns / debaters.size))), rounds: design.rounds };
 }
+
+// Where an evaluator loop stands at the cursor: which draft the writer is on, and whether the evaluator is judging it.
+// Null for runs that are not evaluator loops. Each activation of an agent starts with an agent_start event.
+export function evaluatorProgress(events, cursor) {
+  const design = events.find((e) => e.type === "run_start")?.design;
+  if (design?.pattern !== "evaluator" || !Number.isInteger(design.rounds)) return null;
+  const writers = new Set(design.nodes.filter((n) => n.agent === "writer").map((n) => n.id));
+  const seen = events.slice(0, cursor).filter((e) => e.type === "agent_start");
+  const drafts = seen.filter((e) => writers.has(e.agent)).length;
+  const last = seen.at(-1);
+  return { round: Math.min(design.rounds, Math.max(1, drafts)), rounds: design.rounds, phase: last && !writers.has(last.agent) ? "judging" : "writing" };
+}
+
+// How an evaluator loop ended, from its loop_end event: { result, round, judged, rounds }. Null when the run has no such
+// event (other patterns, and runs recorded before the evaluator loop existed).
+export function loopOutcome(events) {
+  const end = events.find((e) => e.type === "loop_end");
+  if (!end) return null;
+  const rounds = events.find((e) => e.type === "run_start")?.design?.rounds;
+  return { result: end.result, round: end.round, judged: end.judged === true, rounds: Number.isInteger(rounds) ? rounds : end.round };
+}

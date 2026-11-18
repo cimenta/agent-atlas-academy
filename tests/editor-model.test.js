@@ -349,3 +349,61 @@ test("a critic can be set to add its notes to the previous agent's output", () =
   assert.equal(editor.design().nodes[1].addToPrevious, undefined);
   assert.equal(validateDesign(editor.design()).ok, true);
 });
+
+// ---- evaluator loop ----
+test("a reset to the evaluator loop starts with a writer, an evaluator, one edge, 3 rounds and the given criteria", () => {
+  const editor = createEditor("sequential");
+  editor.reset("evaluator", { criteria: "Be short." });
+  const design = editor.design();
+  assert.deepEqual(design.nodes.map((n) => n.agent), ["writer", "evaluator"]);
+  assert.deepEqual(design.edges, [{ from: "writer", to: "evaluator" }]);
+  assert.equal(design.rounds, 3);
+  assert.equal(design.criteria, "Be short.");
+  assert.equal(validateDesign(design).ok, true);
+});
+
+test("setCriteria and setRounds appear in the design, other patterns carry no criteria", () => {
+  const editor = createEditor("evaluator");
+  editor.reset("evaluator", { criteria: "a" });
+  editor.setCriteria("New criteria");
+  editor.setRounds(4);
+  assert.equal(editor.design().criteria, "New criteria");
+  assert.equal(editor.design().rounds, 4);
+  editor.reset("sequential");
+  assert.equal("criteria" in editor.design(), false);
+  assert.equal("rounds" in editor.design(), false);
+});
+
+test("in an evaluator loop a second writer or evaluator cannot be added, and removing one lets it be added again", () => {
+  const editor = createEditor("evaluator");
+  editor.reset("evaluator");
+  assert.equal(editor.addNode("writer").code, "node.duplicate");
+  assert.equal(editor.addNode("evaluator").code, "node.duplicate");
+  assert.equal(editor.addNode("critic").code, "node.agentNotAllowed");
+  editor.removeNode("evaluator");
+  assert.equal(editor.addNode("evaluator").ok, true);
+  assert.equal(editor.paletteFor().find((p) => p.agent === "writer").allowed, false);
+});
+
+test("the evaluator loop allows only the edge writer to evaluator", () => {
+  const editor = createEditor("evaluator");
+  const writer = add(editor, "writer");
+  const evaluator = add(editor, "evaluator");
+  assert.equal(editor.canConnect(evaluator, writer).code, "eval.edges");
+  assert.equal(editor.connect(writer, evaluator).ok, true);
+  assert.equal(editor.canConnect(writer, evaluator).ok, false);
+});
+
+test("writer can be added more than once in the other patterns", () => {
+  const editor = createEditor("sequential");
+  add(editor, "writer");
+  add(editor, "writer");
+});
+
+test("layout puts the writer before the evaluator", () => {
+  const editor = createEditor("evaluator");
+  editor.reset("evaluator");
+  const { nodes } = layoutDesign(editor.design(), { orientation: "horizontal" });
+  const x = (id) => nodes.find((n) => n.id === id).x;
+  assert.ok(x("writer") < x("evaluator"));
+});

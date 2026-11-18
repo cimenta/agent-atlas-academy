@@ -3,7 +3,7 @@
 import { h } from "../dom.js";
 import { helpIcon } from "../help-popup.js";
 import { agentLabel } from "../engine/labels.js";
-import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, OUTPUT_TOKENS } from "../engine/catalog.js";
+import { AGENT_TYPES, CRITERIA_MAX, MODELS, LIMIT_DEFAULTS, OUTPUT_TOKENS } from "../engine/catalog.js";
 import { AGENT_LIMIT_KEYS, agentLimitRange } from "../engine/agent-limits.js";
 import { TOOLS } from "../engine/tools.js";
 import { roleText } from "../engine/prompts.js";
@@ -518,6 +518,23 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       changed();
     });
     const parts = [h(doc, "h4", {}, t("editor.settings", { name: nodeLabel(node) })), field("ed-model", t("editor.model"), model)];
+    if (node.agent === "evaluator") {
+      // What the evaluator judges by, and how many rounds the loop may take.
+      const criteria = h(doc, "textarea", { id: "ed-criteria", rows: 5, maxlength: CRITERIA_MAX, "data-ui": "evaluator-criteria" });
+      criteria.value = editor.criteria();
+      criteria.addEventListener("input", () => {
+        editor.setCriteria(criteria.value);
+        onChange();
+      });
+      criteria.addEventListener("change", () => draw());
+      parts.push(field("ed-criteria", t("editor.criteria"), criteria), h(doc, "p", { class: "hint" }, t("editor.criteriaHelp")));
+      const rounds = h(doc, "input", { id: "ed-eval-rounds", type: "number", min: 1, max: 4, step: 1, value: design.rounds, "data-ui": "evaluator-rounds" });
+      rounds.addEventListener("change", () => {
+        editor.setRounds(Number(rounds.value));
+        changed();
+      });
+      parts.push(field("ed-eval-rounds", t("editor.evaluatorRounds"), rounds), h(doc, "p", { class: "hint" }, t("editor.evaluatorRoundsHelp")));
+    }
     const searchRow = h(doc, "div", { class: "field checkbox" }, search, h(doc, "label", { for: "ed-search" }, t("editor.search")));
     // Tools: an agent gets only the tools it needs.
     parts.push(h(doc, "h4", { class: "editor-tools-heading" }, t("editor.toolsHeading"), helpIcon({ doc, t, id: "create-tools", name: t("editor.toolsHeading") })));

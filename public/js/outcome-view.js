@@ -24,3 +24,22 @@ export function outcomeNotice({ doc, t, outcome, events, cost, durationMs, free 
   if (meta.length) notice.append(h(doc, "span", { class: "outcome-meta", title: info.cost !== null ? t("run.outcome.costHint") : undefined }, meta.join(" · ")));
   return notice;
 }
+
+// The notice that says how an evaluator loop ended: accepted, not accepted (the rounds ran out) or stopped by a limit.
+// `loop` is what loopOutcome gives. The text is the same on the Result tab and at the end of a replay.
+export function loopNotice({ doc, t, loop }) {
+  const params = { n: loop.round, total: loop.rounds };
+  const parts = {
+    accepted: { level: "ok", icon: "✓", title: "loop.accepted", body: "loop.accepted.body" },
+    not_accepted: { level: "warn", icon: "⚠", title: "loop.notAccepted", body: "loop.notAccepted.body" },
+    stopped: { level: "fail", icon: "■", title: "loop.stopped", body: loop.judged ? "loop.stopped.judged" : "loop.stopped.unjudged" },
+  }[loop.result];
+  if (!parts) return null;
+  return h(
+    doc,
+    "div",
+    { class: `notice outcome outcome-${parts.level}`, "data-ui": "loop-outcome", "data-loop": loop.result, role: "status" },
+    h(doc, "span", { class: "outcome-icon", "aria-hidden": "true" }, parts.icon),
+    h(doc, "span", { class: "outcome-text" }, h(doc, "strong", {}, t(parts.title, params)), " ", t(parts.body, params)),
+  );
+}

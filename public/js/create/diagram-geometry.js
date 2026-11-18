@@ -97,6 +97,18 @@ export function arrowsOf(design, pos) {
 // In a debate the debaters answer each other in turn: an arrow from each debater to the next, and a
 // dashed one from the last back to the first for the next round (when there is more than one round).
 export function turnArrows(design, pos) {
+  if (design.pattern === "evaluator") {
+    // The feedback goes back from the evaluator to the writer: a dashed arc under both boxes. Its key is the one of the
+    // handoff event from the evaluator to the writer, so it lights up in the replay when the feedback is sent.
+    const writer = design.nodes.find((n) => n.agent === "writer");
+    const evaluator = design.nodes.find((n) => n.agent === "evaluator");
+    if (!writer || !evaluator || !pos.has(writer.id) || !pos.has(evaluator.id)) return [];
+    const w = pos.get(writer.id);
+    const e = pos.get(evaluator.id);
+    const bottom = Math.max(w.y, e.y) + BOX_H;
+    const d = `M ${e.x + BOX_W / 2} ${e.y + BOX_H} Q ${(w.x + e.x + BOX_W) / 2} ${bottom + 44} ${w.x + BOX_W / 2} ${w.y + BOX_H + TOUCH}`;
+    return [{ key: `${evaluator.id}>${writer.id}`, from: evaluator.id, to: writer.id, kind: "return", d }];
+  }
   if (design.pattern !== "debate") return [];
   const ids = design.nodes.filter((n) => n.agent === "debater" && pos.has(n.id)).map((n) => n.id);
   if (ids.length < 2) return [];

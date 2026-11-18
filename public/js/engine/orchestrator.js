@@ -78,8 +78,10 @@ export async function runDesign({ design, task, limits, language = "en", call, c
       send({ type: "warning", ...(error.agent ? { agent: error.agent } : {}), limit: reason, message: limitMessage(reason, clampLimits(limits), { label: error.label, value: error.value }) });
     } else if (signal?.aborted) {
       outcome = "stopped_user";
+      finalText = error?.partialText ?? "";
     } else {
       outcome = "failed";
+      finalText = error?.partialText ?? "";
       send({ type: "error", message: redact(error?.message) || "The run failed" });
     }
   } finally {

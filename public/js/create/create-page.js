@@ -60,6 +60,7 @@ function patternIcon(doc, pattern) {
     parallel: () => [line(12, 10, 52, 20), line(12, 30, 52, 20), dot(12, 10), dot(12, 30), dot(52, 20)],
     supervisor: () => [line(12, 20, 52, 6), line(12, 20, 52, 16), line(12, 20, 52, 26), line(12, 20, 52, 36), dot(12, 20), dot(52, 6), dot(52, 16), dot(52, 26), dot(52, 36)],
     debate: () => [line(12, 10, 52, 20), line(12, 30, 52, 20), line(12, 10, 12, 30), dot(12, 10), dot(12, 30), dot(52, 20)],
+    evaluator: () => [line(12, 14, 52, 14), line(52, 14, 52, 30), line(52, 30, 12, 30), line(12, 30, 12, 14), dot(12, 14), dot(52, 14)],
   };
   shapes[pattern]();
   return svg;
@@ -159,7 +160,7 @@ export function renderCreate(ctx) {
             const hadNodes = draft.editor.design().nodes.length > 0;
             if (hadNodes && !doc.defaultView.confirm(t("create.patternConfirm"))) return;
             draft.pattern = p;
-            draft.editor.reset(p);
+            draft.editor.reset(p, { criteria: t("editor.criteriaExample") });
             editorHandle.refresh();
             patternNotice.textContent = hadNodes ? t("create.patternChanged") : "";
             patternNotice.hidden = !hadNodes;
@@ -286,6 +287,7 @@ export function renderCreate(ctx) {
         const w = summary.warning;
         estimateLines.push(h(doc, "div", { class: "limit-warning", role: "status", "data-ui": "limit-warning" }, h(doc, "b", {}, t("create.limitWarning.title")), t("create.limitWarning.body", { turns: w.turns, tokens: w.tokens.toLocaleString(ctx.lang === "cs" ? "cs-CZ" : "en-US"), steps: w.maxSteps, maxTokens: w.maxTokens.toLocaleString(ctx.lang === "cs" ? "cs-CZ" : "en-US") }), " ", h(doc, "a", { href: "#/settings" }, t("create.limitWarning.link"))));
       }
+      if (summary.emptyCriteria) estimateLines.push(h(doc, "div", { class: "limit-warning", role: "status", "data-ui": "criteria-warning" }, t("create.criteriaWarning")));
       if (marked && summary.hasSearch) estimateLines.push(h(doc, "p", { class: "notice", "data-ui": "free-tier-search" }, t("create.freeTierSearch")));
       if (marked && paidOnly) estimateLines.push(h(doc, "p", { class: "notice", "data-ui": "free-tier-no-strong" }, t("create.freeTierNoStrong")));
       if (summary.hasSearch && !isFree) {

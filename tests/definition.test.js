@@ -111,3 +111,15 @@ test("a critic that adds its notes to the previous output keeps that setting thr
   assert.equal(loaded.ok, true);
   assert.equal(loaded.editor.design().nodes[1].addToPrevious, true);
 });
+
+test("an evaluator loop keeps its criteria and rounds through save and load", () => {
+  const editor = createEditor("evaluator");
+  editor.reset("evaluator", { criteria: "Cite a source." });
+  editor.setRounds(2);
+  const design = editor.design();
+  const run = { id: "r-ev", pattern: "evaluator", task: "T", design, events: [{ t: 0, type: "run_start", task: "T", pattern: "evaluator", design }] };
+  const loaded = loadDefinition(JSON.stringify(buildDefinition({ task: "T", design })));
+  assert.equal(loaded.ok, true);
+  assert.equal(loaded.editor.design().criteria, "Cite a source.");
+  assert.equal(loaded.editor.design().rounds, 2);
+});

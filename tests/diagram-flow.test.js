@@ -171,3 +171,10 @@ function fakeDoc2() {
   });
   return { createElement: make, createElementNS: (ns, name) => make(name), createTextNode: (text) => ({ text }) };
 }
+
+test("an evaluator loop has a dashed return arrow from the evaluator to the writer, keyed like the feedback handoff", () => {
+  const design = { pattern: "evaluator", rounds: 3, criteria: "", nodes: [{ id: "writer", agent: "writer" }, { id: "evaluator", agent: "evaluator" }], edges: [{ from: "writer", to: "evaluator" }] };
+  const pos = autoPositions(design, { wide: true });
+  const arrows = arrowsOf(design, pos);
+  assert.deepEqual(arrows.map((a) => [a.key, a.kind]), [["writer>evaluator", "edge"], ["evaluator>writer", "return"]]);
+});
