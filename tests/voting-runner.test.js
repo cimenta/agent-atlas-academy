@@ -143,3 +143,29 @@ test("in a mock run every voter gives the same answer, whatever its role", async
   assert.equal(notes.length, 3);
   assert.equal(new Set(notes).size, 1);
 });
+
+// ---- the review minors ----
+test("a voter that waits for approval does not cut the other voters off", async () => {
+  const d = design({ nodes: [node("a", "researcher", { approve: true }), node("b", "writer"), node("c", "critic"), node("tally", "tally")] });
+  const { result, events } = await runWith(d, ANSWERS, [TALLY]);
+  assert.equal(result.outcome, "waiting_approval");
+  assert.deepEqual(events.filter((e) => e.type === "agent_output").map((e) => e.agent).sort(), ["b", "c"]);
+});
+
+test("a voter that fails ends the run as failed with an empty result", async () => {
+  const call = async (body) => {
+    if (/^Role: writer/.test(body.system)) throw new Error("boom");
+    return text("x");
+  };
+  const result = await runDesign({ design: design(), task: "t", limits: LIMIT_DEFAULTS, call, emit: () => {} });
+  assert.equal(result.outcome, "failed");
+  assert.equal(result.finalText, "");
+});
+
+test("a cost cap reached by the voters ends the run before the tally with an empty result", async () => {
+  const call = async () => ({ content: [{ type: "text", text: "x" }], stop_reason: "end_turn", usage: { input_tokens: 40000, output_tokens: 1000 } });
+  const result = await runDesign({ design: design(), task: "t", limits: { ...LIMIT_DEFAULTS, maxTokens: 150000, maxCostUsd: 0.01 }, call, emit: () => {} });
+  assert.equal(result.outcome, "stopped_limit");
+  assert.equal(result.reason, "cost");
+  assert.equal(result.finalText, "");
+});

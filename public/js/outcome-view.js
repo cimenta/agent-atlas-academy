@@ -84,7 +84,7 @@ export function votingNotice({ doc, t, end }) {
     "div",
     { class: `notice outcome outcome-${parts.level}`, "data-ui": "voting-outcome", "data-voting": end.result, role: "status" },
     h(doc, "span", { class: "outcome-icon", "aria-hidden": "true" }, parts.icon),
-    h(doc, "span", { class: "outcome-text" }, h(doc, "strong", {}, t(parts.title, params)), " ", t(parts.body, params)),
+    h(doc, "span", { class: "outcome-text" }, h(doc, "strong", {}, t(parts.title, params)), " ", t(parts.body, params), ...(end.note && end.result !== "stopped" ? [" ", h(doc, "em", { "data-ui": "voting-outcome-note" }, end.note)] : [])),
   );
 }
 

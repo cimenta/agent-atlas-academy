@@ -59,7 +59,7 @@ export function renderResult(ctx, run) {
   const handPath = handoffPath(run.events);
   const handDesign = run.events.find((e) => e.type === "run_start")?.design;
   const answerView = () => {
-    if (!answer) return h(doc, "p", { class: "notice" }, t("result.noText"));
+    if (!answer) return h(doc, "div", { class: "answer-wrap" }, routedEnd ? routerNotice({ doc, t, design: handDesign, end: routedEnd }) : "", votedEnd ? votingNotice({ doc, t, end: votedEnd }) : "", h(doc, "p", { class: "notice" }, t("result.noText")));
     const cleanArticle = () => {
       const article = h(doc, "article", { class: "answer rendered", "data-ui": "answer-formatted" });
       article.append(renderBlocks(parseMarkdown(answer), doc));

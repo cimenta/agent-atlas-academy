@@ -310,3 +310,12 @@ test("votingEnd: majority, no majority, stopped by a limit, nothing for failed o
   assert.equal(votingEnd(vEvents(["a"], { type: "done", outcome: "failed" })), null);
   assert.equal(votingEnd(vEvents().slice(0, 5)), null);
 });
+
+test("votingEnd: exactly half of the voters is no majority", async () => {
+  const { votingEnd } = await import("../public/js/replay/inspect-model.js");
+  const four = vEvents().map((e) => (e.type === "run_start" ? { ...e, design: { ...e.design, nodes: [...e.design.nodes, { id: "d", agent: "writer" }] } } : e));
+  const end = votingEnd(four);
+  assert.equal(end.total, 4);
+  assert.equal(end.votes, 2);
+  assert.equal(end.result, "none");
+});

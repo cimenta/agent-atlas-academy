@@ -72,6 +72,8 @@ export function createEditor(initialPattern) {
       if (!type.patterns.includes(pattern)) return { ok: false, code: "node.agentNotAllowed" };
       if (nodes.length >= NODE_MAX) return { ok: false, code: "node.count" };
       if (onceOnly(agent) && nodes.some((n) => n.agent === agent)) return { ok: false, code: "node.duplicate" };
+      // A voting run has the tally and at most five voters.
+      if (pattern === "voting" && nodes.length >= 6) return { ok: false, code: "vote.voters" };
       const node = { id: nextId(agent), agent, model: defaultModel?.model ?? DEFAULT_MODEL, search: type.searchDefault };
       if (defaultModel) node.slot = defaultModel.slot;
       if (type.free) {

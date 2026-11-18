@@ -536,3 +536,11 @@ test("voting: layout puts the voters first and the tally in the next column", ()
   assert.equal(at(tally).x, 1);
   assert.notEqual(at(a).y, at(b).y);
 });
+
+test("voting: the editor refuses a sixth voter, as the validation does", () => {
+  const editor = createEditor("voting");
+  editor.reset("voting");
+  for (let i = 0; i < 5; i++) add(editor, "writer");
+  assert.equal(editor.addNode("writer").code, "vote.voters");
+  assert.equal(editor.design().nodes.length, 6);
+});
