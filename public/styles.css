@@ -1339,7 +1339,8 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .step-panel .palette-item, .right-col .palette-item { flex-direction: row; align-items: center; min-height: 30px; min-width: 0; padding: 2px 12px; border: 1px dashed var(--accent-line); border-radius: 999px; background: var(--card); color: var(--accent); font-size: 0.85rem; }
 .step-panel .palette-item::before, .right-col .palette-item::before { content: "+"; margin-right: 4px; }
 .step-panel .palette-item .palette-help, .right-col .palette-item .palette-help { display: none; }
-.step-panel .editor-diagram-head, .right-col .editor-diagram-head { display: none; }
+.step-panel .editor-diagram-head h3, .right-col .editor-diagram-head h3 { display: none; }
+.step-panel .editor-diagram-head, .right-col .editor-diagram-head { justify-content: flex-end; }
 .step-panel .diagram-wrap, .right-col .diagram-wrap { min-height: 210px; }
 /* Workspace layout (B): settings on the left, diagram and checks on the right */
 .workspace-bar { position: sticky; top: 0; z-index: 3; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 12px 0 6px; padding: 8px 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); }
