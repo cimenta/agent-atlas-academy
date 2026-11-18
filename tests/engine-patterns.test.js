@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { validateDesign, orderOf, clampLimits, parallelParts, PATTERNS } from "../public/js/engine/patterns.js";
-import { LIMIT_DEFAULTS, LIMIT_MAX, NODE_MAX, MODELS, AGENT_TYPES } from "../public/js/engine/catalog.js";
+import { LIMIT_DEFAULTS, LIMIT_MAX, NODE_MAX, MODELS, AGENT_TYPES, CRITERIA_MAX } from "../public/js/engine/catalog.js";
 
 const node = (id, agent, extra = {}) => ({ id, agent, model: "fast", search: false, ...extra });
 const edge = (from, to) => ({ from, to });
@@ -29,10 +29,10 @@ const debate = () => ({
   rounds: 2,
 });
 
-test("the catalog lists four patterns, three models and the agent types", () => {
-  assert.deepEqual(PATTERNS, ["sequential", "parallel", "supervisor", "debate"]);
+test("the catalog lists five patterns, three models and the agent types", () => {
+  assert.deepEqual(PATTERNS, ["sequential", "parallel", "supervisor", "debate", "evaluator"]);
   assert.deepEqual(MODELS.map((m) => m.key), ["fast", "balanced", "strong"]);
-  for (const key of ["planner", "researcher", "critic", "writer", "supervisor", "combiner", "debater", "judge", "free"]) {
+  for (const key of ["planner", "researcher", "critic", "writer", "supervisor", "combiner", "debater", "judge", "evaluator", "free"]) {
     assert.ok(AGENT_TYPES[key], key);
   }
 });
@@ -244,4 +244,52 @@ test("addToPrevious is allowed only on a critic in a sequential or parallel desi
   sup.nodes.push(node("critic", "critic", { addToPrevious: true }));
   sup.edges.push(edge("supervisor", "critic"));
   assert.deepEqual(codes(validateDesign(sup)), ["node.addToPrevious"]);
+});
+
+// ---- evaluator loop ----
+const evaluatorDesign = (extra = {}) => ({
+  pattern: "evaluator",
+  nodes: [node("writer", "writer"), node("evaluator", "evaluator")],
+  edges: [edge("writer", "evaluator")],
+  rounds: 3,
+  criteria: "x",
+  ...extra,
+});
+
+test("evaluator design: one writer, one evaluator, one edge writer to evaluator is valid", () => {
+  assert.deepEqual(validateDesign(evaluatorDesign()), { ok: true, errors: [] });
+  assert.ok(PATTERNS.includes("evaluator"));
+});
+
+test("evaluator rounds 0, 5, 2.5 and missing give eval.rounds", () => {
+  for (const rounds of [0, 5, 2.5, undefined]) {
+    assert.ok(codes(validateDesign(evaluatorDesign({ rounds }))).includes("eval.rounds"), String(rounds));
+  }
+});
+
+test("evaluator criteria: too long or not a string give eval.criteria, empty string is valid", () => {
+  assert.ok(codes(validateDesign(evaluatorDesign({ criteria: "a".repeat(CRITERIA_MAX + 1) }))).includes("eval.criteria"));
+  assert.ok(codes(validateDesign(evaluatorDesign({ criteria: 5 }))).includes("eval.criteria"));
+  assert.ok(codes(validateDesign(evaluatorDesign({ criteria: undefined }))).includes("eval.criteria"));
+  assert.equal(validateDesign(evaluatorDesign({ criteria: "" })).ok, true);
+});
+
+test("evaluator: two writers give eval.writer, no evaluator gives eval.evaluator", () => {
+  const twoWriters = evaluatorDesign({ nodes: [node("writer", "writer"), node("writer-2", "writer"), node("evaluator", "evaluator")] });
+  assert.ok(codes(validateDesign(twoWriters)).includes("eval.writer"));
+  const none = evaluatorDesign({ nodes: [node("writer", "writer")], edges: [] });
+  assert.ok(codes(validateDesign(none)).includes("eval.evaluator"));
+});
+
+test("evaluator edges: reversed, doubled or missing give eval.edges", () => {
+  assert.ok(codes(validateDesign(evaluatorDesign({ edges: [edge("evaluator", "writer")] }))).includes("eval.edges"));
+  assert.ok(codes(validateDesign(evaluatorDesign({ edges: [edge("writer", "evaluator"), edge("evaluator", "writer")] }))).includes("eval.edges"));
+  assert.ok(codes(validateDesign(evaluatorDesign({ edges: [] }))).includes("eval.edges"));
+});
+
+test("agent types keep to their patterns for the evaluator loop", () => {
+  const withCritic = evaluatorDesign({ nodes: [node("writer", "writer"), node("evaluator", "evaluator"), node("critic", "critic")] });
+  assert.ok(codes(validateDesign(withCritic)).includes("node.agentNotAllowed"));
+  const inSequential = { pattern: "sequential", nodes: [node("evaluator", "evaluator")], edges: [] };
+  assert.ok(codes(validateDesign(inSequential)).includes("node.agentNotAllowed"));
 });

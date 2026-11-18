@@ -2,9 +2,9 @@
 // editor in the browser and again by the server, which never trusts the browser.
 import { isSlot } from "../key-slots.js";
 import { validNodeLimits, ON_LIMIT } from "./agent-limits.js";
-import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, LIMIT_MAX, clampCostCap, NODE_MAX, NAME_MAX, INSTRUCTIONS_MAX } from "./catalog.js";
+import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, LIMIT_MAX, clampCostCap, CRITERIA_MAX, NODE_MAX, NAME_MAX, INSTRUCTIONS_MAX } from "./catalog.js";
 
-export const PATTERNS = ["sequential", "parallel", "supervisor", "debate"];
+export const PATTERNS = ["sequential", "parallel", "supervisor", "debate", "evaluator"];
 
 const ID = /^[a-z0-9-]{1,32}$/;
 const MODEL_KEYS = new Set(MODELS.map((m) => m.key));
@@ -113,6 +113,17 @@ export function validateDesign(design) {
     if (supervisors.length !== 1) add("sup.supervisor");
     if (workers.length < 1) add("sup.workers");
     if (supervisors.length === 1 && !hubEdgesOk(workers, supervisors[0], false)) add("sup.edges");
+  } else if (pattern === "evaluator") {
+    const writers = byAgent("writer");
+    const evaluators = byAgent("evaluator");
+    if (writers.length !== 1) add("eval.writer");
+    if (evaluators.length !== 1) add("eval.evaluator");
+    if (writers.length === 1 && evaluators.length === 1) {
+      const [only] = goodEdges;
+      if (goodEdges.length !== 1 || only.from !== writers[0].id || only.to !== evaluators[0].id) add("eval.edges");
+    }
+    if (!Number.isInteger(design.rounds) || design.rounds < 1 || design.rounds > 4) add("eval.rounds");
+    if (typeof design.criteria !== "string" || design.criteria.length > CRITERIA_MAX) add("eval.criteria");
   } else {
     const debaters = byAgent("debater");
     const judges = byAgent("judge");

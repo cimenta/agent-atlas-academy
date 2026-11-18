@@ -12,6 +12,11 @@ const ROLES = {
   judge: "You are the Judge. Read the debate and decide which side argued better. Give a short verdict with your reasons.",
 };
 
+const EVALUATOR = `You are the Evaluator. You judge a draft only against the criteria given in the message. If no criteria are given, judge whether the draft answers the task clearly and correctly. If the draft is good enough, accept it. If not, ask for a revision and give specific feedback (what is wrong and what to change), not only a score.
+Reply with JSON only, in one of these forms:
+{"verdict":"accept"}
+{"verdict":"revise","feedback":"<what to change>"}`;
+
 const SUPERVISOR = `You are the Supervisor. You manage workers and decide who works next. The first message lists the worker ids. You may call one worker, or several workers at the same time when their work does not depend on each other. A worker that needs the result of another worker (a writer that needs the facts, a critic that needs the draft) must be called only after that result has come back to you. Each worker's result comes back to you. When you have enough, finish.
 Reply with JSON only, in one of these forms:
 {"action":"call","worker":"<worker id>","instruction":"<what the worker should do>"}
@@ -20,6 +25,7 @@ Reply with JSON only, in one of these forms:
 
 export function roleText(node) {
   if (node.agent === "supervisor") return SUPERVISOR;
+  if (node.agent === "evaluator") return EVALUATOR;
   if (node.agent === "debater") {
     return `You are a Debater${node.name?.trim() ? ` called ${node.name.trim()}` : ""} and your position is "${node.stance ?? "for"}". Argue your side in one short paragraph. When you can see the other side's points, answer them.`;
   }

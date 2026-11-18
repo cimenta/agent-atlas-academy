@@ -14,12 +14,14 @@ import * as sequential from "./runners/sequential.js";
 import * as parallel from "./runners/parallel.js";
 import * as supervisor from "./runners/supervisor.js";
 import * as debate from "./runners/debate.js";
+import * as evaluator from "./runners/evaluator.js";
 
 export const RUNNERS = {
   sequential: sequential.run,
   parallel: parallel.run,
   supervisor: supervisor.run,
   debate: debate.run,
+  evaluator: evaluator.run,
 };
 
 // callFor(node) gives the provider call of an agent that names its own key slot; without it every agent uses `call`.
@@ -70,6 +72,8 @@ export async function runDesign({ design, task, limits, language = "en", call, c
     } else if (error instanceof LimitError) {
       outcome = "stopped_limit";
       reason = error.reason;
+      // A runner may hand back what it had written so far (the evaluator loop returns its last draft).
+      finalText = error.partialText ?? "";
       // The replay keeps a line that says which limit of the harness stopped the run.
       send({ type: "warning", ...(error.agent ? { agent: error.agent } : {}), limit: reason, message: limitMessage(reason, clampLimits(limits), { label: error.label, value: error.value }) });
     } else if (signal?.aborted) {

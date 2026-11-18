@@ -3,7 +3,7 @@
 const NOTE_MAX = 2000;
 const isText = (v) => typeof v === "string" && v.length > 0;
 
-function candidates(text) {
+export function candidates(text) {
   const found = [text];
   const fenced = /```(?:json)?\s*([\s\S]*?)```/i.exec(text);
   if (fenced) found.push(fenced[1]);

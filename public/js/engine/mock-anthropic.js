@@ -11,6 +11,7 @@ const TEXT = {
   writer: "Final answer: here is a short, clear answer that follows the plan and the review.",
   combiner: "Combined answer: the separate findings agree, and together they give one clear answer.",
   debater: "My position: the main point holds, because the evidence points one way and the risks are small.",
+  evaluator: "",
   judge: "Verdict: both sides made fair points, and on balance the first argument was stronger.",
   free: "Here is my contribution, written in my own style.",
 };
@@ -20,7 +21,8 @@ function firstUserText(messages) {
   return typeof first?.content === "string" ? first.content : "";
 }
 
-export function createMockCall({ delayMs = 0 } = {}) {
+// evaluatorAcceptsAt: the verdict (counted from 1) at which the mock evaluator accepts; 0 means it never accepts.
+export function createMockCall({ delayMs = 0, evaluatorAcceptsAt = 2 } = {}) {
   return async function call(body, { signal } = {}) {
     if (signal?.aborted) throw new AnthropicError("The request was cancelled");
     if (delayMs) await sleep(delayMs);
@@ -37,6 +39,18 @@ export function createMockCall({ delayMs = 0 } = {}) {
       usage: { ...usage, ...extraUsage },
     });
 
+    if (role === "writer" && messages.filter((m) => m.role === "user").length > 1) {
+      // A revised draft: it differs from the one before, as a real revision would.
+      return reply([{ type: "text", text: `${TEXT.writer} (revision ${messages.filter((m) => m.role === "user").length - 1})` }]);
+    }
+    if (role === "evaluator") {
+      const given = messages.filter((m) => m.role === "assistant").length + 1;
+      const text =
+        evaluatorAcceptsAt > 0 && given >= evaluatorAcceptsAt
+          ? JSON.stringify({ verdict: "accept" })
+          : JSON.stringify({ verdict: "revise", feedback: `Round ${given}: add one concrete example and cut one general sentence.` });
+      return reply([{ type: "text", text }]);
+    }
     if (role === "supervisor") {
       const workers = (/Workers: (.+)/.exec(firstUserText(messages))?.[1] ?? "").split(",").map((w) => w.trim()).filter(Boolean);
       const done = messages.filter((m) => m.role === "assistant").length;

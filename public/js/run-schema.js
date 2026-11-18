@@ -14,6 +14,7 @@ export const EVENT_TYPES = [
   "error",
   "approval",
   "approved",
+  "loop_end",
 ];
 
 const isText = (value) => typeof value === "string" && value.length > 0;

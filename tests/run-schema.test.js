@@ -24,6 +24,7 @@ test("the schema version is 1 and the event types are the agreed list", () => {
     "error",
     "approval",
     "approved",
+    "loop_end",
   ]);
 });
 
@@ -90,4 +91,12 @@ test("rejects negative or non-finite token counts", () => {
   if (!event) return;
   event.tokens = { input: -5, output: 1 };
   assert.equal(validateRun(run).ok, false);
+});
+
+test("a run with a loop_end event is valid, and so is one without it", () => {
+  const run = sample();
+  assert.equal(validateRun(run).ok, true);
+  const last = run.events.at(-1);
+  run.events.splice(-1, 0, { type: "loop_end", result: "accepted", round: 1, judged: true, t: last.t });
+  assert.deepEqual(validateRun(run), { ok: true, errors: [] });
 });

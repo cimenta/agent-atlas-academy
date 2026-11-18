@@ -62,15 +62,19 @@ export const paidOnlyModelUsed = (design, provider) =>
 
 const GENERAL = ["sequential", "parallel", "supervisor"];
 
+// The longest text of the criteria an evaluator judges by (evaluator loop).
+export const CRITERIA_MAX = 1000;
+
 export const AGENT_TYPES = {
   planner: { label: "Planner", patterns: GENERAL, searchDefault: false, free: false },
   researcher: { label: "Researcher", patterns: GENERAL, searchDefault: true, free: false },
   critic: { label: "Critic", patterns: GENERAL, searchDefault: false, free: false },
-  writer: { label: "Writer", patterns: GENERAL, searchDefault: false, free: false },
+  writer: { label: "Writer", patterns: [...GENERAL, "evaluator"], searchDefault: false, free: false },
   supervisor: { label: "Supervisor", patterns: ["supervisor"], searchDefault: false, free: false },
   combiner: { label: "Combiner", patterns: ["parallel"], searchDefault: false, free: false },
   debater: { label: "Debater", patterns: ["debate"], searchDefault: false, free: false },
   judge: { label: "Judge", patterns: ["debate"], searchDefault: false, free: false },
+  evaluator: { label: "Evaluator", patterns: ["evaluator"], searchDefault: false, free: false },
   free: { label: "Free agent", patterns: GENERAL, searchDefault: false, free: true },
 };
 

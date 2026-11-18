@@ -12,6 +12,7 @@ export function activationsOf(design, limits) {
     const debaters = nodes.filter((n) => n.agent === "debater").length;
     return debaters * design.rounds + 1;
   }
+  if (design.pattern === "evaluator") return 2 * design.rounds;
   if (design.pattern === "supervisor") {
     const workers = nodes.filter((n) => n.agent !== "supervisor").length;
     return Math.min(maxSteps, 2 * workers + 2);
@@ -43,4 +44,9 @@ export function limitWarning(design, limits) {
   const over = tokens > clamped.maxTokens;
   if (!steps && !over) return null;
   return { turns, tokens, maxSteps: clamped.maxSteps, maxTokens: clamped.maxTokens, steps, tokensOver: over };
+}
+
+// An evaluator loop without criteria: the evaluator judges by the task alone. Create warns before the run.
+export function emptyCriteria(design) {
+  return design?.pattern === "evaluator" && (typeof design.criteria !== "string" || design.criteria.trim() === "");
 }
