@@ -145,7 +145,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
   // events: all events of the run; cursor: how many are applied; state: the inspector state; selectedId: the agent shown below.
   function update(args) {
     lastArgs = args;
-    const { events, cursor, state, selectedId, badgeText, badgeNumber, failed, marks = new Map(), idleStatus = "waiting" } = args;
+    const { events, cursor, state, selectedId, badgeText, badgeNumber, failed, marks = new Map(), notes = new Map(), idleStatus = "waiting" } = args;
     for (const [id, parts] of boxes) {
       // An agent that failed in a recorded run shows as failed from the start, before the replay reaches the failure.
       const isFailed = failed?.has(id) === true;
@@ -156,7 +156,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       parts.name.textContent = agent?.label ?? boxLabel(id);
       // A voting run marks every agent once the tally has decided: "agrees", "differs" (dimmed) or the count.
       const mark = status === "done" ? marks.get(id) : undefined;
-      parts.status.textContent = mark ? mark.text : statusText(agent ?? { status: idleStatus, ms: null });
+      parts.status.textContent = `${mark ? mark.text : statusText(agent ?? { status: idleStatus, ms: null })}${notes.get(id) ? ` · ${notes.get(id)}` : ""}`;
       parts.box.setAttribute("data-dissent", String(mark?.dissent === true));
       if (parts.retry) {
         parts.retry.hidden = status !== "error";

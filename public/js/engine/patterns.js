@@ -2,6 +2,7 @@
 // editor in the browser and again by the server, which never trusts the browser.
 import { isSlot } from "../key-slots.js";
 import { validNodeLimits, ON_LIMIT } from "./agent-limits.js";
+import { NOTEBOOK_CHOICES } from "./notebook.js";
 import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, LIMIT_MAX, clampCostCap, CRITERIA_MAX, NODE_MAX, NAME_MAX, INSTRUCTIONS_MAX } from "./catalog.js";
 
 export const PATTERNS = ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff", "router", "voting"];
@@ -31,6 +32,9 @@ export function validateDesign(design) {
     return finish();
   }
 
+  // Memory management: the shared notebook switch of the run.
+  if (design.memory !== undefined && !(isObject(design.memory) && typeof design.memory.notebook === "boolean")) add("memory.notebook");
+
   const ids = new Set();
   const goodNodes = [];
   for (const node of nodes) {
@@ -59,6 +63,8 @@ export function validateDesign(design) {
     if (node.limits !== undefined && !validNodeLimits(node.limits)) add("node.limits", { id: node.id });
     if (node.onLimit !== undefined && !ON_LIMIT.includes(node.onLimit)) add("node.onLimit", { id: node.id });
     if (node.approve !== undefined && node.approve !== true) add("node.approve", { id: node.id });
+    if (node.condense !== undefined && typeof node.condense !== "boolean") add("node.condense", { id: node.id });
+    if (node.notebook !== undefined && !NOTEBOOK_CHOICES.includes(node.notebook)) add("node.notebook", { id: node.id });
     if (node.stance !== undefined && node.stance !== "for" && node.stance !== "against") add("node.stance", { id: node.id });
     // Only a critic in a chain can add its notes to the output of the agent before it.
     if (node.addToPrevious !== undefined && !(node.addToPrevious === true && node.agent === "critic" && (pattern === "sequential" || pattern === "parallel"))) add("node.addToPrevious", { id: node.id });

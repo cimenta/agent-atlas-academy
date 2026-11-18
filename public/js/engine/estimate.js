@@ -5,7 +5,31 @@ import { clampLimits } from "./patterns.js";
 
 export const TOKENS_PER_ACTIVATION = 3000;
 
+import { mayCondense } from "./condense.js";
+
+const CAPPED = ["router", "voting", "handoff", "supervisor"];
+
+// Condensing calls: one for each activation of an agent that condenses and receives material (debaters once a round, a supervisor's
+// worker once for each instruction it may get). A router, voting or handoff run and an evaluator loop have none.
+function condensesOf(design) {
+  const rounds = Number.isFinite(design.rounds) ? design.rounds : 1;
+  let calls = 0;
+  for (const n of design.nodes) {
+    if (n.condense !== true || !mayCondense(n.agent, design.pattern)) continue;
+    if (design.pattern === "debate") calls += n.agent === "debater" ? rounds : 1;
+    else if (design.pattern === "supervisor") calls += 2;
+    else if (design.pattern === "sequential" || design.pattern === "parallel") calls += 1;
+  }
+  return calls;
+}
+
+// Every agent that condenses its input makes one more call each time it runs.
 export function activationsOf(design, limits) {
+  const total = runsOf(design, { ...limits, maxSteps: 1e9 }) + condensesOf(design);
+  return CAPPED.includes(design.pattern) ? Math.min(clampLimits(limits).maxSteps, total) : total;
+}
+
+function runsOf(design, limits) {
   const { maxSteps } = clampLimits(limits);
   const nodes = design.nodes;
   if (design.pattern === "debate") {

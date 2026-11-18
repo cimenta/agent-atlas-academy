@@ -3,20 +3,23 @@
 import { AGENT_TYPES, DEFAULT_MODEL, NODE_MAX } from "../engine/catalog.js";
 import { validateDesign } from "../engine/patterns.js";
 import { cleanNodeLimits } from "../engine/agent-limits.js";
+import { NOTEBOOK_CHOICES, mayWrite } from "../engine/notebook.js";
+import { mayCondense } from "../engine/condense.js";
 
 const ONCE_ONLY = new Set(["supervisor", "combiner", "judge", "evaluator", "router", "tally"]);
-const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve"];
+const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve", "notebook", "condense"];
 const DEFAULT_ROUNDS = 2;
 const EVALUATOR_ROUNDS = 3;
 const roundsFor = (pattern) => (pattern === "evaluator" ? EVALUATOR_ROUNDS : DEFAULT_ROUNDS);
 
 // A node carries limits and onLimit only when they are set: the limits are cleaned, and an onLimit of stop (the default) is left out.
-function tidyLimits(node) {
+function tidyLimits(node, pattern) {
   const limits = cleanNodeLimits(node.limits);
   if (limits) node.limits = limits;
   else delete node.limits;
   if (node.onLimit !== "pass") delete node.onLimit;
   if (node.approve !== true) delete node.approve;
+  if (node.condense !== true || !mayCondense(node.agent, pattern)) delete node.condense;
 }
 
 export function createEditor(initialPattern) {
@@ -25,6 +28,7 @@ export function createEditor(initialPattern) {
   let edges = [];
   let rounds = roundsFor(pattern);
   let criteria = "";
+  let notebook = false; // the shared notebook of the run is switched on
   let start; // handoff: the id of the agent that begins
   let positions = {};
   // The default model: { slot, model }. A new agent starts with it, and so does every agent that has not been
@@ -32,6 +36,9 @@ export function createEditor(initialPattern) {
   let defaultModel = null;
 
   const find = (id) => nodes.find((n) => n.id === id);
+  // What an agent may choose for the notebook: an agent whose reply is a decision may only read.
+  const choicesFor = (node) => (mayWrite(node.agent, pattern) ? [...NOTEBOOK_CHOICES] : ["none", "read"]);
+  const defaultChoice = (node) => (mayWrite(node.agent, pattern) ? "both" : "read");
   // An agent that can be added only once. In an evaluator loop that is also the writer.
   const onceOnly = (agent) => ONCE_ONLY.has(agent) || (pattern === "evaluator" && agent === "writer");
   const hasEdge = (from, to) => edges.some((e) => e.from === from && e.to === to);
@@ -57,6 +64,8 @@ export function createEditor(initialPattern) {
   return {
     design() {
       const copy = { pattern, nodes: structuredClone(nodes), edges: structuredClone(edges) };
+      if (notebook) copy.memory = { notebook: true };
+      else for (const node of copy.nodes) delete node.notebook;
       if (pattern === "debate") copy.rounds = rounds;
       if (pattern === "handoff" && start !== undefined) copy.start = start;
       if (pattern === "evaluator") {
@@ -81,7 +90,8 @@ export function createEditor(initialPattern) {
         node.instructions = "";
       }
       for (const key of EDITABLE) if (key in overrides) node[key] = overrides[key];
-      tidyLimits(node);
+      if (notebook && !choicesFor(node).includes(node.notebook)) node.notebook = defaultChoice(node);
+      tidyLimits(node, pattern);
       nodes.push(node);
       if (pattern === "handoff" && start === undefined) start = node.id;
       return { ok: true, id: node.id };
@@ -106,8 +116,24 @@ export function createEditor(initialPattern) {
     setNode(id, patch) {
       const node = find(id);
       if (!node) return;
-      for (const key of EDITABLE) if (key in patch) node[key] = patch[key];
-      tidyLimits(node);
+      for (const key of EDITABLE) if (key in patch && (key !== "notebook" || choicesFor(node).includes(patch.notebook))) node[key] = patch[key];
+      tidyLimits(node, pattern);
+    },
+
+    // The shared notebook of the run. Switching it on gives every agent its default choice, switching it off takes the choices away.
+    notebookOn() {
+      return notebook;
+    },
+    setNotebook(on) {
+      notebook = on === true;
+      for (const node of nodes) {
+        if (notebook) node.notebook = defaultChoice(node);
+        else delete node.notebook;
+      }
+    },
+    notebookChoices(id) {
+      const node = find(id);
+      return node ? choicesFor(node) : [];
     },
 
     defaultModel() {

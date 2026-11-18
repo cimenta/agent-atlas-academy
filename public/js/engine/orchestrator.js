@@ -8,6 +8,7 @@ import { redact } from "./anthropic.js";
 import { limitMessage } from "./harness.js";
 import { clampLimits } from "./patterns.js";
 import { createPassOn } from "./handoff.js";
+import { createNotebook } from "./notebook.js";
 import { ApprovalPause } from "./approval.js";
 import { clampHandoffChars } from "./catalog.js";
 import * as sequential from "./runners/sequential.js";
@@ -57,10 +58,12 @@ export async function runDesign({ design, task, limits, language = "en", call, c
   if (signal?.aborted) control.abort();
   else signal?.addEventListener("abort", onAbort, { once: true });
 
+  // The shared notebook, only when the run has it switched on.
+  const notebook = design.memory?.notebook === true ? createNotebook({ emit: send }) : null;
   const agents = new Map(
     design.nodes.map((node) => [
       node.id,
-      createAgent({ node, design, call: callFor?.(node) ?? call, emit: send, budget, signal: control.signal, language, provider: nodeProvider(node, provider), maxOutputTokens, retries, retryDelaySec, freeTier, repeatStop, fallback, askFirst: node.approve === true && !approved.includes(node.id), cached: resume.filter((r) => r.agent === node.id) }),
+      createAgent({ node, design, call: callFor?.(node) ?? call, emit: send, budget, signal: control.signal, language, provider: nodeProvider(node, provider), maxOutputTokens, retries, retryDelaySec, freeTier, repeatStop, fallback, askFirst: node.approve === true && !approved.includes(node.id), notebook, task, cached: resume.filter((r) => r.agent === node.id) }),
     ]),
   );
   const passOn = createPassOn({ chars: clampHandoffChars(handoffChars), emit: send });

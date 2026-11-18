@@ -68,6 +68,7 @@ test("runMetrics counts notes and the characters saved by condensing", () => {
   const m = runMetrics({ events: more });
   assert.equal(m.notes, 2);
   assert.equal(m.saved, 2500);
+  assert.equal(m.steps, runMetrics({ events }).steps + 1); // the condensing call is a step
 });
 
 test("runMetrics matches the totals of buildStatistics for the same run", () => {
@@ -100,4 +101,12 @@ test("the notebook split applies only when the run has the notebook on", () => {
   const plain = contextOf(text, "writer")[0];
   assert.equal(plain.parts.notebook, 0);
   assert.equal(plain.parts.others, FIRST.length - `Task: ${TASK}`.length + book.length);
+});
+
+test("a notebook block in a later user message counts as notebook too", () => {
+  const book = "\n\nNotebook:\nB has 8 GB.";
+  const withBook = events.map((e) => (e.type === "run_start" ? { ...e, design: { memory: { notebook: true } } } : e.round === 2 ? { ...e, newMessages: [{ role: "user", content: "Go on." + book }] } : e));
+  const [, second] = contextOf(withBook, "writer");
+  assert.equal(second.parts.notebook, book.length);
+  assert.equal(second.parts.others, FIRST.length - `Task: ${TASK}`.length + "Go on.".length);
 });

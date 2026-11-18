@@ -8,6 +8,10 @@ import { AgentLimitError, LimitError } from "./budget.js";
 import { agentPassMessage } from "./harness.js";
 import { usageCostUsd } from "./cost.js";
 import { ApprovalPause, APPROVAL_INPUT_MAX } from "./approval.js";
+import { notebookRole, extractNotes } from "./notebook.js";
+import { splitInput, mayCondense, condenseInstruction, condensedInput } from "./condense.js";
+
+const CONDENSE_MIN_TOKENS = 2000; // an agent with fewer tokens than this left does not condense
 
 const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -22,7 +26,7 @@ function searchOutput(content) {
 // A copy is taken so later changes to the conversation cannot reach an event already sent.
 const copy = (value) => structuredClone(value);
 
-export function createAgent({ node, design = null, call, emit, budget: runBudget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default, retries = RETRIES.default, retryDelaySec = RETRY_DELAY_SEC.default, freeTier = false, repeatStop = REPEAT_STOP.default, fallback = "off", askFirst = false }) {
+export function createAgent({ node, design = null, call, emit, budget: runBudget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default, retries = RETRIES.default, retryDelaySec = RETRY_DELAY_SEC.default, freeTier = false, repeatStop = REPEAT_STOP.default, fallback = "off", askFirst = false, notebook = null, task = null }) {
   const retryLimit = clampRetries(retries);
   const retryDelayMs = clampRetryDelaySec(retryDelaySec) * 1000;
   // The agent counts against its own limits too (node.limits); the limits of the run still apply.
@@ -32,7 +36,9 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
   // Answers from an earlier try of the run: used up first, in order, before the provider is called again.
   const answers = [...cached];
   const model = nodeModel(node, provider).id;
-  const system = systemPromptFor(node, { language, pattern: design?.pattern });
+  // The shared notebook: what this agent may do with it (nothing unless the run has it switched on).
+  const book = notebook ? notebookRole(node, design) : { on: false, read: false, write: false };
+  const system = systemPromptFor(node, { language, pattern: design?.pattern, memory: book.on ? book : undefined });
   const label = agentLabel(node, design, AGENT_TYPES[node.agent]?.label ?? node.agent);
   const limitValue = { agent_steps: node.limits?.maxSteps, agent_tokens: node.limits?.maxTokens, agent_searches: node.limits?.maxSearches };
   const stopRun = (reason) => new LimitError(`agent_${reason}`, { agent: node.id, label, value: limitValue[`agent_${reason}`] });
@@ -47,6 +53,16 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
     lastSame = now;
     if (repeatLimit > 0 && now !== "" && sameInARow >= repeatLimit) throw new LimitError("repeat", { agent: node.id, label, value: sameInARow });
   };
+  // The notes in a reply go to the notebook and out of the text that goes on. `silent`: the reply comes from an earlier try
+  // of the run, whose note events already exist.
+  const takeNotes = (reply, silent = false) => {
+    if (!book.write) return reply;
+    const { text, notes } = extractNotes(reply);
+    for (const note of notes) notebook.add(node.id, note, { silent });
+    return text;
+  };
+  // Condensing: the material of an input is shortened by one extra call, only when the node asks for it.
+  const condenses = node.condense === true && mayCondense(node.agent, design?.pattern) && typeof task === "string";
   // After the fallback switch the agent runs on another model; the cost follows it.
   let active = nodeModel(node, provider);
   const costOf = (usage) => usageCostUsd(usage, { ...node, model: active.key }, { provider, freeTier });
@@ -55,8 +71,9 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
   let sent = 0; // how many messages earlier requests already carried
   let round = 0;
 
-  async function request() {
+  async function request(custom = null) {
     budget.chargeStep();
+    if (custom) return call(custom, { signal });
     const tools = toolsFor(node, budget);
     const body = {
       model: active.id,
@@ -69,16 +86,16 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
     return call(body, { signal });
   }
 
-  async function requestWithRetry() {
+  async function requestWithRetry(custom = null) {
     let switched = false;
     for (let tried = 0; ; tried++) {
       try {
-        return await request();
+        return await request(custom);
       } catch (error) {
         if (!(error instanceof AnthropicError) || !error.retryable) throw error;
         if (tried >= retryLimit) {
           // Out of tries. With the automatic fallback, one more try with another model of the same provider.
-          const next = !switched && fallback === "auto" ? fallbackModelFor(node, provider, freeTier) : null;
+          const next = !switched && !custom && fallback === "auto" ? fallbackModelFor(node, provider, freeTier) : null;
           if (!next) throw error;
           switched = true;
           emit({ type: "warning", agent: node.id, fallback: { from: active.id, to: next.id }, message: `The provider stayed busy (${redact(error.message.split("\n\n").at(-1))}). Trying once more with ${next.label} (${next.id}) instead of ${active.label} (${active.id}).` });
@@ -94,11 +111,75 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
     }
   }
 
+  const fastNode = { ...node, model: "fast" };
+  const condenseCost = (usage) => usageCostUsd(usage, { ...node, model: nodeModel(fastNode, provider).key }, { provider, freeTier });
+
+  // An earlier condensing (recorded in the run that is carried on): charged again so the limits stay honest, nothing is called or sent.
+  function replayCondense(plainInput, recorded) {
+    const split = recorded && condenses ? splitInput(plainInput, task) : null;
+    if (!split) return plainInput;
+    const usage = { input: Number(recorded.usage?.input) || 0, output: Number(recorded.usage?.output) || 0 };
+    try {
+      budget.chargeStep();
+      budget.chargeUsage({ ...usage, searches: 0, cost: condenseCost(usage) });
+    } catch (error) {
+      if (!(error instanceof AgentLimitError)) throw error;
+      if (onLimit === "stop") throw stopRun(error.reason);
+    }
+    return recorded.kept === false || typeof recorded.text !== "string" ? plainInput : condensedInput(split.head, recorded.text, split.tail);
+  }
+
+  // The extra call that shortens the material of an input. Returns the input the agent gets: the shortened one, or the one it was given
+  // when the call is skipped, fails or does not give a shorter text. The call is a step of this agent, so it needs two steps and some
+  // tokens left, else it is skipped and the agent keeps them for its own work.
+  async function condense(split, plainInput) {
+    if (budget.remainingSteps() < 2 || budget.remainingTokens() < CONDENSE_MIN_TOKENS) {
+      emit({ type: "warning", agent: node.id, condense: "skipped", message: "The input was not condensed: this agent has too few steps or tokens left for the extra call." });
+      return plainInput;
+    }
+    const fast = nodeModel(fastNode, provider);
+    const body = { model: fast.id, max_tokens: Math.max(1, Math.min(600, budget.remainingTokens())), system: condenseInstruction(language), messages: [{ role: "user", content: split.material }] };
+    let response;
+    try {
+      response = await requestWithRetry(body);
+    } catch (error) {
+      if (error instanceof AgentLimitError) {
+        if (onLimit === "stop") throw stopRun(error.reason);
+        return plainInput;
+      }
+      // A busy or failing provider does not fail the run for this: the agent reads the full text.
+      if (error instanceof AnthropicError && !signal?.aborted) {
+        emit({ type: "warning", agent: node.id, condense: "failed", message: `The input was not condensed (${redact(String(error.message).split("\n\n").at(-1))}). The agent reads the full text.` });
+        return plainInput;
+      }
+      throw error;
+    }
+    const summary = textOf(response.content ?? []);
+    const usage = { input: response.usage?.input_tokens ?? 0, output: response.usage?.output_tokens ?? 0 };
+    const kept = summary !== "" && summary.length < split.material.length;
+    // Recorded before it is charged, like a round: a limit hit by this call still leaves the record of what was spent.
+    emit({ type: "condense", agent: node.id, from: split.material.length, to: summary.length, text: summary, material: split.material, usage, model: fast.id, kept });
+    try {
+      budget.chargeUsage({ ...usage, searches: 0, cost: condenseCost(usage) });
+    } catch (error) {
+      if (!(error instanceof AgentLimitError)) throw error;
+      if (onLimit === "stop") throw stopRun(error.reason);
+    }
+    return kept ? condensedInput(split.head, summary, split.tail) : plainInput;
+  }
+
   return {
     id: node.id,
-    async run(input) {
-      const earlier = answers.shift();
+    async run(plainInput) {
+      // An agent that reads gets the notes written so far at the end of its input.
+      const inputFor = (mode, base = plainInput) => (book.read ? `${base}${notebook.forReader({ mode })}` : base);
+      // A recorded condensing with no answer after it: the agent failed after condensing, so it is not called again.
+      const pendingCondense = answers[0]?.pending === true ? answers.shift().condense : null;
+      const earlier = pendingCondense ? undefined : answers.shift();
       if (earlier) {
+        // One turn of the event loop, as a real call takes: agents that start together read the notebook before any of them writes to it.
+        await Promise.resolve();
+        const input = inputFor("replay", replayCondense(plainInput, earlier.condense));
         // Nothing is sent or emitted: the caller already holds this agent's events. The agent just remembers the exchange.
         try {
           budget.chargeStep();
@@ -110,10 +191,11 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
         }
         messages.push({ role: "user", content: input }, { role: "assistant", content: [{ type: "text", text: earlier.text }] });
         sent = messages.length;
-        return { text: earlier.text, usage: { input: Number(earlier.tokens?.input) || 0, output: Number(earlier.tokens?.output) || 0, searches: 0 } };
+        return { text: takeNotes(earlier.text, true), usage: { input: Number(earlier.tokens?.input) || 0, output: Number(earlier.tokens?.output) || 0, searches: 0 } };
       }
       // Marked for human approval and not approved yet: say what the agent would receive, and end the run here.
       if (askFirst) {
+        const input = inputFor("peek");
         emit({ type: "approval", agent: node.id, role: label, input: String(input).slice(0, APPROVAL_INPUT_MAX), inputChars: String(input).length });
         throw new ApprovalPause(node.id);
       }
@@ -125,6 +207,9 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
         tools: toolsFor(node, budget).map((tool) => tool.name),
         system,
       });
+      const split = condenses ? splitInput(plainInput, task) : null;
+      const base = pendingCondense ? replayCondense(plainInput, pendingCondense) : split ? await condense(split, plainInput) : plainInput;
+      const input = inputFor("live", base);
       messages.push({ role: "user", content: input });
       const total = { input: 0, output: 0, searches: 0 };
       const texts = [];
@@ -137,7 +222,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
         if (written === "") throw new Error(`The agent ${label} reached its own limit (${reason}) before it wrote anything. Raise the limit of this agent in the editor, and run again.`);
         emit({ type: "warning", agent: node.id, limit: `agent_${reason}`, message: agentPassMessage(`agent_${reason}`, { label, value: limitValue[`agent_${reason}`] }) });
         emit({ type: "agent_output", agent: node.id, text: written, tokens: { input: total.input, output: total.output } });
-        return { text: written, usage: total };
+        return { text: takeNotes(written), usage: total };
       };
       for (;;) {
         const fresh = copy(messages.slice(sent));
@@ -211,8 +296,9 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
       }
       const text = texts.filter(Boolean).join("\n").trim();
       emit({ type: "agent_output", agent: node.id, text, tokens: { input: total.input, output: total.output } });
-      checkRepeat(text);
-      return { text, usage: total };
+      const passed = takeNotes(text);
+      checkRepeat(passed);
+      return { text: passed, usage: total };
     },
   };
 }

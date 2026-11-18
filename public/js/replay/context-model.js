@@ -63,6 +63,11 @@ export function contextOf(events, agentId, cursor = events.length) {
           parts.others += split.others;
           parts.notebook += split.notebook;
           first = false;
+        } else if (notebookOn && message.role === "user" && typeof message.content === "string" && message.content.lastIndexOf(NOTEBOOK_MARK) !== -1) {
+          const at = message.content.lastIndexOf(NOTEBOOK_MARK);
+          parts.notebook += message.content.length - at;
+          parts.others += at;
+          first = false;
         } else {
           parts.others += lengthOf(message.content);
           if (message.role === "user") first = false;
@@ -80,12 +85,16 @@ export function runMetrics(run) {
   let largest = 0;
   let notes = 0;
   let saved = 0;
+  let condensed = 0;
   for (const event of events) {
     if (event?.type === "round") largest = Math.max(largest, Number(event.usage?.input) || 0);
     else if (event?.type === "note") notes += 1;
-    else if (event?.type === "condense") saved += Math.max(0, (Number(event.from) || 0) - (Number(event.to) || 0));
+    else if (event?.type === "condense") {
+      condensed += 1;
+      if (event.kept !== false) saved += Math.max(0, (Number(event.from) || 0) - (Number(event.to) || 0));
+    }
   }
-  return { steps: stats.calls, input: stats.usage.input, output: stats.usage.output, cost: stats.cost, ms: stats.totalMs, largest, notes, saved, outcome: stats.status };
+  return { steps: stats.calls + condensed, input: stats.usage.input, output: stats.usage.output, cost: stats.cost, ms: stats.totalMs, largest, notes, saved, outcome: stats.status };
 }
 
 // The input tokens of every model call of the run, in the order the calls happened, with the label of the agent.

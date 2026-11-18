@@ -12,6 +12,10 @@ import { openInCreate } from "../create/draft.js";
 import { downloadFile, safeFileName } from "../download.js";
 import { stepDetail } from "./step-detail.js";
 import { contextOf } from "./context-model.js";
+import { notebookOf } from "./notebook-model.js";
+import { notebookPanel } from "./notebook-view.js";
+import { condensesOf } from "./condense-model.js";
+import { condensePanel } from "./condense-view.js";
 import { contextView } from "./context-view.js";
 import { paintModelTag } from "../provider-colors.js";
 import { createAboutPanel } from "./about.js";
@@ -162,6 +166,11 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   const range = h(doc, "input", { type: "range", "data-ui": "player-slider", min: 0, max: events.length, step: 1, value: 0, "aria-label": t("player.progress") });
   const status = h(doc, "div", { class: "status", "data-ui": "player-status", "aria-live": "polite" });
   const banners = h(doc, "div", { class: "banners", "data-ui": "run-banners" });
+  // The shared notebook, when the run had it: the notes written so far.
+  const notebookHost = h(doc, "div", { class: "notebook-host", "data-ui": "notebook-host" });
+  // What was shortened before an agent read it (condensing), and which full texts are open.
+  const condenseHost = h(doc, "div", { class: "condense-host", "data-ui": "condense-host" });
+  const openCondense = new Set();
   const chips = h(doc, "div", { class: "chips", "data-ui": "agent-cards", role: "list", "aria-label": t("player.agents") });
   const tabButtons = ["steps", "messages", "output", "context"].map((name) => {
     const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-tab": name, "data-ui": `tab-${name}` }, t({ steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput", context: "player.tabContext" }[name]));
@@ -225,6 +234,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     ),
     aboutPanel ? aboutPanel.element : "",
     banners,
+    notebookHost,
+    condenseHost,
     // Side layout: the buttons form a narrow column to the right of the diagram, slider and status.
     // Bar layout: one slim line under the diagram holds buttons, slider and speed.
     ...(sideLayout
@@ -336,6 +347,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       failed: live ? null : failedAtEnd,
       selectedId: currentAgent()?.id ?? null,
       marks,
+      notes: notebookMarks(),
       badgeText: voted
         ? t("player.votes", { votes: voted.votes, total: voted.total })
         : routing
@@ -352,6 +364,47 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       badgeNumber: debate ? (debate.verdict ? undefined : debate.round) : evaluating ? evaluating.round : undefined,
     });
     return true;
+  }
+
+  // What the agents did with the notebook so far: "wrote 2", "read 3", shown on the diagram next to the status.
+  function notebookMarks() {
+    const book = notebookOf(events, player.cursor);
+    const marks = new Map();
+    for (const item of condensesOf(events, player.cursor)) marks.set(item.agent, t("player.condensed"));
+    if (!book.on) return marks;
+    for (const [id, n] of book.perAgent) {
+      const parts = [];
+      if (n.wrote > 0) parts.push(t("player.notebookWrote", { n: n.wrote }));
+      if (n.read > 0) parts.push(t("player.notebookRead", { n: n.read }));
+      if (marks.has(id)) parts.push(marks.get(id));
+      if (parts.length > 0) marks.set(id, parts.join(" · "));
+    }
+    return marks;
+  }
+
+  function renderNotebook() {
+    const book = notebookOf(events, player.cursor);
+    const design = designOfRun();
+    const panel = book.on ? notebookPanel({ doc, t, notes: book.notes, label: (id) => state.agents[id]?.label ?? (design ? designLabel(design, id) : id), help: help("create-memory", t("create.notebook")) }) : null;
+    notebookHost.replaceChildren(...(panel ? [panel] : []));
+  }
+
+  function renderCondense() {
+    const design = designOfRun();
+    const panel = condensePanel({
+      doc,
+      t,
+      items: condensesOf(events, player.cursor),
+      label: (id) => state.agents[id]?.label ?? (design ? designLabel(design, id) : id),
+      num: (n) => new Intl.NumberFormat(doc.documentElement?.lang || undefined).format(n),
+      isOpen: (i) => openCondense.has(i),
+      toggle: (i) => {
+        if (openCondense.has(i)) openCondense.delete(i);
+        else openCondense.add(i);
+        renderCondense();
+      },
+    });
+    condenseHost.replaceChildren(...(panel ? [panel] : []));
   }
 
   function renderChips() {
@@ -572,6 +625,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     status.replaceChildren(...(debate && !designOfRun() ? [roundBadge] : []), parts.join(" · "));
     for (const b of tabButtons) b.setAttribute("aria-selected", String(b.getAttribute("data-tab") === ui.tab));
     renderBanners();
+    renderNotebook();
+    renderCondense();
     renderChips();
     drawBody = () => {
       const agent = currentAgent();

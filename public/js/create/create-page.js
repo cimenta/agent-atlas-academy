@@ -445,6 +445,15 @@ export function renderCreate(ctx) {
       drawReview();
     });
 
+    // Memory management: the shared notebook of the run, off until the student switches it on.
+    const notebookBox = h(doc, "input", { id: "cr-notebook", type: "checkbox", checked: draft.editor.notebookOn(), "data-ui": "notebook-switch" });
+    notebookBox.addEventListener("change", () => {
+      draft.editor.setNotebook(notebookBox.checked);
+      editorHandle.refresh();
+      drawReview();
+    });
+    const memoryField = h(doc, "div", { class: "field wide memory-field", "data-ui": "memory-field" }, h(doc, "h3", {}, t("create.memoryHeading"), help("create-memory", t("create.memoryHeading"))), h(doc, "div", { class: "field checkbox" }, notebookBox, h(doc, "label", { for: "cr-notebook" }, t("create.notebook"))), h(doc, "p", { class: "hint" }, t("create.notebookHint")));
+
     root.replaceChildren(
       h(doc, "div", { class: "create-head" }, h(doc, "h2", {}, t("create.title")), loadButton, clearButton, definitionFile),
       startNotice ? h(doc, "p", { class: "notice", role: noticeRole }, startNotice) : "",
@@ -455,6 +464,7 @@ export function renderCreate(ctx) {
       h(doc, "p", { class: "hint" }, t("create.patternHelp")),
       patternGroup,
       patternNotice,
+      memoryField,
       providerField,
       h(doc, "h3", {}, t("create.designHeading"), help("create-diagram", t("create.designHeading"))),
       editorHost,
@@ -520,7 +530,18 @@ export function renderCreate(ctx) {
       const when = (base.at(-1)?.t ?? 0) + 500;
       for (const waiting of pendingApprovals(base)) base.push({ type: "approved", agent: waiting.agent, t: when, at: Date.now() });
     }
-    const answers = base.filter((e) => e.type === "agent_output").map((e) => ({ agent: e.agent, text: e.text, tokens: e.tokens }));
+    // A recorded condensing goes with the answer that follows it; one with no answer after it (the agent failed after condensing)
+    // is carried on alone, so the extra call is not made and paid for again.
+    const answers = [];
+    const condensed = new Map();
+    for (const e of base) {
+      if (e.type === "condense") condensed.set(e.agent, { from: e.from, to: e.to, text: e.text, usage: e.usage, kept: e.kept !== false });
+      else if (e.type === "agent_output") {
+        answers.push({ agent: e.agent, text: e.text, tokens: e.tokens, ...(condensed.has(e.agent) ? { condense: condensed.get(e.agent) } : {}) });
+        condensed.delete(e.agent);
+      }
+    }
+    for (const [agent, condense] of condensed) answers.push({ agent, pending: true, condense });
     const earlier = resume ? deriveInspector(resume.events) : null;
     const failedIds = earlier ? earlier.order.filter((a) => earlier.agents[a].status === "error") : [];
     const offset = base.length > 0 ? (base.at(-1).t ?? 0) + 1000 : 0;

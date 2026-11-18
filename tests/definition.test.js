@@ -142,3 +142,26 @@ test("a handoff definition keeps its start through save and load; an old one wit
   assert.equal(again.ok, true);
   assert.equal(again.editor.start(), a);
 });
+
+test("a definition keeps the notebook switch and the choice of each agent", () => {
+  const editor = createEditor("sequential");
+  editor.setNotebook(true);
+  const a = editor.addNode("researcher").id;
+  const b = editor.addNode("writer").id;
+  editor.connect(a, b);
+  editor.setNode(a, { notebook: "write" });
+  editor.setNode(b, { notebook: "read" });
+  const text = JSON.stringify(buildDefinition({ task: "t", design: editor.design() }));
+  const loaded = loadDefinition(text);
+  assert.equal(loaded.ok, true);
+  assert.equal(loaded.editor.notebookOn(), true);
+  assert.deepEqual(loaded.editor.design().nodes.map((n) => n.notebook), ["write", "read"]);
+});
+
+test("a definition keeps the condense flag of an agent", () => {
+  const design = { pattern: "sequential", nodes: [{ id: "a", agent: "researcher", model: "fast", search: false }, { id: "b", agent: "writer", model: "fast", search: false, condense: true }], edges: [{ from: "a", to: "b" }] };
+  const out = loadDefinition(JSON.stringify({ format: DEFINITION_FORMAT, version: DEFINITION_VERSION, task: "t", design }));
+  assert.equal(out.ok, true);
+  assert.equal(out.editor.design().nodes.find((n) => n.agent === "writer").condense, true);
+  assert.equal("condense" in out.editor.design().nodes.find((n) => n.agent === "researcher"), false);
+});

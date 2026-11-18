@@ -25,6 +25,8 @@ test("the schema version is 1 and the event types are the agreed list", () => {
     "approval",
     "approved",
     "loop_end",
+    "note",
+    "condense",
   ]);
 });
 

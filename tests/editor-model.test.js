@@ -544,3 +544,67 @@ test("voting: the editor refuses a sixth voter, as the validation does", () => {
   assert.equal(editor.addNode("writer").code, "vote.voters");
   assert.equal(editor.design().nodes.length, 6);
 });
+
+// ---- shared notebook ----
+test("notebook: off by default, nothing in the design", () => {
+  const editor = createEditor("sequential");
+  add(editor, "writer");
+  assert.equal(editor.notebookOn(), false);
+  const design = editor.design();
+  assert.equal("memory" in design, false);
+  assert.equal("notebook" in design.nodes[0], false);
+});
+
+test("notebook: switching on gives every agent read and write, switching off removes it again", () => {
+  const editor = createEditor("sequential");
+  const a = add(editor, "researcher");
+  editor.setNotebook(true);
+  const b = add(editor, "writer");
+  let design = editor.design();
+  assert.deepEqual(design.memory, { notebook: true });
+  assert.equal(design.nodes.find((n) => n.id === a).notebook, "both");
+  assert.equal(design.nodes.find((n) => n.id === b).notebook, "both");
+  assert.deepEqual(validateDesign(design).errors.filter((e) => /notebook/.test(e.code)), []);
+  editor.setNode(a, { notebook: "write" });
+  assert.equal(editor.design().nodes.find((n) => n.id === a).notebook, "write");
+  editor.setNotebook(false);
+  design = editor.design();
+  assert.equal("memory" in design, false);
+  assert.ok(design.nodes.every((n) => !("notebook" in n)));
+});
+
+test("notebook: an agent whose reply is a decision may only read", () => {
+  const editor = createEditor("supervisor");
+  const s = add(editor, "supervisor");
+  editor.setNotebook(true);
+  assert.equal(editor.design().nodes.find((n) => n.id === s).notebook, "read");
+  assert.deepEqual(editor.notebookChoices(s), ["none", "read"]);
+  editor.setNode(s, { notebook: "write" });
+  assert.equal(editor.design().nodes.find((n) => n.id === s).notebook, "read");
+  const w = add(editor, "researcher");
+  assert.deepEqual(editor.notebookChoices(w), ["none", "read", "write", "both"]);
+  const handoff = createEditor("handoff");
+  const h = add(handoff, "writer");
+  assert.deepEqual(handoff.notebookChoices(h), ["none", "read"]);
+});
+
+test("notebook: the switch stays when the pattern is changed and the new agents get their default", () => {
+  const editor = createEditor("sequential");
+  editor.setNotebook(true);
+  editor.reset("voting");
+  const tally = editor.design().nodes[0];
+  assert.equal(editor.notebookOn(), true);
+  assert.equal(tally.notebook, "read");
+});
+
+test("condense is a flag an agent may carry; a decision agent cannot, and a false flag is left out", () => {
+  const editor = createEditor("sequential");
+  const a = editor.addNode("writer", { condense: true }).id;
+  assert.equal(editor.design().nodes.find((n) => n.id === a).condense, true);
+  editor.setNode(a, { condense: false });
+  assert.equal("condense" in editor.design().nodes.find((n) => n.id === a), false);
+  const sup = createEditor("supervisor");
+  const s = sup.addNode("supervisor", { condense: true }).id;
+  sup.setNode(s, { condense: true });
+  assert.equal("condense" in sup.design().nodes.find((n) => n.id === s), false);
+});

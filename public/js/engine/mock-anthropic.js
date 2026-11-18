@@ -16,6 +16,15 @@ const TEXT = {
   free: "Here is my contribution, written in my own style.",
 };
 
+// The note a mock agent leaves when it may write to the notebook.
+const NOTES = {
+  planner: "The plan has three steps: find the facts, weigh them, write the answer.",
+  researcher: "The sources agree on the basics of the task.",
+  critic: "One claim still needs a source.",
+  writer: "The final text is short and follows the plan.",
+  free: "A note from this agent for the others.",
+};
+
 function firstUserText(messages) {
   const first = (messages ?? []).find((m) => m.role === "user");
   return typeof first?.content === "string" ? first.content : "";
@@ -39,6 +48,18 @@ export function createMockCall({ delayMs = 0, evaluatorAcceptsAt = 2 } = {}) {
       usage: { ...usage, ...extraUsage },
     });
 
+    // The shared notebook: an agent that may write adds a note, and one that read notes says how many.
+    const MARK = "\n\nNotebook:\n";
+    const lastInput = [...messages].reverse().find((m) => m.role === "user");
+    const seen = typeof lastInput?.content === "string" && lastInput.content.includes(MARK) ? (lastInput.content.split(MARK).pop().match(/^- /gm) ?? []).length : 0;
+    const withMemory = (text) =>
+      `${text}${seen > 0 ? ` (Used ${seen} ${seen === 1 ? "note" : "notes"} from the notebook.)` : ""}${String(body?.system ?? "").includes("<note>") ? `\n\n<note>${NOTES[role] ?? NOTES.free}</note>` : ""}`;
+
+    if (String(body?.system ?? "").startsWith("You shorten text")) {
+      // The extra call of condensing: the mock keeps the start of the text.
+      const material = typeof firstUserText(messages) === "string" ? firstUserText(messages) : "";
+      return reply([{ type: "text", text: `${material.replace(/\s+/g, " ").slice(0, 200).trim()}...` }]);
+    }
     if (String(body?.system ?? "").includes("one of several voters")) {
       // In a voting run every mock voter gives the same answer, so the mock tally can say that all of them agree.
       return reply([{ type: "text", text: "The sky is blue because air scatters blue light more than red light." }]);
@@ -95,11 +116,11 @@ export function createMockCall({ delayMs = 0, evaluatorAcceptsAt = 2 } = {}) {
             tool_use_id: "srvtoolu_mock",
             content: [{ type: "web_search_result", title: "Example source", url: "https://example.org/source" }],
           },
-          { type: "text", text: TEXT.researcher },
+          { type: "text", text: withMemory(TEXT.researcher) },
         ],
         { server_tool_use: { web_search_requests: 1 } },
       );
     }
-    return reply([{ type: "text", text: TEXT[role] ?? TEXT.free }]);
+    return reply([{ type: "text", text: withMemory(TEXT[role] ?? TEXT.free) }]);
   };
 }

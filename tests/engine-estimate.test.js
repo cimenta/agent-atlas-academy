@@ -141,3 +141,19 @@ test("limitWarning flags a handoff design with 8 agents and 6 steps", async () =
   assert.equal(limitWarning(handDesign(8), { ...LIMIT_DEFAULTS, maxSteps: 6 }).steps, true);
   assert.equal(limitWarning(handDesign(3), LIMIT_DEFAULTS), null);
 });
+
+test("an agent that condenses adds one step to the estimate", async () => {
+  const nodes = [{ id: "a", agent: "researcher", model: "fast" }, { id: "b", agent: "writer", model: "fast", condense: true }];
+  const d = { pattern: "sequential", nodes, edges: [{ from: "a", to: "b" }] };
+  const plain = { ...d, nodes: nodes.map(({ condense, ...n }) => n) };
+  assert.equal(activationsOf(d, {}), activationsOf(plain, {}) + 1);
+});
+
+test("review: condensing is counted for every activation of the agent, and only where an agent can condense", () => {
+  const n = (id, agent, extra = {}) => ({ id, agent, model: "fast", ...extra });
+  const plain = { pattern: "debate", rounds: 3, nodes: [n("d1", "debater"), n("d2", "debater"), n("d3", "debater"), n("j", "judge")], edges: [] };
+  const cond = { ...plain, nodes: plain.nodes.map((x) => (x.id === "d1" ? { ...x, condense: true } : x)) };
+  assert.equal(activationsOf(cond, {}), activationsOf(plain, {}) + 3);
+  const hand = { pattern: "handoff", start: "a", nodes: [n("a", "writer", { condense: true }), n("b", "critic")], edges: [{ from: "a", to: "b" }] };
+  assert.equal(activationsOf(hand, {}), activationsOf({ ...hand, nodes: hand.nodes.map(({ condense, ...x }) => x) }, {}));
+});

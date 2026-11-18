@@ -15,6 +15,8 @@ export const EVENT_TYPES = [
   "approval",
   "approved",
   "loop_end",
+  "note",
+  "condense",
 ];
 
 const isText = (value) => typeof value === "string" && value.length > 0;
@@ -57,6 +59,12 @@ function checkEvent(event, index, previousT, errors, agents) {
         errors.push(`${at}.tokens.${key} must be a non-negative number`);
       }
     }
+  }
+  if (event.type === "condense" && (!isText(event.agent) || typeof event.text !== "string" || !Number.isFinite(event.from) || !Number.isFinite(event.to))) {
+    errors.push(`${at}.agent, ${at}.text, ${at}.from and ${at}.to of a condense must be a string, a string and two numbers`);
+  }
+  if (event.type === "note" && (!isText(event.agent) || typeof event.text !== "string")) {
+    errors.push(`${at}.agent and ${at}.text of a note must be strings`);
   }
   if (event.type === "agent_output" && typeof event.text !== "string") {
     errors.push(`${at}.text must be a string`);

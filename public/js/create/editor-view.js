@@ -7,6 +7,7 @@ import { AGENT_TYPES, CRITERIA_MAX, MODELS, LIMIT_DEFAULTS, OUTPUT_TOKENS } from
 import { AGENT_LIMIT_KEYS, agentLimitRange } from "../engine/agent-limits.js";
 import { TOOLS } from "../engine/tools.js";
 import { roleText } from "../engine/prompts.js";
+import { mayCondense } from "../engine/condense.js";
 import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, extentOf, isTwoWay, straight, turnArrows, TWO_WAY_GAP } from "./diagram-geometry.js";
 
 const MOVE_THRESHOLD = 5;
@@ -333,6 +334,8 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         { type: "button", class: "dnode-body", "data-focus-key": `node-${node.id}`, "aria-pressed": String(selectedId === node.id), "aria-label": t("editor.selectNode", { name: nodeLabel(node) }) },
         h(doc, "strong", {}, nodeLabel(node)),
         h(doc, "small", {}, modelUi ? modelUi.label(node) : (getModels(node).find((m) => m.key === node.model)?.label ?? "")),
+        ...(design.memory?.notebook === true ? [h(doc, "small", { class: "dnode-notebook", "data-ui": "node-notebook" }, t(`editor.notebook.short.${node.notebook ?? "both"}`))] : []),
+        ...(node.condense === true ? [h(doc, "small", { class: "dnode-notebook", "data-ui": "node-condense" }, t("editor.condensed"))] : []),
       );
       body.addEventListener("click", () => {
         if (suppressClick) return;
@@ -569,6 +572,35 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     parts.push(h(doc, "h4", { class: "editor-approval-heading" }, t("editor.approvalHeading"), helpIcon({ doc, t, id: "create-approval", name: t("editor.approvalHeading") })));
     parts.push(h(doc, "div", { class: "field checkbox" }, approve, h(doc, "label", { for: "ed-approve" }, t("editor.approve"))));
     parts.push(h(doc, "p", { class: "hint" }, t("editor.approveNote")));
+    // The shared notebook: what this agent may do with it. Only when the run has the notebook switched on.
+    if (editor.notebookOn()) {
+      const choices = editor.notebookChoices(node.id);
+      parts.push(h(doc, "h4", { class: "editor-notebook-heading" }, t("editor.notebookHeading"), helpIcon({ doc, t, id: "create-memory", name: t("editor.notebookHeading") })));
+      const group = h(doc, "div", { class: "field", role: "radiogroup", "aria-label": t("editor.notebookHeading"), "data-ui": "agent-notebook" });
+      for (const choice of choices) {
+        const radio = h(doc, "input", { id: `ed-notebook-${choice}`, type: "radio", name: "ed-notebook", value: choice, checked: (node.notebook ?? "both") === choice, "data-ui": `notebook-${choice}` });
+        radio.addEventListener("change", () => {
+          editor.setNode(node.id, { notebook: choice });
+          changed();
+        });
+        group.append(h(doc, "div", { class: "field checkbox" }, radio, h(doc, "label", { for: `ed-notebook-${choice}` }, t(`editor.notebook.${choice}`))));
+      }
+      parts.push(group, h(doc, "p", { class: "hint" }, t(`editor.notebook.hint.${node.notebook ?? "both"}`)));
+      if (choices.length < 4) parts.push(h(doc, "p", { class: "hint", "data-ui": "notebook-decision" }, t("editor.notebook.decision")));
+    }
+    // Condensing: one extra call shortens what earlier agents wrote before this agent reads it. Not for an agent whose reply is a decision.
+    parts.push(h(doc, "h4", { class: "editor-condense-heading" }, t("editor.condenseHeading"), helpIcon({ doc, t, id: "create-memory", name: t("editor.condenseHeading") })));
+    if (mayCondense(node.agent, editor.design().pattern)) {
+      const condense = h(doc, "input", { id: "ed-condense", type: "checkbox", checked: node.condense === true, "data-ui": "agent-condense" });
+      condense.addEventListener("change", () => {
+        editor.setNode(node.id, { condense: condense.checked });
+        changed();
+      });
+      parts.push(h(doc, "div", { class: "field checkbox" }, condense, h(doc, "label", { for: "ed-condense" }, t("editor.condense"))));
+      parts.push(h(doc, "p", { class: "hint" }, t("editor.condenseHint")));
+    } else {
+      parts.push(h(doc, "p", { class: "hint", "data-ui": "condense-decision" }, t("editor.condenseDecision")));
+    }
     parts.push(limitsBlock(node));
     if (type.free) {
       const name = h(doc, "input", { id: "ed-name", type: "text", maxlength: 40, value: node.name ?? "" });

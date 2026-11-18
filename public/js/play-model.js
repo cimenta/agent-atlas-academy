@@ -52,6 +52,14 @@ export function buildResultModel(run) {
   let cost = null;
   if (run?.design && Array.isArray(run.design.nodes)) {
     cost = usage.searches * catalog.searchPriceUsd;
+    // The extra calls of condensing are priced with the fast model of the agent's provider.
+    for (const e of events) {
+      if (e.type !== "condense") continue;
+      const node = run.design.nodes.find((n) => n.id === e.agent);
+      if (slotIsFree(node?.slot)) continue;
+      const fast = nodeModel({ ...(node ?? {}), model: "fast" }, provider);
+      cost += ((Number(e.usage?.input) || 0) * fast.inputPerMTok + (Number(e.usage?.output) || 0) * fast.outputPerMTok) / 1e6;
+    }
     for (const a of perAgent) {
       const node = run.design.nodes.find((n) => n.id === a.agent);
       // An agent that ran on a key of the free tier cost nothing, whatever the list price of its model.

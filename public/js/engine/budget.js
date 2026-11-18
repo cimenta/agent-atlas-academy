@@ -58,6 +58,7 @@ export function createBudget(limits, { now = Date.now, timeLimitMs = TIME_LIMIT_
       check();
     },
     remainingTokens: () => Math.max(0, max.maxTokens - used.input - used.output),
+    remainingSteps: () => Math.max(0, max.maxSteps - used.steps),
     remainingSearches: () => Math.max(0, max.maxSearches - used.searches),
     remainingMs: () => Math.max(0, timeLimitMs - elapsed()),
     usage: () => ({ ...used }),
@@ -86,6 +87,7 @@ export function createBudget(limits, { now = Date.now, timeLimitMs = TIME_LIMIT_
           if (own.searches > ceiling.searches) throw new AgentLimitError("searches");
         },
         remainingTokens: () => Math.min(budget.remainingTokens(), Math.max(0, ceiling.tokens - own.input - own.output)),
+        remainingSteps: () => Math.min(budget.remainingSteps(), Math.max(0, ceiling.steps - own.steps)),
         remainingSearches: () => Math.min(budget.remainingSearches(), Math.max(0, ceiling.searches - own.searches)),
         remainingMs: budget.remainingMs,
         usage: () => ({ ...own }),

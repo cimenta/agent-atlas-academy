@@ -1207,3 +1207,16 @@ a.art-pill:hover { text-decoration: underline; }
 .ctx-col i.h90 { height: 72%; }
 .ctx-col i.h95 { height: 76%; }
 .ctx-col i.h100 { height: 80%; }
+
+/* The notebook panel in the replay. */
+.nb { border: 1px solid var(--accent-line); border-radius: 10px; background: var(--accent-bg); padding: 10px 12px; margin: 8px 0; }
+.nb h4 { margin: 0 0 6px; font-size: 0.85rem; color: var(--accent); }
+.nb .n { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; margin: 6px 0; font-size: 0.9rem; }
+.nb .n b { font-size: 0.78rem; color: var(--muted); display: block; }
+.dnode-notebook { display: block; font-size: 0.72rem; color: var(--accent); }
+
+/* The condensing box in the replay. */
+.cond { border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 10px; background: var(--card); padding: 10px 12px; margin: 8px 0; }
+.cond h4 { margin: 0 0 6px; font-size: 0.85rem; }
+.cond .cond-full { white-space: pre-wrap; max-height: 16rem; overflow: auto; font-size: 0.8rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px; }
+.cond .cond-foot { margin: 6px 0 0; }

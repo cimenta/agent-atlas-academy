@@ -57,6 +57,7 @@ export function loadDefinition(text) {
   }
 
   const editor = createEditor(design.pattern);
+  if (design.memory?.notebook === true) editor.setNotebook(true);
   const ids = new Map();
   for (const node of design.nodes) {
     if (!isObject(node)) return fail("invalid");
@@ -77,6 +78,8 @@ export function loadDefinition(text) {
     if (isObject(node.limits)) overrides.limits = node.limits;
     if (node.onLimit === "pass") overrides.onLimit = "pass";
     if (node.approve === true) overrides.approve = true;
+    if (node.condense === true) overrides.condense = true;
+    if (design.memory?.notebook === true && typeof node.notebook === "string") overrides.notebook = node.notebook;
     for (const key of ["name", "instructions", "stance"]) if (typeof node[key] === "string") overrides[key] = node[key];
     const added = editor.addNode(node.agent, overrides);
     if (!added.ok) return fail("invalid", [{ code: added.code }]);
