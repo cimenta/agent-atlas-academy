@@ -8,6 +8,7 @@ import { AGENT_LIMIT_KEYS, agentLimitRange } from "../engine/agent-limits.js";
 import { TOOLS } from "../engine/tools.js";
 import { roleText } from "../engine/prompts.js";
 import { mayCondense } from "../engine/condense.js";
+import { MULTI_RUN } from "../engine/spawn.js";
 import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, extentOf, isTwoWay, straight, turnArrows, TWO_WAY_GAP } from "./diagram-geometry.js";
 
 const MOVE_THRESHOLD = 5;
@@ -351,7 +352,10 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         draw();
       });
       const isStart = design.pattern === "handoff" && design.start === node.id;
-      const box = h(doc, "div", { class: "dnode", "data-node-id": node.id, "data-selected": String(selectedId === node.id), "data-connecting": String(connectFrom === node.id), ...(isStart ? { "data-start": "true" } : {}) }, body, port);
+      // A node that runs once for every part or step is drawn as a stack with a badge (x2-6).
+      const multi = node.agent === MULTI_RUN[design.pattern];
+      const box = h(doc, "div", { class: "dnode", "data-node-id": node.id, "data-selected": String(selectedId === node.id), "data-connecting": String(connectFrom === node.id), ...(isStart ? { "data-start": "true" } : {}), ...(multi ? { "data-multi": "true" } : {}) }, body, port);
+      if (multi) box.append(h(doc, "span", { class: "dnode-runs", "data-ui": "node-runs" }, t("editor.runsRange")));
       if (isStart) box.append(h(doc, "span", { class: "dnode-start", "data-ui": "start-flag" }, `▶ ${t("editor.startFlag")}`));
       if (selectedId === node.id) {
         const cross = h(doc, "button", { type: "button", class: "dnode-remove", "data-focus-key": `delete-${node.id}`, "aria-label": t("editor.removeNamed", { name: nodeLabel(node) }), title: t("editor.remove") }, "×");
@@ -529,7 +533,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       changed();
     });
     const parts = [h(doc, "h4", {}, t("editor.settings", { name: nodeLabel(node) })), field("ed-model", t("editor.model"), model)];
-    if (node.agent === "evaluator") {
+    if (node.agent === "evaluator" || (design.selfCritique === true && node.agent === "writer")) {
       // What the evaluator judges by, and how many rounds the loop may take.
       const criteria = h(doc, "textarea", { id: "ed-criteria", rows: 5, maxlength: CRITERIA_MAX, "data-ui": "evaluator-criteria" });
       criteria.value = editor.criteria();
@@ -659,6 +663,19 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     return h(doc, "section", { class: "editor-settings", "aria-label": t("editor.settings", { name: nodeLabel(node) }) }, ...parts);
   }
 
+  // Evaluator loop: the switch that lets the writer judge its own draft (the evaluator then goes away).
+  function selfCritiqueBlock(design) {
+    if (design.pattern !== "evaluator") return "";
+    const box = h(doc, "input", { id: "ed-self-critique", type: "checkbox", checked: editor.selfCritique(), "data-ui": "self-critique-switch" });
+    box.addEventListener("change", () => {
+      editor.setSelfCritique(box.checked);
+      selectedId = null;
+      connectFrom = null;
+      changed();
+    });
+    return h(doc, "div", { class: "field checkbox self-critique-field", "data-ui": "self-critique-field" }, box, h(doc, "label", { for: "ed-self-critique" }, t("editor.selfCritique")), helpIcon({ doc, t, id: "create-selfcritique", name: t("editor.selfCritique") }), h(doc, "p", { class: "hint" }, t("editor.selfCritiqueHelp")));
+  }
+
   function roundsBlock(design) {
     if (design.pattern !== "debate") return "";
     const input = h(doc, "input", { id: "ed-rounds", type: "number", min: 1, max: 4, step: 1, value: design.rounds });
@@ -682,6 +699,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       h(doc, "p", { class: "hint" }, t("editor.hint")),
       notice ? h(doc, "p", { class: "notice", role: "alert" }, notice) : "",
       paletteBlock(design),
+      selfCritiqueBlock(design),
       diagramBlock(design),
       h(doc, "div", { class: "editor-lower" }, settingsBlock(design), h(doc, "section", { class: "editor-connections", "aria-label": t("editor.connections") }, h(doc, "h4", {}, t("editor.connections")), connectionsBlock(design))),
       roundsBlock(design),

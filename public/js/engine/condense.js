@@ -5,6 +5,8 @@ export const CONDENSE_WORDS = 150; // the summary is at most this many words
 export const CONDENSE_TAIL_MAX = 120; // a closing one-line instruction up to this long stays outside the material
 export const CONDENSE_HEADING = "Summary of what the earlier agents wrote (shortened):";
 const DECISION_AGENTS = new Set(["supervisor", "evaluator", "router", "tally"]);
+// A worker and an executor get their instruction (a part, a step of the plan) in the input, so it must not be summarised.
+const INSTRUCTION_AGENTS = new Set(["worker", "executor"]);
 // Inputs that are not material for a summary: an instruction the program gives, and the draft a writer revises.
 const NOT_MATERIAL = ["Instruction from the supervisor:", "Your last draft:"];
 // Patterns in which no agent condenses: a handoff agent and an evaluator loop need the text exactly as it is.
@@ -13,7 +15,7 @@ const NO_CONDENSE_PATTERNS = new Set(["handoff", "evaluator"]);
 // May an agent of this type, in this pattern, receive a condensed input? Not one whose reply the program reads as a decision:
 // it must see everything it judges.
 export function mayCondense(agent, pattern) {
-  return !DECISION_AGENTS.has(agent) && !NO_CONDENSE_PATTERNS.has(pattern);
+  return !DECISION_AGENTS.has(agent) && !INSTRUCTION_AGENTS.has(agent) && !NO_CONDENSE_PATTERNS.has(pattern);
 }
 
 // An input is the task, a blank line and the material (what other agents passed on), sometimes a one-line instruction at the end.

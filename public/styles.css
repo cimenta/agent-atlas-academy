@@ -1259,3 +1259,19 @@ a.art-pill:hover { text-decoration: underline; }
 .compare-last-label { font-size: 0.8rem; }
 .compare-totals { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; color: var(--muted); }
 .compare-totals b { color: inherit; }
+/* A node that runs once for every part or step: a stack of boxes and a badge (x2-6, or the real number after a run). */
+.dnode[data-multi="true"], .replay-diagram .rnode[data-multi="true"] { box-shadow: 6px -6px 0 -1px var(--surface), 6px -6px 0 0 var(--border), 12px -12px 0 -1px var(--surface), 12px -12px 0 0 var(--border); }
+.dnode-runs { position: absolute; top: -10px; right: 6px; padding: 0 8px; border-radius: 999px; border: 1px solid var(--accent-line); background: var(--accent-bg); color: var(--accent); font-size: 0.72rem; font-weight: 700; pointer-events: none; }
+.rnode .dnode-runs[hidden] { display: none; }
+/* The parts of a map-reduce run and the plan of a plan-and-execute run. */
+.dynamic-panel { margin: 12px 0; }
+.dynamic-panel .plan { list-style: none; margin: 8px 0; padding: 0; counter-reset: step; }
+.dynamic-panel .plan li { counter-increment: step; display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; margin: 6px 0; background: var(--card, var(--surface)); }
+.dynamic-panel .plan li::before { content: counter(step); font-weight: 700; color: var(--muted); min-width: 18px; }
+.dynamic-panel .plan li.done { border-color: var(--done); background: var(--done-bg); }
+.dynamic-panel .plan li.now { border-color: var(--accent-line); background: var(--accent-bg); }
+.dynamic-panel .plan li.todo { border-style: dashed; color: var(--muted); }
+.dynamic-panel .plan li > span { flex: 1; }
+.plan-pick { margin-left: auto; font-size: 0.8rem; white-space: nowrap; }
+.self-critique-field { flex-wrap: wrap; margin: 8px 0; }
+.self-critique-field .hint { flex-basis: 100%; margin: 4px 0 0; }

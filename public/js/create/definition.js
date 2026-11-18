@@ -93,6 +93,7 @@ export function loadDefinition(text) {
   if ((design.pattern === "debate" || design.pattern === "evaluator") && Number.isInteger(design.rounds)) editor.setRounds(design.rounds);
   if (design.pattern === "handoff" && ids.has(design.start)) editor.setStart(ids.get(design.start));
   if (design.pattern === "evaluator" && typeof design.criteria === "string") editor.setCriteria(design.criteria);
+  if (design.pattern === "evaluator" && design.selfCritique === true) editor.setSelfCritique(true);
 
   const problems = editor.errors();
   if (problems.length > 0) return fail("invalid", problems);

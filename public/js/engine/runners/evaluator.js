@@ -29,7 +29,11 @@ const REPAIR = 'Reply with valid JSON as instructed: {"verdict":"accept"} or {"v
 // (the last draft goes with the error, so the run can still show it).
 export async function run({ design, task, agents, emit, passOn = (text) => text }) {
   const writer = design.nodes.find((n) => n.agent === "writer");
-  const evaluator = design.nodes.find((n) => n.agent === "evaluator");
+  // Self-critique: the writer judges its own draft, with a second call that has the evaluator role.
+  const self = design.selfCritique === true;
+  const evaluator = self ? writer : design.nodes.find((n) => n.agent === "evaluator");
+  const judge = (input) => (self ? agents.get(writer.id).run(input, { as: "evaluator" }) : agents.get(evaluator.id).run(input));
+  let judging = false; // self-critique: is the agent in its judging call?
   const criteria = typeof design.criteria === "string" && design.criteria.trim() !== "" ? design.criteria.trim() : "(none given)";
   let draft = "";
   let drafts = 0;
@@ -38,15 +42,19 @@ export async function run({ design, task, agents, emit, passOn = (text) => text 
   try {
     for (let round = 1; round <= design.rounds; round++) {
       const writerInput =
-        round === 1 ? `Task: ${task}` : `Task: ${task}\n\nYour last draft:\n${passOn(draft, writer.id)}\n\nThe evaluator's feedback:\n${passOn(feedback, evaluator.id)}\n\nWrite the improved draft now.`;
+        round === 1
+          ? `Task: ${task}`
+          : `Task: ${task}\n\nYour last draft:\n${passOn(draft, writer.id)}\n\n${self ? "Your own feedback on it" : "The evaluator's feedback"}:\n${passOn(feedback, evaluator.id)}\n\nWrite the improved draft now.`;
+      judging = false;
       draft = (await agents.get(writer.id).run(writerInput)).text;
       drafts = round;
       judged = false;
-      emit({ type: "handoff", from: writer.id, to: evaluator.id, note: draft.slice(0, NOTE_MAX) });
+      if (!self) emit({ type: "handoff", from: writer.id, to: evaluator.id, note: draft.slice(0, NOTE_MAX) });
       let input = `Task: ${task}\n\nCriteria:\n${criteria}\n\nDraft:\n${passOn(draft, writer.id)}\n\nGive your verdict now.`;
       let verdict = null;
+      judging = true;
       for (let tries = 0; tries < 2 && !verdict; tries++) {
-        verdict = parseVerdict((await agents.get(evaluator.id).run(input)).text);
+        verdict = parseVerdict((await judge(input)).text);
         input = REPAIR;
       }
       if (!verdict) throw new Error("evaluator.invalid: the evaluator did not give a valid verdict twice in a row");
@@ -57,12 +65,12 @@ export async function run({ design, task, agents, emit, passOn = (text) => text 
       }
       feedback = verdict.feedback;
       // The writer gets the feedback only when there is a next round.
-      if (round < design.rounds) emit({ type: "handoff", from: evaluator.id, to: writer.id, note: feedback.slice(0, NOTE_MAX) });
+      if (round < design.rounds && !self) emit({ type: "handoff", from: evaluator.id, to: writer.id, note: feedback.slice(0, NOTE_MAX) });
     }
   } catch (error) {
     if (error instanceof LimitError) {
       // A limit of the evaluator that comes after its answer (repeated answers, its tokens) still leaves a verdict in the replay.
-      const afterVerdict = error.agent === evaluator.id && (error.reason === "repeat" || error.reason === "agent_tokens");
+      const afterVerdict = error.agent === evaluator.id && (!self || judging) && (error.reason === "repeat" || error.reason === "agent_tokens");
       emit({ type: "loop_end", result: "stopped", round: Math.max(1, drafts), judged: drafts > 0 && (judged || afterVerdict) });
     }
     // Whatever ends the run, the last draft is its result; a pause for approval is not an ending.

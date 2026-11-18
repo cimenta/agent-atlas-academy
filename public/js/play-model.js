@@ -5,6 +5,7 @@ import { deriveInspector } from "./replay/inspect-model.js";
 import { validateRun } from "./run-schema.js";
 import { clampLimits } from "./engine/patterns.js";
 import { TIME_LIMIT_MS } from "./engine/budget.js";
+import { nodeIdOf } from "./engine/spawn.js";
 
 // The library run the home page plays: the one marked "home": true in runs/index.json, else the first.
 export function pickHomeRun(runs) {
@@ -55,13 +56,13 @@ export function buildResultModel(run) {
     // The extra calls of condensing are priced with the fast model of the agent's provider.
     for (const e of events) {
       if (e.type !== "condense") continue;
-      const node = run.design.nodes.find((n) => n.id === e.agent);
+      const node = run.design.nodes.find((n) => n.id === nodeIdOf(e.agent));
       if (slotIsFree(node?.slot)) continue;
       const fast = nodeModel({ ...(node ?? {}), model: "fast" }, provider);
       cost += ((Number(e.usage?.input) || 0) * fast.inputPerMTok + (Number(e.usage?.output) || 0) * fast.outputPerMTok) / 1e6;
     }
     for (const a of perAgent) {
-      const node = run.design.nodes.find((n) => n.id === a.agent);
+      const node = run.design.nodes.find((n) => n.id === nodeIdOf(a.agent));
       // An agent that ran on a key of the free tier cost nothing, whatever the list price of its model.
       if (slotIsFree(node?.slot)) continue;
       const model = nodeModel(node, provider);
@@ -100,7 +101,7 @@ export function buildStatistics(run) {
     .filter((id) => inspector.agents[id].startT !== null)
     .map((id) => {
       const a = inspector.agents[id];
-      const node = run?.design?.nodes?.find((n) => n.id === id);
+      const node = run?.design?.nodes?.find((n) => n.id === nodeIdOf(id));
       const tokens = base.perAgent.find((x) => x.agent === id);
       return {
         limits: node?.limits && Object.keys(node.limits).length > 0 ? node.limits : null,

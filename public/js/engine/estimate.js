@@ -7,7 +7,7 @@ export const TOKENS_PER_ACTIVATION = 3000;
 
 import { mayCondense } from "./condense.js";
 
-const CAPPED = ["router", "voting", "handoff", "supervisor"];
+const CAPPED = ["router", "voting", "handoff", "supervisor", "mapreduce", "planexec"];
 
 // Condensing calls: one for each activation of an agent that condenses and receives material (debaters once a round, a supervisor's
 // worker once for each instruction it may get). A router, voting or handoff run and an evaluator loop have none.
@@ -18,7 +18,7 @@ function condensesOf(design) {
     if (n.condense !== true || !mayCondense(n.agent, design.pattern)) continue;
     if (design.pattern === "debate") calls += n.agent === "debater" ? rounds : 1;
     else if (design.pattern === "supervisor") calls += 2;
-    else if (design.pattern === "sequential" || design.pattern === "parallel") calls += 1;
+    else if (design.pattern === "sequential" || design.pattern === "parallel" || design.pattern === "mapreduce") calls += 1;
   }
   return calls;
 }
@@ -42,6 +42,10 @@ function runsOf(design, limits) {
   if (design.pattern === "router") return Math.min(maxSteps, 3);
   // Every voter once, the tally once (a second time after one repair).
   if (design.pattern === "voting") return Math.min(maxSteps, nodes.length + 1);
+  // The splitter (once, a second time after one repair), up to six workers and the reducer.
+  if (design.pattern === "mapreduce") return Math.min(maxSteps, 9);
+  // The planner (once, a second time after one repair) and up to six steps.
+  if (design.pattern === "planexec") return Math.min(maxSteps, 8);
   if (design.pattern === "handoff") return Math.min(maxSteps, 2 * nodes.length);
   if (design.pattern === "supervisor") {
     const workers = nodes.filter((n) => n.agent !== "supervisor").length;

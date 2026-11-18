@@ -66,7 +66,7 @@ const GENERAL = ["sequential", "parallel", "supervisor", "handoff", "router", "v
 export const CRITERIA_MAX = 1000;
 
 export const AGENT_TYPES = {
-  planner: { label: "Planner", patterns: GENERAL, searchDefault: false, free: false },
+  planner: { label: "Planner", patterns: [...GENERAL, "planexec"], searchDefault: false, free: false },
   researcher: { label: "Researcher", patterns: GENERAL, searchDefault: true, free: false },
   critic: { label: "Critic", patterns: GENERAL, searchDefault: false, free: false },
   writer: { label: "Writer", patterns: [...GENERAL, "evaluator"], searchDefault: false, free: false },
@@ -77,6 +77,10 @@ export const AGENT_TYPES = {
   evaluator: { label: "Evaluator", patterns: ["evaluator"], searchDefault: false, free: false },
   router: { label: "Router", patterns: ["router"], searchDefault: false, free: false },
   tally: { label: "Tally", patterns: ["voting"], searchDefault: false, free: false },
+  splitter: { label: "Splitter", patterns: ["mapreduce"], searchDefault: false, free: false },
+  worker: { label: "Worker", patterns: ["mapreduce"], searchDefault: false, free: false },
+  reducer: { label: "Reducer", patterns: ["mapreduce"], searchDefault: false, free: false },
+  executor: { label: "Executor", patterns: ["planexec"], searchDefault: false, free: false },
   free: { label: "Free agent", patterns: GENERAL, searchDefault: false, free: true },
 };
 

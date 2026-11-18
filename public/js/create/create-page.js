@@ -84,6 +84,10 @@ function patternIcon(doc, pattern) {
     router: () => [line(10, 20, 28, 20), line(28, 20, 52, 20, { width: 3 }), line(28, 20, 50, 7, { dashed: true }), line(28, 20, 50, 33, { dashed: true }), dot(10, 20), dot(55, 20), ring(55, 5), ring(55, 35)],
     // Three voters (the last one differs, dashed and dimmed) run into one filled dot: the tally.
     voting: () => [line(14, 6, 48, 20), line(14, 20, 48, 20), line(14, 34, 48, 20, { dashed: true }), voter(9, 6), voter(9, 20), voter(9, 34, true), dot(54, 20)],
+    // One dot fans out into three and they merge back into one dot.
+    mapreduce: () => [line(8, 20, 30, 6), line(8, 20, 30, 20), line(8, 20, 30, 34), line(34, 6, 56, 20), line(34, 20, 56, 20), line(34, 34, 56, 20), dot(8, 20), dot(32, 6), dot(32, 20), dot(32, 34), dot(56, 20)],
+    // A short list (the plan) and a row of steps, the first one filled.
+    planexec: () => [line(6, 6, 40, 6), line(6, 12, 30, 12), line(14, 30, 32, 30), line(40, 30, 50, 30), dot(10, 30), ring(36, 30), ring(54, 30)],
     evaluator: () => [line(12, 14, 52, 14), line(52, 14, 52, 30), line(52, 30, 12, 30), line(12, 30, 12, 14), dot(12, 14), dot(52, 14)],
   };
   shapes[pattern]();
@@ -460,7 +464,7 @@ export function renderCreate(ctx) {
       carryLimits ? carryLimits.element : "",
       draft.retry ? carryOnButton : "",
       h(doc, "div", { class: "field wide" }, h(doc, "label", { for: "cr-task" }, t("create.taskLabel"), help("create-task", t("create.taskLabel"))), taskInput, counter),
-      h(doc, "h3", {}, t("create.patternHeading"), help("create-pattern", t("create.patternHeading")), ...(draft.pattern === "handoff" ? [help("create-handoff", t("pattern.handoff"))] : []), ...(draft.pattern === "router" ? [help("create-router", t("pattern.router"))] : []), ...(draft.pattern === "voting" ? [help("create-voting", t("pattern.voting"))] : [])),
+      h(doc, "h3", {}, t("create.patternHeading"), help("create-pattern", t("create.patternHeading")), ...(draft.pattern === "handoff" ? [help("create-handoff", t("pattern.handoff"))] : []), ...(draft.pattern === "router" ? [help("create-router", t("pattern.router"))] : []), ...(draft.pattern === "voting" ? [help("create-voting", t("pattern.voting"))] : []), ...(draft.pattern === "mapreduce" ? [help("create-mapreduce", t("pattern.mapreduce"))] : []), ...(draft.pattern === "planexec" ? [help("create-planexec", t("pattern.planexec"))] : [])),
       h(doc, "p", { class: "hint" }, t("create.patternHelp")),
       patternGroup,
       patternNotice,

@@ -8,6 +8,7 @@ import { redact } from "./anthropic.js";
 import { limitMessage } from "./harness.js";
 import { clampLimits } from "./patterns.js";
 import { createPassOn } from "./handoff.js";
+import { createSpawner, nodeIdOf, MULTI_RUN } from "./spawn.js";
 import { createNotebook } from "./notebook.js";
 import { ApprovalPause } from "./approval.js";
 import { clampHandoffChars } from "./catalog.js";
@@ -19,6 +20,8 @@ import * as evaluator from "./runners/evaluator.js";
 import * as handoff from "./runners/handoff.js";
 import * as router from "./runners/router.js";
 import * as voting from "./runners/voting.js";
+import * as mapreduce from "./runners/mapreduce.js";
+import * as planexec from "./runners/planexec.js";
 
 export const RUNNERS = {
   sequential: sequential.run,
@@ -29,6 +32,8 @@ export const RUNNERS = {
   handoff: handoff.run,
   router: router.run,
   voting: voting.run,
+  mapreduce: mapreduce.run,
+  planexec: planexec.run,
 };
 
 // callFor(node) gives the provider call of an agent that names its own key slot; without it every agent uses `call`.
@@ -60,12 +65,13 @@ export async function runDesign({ design, task, limits, language = "en", call, c
 
   // The shared notebook, only when the run has it switched on.
   const notebook = design.memory?.notebook === true ? createNotebook({ emit: send }) : null;
-  const agents = new Map(
-    design.nodes.map((node) => [
-      node.id,
-      createAgent({ node, design, call: callFor?.(node) ?? call, emit: send, budget, signal: control.signal, language, provider: nodeProvider(node, provider), maxOutputTokens, retries, retryDelaySec, freeTier, repeatStop, fallback, askFirst: node.approve === true && !approved.includes(node.id), notebook, task, cached: resume.filter((r) => r.agent === node.id) }),
-    ]),
-  );
+  // One approval of any run of a node covers all runs of it ("worker#1" approved means "worker" is approved).
+  const isApproved = (id) => approved.some((a) => nodeIdOf(a) === nodeIdOf(id));
+  const make = (node) =>
+    createAgent({ node, design, call: callFor?.(node) ?? call, emit: send, budget, signal: control.signal, language, provider: nodeProvider(node, provider), maxOutputTokens, retries, retryDelaySec, freeTier, repeatStop, fallback, askFirst: node.approve === true && !isApproved(node.id), notebook, task, cached: resume.filter((r) => r.agent === node.id) });
+  // The node that runs once for every part or step has no agent up front; the runner makes one for each run (spawn).
+  const agents = new Map(design.nodes.filter((node) => node.agent !== MULTI_RUN[design.pattern]).map((node) => [node.id, make(node)]));
+  const spawn = createSpawner({ design, make });
   const passOn = createPassOn({ chars: clampHandoffChars(handoffChars), emit: send });
   if (resume.length === 0) send({ type: "run_start", task, pattern: design.pattern, design });
 
@@ -73,7 +79,7 @@ export async function runDesign({ design, task, limits, language = "en", call, c
   let finalText = "";
   let reason;
   try {
-    finalText = await RUNNERS[design.pattern]({ design, task, agents, emit: send, budget, signal: control.signal, passOn });
+    finalText = await RUNNERS[design.pattern]({ design, task, agents, spawn, emit: send, budget, signal: control.signal, passOn });
   } catch (error) {
     control.abort();
     if (error instanceof ApprovalPause) {

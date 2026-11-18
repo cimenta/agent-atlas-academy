@@ -69,6 +69,23 @@ export function createMockCall({ delayMs = 0, evaluatorAcceptsAt = 2 } = {}) {
       const ids = [...(typeof firstUserText(messages) === "string" ? firstUserText(messages) : "").matchAll(/^--- (\S+) ---$/gm)].map((m) => m[1]);
       return reply([{ type: "text", text: JSON.stringify({ answer: "Final answer: the voters gave the same answer, and this is it.", agree: ids, note: "" }) }]);
     }
+    if (role === "splitter") {
+      // The mock splitter always makes three parts.
+      return reply([{ type: "text", text: JSON.stringify({ parts: ["Part 1: collect the key facts.", "Part 2: weigh the facts against each other.", "Part 3: note what is still open."] }) }]);
+    }
+    if (role === "planner" && String(body?.system ?? "").includes('"steps"')) {
+      // The mock planner always makes a plan of three steps.
+      return reply([{ type: "text", text: JSON.stringify({ steps: ["Collect the key facts.", "Weigh the facts.", "Write the final answer."] }) }]);
+    }
+    if (role === "worker") {
+      const part = /Your part:\n(.*)/.exec(typeof lastInput?.content === "string" ? lastInput.content : "")?.[1] ?? "its part";
+      return reply([{ type: "text", text: `Result for "${part}": done in a few clear sentences.` }]);
+    }
+    if (role === "reducer") return reply([{ type: "text", text: "Final answer: the results of the workers were merged into one short, clear answer." }]);
+    if (role === "executor") {
+      const step = /Now do step (\d+)/.exec(typeof lastInput?.content === "string" ? lastInput.content : "")?.[1] ?? "1";
+      return reply([{ type: "text", text: `Step ${step} done: the result is short and builds on the steps before it.` }]);
+    }
     if (role === "router") {
       // The mock router always chooses the first specialist in the list, so a mock run ends the same way each time.
       const first = [...messages].reverse().find((m) => m.role === "user");

@@ -19,4 +19,6 @@ In **self-critique** an agent is asked to review a piece of work against criteri
 - A critique asked for in vague terms ("is this good?") tends to approve everything.
 - Each review is an extra call that costs time and tokens.
 
+In Agent Atlas you can try it in Create. In the evaluator loop, switch on **The Writer judges its own draft**. The evaluator goes away, and the Writer writes a draft, then answers a second time as its own judge against your criteria, and rewrites if it is not satisfied. It is cheaper than a separate evaluator, but the replay is a good place to see how often a model accepts its own text. Switch it off to bring the evaluator back and compare the two runs.
+
 Better results usually come from clear criteria, a separate reviewer role and, when you can, checking facts against a source instead of asking opinion alone.

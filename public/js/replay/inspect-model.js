@@ -2,6 +2,8 @@ import { agentLabel, numberRepeatedLabels } from "../engine/labels.js";
 import { AGENT_TYPES } from "../engine/catalog.js";
 import { warningHelp } from "../help-ids.js";
 import { parseVotingReply } from "../engine/runners/voting.js";
+import { parseStepsReply } from "../engine/runners/planexec.js";
+import { MULTI_RUN } from "../engine/spawn.js";
 // Turns a run's events into what the inspector shows: one entry per agent, with its steps
 // (model calls, tool calls, handoffs), the messages of each model round and its output.
 // Pure: no DOM.
@@ -275,9 +277,68 @@ export function evaluatorProgress(events, cursor) {
   if (design?.pattern !== "evaluator" || !Number.isInteger(design.rounds)) return null;
   const writers = new Set(design.nodes.filter((n) => n.agent === "writer").map((n) => n.id));
   const seen = events.slice(0, cursor).filter((e) => e.type === "agent_start");
-  const drafts = seen.filter((e) => writers.has(e.agent)).length;
+  // With self-critique the writer judges too: its second call of a round is marked `judging`.
+  const drafts = seen.filter((e) => writers.has(e.agent) && e.judging !== true).length;
   const last = seen.at(-1);
-  return { round: Math.min(design.rounds, Math.max(1, drafts)), rounds: design.rounds, phase: last && !writers.has(last.agent) ? "judging" : "writing" };
+  return { round: Math.min(design.rounds, Math.max(1, drafts)), rounds: design.rounds, phase: last && (!writers.has(last.agent) || last.judging === true) ? "judging" : "writing" };
+}
+
+// ---- map-reduce and plan-and-execute: a node that runs once for every part or step (agents "worker#1", "executor#2") ----
+const runStatus = (seen, id) => (seen.some((e) => e.type === "agent_output" && e.agent === id) ? "done" : seen.some((e) => e.type === "agent_start" && e.agent === id) ? "working" : "waiting");
+
+// The parts a splitter made, up to the cursor: [{ n, id, text, status }] with the status of the worker that has the part
+// (waiting, working, done). Empty for other patterns and before the split.
+export function partsOf(events, cursor = events.length) {
+  const design = events.find((e) => e.type === "run_start")?.design;
+  if (design?.pattern !== "mapreduce") return [];
+  const splitter = design.nodes.find((n) => n.agent === "splitter");
+  const worker = design.nodes.find((n) => n.agent === "worker");
+  const seen = events.slice(0, cursor);
+  return seen
+    .filter((e) => e.type === "handoff" && e.from === splitter?.id && typeof e.to === "string" && e.to.startsWith(`${worker?.id}#`))
+    .map((e, i) => ({ n: i + 1, id: e.to, text: typeof e.note === "string" ? e.note : "", status: runStatus(seen, e.to) }));
+}
+
+// The plan a planner made, up to the cursor: [{ n, id, text, status }] with the status of the step (waiting, working, done).
+// Empty for other patterns, before the plan and when the planner's reply is not a valid plan.
+export function planOf(events, cursor = events.length) {
+  const design = events.find((e) => e.type === "run_start")?.design;
+  if (design?.pattern !== "planexec") return [];
+  const planner = design.nodes.find((n) => n.agent === "planner");
+  const executor = design.nodes.find((n) => n.agent === "executor");
+  const seen = events.slice(0, cursor);
+  for (const event of [...seen].reverse()) {
+    if (event.type !== "agent_output" || event.agent !== planner?.id) continue;
+    const steps = parseStepsReply(event.text);
+    if (steps) return steps.map((text, i) => ({ n: i + 1, id: `${executor.id}#${i + 1}`, text, status: runStatus(seen, `${executor.id}#${i + 1}`) }));
+  }
+  return [];
+}
+
+// How many runs a node has in a record: { total (parts or steps), started, done }. All zero for a node that runs once.
+export function runsOfNode(events, nodeId, cursor = events.length) {
+  const design = events.find((e) => e.type === "run_start")?.design;
+  const node = design?.nodes?.find((n) => n.id === nodeId);
+  if (!node || node.agent !== MULTI_RUN[design.pattern]) return { total: 0, started: 0, done: 0 };
+  const seen = events.slice(0, cursor);
+  const mine = (e) => typeof e.agent === "string" && e.agent.startsWith(`${nodeId}#`);
+  const started = new Set(seen.filter((e) => e.type === "agent_start" && mine(e)).map((e) => e.agent)).size;
+  const done = new Set(seen.filter((e) => e.type === "agent_output" && mine(e)).map((e) => e.agent)).size;
+  const total = (design.pattern === "mapreduce" ? partsOf(events, cursor) : planOf(events, cursor)).length;
+  return { total: Math.max(total, started), started, done };
+}
+
+// How a map-reduce or plan-and-execute run ended: { kind, result: "finished" | "stopped", total, done } (parts or steps).
+// Null for other patterns, for failed runs and for runs with no end yet.
+export function dynamicEnd(events) {
+  const design = events.find((e) => e.type === "run_start")?.design;
+  const done = events.find((e) => e.type === "done");
+  if ((design?.pattern !== "mapreduce" && design?.pattern !== "planexec") || !done) return null;
+  const node = design.nodes.find((n) => n.agent === MULTI_RUN[design.pattern]);
+  const runs = runsOfNode(events, node.id);
+  if (done.outcome === "finished") return { kind: design.pattern, result: "finished", total: runs.total, done: runs.done };
+  if (done.outcome === "stopped_limit") return { kind: design.pattern, result: "stopped", total: runs.total, done: runs.done };
+  return null;
 }
 
 // How an evaluator loop ended, from its loop_end event: { result, round, judged, rounds }. Null when the run has no such
@@ -286,7 +347,8 @@ export function loopOutcome(events) {
   const end = events.find((e) => e.type === "loop_end");
   if (!end) return null;
   const rounds = events.find((e) => e.type === "run_start")?.design?.rounds;
-  return { result: end.result, round: end.round, judged: end.judged === true, rounds: Number.isInteger(rounds) ? rounds : end.round };
+  const self = events.find((e) => e.type === "run_start")?.design?.selfCritique === true;
+  return { result: end.result, round: end.round, judged: end.judged === true, rounds: Number.isInteger(rounds) ? rounds : end.round, ...(self ? { self } : {}) };
 }
 
 // Where a handoff run stands at the cursor: who holds control (the agent that started most recently), how many handoffs

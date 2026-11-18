@@ -29,10 +29,10 @@ const debate = () => ({
   rounds: 2,
 });
 
-test("the catalog lists eight patterns, three models and the agent types", () => {
-  assert.deepEqual(PATTERNS, ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff", "router", "voting"]);
+test("the catalog lists ten patterns, three models and the agent types", () => {
+  assert.deepEqual(PATTERNS, ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff", "router", "voting", "mapreduce", "planexec"]);
   assert.deepEqual(MODELS.map((m) => m.key), ["fast", "balanced", "strong"]);
-  for (const key of ["planner", "researcher", "critic", "writer", "supervisor", "combiner", "debater", "judge", "evaluator", "router", "tally", "free"]) {
+  for (const key of ["planner", "researcher", "critic", "writer", "supervisor", "combiner", "debater", "judge", "evaluator", "router", "tally", "splitter", "worker", "reducer", "executor", "free"]) {
     assert.ok(AGENT_TYPES[key], key);
   }
 });

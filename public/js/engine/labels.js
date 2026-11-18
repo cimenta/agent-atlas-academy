@@ -4,6 +4,9 @@ const CAN_BE_NAMED = new Set(["free", "debater"]);
 const givenName = (node) => (CAN_BE_NAMED.has(node.agent) && typeof node.name === "string" ? node.name.trim() : "");
 
 export function agentLabel(node, design, baseLabel) {
+  // A run of a node that runs several times (id "worker#2") is labelled like its node plus its number.
+  const hash = typeof node.id === "string" ? node.id.indexOf("#") : -1;
+  if (hash > 0) return `${agentLabel({ ...node, id: node.id.slice(0, hash) }, design, baseLabel)} ${node.id.slice(hash + 1)}`;
   if (givenName(node)) return givenName(node);
   const same = Array.isArray(design?.nodes) ? design.nodes.filter((n) => n.agent === node.agent && !givenName(n)) : [];
   if (same.length < 2) return baseLabel;

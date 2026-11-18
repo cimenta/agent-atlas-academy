@@ -99,6 +99,19 @@ export function arrowsOf(design, pos) {
 // In a debate the debaters answer each other in turn: an arrow from each debater to the next, and a
 // dashed one from the last back to the first for the next round (when there is more than one round).
 export function turnArrows(design, pos) {
+  // A box that runs again (the executor, once for each step) or judges its own draft (self-critique): a dashed arc under the
+  // box that leaves it and comes back. Its key is the one of the handoff from one run of the node to the next.
+  const loopOn = design.pattern === "planexec" ? "executor" : design.pattern === "evaluator" && design.selfCritique === true ? "writer" : null;
+  if (loopOn) {
+    const node = design.nodes.find((n) => n.agent === loopOn);
+    if (!node || !pos.has(node.id)) return [];
+    const p = pos.get(node.id);
+    const left = p.x + BOX_W * 0.3;
+    const right = p.x + BOX_W * 0.7;
+    const bottom = p.y + BOX_H;
+    const d = `M ${right} ${bottom} C ${right + 10} ${bottom + 46} ${left - 10} ${bottom + 46} ${left} ${bottom + TOUCH}`;
+    return [{ key: `${node.id}>${node.id}`, from: node.id, to: node.id, kind: "return", d }];
+  }
   if (design.pattern === "evaluator") {
     // The feedback goes back from the evaluator to the writer: a dashed arc under both boxes. Its key is the one of the
     // handoff event from the evaluator to the writer, so it lights up in the replay when the feedback is sent.

@@ -1,3 +1,4 @@
+import { nodeIdOf } from "../engine/spawn.js";
 // Which arrows of the diagram have carried data so far in a replay, and which one carried it last.
 // Pure: no DOM. Arrow keys are "from>to" for a handoff and "turn:from>to" for the turn order of a debate.
 
@@ -15,7 +16,10 @@ export function flowState(events, cursor, design) {
   let previousDebater = null;
   applied.forEach((event, index) => {
     let key = null;
-    if (event.type === "handoff" && typeof event.from === "string" && typeof event.to === "string") key = `${event.from}>${event.to}`;
+    // The runs of a node that runs several times ("worker#2") count as the node, because the diagram draws one box for it.
+    if (event.type === "handoff" && typeof event.from === "string" && typeof event.to === "string") key = `${nodeIdOf(event.from)}>${nodeIdOf(event.to)}`;
+    // A writer that judges its own draft lights the arc of its box while it judges.
+    if (event.type === "agent_start" && event.judging === true && typeof event.agent === "string") key = `${event.agent}>${event.agent}`;
     if (event.type === "agent_start" && debaters.includes(event.agent)) {
       if (previousDebater !== null) key = `turn:${previousDebater}>${event.agent}`;
       previousDebater = event.agent;

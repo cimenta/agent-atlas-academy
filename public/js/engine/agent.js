@@ -38,7 +38,11 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
   const model = nodeModel(node, provider).id;
   // The shared notebook: what this agent may do with it (nothing unless the run has it switched on).
   const book = notebook ? notebookRole(node, design) : { on: false, read: false, write: false };
-  const system = systemPromptFor(node, { language, pattern: design?.pattern, memory: book.on ? book : undefined });
+  const memory = book.on ? book : undefined;
+  const ownSystem = systemPromptFor(node, { language, pattern: design?.pattern, memory });
+  // Self-critique: the same agent is asked to judge its own draft (run(input, { as: "evaluator" })), with the evaluator role.
+  const judgeSystem = systemPromptFor({ ...node, agent: "evaluator" }, { language, pattern: design?.pattern, memory });
+  let system = ownSystem;
   const label = agentLabel(node, design, AGENT_TYPES[node.agent]?.label ?? node.agent);
   const limitValue = { agent_steps: node.limits?.maxSteps, agent_tokens: node.limits?.maxTokens, agent_searches: node.limits?.maxSearches };
   const stopRun = (reason) => new LimitError(`agent_${reason}`, { agent: node.id, label, value: limitValue[`agent_${reason}`] });
@@ -170,7 +174,9 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
 
   return {
     id: node.id,
-    async run(plainInput) {
+    async run(plainInput, { as } = {}) {
+      const judging = as === "evaluator";
+      system = judging ? judgeSystem : ownSystem;
       // An agent that reads gets the notes written so far at the end of its input.
       const inputFor = (mode, base = plainInput) => (book.read ? `${base}${notebook.forReader({ mode })}` : base);
       // A recorded condensing with no answer after it: the agent failed after condensing, so it is not called again.
@@ -206,6 +212,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
         model,
         tools: toolsFor(node, budget).map((tool) => tool.name),
         system,
+        ...(judging ? { judging: true } : {}),
       });
       const split = condenses ? splitInput(plainInput, task) : null;
       const base = pendingCondense ? replayCondense(plainInput, pendingCondense) : split ? await condense(split, plainInput) : plainInput;
@@ -217,7 +224,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
       // The agent reached a limit of its own. Stop: the run ends. Pass: what it wrote goes on, and the run carries on.
       const endAtLimit = (reason) => {
         // In a handoff, router or voting run (the tally) the reply is the decision, so a cut-off reply cannot be passed on: a limit of the agent always stops the run.
-        if (onLimit === "stop" || design?.pattern === "handoff" || node.agent === "router" || node.agent === "tally") throw stopRun(reason);
+        if (onLimit === "stop" || design?.pattern === "handoff" || node.agent === "router" || node.agent === "tally" || node.agent === "splitter" || (node.agent === "planner" && design?.pattern === "planexec")) throw stopRun(reason);
         const written = texts.filter(Boolean).join("\n").trim();
         if (written === "") throw new Error(`The agent ${label} reached its own limit (${reason}) before it wrote anything. Raise the limit of this agent in the editor, and run again.`);
         emit({ type: "warning", agent: node.id, limit: `agent_${reason}`, message: agentPassMessage(`agent_${reason}`, { label, value: limitValue[`agent_${reason}`] }) });

@@ -6,7 +6,7 @@ import { cleanNodeLimits } from "../engine/agent-limits.js";
 import { NOTEBOOK_CHOICES, mayWrite } from "../engine/notebook.js";
 import { mayCondense } from "../engine/condense.js";
 
-const ONCE_ONLY = new Set(["supervisor", "combiner", "judge", "evaluator", "router", "tally"]);
+const ONCE_ONLY = new Set(["supervisor", "combiner", "judge", "evaluator", "router", "tally", "splitter", "worker", "reducer", "executor"]);
 const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve", "notebook", "condense"];
 const DEFAULT_ROUNDS = 2;
 const EVALUATOR_ROUNDS = 3;
@@ -29,6 +29,7 @@ export function createEditor(initialPattern) {
   let rounds = roundsFor(pattern);
   let criteria = "";
   let notebook = false; // the shared notebook of the run is switched on
+  let selfCritique = false; // evaluator loop: the writer judges its own draft (there is no evaluator)
   let start; // handoff: the id of the agent that begins
   let positions = {};
   // The default model: { slot, model }. A new agent starts with it, and so does every agent that has not been
@@ -40,7 +41,7 @@ export function createEditor(initialPattern) {
   const choicesFor = (node) => (mayWrite(node.agent, pattern) ? [...NOTEBOOK_CHOICES] : ["none", "read"]);
   const defaultChoice = (node) => (mayWrite(node.agent, pattern) ? "both" : "read");
   // An agent that can be added only once. In an evaluator loop that is also the writer.
-  const onceOnly = (agent) => ONCE_ONLY.has(agent) || (pattern === "evaluator" && agent === "writer");
+  const onceOnly = (agent) => ONCE_ONLY.has(agent) || (pattern === "evaluator" && agent === "writer") || (pattern === "planexec" && agent === "planner");
   const hasEdge = (from, to) => edges.some((e) => e.from === from && e.to === to);
 
   function nextId(agent) {
@@ -71,8 +72,27 @@ export function createEditor(initialPattern) {
       if (pattern === "evaluator") {
         copy.rounds = rounds;
         copy.criteria = criteria;
+        if (selfCritique) copy.selfCritique = true;
       }
       return copy;
+    },
+
+    // Evaluator loop: the writer judges its own draft. On, the evaluator and its arrow go away; off, they come back.
+    selfCritique() {
+      return selfCritique;
+    },
+    setSelfCritique(on) {
+      if (pattern !== "evaluator") return;
+      selfCritique = on === true;
+      if (selfCritique) {
+        nodes = nodes.filter((n) => n.agent !== "evaluator");
+        edges = [];
+        for (const id of Object.keys(positions)) if (!find(id)) delete positions[id];
+      } else if (!nodes.some((n) => n.agent === "evaluator")) {
+        const added = this.addNode("evaluator");
+        const writer = nodes.find((n) => n.agent === "writer");
+        if (added.ok && writer) edges.push({ from: writer.id, to: added.id });
+      }
     },
 
     addNode(agent, overrides = {}) {
@@ -80,6 +100,7 @@ export function createEditor(initialPattern) {
       if (!type) return { ok: false, code: "node.agent" };
       if (!type.patterns.includes(pattern)) return { ok: false, code: "node.agentNotAllowed" };
       if (nodes.length >= NODE_MAX) return { ok: false, code: "node.count" };
+      if (selfCritique && agent === "evaluator") return { ok: false, code: "node.agentNotAllowed" };
       if (onceOnly(agent) && nodes.some((n) => n.agent === agent)) return { ok: false, code: "node.duplicate" };
       // A voting run has the tally and at most five voters.
       if (pattern === "voting" && nodes.length >= 6) return { ok: false, code: "vote.voters" };
@@ -211,10 +232,15 @@ export function createEditor(initialPattern) {
         if (!(a.agent === "router" && b.agent !== "router")) code = "rout.edges";
       } else if (pattern === "voting") {
         if (!(b.agent === "tally" && a.agent !== "tally")) code = "vote.edges";
+      } else if (pattern === "mapreduce") {
+        // Only the two arrows of the line: splitter to worker, worker to reducer.
+        if (!((a.agent === "splitter" && b.agent === "worker") || (a.agent === "worker" && b.agent === "reducer"))) code = "map.edges";
+      } else if (pattern === "planexec") {
+        if (!(a.agent === "planner" && b.agent === "executor")) code = "plan.edges";
       } else if (pattern === "handoff") {
         // Any two different agents may be joined, in either direction: an arrow means "may hand over to".
       } else if (pattern === "evaluator") {
-        if (!(a.agent === "writer" && b.agent === "evaluator") || edges.length > 0) code = "eval.edges";
+        if (!(a.agent === "writer" && b.agent === "evaluator") || edges.length > 0 || selfCritique) code = "eval.edges";
       } else if (!(a.agent === "debater" && b.agent === "judge")) {
         code = "deb.edges";
       }
@@ -278,8 +304,19 @@ export function createEditor(initialPattern) {
       criteria = nextPattern === "evaluator" ? example : "";
       positions = {};
       start = undefined;
+      selfCritique = false;
       if (nextPattern === "router") this.addNode("router");
       if (nextPattern === "voting") this.addNode("tally");
+      // These patterns always have the same agents and arrows, so they start with them in place.
+      if (nextPattern === "mapreduce") {
+        for (const agent of ["splitter", "worker", "reducer"]) this.addNode(agent);
+        edges.push({ from: "splitter", to: "worker" }, { from: "worker", to: "reducer" });
+      }
+      if (nextPattern === "planexec") {
+        this.addNode("planner");
+        this.addNode("executor");
+        edges.push({ from: "planner", to: "executor" });
+      }
       if (nextPattern === "evaluator") {
         this.addNode("writer");
         this.addNode("evaluator");
@@ -296,7 +333,8 @@ export function layoutDesign(design, { orientation = "vertical" } = {}) {
   const connected = new Set(edges.flatMap((e) => [e.from, e.to]));
   const spots = new Map(); // id -> { rank, offset }
 
-  if (pattern === "sequential") {
+  // Map-reduce and plan-and-execute are a line of boxes, laid out like a chain.
+  if (pattern === "sequential" || pattern === "mapreduce" || pattern === "planexec") {
     const incoming = new Map(nodes.map((n) => [n.id, 0]));
     for (const e of edges) incoming.set(e.to, (incoming.get(e.to) ?? 0) + 1);
     let level = nodes.filter((n) => connected.has(n.id) && incoming.get(n.id) === 0).map((n) => n.id);

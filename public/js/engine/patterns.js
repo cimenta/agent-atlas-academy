@@ -5,7 +5,7 @@ import { validNodeLimits, ON_LIMIT } from "./agent-limits.js";
 import { NOTEBOOK_CHOICES } from "./notebook.js";
 import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, LIMIT_MAX, clampCostCap, CRITERIA_MAX, NODE_MAX, NAME_MAX, INSTRUCTIONS_MAX } from "./catalog.js";
 
-export const PATTERNS = ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff", "router", "voting"];
+export const PATTERNS = ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff", "router", "voting", "mapreduce", "planexec"];
 
 const ID = /^[a-z0-9-]{1,32}$/;
 const MODEL_KEYS = new Set(MODELS.map((m) => m.key));
@@ -31,6 +31,9 @@ export function validateDesign(design) {
     add("edge.count");
     return finish();
   }
+
+  // Self-critique is a switch of the evaluator loop alone: true or absent, nothing else.
+  if (design.selfCritique !== undefined && (design.selfCritique !== true || pattern !== "evaluator")) add("eval.self");
 
   // Memory management: the shared notebook switch of the run.
   if (design.memory !== undefined && !(isObject(design.memory) && typeof design.memory.notebook === "boolean")) add("memory.notebook");
@@ -133,6 +136,16 @@ export function validateDesign(design) {
     if (tallies.length !== 1) add("vote.tally");
     if (voters.length < 3 || voters.length > 5) add("vote.voters");
     if (tallies.length === 1 && !hubEdgesOk(voters, tallies[0], true)) add("vote.edges");
+  } else if (pattern === "mapreduce") {
+    // A splitter, one worker (it runs once for every part) and a reducer, in a line.
+    const shape = ["splitter", "worker", "reducer"].every((a) => byAgent(a).length === 1) && goodNodes.length === 3;
+    if (!shape) add("map.nodes");
+    else if (!lineOk(goodEdges, byAgent("splitter")[0].id, byAgent("worker")[0].id, byAgent("reducer")[0].id)) add("map.edges");
+  } else if (pattern === "planexec") {
+    // A planner and one executor (it runs once for every step) with one arrow between them.
+    const shape = byAgent("planner").length === 1 && byAgent("executor").length === 1 && goodNodes.length === 2;
+    if (!shape) add("plan.nodes");
+    else if (!lineOk(goodEdges, byAgent("planner")[0].id, byAgent("executor")[0].id)) add("plan.edges");
   } else if (pattern === "handoff") {
     // Arrows mean "may hand over to". The starting agent is named in design.start and must be able to hand over.
     if (goodNodes.length < 2) add("hand.nodes");
@@ -141,11 +154,16 @@ export function validateDesign(design) {
   } else if (pattern === "evaluator") {
     const writers = byAgent("writer");
     const evaluators = byAgent("evaluator");
-    if (writers.length !== 1) add("eval.writer");
-    if (evaluators.length !== 1) add("eval.evaluator");
-    if (writers.length === 1 && evaluators.length === 1) {
-      const [only] = goodEdges;
-      if (goodEdges.length !== 1 || only.from !== writers[0].id || only.to !== evaluators[0].id) add("eval.edges");
+    if (design.selfCritique === true) {
+      // Self-critique: the one writer judges its own draft, so there is no evaluator and no arrow.
+      if (goodNodes.length !== 1 || writers.length !== 1 || goodEdges.length !== 0) add("eval.self");
+    } else {
+      if (writers.length !== 1) add("eval.writer");
+      if (evaluators.length !== 1) add("eval.evaluator");
+      if (writers.length === 1 && evaluators.length === 1) {
+        const [only] = goodEdges;
+        if (goodEdges.length !== 1 || only.from !== writers[0].id || only.to !== evaluators[0].id) add("eval.edges");
+      }
     }
     if (!Number.isInteger(design.rounds) || design.rounds < 1 || design.rounds > 4) add("eval.rounds");
     if (typeof design.criteria !== "string" || design.criteria.length > CRITERIA_MAX) add("eval.criteria");
@@ -158,6 +176,12 @@ export function validateDesign(design) {
     if (!Number.isInteger(design.rounds) || design.rounds < 1 || design.rounds > 4) add("deb.rounds");
   }
   return finish();
+}
+
+// True when the edges are exactly the arrows of the line a > b > c ... (each once, nothing else).
+function lineOk(edges, ...ids) {
+  const wanted = ids.slice(1).map((to, i) => `${ids[i]}>${to}`);
+  return edges.length === wanted.length && wanted.every((key) => edges.some((e) => `${e.from}>${e.to}` === key));
 }
 
 // The parts of a parallel design: workers that all feed the one combiner, and an optional line

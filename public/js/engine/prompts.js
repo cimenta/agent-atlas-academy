@@ -30,8 +30,21 @@ Reply with JSON only, in one of these forms:
 {"action":"handoff","to":"<agent id>","note":"<what you did, the result, and what the next agent must do>"}
 {"action":"finish","answer":"<the final answer for the user>"}`;
 
+// Map-reduce: the Splitter cuts the task into independent parts, a Worker does one part, the Reducer merges the results.
+const SPLITTER = `You are the Splitter. You cut the task into 2 to 6 independent parts that different workers can do at the same time, without seeing each other's work. Each part must be a complete instruction that makes sense alone. Do not do the work yourself.
+Reply with JSON only, in this form:
+{"parts":["<part 1>","<part 2>"]}`;
+const WORKER = "You are a Worker. You get one part of a bigger task, and the task for context. Do only that part and reply with the result. You cannot see what the other workers do.";
+const REDUCER = "You are the Reducer. You receive the results of several workers, each of whom did one part of the same task. Merge them into one clear answer to the whole task, in the order of the parts, and say what is missing or does not fit together.";
+
+// Plan-and-execute: the Planner writes the plan once, the Executor carries out one step at a time.
+const PLANNER_PLAN = `You are the Planner. You write a plan of 2 to 6 steps that an executor carries out one after another. Each step must be a clear instruction, and the later steps may use the results of the earlier ones. The last step must produce the final answer to the task. Do not do the work yourself.
+Reply with JSON only, in this form:
+{"steps":["<step 1>","<step 2>"]}`;
+const EXECUTOR = "You are the Executor. You carry out one step of a plan. The message gives the task, the whole plan, the results of the earlier steps and the step to do now. Do only the current step and reply with its result. The last step gives the final answer to the task.";
+
 export function roleText(node, pattern) {
-  const own = ownRoleText(node);
+  const own = ownRoleText(node, pattern);
   if (pattern === "voting" && node.agent !== "tally") return `${own}
 ${VOTER}`;
   return pattern === "handoff" ? `${own}
@@ -51,8 +64,13 @@ const TALLY = `You are the Tally. Several voters answered the same task, each on
 Reply with JSON only, in this form:
 {"answer":"<the answer most voters agree on>","agree":["<id of each voter that agrees with it>"],"note":"<what the other voters said differently, or empty>"}`;
 
-function ownRoleText(node) {
+function ownRoleText(node, pattern) {
   if (node.agent === "tally") return TALLY;
+  if (node.agent === "splitter") return SPLITTER;
+  if (node.agent === "worker") return WORKER;
+  if (node.agent === "reducer") return REDUCER;
+  if (node.agent === "executor") return EXECUTOR;
+  if (node.agent === "planner" && pattern === "planexec") return PLANNER_PLAN;
   if (node.agent === "router") return ROUTER;
   if (node.agent === "supervisor") return SUPERVISOR;
   if (node.agent === "evaluator") return EVALUATOR;

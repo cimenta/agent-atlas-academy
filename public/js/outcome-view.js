@@ -36,6 +36,8 @@ export function loopNotice({ doc, t, loop }) {
     stopped: { level: "fail", icon: "■", title: "loop.stopped", body: loop.judged ? "loop.stopped.judged" : "loop.stopped.unjudged" },
   }[loop.result];
   if (!parts) return null;
+  // With self-critique there is no evaluator: the Writer judged its own draft, so the text says that.
+  if (loop.self === true) parts.body += ".self";
   return h(
     doc,
     "div",
@@ -85,6 +87,21 @@ export function votingNotice({ doc, t, end }) {
     { class: `notice outcome outcome-${parts.level}`, "data-ui": "voting-outcome", "data-voting": end.result, role: "status" },
     h(doc, "span", { class: "outcome-icon", "aria-hidden": "true" }, parts.icon),
     h(doc, "span", { class: "outcome-text" }, h(doc, "strong", {}, t(parts.title, params)), " ", t(parts.body, params), ...(end.note && end.result !== "stopped" ? [" ", h(doc, "em", { "data-ui": "voting-outcome-note" }, end.note)] : [])),
+  );
+}
+
+// The notice that says how a map-reduce or plan-and-execute run ended: finished (all parts or steps done) or stopped by a
+// limit. `end` is what dynamicEnd gives. A stopped plan keeps the text of its last finished step; a stopped map-reduce has none.
+export function dynamicNotice({ doc, t, end }) {
+  const base = end.kind === "mapreduce" ? "mapreduce" : "planexec";
+  const key = end.result === "finished" ? `${base}.finished` : end.done > 0 && base === "planexec" ? `${base}.stopped` : `${base}.stoppedEmpty`;
+  const params = { n: end.total, done: end.done };
+  return h(
+    doc,
+    "div",
+    { class: `notice outcome outcome-${end.result === "finished" ? "ok" : "fail"}`, "data-ui": "dynamic-outcome", "data-dynamic": `${end.kind}-${end.result}`, role: "status" },
+    h(doc, "span", { class: "outcome-icon", "aria-hidden": "true" }, end.result === "finished" ? "✓" : "■"),
+    h(doc, "span", { class: "outcome-text" }, h(doc, "strong", {}, t(key, params)), " ", t(`${key}.body`, params)),
   );
 }
 

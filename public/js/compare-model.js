@@ -1,6 +1,8 @@
 // Comparing recorded runs: what is different between them (design, limits, task, ...) and what that did (time, cost, tokens, ...).
 // Everything is read from the recordings, so old ones compare too; a figure a recording does not hold is null.
 import { runMetrics } from "./replay/context-model.js";
+import { runsOfNode } from "./replay/inspect-model.js";
+import { MULTI_RUN } from "./engine/spawn.js";
 
 export const MAX_COMPARE = 4;
 export const MAX_SIDE = 3;
@@ -42,6 +44,8 @@ export function differences(runs) {
     add(`search:${id}`, "search", nodes.map((n) => n.search === true), id);
     add(`notebookChoice:${id}`, "notebookChoice", list.map((r, i) => (notebookOn(r) ? nodes[i].notebook ?? "both" : null)), id);
     add(`condense:${id}`, "condense", nodes.map((n) => n.condense === true), id);
+    // A node that runs once for every part or step: how many runs it had (they differ when the splitter or the planner chose otherwise).
+    if (nodes.some((n, i) => n.agent === MULTI_RUN[patternOf(list[i])])) add(`runs:${id}`, "runs", list.map((r) => runsOfNode(Array.isArray(r?.events) ? r.events : [], id).total), id);
     for (const key of AGENT_LIMIT_KEYS) add(`agentLimit:${id}:${key}`, "agentLimit", nodes.map((n) => finite(n.limits?.[key])), id);
   }
   for (const key of LIMIT_KEYS) add(`limit:${key}`, "limit", list.map((r) => finite(r?.limits?.[key])));

@@ -4,7 +4,7 @@ import { h } from "../dom.js";
 import { helpIcon } from "../help-popup.js";
 import { validateRun } from "../run-schema.js";
 import { createPlayer } from "./player.js";
-import { debateProgress, deriveInspector, designLabel, evaluatorProgress, handoffOutcome, handoffProgress, handoffSender, loopOutcome, routerChoice, routerEnd, votingEnd, votingTally } from "./inspect-model.js";
+import { debateProgress, deriveInspector, designLabel, evaluatorProgress, handoffOutcome, handoffProgress, handoffSender, loopOutcome, routerChoice, routerEnd, votingEnd, votingTally, partsOf, planOf, runsOfNode, dynamicEnd } from "./inspect-model.js";
 import { createViewer } from "./viewer.js";
 import { markText, searchBar } from "../text-search.js";
 import { definitionFromRun } from "../create/definition.js";
@@ -16,6 +16,8 @@ import { notebookOf } from "./notebook-model.js";
 import { notebookPanel } from "./notebook-view.js";
 import { condensesOf } from "./condense-model.js";
 import { condensePanel } from "./condense-view.js";
+import { dynamicPanel } from "./dynamic-view.js";
+import { MULTI_RUN, nodeIdOf } from "../engine/spawn.js";
 import { contextView } from "./context-view.js";
 import { paintModelTag } from "../provider-colors.js";
 import { createAboutPanel } from "./about.js";
@@ -25,7 +27,7 @@ import { limitsChoice } from "./limits-choice.js";
 import { canSubmit, submitRun } from "../submit-run.js";
 import { runForExport } from "../run-export.js";
 import { createReplayDiagram, ROUND_MARK } from "./diagram.js";
-import { outcomeNotice, loopNotice, handoffNotice, handoffPathView, routerNotice, votingNotice } from "../outcome-view.js";
+import { outcomeNotice, loopNotice, handoffNotice, handoffPathView, routerNotice, votingNotice, dynamicNotice } from "../outcome-view.js";
 import { buildResultModel } from "../play-model.js";
 import { clearActivePlayer, setActivePlayer } from "../shortcuts.js";
 import { pickNeighbour } from "./spatial.js";
@@ -170,6 +172,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   const notebookHost = h(doc, "div", { class: "notebook-host", "data-ui": "notebook-host" });
   // What was shortened before an agent read it (condensing), and which full texts are open.
   const condenseHost = h(doc, "div", { class: "condense-host", "data-ui": "condense-host" });
+  const dynamicHost = h(doc, "div", { class: "dynamic-host", "data-ui": "dynamic-host" });
   const openCondense = new Set();
   const chips = h(doc, "div", { class: "chips", "data-ui": "agent-cards", role: "list", "aria-label": t("player.agents") });
   const tabButtons = ["steps", "messages", "output", "context"].map((name) => {
@@ -234,6 +237,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     ),
     aboutPanel ? aboutPanel.element : "",
     banners,
+    dynamicHost,
     notebookHost,
     condenseHost,
     // Side layout: the buttons form a narrow column to the right of the diagram, slider and status.
@@ -310,7 +314,9 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
               }
             : null,
           onSelect: (id) => {
-            Object.assign(ui, { agent: id, follow: false, step: null, round: null });
+            // The box of a node that runs once for every part or step shows its first run.
+            const first = state.order.find((x) => x.startsWith(`${id}#`));
+            Object.assign(ui, { agent: first ?? id, follow: false, step: null, round: null });
             render();
           },
         });
@@ -334,6 +340,22 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
         else marks.set(node.id, voted.agree.includes(node.id) ? { text: t("player.voteAgrees") } : { text: t("player.voteDiffers"), dissent: true });
       }
     }
+    // A node that runs once for every part or step is one box with a badge (x4) and a line such as "3 of 4 done".
+    const runs = new Map();
+    for (const node of diagramDesign.nodes) {
+      if (node.agent !== MULTI_RUN[diagramDesign.pattern]) continue;
+      const r = runsOfNode(events, node.id, player.cursor);
+      if (r.total === 0) continue;
+      const mine = state.order.filter((x) => x.startsWith(`${node.id}#`)).map((x) => state.agents[x]);
+      const status = mine.some((a) => a.status === "error") ? "error" : r.done >= r.total ? "done" : r.started > 0 ? "working" : "waiting";
+      const text = diagramDesign.pattern === "mapreduce" ? t("player.partsDone", { done: r.done, total: r.total }) : r.done >= r.total ? t("player.stepsDone", { total: r.total }) : t("player.stepOf", { n: Math.min(r.total, Math.max(1, r.started)), total: r.total });
+      runs.set(node.id, { status, text, badge: `×${r.total}`, total: r.total, started: r.started, done: r.done });
+    }
+    const dynBadge = (() => {
+      const r = [...runs.values()][0];
+      if (!r) return "";
+      return diagramDesign.pattern === "mapreduce" ? t("player.partsBadge", { n: r.total }) : t("player.stepBadge", { n: Math.min(r.total, Math.max(1, r.started)), total: r.total });
+    })();
     // In a recorded (not live) run, the agents that failed at its end are marked from the start.
     if (!live && failedAtEnd === null) {
       const whole = deriveInspector(events);
@@ -347,6 +369,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       failed: live ? null : failedAtEnd,
       selectedId: currentAgent()?.id ?? null,
       marks,
+      runs,
       notes: notebookMarks(),
       badgeText: voted
         ? t("player.votes", { votes: voted.votes, total: voted.total })
@@ -359,8 +382,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
         : handing
           ? t("player.handoffHolder", { name: designLabel(diagramDesign, handing.holder) }) + ` · ${t("player.handoffCount", { n: handing.handoffs })}`
           : evaluating
-          ? t("player.debateRound", { n: ROUND_MARK, total: evaluating.rounds }) + (evaluating.phase === "judging" ? ` · ${t("player.evaluatorJudging")}` : "")
-          : "",
+          ? t("player.debateRound", { n: ROUND_MARK, total: evaluating.rounds }) + (evaluating.phase === "judging" ? ` · ${t(diagramDesign.selfCritique === true ? "player.selfJudging" : "player.evaluatorJudging")}` : "")
+          : dynBadge,
       badgeNumber: debate ? (debate.verdict ? undefined : debate.round) : evaluating ? evaluating.round : undefined,
     });
     return true;
@@ -387,6 +410,23 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     const design = designOfRun();
     const panel = book.on ? notebookPanel({ doc, t, notes: book.notes, label: (id) => state.agents[id]?.label ?? (design ? designLabel(design, id) : id), help: help("create-memory", t("create.notebook")) }) : null;
     notebookHost.replaceChildren(...(panel ? [panel] : []));
+  }
+
+  function renderDynamic() {
+    const design = designOfRun();
+    const label = (id) => state.agents[id]?.label ?? (design ? designLabel(design, nodeIdOf(id)) : id);
+    const panel = dynamicPanel({
+      doc,
+      t,
+      parts: partsOf(events, player.cursor),
+      plan: planOf(events, player.cursor),
+      label,
+      select: (id) => {
+        Object.assign(ui, { agent: id, follow: false, step: null, round: null });
+        render();
+      },
+    });
+    dynamicHost.replaceChildren(...(panel ? [panel] : []));
   }
 
   function renderCondense() {
@@ -590,6 +630,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     if (routedTo && player.cursor > 0) items.push(handoffPathView({ doc, t, design: handDesign, path: [handDesign.nodes.find((n) => n.agent === "router")?.id, routedTo.to] }));
     const voting = votingEnd(events);
     if (voting && player.cursor > events.findIndex((e) => e.type === "done")) items.push(votingNotice({ doc, t, end: voting }));
+    const dyn = dynamicEnd(events);
+    if (dyn && player.cursor > events.findIndex((e) => e.type === "done")) items.push(dynamicNotice({ doc, t, end: dyn }));
     const routed = routerEnd(events);
     if (routed && player.cursor > events.findIndex((e) => e.type === "done")) items.push(routerNotice({ doc, t, design: handDesign, end: routed }));
     if (handed && player.cursor > events.findIndex((e) => e.type === "done")) items.push(handoffNotice({ doc, t, design: handDesign, outcome: handed }));
@@ -627,6 +669,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     renderBanners();
     renderNotebook();
     renderCondense();
+    renderDynamic();
     renderChips();
     drawBody = () => {
       const agent = currentAgent();

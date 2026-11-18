@@ -4,6 +4,7 @@
 import { h } from "../dom.js";
 import { BOX_H, BOX_W, arrowsOf, autoPositions, extentOf } from "../create/diagram-geometry.js";
 import { flowState } from "./flow.js";
+import { MULTI_RUN, nodeIdOf } from "../engine/spawn.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const HEADS = ["pending", "used", "lit"];
@@ -106,7 +107,9 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
   for (const node of design.nodes) {
     const name = h(doc, "strong", {}, "");
     const status = h(doc, "small", {}, "");
-    const box = h(doc, "button", { type: "button", class: "rnode", "data-node-id": node.id, "data-ui": `diagram-node-${node.id}`, "data-status": "waiting", "aria-pressed": "false", ...(design.pattern === "handoff" && design.start === node.id && startLabel ? { "data-start": startLabel } : {}) }, name, status);
+    const multi = node.agent === MULTI_RUN[design.pattern];
+    const runsBadge = h(doc, "span", { class: "dnode-runs", "data-ui": "diagram-runs", hidden: !multi });
+    const box = h(doc, "button", { type: "button", class: "rnode", "data-node-id": node.id, ...(multi ? { "data-multi": "true" } : {}), "data-ui": `diagram-node-${node.id}`, "data-status": "waiting", "aria-pressed": "false", ...(design.pattern === "handoff" && design.start === node.id && startLabel ? { "data-start": startLabel } : {}) }, name, status, runsBadge);
     box.style.left = `${pos.get(node.id).x}px`;
     box.style.top = `${pos.get(node.id).y}px`;
     box.style.width = `${BOX_W}px`;
@@ -129,7 +132,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       retry.style.left = `${pos.get(node.id).x + BOX_W - (retryMenu ? 86 : 64)}px`;
       retry.style.top = `${pos.get(node.id).y + BOX_H - 26}px`;
     }
-    boxes.set(node.id, { box, name, status, retry });
+    boxes.set(node.id, { box, name, status, retry, runsBadge, multi });
     area.append(box);
     if (retry) area.append(retry);
   }
@@ -145,18 +148,22 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
   // events: all events of the run; cursor: how many are applied; state: the inspector state; selectedId: the agent shown below.
   function update(args) {
     lastArgs = args;
-    const { events, cursor, state, selectedId, badgeText, badgeNumber, failed, marks = new Map(), notes = new Map(), idleStatus = "waiting" } = args;
+    const { events, cursor, state, selectedId, badgeText, badgeNumber, failed, marks = new Map(), notes = new Map(), runs = new Map(), idleStatus = "waiting" } = args;
     for (const [id, parts] of boxes) {
       // An agent that failed in a recorded run shows as failed from the start, before the replay reaches the failure.
+      // A node that runs once for every part or step is one box: its runs are summed up in `runs` (status, text and count).
+      const sum = runs.get(id);
       const isFailed = failed?.has(id) === true;
-      const agent = isFailed ? { ...(state.agents[id] ?? { ms: null }), status: "error" } : state.agents[id];
+      const agent = sum ? { status: sum.status, ms: null, label: boxLabel(id) } : isFailed ? { ...(state.agents[id] ?? { ms: null }), status: "error" } : state.agents[id];
+      parts.runsBadge.hidden = !parts.multi;
+      parts.runsBadge.textContent = sum ? sum.badge : parts.multi ? "×?" : "";
       const status = agent?.status ?? idleStatus;
       parts.box.setAttribute("data-status", status);
-      parts.box.setAttribute("aria-pressed", String(selectedId === id));
+      parts.box.setAttribute("aria-pressed", String(selectedId === id || (parts.multi && typeof selectedId === "string" && nodeIdOf(selectedId) === id)));
       parts.name.textContent = agent?.label ?? boxLabel(id);
       // A voting run marks every agent once the tally has decided: "agrees", "differs" (dimmed) or the count.
       const mark = status === "done" ? marks.get(id) : undefined;
-      parts.status.textContent = `${mark ? mark.text : statusText(agent ?? { status: idleStatus, ms: null })}${notes.get(id) ? ` · ${notes.get(id)}` : ""}`;
+      parts.status.textContent = `${sum ? sum.text : mark ? mark.text : statusText(agent ?? { status: idleStatus, ms: null })}${notes.get(id) ? ` · ${notes.get(id)}` : ""}`;
       parts.box.setAttribute("data-dissent", String(mark?.dissent === true));
       if (parts.retry) {
         parts.retry.hidden = status !== "error";
