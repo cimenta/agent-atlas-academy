@@ -15,6 +15,6 @@ related: [what-is-an-agent, single-agent, sequential-chain, supervisor-and-worke
 
 The same agents arranged differently can give different quality, cost and speed. That is why Agent Atlas lets you run one task with different patterns. Putting the runs side by side to compare them is coming.
 
-Create offers six patterns: [sequential chain](#/learn/sequential-chain), [parallel fan-out](#/learn/parallel-fan-out-fan-in), [supervisor and workers](#/learn/supervisor-and-workers), [debate](#/learn/debate), [evaluator loop](#/learn/evaluator-loop) and [handoff](#/learn/handoff).
+Create offers seven patterns: [sequential chain](#/learn/sequential-chain), [parallel fan-out](#/learn/parallel-fan-out-fan-in), [supervisor and workers](#/learn/supervisor-and-workers), [debate](#/learn/debate), [evaluator loop](#/learn/evaluator-loop), [handoff](#/learn/handoff) and [router](#/learn/router).
 
 Sometimes ordinary program code decides the order. Sometimes an agent decides, as in the supervisor pattern. Either way, the orchestration is what turns a set of separate model calls into one process.

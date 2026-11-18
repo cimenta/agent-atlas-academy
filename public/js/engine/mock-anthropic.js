@@ -39,6 +39,12 @@ export function createMockCall({ delayMs = 0, evaluatorAcceptsAt = 2 } = {}) {
       usage: { ...usage, ...extraUsage },
     });
 
+    if (role === "router") {
+      // The mock router always chooses the first specialist in the list, so a mock run ends the same way each time.
+      const first = [...messages].reverse().find((m) => m.role === "user");
+      const target = /You may route to:\s*([^\s,(]+)/.exec(typeof first?.content === "string" ? first.content : "")?.[1] ?? "";
+      return reply([{ type: "text", text: JSON.stringify({ route: target, reason: "This specialist fits the task best." }) }]);
+    }
     if (String(body?.system ?? "").includes('"action":"handoff"')) {
       // A handoff run: the first time an agent is activated it hands over to the first agent it may, then it finishes.
       const lastUser = [...messages].reverse().find((m) => m.role === "user");

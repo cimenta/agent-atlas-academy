@@ -463,3 +463,40 @@ test("handoff: layout puts the start first and the agents it hands to next", () 
   assert.equal(at(c).x, 1);
   assert.ok(at(d).x > at(c).x, "an agent not reached goes after the others");
 });
+
+// ---- router ----
+test("router: reset places the router, specialists are added, only router to specialist may be joined", () => {
+  const editor = createEditor("router");
+  editor.reset("router");
+  assert.equal(editor.design().nodes.length, 1);
+  const router = editor.design().nodes[0].id;
+  assert.equal(editor.addNode("router").code, "node.duplicate");
+  const a = add(editor, "writer");
+  const b = add(editor, "researcher");
+  assert.equal(editor.connect(router, a).ok, true);
+  assert.equal(editor.connect(a, router).code, "rout.edges");
+  assert.equal(editor.connect(a, b).code, "rout.edges");
+  assert.equal(editor.connect(router, b).ok, true);
+  assert.deepEqual(validateDesign(editor.design()).errors, []);
+});
+
+test("router: the router agent is refused in other patterns and the supervisor in this one", () => {
+  assert.equal(createEditor("sequential").addNode("router").code, "node.agentNotAllowed");
+  const editor = createEditor("router");
+  assert.equal(editor.addNode("supervisor").code, "node.agentNotAllowed");
+});
+
+test("router: layout puts the router first and the specialists in the next column", () => {
+  const editor = createEditor("router");
+  editor.reset("router");
+  const router = editor.design().nodes[0].id;
+  const a = add(editor, "writer");
+  const b = add(editor, "critic");
+  editor.connect(router, a);
+  editor.connect(router, b);
+  const at = (id) => layoutDesign(editor.design(), { orientation: "horizontal" }).nodes.find((n) => n.id === id);
+  assert.equal(at(router).x, 0);
+  assert.equal(at(a).x, 1);
+  assert.equal(at(b).x, 1);
+  assert.notEqual(at(a).y, at(b).y);
+});

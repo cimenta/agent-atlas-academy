@@ -4,7 +4,7 @@ import { isSlot } from "../key-slots.js";
 import { validNodeLimits, ON_LIMIT } from "./agent-limits.js";
 import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, LIMIT_MAX, clampCostCap, CRITERIA_MAX, NODE_MAX, NAME_MAX, INSTRUCTIONS_MAX } from "./catalog.js";
 
-export const PATTERNS = ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff"];
+export const PATTERNS = ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff", "router"];
 
 const ID = /^[a-z0-9-]{1,32}$/;
 const MODEL_KEYS = new Set(MODELS.map((m) => m.key));
@@ -113,6 +113,13 @@ export function validateDesign(design) {
     if (supervisors.length !== 1) add("sup.supervisor");
     if (workers.length < 1) add("sup.workers");
     if (supervisors.length === 1 && !hubEdgesOk(workers, supervisors[0], false)) add("sup.edges");
+  } else if (pattern === "router") {
+    // One router chooses one of two to six specialists; every arrow goes from the router to a specialist, once each.
+    const routers = byAgent("router");
+    const specialists = others("router");
+    if (routers.length !== 1) add("rout.router");
+    if (specialists.length < 2 || specialists.length > 6) add("rout.specialists");
+    if (routers.length === 1 && !hubEdgesOk(specialists, routers[0], false)) add("rout.edges");
   } else if (pattern === "handoff") {
     // Arrows mean "may hand over to". The starting agent is named in design.start and must be able to hand over.
     if (goodNodes.length < 2) add("hand.nodes");

@@ -249,3 +249,29 @@ test("handoffProgress: between a handoff and the next agent_start the holder is 
   const events = hEvents().slice(0, 3);
   assert.equal(handoffProgress(events, 3).holder, "b");
 });
+
+// ---- router ----
+const rDesign = { pattern: "router", nodes: [{ id: "router", agent: "router" }, { id: "w", agent: "writer" }, { id: "r", agent: "researcher" }], edges: [{ from: "router", to: "w" }, { from: "router", to: "r" }] };
+const rEvents = (done = { type: "done", outcome: "finished" }) => [
+  { type: "run_start", task: "t", pattern: "router", design: rDesign },
+  { type: "agent_start", agent: "router" },
+  { type: "handoff", from: "router", to: "w", note: "A writing task." },
+  { type: "agent_start", agent: "w" },
+  done,
+];
+
+test("routerChoice: nothing before the choice, the specialist and the reason after it, null for other patterns", async () => {
+  const { routerChoice } = await import("../public/js/replay/inspect-model.js");
+  assert.equal(routerChoice(rEvents(), 2), null);
+  assert.deepEqual(routerChoice(rEvents(), 3), { to: "w", reason: "A writing task." });
+  assert.equal(routerChoice(hEvents(), 5), null);
+});
+
+test("routerEnd: answered, stopped by a limit, nothing for failed or unfinished runs", async () => {
+  const { routerEnd } = await import("../public/js/replay/inspect-model.js");
+  assert.deepEqual(routerEnd(rEvents()), { result: "answered", to: "w", reason: "A writing task." });
+  assert.deepEqual(routerEnd(rEvents({ type: "done", outcome: "stopped_limit" })), { result: "stopped", to: "w", reason: "A writing task." });
+  assert.deepEqual(routerEnd(rEvents({ type: "done", outcome: "stopped_limit" }).filter((e) => e.type !== "handoff")), { result: "stopped", to: null, reason: "" });
+  assert.equal(routerEnd(rEvents({ type: "done", outcome: "failed" })), null);
+  assert.equal(routerEnd(rEvents().slice(0, 4)), null);
+});

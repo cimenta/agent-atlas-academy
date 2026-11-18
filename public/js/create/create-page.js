@@ -56,9 +56,14 @@ function patternIcon(doc, pattern) {
     for (const [k, v] of Object.entries({ cx: x, cy: y, r: 8, fill: "none", stroke: "currentColor", "stroke-width": 1.5 })) c.setAttribute(k, String(v));
     svg.append(c);
   };
-  const line = (x1, y1, x2, y2) => {
+  const ring = (x, y) => {
+    const c = doc.createElementNS(SVG_NS, "circle");
+    for (const [k, v] of Object.entries({ cx: x, cy: y, r: 4, fill: "none", stroke: "currentColor", "stroke-width": 1.5 })) c.setAttribute(k, String(v));
+    svg.append(c);
+  };
+  const line = (x1, y1, x2, y2, { width = 1.5, dashed = false } = {}) => {
     const l = doc.createElementNS(SVG_NS, "line");
-    for (const [k, v] of Object.entries({ x1, y1, x2, y2, stroke: "currentColor", "stroke-width": 1.5 })) l.setAttribute(k, String(v));
+    for (const [k, v] of Object.entries({ x1, y1, x2, y2, stroke: "currentColor", "stroke-width": width, ...(dashed ? { "stroke-dasharray": "3 3", opacity: 0.6 } : {}) })) l.setAttribute(k, String(v));
     svg.append(l);
   };
   const shapes = {
@@ -67,6 +72,8 @@ function patternIcon(doc, pattern) {
     supervisor: () => [line(12, 20, 52, 6), line(12, 20, 52, 16), line(12, 20, 52, 26), line(12, 20, 52, 36), dot(12, 20), dot(52, 6), dot(52, 16), dot(52, 26), dot(52, 36)],
     debate: () => [line(12, 10, 52, 20), line(12, 30, 52, 20), line(12, 10, 12, 30), dot(12, 10), dot(12, 30), dot(52, 20)],
     handoff: () => [line(8, 20, 28, 20), line(28, 20, 56, 20), dot(8, 20), dot(28, 20), dot(56, 20), circle(8, 20)],
+    // A switch: one solid, thick branch to a filled dot (the chosen route), two thin dashed branches to empty rings.
+    router: () => [line(10, 20, 28, 20), line(28, 20, 52, 20, { width: 3 }), line(28, 20, 50, 7, { dashed: true }), line(28, 20, 50, 33, { dashed: true }), dot(10, 20), dot(55, 20), ring(55, 5), ring(55, 35)],
     evaluator: () => [line(12, 14, 52, 14), line(52, 14, 52, 30), line(52, 30, 12, 30), line(12, 30, 12, 14), dot(12, 14), dot(52, 14)],
   };
   shapes[pattern]();
@@ -434,7 +441,7 @@ export function renderCreate(ctx) {
       carryLimits ? carryLimits.element : "",
       draft.retry ? carryOnButton : "",
       h(doc, "div", { class: "field wide" }, h(doc, "label", { for: "cr-task" }, t("create.taskLabel"), help("create-task", t("create.taskLabel"))), taskInput, counter),
-      h(doc, "h3", {}, t("create.patternHeading"), help("create-pattern", t("create.patternHeading")), ...(draft.pattern === "handoff" ? [help("create-handoff", t("pattern.handoff"))] : [])),
+      h(doc, "h3", {}, t("create.patternHeading"), help("create-pattern", t("create.patternHeading")), ...(draft.pattern === "handoff" ? [help("create-handoff", t("pattern.handoff"))] : []), ...(draft.pattern === "router" ? [help("create-router", t("pattern.router"))] : [])),
       h(doc, "p", { class: "hint" }, t("create.patternHelp")),
       patternGroup,
       patternNotice,

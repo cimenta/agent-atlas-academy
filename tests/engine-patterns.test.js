@@ -29,10 +29,10 @@ const debate = () => ({
   rounds: 2,
 });
 
-test("the catalog lists six patterns, three models and the agent types", () => {
-  assert.deepEqual(PATTERNS, ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff"]);
+test("the catalog lists seven patterns, three models and the agent types", () => {
+  assert.deepEqual(PATTERNS, ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff", "router"]);
   assert.deepEqual(MODELS.map((m) => m.key), ["fast", "balanced", "strong"]);
-  for (const key of ["planner", "researcher", "critic", "writer", "supervisor", "combiner", "debater", "judge", "evaluator", "free"]) {
+  for (const key of ["planner", "researcher", "critic", "writer", "supervisor", "combiner", "debater", "judge", "evaluator", "router", "free"]) {
     assert.ok(AGENT_TYPES[key], key);
   }
 });
@@ -338,4 +338,47 @@ test("handoff allows the general agent types and refuses the special ones", () =
     const bad = handoffDesign({ nodes: [node("planner", "planner"), node("x", agent)], edges: [edge("planner", "x")] });
     assert.ok(codes(validateDesign(bad)).includes("node.agentNotAllowed"), agent);
   }
+});
+
+// ---- router ----
+const routerDesign = (extra = {}) => ({
+  pattern: "router",
+  nodes: [node("router", "router"), node("writer", "writer"), node("researcher", "researcher")],
+  edges: [edge("router", "writer"), edge("router", "researcher")],
+  ...extra,
+});
+
+test("router design: one router and two specialists with an edge each is valid", () => {
+  assert.deepEqual(validateDesign(routerDesign()), { ok: true, errors: [] });
+  assert.ok(PATTERNS.includes("router"));
+});
+
+test("router: no router or two routers give rout.router", () => {
+  const none = routerDesign({ nodes: [node("a", "planner"), node("b", "writer")], edges: [] });
+  assert.ok(codes(validateDesign(none)).includes("rout.router"));
+  const two = routerDesign({ nodes: [node("router", "router"), node("r2", "router"), node("w", "writer"), node("x", "critic")], edges: [edge("router", "w"), edge("router", "x")] });
+  assert.ok(codes(validateDesign(two)).includes("node.agentNotAllowed") === false && codes(validateDesign(two)).includes("rout.router"));
+});
+
+test("router: fewer than two or more than six specialists give rout.specialists", () => {
+  const one = routerDesign({ nodes: [node("router", "router"), node("writer", "writer")], edges: [edge("router", "writer")] });
+  assert.ok(codes(validateDesign(one)).includes("rout.specialists"));
+  const kinds = ["planner", "researcher", "critic", "writer", "free"];
+  const many = Array.from({ length: 7 }, (_, i) => node(`s${i}`, kinds[i % 5]));
+  const seven = routerDesign({ nodes: [node("router", "router"), ...many], edges: many.map((n) => edge("router", n.id)) });
+  assert.ok(codes(validateDesign(seven)).includes("node.count") || codes(validateDesign(seven)).includes("rout.specialists"));
+  const six = many.slice(0, 6);
+  assert.equal(validateDesign(routerDesign({ nodes: [node("router", "router"), ...six], edges: six.map((n) => edge("router", n.id)) })).ok, true);
+});
+
+test("router: edges must go from the router to each specialist, once", () => {
+  assert.ok(codes(validateDesign(routerDesign({ edges: [edge("router", "writer")] }))).includes("rout.edges"));
+  assert.ok(codes(validateDesign(routerDesign({ edges: [edge("writer", "router"), edge("router", "researcher")] }))).includes("rout.edges"));
+  assert.ok(codes(validateDesign(routerDesign({ edges: [edge("router", "writer"), edge("router", "researcher"), edge("writer", "researcher")] }))).includes("rout.edges"));
+});
+
+test("the router agent belongs only to the router pattern; specialists are the general types", () => {
+  assert.deepEqual(AGENT_TYPES.router.patterns, ["router"]);
+  for (const agent of ["planner", "researcher", "critic", "writer", "free"]) assert.ok(AGENT_TYPES[agent].patterns.includes("router"), agent);
+  for (const agent of ["supervisor", "combiner", "debater", "judge", "evaluator"]) assert.ok(!AGENT_TYPES[agent].patterns.includes("router"), agent);
 });

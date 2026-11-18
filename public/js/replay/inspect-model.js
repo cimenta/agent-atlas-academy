@@ -328,3 +328,23 @@ export function handoffSender(text) {
   const found = typeof text === "string" ? /Handed over by ([^:\r\n]+):/.exec(text) : null;
   return found ? found[1].trim() : null;
 }
+
+// What a router run chose, up to the cursor: { to, reason } from its handoff event. Null for other patterns and before the choice.
+export function routerChoice(events, cursor = events.length) {
+  const design = events.find((e) => e.type === "run_start")?.design;
+  if (design?.pattern !== "router") return null;
+  const move = events.slice(0, cursor).find((e) => e.type === "handoff");
+  return move ? { to: move.to, reason: typeof move.note === "string" ? move.note : "" } : null;
+}
+
+// How a router run ended: "answered" (the chosen specialist answered) or "stopped" (a limit before the answer).
+// { result, to, reason }. Null for other patterns, for failed runs and for runs with no end yet.
+export function routerEnd(events) {
+  const design = events.find((e) => e.type === "run_start")?.design;
+  const done = events.find((e) => e.type === "done");
+  if (design?.pattern !== "router" || !done) return null;
+  const choice = routerChoice(events);
+  if (done.outcome === "finished" && choice) return { result: "answered", ...choice };
+  if (done.outcome === "stopped_limit") return { result: "stopped", to: choice?.to ?? null, reason: choice?.reason ?? "" };
+  return null;
+}

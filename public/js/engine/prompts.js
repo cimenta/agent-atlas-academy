@@ -36,7 +36,13 @@ export function roleText(node, pattern) {
 ${HANDOFF}` : own;
 }
 
+// The Router chooses one specialist for the task, once. It does not do the work and never sees the answer.
+const ROUTER = `You are the Router. You read the task and choose exactly one specialist to answer it. The first message lists the specialist ids and what each one is for. You do not answer the task yourself, and you will not see the specialist's answer. Choose the specialist whose role fits the task best.
+Reply with JSON only, in this form:
+{"route":"<specialist id>","reason":"<why this specialist fits the task>"}`;
+
 function ownRoleText(node) {
+  if (node.agent === "router") return ROUTER;
   if (node.agent === "supervisor") return SUPERVISOR;
   if (node.agent === "evaluator") return EVALUATOR;
   if (node.agent === "debater") {

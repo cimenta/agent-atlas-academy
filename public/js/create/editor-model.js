@@ -4,7 +4,7 @@ import { AGENT_TYPES, DEFAULT_MODEL, NODE_MAX } from "../engine/catalog.js";
 import { validateDesign } from "../engine/patterns.js";
 import { cleanNodeLimits } from "../engine/agent-limits.js";
 
-const ONCE_ONLY = new Set(["supervisor", "combiner", "judge", "evaluator"]);
+const ONCE_ONLY = new Set(["supervisor", "combiner", "judge", "evaluator", "router"]);
 const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve"];
 const DEFAULT_ROUNDS = 2;
 const EVALUATOR_ROUNDS = 3;
@@ -179,6 +179,8 @@ export function createEditor(initialPattern) {
         } else if (!(combiner && from === tail && !touched(to))) code = "par.edges";
       } else if (pattern === "supervisor") {
         if (!(a.agent === "supervisor" && b.agent !== "supervisor")) code = "sup.edges";
+      } else if (pattern === "router") {
+        if (!(a.agent === "router" && b.agent !== "router")) code = "rout.edges";
       } else if (pattern === "handoff") {
         // Any two different agents may be joined, in either direction: an arrow means "may hand over to".
       } else if (pattern === "evaluator") {
@@ -246,6 +248,7 @@ export function createEditor(initialPattern) {
       criteria = nextPattern === "evaluator" ? example : "";
       positions = {};
       start = undefined;
+      if (nextPattern === "router") this.addNode("router");
       if (nextPattern === "evaluator") {
         this.addNode("writer");
         this.addNode("evaluator");
@@ -279,7 +282,7 @@ export function layoutDesign(design, { orientation = "vertical" } = {}) {
       level = [...new Set(edges.filter((e) => level.includes(e.from) && !spots.has(e.to)).map((e) => e.to))];
     }
   } else {
-    const hubAgent = { parallel: "combiner", supervisor: "supervisor", debate: "judge", evaluator: "evaluator" }[pattern];
+    const hubAgent = { parallel: "combiner", supervisor: "supervisor", debate: "judge", evaluator: "evaluator", router: "router" }[pattern];
     const hub = nodes.find((n) => n.agent === hubAgent && connected.has(n.id));
     const followers = [];
     if (pattern === "parallel" && hub) {
@@ -292,8 +295,9 @@ export function layoutDesign(design, { orientation = "vertical" } = {}) {
       }
     }
     const spokes = nodes.filter((n) => n.agent !== hubAgent && connected.has(n.id) && !followers.includes(n.id));
-    const spokeRank = pattern === "supervisor" ? 1 : 0;
-    const hubRank = pattern === "supervisor" ? 0 : 1;
+    const hubFirst = pattern === "supervisor" || pattern === "router";
+    const spokeRank = hubFirst ? 1 : 0;
+    const hubRank = hubFirst ? 0 : 1;
     spokes.forEach((n, offset) => spots.set(n.id, { rank: spokeRank, offset }));
     if (hub) spots.set(hub.id, { rank: hubRank, offset: Math.floor((spokes.length - 1) / 2) });
     followers.forEach((id, i) => spots.set(id, { rank: hubRank + 1 + i, offset: Math.floor((spokes.length - 1) / 2) }));
