@@ -37,4 +37,4 @@ Pokud se text nevejde, musí se zkrátit, shrnout nebo vynechat, jinak volání 
 - **Nejvíce tokenů na běh** a **Nejvíce tokenů jedné odpovědi** omezují celek a nejdelší jednu odpověď.
 - Agent Atlas staré zprávy nesumarizuje. Každý agent dostane vstup, který určuje jeho vzor, a proto debata, kde všichni čtou celou dosavadní konverzaci, stojí víc než řetězec.
 
-Když běh stojí víc, než jste čekali, podívejte se na vstup pozdních kroků. Tam se okno obvykle zaplnilo.
+Když běh stojí víc, než jste čekali, podívejte se na vstup pozdních kroků. Tam se okno obvykle zaplnilo. Ukáže to záložka **Kontext** v přehrávání: pro každé volání modelu vybraného agenta vstupní tokeny a z čeho se skládaly (pokyny, zadání, to, co předali jiní agenti, jeho vlastní dřívější zprávy). Záložka Statistika ukazuje kontext všech volání v pořadí, takže vidíte, jak roste.

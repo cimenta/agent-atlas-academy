@@ -4,6 +4,8 @@ import { helpIcon } from "./help-popup.js";
 import { parseMarkdown } from "./markdown.js";
 import { renderBlocks } from "./render.js";
 import { buildResultModel, buildStatistics, limitRows } from "./play-model.js";
+import { runMetrics, contextPerCall } from "./replay/context-model.js";
+import { contextChart } from "./replay/context-view.js";
 import { copyText, downloadFile, safeFileName } from "./download.js";
 import { formatDuration, formatUsd } from "./create/create-model.js";
 import { outcomeNotice, loopNotice, handoffNotice, handoffPathView, routerNotice, votingNotice } from "./outcome-view.js";
@@ -24,6 +26,7 @@ export function renderResult(ctx, run) {
   const { doc, t } = ctx;
   const model = buildResultModel(run);
   const stats = buildStatistics(run);
+  const metrics = runMetrics(run);
   const answer = model.finalText || "";
   const ui = { tab: "answer", view: "formatted", q: "" };
   const help = (id, name) => helpIcon({ doc, t, id, name });
@@ -137,6 +140,9 @@ export function renderResult(ctx, run) {
       tile(num(stats.usage.output), t("stats.outputTokens")),
       tile(num(stats.usage.searches), t("stats.searches")),
       tile(num(stats.calls), t("stats.calls")),
+      ...(metrics.largest > 0 ? [tile(num(metrics.largest), t("stats.largest"), "result-context")] : []),
+      ...(metrics.notes > 0 ? [tile(num(metrics.notes), t("stats.notesTile"))] : []),
+      ...(metrics.saved > 0 ? [tile(num(metrics.saved), t("stats.savedTile"))] : []),
       ...(loop ? [tile(t(`stats.loop.${{ accepted: "accepted", not_accepted: "notAccepted", stopped: "stopped" }[loop.result]}`, { n: loop.round, total: loop.rounds }), t("stats.loop"))] : []),
       ...(handPath ? [tile(String(handPath.length - 1), t("stats.handoffs"))] : []),
       ...(routedChoice ? [tile(designLabel(handDesign, routedChoice.to), t("stats.routedTo"))] : []),
@@ -208,6 +214,7 @@ export function renderResult(ctx, run) {
       "div",
       { class: "stats-wrap" },
       tiles,
+      contextChart({ doc, t, points: contextPerCall(run.events), num, help: help("result-context", t("stats.contextPerCall")) }) ?? "",
       ...(handPath ? [handoffPathView({ doc, t, design: handDesign, path: handPath })] : []),
       ...(routedChoice && routedChoice.reason ? [h(doc, "p", { class: "hint", "data-ui": "router-reason" }, routedChoice.reason)] : []),
       ...(votedTally && votedTally.note ? [h(doc, "p", { class: "hint", "data-ui": "voting-note" }, votedTally.note)] : []),

@@ -37,4 +37,4 @@ If the text does not fit, it has to be cut, summarised or left out, or the call 
 - **Maximum tokens per run** and **tokens of one reply** limit the total and the longest single answer.
 - Agent Atlas does not summarise old messages. Each agent gets the input its pattern defines, which is why a debate, where everyone reads the whole conversation so far, costs more than a chain.
 
-When a run costs more than you expected, look at the input of the late steps. That is where the window usually filled up.
+When a run costs more than you expected, look at the input of the late steps. That is where the window usually filled up. The **Context** tab in the replay shows it: for each model call of the chosen agent, the input tokens and what they were made of (instructions, the task, what other agents passed on, its own earlier messages). The Statistics tab shows the context of every call in order, so you can see it grow.

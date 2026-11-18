@@ -11,6 +11,8 @@ import { definitionFromRun } from "../create/definition.js";
 import { openInCreate } from "../create/draft.js";
 import { downloadFile, safeFileName } from "../download.js";
 import { stepDetail } from "./step-detail.js";
+import { contextOf } from "./context-model.js";
+import { contextView } from "./context-view.js";
 import { paintModelTag } from "../provider-colors.js";
 import { createAboutPanel } from "./about.js";
 import { createRunMenu } from "./run-menu.js";
@@ -161,8 +163,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   const status = h(doc, "div", { class: "status", "data-ui": "player-status", "aria-live": "polite" });
   const banners = h(doc, "div", { class: "banners", "data-ui": "run-banners" });
   const chips = h(doc, "div", { class: "chips", "data-ui": "agent-cards", role: "list", "aria-label": t("player.agents") });
-  const tabButtons = ["steps", "messages", "output"].map((name) => {
-    const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-tab": name, "data-ui": `tab-${name}` }, t({ steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput" }[name]));
+  const tabButtons = ["steps", "messages", "output", "context"].map((name) => {
+    const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-tab": name, "data-ui": `tab-${name}` }, t({ steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput", context: "player.tabContext" }[name]));
     button.addEventListener("click", () => {
       ui.tab = name;
       ui.follow = false;
@@ -170,7 +172,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     });
     return button;
   });
-  const tabHelpNames = { steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput" };
+  const tabHelpNames = { steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput", context: "player.tabContext" };
   const tabs = h(doc, "div", { class: "tabs", "data-ui": "inspector-tabs", role: "tablist" }, ...tabButtons.flatMap((button) => {
     const name = button.getAttribute("data-tab");
     return [button, help(`replay-${name}`, t(tabHelpNames[name]))];
@@ -501,6 +503,10 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     );
   }
 
+  function renderContext(agent) {
+    return contextView({ doc, t, label: agent.label, rows: contextOf(events, agent.id, player.cursor), num: (n) => new Intl.NumberFormat(doc.documentElement?.lang || undefined).format(n) });
+  }
+
   function renderOutput(agent) {
     // In a handoff run control can come back, so the agent that ended the run is not the last one that appeared.
     const ended = handoffOutcome(events);
@@ -579,7 +585,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
         body.replaceChildren(h(doc, "p", { class: "doc" }, t("insp.waiting")));
         return;
       }
-      body.replaceChildren(ui.tab === "steps" ? renderSteps(agent) : ui.tab === "messages" ? renderMessages(agent) : renderOutput(agent));
+      body.replaceChildren(ui.tab === "steps" ? renderSteps(agent) : ui.tab === "messages" ? renderMessages(agent) : ui.tab === "context" ? renderContext(agent) : renderOutput(agent));
     };
     if (search.query()) search.run();
     else drawBody();
@@ -621,10 +627,10 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     isLive: () => player.live,
     stop: () => onStop?.(),
   };
-  // Keyboard zones. Tab goes player, Steps, Messages, Output and round again (Shift+Tab goes back, and
+  // Keyboard zones. Tab goes player, Steps, Messages, Output, Context and round again (Shift+Tab goes back, and
   // leaves from the player). In the player the arrows or W A S D move between the agents and Enter inspects
   // the one that has the focus. In Steps and Messages the same keys move between steps or rounds.
-  const ZONES = ["player", "steps", "messages", "output"];
+  const ZONES = ["player", "steps", "messages", "output", "context"];
   const MOVES = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", w: "up", s: "down", a: "left", d: "right" };
   const isLetter = (key) => key.length === 1;
   let lastG = 0;
@@ -692,7 +698,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     if (event.key === "Tab") {
       const at = ZONES.indexOf(zone);
       used();
-      // Tab goes round the player and its tabs: player, Steps, Messages, Output and round again; Shift+Tab goes back.
+      // Tab goes round the player and its tabs: player, Steps, Messages, Output, Context and round again; Shift+Tab goes back.
       focusZone(ZONES[(at + (event.shiftKey ? -1 : 1) + ZONES.length) % ZONES.length]);
       return;
     }
