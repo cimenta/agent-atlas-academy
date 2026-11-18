@@ -123,3 +123,22 @@ test("an evaluator loop keeps its criteria and rounds through save and load", ()
   assert.equal(loaded.editor.design().criteria, "Cite a source.");
   assert.equal(loaded.editor.design().rounds, 2);
 });
+
+// ---- handoff ----
+test("a handoff definition keeps its start through save and load; an old one without start starts with the first agent", () => {
+  const editor = createEditor("handoff");
+  const a = editor.addNode("planner").id;
+  const b = editor.addNode("writer").id;
+  editor.connect(a, b);
+  editor.connect(b, a);
+  editor.setStart(b);
+  const text = JSON.stringify(buildDefinition({ task: "t", design: editor.design() }));
+  const loaded = loadDefinition(text);
+  assert.equal(loaded.ok, true);
+  assert.equal(loaded.editor.start(), b);
+  const old = JSON.parse(text);
+  delete old.design.start;
+  const again = loadDefinition(JSON.stringify(old));
+  assert.equal(again.ok, true);
+  assert.equal(again.editor.start(), a);
+});

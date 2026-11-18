@@ -25,6 +25,7 @@ export function createEditor(initialPattern) {
   let edges = [];
   let rounds = roundsFor(pattern);
   let criteria = "";
+  let start; // handoff: the id of the agent that begins
   let positions = {};
   // The default model: { slot, model }. A new agent starts with it, and so does every agent that has not been
   // given a model of its own (custom is not true).
@@ -57,6 +58,7 @@ export function createEditor(initialPattern) {
     design() {
       const copy = { pattern, nodes: structuredClone(nodes), edges: structuredClone(edges) };
       if (pattern === "debate") copy.rounds = rounds;
+      if (pattern === "handoff" && start !== undefined) copy.start = start;
       if (pattern === "evaluator") {
         copy.rounds = rounds;
         copy.criteria = criteria;
@@ -79,6 +81,7 @@ export function createEditor(initialPattern) {
       for (const key of EDITABLE) if (key in overrides) node[key] = overrides[key];
       tidyLimits(node);
       nodes.push(node);
+      if (pattern === "handoff" && start === undefined) start = node.id;
       return { ok: true, id: node.id };
     },
 
@@ -86,6 +89,16 @@ export function createEditor(initialPattern) {
       nodes = nodes.filter((n) => n.id !== id);
       edges = edges.filter((e) => e.from !== id && e.to !== id);
       delete positions[id];
+      if (start === id) start = nodes[0]?.id;
+    },
+
+    // Handoff: the agent that begins the run. An unknown id is ignored.
+    setStart(id) {
+      if (find(id)) start = id;
+    },
+
+    start() {
+      return start;
     },
 
     setNode(id, patch) {
@@ -166,6 +179,8 @@ export function createEditor(initialPattern) {
         } else if (!(combiner && from === tail && !touched(to))) code = "par.edges";
       } else if (pattern === "supervisor") {
         if (!(a.agent === "supervisor" && b.agent !== "supervisor")) code = "sup.edges";
+      } else if (pattern === "handoff") {
+        // Any two different agents may be joined, in either direction: an arrow means "may hand over to".
       } else if (pattern === "evaluator") {
         if (!(a.agent === "writer" && b.agent === "evaluator") || edges.length > 0) code = "eval.edges";
       } else if (!(a.agent === "debater" && b.agent === "judge")) {
@@ -230,6 +245,7 @@ export function createEditor(initialPattern) {
       rounds = roundsFor(nextPattern);
       criteria = nextPattern === "evaluator" ? example : "";
       positions = {};
+      start = undefined;
       if (nextPattern === "evaluator") {
         this.addNode("writer");
         this.addNode("evaluator");
@@ -253,6 +269,14 @@ export function layoutDesign(design, { orientation = "vertical" } = {}) {
     for (let rank = 0; level.length > 0 && rank <= nodes.length; rank++) {
       level.forEach((id, offset) => spots.set(id, { rank, offset }));
       level = edges.filter((e) => level.includes(e.from) && !spots.has(e.to)).map((e) => e.to);
+    }
+  } else if (pattern === "handoff") {
+    // By distance from the start: the start first, the agents it hands to next, and so on. Agents never reached go after.
+    const first = nodes.some((n) => n.id === design.start) ? design.start : nodes[0]?.id;
+    let level = first === undefined ? [] : [first];
+    for (let rank = 0; level.length > 0 && rank <= nodes.length; rank++) {
+      level.forEach((id, offset) => spots.set(id, { rank, offset }));
+      level = [...new Set(edges.filter((e) => level.includes(e.from) && !spots.has(e.to)).map((e) => e.to))];
     }
   } else {
     const hubAgent = { parallel: "combiner", supervisor: "supervisor", debate: "judge", evaluator: "evaluator" }[pattern];

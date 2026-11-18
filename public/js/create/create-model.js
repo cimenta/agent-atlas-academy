@@ -4,6 +4,21 @@ import { estimateRun, limitWarning, emptyCriteria } from "../engine/estimate.js"
 import { TOOLS } from "../engine/tools.js";
 
 // keyLocked: a key is saved on this computer but not unlocked yet, so the reason says to unlock it.
+// A carried-on run: the earlier try already holds some handoffs, and the new try replays them. This returns a function
+// that says true for a replayed handoff (and counts it off) and false for a new one. Counting matters: in a ping-pong the
+// same handoff can really happen again.
+export function handoffSkipper(base) {
+  const left = new Map();
+  for (const e of base) if (e.type === "handoff") left.set(`${e.from}>${e.to}>${e.note}`, (left.get(`${e.from}>${e.to}>${e.note}`) ?? 0) + 1);
+  return (event) => {
+    const key = `${event.from}>${event.to}>${event.note}`;
+    const n = left.get(key) ?? 0;
+    if (n === 0) return false;
+    left.set(key, n - 1);
+    return true;
+  };
+}
+
 export function canRun({ task, apiKey, editorErrors, keyLocked = false }) {
   const reasons = [];
   const text = typeof task === "string" ? task.trim() : "";

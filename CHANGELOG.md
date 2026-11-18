@@ -6,6 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Handoff: a sixth pattern in Create. Agents are joined by arrows that mean may hand over to, and one agent is marked as the start. The start agent works on the task and then hands control to an agent it has an arrow to, with a note, or finishes. The next agent gets the task and the note and nothing else. Arrows may run both ways. A run ends finished, stopped by a limit (the result is the last note, nobody finished the task) or failed. The replay shows who holds control and the path, the Result tab shows a notice, a Handoffs tile and the path. Help has a new section Handoff with all the ways of passing information at a handoff and why Agent Atlas uses the note plus the task, with its own ? button in Create. The Learn article Handoff is rewritten (English and Czech) and is no longer marked coming.
 - Evaluator loop: a fifth pattern in Create. A writer drafts, an evaluator judges the draft against criteria that you write, and the writer revises, for 1 to 4 rounds. The evaluator accepts or sends feedback, and the program reads that verdict. A loop ends accepted, not accepted (the rounds ran out, the last draft is the result and is marked), or stopped by a limit. The replay shows the round and a notice at the end, the Result tab shows the notice and a Loop tile, and Create warns when no criteria are written. The Learn article Evaluator loop is written (English and Czech) and is no longer marked coming.
 
 ### Changed

@@ -21,7 +21,7 @@ const realClock = { setTimeout: (fn, ms) => globalThis.setTimeout(fn, ms), clear
 // onRetry(id): when given, an agent that failed gets a Retry button (retryLabel is its text).
 // retryMenu: { arrowLabel, title, providerName(provider), tagText(choice), choicesOf(id) }; when given, the Retry button has an
 // arrow that opens a list of models, and a pick calls onRetry(id, choice.value).
-export function createReplayDiagram({ doc, design, wide, onSelect, statusText, boxLabel, onRetry = null, retryLabel = "Retry", retryMenu = null, clock = realClock, now = () => Date.now() }) {
+export function createReplayDiagram({ doc, design, wide, onSelect, statusText, boxLabel, startLabel = "", onRetry = null, retryLabel = "Retry", retryMenu = null, clock = realClock, now = () => Date.now() }) {
   const pos = autoPositions(design, { wide });
   const { width, height } = extentOf(pos);
   const area = h(doc, "div", { class: "diagram replay-diagram", "data-ui": "replay-diagram" });
@@ -106,7 +106,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
   for (const node of design.nodes) {
     const name = h(doc, "strong", {}, "");
     const status = h(doc, "small", {}, "");
-    const box = h(doc, "button", { type: "button", class: "rnode", "data-node-id": node.id, "data-ui": `diagram-node-${node.id}`, "data-status": "waiting", "aria-pressed": "false" }, name, status);
+    const box = h(doc, "button", { type: "button", class: "rnode", "data-node-id": node.id, "data-ui": `diagram-node-${node.id}`, "data-status": "waiting", "aria-pressed": "false", ...(design.pattern === "handoff" && design.start === node.id && startLabel ? { "data-start": startLabel } : {}) }, name, status);
     box.style.left = `${pos.get(node.id).x}px`;
     box.style.top = `${pos.get(node.id).y}px`;
     box.style.width = `${BOX_W}px`;

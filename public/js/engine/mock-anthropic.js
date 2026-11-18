@@ -39,6 +39,17 @@ export function createMockCall({ delayMs = 0, evaluatorAcceptsAt = 2 } = {}) {
       usage: { ...usage, ...extraUsage },
     });
 
+    if (String(body?.system ?? "").includes('"action":"handoff"')) {
+      // A handoff run: the first time an agent is activated it hands over to the first agent it may, then it finishes.
+      const lastUser = [...messages].reverse().find((m) => m.role === "user");
+      const target = /You may hand over to:\s*([^\s,(]+)/.exec(typeof lastUser?.content === "string" ? lastUser.content : "")?.[1];
+      const answered = messages.some((m) => m.role === "assistant");
+      const text =
+        target && !answered
+          ? JSON.stringify({ action: "handoff", to: target, note: `${TEXT[role] ?? TEXT.free} Please take it from here and carry the task one step further.` })
+          : JSON.stringify({ action: "finish", answer: `Final answer: the work of the agents was put together into one short, clear answer (finished by ${role}).` });
+      return reply([{ type: "text", text }]);
+    }
     if (role === "writer" && messages.filter((m) => m.role === "user").length > 1) {
       // A revised draft: it differs from the one before, as a real revision would.
       return reply([{ type: "text", text: `${TEXT.writer} (revision ${messages.filter((m) => m.role === "user").length - 1})` }]);

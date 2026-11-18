@@ -198,17 +198,23 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         const key = `${edge.from}>${edge.to}`;
         const selected = selectedEdge === key;
         // Between a supervisor and a worker the data goes both ways: one connection, drawn with two arrows side by side.
+        // In a handoff an edge that has a reverse edge moves aside, so the two arrows run side by side.
+        const sideBySide = design.pattern === "handoff" && design.edges.some((o) => o.from === edge.to && o.to === edge.from);
+        const gap = isTwoWay(design) || sideBySide ? -TWO_WAY_GAP : 0;
         const shown = isTwoWay(design) ? [[edge.from, edge.to], [edge.to, edge.from]] : [[edge.from, edge.to]];
         const lines = shown.map(([from, to]) => {
           const line = doc.createElementNS(SVG_NS, "line");
           for (const [k, v] of Object.entries({ "marker-end": "url(#arrowhead)", "stroke-width": selected ? "4" : "2", stroke: selected ? "var(--accent)" : "currentColor" })) line.setAttribute(k, v);
-          const s2 = straight(pos, from, to, isTwoWay(design) ? -TWO_WAY_GAP : 0);
+          const s2 = straight(pos, from, to, gap);
           setLine(line, { x: s2.x1, y: s2.y1 }, { x: s2.x2, y: s2.y2 });
           return line;
         });
         const hit = doc.createElementNS(SVG_NS, "line");
         for (const [k, v] of Object.entries({ stroke: "transparent", "stroke-width": "22", class: "edge-hit" })) hit.setAttribute(k, v);
-        setLine(hit, start, end);
+        if (sideBySide) {
+          const own = straight(pos, edge.from, edge.to, gap);
+          setLine(hit, { x: own.x1, y: own.y1 }, { x: own.x2, y: own.y2 });
+        } else setLine(hit, start, end);
         hit.addEventListener("click", () => {
           selectedEdge = selectedEdge === key ? null : key;
           selectedId = null;
@@ -341,7 +347,9 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         selectedEdge = null;
         draw();
       });
-      const box = h(doc, "div", { class: "dnode", "data-node-id": node.id, "data-selected": String(selectedId === node.id), "data-connecting": String(connectFrom === node.id) }, body, port);
+      const isStart = design.pattern === "handoff" && design.start === node.id;
+      const box = h(doc, "div", { class: "dnode", "data-node-id": node.id, "data-selected": String(selectedId === node.id), "data-connecting": String(connectFrom === node.id), ...(isStart ? { "data-start": "true" } : {}) }, body, port);
+      if (isStart) box.append(h(doc, "span", { class: "dnode-start", "data-ui": "start-flag" }, `▶ ${t("editor.startFlag")}`));
       if (selectedId === node.id) {
         const cross = h(doc, "button", { type: "button", class: "dnode-remove", "data-focus-key": `delete-${node.id}`, "aria-label": t("editor.removeNamed", { name: nodeLabel(node) }), title: t("editor.remove") }, "×");
         cross.addEventListener("click", () => removeSelected());
@@ -535,6 +543,16 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       });
       parts.push(field("ed-eval-rounds", t("editor.evaluatorRounds"), rounds), h(doc, "p", { class: "hint" }, t("editor.evaluatorRoundsHelp")));
     }
+    if (design.pattern === "handoff") {
+      // Which agent begins the run. The one that begins shows a checked box that cannot be unchecked: another agent must be chosen.
+      const isStart = design.start === node.id;
+      const startBox = h(doc, "input", { id: "ed-start", type: "checkbox", checked: isStart, disabled: isStart, "data-ui": "handoff-start" });
+      startBox.addEventListener("change", () => {
+        editor.setStart(node.id);
+        changed();
+      });
+      parts.push(h(doc, "div", { class: "field checkbox" }, startBox, h(doc, "label", { for: "ed-start" }, isStart ? t("editor.startsRun") : t("editor.makeStart"))), h(doc, "p", { class: "hint" }, t("editor.startHelp")));
+    }
     const searchRow = h(doc, "div", { class: "field checkbox" }, search, h(doc, "label", { for: "ed-search" }, t("editor.search")));
     // Tools: an agent gets only the tools it needs.
     parts.push(h(doc, "h4", { class: "editor-tools-heading" }, t("editor.toolsHeading"), helpIcon({ doc, t, id: "create-tools", name: t("editor.toolsHeading") })));
@@ -598,7 +616,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
           "details",
           { class: "agent-prompt", "data-ui": "agent-prompt", open: true },
           h(doc, "summary", {}, t("editor.prompt")),
-          h(doc, "pre", {}, roleText(node)),
+          h(doc, "pre", {}, roleText(node, design.pattern)),
           h(doc, "p", { class: "hint" }, t("editor.promptHelp")),
         ),
       );

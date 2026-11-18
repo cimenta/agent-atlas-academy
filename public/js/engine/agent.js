@@ -32,7 +32,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
   // Answers from an earlier try of the run: used up first, in order, before the provider is called again.
   const answers = [...cached];
   const model = nodeModel(node, provider).id;
-  const system = systemPromptFor(node, { language });
+  const system = systemPromptFor(node, { language, pattern: design?.pattern });
   const label = agentLabel(node, design, AGENT_TYPES[node.agent]?.label ?? node.agent);
   const limitValue = { agent_steps: node.limits?.maxSteps, agent_tokens: node.limits?.maxTokens, agent_searches: node.limits?.maxSearches };
   const stopRun = (reason) => new LimitError(`agent_${reason}`, { agent: node.id, label, value: limitValue[`agent_${reason}`] });
@@ -131,7 +131,8 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
       let pauses = 0;
       // The agent reached a limit of its own. Stop: the run ends. Pass: what it wrote goes on, and the run carries on.
       const endAtLimit = (reason) => {
-        if (onLimit === "stop") throw stopRun(reason);
+        // In a handoff the reply is the decision, so a cut-off reply cannot be passed on: a limit of the agent always stops the run.
+        if (onLimit === "stop" || design?.pattern === "handoff") throw stopRun(reason);
         const written = texts.filter(Boolean).join("\n").trim();
         if (written === "") throw new Error(`The agent ${label} reached its own limit (${reason}) before it wrote anything. Raise the limit of this agent in the editor, and run again.`);
         emit({ type: "warning", agent: node.id, limit: `agent_${reason}`, message: agentPassMessage(`agent_${reason}`, { label, value: limitValue[`agent_${reason}`] }) });

@@ -88,6 +88,7 @@ export function loadDefinition(text) {
     if (!joined.ok) return fail("invalid", [{ code: joined.code }]);
   }
   if ((design.pattern === "debate" || design.pattern === "evaluator") && Number.isInteger(design.rounds)) editor.setRounds(design.rounds);
+  if (design.pattern === "handoff" && ids.has(design.start)) editor.setStart(ids.get(design.start));
   if (design.pattern === "evaluator" && typeof design.criteria === "string") editor.setCriteria(design.criteria);
 
   const problems = editor.errors();

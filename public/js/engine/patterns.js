@@ -4,7 +4,7 @@ import { isSlot } from "../key-slots.js";
 import { validNodeLimits, ON_LIMIT } from "./agent-limits.js";
 import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, LIMIT_MAX, clampCostCap, CRITERIA_MAX, NODE_MAX, NAME_MAX, INSTRUCTIONS_MAX } from "./catalog.js";
 
-export const PATTERNS = ["sequential", "parallel", "supervisor", "debate", "evaluator"];
+export const PATTERNS = ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff"];
 
 const ID = /^[a-z0-9-]{1,32}$/;
 const MODEL_KEYS = new Set(MODELS.map((m) => m.key));
@@ -113,6 +113,11 @@ export function validateDesign(design) {
     if (supervisors.length !== 1) add("sup.supervisor");
     if (workers.length < 1) add("sup.workers");
     if (supervisors.length === 1 && !hubEdgesOk(workers, supervisors[0], false)) add("sup.edges");
+  } else if (pattern === "handoff") {
+    // Arrows mean "may hand over to". The starting agent is named in design.start and must be able to hand over.
+    if (goodNodes.length < 2) add("hand.nodes");
+    if (typeof design.start !== "string" || !ids.has(design.start)) add("hand.start");
+    else if (!goodEdges.some((e) => e.from === design.start)) add("hand.edges");
   } else if (pattern === "evaluator") {
     const writers = byAgent("writer");
     const evaluators = byAgent("evaluator");

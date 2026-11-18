@@ -4,7 +4,7 @@ import { h } from "../dom.js";
 import { helpIcon } from "../help-popup.js";
 import { validateRun } from "../run-schema.js";
 import { createPlayer } from "./player.js";
-import { debateProgress, deriveInspector, designLabel, evaluatorProgress, loopOutcome } from "./inspect-model.js";
+import { debateProgress, deriveInspector, designLabel, evaluatorProgress, handoffOutcome, handoffProgress, handoffSender, loopOutcome } from "./inspect-model.js";
 import { createViewer } from "./viewer.js";
 import { markText, searchBar } from "../text-search.js";
 import { definitionFromRun } from "../create/definition.js";
@@ -19,7 +19,7 @@ import { limitsChoice } from "./limits-choice.js";
 import { canSubmit, submitRun } from "../submit-run.js";
 import { runForExport } from "../run-export.js";
 import { createReplayDiagram, ROUND_MARK } from "./diagram.js";
-import { outcomeNotice, loopNotice } from "../outcome-view.js";
+import { outcomeNotice, loopNotice, handoffNotice, handoffPathView } from "../outcome-view.js";
 import { buildResultModel } from "../play-model.js";
 import { clearActivePlayer, setActivePlayer } from "../shortcuts.js";
 import { pickNeighbour } from "./spatial.js";
@@ -278,6 +278,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       try {
         const wide = (doc.defaultView?.innerWidth ?? 1024) >= 720;
         diagram = createReplayDiagram({
+          startLabel: `▶ ${t("editor.startFlag")}`,
           doc,
           design,
           wide,
@@ -309,6 +310,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     }
     const debate = debateProgress(events, player.cursor);
     const evaluating = evaluatorProgress(events, player.cursor);
+    const handing = handoffProgress(events, player.cursor);
     // In a recorded (not live) run, the agents that failed at its end are marked from the start.
     if (!live && failedAtEnd === null) {
       const whole = deriveInspector(events);
@@ -325,7 +327,9 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
         ? debate.verdict
           ? t("player.debateVerdict")
           : t("player.debateRound", { n: ROUND_MARK, total: debate.rounds })
-        : evaluating
+        : handing
+          ? t("player.handoffHolder", { name: designLabel(diagramDesign, handing.holder) }) + ` · ${t("player.handoffCount", { n: handing.handoffs })}`
+          : evaluating
           ? t("player.debateRound", { n: ROUND_MARK, total: evaluating.rounds }) + (evaluating.phase === "judging" ? ` · ${t("player.evaluatorJudging")}` : "")
           : "",
       badgeNumber: debate ? (debate.verdict ? undefined : debate.round) : evaluating ? evaluating.round : undefined,
@@ -449,7 +453,14 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       });
       return button;
     });
-    const sent = round.messages.map((m, i) => messageEl(m, index > 0 && i >= round.before, i === 0 ? firstTag : ""));
+    // In a handoff run every message that carries a note says who handed it over; the first message of the start agent is the task.
+    const isHandoff = designOfRun()?.pattern === "handoff";
+    const tagOf = (m, i) => {
+      if (!isHandoff) return i === 0 ? firstTag : "";
+      const sender = handoffSender(typeof m.content === "string" ? m.content : "");
+      return sender ? t("insp.handoffFrom", { name: sender }) : i === 0 ? t("insp.userInput") : "";
+    };
+    const sent = round.messages.map((m, i) => messageEl(m, index > 0 && i >= round.before, tagOf(m, i)));
     const reply = h(doc, "div", { class: "mc nw" }, h(doc, "span", { class: "rl assistant" }, "assistant"), ...round.response.map(blockEl));
     return h(
       doc,
@@ -476,7 +487,9 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   }
 
   function renderOutput(agent) {
-    const last = state.order.at(-1) === agent.id;
+    // In a handoff run control can come back, so the agent that ended the run is not the last one that appeared.
+    const ended = handoffOutcome(events);
+    const last = ended ? ended.by === agent.id : state.order.at(-1) === agent.id;
     const note = agent.output ? (last ? t("insp.outFinal") : t("insp.outNext")) : "";
     return h(doc, "div", {}, h(doc, "p", { class: "lb" }, `${t("insp.outOf")} ${agent.label}${note}`), viewer.view(`o-${agent.id}`, agent.output ?? t("insp.nothing")));
   }
@@ -494,6 +507,12 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       items.push(h(doc, "div", { class: "banner warn" }, ...(time ? [h(doc, "time", { class: "banner-time", "data-ui": "banner-time", datetime: new Date(at).toISOString() }, time), " "] : []), `⚠ ${w}`, " ", help(state.warningHelps[i] ?? "replay-warnings", t("replay.warningHelp"))));
     });
     // How an evaluator loop ended shows once the replay has reached that point.
+    // A handoff run shows the path so far, and at its end how it ended.
+    const handing = handoffProgress(events, player.cursor);
+    const handDesign = events.find((e) => e.type === "run_start")?.design;
+    if (handing && player.cursor > 0) items.push(handoffPathView({ doc, t, design: handDesign, path: handing.path }));
+    const handed = handoffOutcome(events);
+    if (handed && player.cursor > events.findIndex((e) => e.type === "done")) items.push(handoffNotice({ doc, t, design: handDesign, outcome: handed }));
     const loop = loopOutcome(events);
     if (loop && player.cursor > events.findIndex((e) => e.type === "loop_end")) items.push(loopNotice({ doc, t, loop }));
     banners.replaceChildren(...items);

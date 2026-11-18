@@ -86,7 +86,9 @@ export function arrowsOf(design, pos) {
         out.push({ key: `${from}>${to}`, from, to, kind: "edge", d: `M ${s.x1} ${s.y1} L ${s.x2} ${s.y2}`, edge });
       }
     } else {
-      const s = straight(pos, edge.from, edge.to);
+      // A handoff with arrows both ways between two agents: each arrow moves aside, so they run side by side.
+      const bothWays = design.pattern === "handoff" && design.edges.some((o) => o.from === edge.to && o.to === edge.from);
+      const s = straight(pos, edge.from, edge.to, bothWays ? -TWO_WAY_GAP : 0);
       out.push({ key: `${edge.from}>${edge.to}`, from: edge.from, to: edge.to, kind: "edge", d: `M ${s.x1} ${s.y1} L ${s.x2} ${s.y2}`, edge });
     }
   }

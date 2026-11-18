@@ -407,3 +407,59 @@ test("layout puts the writer before the evaluator", () => {
   const x = (id) => nodes.find((n) => n.id === id).x;
   assert.ok(x("writer") < x("evaluator"));
 });
+
+// ---- handoff ----
+test("handoff: the first agent added is the start", () => {
+  const editor = createEditor("handoff");
+  const a = add(editor, "planner");
+  add(editor, "writer");
+  assert.equal(editor.start(), a);
+  assert.equal(editor.design().start, a);
+});
+
+test("handoff: setStart changes it and unknown ids are ignored", () => {
+  const editor = createEditor("handoff");
+  add(editor, "planner");
+  const b = add(editor, "writer");
+  editor.setStart(b);
+  assert.equal(editor.start(), b);
+  editor.setStart("nobody");
+  assert.equal(editor.start(), b);
+});
+
+test("handoff: removing the start agent moves it to the first remaining agent", () => {
+  const editor = createEditor("handoff");
+  const a = add(editor, "planner");
+  const b = add(editor, "writer");
+  editor.removeNode(a);
+  assert.equal(editor.start(), b);
+  editor.removeNode(b);
+  assert.equal(editor.start(), undefined);
+  assert.equal("start" in editor.design(), false);
+});
+
+test("handoff: a design with the start and an edge passes validateDesign; both directions are allowed, a duplicate is not", () => {
+  const editor = createEditor("handoff");
+  const a = add(editor, "planner");
+  const b = add(editor, "writer");
+  assert.equal(editor.connect(a, b).ok, true);
+  assert.equal(editor.connect(b, a).ok, true);
+  assert.equal(editor.connect(a, b).code, "edge.duplicate");
+  assert.equal(editor.connect(a, a).code, "edge.self");
+  assert.deepEqual(validateDesign(editor.design()).errors, []);
+});
+
+test("handoff: layout puts the start first and the agents it hands to next", () => {
+  const editor = createEditor("handoff");
+  const a = add(editor, "planner");
+  const b = add(editor, "researcher");
+  const c = add(editor, "writer");
+  const d = add(editor, "critic");
+  editor.connect(a, b);
+  editor.connect(b, c);
+  editor.setStart(b);
+  const at = (id) => layoutDesign(editor.design(), { orientation: "horizontal" }).nodes.find((n) => n.id === id);
+  assert.equal(at(b).x, 0);
+  assert.equal(at(c).x, 1);
+  assert.ok(at(d).x > at(c).x, "an agent not reached goes after the others");
+});

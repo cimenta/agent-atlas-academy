@@ -15,6 +15,7 @@ import * as parallel from "./runners/parallel.js";
 import * as supervisor from "./runners/supervisor.js";
 import * as debate from "./runners/debate.js";
 import * as evaluator from "./runners/evaluator.js";
+import * as handoff from "./runners/handoff.js";
 
 export const RUNNERS = {
   sequential: sequential.run,
@@ -22,6 +23,7 @@ export const RUNNERS = {
   supervisor: supervisor.run,
   debate: debate.run,
   evaluator: evaluator.run,
+  handoff: handoff.run,
 };
 
 // callFor(node) gives the provider call of an agent that names its own key slot; without it every agent uses `call`.

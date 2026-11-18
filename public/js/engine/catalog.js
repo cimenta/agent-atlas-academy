@@ -60,7 +60,7 @@ export const providersOf = (design, fallback = "anthropic") => {
 export const paidOnlyModelUsed = (design, provider) =>
   (design?.nodes ?? []).some((n) => providerCatalog(nodeProvider(n, provider)).models.find((m) => m.key === n.model)?.freeTier === false);
 
-const GENERAL = ["sequential", "parallel", "supervisor"];
+const GENERAL = ["sequential", "parallel", "supervisor", "handoff"];
 
 // The longest text of the criteria an evaluator judges by (evaluator loop).
 export const CRITERIA_MAX = 1000;

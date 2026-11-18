@@ -29,8 +29,8 @@ const debate = () => ({
   rounds: 2,
 });
 
-test("the catalog lists five patterns, three models and the agent types", () => {
-  assert.deepEqual(PATTERNS, ["sequential", "parallel", "supervisor", "debate", "evaluator"]);
+test("the catalog lists six patterns, three models and the agent types", () => {
+  assert.deepEqual(PATTERNS, ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff"]);
   assert.deepEqual(MODELS.map((m) => m.key), ["fast", "balanced", "strong"]);
   for (const key of ["planner", "researcher", "critic", "writer", "supervisor", "combiner", "debater", "judge", "evaluator", "free"]) {
     assert.ok(AGENT_TYPES[key], key);
@@ -292,4 +292,50 @@ test("agent types keep to their patterns for the evaluator loop", () => {
   assert.ok(codes(validateDesign(withCritic)).includes("node.agentNotAllowed"));
   const inSequential = { pattern: "sequential", nodes: [node("evaluator", "evaluator")], edges: [] };
   assert.ok(codes(validateDesign(inSequential)).includes("node.agentNotAllowed"));
+});
+
+// ---- handoff ----
+const handoffDesign = (extra = {}) => ({
+  pattern: "handoff",
+  nodes: [node("planner", "planner"), node("researcher", "researcher"), node("writer", "writer")],
+  edges: [edge("planner", "researcher"), edge("researcher", "writer")],
+  start: "planner",
+  ...extra,
+});
+
+test("handoff design with a start and arrows is valid", () => {
+  assert.deepEqual(validateDesign(handoffDesign()), { ok: true, errors: [] });
+  assert.ok(PATTERNS.includes("handoff"));
+});
+
+test("handoff: one agent gives hand.nodes", () => {
+  const one = handoffDesign({ nodes: [node("planner", "planner")], edges: [] });
+  assert.ok(codes(validateDesign(one)).includes("hand.nodes"));
+});
+
+test("handoff: a missing, non-string or unknown start gives hand.start", () => {
+  for (const start of [undefined, 5, "nobody"]) assert.ok(codes(validateDesign(handoffDesign({ start }))).includes("hand.start"), String(start));
+});
+
+test("handoff: a start with no outgoing arrow gives hand.edges", () => {
+  assert.ok(codes(validateDesign(handoffDesign({ start: "writer" }))).includes("hand.edges"));
+});
+
+test("handoff: cycles, arrows both ways and an unreachable agent are valid", () => {
+  const both = handoffDesign({ edges: [edge("planner", "researcher"), edge("researcher", "planner"), edge("researcher", "writer"), edge("writer", "planner")] });
+  assert.equal(validateDesign(both).ok, true);
+  const lonely = handoffDesign({ edges: [edge("planner", "researcher")] });
+  assert.equal(validateDesign(lonely).ok, true);
+});
+
+test("handoff: a self edge gives edge.self", () => {
+  assert.ok(codes(validateDesign(handoffDesign({ edges: [edge("planner", "researcher"), edge("writer", "writer")] }))).includes("edge.self"));
+});
+
+test("handoff allows the general agent types and refuses the special ones", () => {
+  for (const agent of ["planner", "researcher", "critic", "writer", "free"]) assert.ok(AGENT_TYPES[agent].patterns.includes("handoff"), agent);
+  for (const agent of ["supervisor", "combiner", "debater", "judge", "evaluator"]) {
+    const bad = handoffDesign({ nodes: [node("planner", "planner"), node("x", agent)], edges: [edge("planner", "x")] });
+    assert.ok(codes(validateDesign(bad)).includes("node.agentNotAllowed"), agent);
+  }
 });

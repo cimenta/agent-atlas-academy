@@ -122,3 +122,22 @@ test("the mock evaluator can be set to accept at round 1, 3, or never", async ()
   const never = await mockRun({ evaluatorAcceptsAt: 0 });
   assert.deepEqual({ r: never.end.result, n: never.end.round }, { r: "not_accepted", n: 3 });
 });
+
+// ---- handoff ----
+const handDesign = (n) => ({
+  pattern: "handoff",
+  start: "n0",
+  nodes: Array.from({ length: n }, (_, i) => ({ id: `n${i}`, agent: "writer", model: "fast", search: false })),
+  edges: [{ from: "n0", to: "n1" }],
+});
+
+test("activationsOf a handoff design is two per agent, never more than the step limit", () => {
+  assert.equal(activationsOf(handDesign(3), LIMIT_DEFAULTS), 6);
+  assert.equal(activationsOf(handDesign(3), { ...LIMIT_DEFAULTS, maxSteps: 4 }), 4);
+});
+
+test("limitWarning flags a handoff design with 8 agents and 6 steps", async () => {
+  const { limitWarning } = await import("../public/js/engine/estimate.js");
+  assert.equal(limitWarning(handDesign(8), { ...LIMIT_DEFAULTS, maxSteps: 6 }).steps, true);
+  assert.equal(limitWarning(handDesign(3), LIMIT_DEFAULTS), null);
+});

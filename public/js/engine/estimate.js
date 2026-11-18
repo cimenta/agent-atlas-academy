@@ -13,6 +13,8 @@ export function activationsOf(design, limits) {
     return debaters * design.rounds + 1;
   }
   if (design.pattern === "evaluator") return 2 * design.rounds;
+  // The path depends on the agents' choices; two turns for each agent is a typical upper estimate.
+  if (design.pattern === "handoff") return Math.min(maxSteps, 2 * nodes.length);
   if (design.pattern === "supervisor") {
     const workers = nodes.filter((n) => n.agent !== "supervisor").length;
     return Math.min(maxSteps, 2 * workers + 2);

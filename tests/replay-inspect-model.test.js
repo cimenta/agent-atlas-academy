@@ -199,3 +199,53 @@ test("loopOutcome reads the three endings and is null without a loop_end event",
   }
   assert.equal(loopOutcome(evalEvents(3, start("writer"))), null);
 });
+
+// ---- handoff ----
+import { handoffProgress, handoffPath, handoffOutcome } from "../public/js/replay/inspect-model.js";
+
+const hDesign = { pattern: "handoff", start: "a", nodes: [{ id: "a", agent: "planner" }, { id: "b", agent: "writer" }], edges: [{ from: "a", to: "b" }, { from: "b", to: "a" }] };
+const hEvents = (done = { type: "done", outcome: "finished" }) => [
+  { type: "run_start", task: "t", pattern: "handoff", design: hDesign },
+  { type: "agent_start", agent: "a" },
+  { type: "handoff", from: "a", to: "b", note: "n1" },
+  { type: "agent_start", agent: "b" },
+  { type: "handoff", from: "b", to: "a", note: "n2" },
+  { type: "agent_start", agent: "a" },
+  done,
+];
+
+test("handoffProgress: before the first event, after the start, after a handoff, and on a return to an earlier agent", () => {
+  const events = hEvents();
+  assert.deepEqual(handoffProgress(events, 1), { holder: "a", handoffs: 0, path: ["a"] });
+  assert.deepEqual(handoffProgress(events, 2), { holder: "a", handoffs: 0, path: ["a"] });
+  assert.deepEqual(handoffProgress(events, 3), { holder: "b", handoffs: 1, path: ["a", "b"] });
+  assert.deepEqual(handoffProgress(events, 4), { holder: "b", handoffs: 1, path: ["a", "b"] });
+  assert.deepEqual(handoffProgress(events, 7), { holder: "a", handoffs: 2, path: ["a", "b", "a"] });
+});
+
+test("handoffProgress and handoffPath are null for other patterns; handoffPath of a run without handoff is the start", () => {
+  const debate = [{ type: "run_start", design: { pattern: "debate", nodes: [], edges: [], rounds: 1 } }];
+  assert.equal(handoffProgress(debate, 1), null);
+  assert.equal(handoffPath(debate), null);
+  assert.deepEqual(handoffPath(hEvents()), ["a", "b", "a"]);
+  assert.deepEqual(handoffPath([{ type: "run_start", design: hDesign }, { type: "agent_start", agent: "a" }]), ["a"]);
+});
+
+test("handoffOutcome: finished by the last agent, stopped by a limit, nothing for failed or unfinished runs", () => {
+  assert.deepEqual(handoffOutcome(hEvents()), { result: "finished", handoffs: 2, by: "a" });
+  assert.deepEqual(handoffOutcome(hEvents({ type: "done", outcome: "stopped_limit", reason: "steps" })), { result: "stopped", handoffs: 2, by: "a", reason: "steps" });
+  assert.equal(handoffOutcome(hEvents({ type: "done", outcome: "failed" })), null);
+  assert.equal(handoffOutcome(hEvents().slice(0, 4)), null);
+});
+
+test("handoffSender reads the sender from a message that carries a note; the first message of the start agent has none", async () => {
+  const { handoffSender } = await import("../public/js/replay/inspect-model.js");
+  assert.equal(handoffSender("Task: t\n\nHanded over by Planner:\nnote text\n\nYou may hand over to: b (Writer)"), "Planner");
+  assert.equal(handoffSender("Task: t\n\nYou may hand over to: b (Writer)"), null);
+  assert.equal(handoffSender(5), null);
+});
+
+test("handoffProgress: between a handoff and the next agent_start the holder is the agent the handoff went to", () => {
+  const events = hEvents().slice(0, 3);
+  assert.equal(handoffProgress(events, 3).holder, "b");
+});

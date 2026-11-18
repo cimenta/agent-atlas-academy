@@ -6,8 +6,8 @@ import { renderBlocks } from "./render.js";
 import { buildResultModel, buildStatistics, limitRows } from "./play-model.js";
 import { copyText, downloadFile, safeFileName } from "./download.js";
 import { formatDuration, formatUsd } from "./create/create-model.js";
-import { outcomeNotice, loopNotice } from "./outcome-view.js";
-import { loopOutcome } from "./replay/inspect-model.js";
+import { outcomeNotice, loopNotice, handoffNotice, handoffPathView } from "./outcome-view.js";
+import { loopOutcome, handoffOutcome, handoffPath } from "./replay/inspect-model.js";
 import { markText, searchBar } from "./text-search.js";
 import { paintModelTag } from "./provider-colors.js";
 
@@ -51,6 +51,9 @@ export function renderResult(ctx, run) {
   };
 
   const loop = loopOutcome(run.events);
+  const handed = handoffOutcome(run.events);
+  const handPath = handoffPath(run.events);
+  const handDesign = run.events.find((e) => e.type === "run_start")?.design;
   const answerView = () => {
     if (!answer) return h(doc, "p", { class: "notice" }, t("result.noText"));
     const cleanArticle = () => {
@@ -114,7 +117,7 @@ export function renderResult(ctx, run) {
     );
 
     search.run();
-    return h(doc, "div", { class: "answer-wrap" }, loop ? loopNotice({ doc, t, loop }) : "", h(doc, "div", { class: "answer-toolbar noprint" }, segment, copy, copied, exports), search.element, holder);
+    return h(doc, "div", { class: "answer-wrap" }, loop ? loopNotice({ doc, t, loop }) : "", handed ? handoffNotice({ doc, t, design: handDesign, outcome: handed }) : "", h(doc, "div", { class: "answer-toolbar noprint" }, segment, copy, copied, exports), search.element, holder);
   };
 
   const statsView = () => {
@@ -131,6 +134,7 @@ export function renderResult(ctx, run) {
       tile(num(stats.usage.searches), t("stats.searches")),
       tile(num(stats.calls), t("stats.calls")),
       ...(loop ? [tile(t(`stats.loop.${{ accepted: "accepted", not_accepted: "notAccepted", stopped: "stopped" }[loop.result]}`, { n: loop.round, total: loop.rounds }), t("stats.loop"))] : []),
+      ...(handPath ? [tile(String(handPath.length - 1), t("stats.handoffs"))] : []),
     );
     const table = h(
       doc,
@@ -198,6 +202,7 @@ export function renderResult(ctx, run) {
       "div",
       { class: "stats-wrap" },
       tiles,
+      ...(handPath ? [handoffPathView({ doc, t, design: handDesign, path: handPath })] : []),
       stats.perAgent.length ? h(doc, "h3", {}, t("result.perAgent"), help("result-agents", t("result.perAgent"))) : "",
       stats.perAgent.length ? table : "",
       limitsSection,

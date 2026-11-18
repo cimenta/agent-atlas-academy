@@ -23,7 +23,7 @@ import { createEditor } from "./editor-model.js";
 import { draft, useDefinition } from "./draft.js";
 import { deriveInspector } from "../replay/inspect-model.js";
 import { mountEditor } from "./editor-view.js";
-import { canRun, reviewSummary } from "./create-model.js";
+import { canRun, reviewSummary, handoffSkipper } from "./create-model.js";
 import { buildResultModel } from "../play-model.js";
 import { loadDefinition, definitionFromRun } from "./definition.js";
 
@@ -50,6 +50,12 @@ function patternIcon(doc, pattern) {
     c.setAttribute("fill", "currentColor");
     svg.append(c);
   };
+  // A ring round a dot: the agent that starts.
+  const circle = (x, y) => {
+    const c = doc.createElementNS(SVG_NS, "circle");
+    for (const [k, v] of Object.entries({ cx: x, cy: y, r: 8, fill: "none", stroke: "currentColor", "stroke-width": 1.5 })) c.setAttribute(k, String(v));
+    svg.append(c);
+  };
   const line = (x1, y1, x2, y2) => {
     const l = doc.createElementNS(SVG_NS, "line");
     for (const [k, v] of Object.entries({ x1, y1, x2, y2, stroke: "currentColor", "stroke-width": 1.5 })) l.setAttribute(k, String(v));
@@ -60,6 +66,7 @@ function patternIcon(doc, pattern) {
     parallel: () => [line(12, 10, 52, 20), line(12, 30, 52, 20), dot(12, 10), dot(12, 30), dot(52, 20)],
     supervisor: () => [line(12, 20, 52, 6), line(12, 20, 52, 16), line(12, 20, 52, 26), line(12, 20, 52, 36), dot(12, 20), dot(52, 6), dot(52, 16), dot(52, 26), dot(52, 36)],
     debate: () => [line(12, 10, 52, 20), line(12, 30, 52, 20), line(12, 10, 12, 30), dot(12, 10), dot(12, 30), dot(52, 20)],
+    handoff: () => [line(8, 20, 28, 20), line(28, 20, 56, 20), dot(8, 20), dot(28, 20), dot(56, 20), circle(8, 20)],
     evaluator: () => [line(12, 14, 52, 14), line(52, 14, 52, 30), line(52, 30, 12, 30), line(12, 30, 12, 14), dot(12, 14), dot(52, 14)],
   };
   shapes[pattern]();
@@ -427,7 +434,7 @@ export function renderCreate(ctx) {
       carryLimits ? carryLimits.element : "",
       draft.retry ? carryOnButton : "",
       h(doc, "div", { class: "field wide" }, h(doc, "label", { for: "cr-task" }, t("create.taskLabel"), help("create-task", t("create.taskLabel"))), taskInput, counter),
-      h(doc, "h3", {}, t("create.patternHeading"), help("create-pattern", t("create.patternHeading"))),
+      h(doc, "h3", {}, t("create.patternHeading"), help("create-pattern", t("create.patternHeading")), ...(draft.pattern === "handoff" ? [help("create-handoff", t("pattern.handoff"))] : [])),
       h(doc, "p", { class: "hint" }, t("create.patternHelp")),
       patternGroup,
       patternNotice,
@@ -500,7 +507,7 @@ export function renderCreate(ctx) {
     const earlier = resume ? deriveInspector(resume.events) : null;
     const failedIds = earlier ? earlier.order.filter((a) => earlier.agents[a].status === "error") : [];
     const offset = base.length > 0 ? (base.at(-1).t ?? 0) + 1000 : 0;
-    const seenHandoffs = new Set(base.filter((e) => e.type === "handoff").map((e) => `${e.from}>${e.to}>${e.note}`));
+    const skipHandoff = handoffSkipper(base);
 
     const id = resume ? resume.id : makeRunId(Date.now());
     const events = [...base];
@@ -633,7 +640,7 @@ export function renderCreate(ctx) {
       provider,
       onEvent: (event) => {
         // Carried on: the clock continues from the earlier try, and a handoff the earlier try already has is not shown twice.
-        if (resume && event.type === "handoff" && seenHandoffs.has(`${event.from}>${event.to}>${event.note}`)) return;
+        if (resume && event.type === "handoff" && skipHandoff(event)) return;
         const shifted = resume ? { ...event, t: (event.t ?? 0) + offset } : event;
         // A warning keeps the clock time it happened at, so a later look at the run shows which came from which try.
         const next = event.type === "warning" ? { ...shifted, at: Date.now() } : shifted;

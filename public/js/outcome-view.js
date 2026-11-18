@@ -1,5 +1,6 @@
 // The notice that says how a run ended: icon, message, time and cost.
 import { h } from "./dom.js";
+import { designLabel } from "./replay/inspect-model.js";
 import { describeOutcome, formatDuration, formatUsd, runOutcomeMessageKey } from "./create/create-model.js";
 
 // tryCost: for a run carried on after a failure, what this try alone cost (cost is then the whole run), so a retry of one
@@ -39,6 +40,30 @@ export function loopNotice({ doc, t, loop }) {
     doc,
     "div",
     { class: `notice outcome outcome-${parts.level}`, "data-ui": "loop-outcome", "data-loop": loop.result, role: "status" },
+    h(doc, "span", { class: "outcome-icon", "aria-hidden": "true" }, parts.icon),
+    h(doc, "span", { class: "outcome-text" }, h(doc, "strong", {}, t(parts.title, params)), " ", t(parts.body, params)),
+  );
+}
+
+// The path of a handoff run: the agents control went through, in order. The agent that holds control now (or ended the run) is marked.
+export function handoffPathView({ doc, t, design, path }) {
+  const items = [h(doc, "strong", {}, t("handoff.path"))];
+  path.forEach((id, i) => {
+    if (i > 0) items.push(h(doc, "span", { class: "path-arrow", "aria-hidden": "true" }, "→"));
+    items.push(h(doc, "span", { class: i === path.length - 1 ? "path-step now" : "path-step" }, designLabel(design, id)));
+  });
+  return h(doc, "div", { class: "handoff-path", "data-ui": "handoff-path" }, ...items);
+}
+
+// The notice that says how a handoff run ended: an agent finished it, or a limit stopped it and nobody finished.
+// `outcome` is what handoffOutcome gives.
+export function handoffNotice({ doc, t, design, outcome }) {
+  const params = { n: outcome.handoffs, name: designLabel(design, outcome.by) };
+  const parts = outcome.result === "finished" ? { level: "ok", icon: "✓", title: "handoff.finished", body: "handoff.finished.body" } : { level: "fail", icon: "■", title: "handoff.stopped", body: "handoff.stopped.body" };
+  return h(
+    doc,
+    "div",
+    { class: `notice outcome outcome-${parts.level}`, "data-ui": "handoff-outcome", "data-handoff": outcome.result, role: "status" },
     h(doc, "span", { class: "outcome-icon", "aria-hidden": "true" }, parts.icon),
     h(doc, "span", { class: "outcome-text" }, h(doc, "strong", {}, t(parts.title, params)), " ", t(parts.body, params)),
   );

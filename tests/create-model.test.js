@@ -110,3 +110,17 @@ test("the review summary says when an evaluator loop has no criteria", async () 
   assert.equal(reviewSummary({ design: design(""), limits: LIMIT_DEFAULTS }).emptyCriteria, true);
   assert.equal(reviewSummary({ design: design("Short."), limits: LIMIT_DEFAULTS }).emptyCriteria, false);
 });
+
+// ---- found in the final review of the handoff pattern ----
+import { handoffSkipper } from "../public/js/create/create-model.js";
+
+test("handoffSkipper skips only as many repeats of a handoff as the earlier try already has", () => {
+  const h = (note) => ({ type: "handoff", from: "a", to: "b", note });
+  const skip = handoffSkipper([h("N1"), h("N2"), h("N1")]);
+  assert.equal(skip(h("N1")), true);
+  assert.equal(skip(h("N1")), true);
+  assert.equal(skip(h("N1")), false, "a third N1 is a new handoff");
+  assert.equal(skip(h("N2")), true);
+  assert.equal(skip(h("N2")), false);
+  assert.equal(skip({ type: "handoff", from: "b", to: "a", note: "N1" }), false);
+});

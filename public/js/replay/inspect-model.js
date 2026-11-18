@@ -287,3 +287,44 @@ export function loopOutcome(events) {
   const rounds = events.find((e) => e.type === "run_start")?.design?.rounds;
   return { result: end.result, round: end.round, judged: end.judged === true, rounds: Number.isInteger(rounds) ? rounds : end.round };
 }
+
+// Where a handoff run stands at the cursor: who holds control (the agent that started most recently), how many handoffs
+// have happened and the path so far (the start, then each agent control went to). Null for other patterns.
+export function handoffProgress(events, cursor) {
+  const design = events.find((e) => e.type === "run_start")?.design;
+  if (design?.pattern !== "handoff") return null;
+  const seen = events.slice(0, cursor);
+  const moves = seen.filter((e) => e.type === "handoff");
+  const starts = seen.filter((e) => e.type === "agent_start");
+  const path = [design.start, ...moves.map((e) => e.to)];
+  // Between a handoff and the next agent_start, control already sits with the agent the handoff went to.
+  const lastMove = seen.findLastIndex((e) => e.type === "handoff");
+  const lastStart = seen.findLastIndex((e) => e.type === "agent_start");
+  const holder = lastMove > lastStart ? seen[lastMove].to : (starts.at(-1)?.agent ?? design.start);
+  return { holder, handoffs: moves.length, path };
+}
+
+// The whole path of a recorded handoff run. Null for other patterns.
+export function handoffPath(events) {
+  const design = events.find((e) => e.type === "run_start")?.design;
+  if (design?.pattern !== "handoff") return null;
+  return [design.start, ...events.filter((e) => e.type === "handoff").map((e) => e.to)];
+}
+
+// How a handoff run ended: finished (an agent decided the task was done) or stopped by a limit (nobody finished it).
+// { result, handoffs, by, reason? }. Null for other patterns and for runs that failed, wait for approval or have no end yet.
+export function handoffOutcome(events) {
+  const design = events.find((e) => e.type === "run_start")?.design;
+  if (design?.pattern !== "handoff") return null;
+  const done = events.find((e) => e.type === "done");
+  if (!done || (done.outcome !== "finished" && done.outcome !== "stopped_limit")) return null;
+  const handoffs = events.filter((e) => e.type === "handoff").length;
+  const by = events.filter((e) => e.type === "agent_start").at(-1)?.agent ?? design.start;
+  return done.outcome === "finished" ? { result: "finished", handoffs, by } : { result: "stopped", handoffs, by, ...(done.reason ? { reason: done.reason } : {}) };
+}
+
+// The agent a message was handed over by: the messages of a handoff run say "Handed over by <label>:". Null for any other text.
+export function handoffSender(text) {
+  const found = typeof text === "string" ? /Handed over by ([^:\r\n]+):/.exec(text) : null;
+  return found ? found[1].trim() : null;
+}

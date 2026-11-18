@@ -178,3 +178,12 @@ test("an evaluator loop has a dashed return arrow from the evaluator to the writ
   const arrows = arrowsOf(design, pos);
   assert.deepEqual(arrows.map((a) => [a.key, a.kind]), [["writer>evaluator", "edge"], ["evaluator>writer", "return"]]);
 });
+
+test("a handoff design draws an edge and its reverse as two separate paths", () => {
+  const design = { pattern: "handoff", start: "a", nodes: [{ id: "a", agent: "planner" }, { id: "b", agent: "writer" }], edges: [{ from: "a", to: "b" }, { from: "b", to: "a" }] };
+  const arrows = arrowsOf(design, autoPositions(design, { wide: true }));
+  assert.deepEqual(arrows.map((x) => x.key), ["a>b", "b>a"]);
+  assert.notEqual(arrows[0].d, arrows[1].d);
+  const [one, two] = arrows.map((x) => x.d.match(/-?[\d.]+/g).map(Number));
+  assert.notEqual(one[1], two[3], "the two arrows do not lie on the same line");
+});
