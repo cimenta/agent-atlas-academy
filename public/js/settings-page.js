@@ -496,6 +496,14 @@ export function renderSettings(ctx) {
     say(t("settings.playerSaved"));
   });
 
+  // Which layout the Create page has: the guided steps or the workspace.
+  const createLayoutSelect = h(doc, "select", { id: "set-create-layout", "data-ui": "create-layout" }, h(doc, "option", { value: "steps" }, t("settings.createSteps")), h(doc, "option", { value: "workspace" }, t("settings.createWorkspace")));
+  createLayoutSelect.value = settings.get().createLayout;
+  createLayoutSelect.addEventListener("change", () => {
+    settings.setCreateLayout(createLayoutSelect.value);
+    say(t("settings.createSaved"));
+  });
+
   // Keyboard shortcuts: an on/off box and the list of keys.
   const shortcutsBox = h(doc, "input", { id: "set-shortcuts", type: "checkbox" });
   shortcutsBox.checked = settings.get().shortcuts;
@@ -708,6 +716,9 @@ export function renderSettings(ctx) {
       h(doc, "h3", {}, t("settings.helpButtonsHeading"), help("settings-help-buttons", t("settings.helpButtonsHeading"))),
       h(doc, "p", {}, t("settings.helpButtonsIntro")),
       h(doc, "div", { class: "field checkbox" }, helpBox, h(doc, "label", { for: "set-help-buttons" }, t("settings.helpButtonsLabel"))),
+      h(doc, "h3", {}, t("settings.createHeading")),
+      h(doc, "p", {}, t("settings.createIntro")),
+      field("set-create-layout", t("settings.createLabel"), createLayoutSelect),
     ),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.playerHeading"), help("settings-player", t("settings.playerHeading"))), h(doc, "p", {}, t("settings.playerIntro")), field("set-player-layout", t("settings.playerLabel"), layoutSelect)),
     h(doc, "section", { class: "settings-section", "data-ui": "shortcuts-section" }, h(doc, "h2", {}, t("shortcuts.heading"), help("settings-shortcuts", t("shortcuts.heading"))), h(doc, "p", {}, t("shortcuts.intro")), h(doc, "div", { class: "field checkbox" }, shortcutsBox, h(doc, "label", { for: "set-shortcuts" }, t("shortcuts.enable"))), h(doc, "p", {}, t("shortcuts.changeHint")), shortcutList, resetKeys),

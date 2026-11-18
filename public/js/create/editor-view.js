@@ -8,6 +8,8 @@ import { AGENT_LIMIT_KEYS, agentLimitRange } from "../engine/agent-limits.js";
 import { TOOLS } from "../engine/tools.js";
 import { roleText } from "../engine/prompts.js";
 import { mayCondense } from "../engine/condense.js";
+import { innerTabs } from "./steps-view.js";
+import { agentTabIds, currentAgentTab } from "./agent-tabs.js";
 import { MULTI_RUN } from "../engine/spawn.js";
 import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, extentOf, isTwoWay, straight, turnArrows, TWO_WAY_GAP } from "./diagram-geometry.js";
 
@@ -16,7 +18,7 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 
 export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, getModels = (node) => MODELS, modelUi = null, webSearchAllowed = () => true, runLimits = () => ({ ...LIMIT_DEFAULTS, maxOutputTokens: OUTPUT_TOKENS.default }) }) {
   let selectedId = null;
-  let limitsOpen = false; // the Limits of this agent block stays open while the visitor works on it
+  let settingsTab = "tools"; // the tab of the agent settings that is open, kept while the visitor works on agents
   let connectFrom = null;
   let notice = "";
   let selectedEdge = null;
@@ -498,19 +500,14 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       editor.setNode(node.id, { onLimit: onLimit.value });
       changed();
     });
-    const details = h(
+    return h(
       doc,
-      "details",
-      { class: "agent-limits", "data-ui": "agent-limits", open: limitsOpen || count > 0 },
-      h(doc, "summary", {}, limitsIcon(), h(doc, "span", {}, t("editor.limits.title")), count > 0 ? h(doc, "span", { class: "limit-count", "data-ui": "agent-limits-count" }, t("editor.limits.count", { n: count })) : "", h(doc, "span", { class: "limit-spacer" }), h(doc, "span", { class: "limit-hint-open", "data-ui": "agent-limits-hint-open" }, t("editor.limits.open")), h(doc, "span", { class: "limit-hint-close", "data-ui": "agent-limits-hint-close" }, t("editor.limits.close")), h(doc, "span", { class: "limit-chevron", "aria-hidden": "true" })),
+      "div",
+      { class: "agent-limits", "data-ui": "agent-limits" },
       h(doc, "p", { class: "hint" }, t("editor.limits.help")),
       ...rows,
       h(doc, "div", { class: "field" }, h(doc, "label", { for: "ed-on-limit" }, t("editor.limits.onLimit.label")), onLimit),
     );
-    details.addEventListener("toggle", () => {
-      limitsOpen = details.open;
-    });
-    return details;
   }
 
   function settingsBlock(design) {
@@ -532,7 +529,9 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       editor.setNode(node.id, { search: search.checked });
       changed();
     });
-    const parts = [h(doc, "h4", {}, t("editor.settings", { name: nodeLabel(node) })), field("ed-model", t("editor.model"), model)];
+    const remove = h(doc, "button", { type: "button", class: "danger small", "data-focus-key": "remove-node" }, t("editor.remove"));
+    remove.addEventListener("click", () => removeSelected());
+    const parts = [h(doc, "div", { class: "editor-settings-head" }, h(doc, "h4", {}, t("editor.settings", { name: nodeLabel(node) })), remove), field("ed-model", t("editor.model"), model)];
     if (node.agent === "evaluator" || (design.selfCritique === true && node.agent === "writer")) {
       // What the evaluator judges by, and how many rounds the loop may take.
       const criteria = h(doc, "textarea", { id: "ed-criteria", rows: 5, maxlength: CRITERIA_MAX, "data-ui": "evaluator-criteria" });
@@ -560,26 +559,29 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       });
       parts.push(h(doc, "div", { class: "field checkbox" }, startBox, h(doc, "label", { for: "ed-start" }, isStart ? t("editor.startsRun") : t("editor.makeStart"))), h(doc, "p", { class: "hint" }, t("editor.startHelp")));
     }
+    const toolsPane = [];
     const searchRow = h(doc, "div", { class: "field checkbox" }, search, h(doc, "label", { for: "ed-search" }, t("editor.search")));
     // Tools: an agent gets only the tools it needs.
-    parts.push(h(doc, "h4", { class: "editor-tools-heading" }, t("editor.toolsHeading"), helpIcon({ doc, t, id: "create-tools", name: t("editor.toolsHeading") })));
-    parts.push(searchRow);
-    if (TOOLS.web_search?.extraFee) parts.push(h(doc, "p", { class: "notice" }, t("editor.searchFee")));
-    parts.push(h(doc, "p", { class: "hint" }, t("editor.toolsNote")));
-    if (node.search === true && !webSearchAllowed()) parts.push(h(doc, "p", { class: "limit-warning", "data-ui": "search-off-warning" }, t("editor.searchOffInSettings")));
+    toolsPane.push(h(doc, "h4", { class: "editor-tools-heading" }, t("editor.toolsHeading"), helpIcon({ doc, t, id: "create-tools", name: t("editor.toolsHeading") })));
+    toolsPane.push(searchRow);
+    if (TOOLS.web_search?.extraFee) toolsPane.push(h(doc, "p", { class: "notice" }, t("editor.searchFee")));
+    toolsPane.push(h(doc, "p", { class: "hint" }, t("editor.toolsNote")));
+    if (node.search === true && !webSearchAllowed()) toolsPane.push(h(doc, "p", { class: "limit-warning", "data-ui": "search-off-warning" }, t("editor.searchOffInSettings")));
+    const approvalPane = [];
     // Approval: the run stops before this agent and waits for a click.
     const approve = h(doc, "input", { id: "ed-approve", type: "checkbox", checked: node.approve === true, "data-ui": "agent-approve" });
     approve.addEventListener("change", () => {
       editor.setNode(node.id, { approve: approve.checked });
       changed();
     });
-    parts.push(h(doc, "h4", { class: "editor-approval-heading" }, t("editor.approvalHeading"), helpIcon({ doc, t, id: "create-approval", name: t("editor.approvalHeading") })));
-    parts.push(h(doc, "div", { class: "field checkbox" }, approve, h(doc, "label", { for: "ed-approve" }, t("editor.approve"))));
-    parts.push(h(doc, "p", { class: "hint" }, t("editor.approveNote")));
+    approvalPane.push(h(doc, "h4", { class: "editor-approval-heading" }, t("editor.approvalHeading"), helpIcon({ doc, t, id: "create-approval", name: t("editor.approvalHeading") })));
+    approvalPane.push(h(doc, "div", { class: "field checkbox" }, approve, h(doc, "label", { for: "ed-approve" }, t("editor.approve"))));
+    approvalPane.push(h(doc, "p", { class: "hint" }, t("editor.approveNote")));
+    const notebookPane = [];
     // The shared notebook: what this agent may do with it. Only when the run has the notebook switched on.
     if (editor.notebookOn()) {
       const choices = editor.notebookChoices(node.id);
-      parts.push(h(doc, "h4", { class: "editor-notebook-heading" }, t("editor.notebookHeading"), helpIcon({ doc, t, id: "create-memory", name: t("editor.notebookHeading") })));
+      notebookPane.push(h(doc, "h4", { class: "editor-notebook-heading" }, t("editor.notebookHeading"), helpIcon({ doc, t, id: "create-memory", name: t("editor.notebookHeading") })));
       const group = h(doc, "div", { class: "field", role: "radiogroup", "aria-label": t("editor.notebookHeading"), "data-ui": "agent-notebook" });
       for (const choice of choices) {
         const radio = h(doc, "input", { id: `ed-notebook-${choice}`, type: "radio", name: "ed-notebook", value: choice, checked: (node.notebook ?? "both") === choice, "data-ui": `notebook-${choice}` });
@@ -589,23 +591,53 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         });
         group.append(h(doc, "div", { class: "field checkbox" }, radio, h(doc, "label", { for: `ed-notebook-${choice}` }, t(`editor.notebook.${choice}`))));
       }
-      parts.push(group, h(doc, "p", { class: "hint" }, t(`editor.notebook.hint.${node.notebook ?? "both"}`)));
-      if (choices.length < 4) parts.push(h(doc, "p", { class: "hint", "data-ui": "notebook-decision" }, t("editor.notebook.decision")));
+      notebookPane.push(group, h(doc, "p", { class: "hint" }, t(`editor.notebook.hint.${node.notebook ?? "both"}`)));
+      if (choices.length < 4) notebookPane.push(h(doc, "p", { class: "hint", "data-ui": "notebook-decision" }, t("editor.notebook.decision")));
     }
+    const condensePane = [];
     // Condensing: one extra call shortens what earlier agents wrote before this agent reads it. Not for an agent whose reply is a decision.
-    parts.push(h(doc, "h4", { class: "editor-condense-heading" }, t("editor.condenseHeading"), helpIcon({ doc, t, id: "create-memory", name: t("editor.condenseHeading") })));
+    condensePane.push(h(doc, "h4", { class: "editor-condense-heading" }, t("editor.condenseHeading"), helpIcon({ doc, t, id: "create-memory", name: t("editor.condenseHeading") })));
     if (mayCondense(node.agent, editor.design().pattern)) {
       const condense = h(doc, "input", { id: "ed-condense", type: "checkbox", checked: node.condense === true, "data-ui": "agent-condense" });
       condense.addEventListener("change", () => {
         editor.setNode(node.id, { condense: condense.checked });
         changed();
       });
-      parts.push(h(doc, "div", { class: "field checkbox" }, condense, h(doc, "label", { for: "ed-condense" }, t("editor.condense"))));
-      parts.push(h(doc, "p", { class: "hint" }, t("editor.condenseHint")));
+      condensePane.push(h(doc, "div", { class: "field checkbox" }, condense, h(doc, "label", { for: "ed-condense" }, t("editor.condense"))));
+      condensePane.push(h(doc, "p", { class: "hint" }, t("editor.condenseHint")));
     } else {
-      parts.push(h(doc, "p", { class: "hint", "data-ui": "condense-decision" }, t("editor.condenseDecision")));
+      condensePane.push(h(doc, "p", { class: "hint", "data-ui": "condense-decision" }, t("editor.condenseDecision")));
     }
-    parts.push(limitsBlock(node));
+    const limitsPane = [limitsBlock(node)];
+    if (!type.free) {
+      // The built-in agents are defined by a fixed prompt; show it so nothing is hidden.
+      parts.push(
+        h(
+          doc,
+          "details",
+          { class: "agent-prompt", "data-ui": "agent-prompt", open: true },
+          h(doc, "summary", {}, t("editor.prompt")),
+          h(doc, "pre", {}, roleText(node, design.pattern)),
+          h(doc, "p", { class: "hint" }, t("editor.promptHelp")),
+        ),
+      );
+    }
+    // The settings that are not about the model sit in tabs, so the panel stays short.
+    const panes = { tools: toolsPane, condense: condensePane, approval: approvalPane, notebook: notebookPane, limits: limitsPane };
+    const tabIds = agentTabIds({ notebookOn: editor.notebookOn() });
+    settingsTab = currentAgentTab(settingsTab, tabIds);
+    const limitCount = Object.keys(node.limits ?? {}).length;
+    const tabLabel = { tools: t("editor.toolsHeading"), condense: t("editor.condenseHeading"), approval: t("editor.approvalHeading"), notebook: t("editor.notebookHeading"), limits: `${t("editor.tab.limits")}${limitCount > 0 ? ` (${limitCount})` : ""}` };
+    const paneHost = h(doc, "div", { class: "agent-tab-panes" });
+    const paneEls = new Map(tabIds.map((id) => [id, h(doc, "div", { class: "agent-tab-pane", role: "tabpanel", "data-ui": `agent-pane-${id}`, hidden: id !== settingsTab }, ...panes[id])]));
+    paneHost.append(...paneEls.values());
+    const tabs = innerTabs({ doc, t, tabs: tabIds.map((id) => ({ id, label: tabLabel[id] })), current: settingsTab, onSelect: (id) => {
+      settingsTab = id;
+      for (const [pid, el] of paneEls) el.hidden = pid !== id;
+      tabs.update(id);
+    } });
+    tabs.element.setAttribute("data-ui", "agent-tabs");
+    parts.push(tabs.element, paneHost);
     if (type.free) {
       const name = h(doc, "input", { id: "ed-name", type: "text", maxlength: 40, value: node.name ?? "" });
       name.addEventListener("input", () => {
@@ -644,22 +676,6 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       });
       parts.push(field("ed-stance", t("editor.stance"), stance));
     }
-    if (!type.free) {
-      // The built-in agents are defined by a fixed prompt; show it so nothing is hidden.
-      parts.push(
-        h(
-          doc,
-          "details",
-          { class: "agent-prompt", "data-ui": "agent-prompt", open: true },
-          h(doc, "summary", {}, t("editor.prompt")),
-          h(doc, "pre", {}, roleText(node, design.pattern)),
-          h(doc, "p", { class: "hint" }, t("editor.promptHelp")),
-        ),
-      );
-    }
-    const remove = h(doc, "button", { type: "button", class: "danger", "data-focus-key": "remove-node" }, t("editor.remove"));
-    remove.addEventListener("click", () => removeSelected());
-    parts.push(remove);
     return h(doc, "section", { class: "editor-settings", "aria-label": t("editor.settings", { name: nodeLabel(node) }) }, ...parts);
   }
 

@@ -2,6 +2,7 @@
 import { AGENT_TYPES, TASK_MAX_CHARS, pricesFor } from "../engine/catalog.js";
 import { estimateRun, limitWarning, emptyCriteria } from "../engine/estimate.js";
 import { TOOLS } from "../engine/tools.js";
+import { isSlot } from "../key-slots.js";
 
 // keyLocked: a key is saved on this computer but not unlocked yet, so the reason says to unlock it.
 // A carried-on run: the earlier try already holds some handoffs, and the new try replays them. This returns a function
@@ -37,6 +38,17 @@ export function reviewSummary({ design, limits, provider = "anthropic" }) {
     emptyCriteria: emptyCriteria(design),
     hasSearch: design.nodes.some((n) => n.search === true && TOOLS.web_search.extraFee === true),
   };
+}
+
+// The rows of the agents table in step 3: who the agent is, which provider and model it uses and whether that costs money.
+// slotName(slot): the name of the provider, slotIsFree(slot): the key is on a free tier, modelInfo(slot, key): { label, id } of the model,
+// fallbackSlot: the slot of an agent that names none (a loaded definition).
+export function agentRows({ design, slotName, slotIsFree, modelInfo, fallbackSlot }) {
+  return design.nodes.map((n) => {
+    const slot = isSlot(n.slot) ? n.slot : fallbackSlot;
+    const model = modelInfo(slot, n.model);
+    return { id: n.id, label: n.name || AGENT_TYPES[n.agent]?.label || n.agent, slot, provider: slotName(slot), modelLabel: model.label, modelId: model.id, paid: !slotIsFree(slot), search: n.search === true, custom: n.custom === true };
+  });
 }
 
 const OUTCOMES = new Set(["finished", "stopped_user", "stopped_limit", "interrupted", "failed", "waiting_approval"]);

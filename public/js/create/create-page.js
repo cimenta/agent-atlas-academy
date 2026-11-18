@@ -20,12 +20,14 @@ import { pendingApprovals, approvedAgents } from "../engine/approval.js";
 import { mountLiveReplay } from "../replay/view.js";
 import { createBatchedSaver } from "../storage/runs-store.js";
 import { createEditor } from "./editor-model.js";
-import { draft, useDefinition } from "./draft.js";
+import { draft, useDefinition, resetDecisions, decideLoaded, resetForLoad, showKeyStep } from "./draft.js";
 import { deriveInspector } from "../replay/inspect-model.js";
 import { mountEditor } from "./editor-view.js";
-import { canRun, reviewSummary, handoffSkipper } from "./create-model.js";
+import { canRun, reviewSummary, handoffSkipper, agentRows } from "./create-model.js";
 import { buildResultModel } from "../play-model.js";
 import { loadDefinition, definitionFromRun } from "./definition.js";
+import { STEPS, stepStatus, navState, stepAfterChange, missing, footHint, toggleSlot, modelValid, setDefaultKeepingAgents, workspaceLocked, workspaceEstimateUsd } from "./steps-model.js";
+import { stepBar, footer, partHeading, innerTabs, workspaceBar, statusIcon } from "./steps-view.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const LIMIT_FIELDS = [
@@ -107,11 +109,10 @@ export function renderCreate(ctx) {
   // A ? next to a heading: it opens that section of Help.
   const help = (id, name) => helpIcon({ doc, t, id, name });
   const hasKey = (id) => vaultFor(id).getSessionKey() !== null || vaultFor(id).hasStoredKey();
-  // The visitor may choose several key slots (Claude, Gemini free, Gemini paid). Until a choice is made it is the first one with a key.
-  const chosenSlots = () => {
-    if (!Array.isArray(draft.slots) || draft.slots.length === 0 || !draft.slots.every(isSlot)) draft.slots = [SLOT_IDS.find(hasKey) ?? "anthropic"];
-    return draft.slots;
-  };
+  // The student may switch on several key slots (Claude, Gemini free, Gemini paid). Nothing has a default: none is on until they decide.
+  const chosenSlots = () => (Array.isArray(draft.slots) && draft.slots.every(isSlot) ? draft.slots : []);
+  // The slots the page works with: the chosen ones, or while none is chosen the first one with a key (the diagram stays closed then).
+  const workingSlots = () => (chosenSlots().length > 0 ? chosenSlots() : [SLOT_IDS.find(hasKey) ?? "anthropic"]);
   const slotName = (id) => (slotProvider(id) === "google" ? t(slotIsFree(id) ? "create.geminiFree" : "create.geminiPaid") : providerCatalog(slotProvider(id)).label);
   // The models a slot offers: a free Gemini key offers only the models that have a free tier.
   const modelsOfSlot = (slot) => {
@@ -130,20 +131,31 @@ export function renderCreate(ctx) {
   };
   // The default model must be one of the chosen slots' models; agents whose choice is gone return to it.
   const keepModels = () => {
-    const current = draft.editor.defaultModel();
-    const ok = current && chosenSlots().includes(current.slot) && modelsOfSlot(current.slot).some((m) => m.key === current.model);
-    if (!ok) {
-      const slot = chosenSlots()[0];
-      const list = modelsOfSlot(slot);
-      draft.editor.setDefaultModel({ slot, model: (list.find((m) => m.key === DEFAULT_MODEL) ?? list[0]).key });
+    // A loaded definition counts as decided: its providers are the ones its agents use (else the first one with a key).
+    if (draft.decisions.providers && chosenSlots().length === 0) {
+      const named = [...new Set(draft.editor.design().nodes.map((n) => n.slot).filter(isSlot))];
+      draft.slots = named.length > 0 ? named : [workingSlots()[0]];
     }
-    draft.editor.keepSlots((node) => chosenSlots().includes(node.slot) && modelsOfSlot(node.slot).some((m) => m.key === node.model));
+    const slots = workingSlots();
+    const current = draft.editor.defaultModel();
+    if (!modelValid(current, slots, modelsOfSlot)) {
+      const slot = slots[0];
+      const list = modelsOfSlot(slot);
+      const choice = { slot, model: (list.find((m) => m.key === DEFAULT_MODEL) ?? list[0]).key };
+      // A loaded definition has no default model yet: its agents keep the models they have.
+      if (current === null) setDefaultKeepingAgents(draft.editor, choice, (n) => slots.includes(n.slot) && modelsOfSlot(n.slot).some((m) => m.key === n.model));
+      else draft.editor.setDefaultModel(choice);
+      // The default model the student chose belonged to a provider that is switched off now: they choose again.
+      if (current !== null) draft.decisions.model = false;
+    }
+    draft.editor.keepSlots((node) => slots.includes(node.slot) && modelsOfSlot(node.slot).some((m) => m.key === node.model));
+    if (chosenSlots().length === 0) Object.assign(draft.decisions, { providers: false, model: false });
   };
-  // The slots the agents use (the chosen ones while the diagram is empty), each once.
+  // The slots the agents use (the working ones while the diagram is empty), each once.
   const usedSlots = (design) => {
     const slots = [];
     for (const n of design.nodes) if (isSlot(n.slot) && !slots.includes(n.slot)) slots.push(n.slot);
-    return slots.length > 0 ? slots : [chosenSlots()[0]];
+    return slots.length > 0 ? slots : [workingSlots()[0]];
   };
   // Retry carries on with the limits of Settings when the box is checked, else with the limits the run had.
   const withLimitChoice = (record, useCurrent) => (useCurrent ? withCurrentLimits(record, ctx.settings.get().limits) : record);
@@ -178,16 +190,17 @@ export function renderCreate(ctx) {
           const button = h(
             doc,
             "button",
-            { type: "button", class: "pattern-button", "aria-pressed": String(draft.pattern === p), "data-pattern": p },
+            { type: "button", class: "pattern-button", "aria-pressed": String(draft.decisions.pattern && draft.pattern === p), "data-pattern": p },
             patternIcon(doc, p),
             h(doc, "strong", {}, t(`pattern.${p}`)),
             h(doc, "span", { class: "palette-help" }, t(`create.pattern.${p}`)),
           );
           button.addEventListener("click", () => {
-            if (draft.pattern === p) return;
+            if (draft.decisions.pattern && draft.pattern === p) return;
             const hadNodes = draft.editor.design().nodes.length > 0;
             if (hadNodes && !doc.defaultView.confirm(t("create.patternConfirm"))) return;
             draft.pattern = p;
+            draft.decisions.pattern = true;
             draft.editor.reset(p, { criteria: t("editor.criteriaExample") });
             editorHandle.refresh();
             patternNotice.textContent = hadNodes ? t("create.patternChanged") : "";
@@ -208,40 +221,48 @@ export function renderCreate(ctx) {
     const defaultHost = h(doc, "div", { class: "field default-model", "data-ui": "default-model-field" });
     const drawDefaultModel = () => {
       const current = draft.editor.defaultModel();
-      const select = h(doc, "select", { id: "cr-default-model", "data-ui": "default-model" }, ...choiceGroups().map((g) => h(doc, "optgroup", { label: g.label }, ...g.options.map((o) => h(doc, "option", { value: o.value, selected: current !== null && o.value === choiceValue(current.slot, current.model) }, o.label)))));
+      const none = chosenSlots().length === 0;
+      // No model is shown as chosen until the student chooses one.
+      const select = h(doc, "select", { id: "cr-default-model", "data-ui": "default-model", "aria-label": t("create.defaultModel") }, h(doc, "option", { value: "", selected: !draft.decisions.model }, t(none ? "create.chooseProviderFirst" : "create.chooseModel")), ...choiceGroups().map((g) => h(doc, "optgroup", { label: g.label }, ...g.options.map((o) => h(doc, "option", { value: o.value, selected: draft.decisions.model && current !== null && o.value === choiceValue(current.slot, current.model) }, o.label)))));
+      select.disabled = none;
       select.addEventListener("change", () => {
         const choice = parseChoice(select.value);
         if (!choice) return;
         draft.editor.setDefaultModel(choice);
+        draft.decisions.model = true;
         editorHandle.refresh();
         drawReview();
       });
-      defaultHost.replaceChildren(h(doc, "label", { for: "cr-default-model" }, t("create.defaultModel")), select, h(doc, "p", { class: "hint" }, t("create.defaultModelHint")));
+      defaultHost.replaceChildren(select);
     };
     const drawProviderTiles = () => {
       const chosen = chosenSlots();
+      // Only providers that are set up (a key saved or loaded) are offered, and one a loaded definition already uses.
+      const offered = SLOT_IDS.filter((id) => chosen.includes(id) || keyState(vaultFor(id)) !== "none");
+      if (offered.length === 0) {
+        providerTiles.replaceChildren(h(doc, "a", { class: "no-providers", href: "#/settings/key/anthropic", "data-ui": "no-providers" }, t("create.noProviders")));
+        drawDefaultModel();
+        return;
+      }
       providerTiles.replaceChildren(
-        ...SLOT_IDS.map((id) => {
+        ...offered.map((id) => {
           const state = keyState(vaultFor(id));
           const selected = chosen.includes(id);
           const kind = slotProvider(id);
           const name = slotName(id);
-          const noKey = state === "none" && !selected;
-          const sub = noKey ? t("create.providerAddKey") : kind === "google" ? t(slotIsFree(id) ? "create.providerFree" : "create.providerPaid") : "";
+          const sub = kind === "google" ? t(slotIsFree(id) ? "create.providerFree" : "create.providerPaid") : "";
           const dotText = t(state === "locked" ? "settings.dotLocked" : "settings.dotLoaded");
           const parts = [
             h(doc, "span", { class: `pv-mark pv-${kind}`, "aria-hidden": "true" }, MARKS[kind]),
             h(doc, "span", { class: "pv-text" }, h(doc, "span", { class: "pv-name" }, name), ...(sub ? [h(doc, "span", { class: "pv-sub" }, sub)] : [])),
             ...(state === "none" ? [] : [h(doc, "span", { class: `pv-dot ${state === "locked" ? "yellow" : "green"}`, role: "img", "aria-label": dotText, title: dotText })]),
-            ...(noKey ? [] : [h(doc, "span", { class: "pv-check", "aria-hidden": "true" }, selected ? "✓" : "")]),
+            h(doc, "span", { class: "pv-check", "aria-hidden": "true" }, selected ? "✓" : ""),
           ];
-          // A provider without a key is a link to Settings, unless it is the one chosen (its key is entered below).
-          if (noKey) return h(doc, "a", { class: "provider-tile dim", href: `#/settings/key/${id}`, "data-ui": `provider-tile-${id}`, title: t("create.providerAddKey") }, ...parts);
           const tile = h(doc, "button", { type: "button", class: `provider-tile${selected ? " on" : ""}`, role: "checkbox", "aria-checked": String(selected), "data-ui": `provider-tile-${id}` }, ...parts);
           tile.addEventListener("click", () => {
-            // Any number of providers may be chosen, but one stays.
-            if (selected && chosen.length === 1) return;
-            draft.slots = SLOT_IDS.filter((s) => (s === id ? !selected : chosen.includes(s)));
+            // Any number of providers may be on, also none: the student decides.
+            draft.slots = toggleSlot(chosen, id, SLOT_IDS);
+            draft.decisions.providers = draft.slots.length > 0;
             keepModels();
             editorHandle.refresh();
             drawReview();
@@ -252,14 +273,14 @@ export function renderCreate(ctx) {
       drawDefaultModel();
     };
     const legendItem = (cls, text) => h(doc, "span", {}, ...(cls ? [h(doc, "i", { class: `pv-lg ${cls}` })] : []), text);
-    const providerLegend = h(doc, "div", { class: "pv-legend", "data-ui": "provider-legend" }, legendItem("green", t("create.legendLoaded")), legendItem("yellow", t("create.legendLocked")), legendItem("", t("create.legendNone")));
-    const providerField = h(doc, "div", { class: "field provider-field", "data-ui": "provider-field" }, h(doc, "p", { class: "pv-title" }, t("create.providerLabel")), providerTiles, providerLegend, h(doc, "p", { class: "hint" }, t("create.providerHint")), defaultHost);
+    const providerLegend = h(doc, "div", { class: "pv-legend", "data-ui": "provider-legend" }, legendItem("green", t("create.legendLoaded")), legendItem("yellow", t("create.legendLocked")));
+    const providerField = h(doc, "div", { class: "field provider-field", "data-ui": "provider-field" }, h(doc, "div", { class: "provider-row" }, providerTiles, defaultHost), providerLegend);
 
     // The model of an agent: its level (Fast, Balanced, Strong), and the provider when more than one is chosen.
     const nodeModelLabel = (node) => {
-      const slot = isSlot(node?.slot) ? node.slot : chosenSlots()[0];
+      const slot = isSlot(node?.slot) ? node.slot : workingSlots()[0];
       const level = providerCatalog(slotProvider(slot)).models.find((m) => m.key === node?.model)?.label ?? "";
-      return chosenSlots().length > 1 ? `${level} · ${slotName(slot)}` : level;
+      return workingSlots().length > 1 ? `${level} · ${slotName(slot)}` : level;
     };
 
     // Editor.
@@ -267,8 +288,56 @@ export function renderCreate(ctx) {
     const reviewHost = h(doc, "section", { class: "review", "data-ui": "run-review", "aria-label": t("create.reviewHeading") });
     let editorHandle;
 
+    // The guided steps: which one is open, what is set, what the buttons may do. The rules are in steps-model.js.
+    let lastVerdict = null;
+    let lastEstimate = "";
+    // The layout is read when Create opens: the guided steps, or the workspace with everything on one screen.
+    const workspace = ctx.settings.get().createLayout === "workspace";
+    const wsBar = workspace ? workspaceBar({ doc, t, onRun: () => beginRun() }) : null;
+    let rightColumn = null;
+    let headings = {};
+    const stepsStatus = () => {
+      const design = draft.editor.design();
+      return stepStatus({ task: draft.task, decisions: draft.decisions, nodeCount: design.nodes.length, editorOk: draft.editor.errors().length === 0, keysReady: usedSlots(design).every((s) => vaultFor(s).getSessionKey() !== null) });
+    };
+    const hintText = (status) => {
+      const kind = footHint(status);
+      if (workspace && kind === "setup") return t("create.ws.locked");
+      return kind === "missing" ? t("create.hint.missing", { items: missing(status).map((k) => t(`create.missing.${k}`)).join(", ") }) : t(`create.hint.${kind}`);
+    };
+    const panels = { setup: h(doc, "div", { class: "step-panel", "data-ui": "step-setup" }), diagram: h(doc, "div", { class: "step-panel", "data-ui": "step-diagram" }), check: h(doc, "div", { class: "step-panel", "data-ui": "step-check" }) };
+    const goStep = (step) => {
+      draft.step = step;
+      refreshSteps();
+    };
+    const move = (by) => goStep(STEPS[STEPS.indexOf(draft.step) + by] ?? draft.step);
+    const bar = stepBar({ doc, t, status: stepsStatus(), current: draft.step, onGo: goStep });
+    const foot = footer({ doc, t, onBack: () => move(-1), onNext: () => move(1), onRun: () => beginRun() });
+    function refreshSteps() {
+      const status = stepsStatus();
+      if (workspace) {
+        const locked = workspaceLocked(status);
+        wsBar.update({ status, estimate: lastEstimate, hint: hintText(status), runEnabled: status.ready && lastVerdict?.ok === true, agents: draft.editor.design().nodes.length });
+        for (const [part, heading] of Object.entries(headings)) heading.setState(status.parts[part] ? "done" : "none");
+        if (rightColumn) {
+          rightColumn.classList.toggle("locked", locked);
+          rightColumn.inert = locked;
+        }
+        return;
+      }
+      draft.step = stepAfterChange(draft.step, status);
+      bar.update(status, draft.step);
+      const nav = navState({ step: draft.step, status });
+      foot.update({ nav: { ...nav, run: nav.run && lastVerdict?.ok === true }, hint: hintText(status) });
+      for (const [part, heading] of Object.entries(headings)) heading.setState(status.parts[part] ? "done" : "none");
+      for (const step of STEPS) panels[step].hidden = step !== draft.step;
+    }
+
     // Review.
     function drawReview() {
+      // The review is rebuilt on every change: the element that had the focus gets it back (found by id or data-ui).
+      const focused = reviewHost.contains?.(doc.activeElement) ? doc.activeElement : null;
+      const focusKey = focused ? (focused.id ? `#${focused.id}` : focused.getAttribute?.("data-ui") ? `[data-ui="${focused.getAttribute("data-ui")}"]` : focused.getAttribute?.("data-tab") ? `[data-tab="${focused.getAttribute("data-tab")}"]` : null) : null;
       keepModels();
       const design = draft.editor.design();
       const limits = clampLimits(draft.limits);
@@ -284,29 +353,48 @@ export function renderCreate(ctx) {
       const paidOnly = paidOnlyModelUsed(design, provider);
       const isFree = marked && !paidOnly;
 
+      // The limits are read from Settings; the student may change them for this run. An empty field goes back to the value of Settings.
       const limitInputs = LIMIT_FIELDS.map(([key, labelKey]) => {
-        const input = h(doc, "input", { id: `cr-${key}`, type: "number", min: key === "maxSearches" ? 0 : 1, max: LIMIT_MAX[key], step: 1, value: limits[key] });
+        const input = h(doc, "input", { id: `cr-${key}`, type: "number", min: key === "maxSearches" ? 0 : 1, max: LIMIT_MAX[key], step: 1, value: limits[key], placeholder: t("create.limitsPlaceholder", { value: ctx.settings.get().limits[key] }) });
         input.addEventListener("change", () => {
-          draft.limits = clampLimits({ ...draft.limits, [key]: Number(input.value) });
-          draft.limitsEdited = true;
-          drawReview();
+          const own = input.value.trim() !== "";
+          draft.limits = clampLimits({ ...draft.limits, [key]: own ? Number(input.value) : ctx.settings.get().limits[key] });
+          if (own) draft.limitsEdited = true;
+          draft.decisions.limits[key] = true;
+          // After the focus has moved on, so that Tab lands on the next field and Run is ready for the click that follows.
+          doc.defaultView.setTimeout(() => { const id = doc.activeElement?.id; drawReview(); if (id) doc.getElementById?.(id)?.focus?.(); }, 0);
         });
         return h(doc, "div", { class: "field" }, h(doc, "label", { for: `cr-${key}` }, t(labelKey)), input);
       });
 
-      const agents = summary.agents.length
+      // The agents table: provider and model (a choice for each agent), the real model name, whether it is paid, and search.
+      const rows = agentRows({ design, slotName, slotIsFree, modelInfo: (slot, key) => ({ label: choiceLabel(slot, key), id: providerCatalog(slotProvider(slot)).models.find((m) => m.key === key)?.id ?? key }), fallbackSlot: workingSlots()[0] });
+      const agentsTable = rows.length
         ? h(
             doc,
-            "ul",
-            {},
-            ...summary.agents.map((a) => {
-              const node = design.nodes.find((n) => n.id === a.id);
-              return h(doc, "li", {}, `${a.label} — ${nodeModelLabel(node)}${a.search ? `, ${t("create.withSearch")}` : ""}`);
-            }),
+            "table",
+            { class: "agents-table", "data-ui": "agents-table" },
+            h(doc, "thead", {}, h(doc, "tr", {}, ...["agent", "model", "modelName", "paid", "search"].map((c) => h(doc, "th", { scope: "col" }, t(`create.col.${c}`))))),
+            h(
+              doc,
+              "tbody",
+              {},
+              ...rows.map((r) => {
+                const node = design.nodes.find((n) => n.id === r.id);
+                const select = h(doc, "select", { "aria-label": `${r.label}: ${t("create.col.model")}`, "data-ui": `agent-model-${r.id}` }, h(doc, "option", { value: "", selected: !r.custom }, modelUi.defaultOption()), ...modelUi.groups().map((g) => h(doc, "optgroup", { label: g.label }, ...g.options.map((o) => h(doc, "option", { value: o.value, selected: r.custom && o.value === modelUi.valueOf(node) }, o.label)))));
+                select.addEventListener("change", () => {
+                  modelUi.pick(r.id, select.value);
+                  editorHandle.refresh();
+                  drawReview();
+                });
+                return h(doc, "tr", {}, h(doc, "th", { scope: "row" }, r.label), h(doc, "td", {}, select), h(doc, "td", {}, h(doc, "code", {}, r.modelId)), h(doc, "td", {}, t(r.paid ? "create.paidYes" : "create.paidNo")), h(doc, "td", {}, t(r.search ? "create.searchOn" : "create.searchOff")));
+              }),
+            ),
           )
         : h(doc, "p", { class: "hint" }, t("editor.empty"));
 
       const est = summary.estimate;
+      lastEstimate = design.nodes.length > 0 && draft.decisions.model ? (isFree ? t("create.estimateFree") : t("create.ws.estimate", { usd: workspaceEstimateUsd(est) })) : "";
       const estimateLines = [
         h(doc, "p", {}, h(doc, "strong", { "data-ui": isFree ? "estimate-free" : "estimate-cost" }, isFree ? t("create.estimateFree") : t("create.estimate", { usd: est.costUsd.toFixed(3), date: est.pricesAsOf }))),
         h(doc, "p", { class: "hint" }, t("create.estimateDetail", { tokens: est.tokensUpper, turns: est.activations })),
@@ -375,24 +463,23 @@ export function renderCreate(ctx) {
       };
       const keyParts = used.flatMap((slot, index) => keyBlock(slot, index));
 
-      const run = h(doc, "button", { type: "button", class: "primary run-button", disabled: !verdict.ok }, t("create.run"));
-      run.addEventListener("click", () => beginRun());
+      lastVerdict = verdict;
       const reasons = verdict.ok ? "" : h(doc, "ul", { class: "reasons", role: "status" }, ...verdict.reasons.map((r) => h(doc, "li", {}, t(`create.reason.${r}`))));
 
-      reviewHost.replaceChildren(
-        h(doc, "h3", {}, t("create.reviewHeading"), help("create-run", t("create.reviewHeading"))),
-        h(doc, "h4", {}, t("create.reviewAgents")),
-        agents,
-        h(doc, "h4", {}, t("create.limitsHeading"), help("create-limits", t("create.limitsHeading"))),
-        ...limitInputs,
-        h(doc, "h4", {}, t("create.estimateHeading"), help("create-estimate", t("create.estimateHeading"))),
-        ...estimateLines,
-        ...providersOf(design, provider).map((p) => h(doc, "p", { class: "notice" }, t(p === "google" ? "create.dataNoticeGoogle" : "create.dataNotice"))),
-        h(doc, "h4", {}, t("create.keyHeading")),
-        ...keyParts,
-        reasons,
-        run,
-      );
+      const status = stepsStatus();
+      const tabs = innerTabs({ doc, t, tabs: [{ id: "agents", label: t("create.tab.agents") }, { id: "limits", label: t("create.tab.limits"), state: status.limits }, { id: "cost", label: t("create.tab.cost") }, { id: "key", label: t("create.tab.key"), state: status.key }], current: draft.subTab, onSelect: (id) => {
+        draft.subTab = id;
+        drawReview();
+      } });
+      const pane = {
+        agents: [agentsTable],
+        limits: [h(doc, "h4", {}, t("create.limitsHeading"), help("create-limits", t("create.limitsHeading"))), ...limitInputs],
+        cost: design.nodes.length === 0 ? [h(doc, "p", { class: "hint" }, t("create.costNeeds"))] : [h(doc, "h4", {}, t("create.estimateHeading"), help("create-estimate", t("create.estimateHeading"))), ...estimateLines, ...providersOf(design, provider).map((p) => h(doc, "p", { class: "notice" }, t(p === "google" ? "create.dataNoticeGoogle" : "create.dataNotice")))],
+        key: [h(doc, "h4", {}, t("create.keyHeading")), ...keyParts],
+      }[draft.subTab] ?? [];
+      reviewHost.replaceChildren(workspace ? "" : h(doc, "h3", {}, t("create.step.check"), help("create-run", t("create.step.check"))), tabs.element, h(doc, "div", { class: "inner-pane", role: "tabpanel", "data-ui": `pane-${draft.subTab}` }, ...pane), reasons);
+      if (focusKey) reviewHost.querySelector?.(focusKey)?.focus?.();
+      refreshSteps();
     }
 
     // A failed run waits for its key: this button carries it on from the agent that failed.
@@ -402,6 +489,7 @@ export function renderCreate(ctx) {
       const run = draft.retry ? (draft.approve === true ? draft.retry : withLimitChoice(draft.retry, draft.retryUseCurrent)) : null;
       if (!run) return;
       if (!keysForRun(run).ready) {
+        showKeyStep();
         showForm(t("create.retryNeedsKey"));
         importantTip(t("create.retryNeedsKey"));
         return;
@@ -422,6 +510,9 @@ export function renderCreate(ctx) {
       draft.task = "";
       draft.pattern = "sequential";
       draft.editor = createEditor("sequential");
+      // Back to a page where nothing is decided.
+      resetDecisions();
+      draft.slots = null;
       showForm(t("create.definition.cleared"), "status");
     });
     definitionFile.addEventListener("change", async () => {
@@ -439,6 +530,9 @@ export function renderCreate(ctx) {
       draft.task = loaded.task;
       draft.pattern = loaded.pattern;
       draft.editor = loaded.editor;
+      // A definition names its pattern, models and memory: loading it is the student deciding them (the providers are read from its agents).
+      decideLoaded();
+      resetForLoad();
       const notes = loaded.notes.map((n) => t(`create.definition.note.${n}`)).join(" ");
       showForm(`${t("create.definition.loaded")} ${notes}`.trim(), "status");
     });
@@ -449,30 +543,61 @@ export function renderCreate(ctx) {
       drawReview();
     });
 
-    // Memory management: the shared notebook of the run, off until the student switches it on.
-    const notebookBox = h(doc, "input", { id: "cr-notebook", type: "checkbox", checked: draft.editor.notebookOn(), "data-ui": "notebook-switch" });
-    notebookBox.addEventListener("change", () => {
-      draft.editor.setNotebook(notebookBox.checked);
-      editorHandle.refresh();
-      drawReview();
+    // Memory management: the shared notebook of the run. Neither choice is made for the student.
+    const memoryGroup = h(doc, "div", { class: "memory-choice", role: "group", "aria-label": t("create.memoryHeading"), "data-ui": "notebook-switch" });
+    const drawMemory = () => {
+      memoryGroup.replaceChildren(
+        ...[["off", false, "create.memoryOff"], ["on", true, "create.memoryOn"]].map(([id, on, key]) => {
+          const button = h(doc, "button", { type: "button", class: "memory-button", "data-ui": `memory-${id}`, "aria-pressed": String(draft.decisions.memory && draft.editor.notebookOn() === on) }, t(key));
+          button.addEventListener("click", () => {
+            draft.editor.setNotebook(on);
+            draft.decisions.memory = true;
+            editorHandle.refresh();
+            drawMemory();
+            drawReview();
+          });
+          return button;
+        }),
+      );
+    };
+    drawMemory();
+    // The ? buttons for patterns that have their own section of Help.
+    const patternHelp = ["handoff", "router", "voting", "mapreduce", "planexec"].filter((p) => draft.pattern === p).map((p) => help(`create-${p}`, t(`pattern.${p}`)));
+    const describeButton = h(doc, "button", { type: "button", class: "small describe-button", "data-ui": "describe-patterns", "aria-pressed": String(draft.describe) }, `ⓘ ${t("create.describe")}`);
+    describeButton.addEventListener("click", () => {
+      draft.describe = !draft.describe;
+      describeButton.setAttribute("aria-pressed", String(draft.describe));
+      patternGroup.classList.toggle("describe", draft.describe);
     });
-    const memoryField = h(doc, "div", { class: "field wide memory-field", "data-ui": "memory-field" }, h(doc, "h3", {}, t("create.memoryHeading"), help("create-memory", t("create.memoryHeading"))), h(doc, "div", { class: "field checkbox" }, notebookBox, h(doc, "label", { for: "cr-notebook" }, t("create.notebook"))), h(doc, "p", { class: "hint" }, t("create.notebookHint")));
+    patternGroup.classList.toggle("describe", draft.describe);
+    const heads = {
+      task: partHeading({ doc, t, state: "none", text: t("create.part.task"), help: [help("create-task", t("create.part.task"))] }),
+      pattern: partHeading({ doc, t, state: "none", text: t("create.part.pattern"), help: [help("create-pattern", t("create.part.pattern")), ...patternHelp], extra: describeButton }),
+      providerModel: partHeading({ doc, t, state: "none", text: t("create.part.provider"), help: [help("create-provider", t("create.part.provider"))] }),
+      memory: partHeading({ doc, t, state: "none", text: t("create.part.memory"), help: [help("create-memory", t("create.part.memory"))] }),
+    };
+    headings = heads;
 
+    taskInput.setAttribute("aria-label", t("create.taskLabel"));
+    const setupParts = [
+      h(doc, "div", { class: "part" }, heads.task.element, taskInput, counter),
+      h(doc, "div", { class: "part" }, heads.pattern.element, patternGroup, patternNotice),
+      h(doc, "div", { class: "part" }, heads.providerModel.element, providerField),
+      h(doc, "div", { class: "part" }, heads.memory.element, memoryGroup),
+    ];
+    panels.setup.replaceChildren(...setupParts);
+    panels.diagram.replaceChildren(...(workspace ? [] : [h(doc, "h3", {}, t("create.step.diagram"), help("create-diagram", t("create.step.diagram")))]), editorHost);
+    if (workspace) {
+      // Settings on the left; diagram and checks on the right, locked until the four parts are decided.
+      rightColumn = h(doc, "section", { class: "col right-col", "data-ui": "ws-right" }, h(doc, "div", { class: "lockmsg" }, h(doc, "div", {}, statusIcon(doc, "lock", t), ` ${t("create.ws.locked")}`)), h(doc, "div", { class: "inner" }, editorHost, reviewHost));
+    }
+    if (!workspace) panels.check.replaceChildren(reviewHost);
     root.replaceChildren(
       h(doc, "div", { class: "create-head" }, h(doc, "h2", {}, t("create.title")), loadButton, clearButton, definitionFile),
       startNotice ? h(doc, "p", { class: "notice", role: noticeRole }, startNotice) : "",
       carryLimits ? carryLimits.element : "",
       draft.retry ? carryOnButton : "",
-      h(doc, "div", { class: "field wide" }, h(doc, "label", { for: "cr-task" }, t("create.taskLabel"), help("create-task", t("create.taskLabel"))), taskInput, counter),
-      h(doc, "h3", {}, t("create.patternHeading"), help("create-pattern", t("create.patternHeading")), ...(draft.pattern === "handoff" ? [help("create-handoff", t("pattern.handoff"))] : []), ...(draft.pattern === "router" ? [help("create-router", t("pattern.router"))] : []), ...(draft.pattern === "voting" ? [help("create-voting", t("pattern.voting"))] : []), ...(draft.pattern === "mapreduce" ? [help("create-mapreduce", t("pattern.mapreduce"))] : []), ...(draft.pattern === "planexec" ? [help("create-planexec", t("pattern.planexec"))] : [])),
-      h(doc, "p", { class: "hint" }, t("create.patternHelp")),
-      patternGroup,
-      patternNotice,
-      memoryField,
-      providerField,
-      h(doc, "h3", {}, t("create.designHeading"), help("create-diagram", t("create.designHeading"))),
-      editorHost,
-      reviewHost,
+      ...(workspace ? [wsBar.element, wsBar.hintElement, h(doc, "div", { class: "ws" }, h(doc, "section", { class: "col", "data-ui": "ws-left" }, ...setupParts), rightColumn)] : [bar.element, panels.setup, panels.diagram, panels.check, foot.element]),
     );
     keepModels();
     const modelUi = {
@@ -721,6 +846,7 @@ export function renderCreate(ctx) {
       const definition = definitionFromRun(pending);
       if (definition) useDefinition(definition);
       draft.slots = Object.keys(keysForRun(pending).keys);
+      showKeyStep();
       showForm(t("create.retryNeedsKey"));
       doc.defaultView.scrollTo?.(0, 0);
       importantTip(t("create.retryNeedsKey"));

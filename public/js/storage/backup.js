@@ -90,6 +90,7 @@ export async function applyBackup(backup, { runStore, settingsStore, vault, mode
   if (typeof backup.settings?.webSearch === "boolean") settingsStore.setWebSearch(backup.settings.webSearch);
   if (typeof backup.settings?.helpButtons === "boolean") settingsStore.setHelpButtons(backup.settings.helpButtons);
   if (backup.settings?.playerLayout === "bar" || backup.settings?.playerLayout === "side") settingsStore.setPlayerLayout(backup.settings.playerLayout);
+  if (backup.settings?.createLayout === "steps" || backup.settings?.createLayout === "workspace") settingsStore.setCreateLayout(backup.settings.createLayout);
   if (typeof backup.settings?.shortcuts === "boolean") settingsStore.setShortcuts(backup.settings.shortcuts);
   if (isObject(backup.settings?.goKeys)) settingsStore.setGoKeys(backup.settings.goKeys);
   if (backup.vault && (mode === "replace" || !vault.hasStoredKey())) vault.importRecord(backup.vault);

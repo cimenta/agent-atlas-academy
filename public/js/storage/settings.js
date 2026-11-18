@@ -18,7 +18,7 @@ export function createSettingsStore(storage) {
     // Tooltips are on unless the user turned them off.
     // The player controls sit on one slim bar ("bar") unless the user chose the side column ("side").
     const free = stored?.freeTier;
-    return { freeTier: { google: free?.google === true }, limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, helpButtons: stored?.helpButtons !== false, webSearch: stored?.webSearch !== false, fallback: clampFallback(stored?.fallback), playerLayout: stored?.playerLayout === "side" ? "side" : "bar", shortcuts: stored?.shortcuts !== false, goKeys: mergeGoKeys(stored?.goKeys), providerColors: mergeProviderColors(stored?.providerColors), requestTimeoutSec: clampTimeoutSec(stored?.requestTimeoutSec), maxOutputTokens: clampOutputTokens(stored?.maxOutputTokens), retries: clampRetries(stored?.retries ?? undefined), retryDelaySec: clampRetryDelaySec(stored?.retryDelaySec), repeatStop: clampRepeatStop(stored?.repeatStop), handoffChars: clampHandoffChars(stored?.handoffChars) };
+    return { freeTier: { google: free?.google === true }, limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, helpButtons: stored?.helpButtons !== false, webSearch: stored?.webSearch !== false, fallback: clampFallback(stored?.fallback), playerLayout: stored?.playerLayout === "side" ? "side" : "bar", createLayout: stored?.createLayout === "workspace" ? "workspace" : "steps", shortcuts: stored?.shortcuts !== false, goKeys: mergeGoKeys(stored?.goKeys), providerColors: mergeProviderColors(stored?.providerColors), requestTimeoutSec: clampTimeoutSec(stored?.requestTimeoutSec), maxOutputTokens: clampOutputTokens(stored?.maxOutputTokens), retries: clampRetries(stored?.retries ?? undefined), retryDelaySec: clampRetryDelaySec(stored?.retryDelaySec), repeatStop: clampRepeatStop(stored?.repeatStop), handoffChars: clampHandoffChars(stored?.handoffChars) };
   }
   function save(next) {
     try {
@@ -79,6 +79,10 @@ export function createSettingsStore(storage) {
     },
     setShortcuts(on) {
       save({ ...get(), shortcuts: on !== false });
+    },
+    // How the Create tab is laid out: guided steps (the default) or the workspace.
+    setCreateLayout(layout) {
+      save({ ...get(), createLayout: layout === "workspace" ? "workspace" : "steps" });
     },
     setPlayerLayout(layout) {
       save({ ...get(), playerLayout: layout === "side" ? "side" : "bar" });
