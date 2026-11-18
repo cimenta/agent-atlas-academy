@@ -20,6 +20,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
   let selectedId = null;
   let settingsTab = "tools"; // the tab of the agent settings that is open, kept while the visitor works on agents
   let connectFrom = null;
+  let connectionsShown = false; // the list of connections is hidden until the student asks for it
   let notice = "";
   let selectedEdge = null;
   let suppressClick = false;
@@ -414,6 +415,15 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     return h(doc, "section", { class: "editor-diagram", "aria-label": t("editor.diagram") }, head, empty, connecting, wrap);
   }
 
+  function connectionsSection(design) {
+    const toggle = h(doc, "button", { type: "button", class: "small", "data-focus-key": "connections-toggle", "data-ui": "connections-toggle", "aria-expanded": String(connectionsShown) }, t(connectionsShown ? "editor.hideConnections" : "editor.showConnections", { n: design.edges.length }));
+    toggle.addEventListener("click", () => {
+      connectionsShown = !connectionsShown;
+      changed();
+    });
+    return h(doc, "section", { class: "editor-connections", "aria-label": t("editor.connections") }, h(doc, "h4", {}, t("editor.connections"), " ", toggle), connectionsShown ? connectionsBlock(design) : "");
+  }
+
   function connectionsBlock(design) {
     if (design.edges.length === 0) return h(doc, "p", { class: "hint" }, t("editor.noConnections"));
     const byId = new Map(design.nodes.map((n) => [n.id, n]));
@@ -717,7 +727,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       paletteBlock(design),
       selfCritiqueBlock(design),
       diagramBlock(design),
-      h(doc, "div", { class: "editor-lower" }, settingsBlock(design), h(doc, "section", { class: "editor-connections", "aria-label": t("editor.connections") }, h(doc, "h4", {}, t("editor.connections")), connectionsBlock(design))),
+      h(doc, "div", { class: "editor-lower" }, settingsBlock(design), connectionsSection(design)),
       roundsBlock(design),
       problemsBlock(),
     );

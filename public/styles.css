@@ -1354,7 +1354,7 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .ws { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 14px; align-items: start; margin-top: 10px; }
 .ws .col { min-width: 0; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); }
 .ws .right-col { position: relative; }
-.ws .right-col.locked .inner { opacity: 0.35; user-select: none; }
+.ws .right-col.locked .inner { opacity: 0.35; user-select: none; pointer-events: none; }
 .ws .lockmsg { display: none; position: absolute; inset: 0; z-index: 2; align-items: flex-start; justify-content: center; padding-top: 90px; pointer-events: none; }
 .ws .right-col.locked .lockmsg { display: flex; }
 .ws .lockmsg div { box-shadow: 0 4px 16px var(--border); max-width: 300px; padding: 10px 16px; text-align: center; font-size: 0.9rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }

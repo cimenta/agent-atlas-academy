@@ -50,6 +50,7 @@ export function resetForLoad() {
 
 // A run that waits for its key: step 3, the key tab, where the key fields are.
 export function showKeyStep() {
+  decideLoaded(); // the key tab is only open when step 1 is decided; a run that waits for its key has decided it
   draft.step = "check";
   draft.subTab = "key";
 }

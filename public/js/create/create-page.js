@@ -19,14 +19,15 @@ import { approvalPanel } from "../approval-panel.js";
 import { pendingApprovals, approvedAgents } from "../engine/approval.js";
 import { mountLiveReplay } from "../replay/view.js";
 import { createBatchedSaver } from "../storage/runs-store.js";
-import { createEditor } from "./editor-model.js";
+import { keepFocus } from "./keep-focus.js";
+import { createEditor, isUntouched } from "./editor-model.js";
 import { draft, useDefinition, resetDecisions, decideLoaded, resetForLoad, showKeyStep } from "./draft.js";
 import { deriveInspector } from "../replay/inspect-model.js";
 import { mountEditor } from "./editor-view.js";
 import { canRun, reviewSummary, handoffSkipper, agentRows } from "./create-model.js";
 import { buildResultModel } from "../play-model.js";
 import { loadDefinition, definitionFromRun } from "./definition.js";
-import { STEPS, stepStatus, navState, stepAfterChange, missing, footHint, toggleSlot, modelValid, setDefaultKeepingAgents, workspaceLocked, workspaceEstimateUsd } from "./steps-model.js";
+import { STEPS, stepStatus, navState, stepAfterChange, missing, footHint, toggleSlot, modelValid, setDefaultKeepingAgents, workspaceLocked, workspaceEstimateUsd, runAllowed } from "./steps-model.js";
 import { stepBar, footer, partHeading, innerTabs, workspaceBar, statusIcon } from "./steps-view.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -184,20 +185,21 @@ export function renderCreate(ctx) {
     // Pattern.
     const patternGroup = h(doc, "div", { class: "pattern-choice", "data-ui": "pattern-choice", role: "group", "aria-label": t("create.patternHeading") });
     const patternNotice = h(doc, "p", { class: "notice", role: "status", hidden: true });
-    const drawPatterns = () => {
+    const drawPatterns = () => keepFocus(doc, patternGroup, drawPatternsRaw);
+    const drawPatternsRaw = () => {
       patternGroup.replaceChildren(
         ...PATTERNS.map((p) => {
           const button = h(
             doc,
             "button",
-            { type: "button", class: "pattern-button", "aria-pressed": String(draft.decisions.pattern && draft.pattern === p), "data-pattern": p },
+            { type: "button", class: "pattern-button", "data-ui": `pattern-${p}`, "aria-pressed": String(draft.decisions.pattern && draft.pattern === p), "data-pattern": p },
             patternIcon(doc, p),
             h(doc, "strong", {}, t(`pattern.${p}`)),
             h(doc, "span", { class: "palette-help" }, t(`create.pattern.${p}`)),
           );
           button.addEventListener("click", () => {
             if (draft.decisions.pattern && draft.pattern === p) return;
-            const hadNodes = draft.editor.design().nodes.length > 0;
+            const hadNodes = !isUntouched(draft.editor.design());
             if (hadNodes && !doc.defaultView.confirm(t("create.patternConfirm"))) return;
             draft.pattern = p;
             draft.decisions.pattern = true;
@@ -235,7 +237,8 @@ export function renderCreate(ctx) {
       });
       defaultHost.replaceChildren(select);
     };
-    const drawProviderTiles = () => {
+    const drawProviderTiles = () => keepFocus(doc, providerTiles, drawProviderTilesRaw);
+    const drawProviderTilesRaw = () => {
       const chosen = chosenSlots();
       // Only providers that are set up (a key saved or loaded) are offered, and one a loaded definition already uses.
       const offered = SLOT_IDS.filter((id) => chosen.includes(id) || keyState(vaultFor(id)) !== "none");
@@ -295,6 +298,7 @@ export function renderCreate(ctx) {
     const workspace = ctx.settings.get().createLayout === "workspace";
     const wsBar = workspace ? workspaceBar({ doc, t, onRun: () => beginRun() }) : null;
     let rightColumn = null;
+    let rightInner = null;
     let headings = {};
     const stepsStatus = () => {
       const design = draft.editor.design();
@@ -311,24 +315,24 @@ export function renderCreate(ctx) {
       refreshSteps();
     };
     const move = (by) => goStep(STEPS[STEPS.indexOf(draft.step) + by] ?? draft.step);
-    const bar = stepBar({ doc, t, status: stepsStatus(), current: draft.step, onGo: goStep });
-    const foot = footer({ doc, t, onBack: () => move(-1), onNext: () => move(1), onRun: () => beginRun() });
+    const bar = workspace ? null : stepBar({ doc, t, status: stepsStatus(), current: draft.step, onGo: goStep });
+    const foot = workspace ? null : footer({ doc, t, onBack: () => move(-1), onNext: () => move(1), onRun: () => beginRun() });
     function refreshSteps() {
       const status = stepsStatus();
       if (workspace) {
         const locked = workspaceLocked(status);
-        wsBar.update({ status, estimate: lastEstimate, hint: hintText(status), runEnabled: status.ready && lastVerdict?.ok === true, agents: draft.editor.design().nodes.length });
+        wsBar.update({ status, estimate: lastEstimate, hint: hintText(status), runEnabled: runAllowed({ status, verdict: lastVerdict, retryPending: draft.retry !== null }), agents: draft.editor.design().nodes.length });
         for (const [part, heading] of Object.entries(headings)) heading.setState(status.parts[part] ? "done" : "none");
         if (rightColumn) {
           rightColumn.classList.toggle("locked", locked);
-          rightColumn.inert = locked;
+          rightInner.inert = locked;
         }
         return;
       }
       draft.step = stepAfterChange(draft.step, status);
       bar.update(status, draft.step);
       const nav = navState({ step: draft.step, status });
-      foot.update({ nav: { ...nav, run: nav.run && lastVerdict?.ok === true }, hint: hintText(status) });
+      foot.update({ nav: { ...nav, run: nav.run && runAllowed({ status, verdict: lastVerdict, retryPending: draft.retry !== null }) }, hint: hintText(status) });
       for (const [part, heading] of Object.entries(headings)) heading.setState(status.parts[part] ? "done" : "none");
       for (const step of STEPS) panels[step].hidden = step !== draft.step;
     }
@@ -545,7 +549,8 @@ export function renderCreate(ctx) {
 
     // Memory management: the shared notebook of the run. Neither choice is made for the student.
     const memoryGroup = h(doc, "div", { class: "memory-choice", role: "group", "aria-label": t("create.memoryHeading"), "data-ui": "notebook-switch" });
-    const drawMemory = () => {
+    const drawMemory = () => keepFocus(doc, memoryGroup, drawMemoryRaw);
+    const drawMemoryRaw = () => {
       memoryGroup.replaceChildren(
         ...[["off", false, "create.memoryOff"], ["on", true, "create.memoryOn"]].map(([id, on, key]) => {
           const button = h(doc, "button", { type: "button", class: "memory-button", "data-ui": `memory-${id}`, "aria-pressed": String(draft.decisions.memory && draft.editor.notebookOn() === on) }, t(key));
@@ -589,7 +594,8 @@ export function renderCreate(ctx) {
     panels.diagram.replaceChildren(...(workspace ? [] : [h(doc, "h3", {}, t("create.step.diagram"), help("create-diagram", t("create.step.diagram")))]), editorHost);
     if (workspace) {
       // Settings on the left; diagram and checks on the right, locked until the four parts are decided.
-      rightColumn = h(doc, "section", { class: "col right-col", "data-ui": "ws-right" }, h(doc, "div", { class: "lockmsg" }, h(doc, "div", {}, statusIcon(doc, "lock", t), ` ${t("create.ws.locked")}`)), h(doc, "div", { class: "inner" }, editorHost, reviewHost));
+      rightInner = h(doc, "div", { class: "inner" }, editorHost, reviewHost);
+      rightColumn = h(doc, "section", { class: "col right-col", "data-ui": "ws-right" }, h(doc, "div", { class: "lockmsg" }, h(doc, "div", {}, statusIcon(doc, "lock", t), ` ${t("create.ws.locked")}`)), rightInner);
     }
     if (!workspace) panels.check.replaceChildren(reviewHost);
     root.replaceChildren(

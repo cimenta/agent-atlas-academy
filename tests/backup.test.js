@@ -132,3 +132,11 @@ test("an imported encrypted key is stored only when none exists (merge) or alway
   assert.equal(s.vault.hasStoredKey(), true);
   assert.equal(await s.vault.unlock("a long passphrase"), KEY);
 });
+
+test("a backup restores the workspace layout, and an unknown layout changes nothing", async () => {
+  const s = stores();
+  await applyBackup(parseBackup(JSON.stringify(exportBackup({ runs: [], settings: { createLayout: "workspace" }, appVersion: "0.3.0" }))).backup, { ...s, mode: "merge" });
+  assert.equal(s.settingsStore.get().createLayout, "workspace");
+  await applyBackup(parseBackup(JSON.stringify(exportBackup({ runs: [], settings: { createLayout: "grid" }, appVersion: "0.3.0" }))).backup, { ...s, mode: "merge" });
+  assert.equal(s.settingsStore.get().createLayout, "workspace");
+});

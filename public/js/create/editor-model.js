@@ -305,6 +305,10 @@ export function createEditor(initialPattern) {
       positions = {};
       start = undefined;
       selfCritique = false;
+      // The one agent these patterns cannot run without is placed for you; the agents around it are added by the student.
+      if (nextPattern === "parallel") this.addNode("combiner");
+      if (nextPattern === "supervisor") this.addNode("supervisor");
+      if (nextPattern === "debate") this.addNode("judge");
       if (nextPattern === "router") this.addNode("router");
       if (nextPattern === "voting") this.addNode("tally");
       // These patterns always have the same agents and arrows, so they start with them in place.
@@ -324,6 +328,15 @@ export function createEditor(initialPattern) {
       }
     },
   };
+}
+
+// True when the design holds only what a fresh start of its pattern places, so no work of the student is in it.
+export function isUntouched(design) {
+  const fresh = createEditor(design.pattern);
+  fresh.reset(design.pattern);
+  const start = fresh.design();
+  const key = (d) => JSON.stringify([d.nodes.map((n) => n.agent), d.edges.map((e) => `${e.from}>${e.to}`)]);
+  return key(design) === key(start);
 }
 
 // Places nodes on a small fixed grid. "rank" is the direction of flow; "offset" is across it.

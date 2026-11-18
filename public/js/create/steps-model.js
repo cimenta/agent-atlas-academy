@@ -90,3 +90,8 @@ export function workspaceLocked(status) {
 export function workspaceEstimateUsd(est) {
   return (est.totalUsd ?? est.costUsd).toFixed(3);
 }
+
+// Run needs everything decided, a diagram without problems, and no failed run waiting to be carried on.
+export function runAllowed({ status, verdict, retryPending }) {
+  return status.ready && verdict?.ok === true && !retryPending;
+}

@@ -222,7 +222,8 @@ test("reset clears nodes and edges and changes the pattern", () => {
   editor.reset("debate");
   const design = editor.design();
   assert.equal(design.pattern, "debate");
-  assert.deepEqual(design.nodes, []);
+  // The earlier agents are gone; the judge, which a debate cannot run without, is placed for you.
+  assert.deepEqual(design.nodes.map((n) => n.agent), ["judge"]);
   assert.deepEqual(design.edges, []);
   assert.equal(design.rounds, 2);
 });

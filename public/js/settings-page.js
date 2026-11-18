@@ -716,7 +716,7 @@ export function renderSettings(ctx) {
       h(doc, "h3", {}, t("settings.helpButtonsHeading"), help("settings-help-buttons", t("settings.helpButtonsHeading"))),
       h(doc, "p", {}, t("settings.helpButtonsIntro")),
       h(doc, "div", { class: "field checkbox" }, helpBox, h(doc, "label", { for: "set-help-buttons" }, t("settings.helpButtonsLabel"))),
-      h(doc, "h3", {}, t("settings.createHeading")),
+      h(doc, "h3", {}, t("settings.createHeading"), help("settings-create", t("settings.createHeading"))),
       h(doc, "p", {}, t("settings.createIntro")),
       field("set-create-layout", t("settings.createLabel"), createLayoutSelect),
     ),
