@@ -69,6 +69,25 @@ export function handoffNotice({ doc, t, design, outcome }) {
   );
 }
 
+// The notice that says how a voting run ended: a majority agreed, nobody had a majority, or a limit stopped it before the
+// tally decided. `end` is what votingEnd gives.
+export function votingNotice({ doc, t, end }) {
+  const parts = {
+    majority: { level: "ok", icon: "✓", title: "voting.majority", body: "voting.majority.body" },
+    none: { level: "warn", icon: "⚠", title: "voting.none", body: "voting.none.body" },
+    stopped: { level: "fail", icon: "■", title: "voting.stopped", body: "voting.stopped.body" },
+  }[end.result];
+  if (!parts) return null;
+  const params = { votes: end.votes, total: end.total };
+  return h(
+    doc,
+    "div",
+    { class: `notice outcome outcome-${parts.level}`, "data-ui": "voting-outcome", "data-voting": end.result, role: "status" },
+    h(doc, "span", { class: "outcome-icon", "aria-hidden": "true" }, parts.icon),
+    h(doc, "span", { class: "outcome-text" }, h(doc, "strong", {}, t(parts.title, params)), " ", t(parts.body, params)),
+  );
+}
+
 // The notice that says how a router run ended: the chosen specialist answered, or a limit stopped it before that.
 // `end` is what routerEnd gives.
 export function routerNotice({ doc, t, design, end }) {

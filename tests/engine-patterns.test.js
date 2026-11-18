@@ -29,10 +29,10 @@ const debate = () => ({
   rounds: 2,
 });
 
-test("the catalog lists seven patterns, three models and the agent types", () => {
-  assert.deepEqual(PATTERNS, ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff", "router"]);
+test("the catalog lists eight patterns, three models and the agent types", () => {
+  assert.deepEqual(PATTERNS, ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff", "router", "voting"]);
   assert.deepEqual(MODELS.map((m) => m.key), ["fast", "balanced", "strong"]);
-  for (const key of ["planner", "researcher", "critic", "writer", "supervisor", "combiner", "debater", "judge", "evaluator", "router", "free"]) {
+  for (const key of ["planner", "researcher", "critic", "writer", "supervisor", "combiner", "debater", "judge", "evaluator", "router", "tally", "free"]) {
     assert.ok(AGENT_TYPES[key], key);
   }
 });
@@ -381,4 +381,47 @@ test("the router agent belongs only to the router pattern; specialists are the g
   assert.deepEqual(AGENT_TYPES.router.patterns, ["router"]);
   for (const agent of ["planner", "researcher", "critic", "writer", "free"]) assert.ok(AGENT_TYPES[agent].patterns.includes("router"), agent);
   for (const agent of ["supervisor", "combiner", "debater", "judge", "evaluator"]) assert.ok(!AGENT_TYPES[agent].patterns.includes("router"), agent);
+});
+
+// ---- voting ----
+const votingDesign = (extra = {}) => ({
+  pattern: "voting",
+  nodes: [node("a", "researcher"), node("b", "writer"), node("c", "critic"), node("tally", "tally")],
+  edges: [edge("a", "tally"), edge("b", "tally"), edge("c", "tally")],
+  ...extra,
+});
+
+test("voting design: one tally and three voters with an edge each is valid", () => {
+  assert.deepEqual(validateDesign(votingDesign()), { ok: true, errors: [] });
+  assert.ok(PATTERNS.includes("voting"));
+});
+
+test("voting: no tally or two tallies give vote.tally", () => {
+  const none = votingDesign({ nodes: [node("a", "researcher"), node("b", "writer"), node("c", "critic")], edges: [] });
+  assert.ok(codes(validateDesign(none)).includes("vote.tally"));
+  const two = votingDesign({ nodes: [node("a", "researcher"), node("b", "writer"), node("c", "critic"), node("tally", "tally"), node("t2", "tally")], edges: [edge("a", "tally"), edge("b", "tally"), edge("c", "tally")] });
+  assert.ok(codes(validateDesign(two)).includes("vote.tally"));
+});
+
+test("voting: fewer than three or more than five voters give vote.voters", () => {
+  const two = votingDesign({ nodes: [node("a", "researcher"), node("b", "writer"), node("tally", "tally")], edges: [edge("a", "tally"), edge("b", "tally")] });
+  assert.ok(codes(validateDesign(two)).includes("vote.voters"));
+  const kinds = ["planner", "researcher", "critic", "writer", "free", "planner"];
+  const voters = (n) => Array.from({ length: n }, (_, i) => node(`v${i}`, kinds[i]));
+  const five = voters(5);
+  assert.equal(validateDesign(votingDesign({ nodes: [...five, node("tally", "tally")], edges: five.map((v) => edge(v.id, "tally")) })).ok, true);
+  const six = voters(6);
+  assert.ok(codes(validateDesign(votingDesign({ nodes: [...six, node("tally", "tally")], edges: six.map((v) => edge(v.id, "tally")) }))).includes("vote.voters"));
+});
+
+test("voting: edges must go from each voter to the tally, once", () => {
+  assert.ok(codes(validateDesign(votingDesign({ edges: [edge("a", "tally"), edge("b", "tally")] }))).includes("vote.edges"));
+  assert.ok(codes(validateDesign(votingDesign({ edges: [edge("tally", "a"), edge("b", "tally"), edge("c", "tally")] }))).includes("vote.edges"));
+  assert.ok(codes(validateDesign(votingDesign({ edges: [edge("a", "tally"), edge("b", "tally"), edge("c", "tally"), edge("a", "b")] }))).includes("vote.edges"));
+});
+
+test("the tally agent belongs only to the voting pattern; voters are the general types", () => {
+  assert.deepEqual(AGENT_TYPES.tally.patterns, ["voting"]);
+  for (const agent of ["planner", "researcher", "critic", "writer", "free"]) assert.ok(AGENT_TYPES[agent].patterns.includes("voting"), agent);
+  for (const agent of ["supervisor", "combiner", "debater", "judge", "evaluator", "router"]) assert.ok(!AGENT_TYPES[agent].patterns.includes("voting"), agent);
 });

@@ -61,6 +61,14 @@ function patternIcon(doc, pattern) {
     for (const [k, v] of Object.entries({ cx: x, cy: y, r: 4, fill: "none", stroke: "currentColor", "stroke-width": 1.5 })) c.setAttribute(k, String(v));
     svg.append(c);
   };
+  // A voter: a ring with a tick. A dimmed one is the voter that differs.
+  const voter = (x, y, dim = false) => {
+    const c = doc.createElementNS(SVG_NS, "circle");
+    for (const [k, v] of Object.entries({ cx: x, cy: y, r: 5, fill: "none", stroke: "currentColor", "stroke-width": 1.5, ...(dim ? { opacity: 0.6 } : {}) })) c.setAttribute(k, String(v));
+    const tick = doc.createElementNS(SVG_NS, "path");
+    for (const [k, v] of Object.entries({ d: `M${x - 2.5} ${y} L${x - 0.5} ${y + 2} L${x + 3} ${y - 2}`, stroke: "currentColor", "stroke-width": 1.5, fill: "none", ...(dim ? { opacity: 0.6 } : {}) })) tick.setAttribute(k, String(v));
+    svg.append(c, tick);
+  };
   const line = (x1, y1, x2, y2, { width = 1.5, dashed = false } = {}) => {
     const l = doc.createElementNS(SVG_NS, "line");
     for (const [k, v] of Object.entries({ x1, y1, x2, y2, stroke: "currentColor", "stroke-width": width, ...(dashed ? { "stroke-dasharray": "3 3", opacity: 0.6 } : {}) })) l.setAttribute(k, String(v));
@@ -74,6 +82,8 @@ function patternIcon(doc, pattern) {
     handoff: () => [line(8, 20, 28, 20), line(28, 20, 56, 20), dot(8, 20), dot(28, 20), dot(56, 20), circle(8, 20)],
     // A switch: one solid, thick branch to a filled dot (the chosen route), two thin dashed branches to empty rings.
     router: () => [line(10, 20, 28, 20), line(28, 20, 52, 20, { width: 3 }), line(28, 20, 50, 7, { dashed: true }), line(28, 20, 50, 33, { dashed: true }), dot(10, 20), dot(55, 20), ring(55, 5), ring(55, 35)],
+    // Three voters (the last one differs, dashed and dimmed) run into one filled dot: the tally.
+    voting: () => [line(14, 6, 48, 20), line(14, 20, 48, 20), line(14, 34, 48, 20, { dashed: true }), voter(9, 6), voter(9, 20), voter(9, 34, true), dot(54, 20)],
     evaluator: () => [line(12, 14, 52, 14), line(52, 14, 52, 30), line(52, 30, 12, 30), line(12, 30, 12, 14), dot(12, 14), dot(52, 14)],
   };
   shapes[pattern]();
@@ -441,7 +451,7 @@ export function renderCreate(ctx) {
       carryLimits ? carryLimits.element : "",
       draft.retry ? carryOnButton : "",
       h(doc, "div", { class: "field wide" }, h(doc, "label", { for: "cr-task" }, t("create.taskLabel"), help("create-task", t("create.taskLabel"))), taskInput, counter),
-      h(doc, "h3", {}, t("create.patternHeading"), help("create-pattern", t("create.patternHeading")), ...(draft.pattern === "handoff" ? [help("create-handoff", t("pattern.handoff"))] : []), ...(draft.pattern === "router" ? [help("create-router", t("pattern.router"))] : [])),
+      h(doc, "h3", {}, t("create.patternHeading"), help("create-pattern", t("create.patternHeading")), ...(draft.pattern === "handoff" ? [help("create-handoff", t("pattern.handoff"))] : []), ...(draft.pattern === "router" ? [help("create-router", t("pattern.router"))] : []), ...(draft.pattern === "voting" ? [help("create-voting", t("pattern.voting"))] : [])),
       h(doc, "p", { class: "hint" }, t("create.patternHelp")),
       patternGroup,
       patternNotice,

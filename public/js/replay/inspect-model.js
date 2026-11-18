@@ -1,6 +1,7 @@
 import { agentLabel, numberRepeatedLabels } from "../engine/labels.js";
 import { AGENT_TYPES } from "../engine/catalog.js";
 import { warningHelp } from "../help-ids.js";
+import { parseVotingReply } from "../engine/runners/voting.js";
 // Turns a run's events into what the inspector shows: one entry per agent, with its steps
 // (model calls, tool calls, handoffs), the messages of each model round and its output.
 // Pure: no DOM.
@@ -346,5 +347,33 @@ export function routerEnd(events) {
   const choice = routerChoice(events);
   if (done.outcome === "finished" && choice) return { result: "answered", ...choice };
   if (done.outcome === "stopped_limit") return { result: "stopped", to: choice?.to ?? null, reason: choice?.reason ?? "" };
+  return null;
+}
+
+// What the tally of a voting run decided, up to the cursor: { agree, votes, total, answer, note }. The decision is the
+// last reply of the tally that reads as one (a repaired reply replaces a bad one). Null for other patterns and before it.
+export function votingTally(events, cursor = events.length) {
+  const design = events.find((e) => e.type === "run_start")?.design;
+  if (design?.pattern !== "voting") return null;
+  const tally = design.nodes.find((n) => n.agent === "tally");
+  const voters = design.nodes.filter((n) => n.agent !== "tally").map((n) => n.id);
+  for (const event of [...events.slice(0, cursor)].reverse()) {
+    if (event.type !== "agent_output" || event.agent !== tally?.id) continue;
+    const decision = parseVotingReply(event.text, voters);
+    if (decision) return { agree: decision.agree, votes: decision.agree.length, total: voters.length, answer: decision.answer, note: decision.note };
+  }
+  return null;
+}
+
+// How a voting run ended: "majority" (more than half of the voters agree), "none" (no majority) or "stopped" (a limit
+// before the tally decided). { result, votes, total, note }. Null for other patterns, for failed runs and runs with no end yet.
+export function votingEnd(events) {
+  const design = events.find((e) => e.type === "run_start")?.design;
+  const done = events.find((e) => e.type === "done");
+  if (design?.pattern !== "voting" || !done) return null;
+  const tally = votingTally(events);
+  const total = design.nodes.filter((n) => n.agent !== "tally").length;
+  if (done.outcome === "finished" && tally) return { result: tally.votes * 2 > tally.total ? "majority" : "none", votes: tally.votes, total: tally.total, note: tally.note };
+  if (done.outcome === "stopped_limit") return { result: "stopped", votes: tally?.votes ?? 0, total, note: tally?.note ?? "" };
   return null;
 }

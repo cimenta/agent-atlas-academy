@@ -4,7 +4,7 @@ import { AGENT_TYPES, DEFAULT_MODEL, NODE_MAX } from "../engine/catalog.js";
 import { validateDesign } from "../engine/patterns.js";
 import { cleanNodeLimits } from "../engine/agent-limits.js";
 
-const ONCE_ONLY = new Set(["supervisor", "combiner", "judge", "evaluator", "router"]);
+const ONCE_ONLY = new Set(["supervisor", "combiner", "judge", "evaluator", "router", "tally"]);
 const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve"];
 const DEFAULT_ROUNDS = 2;
 const EVALUATOR_ROUNDS = 3;
@@ -181,6 +181,8 @@ export function createEditor(initialPattern) {
         if (!(a.agent === "supervisor" && b.agent !== "supervisor")) code = "sup.edges";
       } else if (pattern === "router") {
         if (!(a.agent === "router" && b.agent !== "router")) code = "rout.edges";
+      } else if (pattern === "voting") {
+        if (!(b.agent === "tally" && a.agent !== "tally")) code = "vote.edges";
       } else if (pattern === "handoff") {
         // Any two different agents may be joined, in either direction: an arrow means "may hand over to".
       } else if (pattern === "evaluator") {
@@ -249,6 +251,7 @@ export function createEditor(initialPattern) {
       positions = {};
       start = undefined;
       if (nextPattern === "router") this.addNode("router");
+      if (nextPattern === "voting") this.addNode("tally");
       if (nextPattern === "evaluator") {
         this.addNode("writer");
         this.addNode("evaluator");
@@ -282,7 +285,7 @@ export function layoutDesign(design, { orientation = "vertical" } = {}) {
       level = [...new Set(edges.filter((e) => level.includes(e.from) && !spots.has(e.to)).map((e) => e.to))];
     }
   } else {
-    const hubAgent = { parallel: "combiner", supervisor: "supervisor", debate: "judge", evaluator: "evaluator", router: "router" }[pattern];
+    const hubAgent = { parallel: "combiner", supervisor: "supervisor", debate: "judge", evaluator: "evaluator", router: "router", voting: "tally" }[pattern];
     const hub = nodes.find((n) => n.agent === hubAgent && connected.has(n.id));
     const followers = [];
     if (pattern === "parallel" && hub) {

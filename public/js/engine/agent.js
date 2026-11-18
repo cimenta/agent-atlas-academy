@@ -131,8 +131,8 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
       let pauses = 0;
       // The agent reached a limit of its own. Stop: the run ends. Pass: what it wrote goes on, and the run carries on.
       const endAtLimit = (reason) => {
-        // In a handoff or router run the reply is the decision, so a cut-off reply cannot be passed on: a limit of the agent always stops the run.
-        if (onLimit === "stop" || design?.pattern === "handoff" || node.agent === "router") throw stopRun(reason);
+        // In a handoff, router or voting run (the tally) the reply is the decision, so a cut-off reply cannot be passed on: a limit of the agent always stops the run.
+        if (onLimit === "stop" || design?.pattern === "handoff" || node.agent === "router" || node.agent === "tally") throw stopRun(reason);
         const written = texts.filter(Boolean).join("\n").trim();
         if (written === "") throw new Error(`The agent ${label} reached its own limit (${reason}) before it wrote anything. Raise the limit of this agent in the editor, and run again.`);
         emit({ type: "warning", agent: node.id, limit: `agent_${reason}`, message: agentPassMessage(`agent_${reason}`, { label, value: limitValue[`agent_${reason}`] }) });

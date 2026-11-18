@@ -590,6 +590,8 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .replay-diagram .rnode[data-status="stopped"] { background: var(--warn-bg, #fbf1dc); border: 2px solid var(--warn-line, #d9b36a); padding: 3px 7px; color: var(--warn-text, #6b4a0a); }
 .replay-diagram .rnode[data-status="stopped"] small { color: var(--warn-text, #6b4a0a); font-weight: 600; }
 .replay-diagram .rnode[data-status="error"] { background: var(--working-bg); border-color: var(--working); }
+.replay-diagram .rnode[data-dissent="true"] { opacity: 0.6; border-style: dashed; }
+.flow[data-dissent="true"] { stroke-dasharray: 6 5; opacity: 0.6; }
 .replay-diagram .rnode[aria-pressed="true"] { outline: 3px solid var(--accent); outline-offset: 1px; }
 .replay-diagram-wrap { display: flex; flex-direction: column; }
 .replay-diagram-wrap .diagram-badge { order: -1; align-self: flex-start; margin: 8px 0 0 8px; }

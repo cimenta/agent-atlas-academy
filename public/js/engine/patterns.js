@@ -4,7 +4,7 @@ import { isSlot } from "../key-slots.js";
 import { validNodeLimits, ON_LIMIT } from "./agent-limits.js";
 import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, LIMIT_MAX, clampCostCap, CRITERIA_MAX, NODE_MAX, NAME_MAX, INSTRUCTIONS_MAX } from "./catalog.js";
 
-export const PATTERNS = ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff", "router"];
+export const PATTERNS = ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff", "router", "voting"];
 
 const ID = /^[a-z0-9-]{1,32}$/;
 const MODEL_KEYS = new Set(MODELS.map((m) => m.key));
@@ -120,6 +120,13 @@ export function validateDesign(design) {
     if (routers.length !== 1) add("rout.router");
     if (specialists.length < 2 || specialists.length > 6) add("rout.specialists");
     if (routers.length === 1 && !hubEdgesOk(specialists, routers[0], false)) add("rout.edges");
+  } else if (pattern === "voting") {
+    // Three to five voters answer alone; every arrow goes from a voter to the one tally, once each.
+    const tallies = byAgent("tally");
+    const voters = others("tally");
+    if (tallies.length !== 1) add("vote.tally");
+    if (voters.length < 3 || voters.length > 5) add("vote.voters");
+    if (tallies.length === 1 && !hubEdgesOk(voters, tallies[0], true)) add("vote.edges");
   } else if (pattern === "handoff") {
     // Arrows mean "may hand over to". The starting agent is named in design.start and must be able to hand over.
     if (goodNodes.length < 2) add("hand.nodes");
@@ -175,6 +182,12 @@ export function parallelParts(nodes, edges) {
   }
   if (feeding.length !== workers.length || workers.some((w) => !covered.has(w.id))) return null;
   return { hub, workers, followers };
+}
+
+// The parts of a voting design: the tally and the voters (every other agent).
+export function votingParts(nodes) {
+  const tally = nodes.find((n) => n.agent === "tally");
+  return { tally, voters: nodes.filter((n) => n.agent !== "tally") };
 }
 
 // Node ids from start to end when the edges form one path through all nodes, else null.

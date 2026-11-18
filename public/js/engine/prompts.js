@@ -32,6 +32,8 @@ Reply with JSON only, in one of these forms:
 
 export function roleText(node, pattern) {
   const own = ownRoleText(node);
+  if (pattern === "voting" && node.agent !== "tally") return `${own}
+${VOTER}`;
   return pattern === "handoff" ? `${own}
 ${HANDOFF}` : own;
 }
@@ -41,7 +43,16 @@ const ROUTER = `You are the Router. You read the task and choose exactly one spe
 Reply with JSON only, in this form:
 {"route":"<specialist id>","reason":"<why this specialist fits the task>"}`;
 
+// The Tally reads the answers of the voters and names the one most of them agree on. It does not vote itself.
+// Said to every voter: whatever its role, it gives its own answer to the whole task, so that the answers can be compared.
+const VOTER = "You are one of several voters who answer the same task, each on its own. Answer the whole task yourself, in your own words. Do not only make a plan or review other work: give the answer.";
+
+const TALLY = `You are the Tally. Several voters answered the same task, each on its own. You read all the answers and find the answer most of them agree on. Two answers agree when they say the same thing, even in different words. You do not add your own answer to the vote. If no answers agree, give the answer that the largest group is closest to. The list agree must name at least one voter: the voters whose answer matches yours, or, if all answers differ, the voter whose answer you chose.
+Reply with JSON only, in this form:
+{"answer":"<the answer most voters agree on>","agree":["<id of each voter that agrees with it>"],"note":"<what the other voters said differently, or empty>"}`;
+
 function ownRoleText(node) {
+  if (node.agent === "tally") return TALLY;
   if (node.agent === "router") return ROUTER;
   if (node.agent === "supervisor") return SUPERVISOR;
   if (node.agent === "evaluator") return EVALUATOR;

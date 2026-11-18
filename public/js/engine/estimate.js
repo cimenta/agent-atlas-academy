@@ -16,6 +16,8 @@ export function activationsOf(design, limits) {
   // The path depends on the agents' choices; two turns for each agent is a typical upper estimate.
   // The router once (a second time after one repair) and the chosen specialist once: three at most.
   if (design.pattern === "router") return Math.min(maxSteps, 3);
+  // Every voter once, the tally once (a second time after one repair).
+  if (design.pattern === "voting") return Math.min(maxSteps, nodes.length + 1);
   if (design.pattern === "handoff") return Math.min(maxSteps, 2 * nodes.length);
   if (design.pattern === "supervisor") {
     const workers = nodes.filter((n) => n.agent !== "supervisor").length;

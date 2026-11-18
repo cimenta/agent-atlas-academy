@@ -60,7 +60,7 @@ export const providersOf = (design, fallback = "anthropic") => {
 export const paidOnlyModelUsed = (design, provider) =>
   (design?.nodes ?? []).some((n) => providerCatalog(nodeProvider(n, provider)).models.find((m) => m.key === n.model)?.freeTier === false);
 
-const GENERAL = ["sequential", "parallel", "supervisor", "handoff", "router"];
+const GENERAL = ["sequential", "parallel", "supervisor", "handoff", "router", "voting"];
 
 // The longest text of the criteria an evaluator judges by (evaluator loop).
 export const CRITERIA_MAX = 1000;
@@ -76,6 +76,7 @@ export const AGENT_TYPES = {
   judge: { label: "Judge", patterns: ["debate"], searchDefault: false, free: false },
   evaluator: { label: "Evaluator", patterns: ["evaluator"], searchDefault: false, free: false },
   router: { label: "Router", patterns: ["router"], searchDefault: false, free: false },
+  tally: { label: "Tally", patterns: ["voting"], searchDefault: false, free: false },
   free: { label: "Free agent", patterns: GENERAL, searchDefault: false, free: true },
 };
 

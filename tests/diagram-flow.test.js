@@ -187,3 +187,23 @@ test("a handoff design draws an edge and its reverse as two separate paths", () 
   const [one, two] = arrows.map((x) => x.d.match(/-?[\d.]+/g).map(Number));
   assert.notEqual(one[1], two[3], "the two arrows do not lie on the same line");
 });
+
+test("the replay diagram of a voting run shows who agrees, dims the voter that differs and shows the count on the tally", async () => {
+  const { createReplayDiagram } = await import("../public/js/replay/diagram.js");
+  const design = { pattern: "voting", nodes: [{ id: "a", agent: "researcher" }, { id: "b", agent: "writer" }, { id: "c", agent: "critic" }, { id: "tally", agent: "tally" }], edges: [{ from: "a", to: "tally" }, { from: "b", to: "tally" }, { from: "c", to: "tally" }] };
+  const diagram = createReplayDiagram({ doc: fakeDoc(), design, wide: true, boxLabel: (id) => id, statusText: (a) => a.status, onSelect: () => {}, clock: { setTimeout: () => 1, clearTimeout: () => {} }, now: () => 1000 });
+  const state = { agents: Object.fromEntries(["a", "b", "c", "tally"].map((id) => [id, { status: "done", label: id }])) };
+  const marks = new Map([["a", { text: "agrees" }], ["b", { text: "agrees" }], ["c", { text: "differs", dissent: true }], ["tally", { text: "2 of 3" }]]);
+  diagram.update({ events: [{ type: "run_start" }], cursor: 1, state, selectedId: null, badgeText: "2 of 3 agree", marks });
+  const area = diagram.element.children[0];
+  const box = (id) => area.children.find((c) => c.attrs["data-node-id"] === id);
+  const small = (id) => box(id).children[1].textContent;
+  assert.equal(small("a"), "agrees");
+  assert.equal(small("c"), "differs");
+  assert.equal(small("tally"), "2 of 3");
+  assert.equal(box("c").attrs["data-dissent"], "true");
+  assert.equal(box("a").attrs["data-dissent"], "false");
+  const paths = area.children[0].children.filter((c) => c.name === "path" && c.attrs["data-flow"]);
+  assert.equal(paths.find((p) => p.attrs["data-flow"] === "c>tally").attrs["data-dissent"], "true");
+  assert.equal(paths.find((p) => p.attrs["data-flow"] === "a>tally").attrs["data-dissent"], "false");
+});

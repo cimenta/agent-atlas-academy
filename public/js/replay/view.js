@@ -4,7 +4,7 @@ import { h } from "../dom.js";
 import { helpIcon } from "../help-popup.js";
 import { validateRun } from "../run-schema.js";
 import { createPlayer } from "./player.js";
-import { debateProgress, deriveInspector, designLabel, evaluatorProgress, handoffOutcome, handoffProgress, handoffSender, loopOutcome, routerChoice, routerEnd } from "./inspect-model.js";
+import { debateProgress, deriveInspector, designLabel, evaluatorProgress, handoffOutcome, handoffProgress, handoffSender, loopOutcome, routerChoice, routerEnd, votingEnd, votingTally } from "./inspect-model.js";
 import { createViewer } from "./viewer.js";
 import { markText, searchBar } from "../text-search.js";
 import { definitionFromRun } from "../create/definition.js";
@@ -19,7 +19,7 @@ import { limitsChoice } from "./limits-choice.js";
 import { canSubmit, submitRun } from "../submit-run.js";
 import { runForExport } from "../run-export.js";
 import { createReplayDiagram, ROUND_MARK } from "./diagram.js";
-import { outcomeNotice, loopNotice, handoffNotice, handoffPathView, routerNotice } from "../outcome-view.js";
+import { outcomeNotice, loopNotice, handoffNotice, handoffPathView, routerNotice, votingNotice } from "../outcome-view.js";
 import { buildResultModel } from "../play-model.js";
 import { clearActivePlayer, setActivePlayer } from "../shortcuts.js";
 import { pickNeighbour } from "./spatial.js";
@@ -312,6 +312,15 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     const evaluating = evaluatorProgress(events, player.cursor);
     const handing = handoffProgress(events, player.cursor);
     const routing = routerChoice(events, player.cursor);
+    // Once the tally has decided, the voters that agree say so and the one that differs is dimmed; the tally shows the count.
+    const voted = votingTally(events, player.cursor);
+    const marks = new Map();
+    if (voted) {
+      for (const node of diagramDesign.nodes) {
+        if (node.agent === "tally") marks.set(node.id, { text: t("player.voteTally", { votes: voted.votes, total: voted.total }) });
+        else marks.set(node.id, voted.agree.includes(node.id) ? { text: t("player.voteAgrees") } : { text: t("player.voteDiffers"), dissent: true });
+      }
+    }
     // In a recorded (not live) run, the agents that failed at its end are marked from the start.
     if (!live && failedAtEnd === null) {
       const whole = deriveInspector(events);
@@ -324,7 +333,10 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       state,
       failed: live ? null : failedAtEnd,
       selectedId: currentAgent()?.id ?? null,
-      badgeText: routing
+      marks,
+      badgeText: voted
+        ? t("player.votes", { votes: voted.votes, total: voted.total })
+        : routing
         ? t("player.routedTo", { name: designLabel(diagramDesign, routing.to) })
         : debate
         ? debate.verdict
@@ -517,6 +529,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     const handed = handoffOutcome(events);
     const routedTo = routerChoice(events, player.cursor);
     if (routedTo && player.cursor > 0) items.push(handoffPathView({ doc, t, design: handDesign, path: [handDesign.nodes.find((n) => n.agent === "router")?.id, routedTo.to] }));
+    const voting = votingEnd(events);
+    if (voting && player.cursor > events.findIndex((e) => e.type === "done")) items.push(votingNotice({ doc, t, end: voting }));
     const routed = routerEnd(events);
     if (routed && player.cursor > events.findIndex((e) => e.type === "done")) items.push(routerNotice({ doc, t, design: handDesign, end: routed }));
     if (handed && player.cursor > events.findIndex((e) => e.type === "done")) items.push(handoffNotice({ doc, t, design: handDesign, outcome: handed }));

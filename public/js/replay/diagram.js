@@ -145,7 +145,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
   // events: all events of the run; cursor: how many are applied; state: the inspector state; selectedId: the agent shown below.
   function update(args) {
     lastArgs = args;
-    const { events, cursor, state, selectedId, badgeText, badgeNumber, failed, idleStatus = "waiting" } = args;
+    const { events, cursor, state, selectedId, badgeText, badgeNumber, failed, marks = new Map(), idleStatus = "waiting" } = args;
     for (const [id, parts] of boxes) {
       // An agent that failed in a recorded run shows as failed from the start, before the replay reaches the failure.
       const isFailed = failed?.has(id) === true;
@@ -154,7 +154,10 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       parts.box.setAttribute("data-status", status);
       parts.box.setAttribute("aria-pressed", String(selectedId === id));
       parts.name.textContent = agent?.label ?? boxLabel(id);
-      parts.status.textContent = statusText(agent ?? { status: idleStatus, ms: null });
+      // A voting run marks every agent once the tally has decided: "agrees", "differs" (dimmed) or the count.
+      const mark = status === "done" ? marks.get(id) : undefined;
+      parts.status.textContent = mark ? mark.text : statusText(agent ?? { status: idleStatus, ms: null });
+      parts.box.setAttribute("data-dissent", String(mark?.dissent === true));
       if (parts.retry) {
         parts.retry.hidden = status !== "error";
         if (status !== "error" && menu?.getAttribute("data-for") === id) closeMenu();
@@ -177,6 +180,9 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       const lit = Boolean(active); // blue only while it blinks; afterwards a solid grey arrow
       const state2 = lit ? "lit" : used.has(key) ? "used" : "pending";
       path.setAttribute("class", `flow ${state2}${active ? " " + active.cls : ""}`);
+      // The arrow of a voter that differs from the result is dashed and dimmed.
+      const from = arrows.find((a) => a.key === key)?.from;
+      path.setAttribute("data-dissent", String(marks.get(from)?.dissent === true));
       path.setAttribute("marker-end", `url(#flow-head-${state2})`);
       if (active) nextExpiry = Math.min(nextExpiry, active.until);
     }

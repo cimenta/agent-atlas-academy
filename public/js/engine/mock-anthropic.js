@@ -39,6 +39,15 @@ export function createMockCall({ delayMs = 0, evaluatorAcceptsAt = 2 } = {}) {
       usage: { ...usage, ...extraUsage },
     });
 
+    if (String(body?.system ?? "").includes("one of several voters")) {
+      // In a voting run every mock voter gives the same answer, so the mock tally can say that all of them agree.
+      return reply([{ type: "text", text: "The sky is blue because air scatters blue light more than red light." }]);
+    }
+    if (role === "tally") {
+      // The mock tally says that every voter agrees, so a mock run always has a full majority.
+      const ids = [...(typeof firstUserText(messages) === "string" ? firstUserText(messages) : "").matchAll(/^--- (\S+) ---$/gm)].map((m) => m[1]);
+      return reply([{ type: "text", text: JSON.stringify({ answer: "Final answer: the voters gave the same answer, and this is it.", agree: ids, note: "" }) }]);
+    }
     if (role === "router") {
       // The mock router always chooses the first specialist in the list, so a mock run ends the same way each time.
       const first = [...messages].reverse().find((m) => m.role === "user");

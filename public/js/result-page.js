@@ -6,8 +6,8 @@ import { renderBlocks } from "./render.js";
 import { buildResultModel, buildStatistics, limitRows } from "./play-model.js";
 import { copyText, downloadFile, safeFileName } from "./download.js";
 import { formatDuration, formatUsd } from "./create/create-model.js";
-import { outcomeNotice, loopNotice, handoffNotice, handoffPathView, routerNotice } from "./outcome-view.js";
-import { designLabel, loopOutcome, handoffOutcome, handoffPath, routerChoice, routerEnd } from "./replay/inspect-model.js";
+import { outcomeNotice, loopNotice, handoffNotice, handoffPathView, routerNotice, votingNotice } from "./outcome-view.js";
+import { designLabel, loopOutcome, handoffOutcome, handoffPath, routerChoice, routerEnd, votingEnd, votingTally } from "./replay/inspect-model.js";
 import { markText, searchBar } from "./text-search.js";
 import { paintModelTag } from "./provider-colors.js";
 
@@ -54,6 +54,8 @@ export function renderResult(ctx, run) {
   const handed = handoffOutcome(run.events);
   const routedChoice = routerChoice(run.events);
   const routedEnd = routerEnd(run.events);
+  const votedEnd = votingEnd(run.events);
+  const votedTally = votingTally(run.events);
   const handPath = handoffPath(run.events);
   const handDesign = run.events.find((e) => e.type === "run_start")?.design;
   const answerView = () => {
@@ -119,7 +121,7 @@ export function renderResult(ctx, run) {
     );
 
     search.run();
-    return h(doc, "div", { class: "answer-wrap" }, loop ? loopNotice({ doc, t, loop }) : "", handed ? handoffNotice({ doc, t, design: handDesign, outcome: handed }) : "", routedEnd ? routerNotice({ doc, t, design: handDesign, end: routedEnd }) : "", h(doc, "div", { class: "answer-toolbar noprint" }, segment, copy, copied, exports), search.element, holder);
+    return h(doc, "div", { class: "answer-wrap" }, loop ? loopNotice({ doc, t, loop }) : "", handed ? handoffNotice({ doc, t, design: handDesign, outcome: handed }) : "", routedEnd ? routerNotice({ doc, t, design: handDesign, end: routedEnd }) : "", votedEnd ? votingNotice({ doc, t, end: votedEnd }) : "", h(doc, "div", { class: "answer-toolbar noprint" }, segment, copy, copied, exports), search.element, holder);
   };
 
   const statsView = () => {
@@ -138,6 +140,7 @@ export function renderResult(ctx, run) {
       ...(loop ? [tile(t(`stats.loop.${{ accepted: "accepted", not_accepted: "notAccepted", stopped: "stopped" }[loop.result]}`, { n: loop.round, total: loop.rounds }), t("stats.loop"))] : []),
       ...(handPath ? [tile(String(handPath.length - 1), t("stats.handoffs"))] : []),
       ...(routedChoice ? [tile(designLabel(handDesign, routedChoice.to), t("stats.routedTo"))] : []),
+      ...(votedTally ? [tile(t("stats.votesValue", { votes: votedTally.votes, total: votedTally.total }), t("stats.votes"))] : []),
     );
     const table = h(
       doc,
@@ -207,6 +210,7 @@ export function renderResult(ctx, run) {
       tiles,
       ...(handPath ? [handoffPathView({ doc, t, design: handDesign, path: handPath })] : []),
       ...(routedChoice && routedChoice.reason ? [h(doc, "p", { class: "hint", "data-ui": "router-reason" }, routedChoice.reason)] : []),
+      ...(votedTally && votedTally.note ? [h(doc, "p", { class: "hint", "data-ui": "voting-note" }, votedTally.note)] : []),
       stats.perAgent.length ? h(doc, "h3", {}, t("result.perAgent"), help("result-agents", t("result.perAgent"))) : "",
       stats.perAgent.length ? table : "",
       limitsSection,

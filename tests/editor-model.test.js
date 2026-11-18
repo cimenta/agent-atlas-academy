@@ -500,3 +500,39 @@ test("router: layout puts the router first and the specialists in the next colum
   assert.equal(at(b).x, 1);
   assert.notEqual(at(a).y, at(b).y);
 });
+
+// ---- voting ----
+test("voting: reset places the tally, voters are added, only voter to tally may be joined", () => {
+  const editor = createEditor("voting");
+  editor.reset("voting");
+  assert.equal(editor.design().nodes.length, 1);
+  const tally = editor.design().nodes[0].id;
+  assert.equal(editor.addNode("tally").code, "node.duplicate");
+  const a = add(editor, "writer");
+  const b = add(editor, "researcher");
+  const c = add(editor, "critic");
+  assert.equal(editor.connect(a, tally).ok, true);
+  assert.equal(editor.connect(tally, a).code, "vote.edges");
+  assert.equal(editor.connect(a, b).code, "vote.edges");
+  assert.equal(editor.connect(b, tally).ok, true);
+  assert.equal(editor.connect(c, tally).ok, true);
+  assert.deepEqual(validateDesign(editor.design()).errors, []);
+});
+
+test("voting: the tally agent is refused in other patterns and the router in this one", () => {
+  assert.equal(createEditor("sequential").addNode("tally").code, "node.agentNotAllowed");
+  assert.equal(createEditor("voting").addNode("router").code, "node.agentNotAllowed");
+});
+
+test("voting: layout puts the voters first and the tally in the next column", () => {
+  const editor = createEditor("voting");
+  editor.reset("voting");
+  const tally = editor.design().nodes[0].id;
+  const [a, b, c] = ["writer", "critic", "planner"].map((agent) => add(editor, agent));
+  for (const id of [a, b, c]) editor.connect(id, tally);
+  const at = (id) => layoutDesign(editor.design(), { orientation: "horizontal" }).nodes.find((n) => n.id === id);
+  assert.equal(at(a).x, 0);
+  assert.equal(at(b).x, 0);
+  assert.equal(at(tally).x, 1);
+  assert.notEqual(at(a).y, at(b).y);
+});

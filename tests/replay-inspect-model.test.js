@@ -275,3 +275,38 @@ test("routerEnd: answered, stopped by a limit, nothing for failed or unfinished 
   assert.equal(routerEnd(rEvents({ type: "done", outcome: "failed" })), null);
   assert.equal(routerEnd(rEvents().slice(0, 4)), null);
 });
+
+// ---- voting ----
+const vDesign = { pattern: "voting", nodes: [{ id: "a", agent: "researcher" }, { id: "b", agent: "writer" }, { id: "c", agent: "critic" }, { id: "tally", agent: "tally" }], edges: [{ from: "a", to: "tally" }, { from: "b", to: "tally" }, { from: "c", to: "tally" }] };
+const vDecision = (agree) => JSON.stringify({ answer: "Blue", agree, note: "c differs" });
+const vEvents = (agree = ["a", "b"], done = { type: "done", outcome: "finished" }) => [
+  { type: "run_start", task: "t", pattern: "voting", design: vDesign },
+  { type: "agent_start", agent: "a" },
+  { type: "handoff", from: "a", to: "tally", note: "Blue" },
+  { type: "agent_start", agent: "tally" },
+  { type: "agent_output", agent: "tally", text: vDecision(agree) },
+  done,
+];
+
+test("votingTally: nothing before the decision, the agreeing voters after it, null for other patterns", async () => {
+  const { votingTally } = await import("../public/js/replay/inspect-model.js");
+  assert.equal(votingTally(vEvents(), 4), null);
+  assert.deepEqual(votingTally(vEvents(), 5), { agree: ["a", "b"], votes: 2, total: 3, answer: "Blue", note: "c differs" });
+  assert.equal(votingTally(rEvents(), 5), null);
+});
+
+test("votingTally takes the last valid decision, so a repaired reply counts", async () => {
+  const { votingTally } = await import("../public/js/replay/inspect-model.js");
+  const events = vEvents(["a", "b", "c"]);
+  events.splice(4, 0, { type: "agent_output", agent: "tally", text: "not json" });
+  assert.deepEqual(votingTally(events)?.agree, ["a", "b", "c"]);
+});
+
+test("votingEnd: majority, no majority, stopped by a limit, nothing for failed or unfinished runs", async () => {
+  const { votingEnd } = await import("../public/js/replay/inspect-model.js");
+  assert.deepEqual(votingEnd(vEvents()), { result: "majority", votes: 2, total: 3, note: "c differs" });
+  assert.deepEqual(votingEnd(vEvents(["a"])), { result: "none", votes: 1, total: 3, note: "c differs" });
+  assert.deepEqual(votingEnd(vEvents(["a", "b"], { type: "done", outcome: "stopped_limit" }).filter((e) => e.type !== "agent_output")), { result: "stopped", votes: 0, total: 3, note: "" });
+  assert.equal(votingEnd(vEvents(["a"], { type: "done", outcome: "failed" })), null);
+  assert.equal(votingEnd(vEvents().slice(0, 5)), null);
+});
