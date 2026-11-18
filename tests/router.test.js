@@ -73,3 +73,12 @@ test("anything unexpected is not found", () => {
 test("a help topic can be linked", () => {
   assert.deepEqual(parseRoute("#/help/bugs"), { name: "help", params: { topic: "bugs" } });
 });
+
+test("#/play/compare carries up to four run ids; duplicates and odd ids are dropped", () => {
+  assert.deepEqual(parseRoute("#/play/compare?runs=a,b,c"), { name: "play", params: { view: "compare", ids: ["a", "b", "c"] } });
+  assert.deepEqual(parseRoute("#/play/compare?runs=a,a,b"), { name: "play", params: { view: "compare", ids: ["a", "b"] } });
+  assert.deepEqual(parseRoute("#/play/compare?runs=a,b,c,d,e,f"), { name: "play", params: { view: "compare", ids: ["a", "b", "c", "d"] } });
+  assert.deepEqual(parseRoute("#/play/compare?runs=a,../x,b%20c,B_1"), { name: "play", params: { view: "compare", ids: ["a", "B_1"] } });
+  assert.deepEqual(parseRoute("#/play/compare"), { name: "play", params: { view: "compare", ids: [] } });
+  assert.deepEqual(parseRoute("#/play/compare?runs="), { name: "play", params: { view: "compare", ids: [] } });
+});

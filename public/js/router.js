@@ -10,6 +10,9 @@ export function parseRoute(hash) {
   // The Harness lab may be opened with a run and limits: #/learn/lab?run=<id>&steps=5&tokens=20000&repeat=3
   const lab = /^#\/learn\/lab(?:\?(.*))?$/.exec(hash);
   if (lab) return { name: "lab", params: labParams(lab[1]) };
+  // Comparing runs: #/play/compare?runs=<id>,<id>,... (two to four runs, the first is the base)
+  const compare = /^#\/play\/compare(?:\?(.*))?$/.exec(hash);
+  if (compare) return { name: "play", params: { view: "compare", ids: compareIds(compare[1]) } };
   const match = /^#\/([^/]+)(?:\/([^/]+))?(?:\/([^/]+))?$/.exec(hash);
   if (!match) return NOT_FOUND;
   const [, first, second, third] = match;
@@ -53,4 +56,13 @@ function labParams(query) {
     if (q.get(key) !== null && Number.isInteger(n) && n >= 0) params[key] = n;
   }
   return params;
+}
+
+// The run ids of a comparison link: valid ids only, each once, at most four.
+function compareIds(query) {
+  if (!query) return [];
+  const raw = new URLSearchParams(query).get("runs") ?? "";
+  const ids = [];
+  for (const id of raw.split(",")) if (/^[A-Za-z0-9_-]{1,80}$/.test(id) && !ids.includes(id)) ids.push(id);
+  return ids.slice(0, 4);
 }

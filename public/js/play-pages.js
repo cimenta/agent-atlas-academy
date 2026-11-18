@@ -16,6 +16,8 @@ import { definitionFromRun } from "./create/definition.js";
 import { draft, openInCreate } from "./create/draft.js";
 import { downloadFile, safeFileName } from "./download.js";
 import { runForExport } from "./run-export.js";
+import { renderCompare } from "./compare-page.js";
+import { MAX_COMPARE } from "./compare-model.js";
 import { refreshResultTab } from "./tab-state.js";
 import { clearPageActions, focusActivePlayer, setPageActions } from "./shortcuts.js";
 
@@ -34,7 +36,8 @@ const paneOpen = () => {
     return true;
   }
 };
-const lib = { query: "", open: paneOpen(), tab: null };
+// compare: the runs ticked in the library, in the order they were ticked (the first is the base of a comparison).
+const lib = { query: "", open: paneOpen(), tab: null, compare: [] };
 
 // The tab bar lives in the site header, with the library search next to it.
 function tabBar(ctx, view, { onQuery, onToggle, onFocusList, intro, resultOpen = false } = {}) {
@@ -107,6 +110,8 @@ export async function renderPlay(ctx, route = { params: { view: "replay" } }) {
       return renderResultTab(inner, id);
     case "run":
       return renderReplayTab(inner, id);
+    case "compare":
+      return renderCompare(inner, route.params?.ids ?? route.ids ?? [], (runId) => loadAnyRun(inner, runId));
     default:
       return renderReplayTab(inner);
   }
@@ -144,13 +149,19 @@ function providerRow({ doc, settings }, item) {
 }
 
 // A row of the library: the title with the outcome icon and the cog on top, the time below, then the providers and the pattern tag.
-function runRow(ctx, item, menu) {
+function runRow(ctx, item, menu, pick = null) {
   const { doc, t } = ctx;
+  const tick = pick
+    ? h(doc, "input", { type: "checkbox", class: "run-compare", "data-ui": "compare-select", checked: pick.checked, "aria-label": t("compare.select", { title: item.title }) })
+    : "";
+  if (pick) tick.addEventListener("change", () => pick.onToggle(tick.checked));
   return h(
     doc,
     "li",
     { class: "run-row", "data-ui": "run-row" },
+    tick,
     h(doc, "a", { href: `#/play/run/${item.id}`, class: "run-title" }, item.title),
+    pick?.base ? h(doc, "span", { class: "badge", "data-ui": "compare-base" }, t("compare.baseLib")) : "",
     h(doc, "span", { class: "run-tools" }, outcomeIcon(ctx, item), menu),
     runMeta(ctx, item),
     providerRow(ctx, item),
@@ -352,6 +363,7 @@ export async function renderReplayTab(ctx, requestedId) {
   const removeRun = async (item) => {
     if (!doc.defaultView.confirm(t("play.deleteConfirm", { title: item.title }))) return;
     await ctx.runStore.remove(item.id);
+    lib.compare = lib.compare.filter((id) => id !== item.id);
     if (item.id === currentId) {
       rememberRun("");
       handle?.destroy();
@@ -375,6 +387,23 @@ export async function renderReplayTab(ctx, requestedId) {
   setPageActions(pageActions);
   ctx.onLeave(() => clearPageActions(pageActions));
 
+  let compareNote = "";
+  // The bar under the tabs: how many runs are ticked, and the button that opens the comparison.
+  const compareBar = () => {
+    if (lib.compare.length === 0 && !compareNote) return "";
+    const go = h(doc, "button", { type: "button", class: "primary", "data-ui": "compare-go" }, t("compare.go", { n: lib.compare.length }));
+    go.disabled = lib.compare.length < 2;
+    go.addEventListener("click", () => {
+      location.hash = `#/play/compare?runs=${lib.compare.join(",")}`;
+    });
+    const clear = h(doc, "button", { type: "button", "data-ui": "compare-clear" }, t("compare.clear"));
+    clear.addEventListener("click", () => {
+      lib.compare = [];
+      compareNote = "";
+      draw();
+    });
+    return h(doc, "div", { class: "compare-bar", "data-ui": "compare-bar" }, h(doc, "b", {}, t(lib.compare.length === 1 ? "compare.selectedOne" : "compare.selected", { n: lib.compare.length })), h(doc, "span", { class: "muted" }, t(lib.compare.length === 1 ? "compare.pickOne" : "compare.base")), clear, go, ...(compareNote ? [h(doc, "p", { class: "notice", role: "status", "data-ui": "compare-max" }, compareNote)] : []));
+  };
   const draw = async () => {
     local = await listLocal();
     if (ctx.isStale()) return;
@@ -412,7 +441,19 @@ export async function renderReplayTab(ctx, requestedId) {
         },
       }).element;
     const row = (item) => {
-      const li = runRow(ctx, item, menuOf(item));
+      const li = runRow(ctx, item, menuOf(item), {
+        checked: lib.compare.includes(item.id),
+        base: lib.compare[0] === item.id,
+        onToggle: (on) => {
+          if (on && lib.compare.length >= MAX_COMPARE) {
+            compareNote = t("compare.max", { n: MAX_COMPARE });
+          } else {
+            compareNote = "";
+            lib.compare = on ? [...lib.compare, item.id] : lib.compare.filter((id) => id !== item.id);
+          }
+          draw();
+        },
+      });
       if (item.id === currentId) li.setAttribute("aria-current", "true");
       return li;
     };
@@ -432,6 +473,7 @@ export async function renderReplayTab(ctx, requestedId) {
     pane.replaceChildren(
       paneTabs,
       importNote,
+      compareBar(),
       ...(active === "mine"
         ? [
             mine.length === 0 ? none(lib.query && built.mine.length > 0 ? "play.noMatches" : "play.empty") : h(doc, "ul", { class: "run-list", "data-ui": "run-list-mine" }, ...mine.map((item) => row(item))),
