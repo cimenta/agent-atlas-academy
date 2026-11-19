@@ -1,5 +1,6 @@
 // The shared notebook of a run: short notes that agents leave for each other while the run lasts.
 // It lives only in the run. The program reads and writes it; no model decides what is kept.
+import { validFormat } from "./format.js";
 export const NOTE_MAX = 600;
 export const NOTEBOOK_READ_MAX = 6000;
 export const NOTEBOOK_MARK = "\n\nNotebook:\n";
@@ -12,11 +13,12 @@ export function mayWrite(agent, pattern) {
   return !DECISION_AGENTS.has(agent) && pattern !== "handoff";
 }
 
-// What one agent may do with the notebook: { on, read, write }.
+// What one agent may do with the notebook: { on, read, write }. An agent with an answer format reads only: its reply is one JSON
+// object, so notes after it would break the check.
 export function notebookRole(node, design) {
   if (design?.memory?.notebook !== true) return { on: false, read: false, write: false };
   const choice = NOTEBOOK_CHOICES.includes(node?.notebook) ? node.notebook : "both";
-  return { on: true, read: choice === "read" || choice === "both", write: mayWrite(node?.agent, design?.pattern) && (choice === "write" || choice === "both") };
+  return { on: true, read: choice === "read" || choice === "both", write: mayWrite(node?.agent, design?.pattern) && !validFormat(node?.format) && (choice === "write" || choice === "both") };
 }
 
 // A note is one line: line breaks inside it become spaces, so it cannot pass for a separate entry of another agent.

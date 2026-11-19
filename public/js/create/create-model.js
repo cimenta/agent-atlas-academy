@@ -22,10 +22,89 @@ export function handoffSkipper(base) {
 
 // Like handoffSkipper, for the agents a carried-on run creates again: a creation the earlier try already has (same agent id) and
 // as many refusals as the earlier try had are replays and are not recorded a second time.
+// The answers that carry on a run. An agent that failed its answer format (a failed second check) is asked again: its two bad
+// answers are not replayed, or a Retry would fail the same way without calling the model.
+export function withoutFailedFormat(answers, events) {
+  const last = new Map();
+  for (const e of events) if (e.type === "format_check") last.set(e.agent, e);
+  const out = [...answers];
+  for (const [agent, e] of last) {
+    if (e.ok !== false || e.attempt !== 2) continue;
+    for (let dropped = 0, i = out.length - 1; i >= 0 && dropped < 2; i--) {
+      if (out[i].agent === agent) {
+        out.splice(i, 1);
+        dropped += 1;
+      }
+    }
+  }
+  return out;
+}
+
+// An agent that a guardrail stopped is asked again: the answers of the try that was stopped are not replayed. The stop event says how
+// many answers that try used (a format repair adds one); without it one answer (two after a repair) is dropped. A later answer of the
+// agent means it went on, so nothing is dropped. A stop on the input has no answer to drop.
+export function withoutFailedGuardrail(answers, events) {
+  const stopped = new Map();
+  for (const e of events) {
+    if (e.type === "guardrail_check" && e.action === "stopped" && e.where !== "input") stopped.set(e.agent, e);
+    else if (e.type === "agent_output") stopped.delete(e.agent);
+  }
+  const out = [...answers];
+  for (const [agent, e] of stopped) {
+    const count = Number.isInteger(e.tries) && e.tries > 0 ? e.tries : e.attempt === 2 ? 2 : 1;
+    for (let dropped = 0, i = out.length - 1; i >= 0 && dropped < count; i--) {
+      if (out[i].agent === agent) {
+        out.splice(i, 1);
+        dropped += 1;
+      }
+    }
+  }
+  return out;
+}
+
+// The answers that carry on a run (Retry, Approve), from the events of the earlier try. A recorded condensing goes with the answer that
+// follows it, one with no answer after it (the agent failed after condensing) is carried on alone; the verdicts of reviewing guardrails
+// go with the answer they judged. The checks on the input go in an entry of their own ({ inputChecks: true }) because the agent may have
+// no answer yet (it failed, or waited for approval); they are carried so none is recorded again and no reviewer is paid for twice.
+export function resumeAnswers(base) {
+  let answers = [];
+  const condensed = new Map();
+  const latest = new Map();
+  const inputs = new Map();
+  const isRecordable = (e) => e.action !== "stopped" && !(e.kind === "reviewer" && !e.tokens);
+  for (const e of base) {
+    if (e.type === "condense") condensed.set(e.agent, { from: e.from, to: e.to, text: e.text, usage: e.usage, kept: e.kept !== false });
+    else if (e.type === "agent_output") {
+      const answer = { agent: e.agent, text: e.text, tokens: e.tokens, ...(condensed.has(e.agent) ? { condense: condensed.get(e.agent) } : {}) };
+      latest.set(e.agent, answer);
+      answers.push(answer);
+      condensed.delete(e.agent);
+    } else if (e.type === "guardrail_check" && isRecordable(e)) {
+      const record = { guardrail: e.guardrail, where: e.where, attempt: e.attempt, ok: e.ok, reason: e.reason, tokens: e.tokens, cost: e.cost, model: e.model };
+      if (e.where === "input") inputs.set(e.agent, [...(inputs.get(e.agent) ?? []), record]);
+      else if (e.kind === "reviewer" && latest.has(e.agent)) latest.get(e.agent).guardrails = [...(latest.get(e.agent).guardrails ?? []), record];
+    }
+  }
+  answers = withoutFailedFormat(answers, base);
+  answers = withoutFailedGuardrail(answers, base);
+  for (const [agent, condense] of condensed) answers.push({ agent, pending: true, condense });
+  for (const [agent, guardrails] of inputs) answers.push({ agent, inputChecks: true, guardrails });
+  return answers;
+}
+
 export function createSkipper(base) {
   const made = new Set(base.filter((e) => e.type === "agent_created").map((e) => e.agent));
   let refusals = base.filter((e) => e.type === "agent_refused").length;
+  const handoffs = new Map();
+  for (const e of base) if (e.type === "handoff_refused") handoffs.set(`${e.from}>${e.to}`, (handoffs.get(`${e.from}>${e.to}`) ?? 0) + 1);
   return (event) => {
+    if (event.type === "handoff_refused") {
+      const key = `${event.from}>${event.to}`;
+      const n = handoffs.get(key) ?? 0;
+      if (n === 0) return false;
+      handoffs.set(key, n - 1);
+      return true;
+    }
     if (event.type === "agent_created") return made.has(event.agent);
     if (event.type === "agent_refused" && refusals > 0) {
       refusals -= 1;

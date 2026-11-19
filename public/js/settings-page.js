@@ -330,6 +330,7 @@ export function renderSettings(ctx) {
     settings.setHandoffChars(value("handoff"));
     settings.setWebSearch(webBox.checked);
     settings.setFallback(chosenFallback());
+    settings.setFormatEnforcement(formatRadios.on.checked);
     const saved = settings.get();
     harnessRow("steps").set(saved.limits.maxSteps);
     harnessRow("tokens").set(saved.limits.maxTokens);
@@ -348,6 +349,7 @@ export function renderSettings(ctx) {
     harnessRows.forEach((row) => row.set(row.spec.def));
     webBox.checked = true;
     fallbackRadios.suggest.checked = true;
+    formatRadios.on.checked = true;
     say(t("harness.resetDone"));
   });
   // Three quick choices for how long a request waits for an answer.
@@ -390,6 +392,20 @@ export function renderSettings(ctx) {
   }));
   const chosenFallback = () => FALLBACK_MODES.find((mode) => fallbackRadios[mode].checked) ?? FALLBACK_DEFAULT;
   const fallbackOptions = h(doc, "div", { class: "fallback-options", role: "radiogroup", "aria-label": t("harness.fallbackHeading") }, ...FALLBACK_MODES.map((mode) => h(doc, "label", { class: "fallback-option", for: `set-fallback-${mode}` }, fallbackRadios[mode], h(doc, "span", {}, h(doc, "b", {}, t(`harness.fallback.${mode}`), mode === FALLBACK_DEFAULT ? h(doc, "span", { class: "tag-always" }, t("harness.fallbackDefault")) : ""), h(doc, "span", { class: "hint" }, t(`harness.fallback.${mode}Hint`))))));
+  // Format enforcement: whether the provider is asked to force the shape of a reply (see engine/schema.js).
+  const formatRadios = Object.fromEntries(["on", "off"].map((mode) => {
+    const input = h(doc, "input", { type: "radio", name: "set-format-enforcement", id: `set-format-enforcement-${mode}`, value: mode, "data-ui": `format-enforcement-${mode}` });
+    input.checked = (harnessNow.formatEnforcement ? "on" : "off") === mode;
+    return [mode, input];
+  }));
+  const formatOptions = h(doc, "div", { class: "fallback-options", role: "radiogroup", "aria-label": t("harness.formatHeading") }, ...["on", "off"].map((mode) => h(doc, "label", { class: "fallback-option", for: `set-format-enforcement-${mode}` }, formatRadios[mode], h(doc, "span", {}, h(doc, "b", {}, t(`harness.format.${mode}`), mode === "on" ? h(doc, "span", { class: "tag-always" }, t("harness.fallbackDefault")) : ""), h(doc, "span", { class: "hint" }, t(`harness.format.${mode}Hint`))))));
+  const harnessFormatPage = page(
+    "format",
+    h(doc, "h4", {}, t("harness.formatHeading"), help("harness-format", t("harness.formatHeading"))),
+    h(doc, "p", { class: "hint" }, t("harness.formatIntro")),
+    formatOptions,
+    h(doc, "p", { class: "hint" }, t("harness.formatNote")),
+  );
   const harnessRetries = page(
     "retries",
     h(doc, "h4", {}, t("harness.retriesHeading")),
@@ -457,6 +473,7 @@ export function renderSettings(ctx) {
     ["cost", "harness.tabCost", harnessCost],
     ["guards", "harness.tabGuards", harnessGuards],
     ["tools", "harness.tabTools", harnessTools],
+    ["format", "harness.tabFormat", harnessFormatPage],
     ["fixed", "harness.tabFixed", harnessFixed],
   ];
   const harnessSubButtons = harnessSubs.map(([id, labelKey]) => h(doc, "button", { type: "button", class: "tab provider-tab", role: "tab", "data-ui": `harness-tab-${id}`, "data-sub": id }, t(labelKey)));
@@ -704,7 +721,7 @@ export function renderSettings(ctx) {
       providerTabs,
       providerPanel,
     ),
-    h(doc, "section", { class: "settings-section", "data-ui": "harness-section" }, h(doc, "h2", {}, t("harness.title")), h(doc, "p", {}, t("harness.intro")), harnessSubTabs, harnessLimits, harnessRetries, harnessFallback, harnessCost, harnessGuards, harnessTools, harnessBar, harnessFixed),
+    h(doc, "section", { class: "settings-section", "data-ui": "harness-section" }, h(doc, "h2", {}, t("harness.title")), h(doc, "p", {}, t("harness.intro")), harnessSubTabs, harnessLimits, harnessRetries, harnessFallback, harnessCost, harnessGuards, harnessTools, harnessFormatPage, harnessBar, harnessFixed),
     h(
       doc,
       "section",

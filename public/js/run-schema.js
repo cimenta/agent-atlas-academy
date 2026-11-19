@@ -19,6 +19,9 @@ export const EVENT_TYPES = [
   "condense",
   "agent_created",
   "agent_refused",
+  "handoff_refused",
+  "format_check",
+  "guardrail_check",
 ];
 
 const isText = (value) => typeof value === "string" && value.length > 0;
@@ -71,6 +74,15 @@ function checkEvent(event, index, previousT, errors, agents) {
   }
   if (event.type === "agent_refused" && (!isText(event.by) || !isText(event.reason))) {
     errors.push(`${at}.by and ${at}.reason of a refusal must be strings`);
+  }
+  if (event.type === "handoff_refused" && (!isText(event.from) || !isText(event.to) || !isText(event.reason))) {
+    errors.push(`${at}.from, ${at}.to and ${at}.reason of a refused handoff must be strings`);
+  }
+  if (event.type === "format_check" && (!isText(event.agent) || typeof event.ok !== "boolean" || ![1, 2].includes(event.attempt) || !Array.isArray(event.problems) || !event.problems.every((p) => typeof p === "string"))) {
+    errors.push(`${at}.agent, ${at}.ok, ${at}.attempt and ${at}.problems of a format check must be a string, a boolean, 1 or 2, and a list of strings`);
+  }
+  if (event.type === "guardrail_check" && (!isText(event.agent) || !Number.isInteger(event.guardrail) || event.guardrail < 1 || event.guardrail > 3 || !["input", "output"].includes(event.where) || !["secret", "words", "length", "reviewer"].includes(event.kind) || typeof event.ok !== "boolean" || ![1, 2].includes(event.attempt) || !["passed", "noted", "repair", "stopped"].includes(event.action) || typeof event.reason !== "string")) {
+    errors.push(`${at}.agent, ${at}.guardrail, ${at}.where, ${at}.kind, ${at}.ok, ${at}.attempt, ${at}.action and ${at}.reason of a guardrail check must be valid (a string, 1 to 3, input or output, a kind, a boolean, 1 or 2, an action and a string)`);
   }
   if (event.type === "note" && (!isText(event.agent) || typeof event.text !== "string")) {
     errors.push(`${at}.agent and ${at}.text of a note must be strings`);

@@ -14,8 +14,13 @@ Když odpověď jednoho agenta čte programový kód nebo jiný agent, který o�
 - Tvar lze zkontrolovat automaticky.
 - Předávání mezi agenty je přehlednější.
 
+**Tři cesty k pevnému tvaru a co každá stojí**
+
+1. **Požádat v promptu.** Agentovi řeknete pole. Nestojí to nic, ale model může pole vynechat nebo přidat zbytečný text. V Agent Atlas je to záložka Formát u agenta.
+2. **Zkontrolovat a opravit.** Harness odpověď přečte, zkontroluje každé pole i jeho typ, a když něco nesedí, pošle jednu opravnou zprávu se jmény problémů. Druhé selhání ukončí agenta chybou. Když je oprava potřeba, stojí jedno volání modelu navíc. Přehrávání ukáže každou kontrolu jako zaškrtnutí nebo křížek.
+3. **Vynutit schématem poskytovatele.** Některým poskytovatelům lze říct schéma odpovědi a oni se ho drží. Oprava je pak vzácná, ale ne každý model to spojí s každým nástrojem (třeba s hledáním na webu), proto se to u agenta, který hledá, nepoužije. V Agent Atlas je to nastavení Vynucení formátu v harnessu.
+
 **Pozor na**
 
-- Modely někdy formát poruší, například vynechají pole nebo přidají zbytečný text.
-- Formát proto musí být ověřen. Pokud neprojde, obvyklým řešením je zkusit znovu s chybovou zprávou, nebo skončit.
 - Platný formát neznamená, že je obsah pravdivý. Fakta kontrolujte zvlášť.
+- Každá kontrola a oprava je volání modelu, takže se promítne do ceny. Co se stane, když volání selžou, je v článku [opakování a chyby](#/learn/retries-and-errors), kontroly samotného obsahu jsou v článku [ochranné prvky](#/learn/guardrails).

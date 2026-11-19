@@ -87,6 +87,7 @@ export async function applyBackup(backup, { runStore, settingsStore, vault, mode
   if (backup.settings?.handoffChars !== undefined) settingsStore.setHandoffChars(backup.settings.handoffChars);
   if (typeof backup.settings?.tooltips === "boolean") settingsStore.setTooltips(backup.settings.tooltips);
   if (backup.settings?.fallback !== undefined) settingsStore.setFallback(backup.settings.fallback);
+  if (typeof backup.settings?.formatEnforcement === "boolean") settingsStore.setFormatEnforcement(backup.settings.formatEnforcement);
   if (typeof backup.settings?.webSearch === "boolean") settingsStore.setWebSearch(backup.settings.webSearch);
   if (typeof backup.settings?.helpButtons === "boolean") settingsStore.setHelpButtons(backup.settings.helpButtons);
   if (backup.settings?.playerLayout === "bar" || backup.settings?.playerLayout === "side") settingsStore.setPlayerLayout(backup.settings.playerLayout);

@@ -10,6 +10,12 @@ import { usageCostUsd } from "./cost.js";
 import { ApprovalPause, APPROVAL_INPUT_MAX } from "./approval.js";
 import { notebookRole, extractNotes } from "./notebook.js";
 import { splitInput, mayCondense, condenseInstruction, condensedInput } from "./condense.js";
+import { validFormat, mayFormat, checkFormat, formatRepairText } from "./format.js";
+import { replySchemaFor } from "./schema.js";
+import { validGuardrails, mayGuard, runRule, guardrailRepairText, REVIEWER_SYSTEM, reviewerInput, readVerdict, reviewerSchema } from "./guardrails.js";
+
+const GUARDRAIL_TEXT_MAX = 4000; // the checked text kept in a guardrail event
+const sumUsage = (a = {}, b = {}) => ({ input: (a.input ?? 0) + (b.input ?? 0), output: (a.output ?? 0) + (b.output ?? 0), searches: (a.searches ?? 0) + (b.searches ?? 0) });
 
 const CONDENSE_MIN_TOKENS = 2000; // an agent with fewer tokens than this left does not condense
 
@@ -26,7 +32,7 @@ function searchOutput(content) {
 // A copy is taken so later changes to the conversation cannot reach an event already sent.
 const copy = (value) => structuredClone(value);
 
-export function createAgent({ node, design = null, call, emit, budget: runBudget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default, retries = RETRIES.default, retryDelaySec = RETRY_DELAY_SEC.default, freeTier = false, repeatStop = REPEAT_STOP.default, fallback = "off", askFirst = false, notebook = null, task = null }) {
+export function createAgent({ node, design = null, call, emit, budget: runBudget, signal, language = "en", sleep = defaultSleep, provider = "anthropic", cached = [], maxOutputTokens = OUTPUT_TOKENS.default, retries = RETRIES.default, retryDelaySec = RETRY_DELAY_SEC.default, freeTier = false, repeatStop = REPEAT_STOP.default, fallback = "off", askFirst = false, notebook = null, task = null, formatEnforcement = true }) {
   const retryLimit = clampRetries(retries);
   const retryDelayMs = clampRetryDelaySec(retryDelaySec) * 1000;
   // The agent counts against its own limits too (node.limits); the limits of the run still apply.
@@ -34,7 +40,9 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
   const onLimit = node.onLimit === "pass" ? "pass" : "stop";
   const outputCap = Math.min(clampOutputTokens(maxOutputTokens), node.limits?.maxOutputTokens ?? Infinity);
   // Answers from an earlier try of the run: used up first, in order, before the provider is called again.
-  const answers = [...cached];
+  // The checks on the input that an earlier try recorded travel in entries of their own (inputChecks), not with an answer.
+  const answers = cached.filter((c) => c.inputChecks !== true);
+  const carriedInput = cached.filter((c) => c.inputChecks === true).flatMap((c) => c.guardrails ?? []);
   const model = nodeModel(node, provider).id;
   // The shared notebook: what this agent may do with it (nothing unless the run has it switched on).
   const book = notebook ? notebookRole(node, design) : { on: false, read: false, write: false };
@@ -74,27 +82,34 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
   let lastRequest = null;
   let sent = 0; // how many messages earlier requests already carried
   let round = 0;
+  let judgingNow = false; // the call in progress is the self-critique judging of this agent
 
-  async function request(custom = null) {
-    budget.chargeStep();
+  // chargeTo: the budget that pays the step (the agent's own, or the run's for a call that is not the agent's work).
+  async function request(custom = null, chargeTo = budget) {
+    chargeTo.chargeStep();
     if (custom) return call(custom, { signal });
     const tools = toolsFor(node, budget);
+    // With the setting on, a reply that has a fixed shape is asked for as that shape (the provider forces it). An agent that
+    // searches the web is not forced: a forced reply and a search tool do not combine on every model. Nor is an agent that writes
+    // notes: they go after its answer, and a forced reply can hold nothing else.
+    const schema = formatEnforcement && tools.length === 0 && !book.write ? replySchemaFor(node, design, { judging: judgingNow }) : null;
     const body = {
       model: active.id,
       max_tokens: Math.max(1, Math.min(outputCap, budget.remainingTokens())),
       system,
       messages,
       ...(tools.length > 0 ? { tools } : {}),
+      ...(schema ? { replySchema: schema } : {}),
     };
-    lastRequest = { model: body.model, max_tokens: body.max_tokens, tools: copy(body.tools ?? []), messageCount: body.messages.length };
+    lastRequest = { model: body.model, max_tokens: body.max_tokens, tools: copy(body.tools ?? []), messageCount: body.messages.length, ...(schema ? { forced: true } : {}) };
     return call(body, { signal });
   }
 
-  async function requestWithRetry(custom = null) {
+  async function requestWithRetry(custom = null, chargeTo = budget) {
     let switched = false;
     for (let tried = 0; ; tried++) {
       try {
-        return await request(custom);
+        return await request(custom, chargeTo);
       } catch (error) {
         if (!(error instanceof AnthropicError) || !error.retryable) throw error;
         if (tried >= retryLimit) {
@@ -172,10 +187,10 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
     return kept ? condensedInput(split.head, summary, split.tail) : plainInput;
   }
 
-  return {
-    id: node.id,
+  const inner = {
     async run(plainInput, { as } = {}) {
       const judging = as === "evaluator";
+      judgingNow = judging;
       system = judging ? judgeSystem : ownSystem;
       // An agent that reads gets the notes written so far at the end of its input.
       const inputFor = (mode, base = plainInput) => (book.read ? `${base}${notebook.forReader({ mode })}` : base);
@@ -197,7 +212,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
         }
         messages.push({ role: "user", content: input }, { role: "assistant", content: [{ type: "text", text: earlier.text }] });
         sent = messages.length;
-        return { text: takeNotes(earlier.text, true), usage: { input: Number(earlier.tokens?.input) || 0, output: Number(earlier.tokens?.output) || 0, searches: 0 } };
+        return { text: takeNotes(earlier.text, true), usage: { input: Number(earlier.tokens?.input) || 0, output: Number(earlier.tokens?.output) || 0, searches: 0 }, replayed: true, guardrails: earlier.guardrails ?? [] };
       }
       // Marked for human approval and not approved yet: say what the agent would receive, and end the run here.
       if (askFirst) {
@@ -306,6 +321,122 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
       const passed = takeNotes(text);
       checkRepeat(passed);
       return { text: passed, usage: total };
+    },
+  };
+  const runOnce = inner.run;
+
+  // The answer format: an agent that has one is checked after each answer. A broken answer gets one repair message (the same
+  // conversation goes on), a second broken answer fails the agent. What is passed on is the compact JSON of the declared fields.
+  // A try that came from an earlier try of the run is checked again without a new event: the earlier record already holds it.
+  const formatted = validFormat(node.format) && mayFormat(node.agent, design?.pattern);
+  const checked = (result, attempt) => {
+    const check = checkFormat(result.text, node.format);
+    if (!result.replayed) emit({ type: "format_check", agent: node.id, ok: check.ok, attempt, problems: check.ok ? [] : check.problems, fields: node.format.fields.length });
+    return check;
+  };
+  // One answer with the format step (check, one repair) when the agent has a format.
+  // tries.n counts the model answers this activation used (a format or guardrail repair adds one).
+  async function answerOf(plainInput, options, tries = { n: 0 }) {
+    if (!formatted || options.as === "evaluator") {
+      tries.n += 1;
+      return runOnce(plainInput, options);
+    }
+    tries.n += 1;
+    const first = await runOnce(plainInput, options);
+    const firstCheck = checked(first, 1);
+    if (firstCheck.ok) return { text: firstCheck.text, usage: first.usage, replayed: first.replayed === true, guardrails: first.guardrails };
+    tries.n += 1;
+    const second = await runOnce(formatRepairText(firstCheck.problems), options);
+    const secondCheck = checked(second, 2);
+    if (!secondCheck.ok) throw new Error(`format.invalid: ${label} answered twice outside its format (${secondCheck.problems.join("; ")})`);
+    return { text: secondCheck.text, usage: sumUsage(first.usage, second.usage), replayed: first.replayed === true && second.replayed === true, guardrails: second.guardrails };
+  }
+
+  // The guardrails: up to three checks on what the agent receives or answers (see engine/guardrails.js).
+  const guards = validGuardrails(node.guardrails) && mayGuard(node.agent, design?.pattern) ? node.guardrails.map((g, i) => ({ ...g, n: i + 1 })) : [];
+  const inputGuards = guards.filter((g) => g.where === "input");
+  const outputGuards = guards.filter((g) => g.where === "output");
+  const blocked = (g, reason) => new Error(`guardrail.blocked: ${label} was stopped by guardrail ${g.n} (${reason})`);
+  // Runs the guardrails of one place on a text, records each, and says what has to happen: a guardrail that stops, or those that ask for a repair.
+  // `replayed`: the text comes from an earlier try of the run, whose events the record already holds.
+  // `recorded`: the verdicts of reviewers that the earlier try recorded for this text; one that is there is reused (and charged), not asked again.
+  // On the input each check consumes its own record (the agent may run again, and each run is checked again). `tries`: answers used so far.
+  async function checkGuards(list, text, attempt, replayed, recorded = [], tries = 0) {
+    const stops = [];
+    const repairs = [];
+    for (const g of list) {
+      let silent = replayed;
+      let verdict = null;
+      const onInput = g.where === "input";
+      if (onInput || (g.kind === "reviewer" && replayed)) {
+        const at = recorded.findIndex((r) => r.guardrail === g.n && r.where === g.where && r.attempt === attempt);
+        if (at >= 0) {
+          const rec = onInput ? recorded.splice(at, 1)[0] : recorded[at];
+          silent = true;
+          if (g.kind === "reviewer") verdict = recordedVerdict(rec);
+        } else silent = false; // never judged (the earlier try ended before the check was made): judge it now
+      }
+      verdict ??= await judgeText(g, text);
+      const action = verdict.ok ? "passed" : g.onFail === "stop" ? "stopped" : g.onFail === "repair" && attempt === 1 ? "repair" : g.onFail === "flag" ? "noted" : "stopped";
+      if (!silent) emit({ type: "guardrail_check", agent: node.id, guardrail: g.n, where: g.where, kind: g.kind, ok: verdict.ok, attempt, action, reason: verdict.ok ? "" : verdict.reason, text: String(text).slice(0, GUARDRAIL_TEXT_MAX), ...(g.where === "output" ? { tries } : {}), ...verdict.extra });
+      verdict.charge?.();
+      if (action === "stopped") stops.push({ g, reason: verdict.reason });
+      else if (action === "repair") repairs.push({ g, reason: verdict.reason });
+    }
+    return { stops, repairs };
+  }
+  // A reviewer's verdict from an earlier try: charged again so the limits stay honest, nothing is called or sent.
+  function recordedVerdict(rec) {
+    runBudget.chargeStep();
+    runBudget.chargeUsage({ input: rec.tokens?.input, output: rec.tokens?.output, searches: 0, cost: rec.cost });
+    return { ok: rec.ok, reason: rec.reason ?? "", extra: {} };
+  }
+  // A rule is checked by program code; the reviewing model by one more call.
+  async function judgeText(g, text) {
+    if (g.kind === "reviewer") return review(g, text);
+    const r = runRule(g, text);
+    return { ok: r.ok, reason: r.ok ? "" : r.reason, extra: {} };
+  }
+  // The reviewing model: one call with its own system text, the checked text only in the user message. The call is a step and
+  // tokens of the run (not of this agent's own limits). A reply that cannot be read, or a provider that stays down, is a block.
+  async function review(g, text) {
+    const reviewer = nodeModel({ ...node, model: g.model ?? "fast" }, provider);
+    const body = {
+      model: reviewer.id,
+      max_tokens: Math.max(1, Math.min(300, runBudget.remainingTokens())),
+      system: REVIEWER_SYSTEM,
+      messages: [{ role: "user", content: reviewerInput(text, g.policy) }],
+      ...(formatEnforcement ? { replySchema: reviewerSchema() } : {}),
+    };
+    let response;
+    try {
+      response = await requestWithRetry(body, runBudget);
+    } catch (error) {
+      if (error instanceof AnthropicError && !signal?.aborted) return { ok: false, reason: "the reviewer gave no verdict", extra: {} };
+      throw error;
+    }
+    const read = readVerdict(textOf(response.content ?? []));
+    const usage = { input: response.usage?.input_tokens ?? 0, output: response.usage?.output_tokens ?? 0 };
+    const cost = usageCostUsd({ ...usage, searches: 0 }, { ...node, model: reviewer.key }, { provider, freeTier });
+    // The charge comes after the event is recorded, like a round: a limit hit by this call still leaves the record of what was spent.
+    return { ok: read.ok, reason: read.reason, extra: { tokens: usage, cost, model: reviewer.id }, charge: () => runBudget.chargeUsage({ ...usage, searches: 0, cost }) };
+  }
+
+  return {
+    id: node.id,
+    async run(plainInput, options = {}) {
+      if (guards.length === 0 || options.as === "evaluator") return answerOf(plainInput, options);
+      const tries = { n: 0 };
+      const inChecks = await checkGuards(inputGuards, plainInput, 1, false, carriedInput);
+      if (inChecks.stops.length > 0) throw blocked(inChecks.stops[0].g, inChecks.stops[0].reason);
+      const first = await answerOf(plainInput, options, tries);
+      const outFirst = await checkGuards(outputGuards, first.text, 1, first.replayed, first.guardrails ?? [], tries.n);
+      if (outFirst.stops.length > 0) throw blocked(outFirst.stops[0].g, outFirst.stops[0].reason);
+      if (outFirst.repairs.length === 0) return first;
+      const second = await answerOf(guardrailRepairText(outFirst.repairs.map((r) => r.reason)), options, tries);
+      const outSecond = await checkGuards(outputGuards, second.text, 2, second.replayed, second.guardrails ?? [], tries.n);
+      if (outSecond.stops.length > 0) throw blocked(outSecond.stops[0].g, outSecond.stops[0].reason);
+      return { text: second.text, usage: sumUsage(first.usage, second.usage), replayed: first.replayed === true && second.replayed === true, guardrails: second.guardrails };
     },
   };
 }

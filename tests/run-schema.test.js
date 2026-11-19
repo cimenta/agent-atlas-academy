@@ -29,7 +29,27 @@ test("the schema version is 1 and the event types are the agreed list", () => {
     "condense",
     "agent_created",
     "agent_refused",
+    "handoff_refused",
+    "format_check",
+    "guardrail_check",
   ]);
+});
+
+const guardrailEvent = (extra = {}) => ({ type: "guardrail_check", t: 1000, agent: "writer", guardrail: 1, where: "output", kind: "secret", ok: true, attempt: 1, action: "passed", reason: "", ...extra });
+
+test("a guardrail check event is checked for its shape", () => {
+  const withEvent = (event) => {
+    const run = sample();
+    const at = run.events.length - 1;
+    run.events.splice(at, 0, { ...event, t: run.events[at - 1].t });
+    return validateRun(run);
+  };
+  assert.equal(withEvent(guardrailEvent()).ok, true);
+  for (const bad of [{ attempt: 3 }, { action: "x" }, { agent: "" }, { guardrail: 0 }, { guardrail: 4 }, { where: "middle" }, { ok: "yes" }, { reason: 5 }, { kind: "nope" }]) {
+    const result = withEvent(guardrailEvent(bad));
+    assert.equal(result.ok, false, JSON.stringify(bad));
+    assert.ok(result.errors.some((e) => /guardrail check/.test(e)), JSON.stringify(result.errors));
+  }
 });
 
 test("the sample run is valid", () => {

@@ -9,6 +9,8 @@ import { AGENT_LIMIT_KEYS, agentLimitRange } from "../engine/agent-limits.js";
 import { TOOLS } from "../engine/tools.js";
 import { roleText } from "../engine/prompts.js";
 import { mayCondense } from "../engine/condense.js";
+import { mayGuard, cleanGuardrails, GUARDRAIL_MAX, WORDS_MAX, LENGTH_MIN, LENGTH_MAX, POLICY_MAX, GUARDRAIL_KINDS } from "../engine/guardrails.js";
+import { mayFormat, validFormat, formatPromptText, FORMAT_TYPES, FORMAT_MAX_FIELDS, FIELD_NAME_MAX } from "../engine/format.js";
 import { innerTabs } from "./steps-view.js";
 import { agentTabIds, currentAgentTab } from "./agent-tabs.js";
 import { MULTI_RUN } from "../engine/spawn.js";
@@ -675,12 +677,125 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         }
       }
     }
+    // Answer format: an agent whose reply is not already a decision may be asked for named, typed fields (see engine/format.js).
+    const formatOk = mayFormat(node.agent, design.pattern);
+    const formatPane = [];
+    if (formatOk) {
+      const fields = () => editor.design().nodes.find((n) => n.id === node.id).format?.fields ?? [];
+      const setFields = (next) => {
+        editor.setNode(node.id, { format: next.length > 0 ? { fields: next } : null });
+        changed();
+      };
+      formatPane.push(h(doc, "h4", { class: "editor-format-heading" }, t("editor.formatHeading"), helpIcon({ doc, t, id: "answer-format", name: t("editor.formatHeading") })));
+      const on = h(doc, "input", { id: "ed-format-on", type: "checkbox", checked: node.format !== undefined, "data-ui": "format-on" });
+      on.addEventListener("change", () => {
+        editor.setNode(node.id, { format: on.checked ? { fields: [{ name: "answer", type: "text" }] } : null });
+        changed();
+      });
+      formatPane.push(h(doc, "div", { class: "field checkbox" }, on, h(doc, "label", { for: "ed-format-on" }, t("editor.format"))), h(doc, "p", { class: "hint" }, t("editor.formatHint")));
+      if (node.format !== undefined) {
+        formatPane.push(h(doc, "p", { class: "hint" }, t("editor.formatFields", { max: FORMAT_MAX_FIELDS })));
+        node.format.fields.forEach((f, i) => {
+          const name = h(doc, "input", { type: "text", maxlength: FIELD_NAME_MAX, value: f.name, placeholder: t("editor.formatNamePlaceholder"), "aria-label": t("editor.formatNamePlaceholder"), "data-ui": `format-name-${i}` });
+          name.addEventListener("change", () => {
+            const next = fields().map((x, j) => (j === i ? { ...x, name: name.value.trim() } : x));
+            if (validFormat({ fields: next })) return setFields(next);
+            notice = t("editor.formatNameHint", { max: FIELD_NAME_MAX });
+            draw();
+          });
+          const type = h(doc, "select", { "aria-label": t("editor.formatFields", { max: FORMAT_MAX_FIELDS }), "data-ui": `format-type-${i}` }, ...FORMAT_TYPES.map((value) => h(doc, "option", { value, selected: value === f.type }, t(`editor.formatType.${value}`))));
+          type.addEventListener("change", () => setFields(fields().map((x, j) => (j === i ? { ...x, type: type.value } : x))));
+          const row = [name, type];
+          if (node.format.fields.length > 1) {
+            const remove = h(doc, "button", { type: "button", "data-ui": `format-remove-${i}` }, t("editor.formatRemove"));
+            remove.addEventListener("click", () => setFields(fields().filter((_, j) => j !== i)));
+            row.push(remove);
+          }
+          formatPane.push(h(doc, "div", { class: "format-row" }, ...row));
+        });
+        if (node.format.fields.length < FORMAT_MAX_FIELDS) {
+          const add = h(doc, "button", { type: "button", "data-ui": "format-add" }, t("editor.formatAdd"));
+          add.addEventListener("click", () => {
+            let n = fields().length + 1;
+            while (fields().some((x) => x.name.toLowerCase() === `field ${n}`)) n += 1;
+            setFields([...fields(), { name: `field ${n}`, type: "text" }]);
+          });
+          formatPane.push(add);
+        }
+        formatPane.push(h(doc, "h4", {}, t("editor.formatPreviewHeading")), h(doc, "pre", { "data-ui": "format-preview" }, formatPromptText(node.format)), h(doc, "p", { class: "hint" }, t("editor.formatRepairHint")));
+      }
+    }
+    // Guardrails: up to three checks on what an agent receives or answers (see engine/guardrails.js).
+    const guardrailsOk = mayGuard(node.agent, design.pattern);
+    const guardrailsPane = [];
+    if (guardrailsOk) {
+      const list = () => editor.design().nodes.find((n) => n.id === node.id).guardrails ?? [];
+      const setList = (next) => {
+        const clean = next.length === 0 ? null : cleanGuardrails(next);
+        if (next.length > 0 && (clean === null || clean.length !== next.length)) {
+          notice = t("editor.guardrail.invalid", { min: LENGTH_MIN, max: LENGTH_MAX, policy: POLICY_MAX });
+          draw();
+          return;
+        }
+        editor.setNode(node.id, { guardrails: clean });
+        changed();
+      };
+      const update = (i, patch) => setList(list().map((x, j) => (j === i ? { ...x, ...patch } : x)));
+      const kindDefaults = { secret: {}, words: { words: [t("editor.guardrail.wordsDefault")] }, length: { max: 1500 }, reviewer: { policy: t("editor.guardrail.policyDefault"), model: "fast" } };
+      guardrailsPane.push(h(doc, "h4", { class: "editor-guardrails-heading" }, t("editor.guardrailsHeading"), helpIcon({ doc, t, id: "guardrails", name: t("editor.guardrailsHeading") })), h(doc, "p", { class: "hint" }, t("editor.guardrailsHint", { max: GUARDRAIL_MAX })));
+      (node.guardrails ?? []).forEach((g, i) => {
+        const where = h(doc, "select", { "aria-label": t("editor.guardrail.whereLabel"), "data-ui": `guardrail-where-${i}` }, ...["output", "input"].map((value) => h(doc, "option", { value, selected: value === g.where }, t(`editor.guardrail.where.${value}`))));
+        where.addEventListener("change", () => update(i, { where: where.value, onFail: where.value === "input" && g.onFail === "repair" ? "stop" : g.onFail }));
+        const kind = h(doc, "select", { "aria-label": t("editor.guardrail.kindLabel"), "data-ui": `guardrail-kind-${i}` }, ...GUARDRAIL_KINDS.map((value) => h(doc, "option", { value, selected: value === g.kind }, t(`editor.guardrail.kind.${value}`))));
+        kind.addEventListener("change", () => setList(list().map((x, j) => (j === i ? { where: x.where, onFail: x.onFail, kind: kind.value, ...kindDefaults[kind.value] } : x))));
+        const remove = h(doc, "button", { type: "button", "data-ui": `guardrail-remove-${i}` }, t("editor.guardrailRemove"));
+        remove.addEventListener("click", () => setList(list().filter((_, j) => j !== i)));
+        const actions = g.where === "input" ? ["stop", "flag"] : ["repair", "stop", "flag"];
+        const onFail = h(doc, "select", { id: `ed-guardrail-onfail-${i}`, "data-ui": `guardrail-onfail-${i}` }, ...actions.map((value) => h(doc, "option", { value, selected: value === g.onFail }, t(`editor.guardrail.onFail.${value}`))));
+        onFail.addEventListener("change", () => update(i, { onFail: onFail.value }));
+        const grid = [field(`ed-guardrail-onfail-${i}`, t("editor.guardrail.onFailLabel"), onFail)];
+        const extra = [];
+        if (g.kind === "reviewer") {
+          const reviewer = h(doc, "select", { id: `ed-guardrail-model-${i}`, "data-ui": `guardrail-model-${i}` }, ...getModels(node).map((m) => h(doc, "option", { value: m.key, selected: m.key === (g.model ?? "fast") }, `${m.label} (${m.id})`)));
+          reviewer.addEventListener("change", () => update(i, { model: reviewer.value }));
+          grid.push(field(`ed-guardrail-model-${i}`, t("editor.guardrail.modelLabel"), reviewer));
+          const policy = h(doc, "textarea", { id: `ed-guardrail-policy-${i}`, rows: 3, maxlength: POLICY_MAX, "data-ui": `guardrail-policy-${i}` });
+          policy.value = g.policy ?? "";
+          policy.addEventListener("change", () => update(i, { policy: policy.value.trim() }));
+          extra.push(field(`ed-guardrail-policy-${i}`, t("editor.guardrail.policyLabel", { max: POLICY_MAX }), policy));
+        } else if (g.kind === "words") {
+          const words = h(doc, "textarea", { id: `ed-guardrail-words-${i}`, rows: 3, "data-ui": `guardrail-words-${i}` });
+          words.value = (g.words ?? []).join("\n");
+          words.addEventListener("change", () => update(i, { words: words.value.split("\n").map((w) => w.trim()).filter(Boolean).slice(0, WORDS_MAX) }));
+          extra.push(field(`ed-guardrail-words-${i}`, t("editor.guardrail.wordsLabel"), words));
+        } else if (g.kind === "length") {
+          const max = h(doc, "input", { id: `ed-guardrail-max-${i}`, type: "number", min: LENGTH_MIN, max: LENGTH_MAX, value: String(g.max ?? 1500), "data-ui": `guardrail-max-${i}` });
+          max.addEventListener("change", () => update(i, { max: Number(max.value) }));
+          extra.push(field(`ed-guardrail-max-${i}`, t("editor.guardrail.maxLabel", { min: LENGTH_MIN, max: LENGTH_MAX }), max));
+        }
+        guardrailsPane.push(
+          h(doc, "div", { class: "guardrail-row" },
+            h(doc, "div", { class: "guardrail-top" }, h(doc, "b", {}, t("editor.guardrailTitle", { n: i + 1 })), where, kind, remove),
+            h(doc, "div", { class: "guardrail-grid" }, ...grid),
+            ...extra,
+            h(doc, "p", { class: "hint" }, t(`editor.guardrail.hint.${g.kind}`, { max: WORDS_MAX })),
+            ...(g.where === "input" ? [h(doc, "p", { class: "hint" }, t("editor.guardrail.hint.input"))] : []),
+          ),
+        );
+      });
+      if ((node.guardrails ?? []).length < GUARDRAIL_MAX) {
+        const add = h(doc, "button", { type: "button", "data-ui": "guardrails-add" }, t("editor.guardrailsAdd"));
+        add.addEventListener("click", () => setList([...list(), { where: "output", kind: "secret", onFail: "repair" }]));
+        guardrailsPane.push(add);
+      }
+      guardrailsPane.push(h(doc, "p", { class: "hint" }, t("editor.guardrailsEstimate")));
+    }
     // The settings that are not about the model sit in tabs, so the panel stays short.
-    const panes = { tools: toolsPane, condense: condensePane, approval: approvalPane, notebook: notebookPane, limits: limitsPane, creates: createsPane };
-    const tabIds = agentTabIds({ notebookOn: editor.notebookOn(), creator });
+    const panes = { tools: toolsPane, condense: condensePane, approval: approvalPane, notebook: notebookPane, limits: limitsPane, format: formatPane, guardrails: guardrailsPane, creates: createsPane };
+    const tabIds = agentTabIds({ notebookOn: editor.notebookOn(), creator, formatOk: mayFormat(node.agent, design.pattern), guardrailsOk: mayGuard(node.agent, design.pattern) });
     settingsTab = currentAgentTab(settingsTab, tabIds);
     const limitCount = Object.keys(node.limits ?? {}).length;
-    const tabLabel = { tools: t("editor.toolsHeading"), condense: t("editor.condenseHeading"), approval: t("editor.approvalHeading"), notebook: t("editor.notebookHeading"), limits: `${t("editor.tab.limits")}${limitCount > 0 ? ` (${limitCount})` : ""}`, creates: `${t("editor.tab.creates")} · ${node.creates ? t("editor.createsOn", { n: node.creates.max }) : t("editor.createsOff")}` };
+    const tabLabel = { tools: t("editor.toolsHeading"), condense: t("editor.condenseHeading"), approval: t("editor.approvalHeading"), notebook: t("editor.notebookHeading"), limits: `${t("editor.tab.limits")}${limitCount > 0 ? ` (${limitCount})` : ""}`, format: `${t("editor.tab.format")} · ${node.format ? t("editor.formatOn", { n: node.format.fields.length }) : t("editor.formatOff")}`, guardrails: `${t("editor.tab.guardrails")} · ${node.guardrails ? t("editor.guardrailsOn", { n: node.guardrails.length }) : t("editor.guardrailsOff")}`, creates: `${t("editor.tab.creates")} · ${node.creates ? t("editor.createsOn", { n: node.creates.max }) : t("editor.createsOff")}` };
     const paneHost = h(doc, "div", { class: "agent-tab-panes" });
     const paneEls = new Map(tabIds.map((id) => [id, h(doc, "div", { class: "agent-tab-pane", role: "tabpanel", "data-ui": `agent-pane-${id}`, hidden: id !== settingsTab }, ...panes[id])]));
     paneHost.append(...paneEls.values());

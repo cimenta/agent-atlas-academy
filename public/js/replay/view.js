@@ -43,7 +43,7 @@ const STATUS_KEY = {
   done: "player.statusDone",
   error: "player.statusError",
 };
-const KIND_KEY = { model: "kind.model", tool: "kind.tool", handoff: "kind.handoff", title: "kind.title" };
+const KIND_KEY = { model: "kind.model", tool: "kind.tool", handoff: "kind.handoff", title: "kind.title", check: "kind.check" };
 
 // Glyphs of the small player buttons (plain text, so no icon font is needed).
 const GLYPH = { play: "▶", pause: "❚❚", stop: "■", restart: "↺", previous: "‹", next: "›" };
@@ -255,7 +255,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   );
   container.replaceChildren(root);
 
-  const label = (value) => (typeof value === "string" ? value : value ? t(value.key, value.params) : "");
+  // A parameter that is { key } is a text of its own, translated first (the kind and the place of a guardrail).
+  const label = (value) => (typeof value === "string" ? value : value ? t(value.key, Object.fromEntries(Object.entries(value.params ?? {}).map(([k, v]) => [k, v !== null && typeof v === "object" && typeof v.key === "string" ? t(v.key) : v]))) : "");
 
   // The status of an agent that was cut off: which limit (or you) stopped it.
   function stoppedText(a) {
@@ -512,7 +513,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
       const button = h(
         doc,
         "button",
-        { type: "button", class: `step${i === selected ? " sel" : ""}`, "data-kind": step.kind, "aria-current": i === selected ? "step" : undefined },
+        { type: "button", class: `step${i === selected ? " sel" : ""}${step.refused ? " refused" : ""}${step.kind === "check" ? (step.action === "noted" ? " check-note" : step.ok ? " check-ok" : " check-bad") : ""}`, "data-kind": step.kind, "aria-current": i === selected ? "step" : undefined },
         h(doc, "span", { class: "tg", "data-kind": step.kind }, t(KIND_KEY[step.kind] ?? "kind.model")),
         h(doc, "span", { class: "ti" }, label(step.title)),
         h(doc, "span", { class: "ms", title: step.ms == null && step.server ? t("insp.inModelHint") : undefined }, step.ms != null ? fmt(step.ms) : step.server ? t("insp.inModel") : ""),

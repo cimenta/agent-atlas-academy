@@ -11,6 +11,25 @@ const textOfContent = (content) => {
   return content.filter((b) => b?.type === "text").map((b) => b.text).join("\n");
 };
 
+// A JSON schema as Gemini wants it: the types in capitals, and no additionalProperties.
+function toGeminiSchema(schema) {
+  if (Array.isArray(schema)) return schema.map(toGeminiSchema);
+  if (schema === null || typeof schema !== "object") return schema;
+  const out = {};
+  for (const [key, value] of Object.entries(schema)) {
+    if (key === "additionalProperties") continue;
+    // The names under properties are field names, not schema words: only their values are schemas.
+    if (key === "properties" && value !== null && typeof value === "object") {
+      out.properties = Object.fromEntries(Object.entries(value).map(([name, sub]) => [name, toGeminiSchema(sub)]));
+      continue;
+    }
+    if (key === "type" && typeof value === "string") out.type = value.toUpperCase();
+    else if (key === "enum" || key === "required") out[key] = value;
+    else out[key] = toGeminiSchema(value);
+  }
+  return out;
+}
+
 // Anthropic-shaped body -> Gemini generateContent body.
 export function toGeminiRequest(body) {
   const contents = [];
@@ -22,6 +41,10 @@ export function toGeminiRequest(body) {
     contents,
     generationConfig: { maxOutputTokens: Math.max(1, Number(body.max_tokens) || 1) },
   };
+  if (body.replySchema) {
+    request.generationConfig.responseMimeType = "application/json";
+    request.generationConfig.responseSchema = toGeminiSchema(body.replySchema);
+  }
   if (typeof body.system === "string" && body.system !== "") request.systemInstruction = { parts: [{ text: body.system }] };
   if (Array.isArray(body.tools) && body.tools.length > 0) request.tools = [{ google_search: {} }];
   return request;

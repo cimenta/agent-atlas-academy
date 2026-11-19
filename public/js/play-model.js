@@ -64,6 +64,14 @@ export function buildResultModel(run) {
       const fast = nodeModel({ ...(node ?? {}), model: "fast" }, provider);
       cost += ((Number(e.usage?.input) || 0) * fast.inputPerMTok + (Number(e.usage?.output) || 0) * fast.outputPerMTok) / 1e6;
     }
+    // The calls of reviewing guardrails are priced with the model they ran on.
+    for (const e of events) {
+      if (e.type !== "guardrail_check" || !e.tokens) continue;
+      const node = design.nodes.find((n) => n.id === nodeIdOf(e.agent));
+      if (slotIsFree(node?.slot)) continue;
+      const model = catalog.models.find((m) => m.id === e.model) ?? nodeModel({ ...(node ?? {}), model: "fast" }, provider);
+      cost += ((Number(e.tokens.input) || 0) * model.inputPerMTok + (Number(e.tokens.output) || 0) * model.outputPerMTok) / 1e6;
+    }
     for (const a of perAgent) {
       const node = design.nodes.find((n) => n.id === nodeIdOf(a.agent));
       // An agent that ran on a key of the free tier cost nothing, whatever the list price of its model.
@@ -145,6 +153,9 @@ export function buildStatistics(run) {
     runHit: events.find((e) => e.type === "warning" && typeof e.limit === "string" && !e.limit.startsWith("agent_"))?.limit ?? null,
     perAgent,
     created,
+    refusedHandoffs: events.filter((e) => e.type === "handoff_refused").length,
+    formatRepairs: events.filter((e) => e.type === "format_check" && e.attempt === 2).length,
+    guardrailHits: events.filter((e) => e.type === "guardrail_check" && e.ok === false).length,
   };
 }
 

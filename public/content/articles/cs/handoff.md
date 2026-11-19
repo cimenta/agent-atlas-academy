@@ -35,3 +35,5 @@ Běh může skončit třemi způsoby:
 **Pingpong.** Když A předá B a B předá zpět A a ani jeden nerozhodne, že práce je hotová, zastaví běh jen limity. Vyzkoušejte to ve Vytvořit s malým limitem kroků a přečtěte si, jak přehrání skončí.
 
 Oproti [supervizorovi](#/learn/supervisor-and-workers) nemá předání žádného centrálního agenta ani cesty zpět. Oproti [paralelní práci](#/learn/parallel-fan-out-fan-in) pracuje vždy jen jeden agent.
+
+**Šipka je pravidlo.** Agent smí řízení předat jen po šipce. Když zkusí jiného agenta, Agent Atlas předání odmítne, řekne agentovi proč a nechá ho to zkusit ještě jednou. Druhé odmítnutí ukončí běh chybou a přehrávání ukáže oba pokusy. Méně šipek znamená méně věcí, které se mohou pokazit: je to [nejmenší oprávnění](#/learn/least-privilege) uplatněné na to, kdo smí převzít řízení.

@@ -34,6 +34,16 @@ export function differences(runs) {
   add("createsMax", "createsMax", list.map((r) => (allowed(r) > 0 ? allowed(r) : null)));
   add("created", "created", list.map((r) => (allowed(r) > 0 ? (Array.isArray(r?.events) ? r.events.filter((e) => e.type === "agent_created").length : 0) : null)));
 
+  // Agents with an answer format: how many a run had, and how many repairs they needed (null when it had none).
+  const formatted = (r) => nodesOf(r).filter((n) => n.format !== undefined).length;
+  add("formatAgents", "formatAgents", list.map((r) => (formatted(r) > 0 ? formatted(r) : null)));
+  add("formatRepairs", "formatRepairs", list.map((r) => (formatted(r) > 0 ? (Array.isArray(r?.events) ? r.events.filter((e) => e.type === "format_check" && e.attempt === 2).length : 0) : null)));
+
+  // Agents with guardrails: how many a run had, and how many times a guardrail failed (null when it had none).
+  const guarded = (r) => nodesOf(r).filter((n) => Array.isArray(n.guardrails) && n.guardrails.length > 0).length;
+  add("guardrailAgents", "guardrailAgents", list.map((r) => (guarded(r) > 0 ? guarded(r) : null)));
+  add("guardrailHits", "guardrailHits", list.map((r) => (guarded(r) > 0 ? (Array.isArray(r?.events) ? r.events.filter((e) => e.type === "guardrail_check" && e.ok === false).length : 0) : null)));
+
   const order = [];
   for (const run of list) for (const n of nodesOf(run)) if (!order.includes(n.id)) order.push(n.id);
   const nodeIn = (run, id) => nodesOf(run).find((n) => n.id === id);

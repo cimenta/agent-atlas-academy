@@ -92,7 +92,7 @@ test("a design with the ability is saved in a definition and loaded again", () =
 test("the pane is wired in the editor and its texts exist in both languages", () => {
   const view = read("../public/js/create/editor-view.js");
   for (const id of ["creates-on", "ed-creates-max", "ed-creates-guidance", "creates-search", "agent-pane-creates"].slice(0, 4)) assert.ok(view.includes(id), id);
-  assert.ok(view.includes("agentTabIds({ notebookOn: editor.notebookOn(), creator })"));
+  assert.ok(view.includes("agentTabIds({ notebookOn: editor.notebookOn(), creator, formatOk:"));
   const keys = ["editor.tab.creates", "editor.creatingHeading", "editor.creates", "editor.createsHint", "editor.createsCap", "editor.createsMaxHint", "editor.createsGuidance", "editor.createsGuidancePlaceholder", "editor.createsSearch", "editor.createsSearchHint", "editor.createsOn", "editor.createsOff", "editor.createsNoRoom"];
   const en = JSON.parse(read("../public/locales/en.json"));
   const cs = JSON.parse(read("../public/locales/cs.json"));

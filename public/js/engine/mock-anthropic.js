@@ -1,6 +1,7 @@
 // A stand-in for the Messages API so every pattern can be run without a key.
 // It answers by the "Role: <agent type>" line at the top of the system prompt.
 import { AnthropicError } from "./anthropic.js";
+import { REVIEWER_SYSTEM } from "./guardrails.js";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -31,7 +32,10 @@ function firstUserText(messages) {
 }
 
 // evaluatorAcceptsAt: the verdict (counted from 1) at which the mock evaluator accepts; 0 means it never accepts.
-export function createMockCall({ delayMs = 0, evaluatorAcceptsAt = 2 } = {}) {
+// blockReviewerOnce: the first guardrail reviewed by the mock reviewer is blocked, so a repair is recorded.
+// breakFormatOnce: an agent with an answer format answers in plain text the first time, so a repair is recorded.
+export function createMockCall({ delayMs = 0, evaluatorAcceptsAt = 2, breakFormatOnce = false, blockReviewerOnce = false } = {}) {
+  let reviewerBlocked = false;
   return async function call(body, { signal } = {}) {
     if (signal?.aborted) throw new AnthropicError("The request was cancelled");
     if (delayMs) await sleep(delayMs);
@@ -55,10 +59,25 @@ export function createMockCall({ delayMs = 0, evaluatorAcceptsAt = 2 } = {}) {
     const withMemory = (text) =>
       `${text}${seen > 0 ? ` (Used ${seen} ${seen === 1 ? "note" : "notes"} from the notebook.)` : ""}${String(body?.system ?? "").includes("<note>") ? `\n\n<note>${NOTES[role] ?? NOTES.free}</note>` : ""}`;
 
+    if (body?.system === REVIEWER_SYSTEM) {
+      // A guardrail that reviews a text: the mock passes it, or blocks the first one when asked to (a test hook).
+      const block = blockReviewerOnce && !reviewerBlocked;
+      reviewerBlocked = true;
+      return reply([{ type: "text", text: JSON.stringify(block ? { verdict: "block", reason: "the mock reviewer blocked the text" } : { verdict: "pass", reason: "the mock reviewer found nothing" }) }]);
+    }
     if (String(body?.system ?? "").startsWith("You shorten text")) {
       // The extra call of condensing: the mock keeps the start of the text.
       const material = typeof firstUserText(messages) === "string" ? firstUserText(messages) : "";
       return reply([{ type: "text", text: `${material.replace(/\s+/g, " ").slice(0, 200).trim()}...` }]);
+    }
+    const FORMAT_HEAD = "Reply with one JSON object and nothing else (no text before or after it). The fields:";
+    if (String(body?.system ?? "").includes(FORMAT_HEAD) && !String(body?.system ?? "").includes('"action":')) {
+      // An agent with an answer format: the mock fills every field with a sample of its type.
+      if (breakFormatOnce && !messages.some((m) => m.role === "assistant")) return reply([{ type: "text", text: "Here is my answer." }]);
+      const sample = { text: "Sample text.", "a number": 42, "true or false": true, "a list of texts": ["one", "two"] };
+      const value = {};
+      for (const m of String(body.system).split(FORMAT_HEAD)[1].matchAll(/^"(.+)": (text|a number|true or false|a list of texts)$/gm)) value[m[1]] = sample[m[2]];
+      return reply([{ type: "text", text: JSON.stringify(value) }]);
     }
     if (String(body?.system ?? "").includes("one of several voters")) {
       // In a voting run every mock voter gives the same answer, so the mock tally can say that all of them agree.

@@ -35,3 +35,5 @@ A run can end in three ways:
 **Ping-pong.** If A hands to B and B hands back to A, and neither decides that the work is done, only the limits stop the run. Try it in Create with a step limit that is small, and read how the replay ends.
 
 Compared with a [supervisor](#/learn/supervisor-and-workers), a handoff has no central agent and no return trips. Compared with [parallel work](#/learn/parallel-fan-out-fan-in), only one agent works at a time.
+
+**An arrow is a rule.** An agent can hand over only along an arrow. When it tries another agent, Agent Atlas refuses the handoff, tells the agent why and lets it try once more. A second refusal ends the run with an error, and the replay shows both attempts. Fewer arrows mean less that can go wrong: this is [least privilege](#/learn/least-privilege) applied to who may take control.

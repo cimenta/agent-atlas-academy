@@ -6,9 +6,11 @@ import { validateDesign } from "../engine/patterns.js";
 import { cleanNodeLimits } from "../engine/agent-limits.js";
 import { NOTEBOOK_CHOICES, mayWrite } from "../engine/notebook.js";
 import { mayCondense } from "../engine/condense.js";
+import { cleanFormat, mayFormat } from "../engine/format.js";
+import { cleanGuardrails, mayGuard } from "../engine/guardrails.js";
 
 const ONCE_ONLY = new Set(["supervisor", "combiner", "judge", "evaluator", "router", "tally", "splitter", "worker", "reducer", "executor"]);
-const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve", "notebook", "condense", "creates"];
+const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve", "notebook", "condense", "creates", "format", "guardrails"];
 const DEFAULT_ROUNDS = 2;
 const EVALUATOR_ROUNDS = 3;
 const roundsFor = (pattern) => (pattern === "evaluator" ? EVALUATOR_ROUNDS : DEFAULT_ROUNDS);
@@ -21,6 +23,22 @@ function tidyLimits(node, pattern) {
   if (node.onLimit !== "pass") delete node.onLimit;
   if (node.approve !== true) delete node.approve;
   if (node.condense !== true || !mayCondense(node.agent, pattern)) delete node.condense;
+}
+
+// The answer format: kept cleaned, and only on an agent that may have one (see engine/format.js). Anything else removes it.
+function tidyFormat(node, pattern) {
+  if (node.format === undefined) return;
+  const clean = mayFormat(node.agent, pattern) ? cleanFormat(node.format) : null;
+  if (clean) node.format = clean;
+  else delete node.format;
+}
+
+// The guardrails: kept cleaned (see engine/guardrails.js), and only on an agent that may have them. Anything else removes them.
+function tidyGuardrails(node, pattern) {
+  if (node.guardrails === undefined) return;
+  const clean = mayGuard(node.agent, pattern) ? cleanGuardrails(node.guardrails) : null;
+  if (clean) node.guardrails = clean;
+  else delete node.guardrails;
 }
 
 // The ability to create agents (a Supervisor or a Planner only): kept as { max, guidance, search }, with the cap within 1 and
@@ -128,6 +146,8 @@ export function createEditor(initialPattern) {
       for (const key of EDITABLE) if (key in overrides) node[key] = overrides[key];
       if (notebook && !choicesFor(node).includes(node.notebook)) node.notebook = defaultChoice(node);
       tidyLimits(node, pattern);
+      tidyFormat(node, pattern);
+      tidyGuardrails(node, pattern);
       nodes.push(node);
       for (const n of nodes) tidyCreates(n, nodes.length);
       if (pattern === "handoff" && start === undefined) start = node.id;
@@ -156,6 +176,8 @@ export function createEditor(initialPattern) {
       if (!node) return;
       for (const key of EDITABLE) if (key in patch && (key !== "notebook" || choicesFor(node).includes(patch.notebook))) node[key] = patch[key];
       tidyLimits(node, pattern);
+      tidyFormat(node, pattern);
+      tidyGuardrails(node, pattern);
       tidyCreates(node, nodes.length);
     },
 

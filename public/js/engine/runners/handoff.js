@@ -24,6 +24,25 @@ export function parseHandoffReply(text, allowed) {
   return null;
 }
 
+// A reply that hands over to an agent it may not hand over to: { to, reason } with the reason no-arrow (the agent exists but
+// has no arrow from this one) or unknown (no such agent). Null for any other reply, valid or not.
+export function handoffRefusal(text, allowed, ids) {
+  if (typeof text !== "string") return null;
+  for (const candidate of candidates(text)) {
+    let data;
+    try {
+      data = JSON.parse(candidate.trim());
+    } catch {
+      continue;
+    }
+    if (data === null || typeof data !== "object" || Array.isArray(data) || typeof data.action !== "string" || data.action.trim().toLowerCase() !== "handoff" || typeof data.to !== "string") continue;
+    const to = data.to.trim();
+    if (to === "" || allowed.includes(to)) continue;
+    return { to, reason: ids.includes(to) ? "no-arrow" : "unknown" };
+  }
+  return null;
+}
+
 const NOTE_MAX = 2000;
 
 const repairFor = (allowed) =>
@@ -46,10 +65,18 @@ export async function run({ design, task, agents, emit, passOn = (text) => text 
       const head = from === null ? `Task: ${task}` : `Task: ${task}\n\nHanded over by ${labelOf(from)}:\n${passOn(note, from)}`;
       let input = `${head}\n\n${list}`;
       let decision = null;
+      let refusal = null;
       for (let tries = 0; tries < 2 && !decision; tries++) {
-        decision = parseHandoffReply((await agents.get(current).run(input)).text, allowed);
+        const reply = (await agents.get(current).run(input)).text;
+        decision = parseHandoffReply(reply, allowed);
         input = repairFor(allowed);
+        refusal = decision ? null : handoffRefusal(reply, allowed, [...byId.keys()]);
+        if (refusal) {
+          emit({ type: "handoff_refused", from: current, to: refusal.to, reason: refusal.reason });
+          input = `You cannot hand over to ${refusal.to}: ${refusal.reason === "no-arrow" ? "there is no arrow from you to that agent" : "there is no such agent"}. ${input}`;
+        }
       }
+      if (!decision && refusal) throw new Error(`handoff.refused: ${labelOf(current)} asked twice to hand over to ${refusal.to}, which ${refusal.reason === "no-arrow" ? "it has no arrow to" : "does not exist"}`);
       if (!decision) throw new Error(`handoff.invalid: ${labelOf(current)} did not give a valid decision twice in a row`);
       if (decision.action === "finish") return decision.answer;
       emit({ type: "handoff", from: current, to: decision.to, note: decision.note.slice(0, NOTE_MAX) });

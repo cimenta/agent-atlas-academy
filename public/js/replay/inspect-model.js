@@ -204,6 +204,70 @@ export function deriveInspector(events, cursor = events.length) {
         }
         break;
       }
+      case "handoff_refused": {
+        // The agent tried to hand over to an agent it has no arrow to: the rule of the diagram held.
+        const from = agents[event.from];
+        if (from) {
+          from.steps.push({
+            kind: "handoff",
+            tool: "handoff",
+            refused: true,
+            at: event.t,
+            from: event.from,
+            to: event.to,
+            title: { key: "insp.handoffRefused", params: { name: event.to } },
+            ms: null,
+            input: { key: `insp.handoffRefused.${event.reason}`, params: { name: event.to } },
+            output: "",
+            eventIndex: index,
+          });
+        }
+        break;
+      }
+      case "format_check": {
+        // The harness checked the answer of an agent with an answer format against it (agent.output is the answer that was checked).
+        if (agent) {
+          const problems = (event.problems ?? []).join("; ");
+          const step = (extra) => agent.steps.push({ kind: "check", tool: "format", ok: event.ok === true, attempt: event.attempt, at: event.t, ms: null, eventIndex: index, ...extra });
+          if (event.ok === true) {
+            const n = Number(event.fields) || 0;
+            step({ title: { key: event.attempt === 2 ? "insp.formatOkRepaired" : "insp.formatOk", params: { n } }, input: "", output: agent.output ?? "" });
+          } else {
+            step({ title: { key: "insp.formatFailed", params: { attempt: event.attempt, problems } }, input: problems, output: agent.output ?? "" });
+            // The first failure sends the repair message; the second ends the agent (the error event follows).
+            if (event.attempt === 1) step({ ok: true, title: { key: "insp.formatRepairAsked", params: {} }, input: "", output: "" });
+            else agent.status = "error";
+          }
+        }
+        break;
+      }
+      case "guardrail_check": {
+        // A guardrail of an agent checked what it received or what it answered. event.text is the text that was checked.
+        if (agent) {
+          const titleKey = { passed: "insp.guardrailPassed", noted: "insp.guardrailNoted", repair: "insp.guardrailRepair", stopped: "insp.guardrailStopped" }[event.action];
+          const params = { n: event.guardrail, kind: { key: `insp.guardrail.kind.${event.kind}` }, where: { key: `insp.guardrail.where.${event.where}` } };
+          agent.steps.push({
+            kind: "check",
+            tool: "guardrail",
+            ok: event.ok === true,
+            action: event.action,
+            attempt: event.attempt,
+            at: event.t,
+            ms: null,
+            eventIndex: index,
+            title: { key: titleKey ?? "insp.guardrailPassed", params },
+            input: event.reason ?? "",
+            output: typeof event.text === "string" ? event.text : "",
+            ...(event.tokens ? { reviewer: { tokens: event.tokens, cost: event.cost ?? 0, model: event.model ?? "" } } : {}),
+          });
+          // A repair sends the agent a message; a stop ends the agent (the error event follows).
+          // One message asks for the repair, however many guardrails failed: the step follows the last failing one.
+          const next = applied.slice(index + 1).find((e) => e.type === "guardrail_check" && e.agent === event.agent);
+          if (event.action === "repair" && !(next && next.action === "repair" && next.attempt === event.attempt)) agent.steps.push({ kind: "check", tool: "guardrail", ok: true, at: event.t, ms: null, eventIndex: index, title: { key: "insp.guardrailRepairAsked", params: {} }, input: "", output: "" });
+          if (event.action === "stopped") agent.status = "error";
+        }
+        break;
+      }
       case "approved":
         // You approved this agent: the run waited for your click before it ran.
         if (agent) agent.steps.push({ kind: "approval", tool: "approval", at: event.t, title: { key: "insp.approved", params: {} }, ms: null, input: "", output: { key: "insp.approvedOut", params: {} }, eventIndex: index });

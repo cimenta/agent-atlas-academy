@@ -6,6 +6,8 @@ import { clampLimits } from "./patterns.js";
 export const TOKENS_PER_ACTIVATION = 3000;
 
 import { mayCondense } from "./condense.js";
+import { validFormat, mayFormat } from "./format.js";
+import { validGuardrails, mayGuard } from "./guardrails.js";
 
 const CAPPED = ["router", "voting", "handoff", "supervisor", "mapreduce", "planexec"];
 
@@ -23,9 +25,19 @@ function condensesOf(design) {
   return calls;
 }
 
+// An agent with an answer format may need one repair call (the worst case).
+const formatsOf = (design) => design.nodes.filter((n) => validFormat(n.format) && mayFormat(n.agent, design.pattern)).length;
+
+// A reviewing guardrail is one call; an agent that may be asked to try again by a guardrail needs one more (the worst case).
+const guardrailCallsOf = (design) =>
+  design.nodes.reduce((sum, n) => {
+    if (!validGuardrails(n.guardrails) || !mayGuard(n.agent, design.pattern)) return sum;
+    return sum + n.guardrails.filter((g) => g.kind === "reviewer").length + (n.guardrails.some((g) => g.onFail === "repair") ? 1 : 0);
+  }, 0);
+
 // Every agent that condenses its input makes one more call each time it runs.
 export function activationsOf(design, limits) {
-  const total = runsOf(design, { ...limits, maxSteps: 1e9 }) + condensesOf(design);
+  const total = runsOf(design, { ...limits, maxSteps: 1e9 }) + condensesOf(design) + formatsOf(design) + guardrailCallsOf(design);
   return CAPPED.includes(design.pattern) ? Math.min(clampLimits(limits).maxSteps, total) : total;
 }
 

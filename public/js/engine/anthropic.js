@@ -19,6 +19,22 @@ export function redact(text, apiKey) {
   return out.replace(/sk-ant-[A-Za-z0-9_-]+/g, "[redacted]").replace(/AIza[A-Za-z0-9_-]{20,}/g, "[redacted]").replace(/\bAQ\.[A-Za-z0-9_-]{20,}/g, "[redacted]");
 }
 
+// A request that asks for a reply in a shape (body.replySchema) is sent as a forced tool call: the model must "call" the tool
+// reply, and the input it gives is the reply. The key replySchema never goes over the wire.
+function wireBody(body) {
+  if (!body.replySchema) return body;
+  const { replySchema, ...rest } = body;
+  const tools = [...(rest.tools ?? []), { name: "reply", description: "Give your reply in this shape.", input_schema: replySchema }];
+  return { ...rest, tools, ...(tools.length === 1 ? { tool_choice: { type: "tool", name: "reply" } } : {}) };
+}
+
+// The answer to such a request: the input of the reply tool becomes the text of the reply, so nothing else has to know.
+function textFromReplyTool(data) {
+  if (!Array.isArray(data.content) || !data.content.some((b) => b?.type === "tool_use" && b.name === "reply")) return;
+  data.content = data.content.map((b) => (b?.type === "tool_use" && b.name === "reply" ? { type: "text", text: JSON.stringify(b.input ?? {}) } : b));
+  if (data.stop_reason === "tool_use") data.stop_reason = "end_turn";
+}
+
 export async function callAnthropic(body, { apiKey, fetchImpl = fetch, signal, timeoutMs = 60000 } = {}) {
   if (typeof apiKey !== "string" || apiKey.length === 0) throw new AnthropicError("No API key was given");
   if (signal?.aborted) throw new AnthropicError("The request was cancelled");
@@ -31,7 +47,7 @@ export async function callAnthropic(body, { apiKey, fetchImpl = fetch, signal, t
     response = await fetchImpl(API_URL, {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify(body),
+      body: JSON.stringify(wireBody(body)),
       signal: combined,
     });
   } catch (error) {
@@ -50,6 +66,7 @@ export async function callAnthropic(body, { apiKey, fetchImpl = fetch, signal, t
     const message = redact(data?.error?.message, apiKey) || `Anthropic answered with status ${response.status}`;
     throw new AnthropicError(message, { status: response.status, retryable: RETRYABLE_STATUS.has(response.status) });
   }
+  if (body.replySchema) textFromReplyTool(data);
   // The HTTP side of the answer travels with the data but stays out of it (not enumerable, so
   // it never changes what the caller compares or serialises by accident).
   const headers = {};

@@ -24,7 +24,8 @@ export function stepDetail({ doc, t, step, why, viewer, viewerId, fmt, onShowMes
       return url;
     }
   };
-  const text = (value) => (typeof value === "string" ? value : value ? t(value.key, value.params) : "");
+  // A parameter that is { key } is a text of its own, translated first (the kind and the place of a guardrail).
+  const text = (value) => (typeof value === "string" ? value : value ? t(value.key, Object.fromEntries(Object.entries(value.params ?? {}).map(([k, v]) => [k, v !== null && typeof v === "object" && typeof v.key === "string" ? t(v.key) : v]))) : "");
   const rendered = (value) =>
     looksJson(value) ? viewer.view(viewerId, value) : h(doc, "div", { class: "rendered" }, renderBlocks(parseMarkdown(value), doc));
   const section = (kind, heading, ...children) =>
@@ -32,7 +33,7 @@ export function stepDetail({ doc, t, step, why, viewer, viewerId, fmt, onShowMes
 
   const title = text(step.title);
   root.append(h(doc, "h3", {}, title));
-  const explained = t(step.kind === "tool" ? `insp.doc.${step.tool}` : `insp.doc.${step.kind}`);
+  const explained = t(step.kind === "tool" ? `insp.doc.${step.tool}` : step.kind === "check" && step.tool === "guardrail" ? "insp.doc.guardrail" : `insp.doc.${step.kind}`);
   if (!explained.startsWith("insp.doc.")) root.append(h(doc, "p", { class: "doc" }, explained));
   if (why) root.append(h(doc, "p", { class: "why" }, h(doc, "strong", {}, `${t("player.explanation")}: `), why));
 
@@ -40,6 +41,7 @@ export function stepDetail({ doc, t, step, why, viewer, viewerId, fmt, onShowMes
   if (typeof step.ms === "number") facts.push(t("insp.tookTime", { time: fmt(step.ms) }));
   else if (step.server) facts.push(t("insp.inModelHint"));
   if (typeof step.at === "number") facts.push(t("insp.at", { time: fmt(step.at) }));
+  if (step.reviewer) facts.push(t("insp.guardrailReviewer", { model: step.reviewer.model, input: step.reviewer.tokens?.input ?? 0, output: step.reviewer.tokens?.output ?? 0, cost: Number(step.reviewer.cost ?? 0).toFixed(4) }));
   if (facts.length) root.append(h(doc, "p", { class: "facts" }, facts.join(" · ")));
 
   // ----- input

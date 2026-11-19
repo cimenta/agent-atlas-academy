@@ -1,3 +1,4 @@
+import { validFormat, mayFormat, formatPromptText } from "./format.js";
 // The instructions each agent type receives. The first line is always "Role: <type>".
 const LANGUAGES = { en: "English", cs: "Czech" };
 
@@ -114,5 +115,6 @@ const NOTEBOOK_READ = "Your input may end with a block that starts with Notebook
 export function systemPromptFor(node, { language = "en", pattern, memory } = {}) {
   const spoken = LANGUAGES[language] ?? "English";
   const book = [memory?.read ? NOTEBOOK_READ : "", memory?.write ? NOTEBOOK_WRITE : ""].filter(Boolean).join("\n");
-  return `Role: ${node.agent}\n${roleText(node, pattern)}${book ? `\n${book}` : ""}\nKeep every reply under 300 words. Answer in ${spoken}.${node.search === true ? `\n${WEB_DATA_RULE}` : ""}`;
+  const format = validFormat(node.format) && mayFormat(node.agent, pattern) ? `\n${formatPromptText(node.format)}` : "";
+  return `Role: ${node.agent}\n${roleText(node, pattern)}${book ? `\n${book}` : ""}${format}\nKeep every reply under 300 words. Answer in ${spoken}.${node.search === true ? `\n${WEB_DATA_RULE}` : ""}`;
 }
