@@ -79,6 +79,7 @@ export function loadDefinition(text) {
     if (node.onLimit === "pass") overrides.onLimit = "pass";
     if (node.approve === true) overrides.approve = true;
     if (node.condense === true) overrides.condense = true;
+    if (isObject(node.creates)) overrides.creates = node.creates;
     if (design.memory?.notebook === true && typeof node.notebook === "string") overrides.notebook = node.notebook;
     for (const key of ["name", "instructions", "stance"]) if (typeof node[key] === "string") overrides[key] = node[key];
     const added = editor.addNode(node.agent, overrides);

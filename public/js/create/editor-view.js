@@ -3,7 +3,8 @@
 import { h } from "../dom.js";
 import { helpIcon } from "../help-popup.js";
 import { agentLabel } from "../engine/labels.js";
-import { AGENT_TYPES, CRITERIA_MAX, MODELS, LIMIT_DEFAULTS, OUTPUT_TOKENS } from "../engine/catalog.js";
+import { AGENT_TYPES, CRITERIA_MAX, MODELS, LIMIT_DEFAULTS, OUTPUT_TOKENS, CREATOR_TYPES, NODE_MAX, INSTRUCTIONS_MAX } from "../engine/catalog.js";
+import { createCapFor } from "../engine/created.js";
 import { AGENT_LIMIT_KEYS, agentLimitRange } from "../engine/agent-limits.js";
 import { TOOLS } from "../engine/tools.js";
 import { roleText } from "../engine/prompts.js";
@@ -632,12 +633,54 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         ),
       );
     }
+    // Creating: a Supervisor or a Planner may be allowed to create agents while the run is going; the student sets the cap.
+    const creator = CREATOR_TYPES.includes(node.agent);
+    const createsPane = [];
+    if (creator) {
+      const room = createCapFor(design.nodes.length);
+      createsPane.push(h(doc, "h4", { class: "editor-creates-heading" }, t("editor.creatingHeading"), helpIcon({ doc, t, id: "create-creating", name: t("editor.creatingHeading") })));
+      if (room < 1 && node.creates === undefined) {
+        createsPane.push(h(doc, "p", { class: "hint", "data-ui": "creates-no-room" }, t("editor.createsNoRoom", { total: NODE_MAX })));
+      } else {
+        const on = h(doc, "input", { id: "ed-creates-on", type: "checkbox", checked: node.creates !== undefined, "data-ui": "creates-on" });
+        on.addEventListener("change", () => {
+          editor.setNode(node.id, { creates: on.checked ? { max: 1, guidance: "", search: false } : null });
+          changed();
+        });
+        createsPane.push(h(doc, "div", { class: "field checkbox" }, on, h(doc, "label", { for: "ed-creates-on" }, t("editor.creates"))), h(doc, "p", { class: "hint" }, t("editor.createsHint")));
+        if (node.creates !== undefined) {
+          const max = h(doc, "input", { id: "ed-creates-max", type: "number", min: 1, max: room, value: String(node.creates.max), "data-ui": "creates-max" });
+          max.addEventListener("change", () => {
+            editor.setNode(node.id, { creates: { ...editor.design().nodes.find((n) => n.id === node.id).creates, max: Number(max.value) } });
+            changed();
+          });
+          const guidance = h(doc, "textarea", { id: "ed-creates-guidance", rows: 3, maxlength: INSTRUCTIONS_MAX, placeholder: t("editor.createsGuidancePlaceholder"), "data-ui": "creates-guidance" });
+          guidance.value = node.creates.guidance ?? "";
+          guidance.addEventListener("input", () => {
+            editor.setNode(node.id, { creates: { ...editor.design().nodes.find((n) => n.id === node.id).creates, guidance: guidance.value } });
+            onChange();
+          });
+          const search = h(doc, "input", { id: "ed-creates-search", type: "checkbox", checked: node.creates.search === true, "data-ui": "creates-search" });
+          search.addEventListener("change", () => {
+            editor.setNode(node.id, { creates: { ...editor.design().nodes.find((n) => n.id === node.id).creates, search: search.checked } });
+            changed();
+          });
+          createsPane.push(
+            field("ed-creates-max", t("editor.createsCap"), max),
+            h(doc, "p", { class: "hint" }, t("editor.createsMaxHint", { max: room, n: design.nodes.length, total: NODE_MAX })),
+            field("ed-creates-guidance", t("editor.createsGuidance"), guidance),
+            h(doc, "div", { class: "field checkbox" }, search, h(doc, "label", { for: "ed-creates-search" }, t("editor.createsSearch"))),
+            h(doc, "p", { class: "hint" }, t("editor.createsSearchHint")),
+          );
+        }
+      }
+    }
     // The settings that are not about the model sit in tabs, so the panel stays short.
-    const panes = { tools: toolsPane, condense: condensePane, approval: approvalPane, notebook: notebookPane, limits: limitsPane };
-    const tabIds = agentTabIds({ notebookOn: editor.notebookOn() });
+    const panes = { tools: toolsPane, condense: condensePane, approval: approvalPane, notebook: notebookPane, limits: limitsPane, creates: createsPane };
+    const tabIds = agentTabIds({ notebookOn: editor.notebookOn(), creator });
     settingsTab = currentAgentTab(settingsTab, tabIds);
     const limitCount = Object.keys(node.limits ?? {}).length;
-    const tabLabel = { tools: t("editor.toolsHeading"), condense: t("editor.condenseHeading"), approval: t("editor.approvalHeading"), notebook: t("editor.notebookHeading"), limits: `${t("editor.tab.limits")}${limitCount > 0 ? ` (${limitCount})` : ""}` };
+    const tabLabel = { tools: t("editor.toolsHeading"), condense: t("editor.condenseHeading"), approval: t("editor.approvalHeading"), notebook: t("editor.notebookHeading"), limits: `${t("editor.tab.limits")}${limitCount > 0 ? ` (${limitCount})` : ""}`, creates: `${t("editor.tab.creates")} · ${node.creates ? t("editor.createsOn", { n: node.creates.max }) : t("editor.createsOff")}` };
     const paneHost = h(doc, "div", { class: "agent-tab-panes" });
     const paneEls = new Map(tabIds.map((id) => [id, h(doc, "div", { class: "agent-tab-pane", role: "tabpanel", "data-ui": `agent-pane-${id}`, hidden: id !== settingsTab }, ...panes[id])]));
     paneHost.append(...paneEls.values());

@@ -3,7 +3,7 @@
 import { isSlot } from "../key-slots.js";
 import { validNodeLimits, ON_LIMIT } from "./agent-limits.js";
 import { NOTEBOOK_CHOICES } from "./notebook.js";
-import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, LIMIT_MAX, clampCostCap, CRITERIA_MAX, NODE_MAX, NAME_MAX, INSTRUCTIONS_MAX } from "./catalog.js";
+import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, LIMIT_MAX, clampCostCap, CRITERIA_MAX, NODE_MAX, NAME_MAX, INSTRUCTIONS_MAX, CREATE_MAX, CREATOR_TYPES } from "./catalog.js";
 
 export const PATTERNS = ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff", "router", "voting", "mapreduce", "planexec"];
 
@@ -45,7 +45,7 @@ export function validateDesign(design) {
       add("node.id");
       continue;
     }
-    if (typeof node.id !== "string" || !ID.test(node.id)) add("node.id");
+    if (typeof node.id !== "string" || !ID.test(node.id) || /^made-/.test(node.id)) add("node.id");
     else if (ids.has(node.id)) add("node.duplicate", { id: node.id });
     else {
       ids.add(node.id);
@@ -63,6 +63,12 @@ export function validateDesign(design) {
       if (!ok) add("node.instructions", { id: node.id });
     }
     if (typeof node.search !== "boolean") add("node.search", { id: node.id });
+    if (node.creates !== undefined) {
+      const c = node.creates;
+      const ok = isObject(c) && CREATOR_TYPES.includes(node.agent) && Number.isInteger(c.max) && c.max >= 1 && c.max <= CREATE_MAX && typeof c.guidance === "string" && c.guidance.length <= INSTRUCTIONS_MAX && typeof c.search === "boolean";
+      if (!ok) add("node.creates", { id: node.id });
+      else if (nodes.length + c.max > NODE_MAX) add("node.creates.total", { id: node.id });
+    }
     if (node.limits !== undefined && !validNodeLimits(node.limits)) add("node.limits", { id: node.id });
     if (node.onLimit !== undefined && !ON_LIMIT.includes(node.onLimit)) add("node.onLimit", { id: node.id });
     if (node.approve !== undefined && node.approve !== true) add("node.approve", { id: node.id });

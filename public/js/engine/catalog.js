@@ -124,6 +124,9 @@ export const TASK_MAX_CHARS = 1000;
 export const NODE_MAX = 8;
 export const NAME_MAX = 40;
 export const INSTRUCTIONS_MAX = 2000;
+// Agents that create agents: the agent types that may, and the most one of them may be allowed to create.
+export const CREATOR_TYPES = ["supervisor", "planner"];
+export const CREATE_MAX = 4;
 
 // Profiles: one choice that sets the five adjustable limits at once. Balanced is the default set.
 export const PROFILES = {

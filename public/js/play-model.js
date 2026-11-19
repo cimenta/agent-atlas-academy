@@ -1,11 +1,12 @@
 // Pure helpers for the Play tabs: the list of runs to replay and the numbers on the Result tab.
 import { providerCatalog, paidOnlyModelUsed, nodeModel } from "./engine/catalog.js";
 import { slotIsFree } from "./key-slots.js";
-import { deriveInspector } from "./replay/inspect-model.js";
+import { deriveInspector, createdOf } from "./replay/inspect-model.js";
 import { validateRun } from "./run-schema.js";
 import { clampLimits } from "./engine/patterns.js";
 import { TIME_LIMIT_MS } from "./engine/budget.js";
 import { nodeIdOf } from "./engine/spawn.js";
+import { designWithCreated } from "./engine/created.js";
 
 // The library run the home page plays: the one marked "home": true in runs/index.json, else the first.
 export function pickHomeRun(runs) {
@@ -49,20 +50,22 @@ export function buildResultModel(run) {
   // A run that mixed providers has them joined with a plus sign; each agent is then priced by its own slot.
   const provider = String(run?.recordedWith?.provider ?? "").split("+")[0];
   const catalog = providerCatalog(provider);
-  const free = run?.recordedWith?.freeTier === true && Array.isArray(run?.design?.nodes) && !paidOnlyModelUsed(run.design, provider);
+  // The agents that were created during the run are nodes too: the cost of each is priced with its own node.
+  const design = designWithCreated(run?.design, events);
+  const free = run?.recordedWith?.freeTier === true && Array.isArray(design?.nodes) && !paidOnlyModelUsed(design, provider);
   let cost = null;
-  if (run?.design && Array.isArray(run.design.nodes)) {
+  if (design && Array.isArray(design.nodes)) {
     cost = usage.searches * catalog.searchPriceUsd;
     // The extra calls of condensing are priced with the fast model of the agent's provider.
     for (const e of events) {
       if (e.type !== "condense") continue;
-      const node = run.design.nodes.find((n) => n.id === nodeIdOf(e.agent));
+      const node = design.nodes.find((n) => n.id === nodeIdOf(e.agent));
       if (slotIsFree(node?.slot)) continue;
       const fast = nodeModel({ ...(node ?? {}), model: "fast" }, provider);
       cost += ((Number(e.usage?.input) || 0) * fast.inputPerMTok + (Number(e.usage?.output) || 0) * fast.outputPerMTok) / 1e6;
     }
     for (const a of perAgent) {
-      const node = run.design.nodes.find((n) => n.id === nodeIdOf(a.agent));
+      const node = design.nodes.find((n) => n.id === nodeIdOf(a.agent));
       // An agent that ran on a key of the free tier cost nothing, whatever the list price of its model.
       if (slotIsFree(node?.slot)) continue;
       const model = nodeModel(node, provider);
@@ -101,7 +104,7 @@ export function buildStatistics(run) {
     .filter((id) => inspector.agents[id].startT !== null)
     .map((id) => {
       const a = inspector.agents[id];
-      const node = run?.design?.nodes?.find((n) => n.id === nodeIdOf(id));
+      const node = designWithCreated(run?.design, events)?.nodes?.find((n) => n.id === nodeIdOf(id));
       const tokens = base.perAgent.find((x) => x.agent === id);
       return {
         limits: node?.limits && Object.keys(node.limits).length > 0 ? node.limits : null,
@@ -118,6 +121,15 @@ export function buildStatistics(run) {
         share: agentMs > 0 && a.ms !== null ? a.ms / agentMs : 0,
       };
     });
+  // The agents created during the run: when, by whom, and what each used and cost (priced with its own node).
+  const withCreated = designWithCreated(run?.design, events);
+  const created = createdOf(events).map((c) => {
+    const row = perAgent.find((a) => a.agent === c.id);
+    const node = withCreated?.nodes?.find((n) => n.id === c.id);
+    const model = node ? nodeModel(node, String(run?.recordedWith?.provider ?? "").split("+")[0]) : null;
+    const cost = !model || slotIsFree(node?.slot) ? 0 : ((row?.input ?? 0) * model.inputPerMTok + (row?.output ?? 0) * model.outputPerMTok) / 1e6;
+    return { id: c.id, name: c.name, by: c.by, step: events.findIndex((e) => e.type === "agent_created" && e.agent === c.id) + 1, calls: row?.calls ?? 0, input: row?.input ?? 0, output: row?.output ?? 0, cost };
+  });
   return {
     status: base.status,
     cost: base.cost,
@@ -132,6 +144,7 @@ export function buildStatistics(run) {
     runLimits: run?.limits !== null && typeof run?.limits === "object" && !Array.isArray(run.limits) ? clampLimits(run.limits) : null,
     runHit: events.find((e) => e.type === "warning" && typeof e.limit === "string" && !e.limit.startsWith("agent_"))?.limit ?? null,
     perAgent,
+    created,
   };
 }
 

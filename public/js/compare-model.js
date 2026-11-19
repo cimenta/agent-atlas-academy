@@ -29,6 +29,10 @@ export function differences(runs) {
   add("language", "language", list.map((r) => r?.language ?? null));
   add("provider", "provider", list.map((r) => r?.recordedWith?.provider ?? null));
   add("notebook", "notebook", list.map((r) => notebookOn(r)));
+  // Agents that a Supervisor or Planner may create: how many a run allowed and how many it made (null when it allowed none).
+  const allowed = (r) => nodesOf(r).reduce((sum, n) => sum + (n.creates?.max ?? 0), 0);
+  add("createsMax", "createsMax", list.map((r) => (allowed(r) > 0 ? allowed(r) : null)));
+  add("created", "created", list.map((r) => (allowed(r) > 0 ? (Array.isArray(r?.events) ? r.events.filter((e) => e.type === "agent_created").length : 0) : null)));
 
   const order = [];
   for (const run of list) for (const n of nodesOf(run)) if (!order.includes(n.id)) order.push(n.id);

@@ -17,6 +17,8 @@ export const EVENT_TYPES = [
   "loop_end",
   "note",
   "condense",
+  "agent_created",
+  "agent_refused",
 ];
 
 const isText = (value) => typeof value === "string" && value.length > 0;
@@ -42,7 +44,8 @@ function checkEvent(event, index, previousT, errors, agents) {
   if (["agent_start", "agent_output", "tool_call", "tool_result", "round"].includes(event.type) && !isText(event.agent)) {
     errors.push(`${at}.agent must be a non-empty string`);
   }
-  if (isText(event.agent) && !agents.has(event.agent)) {
+  // A created agent is announced before it starts (and may never start), so its announcement is not checked against the starts.
+  if (isText(event.agent) && event.type !== "agent_created" && !agents.has(event.agent)) {
     errors.push(`${at}.agent "${event.agent}" never starts (no agent_start event)`);
   }
   if (event.type === "handoff") {
@@ -62,6 +65,12 @@ function checkEvent(event, index, previousT, errors, agents) {
   }
   if (event.type === "condense" && (!isText(event.agent) || typeof event.text !== "string" || !Number.isFinite(event.from) || !Number.isFinite(event.to))) {
     errors.push(`${at}.agent, ${at}.text, ${at}.from and ${at}.to of a condense must be a string, a string and two numbers`);
+  }
+  if (event.type === "agent_created" && (!isText(event.by) || !isText(event.agent) || !isObject(event.node) || !isText(event.node.id))) {
+    errors.push(`${at}.by, ${at}.agent and ${at}.node of a creation must be a string, a string and an object with an id`);
+  }
+  if (event.type === "agent_refused" && (!isText(event.by) || !isText(event.reason))) {
+    errors.push(`${at}.by and ${at}.reason of a refusal must be strings`);
   }
   if (event.type === "note" && (!isText(event.agent) || typeof event.text !== "string")) {
     errors.push(`${at}.agent and ${at}.text of a note must be strings`);

@@ -222,6 +222,25 @@ export function renderResult(ctx, run) {
       ...(votedTally && votedTally.note ? [h(doc, "p", { class: "hint", "data-ui": "voting-note" }, votedTally.note)] : []),
       stats.perAgent.length ? h(doc, "h3", {}, t("result.perAgent"), help("result-agents", t("result.perAgent"))) : "",
       stats.perAgent.length ? table : "",
+      ...(stats.created.length > 0
+        ? [
+            h(doc, "h3", {}, t("stats.created.heading")),
+            h(
+              doc,
+              "table",
+              { class: "result-table stats-table", "data-ui": "stats-created" },
+              h(doc, "thead", {}, h(doc, "tr", {}, ...["agent", "by", "at", "calls", "tokens", "cost"].map((key) => h(doc, "th", { scope: "col" }, t(`stats.created.${key}`))))),
+              h(
+                doc,
+                "tbody",
+                {},
+                ...stats.created.map((c) =>
+                  h(doc, "tr", {}, h(doc, "th", { scope: "row" }, c.name), h(doc, "td", {}, stats.perAgent.find((a) => a.agent === c.by)?.label ?? c.by), h(doc, "td", {}, num(c.step)), h(doc, "td", {}, num(c.calls)), h(doc, "td", {}, `${num(c.input)} / ${num(c.output)}`), h(doc, "td", {}, c.cost === 0 ? "—" : `$${formatUsd(c.cost)}`)),
+                ),
+              ),
+            ),
+          ]
+        : []),
       limitsSection,
       when.length ? h(doc, "p", { class: "stats-note" }, when.join(" · ")) : "",
       h(doc, "p", { class: "stats-note" }, t("result.costNote")),

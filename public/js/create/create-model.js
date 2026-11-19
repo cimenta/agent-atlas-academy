@@ -20,6 +20,21 @@ export function handoffSkipper(base) {
   };
 }
 
+// Like handoffSkipper, for the agents a carried-on run creates again: a creation the earlier try already has (same agent id) and
+// as many refusals as the earlier try had are replays and are not recorded a second time.
+export function createSkipper(base) {
+  const made = new Set(base.filter((e) => e.type === "agent_created").map((e) => e.agent));
+  let refusals = base.filter((e) => e.type === "agent_refused").length;
+  return (event) => {
+    if (event.type === "agent_created") return made.has(event.agent);
+    if (event.type === "agent_refused" && refusals > 0) {
+      refusals -= 1;
+      return true;
+    }
+    return false;
+  };
+}
+
 export function canRun({ task, apiKey, editorErrors, keyLocked = false }) {
   const reasons = [];
   const text = typeof task === "string" ? task.trim() : "";

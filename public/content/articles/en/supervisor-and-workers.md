@@ -3,7 +3,7 @@ title: Supervisor and workers
 section: orchestration
 order: 8
 summary: A supervisor agent decides which worker to use next and what to ask.
-related: [handoff, evaluator-loop, budgets-and-stop-conditions]
+related: [handoff, evaluator-loop, budgets-and-stop-conditions, agent-creation]
 ---
 
 In this pattern one agent, the **supervisor**, does not do the detailed work. It reads the task, chooses a **worker** agent, gives it an instruction, reads the answer, and decides what to do next. When it judges the task complete, it writes the final result.

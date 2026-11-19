@@ -64,15 +64,35 @@ const TALLY = `You are the Tally. Several voters answered the same task, each on
 Reply with JSON only, in this form:
 {"answer":"<the answer most voters agree on>","agree":["<id of each voter that agrees with it>"],"note":"<what the other voters said differently, or empty>"}`;
 
+// Said to a supervisor that may create agents: how, how many, and that a new agent can not create agents itself.
+function creatingText(creates) {
+  const guidance = creates.guidance?.trim() ? `
+${"Guidance for new agents: "}${creates.guidance.trim()}` : "";
+  return `You may also create up to ${creates.max} new agents for this task, when no existing worker fits. Reply with:
+{"action":"create","name":"<a short name>","instructions":"<what this agent is and does>"}
+The new agent is added to the workers and gets an id (made-1, made-2 and so on); call it like any other worker. A new agent can not create agents itself, and you can not create more than ${creates.max}.${guidance}`;
+}
+
+// Said to a planner that may create agents: the reply may also name new agents, and a step may be given to one of them.
+function planCreatingText(creates) {
+  const guidance = creates.guidance?.trim() ? `
+${"Guidance for new agents: "}${creates.guidance.trim()}` : "";
+  return `You may also create up to ${creates.max} new agents for this task, when the executor does not fit a step. Then reply in this form instead, and give a step to a new agent by naming it:
+{"agents":[{"name":"<a short name>","instructions":"<what this agent is and does>"}],"steps":["<step 1>",{"text":"<step 2>","agent":"<the name of a new agent>"}]}
+A step without an agent is done by the executor. A new agent can not create agents itself, and you can not create more than ${creates.max}.${guidance}`;
+}
+
 function ownRoleText(node, pattern) {
   if (node.agent === "tally") return TALLY;
   if (node.agent === "splitter") return SPLITTER;
   if (node.agent === "worker") return WORKER;
   if (node.agent === "reducer") return REDUCER;
   if (node.agent === "executor") return EXECUTOR;
-  if (node.agent === "planner" && pattern === "planexec") return PLANNER_PLAN;
+  if (node.agent === "planner" && pattern === "planexec") return node.creates ? `${PLANNER_PLAN}
+${planCreatingText(node.creates)}` : PLANNER_PLAN;
   if (node.agent === "router") return ROUTER;
-  if (node.agent === "supervisor") return SUPERVISOR;
+  if (node.agent === "supervisor") return node.creates ? `${SUPERVISOR}
+${creatingText(node.creates)}` : SUPERVISOR;
   if (node.agent === "evaluator") return EVALUATOR;
   if (node.agent === "debater") {
     return `You are a Debater${node.name?.trim() ? ` called ${node.name.trim()}` : ""} and your position is "${node.stance ?? "for"}". Argue your side in one short paragraph. When you can see the other side's points, answer them.`;

@@ -102,3 +102,28 @@ test("the Statistics tab shows the tiles and one row per agent", () => {
   assert.ok(rows.length >= 3, "header row and at least two agents");
   assert.equal(byUi(main, "answer-formatted").length, 0);
 });
+
+test("the Statistics tab lists created agents in their own table, and only when there are some", async () => {
+  const { runDesign } = await import("../public/js/engine/orchestrator.js");
+  const { LIMIT_DEFAULTS } = await import("../public/js/engine/catalog.js");
+  const { createMockCall } = await import("../public/js/engine/mock-anthropic.js");
+  const design = {
+    pattern: "supervisor",
+    nodes: [
+      { id: "boss", agent: "supervisor", model: "fast", search: false, creates: { max: 2, guidance: "", search: false } },
+      { id: "researcher", agent: "researcher", model: "fast", search: false },
+    ],
+    edges: [{ from: "boss", to: "researcher" }],
+  };
+  const events = [];
+  await runDesign({ design, task: "Explain it", limits: LIMIT_DEFAULTS, call: createMockCall(), emit: (e) => events.push(e) });
+  const main = new Node("main");
+  renderResult({ doc: fakeDoc, t, lang: "en", main }, { ...run, design, events, recordedWith: { provider: "anthropic" } });
+  byUi(main, "result-tab-stats")[0].click();
+  const table = byUi(main, "stats-created");
+  assert.equal(table.length, 1);
+  assert.ok(table[0].textContent.includes("Fact checker"));
+  const plain = mount();
+  byUi(plain, "result-tab-stats")[0].click();
+  assert.equal(byUi(plain, "stats-created").length, 0);
+});

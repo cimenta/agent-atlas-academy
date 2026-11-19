@@ -24,7 +24,7 @@ import { createEditor, isUntouched } from "./editor-model.js";
 import { draft, useDefinition, resetDecisions, decideLoaded, resetForLoad, showKeyStep } from "./draft.js";
 import { deriveInspector } from "../replay/inspect-model.js";
 import { mountEditor } from "./editor-view.js";
-import { canRun, reviewSummary, handoffSkipper, agentRows } from "./create-model.js";
+import { canRun, reviewSummary, handoffSkipper, createSkipper, agentRows } from "./create-model.js";
 import { buildResultModel } from "../play-model.js";
 import { loadDefinition, definitionFromRun } from "./definition.js";
 import { STEPS, stepStatus, navState, stepAfterChange, missing, footHint, toggleSlot, modelValid, setDefaultKeepingAgents, workspaceLocked, workspaceEstimateUsd, runAllowed } from "./steps-model.js";
@@ -681,6 +681,7 @@ export function renderCreate(ctx) {
     const failedIds = earlier ? earlier.order.filter((a) => earlier.agents[a].status === "error") : [];
     const offset = base.length > 0 ? (base.at(-1).t ?? 0) + 1000 : 0;
     const skipHandoff = handoffSkipper(base);
+    const skipCreate = createSkipper(base);
 
     const id = resume ? resume.id : makeRunId(Date.now());
     const events = [...base];
@@ -814,6 +815,7 @@ export function renderCreate(ctx) {
       onEvent: (event) => {
         // Carried on: the clock continues from the earlier try, and a handoff the earlier try already has is not shown twice.
         if (resume && event.type === "handoff" && skipHandoff(event)) return;
+        if (resume && (event.type === "agent_created" || event.type === "agent_refused") && skipCreate(event)) return;
         const shifted = resume ? { ...event, t: (event.t ?? 0) + offset } : event;
         // A warning keeps the clock time it happened at, so a later look at the run shows which came from which try.
         const next = event.type === "warning" ? { ...shifted, at: Date.now() } : shifted;

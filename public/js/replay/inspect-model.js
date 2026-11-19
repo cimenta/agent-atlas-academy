@@ -4,6 +4,7 @@ import { warningHelp } from "../help-ids.js";
 import { parseVotingReply } from "../engine/runners/voting.js";
 import { parseStepsReply } from "../engine/runners/planexec.js";
 import { MULTI_RUN } from "../engine/spawn.js";
+import { designWithCreated } from "../engine/created.js";
 // Turns a run's events into what the inspector shows: one entry per agent, with its steps
 // (model calls, tool calls, handoffs), the messages of each model round and its output.
 // Pure: no DOM.
@@ -52,7 +53,7 @@ export function designLabel(design, id) {
 }
 
 function labelsFor(events, order) {
-  const design = events.find((e) => e.type === "run_start")?.design;
+  const design = designWithCreated(events.find((e) => e.type === "run_start")?.design, events);
   const labels = new Map();
   if (Array.isArray(design?.nodes)) {
     for (const node of design.nodes) labels.set(node.id, agentLabel(node, design, AGENT_TYPES[node.agent]?.label ?? node.agent));
@@ -162,6 +163,44 @@ export function deriveInspector(events, cursor = events.length) {
         if (agents[event.to]) {
           agents[event.to].from = event.from;
           agents[event.to].inputText = typeof event.note === "string" && event.note ? event.note : (from?.output ?? "");
+        }
+        break;
+      }
+      case "agent_created": {
+        const by = agents[event.by];
+        if (by) {
+          by.steps.push({
+            kind: "handoff",
+            tool: "handoff",
+            created: true,
+            at: event.t,
+            from: event.by,
+            to: event.agent,
+            title: { key: "insp.createdTitle", params: { name: event.node?.name ?? event.agent } },
+            ms: null,
+            input: { key: "insp.createdIn", params: { name: event.by } },
+            output: typeof event.node?.instructions === "string" ? event.node.instructions : "",
+            eventIndex: index,
+          });
+        }
+        break;
+      }
+      case "agent_refused": {
+        const by = agents[event.by];
+        if (by) {
+          by.steps.push({
+            kind: "handoff",
+            tool: "handoff",
+            refused: true,
+            at: event.t,
+            from: event.by,
+            to: event.by,
+            title: { key: `insp.refused.${event.reason}` },
+            ms: null,
+            input: { key: "insp.createdIn", params: { name: event.by } },
+            output: "",
+            eventIndex: index,
+          });
         }
         break;
       }
@@ -285,6 +324,20 @@ export function evaluatorProgress(events, cursor) {
 
 // ---- map-reduce and plan-and-execute: a node that runs once for every part or step (agents "worker#1", "executor#2") ----
 const runStatus = (seen, id) => (seen.some((e) => e.type === "agent_output" && e.agent === id) ? "done" : seen.some((e) => e.type === "agent_start" && e.agent === id) ? "working" : "waiting");
+
+// The agents created up to the cursor: [{ id, name, instructions, by, n, max, status }] with the status of the agent
+// (waiting until it starts, working, done). Empty when nothing was created.
+export function createdOf(events, cursor = events.length) {
+  const seen = events.slice(0, Math.max(0, cursor));
+  return seen
+    .filter((e) => e.type === "agent_created" && e.node)
+    .map((e) => ({ id: e.agent, name: e.node.name ?? e.agent, instructions: e.node.instructions ?? "", by: e.by, n: e.n, max: e.max, status: runStatus(seen, e.agent) }));
+}
+
+// The requests to create an agent that were refused up to the cursor: [{ by, reason }].
+export function refusalsOf(events, cursor = events.length) {
+  return events.slice(0, Math.max(0, cursor)).filter((e) => e.type === "agent_refused").map((e) => ({ by: e.by, reason: e.reason }));
+}
 
 // The parts a splitter made, up to the cursor: [{ n, id, text, status }] with the status of the worker that has the part
 // (waiting, working, done). Empty for other patterns and before the split.

@@ -1,13 +1,14 @@
 // The diagram editor's state and rules. Pure: no DOM. The rules mirror validateDesign, so
 // the editor refuses a connection the server would refuse anyway, with the same error code.
-import { AGENT_TYPES, DEFAULT_MODEL, NODE_MAX } from "../engine/catalog.js";
+import { AGENT_TYPES, DEFAULT_MODEL, NODE_MAX, CREATOR_TYPES, INSTRUCTIONS_MAX } from "../engine/catalog.js";
+import { createCapFor } from "../engine/created.js";
 import { validateDesign } from "../engine/patterns.js";
 import { cleanNodeLimits } from "../engine/agent-limits.js";
 import { NOTEBOOK_CHOICES, mayWrite } from "../engine/notebook.js";
 import { mayCondense } from "../engine/condense.js";
 
 const ONCE_ONLY = new Set(["supervisor", "combiner", "judge", "evaluator", "router", "tally", "splitter", "worker", "reducer", "executor"]);
-const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve", "notebook", "condense"];
+const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve", "notebook", "condense", "creates"];
 const DEFAULT_ROUNDS = 2;
 const EVALUATOR_ROUNDS = 3;
 const roundsFor = (pattern) => (pattern === "evaluator" ? EVALUATOR_ROUNDS : DEFAULT_ROUNDS);
@@ -20,6 +21,20 @@ function tidyLimits(node, pattern) {
   if (node.onLimit !== "pass") delete node.onLimit;
   if (node.approve !== true) delete node.approve;
   if (node.condense !== true || !mayCondense(node.agent, pattern)) delete node.condense;
+}
+
+// The ability to create agents (a Supervisor or a Planner only): kept as { max, guidance, search }, with the cap within 1 and
+// the room the run has (the agents of the design and the cap never exceed NODE_MAX). Null, a wrong type or no room removes it.
+function tidyCreates(node, count) {
+  if (node.creates === undefined) return;
+  const c = node.creates;
+  const room = createCapFor(count);
+  if (c === null || typeof c !== "object" || !CREATOR_TYPES.includes(node.agent) || room < 1) {
+    delete node.creates;
+    return;
+  }
+  const max = Math.trunc(Number(c.max));
+  node.creates = { max: Math.max(1, Math.min(room, Number.isFinite(max) ? max : 1)), guidance: typeof c.guidance === "string" ? c.guidance.slice(0, INSTRUCTIONS_MAX) : "", search: c.search === true };
 }
 
 export function createEditor(initialPattern) {
@@ -114,6 +129,7 @@ export function createEditor(initialPattern) {
       if (notebook && !choicesFor(node).includes(node.notebook)) node.notebook = defaultChoice(node);
       tidyLimits(node, pattern);
       nodes.push(node);
+      for (const n of nodes) tidyCreates(n, nodes.length);
       if (pattern === "handoff" && start === undefined) start = node.id;
       return { ok: true, id: node.id };
     },
@@ -121,6 +137,7 @@ export function createEditor(initialPattern) {
     removeNode(id) {
       nodes = nodes.filter((n) => n.id !== id);
       edges = edges.filter((e) => e.from !== id && e.to !== id);
+      for (const n of nodes) tidyCreates(n, nodes.length);
       delete positions[id];
       if (start === id) start = nodes[0]?.id;
     },
@@ -139,6 +156,7 @@ export function createEditor(initialPattern) {
       if (!node) return;
       for (const key of EDITABLE) if (key in patch && (key !== "notebook" || choicesFor(node).includes(patch.notebook))) node[key] = patch[key];
       tidyLimits(node, pattern);
+      tidyCreates(node, nodes.length);
     },
 
     // The shared notebook of the run. Switching it on gives every agent its default choice, switching it off takes the choices away.
@@ -335,7 +353,7 @@ export function isUntouched(design) {
   const fresh = createEditor(design.pattern);
   fresh.reset(design.pattern);
   const start = fresh.design();
-  const key = (d) => JSON.stringify([d.nodes.map((n) => n.agent), d.edges.map((e) => `${e.from}>${e.to}`)]);
+  const key = (d) => JSON.stringify([d.nodes.map((n) => [n.agent, n.creates !== undefined]), d.edges.map((e) => `${e.from}>${e.to}`)]);
   return key(design) === key(start);
 }
 

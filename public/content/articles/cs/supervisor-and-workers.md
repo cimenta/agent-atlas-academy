@@ -3,7 +3,7 @@ title: Supervizor a pracovníci
 section: orchestration
 order: 8
 summary: Supervizor rozhoduje, kterého pracovníka použít dál a na co se ho zeptat.
-related: [handoff, evaluator-loop, budgets-and-stop-conditions]
+related: [handoff, evaluator-loop, budgets-and-stop-conditions, agent-creation]
 ---
 
 V tomto vzoru jeden agent, **supervizor**, nedělá detailní práci. Přečte úlohu, vybere agenta **pracovníka**, dá mu pokyn, přečte odpověď a rozhodne, co dál. Až usoudí, že je úloha hotová, napíše konečný výsledek.

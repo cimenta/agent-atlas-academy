@@ -48,7 +48,8 @@ function runsOf(design, limits) {
   if (design.pattern === "planexec") return Math.min(maxSteps, 8);
   if (design.pattern === "handoff") return Math.min(maxSteps, 2 * nodes.length);
   if (design.pattern === "supervisor") {
-    const workers = nodes.filter((n) => n.agent !== "supervisor").length;
+    // Agents the supervisor may create count as workers: the estimate assumes every allowed one is made and used.
+    const workers = nodes.filter((n) => n.agent !== "supervisor").length + nodes.reduce((sum, n) => sum + (n.creates?.max ?? 0), 0);
     return Math.min(maxSteps, 2 * workers + 2);
   }
   return nodes.length;
@@ -63,7 +64,8 @@ export function estimateRun(design, limits, prices = { models: MODELS, search: S
   const used = design.nodes.map((n) => pricesOf(n).models.find((m) => m.key === n.model)).filter(Boolean);
   const dearest = used.reduce((a, b) => (b.inputPerMTok + b.outputPerMTok > a.inputPerMTok + a.outputPerMTok ? b : a), used[0] ?? prices.models[0]);
   const costUsd = (tokensUpper / 2) * dearest.inputPerMTok / 1e6 + (tokensUpper / 2) * dearest.outputPerMTok / 1e6;
-  const searchers = design.nodes.filter((n) => n.search === true);
+  // Agents created with the search switch on are searchers too, priced like their creator.
+  const searchers = design.nodes.filter((n) => n.search === true || n.creates?.search === true);
   const searchCostUsd = searchers.length > 0 ? clamped.maxSearches * Math.max(...searchers.map((n) => pricesOf(n).search)) : 0;
   return { activations, tokensUpper, costUsd, searchCostUsd, totalUsd: costUsd + searchCostUsd, pricesAsOf: prices.pricesAsOf ?? PRICES_AS_OF };
 }

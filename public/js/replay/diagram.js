@@ -5,6 +5,7 @@ import { h } from "../dom.js";
 import { BOX_H, BOX_W, arrowsOf, autoPositions, extentOf } from "../create/diagram-geometry.js";
 import { flowState } from "./flow.js";
 import { MULTI_RUN, nodeIdOf } from "../engine/spawn.js";
+import { freePlacesOf } from "../engine/created.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const HEADS = ["pending", "used", "lit"];
@@ -22,8 +23,12 @@ const realClock = { setTimeout: (fn, ms) => globalThis.setTimeout(fn, ms), clear
 // onRetry(id): when given, an agent that failed gets a Retry button (retryLabel is its text).
 // retryMenu: { arrowLabel, title, providerName(provider), tagText(choice), choicesOf(id) }; when given, the Retry button has an
 // arrow that opens a list of models, and a pick calls onRetry(id, choice.value).
-export function createReplayDiagram({ doc, design, wide, onSelect, statusText, boxLabel, startLabel = "", onRetry = null, retryLabel = "Retry", retryMenu = null, clock = realClock, now = () => Date.now() }) {
-  const pos = autoPositions(design, { wide });
+export function createReplayDiagram({ doc, design, wide, onSelect, statusText, boxLabel, startLabel = "", onRetry = null, retryLabel = "Retry", retryMenu = null, clock = realClock, now = () => Date.now(), createdText = "created", freePlaceText = (n, max) => `${n}/${max}` }) {
+  // The places still free for created agents are laid out like boxes (an arrow from their creator is used for the layout only).
+  const free = freePlacesOf(design);
+  const freeId = (p) => `~free-${p.by}-${p.n}`;
+  const layout = free.length === 0 ? design : { ...design, nodes: [...design.nodes, ...free.map((p) => ({ id: freeId(p), agent: "free", model: "fast", search: false }))], edges: [...design.edges, ...free.map((p) => ({ from: p.by, to: freeId(p) }))] };
+  const pos = autoPositions(layout, { wide });
   const { width, height } = extentOf(pos);
   const area = h(doc, "div", { class: "diagram replay-diagram", "data-ui": "replay-diagram" });
   const wrap = h(doc, "div", { class: "diagram-wrap replay-diagram-wrap", "data-ui": "replay-diagram-wrap" }, area);
@@ -109,7 +114,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
     const status = h(doc, "small", {}, "");
     const multi = node.agent === MULTI_RUN[design.pattern];
     const runsBadge = h(doc, "span", { class: "dnode-runs", "data-ui": "diagram-runs", hidden: !multi });
-    const box = h(doc, "button", { type: "button", class: "rnode", "data-node-id": node.id, ...(multi ? { "data-multi": "true" } : {}), "data-ui": `diagram-node-${node.id}`, "data-status": "waiting", "aria-pressed": "false", ...(design.pattern === "handoff" && design.start === node.id && startLabel ? { "data-start": startLabel } : {}) }, name, status, runsBadge);
+    const box = h(doc, "button", { type: "button", class: "rnode", "data-node-id": node.id, ...(multi ? { "data-multi": "true" } : {}), ...(node.created === true ? { "data-created": "true" } : {}), "data-ui": `diagram-node-${node.id}`, "data-status": "waiting", "aria-pressed": "false", ...(design.pattern === "handoff" && design.start === node.id && startLabel ? { "data-start": startLabel } : {}) }, name, status, runsBadge);
     box.style.left = `${pos.get(node.id).x}px`;
     box.style.top = `${pos.get(node.id).y}px`;
     box.style.width = `${BOX_W}px`;
@@ -124,17 +129,25 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
         onRetry(node.id, undefined, { useCurrentLimits: true });
       });
       retry = h(doc, "span", { class: "rnode-retry-group", hidden: true }, main);
-      if (retryMenu) {
+      if (retryMenu && node.created !== true) {
         const arrow = h(doc, "button", { type: "button", class: "rnode-retry-arrow", "aria-haspopup": "menu", "aria-expanded": "false", "aria-label": retryMenu.arrowLabel, title: retryMenu.arrowLabel, "data-ui": `diagram-retry-menu-${node.id}` }, "▾");
         arrow.addEventListener("click", () => openMenu(node.id, arrow));
         retry.append(arrow);
       }
-      retry.style.left = `${pos.get(node.id).x + BOX_W - (retryMenu ? 86 : 64)}px`;
+      retry.style.left = `${pos.get(node.id).x + BOX_W - (retryMenu && node.created !== true ? 86 : 64)}px`;
       retry.style.top = `${pos.get(node.id).y + BOX_H - 26}px`;
     }
-    boxes.set(node.id, { box, name, status, retry, runsBadge, multi });
+    boxes.set(node.id, { box, name, status, retry, runsBadge, multi, created: node.created === true });
     area.append(box);
     if (retry) area.append(retry);
+  }
+  for (const place of free) {
+    const spot = h(doc, "div", { class: "rnode free-place", "data-ui": "free-place" }, freePlaceText(place.n, place.max));
+    spot.style.left = `${pos.get(freeId(place)).x}px`;
+    spot.style.top = `${pos.get(freeId(place)).y}px`;
+    spot.style.width = `${BOX_W}px`;
+    spot.style.height = `${BOX_H}px`;
+    area.append(spot);
   }
   const badge = h(doc, "span", { class: "round-badge diagram-badge", "data-ui": "debate-round", hidden: true });
   wrap.append(badge); // shown above the boxes, so it never covers one
@@ -163,7 +176,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       parts.name.textContent = agent?.label ?? boxLabel(id);
       // A voting run marks every agent once the tally has decided: "agrees", "differs" (dimmed) or the count.
       const mark = status === "done" ? marks.get(id) : undefined;
-      parts.status.textContent = `${sum ? sum.text : mark ? mark.text : statusText(agent ?? { status: idleStatus, ms: null })}${notes.get(id) ? ` · ${notes.get(id)}` : ""}`;
+      parts.status.textContent = `${sum ? sum.text : mark ? mark.text : statusText(agent ?? { status: idleStatus, ms: null })}${notes.get(id) ? ` · ${notes.get(id)}` : ""}${parts.created ? ` · ${createdText}` : ""}`;
       parts.box.setAttribute("data-dissent", String(mark?.dissent === true));
       if (parts.retry) {
         parts.retry.hidden = status !== "error";

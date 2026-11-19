@@ -30,29 +30,59 @@ export function parseSupervisorReply(text) {
     if (data.action === "call" && isText(data.worker)) {
       return { action: "call", worker: data.worker, instruction: typeof data.instruction === "string" ? data.instruction : "" };
     }
+    if (data.action === "create" && isText(data.name) && isText(data.instructions)) return { action: "create", name: data.name, instructions: data.instructions };
     if (data.action === "finish" && typeof data.answer === "string") return { action: "finish", answer: data.answer };
   }
   return null;
 }
 
-export async function run({ design, task, agents, emit, passOn = (text) => text }) {
+// Why a request to create an agent was refused, as the supervisor is told it.
+const REFUSED = {
+  "not-allowed": "you may not create agents",
+  cap: "you have already created all the agents you may create",
+  total: "the run has no room for another agent",
+  name: "the name must be 1 to 40 characters",
+  "name-taken": "an agent with that name exists already",
+  instructions: "the instructions must be text of 1 to 2000 characters",
+};
+
+// create(request) makes an agent for a supervisor that may (its node has creates); null when nobody may create.
+export async function run({ design, task, agents, emit, passOn = (text) => text, create = null }) {
   const supervisor = design.nodes.find((n) => n.agent === "supervisor");
   const workerIds = design.nodes.filter((n) => n.agent !== "supervisor").map((n) => n.id);
   const boss = agents.get(supervisor.id);
   let input = `Task: ${task}\nWorkers: ${workerIds.join(", ")}`;
+  const canCreate = create !== null && supervisor.creates !== undefined;
+  let refusedInARow = 0;
   let invalidInARow = 0;
   for (;;) {
     const reply = await boss.run(input);
     const parsed = parseSupervisorReply(reply.text);
+    if (parsed?.action === "create" && canCreate) {
+      invalidInARow = 0;
+      const made = create({ by: supervisor.id, name: parsed.name, instructions: parsed.instructions });
+      if (!made.ok) {
+        refusedInARow += 1;
+        if (refusedInARow >= 2) throw new Error("supervisor.refused: the supervisor asked twice in a row to create an agent that is not allowed");
+        input = `Creating refused: ${REFUSED[made.reason] ?? made.reason}. Valid workers: ${workerIds.join(", ")}.`;
+        continue;
+      }
+      refusedInARow = 0;
+      workerIds.push(made.id);
+      input = `Created ${made.node.name} (id ${made.id}). Valid workers now: ${workerIds.join(", ")}.`;
+      continue;
+    }
     const calls = parsed?.action === "call" ? (parsed.calls ?? [{ worker: parsed.worker, instruction: parsed.instruction }]) : [];
-    const usable = parsed && (parsed.action === "finish" || (calls.every((c) => workerIds.includes(c.worker)) && new Set(calls.map((c) => c.worker)).size === calls.length));
+    const usable = parsed && parsed.action !== "create" && (parsed.action === "finish" || (calls.every((c) => workerIds.includes(c.worker)) && new Set(calls.map((c) => c.worker)).size === calls.length));
     if (!usable) {
       invalidInARow += 1;
+      refusedInARow = 0;
       if (invalidInARow >= 2) throw new Error("supervisor.invalid: the supervisor did not give a valid instruction twice in a row");
       input = `Reply with valid JSON as instructed. Valid workers: ${workerIds.join(", ")}.`;
       continue;
     }
     invalidInARow = 0;
+    refusedInARow = 0;
     if (parsed.action === "finish") return parsed.answer;
     for (const call of calls) emit({ type: "handoff", from: supervisor.id, to: call.worker, note: call.instruction.slice(0, NOTE_MAX) });
     // The called workers work at the same time. Each result goes back to the supervisor as soon as it is ready.

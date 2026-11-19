@@ -74,6 +74,8 @@ export function createMockCall({ delayMs = 0, evaluatorAcceptsAt = 2 } = {}) {
       return reply([{ type: "text", text: JSON.stringify({ parts: ["Part 1: collect the key facts.", "Part 2: weigh the facts against each other.", "Part 3: note what is still open."] }) }]);
     }
     if (role === "planner" && String(body?.system ?? "").includes('"steps"')) {
+      // A planner that may create agents gives the middle step to a created analyst.
+      if (String(body?.system ?? "").includes('"agents"')) return reply([{ type: "text", text: JSON.stringify({ agents: [{ name: "Data analyst", instructions: "You analyse the facts and the figures." }], steps: ["Collect the key facts.", { text: "Weigh the facts.", agent: "Data analyst" }, "Write the final answer."] }) }]);
       // The mock planner always makes a plan of three steps.
       return reply([{ type: "text", text: JSON.stringify({ steps: ["Collect the key facts.", "Weigh the facts.", "Write the final answer."] }) }]);
     }
@@ -118,9 +120,14 @@ export function createMockCall({ delayMs = 0, evaluatorAcceptsAt = 2 } = {}) {
     if (role === "supervisor") {
       const workers = (/Workers: (.+)/.exec(firstUserText(messages))?.[1] ?? "").split(",").map((w) => w.trim()).filter(Boolean);
       const done = messages.filter((m) => m.role === "assistant").length;
+      // A supervisor that may create agents creates one first and calls it last.
+      const creates = String(body?.system ?? "").includes('"action":"create"');
+      if (creates && done === 0) return reply([{ type: "text", text: JSON.stringify({ action: "create", name: "Fact checker", instructions: "Check the claims in the results of the other workers." }) }]);
+      const order = creates ? [...workers, "made-1"] : workers;
+      const turn = creates ? done - 1 : done;
       const text =
-        done < workers.length
-          ? JSON.stringify({ action: "call", worker: workers[done], instruction: "Do your part of the task." })
+        turn < order.length
+          ? JSON.stringify({ action: "call", worker: order[turn], instruction: "Do your part of the task." })
           : JSON.stringify({ action: "finish", answer: "Final answer: the workers' results were put together into one answer." });
       return reply([{ type: "text", text }]);
     }

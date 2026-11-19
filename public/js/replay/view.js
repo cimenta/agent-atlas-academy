@@ -4,7 +4,9 @@ import { h } from "../dom.js";
 import { helpIcon } from "../help-popup.js";
 import { validateRun } from "../run-schema.js";
 import { createPlayer } from "./player.js";
-import { debateProgress, deriveInspector, designLabel, evaluatorProgress, handoffOutcome, handoffProgress, handoffSender, loopOutcome, routerChoice, routerEnd, votingEnd, votingTally, partsOf, planOf, runsOfNode, dynamicEnd } from "./inspect-model.js";
+import { debateProgress, deriveInspector, designLabel, evaluatorProgress, handoffOutcome, handoffProgress, handoffSender, loopOutcome, routerChoice, routerEnd, votingEnd, votingTally, partsOf, planOf, runsOfNode, dynamicEnd, createdOf, refusalsOf } from "./inspect-model.js";
+import { createdPanel } from "./created-view.js";
+import { designWithCreated } from "../engine/created.js";
 import { createViewer } from "./viewer.js";
 import { markText, searchBar } from "../text-search.js";
 import { definitionFromRun } from "../create/definition.js";
@@ -173,6 +175,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   // What was shortened before an agent read it (condensing), and which full texts are open.
   const condenseHost = h(doc, "div", { class: "condense-host", "data-ui": "condense-host" });
   const dynamicHost = h(doc, "div", { class: "dynamic-host", "data-ui": "dynamic-host" });
+  // The agents that were created while the run was going sit under the diagram, as the mockup draws them.
+  const createdHost = h(doc, "div", { class: "dynamic-host", "data-ui": "created-host" });
   const openCondense = new Set();
   const chips = h(doc, "div", { class: "chips", "data-ui": "agent-cards", role: "list", "aria-label": t("player.agents") });
   const tabButtons = ["steps", "messages", "output", "context"].map((name) => {
@@ -245,6 +249,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     ...(sideLayout
       ? [h(doc, "div", { class: "player-row", "data-ui": "player-row" }, h(doc, "div", { class: "player-stage" }, chips, range, status), h(doc, "div", { class: "controls controls-col", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, speedGroup, speedHelp))]
       : [chips, h(doc, "div", { class: "controls controls-bar", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, range, speedGroup, speedMobile, speedHelp), status]),
+    createdHost,
     tabRow,
     body,
   );
@@ -284,9 +289,23 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   let diagram = null;
   let diagramDesign = null;
   let failedAtEnd = null;
+  // The design of the run as it is at the cursor: the agents that were created by then are nodes too. The same object is
+  // returned until another agent is created, so the diagram is only built again when something appears.
+  let designMemo = { base: null, count: -1, design: null };
+  function cursorNow() {
+    try {
+      return player.cursor;
+    } catch {
+      return events.length;
+    }
+  }
   function designOfRun() {
     const d = events.find((e) => e.type === "run_start")?.design;
-    return d && Array.isArray(d.nodes) && Array.isArray(d.edges) && d.nodes.length > 0 ? d : null;
+    if (!(d && Array.isArray(d.nodes) && Array.isArray(d.edges) && d.nodes.length > 0)) return null;
+    const cursor = cursorNow();
+    const count = events.slice(0, cursor).filter((e) => e.type === "agent_created").length;
+    if (designMemo.base !== d || designMemo.count !== count) designMemo = { base: d, count, design: designWithCreated(d, events, cursor) };
+    return designMemo.design;
   }
   function renderDiagram() {
     const design = designOfRun();
@@ -298,6 +317,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
           startLabel: `▶ ${t("editor.startFlag")}`,
           doc,
           design,
+          createdText: t("player.created"),
+          freePlaceText: (n, max) => t("player.freePlace", { n, max }),
           wide,
           boxLabel: (id) => designLabel(design, id),
           statusText: (a) => (a.status === "stopped" ? stoppedText(a) : `${t(STATUS_KEY[a.status])}${a.ms ? ` · ${fmt(a.ms)}` : ""}`),
@@ -426,7 +447,16 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
         render();
       },
     });
+    // Agents that a Supervisor or Planner created while the run was going.
+    const made = createdOf(events, player.cursor);
+    const refusals = refusalsOf(events, player.cursor);
+    const cap = Math.max(0, ...(design?.nodes ?? []).map((n) => n.creates?.max ?? 0));
+    const created = createdPanel({ doc, t, items: made, refusals, max: cap, label, select: (id) => {
+      Object.assign(ui, { agent: id, follow: false, step: null, round: null });
+      render();
+    } });
     dynamicHost.replaceChildren(...(panel ? [panel] : []));
+    createdHost.replaceChildren(...(created ? [created] : []));
   }
 
   function renderCondense() {

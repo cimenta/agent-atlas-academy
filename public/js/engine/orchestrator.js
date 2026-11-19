@@ -22,6 +22,7 @@ import * as router from "./runners/router.js";
 import * as voting from "./runners/voting.js";
 import * as mapreduce from "./runners/mapreduce.js";
 import * as planexec from "./runners/planexec.js";
+import { createRegistry } from "./created.js";
 
 export const RUNNERS = {
   sequential: sequential.run,
@@ -72,6 +73,8 @@ export async function runDesign({ design, task, limits, language = "en", call, c
   // The node that runs once for every part or step has no agent up front; the runner makes one for each run (spawn).
   const agents = new Map(design.nodes.filter((node) => node.agent !== MULTI_RUN[design.pattern]).map((node) => [node.id, make(node)]));
   const spawn = createSpawner({ design, make });
+  // Agents that create agents: the registry checks each request and makes the agent (see created.js).
+  const registry = design.nodes.some((n) => n.creates !== undefined) ? createRegistry({ design, agents, make, emit: send }) : null;
   const passOn = createPassOn({ chars: clampHandoffChars(handoffChars), emit: send });
   if (resume.length === 0) send({ type: "run_start", task, pattern: design.pattern, design });
 
@@ -79,7 +82,7 @@ export async function runDesign({ design, task, limits, language = "en", call, c
   let finalText = "";
   let reason;
   try {
-    finalText = await RUNNERS[design.pattern]({ design, task, agents, spawn, emit: send, budget, signal: control.signal, passOn });
+    finalText = await RUNNERS[design.pattern]({ design, task, agents, spawn, emit: send, budget, signal: control.signal, passOn, create: registry ? registry.request : null });
   } catch (error) {
     control.abort();
     if (error instanceof ApprovalPause) {
