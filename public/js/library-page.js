@@ -178,25 +178,32 @@ export async function renderLibraryTab(ctx, requestedId) {
     compareNote = t("library.exported", { n: runs.length });
     redraw();
   };
+  // The bar under the tabs: small buttons, each with its count in the upper right corner. Shown on both lists.
+  const barButton = (ui, label, count, { primary = false, disabled = false, onClick }) => {
+    const button = h(doc, "button", { type: "button", class: `bar-button${primary ? " primary" : ""}`, "data-ui": ui }, label, h(doc, "span", { class: "bar-count", "aria-hidden": "true" }, String(count)));
+    button.setAttribute("aria-label", `${label} (${count})`);
+    button.disabled = disabled;
+    button.addEventListener("click", onClick);
+    return button;
+  };
   const compareBar = (mineIds) => {
-    if (lib.compare.length === 0 && !compareNote && mineIds.length === 0) return "";
-    const go = h(doc, "button", { type: "button", class: "primary", "data-ui": "compare-go" }, t("compare.go", { n: lib.compare.length }));
-    go.disabled = lib.compare.length < 2;
-    go.addEventListener("click", () => {
-      location.hash = `#/play/compare?runs=${lib.compare.join(",")}`;
-    });
-    const clear = h(doc, "button", { type: "button", "data-ui": "compare-clear" }, t("compare.clear"));
-    clear.addEventListener("click", () => {
-      lib.compare = [];
-      compareNote = "";
-      redraw();
-    });
-    const ticked = h(doc, "button", { type: "button", "data-ui": "export-ticked" }, t("library.action.exportTicked", { n: lib.compare.length }));
-    ticked.disabled = lib.compare.length === 0;
-    ticked.addEventListener("click", () => exportRuns(lib.compare));
-    const all = mineIds.length > 0 ? h(doc, "button", { type: "button", "data-ui": "export-all-mine" }, t("library.action.exportAllMine", { n: mineIds.length })) : "";
-    if (all) all.addEventListener("click", () => exportRuns(mineIds));
-    return h(doc, "div", { class: "compare-bar", "data-ui": "compare-bar" }, ...(lib.compare.length > 0 ? [h(doc, "b", {}, t(lib.compare.length === 1 ? "compare.selectedOne" : "compare.selected", { n: lib.compare.length }))] : []), h(doc, "span", { class: "muted" }, compareNote || (lib.compare.length > 0 ? t(lib.compare.length === 1 ? "compare.pickOne" : "compare.base") : "")), go, ticked, all, ...(lib.compare.length > 0 ? [clear] : []));
+    const n = lib.compare.length;
+    const buttons = [
+      barButton("compare-go", t("library.bar.compare"), n, { primary: true, disabled: n < 2, onClick: () => { location.hash = `#/play/compare?runs=${lib.compare.join(",")}`; } }),
+      barButton("export-ticked", t("library.bar.exportTicked"), n, { disabled: n === 0, onClick: () => exportRuns(lib.compare) }),
+      ...(mineIds.length > 0 ? [barButton("export-all-mine", t("library.bar.exportAll"), mineIds.length, { onClick: () => exportRuns(mineIds) })] : []),
+    ];
+    if (n > 0) {
+      const clear = h(doc, "button", { type: "button", class: "bar-button", "data-ui": "compare-clear" }, t("compare.clear"));
+      clear.addEventListener("click", () => {
+        lib.compare = [];
+        compareNote = "";
+        redraw();
+      });
+      buttons.push(clear);
+    }
+    const hint = compareNote || (n > 0 ? t(n === 1 ? "compare.pickOne" : "compare.base") : "");
+    return h(doc, "div", { class: "compare-bar", "data-ui": "compare-bar" }, ...buttons, ...(hint ? [h(doc, "span", { class: "muted" }, hint)] : []));
   };
 
   // Import: a run file from your computer becomes one of your own runs.

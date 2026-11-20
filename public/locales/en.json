@@ -1563,5 +1563,8 @@
   "settings.runsCount": "{n} runs",
   "settings.runsCountOne": "1 run",
   "settings.runsCountFew": "{n} runs",
-  "settings.checkOthersOne": "1 other model is offered; the app does not use it."
+  "settings.checkOthersOne": "1 other model is offered; the app does not use it.",
+  "library.bar.compare": "Compare",
+  "library.bar.exportTicked": "Export ticked",
+  "library.bar.exportAll": "Export all mine"
 }

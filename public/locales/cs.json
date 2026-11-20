@@ -1563,5 +1563,8 @@
   "settings.runsCount": "{n} běhů",
   "settings.runsCountOne": "1 běh",
   "settings.runsCountFew": "{n} běhy",
-  "settings.checkOthersOne": "Jiný model je nabízen 1; aplikace ho nepoužívá."
+  "settings.checkOthersOne": "Jiný model je nabízen 1; aplikace ho nepoužívá.",
+  "library.bar.compare": "Porovnat",
+  "library.bar.exportTicked": "Export vybraných",
+  "library.bar.exportAll": "Export všech mých"
 }
