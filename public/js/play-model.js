@@ -1,6 +1,7 @@
 // Pure helpers for the Play tabs: the list of runs to replay and the numbers on the Result tab.
 import { providerCatalog, paidOnlyModelUsed, nodeModel } from "./engine/catalog.js";
-import { slotIsFree } from "./key-slots.js";
+import { slotIsFree, isSlot } from "./key-slots.js";
+import { modelsOfSlot, defaultSlot } from "./engine/providers.js";
 import { deriveInspector, createdOf } from "./replay/inspect-model.js";
 import { validateRun } from "./run-schema.js";
 import { clampLimits } from "./engine/patterns.js";
@@ -69,7 +70,7 @@ export function buildResultModel(run) {
       if (e.type !== "guardrail_check" || !e.tokens) continue;
       const node = design.nodes.find((n) => n.id === nodeIdOf(e.agent));
       if (slotIsFree(node?.slot)) continue;
-      const model = catalog.models.find((m) => m.id === e.model) ?? nodeModel({ ...(node ?? {}), model: "fast" }, provider);
+      const model = modelsOfSlot(isSlot(node?.slot) ? node.slot : defaultSlot(provider)).find((m) => m.id === e.model) ?? nodeModel({ ...(node ?? {}), model: "fast" }, provider);
       cost += ((Number(e.tokens.input) || 0) * model.inputPerMTok + (Number(e.tokens.output) || 0) * model.outputPerMTok) / 1e6;
     }
     for (const a of perAgent) {

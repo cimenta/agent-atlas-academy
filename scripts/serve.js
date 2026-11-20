@@ -9,6 +9,9 @@ import { createMockCall } from "../public/js/engine/mock-anthropic.js";
 import { AnthropicError } from "../public/js/engine/anthropic.js";
 import { callChatCompletions } from "../public/js/engine/openai-compat.js";
 import { createGroqMock } from "./mock-groq.js";
+import { createOpenrouterMock, mockOpenrouterList } from "./mock-openrouter.js";
+import { createCloudflareMock, mockCloudflareList } from "./mock-cloudflare.js";
+import { callCloudflare } from "../public/js/engine/cloudflare.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 const port = Number(process.env.PORT) || 8080;
@@ -41,12 +44,18 @@ const mockOverFetch = async (body, { signal, fetchImpl } = {}) => {
 // Groq in mock mode: the real chat-completions adapter talks to the local stand-in. MOCK_GROQ_429=minute|day makes every third call a 429.
 const groqMock = createGroqMock({ mockCall });
 const mockGroq = (body, options = {}) => callChatCompletions(body, { ...options, url: `http://localhost:${port}/mock-provider/groq/chat/completions`, who: "Groq" });
+// OpenRouter in mock mode: the same adapter talks to the local stand-in. MOCK_OR_429=minute|day makes every third call a 429; =gone hides a free model.
+const openrouterMock = createOpenrouterMock({ mockCall });
+const mockOpenrouter = (body, options = {}) => callChatCompletions(body, { ...options, url: `http://localhost:${port}/mock-provider/openrouter/chat/completions`, who: "OpenRouter", maxTokensField: "max_tokens", reasoningEffort: null });
+// Cloudflare in mock mode: the real adapter (key split, account address) talks to the local stand-in. MOCK_CF_429=quota makes every third call a quota answer.
+const cloudflareMock = createCloudflareMock({ mockCall });
+const mockCloudflare = (body, options = {}) => callCloudflare(body, { ...options, fetchImpl: (url, init) => (options.fetchImpl ?? fetch)(String(url).replace("https://api.cloudflare.com", `http://localhost:${port}/mock-provider/cloudflare`), init) });
 const runHandler = useMock
-  ? createRunHandler({ call: mockOverFetch, callGroq: mockGroq, rateLimitImpl: () => true })
+  ? createRunHandler({ call: mockOverFetch, callGroq: mockGroq, callOpenrouter: mockOpenrouter, callCloudflare: mockCloudflare, rateLimitImpl: () => true })
   : createRunHandler();
 
 // Mock mode: the list of models of a provider is its catalog plus a few made-up models, and no provider is asked.
-const mockList = (id) => async () => [...PROVIDERS[id].models.map((m) => m.id), "mock-model-1", "mock-model-2", "mock-model-3"];
+const mockList = (id) => id === "openrouter" ? async () => mockOpenrouterList() : id === "cloudflare" ? async () => mockCloudflareList() : async () => [...PROVIDERS[id].models.map((m) => m.id), "mock-model-1", "mock-model-2", "mock-model-3"];
 const modelsHandler = useMock
   ? createModelsHandler({ lists: Object.fromEntries(Object.keys(PROVIDERS).map((id) => [id, mockList(id)])), rateLimitImpl: () => true })
   : createModelsHandler();
@@ -64,6 +73,32 @@ const server = createServer(async (req, res) => {
       res.on("close", () => stopped.abort());
       try {
         const made = await groqMock(JSON.parse(Buffer.concat(chunks).toString("utf8")), { signal: stopped.signal });
+        res.writeHead(made.status, { "content-type": "application/json", ...made.headers }).end(JSON.stringify(made.body));
+      } catch (error) {
+        res.writeHead(500, { "content-type": "application/json" }).end(JSON.stringify({ error: { message: String(error?.message ?? error) } }));
+      }
+      return;
+    }
+    if (useMock && req.method === "POST" && new URL(req.url, "http://localhost").pathname === "/mock-provider/openrouter/chat/completions") {
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      const stopped = new AbortController();
+      res.on("close", () => stopped.abort());
+      try {
+        const made = await openrouterMock(JSON.parse(Buffer.concat(chunks).toString("utf8")), { signal: stopped.signal });
+        res.writeHead(made.status, { "content-type": "application/json", ...made.headers }).end(JSON.stringify(made.body));
+      } catch (error) {
+        res.writeHead(500, { "content-type": "application/json" }).end(JSON.stringify({ error: { message: String(error?.message ?? error) } }));
+      }
+      return;
+    }
+    if (useMock && req.method === "POST" && /^\/mock-provider\/cloudflare\/.+\/chat\/completions$/.test(new URL(req.url, "http://localhost").pathname)) {
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      const stopped = new AbortController();
+      res.on("close", () => stopped.abort());
+      try {
+        const made = await cloudflareMock(JSON.parse(Buffer.concat(chunks).toString("utf8")), { signal: stopped.signal });
         res.writeHead(made.status, { "content-type": "application/json", ...made.headers }).end(JSON.stringify(made.body));
       } catch (error) {
         res.writeHead(500, { "content-type": "application/json" }).end(JSON.stringify({ error: { message: String(error?.message ?? error) } }));

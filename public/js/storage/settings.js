@@ -3,7 +3,8 @@ import { clampLimits } from "../engine/patterns.js";
 import { clampTimeoutSec, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop, clampHandoffChars, clampFallback } from "../engine/catalog.js";
 import { mergeGoKeys, validateGoKeys } from "../shortcuts.js";
 import { DEFAULT_PROVIDER_COLORS, isColor, mergeProviderColors } from "../provider-colors.js";
-import { PROVIDER_IDS, freeSlotOf } from "../engine/providers.js";
+import { PROVIDER_IDS, freeSlotOf, overrideIdOk } from "../engine/providers.js";
+import { cleanOverrides, OVERRIDE_SLOT, OVERRIDE_TIERS } from "../engine/free-check.js";
 
 const KEY = "aa.settings";
 // The providers that have a free tier (Gemini): the visitor says whether the key is on it.
@@ -21,7 +22,7 @@ export function createSettingsStore(storage) {
     // Tooltips are on unless the user turned them off.
     // The player controls sit on one slim bar ("bar") unless the user chose the side column ("side").
     const free = stored?.freeTier;
-    return { freeTier: Object.fromEntries(FREE_PROVIDERS.map((p) => [p, free?.[p] === true])), limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, helpButtons: stored?.helpButtons !== false, webSearch: stored?.webSearch !== false, fallback: clampFallback(stored?.fallback), formatEnforcement: stored?.formatEnforcement !== false, playerLayout: stored?.playerLayout === "side" ? "side" : "bar", createLayout: stored?.createLayout === "workspace" ? "workspace" : "steps", shortcuts: stored?.shortcuts !== false, goKeys: mergeGoKeys(stored?.goKeys), providerColors: mergeProviderColors(stored?.providerColors), requestTimeoutSec: clampTimeoutSec(stored?.requestTimeoutSec), maxOutputTokens: clampOutputTokens(stored?.maxOutputTokens), retries: clampRetries(stored?.retries ?? undefined), retryDelaySec: clampRetryDelaySec(stored?.retryDelaySec), repeatStop: clampRepeatStop(stored?.repeatStop), handoffChars: clampHandoffChars(stored?.handoffChars) };
+    return { freeTier: Object.fromEntries(FREE_PROVIDERS.map((p) => [p, free?.[p] === true])), limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, helpButtons: stored?.helpButtons !== false, webSearch: stored?.webSearch !== false, fallback: clampFallback(stored?.fallback), formatEnforcement: stored?.formatEnforcement !== false, playerLayout: stored?.playerLayout === "side" ? "side" : "bar", createLayout: stored?.createLayout === "workspace" ? "workspace" : "steps", shortcuts: stored?.shortcuts !== false, goKeys: mergeGoKeys(stored?.goKeys), providerColors: mergeProviderColors(stored?.providerColors), requestTimeoutSec: clampTimeoutSec(stored?.requestTimeoutSec), maxOutputTokens: clampOutputTokens(stored?.maxOutputTokens), retries: clampRetries(stored?.retries ?? undefined), retryDelaySec: clampRetryDelaySec(stored?.retryDelaySec), repeatStop: clampRepeatStop(stored?.repeatStop), handoffChars: clampHandoffChars(stored?.handoffChars), modelOverrides: cleanOverrides(stored?.modelOverrides) };
   }
   function save(next) {
     try {
@@ -39,6 +40,15 @@ export function createSettingsStore(storage) {
     setFreeTier(provider, on) {
       if (!FREE_PROVIDERS.includes(provider)) return;
       save({ ...get(), freeTier: { ...get().freeTier, [provider]: on === true } });
+    },
+    // The id a student chose for a free OpenRouter model that is gone (a tier of the free slot); null removes it. A bad id, an unknown slot or tier is ignored.
+    setModelOverride(slot, key, id) {
+      if (slot !== OVERRIDE_SLOT || !OVERRIDE_TIERS.includes(key)) return;
+      if (id !== null && !overrideIdOk(id)) return;
+      const own = { ...(get().modelOverrides[OVERRIDE_SLOT] ?? {}) };
+      if (id === null) delete own[key];
+      else own[key] = id;
+      save({ ...get(), modelOverrides: cleanOverrides({ [OVERRIDE_SLOT]: own }) });
     },
     // The color of a provider in replays (a #rrggbb value). Anything else is ignored.
     setProviderColor(provider, color) {

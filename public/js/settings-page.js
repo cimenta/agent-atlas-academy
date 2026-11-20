@@ -7,6 +7,7 @@ import { SLOT_IDS, isSlot, slotProvider, slotIsFree, slotLabelKey, slotFreeLimit
 import { limitsBox, modelsBox } from "./settings-limits-box.js";
 import { PROVIDERS, freeSlotOf } from "./engine/providers.js";
 import { checkModels, describeCheck, checkAllModels } from "./model-check-client.js";
+import { sharedFreeCheck, OVERRIDE_SLOT } from "./engine/free-check.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
 import { keyState, overallKeyState } from "./key-state.js";
 import { DEFAULT_GO_KEYS } from "./shortcuts.js";
@@ -54,7 +55,7 @@ export function renderSettings(ctx) {
       const color = settings.get().providerColors[provider];
       input.value = color;
       swatches.forEach((b) => b.setAttribute("aria-pressed", String(b.getAttribute("data-color") === color)));
-      const ids = providerCatalog(provider).models.map((m) => m.id);
+      const ids = PROVIDERS[provider].models.map((m) => m.id);
       sample.replaceChildren(...ids.map((modelId) => {
         const tag = h(doc, "span", { class: "badge agent-model" }, modelId);
         paintModelTag(tag, modelId, settings.get().providerColors);
@@ -79,15 +80,15 @@ export function renderSettings(ctx) {
   };
   const buildKeyPanel = (id) => {
     const v = vaultOf(id);
+    const spec = PROVIDERS[slotProvider(id)];
     let replacing = false; // a key is saved and the visitor chose to replace it
     const sfx = id === SLOT_IDS[0] ? "" : `-${id}`;
     const status = h(doc, "p", { class: "key-status" });
-    const keyInput = h(doc, "input", { id: `set-key${sfx}`, type: "password", autocomplete: "off", spellcheck: "false" });
+    const keyInput = h(doc, "input", { id: `set-key${sfx}`, type: "password", autocomplete: "off", spellcheck: "false", ...(spec.keyPlaceholder ? { placeholder: spec.keyPlaceholder } : {}) });
     const rememberBox = h(doc, "input", { id: `set-remember${sfx}`, type: "checkbox" });
     const passInput = h(doc, "input", { id: `set-pass${sfx}`, type: "password", autocomplete: "new-password" });
     const passBlock = h(doc, "div", { class: "pass-block", hidden: true }, field(`set-pass${sfx}`, t("settings.passphraseLabel"), passInput), h(doc, "p", { class: "notice" }, t("settings.passphraseWarning")));
     const saveButton = h(doc, "button", { type: "button", class: "primary" }, t("settings.keySave"));
-    const spec = PROVIDERS[slotProvider(id)];
     rememberBox.addEventListener("change", () => {
       passBlock.hidden = !rememberBox.checked;
       saveButton.textContent = t(rememberBox.checked ? "settings.keySaveDevice" : "settings.keySave");
@@ -101,6 +102,8 @@ export function renderSettings(ctx) {
     saveButton.addEventListener("click", async () => {
       const key = keyInput.value.trim();
       if (key === "") return say(t("settings.error.emptyKey"), true);
+      // A provider whose key has a fixed shape (Cloudflare: ACCOUNT_ID:TOKEN) names the shape when it is wrong.
+      if (spec.keyPattern && !spec.keyPattern.test(key)) return say(t(spec.text.keyFormat), true);
       try {
         if (rememberBox.checked) await v.remember(key, passInput.value);
         else v.setSessionKey(key);
@@ -135,15 +138,22 @@ export function renderSettings(ctx) {
     });
     // Check models: asks the provider which models it offers to this key. Needs a key that is loaded; one check at a time.
     let checking = false;
+    // The free slot of OpenRouter needs no key: the list of its free models is public.
+    const keyless = id === OVERRIDE_SLOT;
     const checkButton = h(doc, "button", { type: "button", "data-ui": `check-models-${id}` }, t("settings.checkModels"));
     const checkResult = h(doc, "div", { class: "check-result", "data-ui": `check-result-${id}`, "aria-live": "polite" });
     checkButton.addEventListener("click", async () => {
       const key = v.getSessionKey();
-      if (key === null || checking) return;
+      if ((key === null && !keyless) || checking) return;
       checking = true;
       refresh();
       checkResult.replaceChildren(h(doc, "p", { class: "hint" }, t("settings.checkRunning")));
-      const result = await checkModels({ provider: slotProvider(id), key });
+      let result;
+      if (keyless) {
+        // The same check Create uses: asking again here also refreshes what Create shows.
+        const asked = await (ctx.freeCheck ?? sharedFreeCheck).run({ force: true });
+        result = asked.ok ? { ok: true, total: asked.data.total, ids: asked.data.ids, catalogFound: asked.data.catalogFound } : { ok: false, error: asked.error };
+      } else result = await checkModels({ provider: slotProvider(id), key });
       checking = false;
       checkResult.replaceChildren(...renderCheck(describeCheck(id, result)));
       refresh();
@@ -151,10 +161,17 @@ export function renderSettings(ctx) {
     // A provider with free limits explains them next to the key, and which models it is used with.
     const limits = slotFreeLimits(id);
     const limitBoxes = [];
-    if (limits) limitBoxes.push(limitsBox({ doc, t, limits, num: (n) => n.toLocaleString(ctx.lang === "cs" ? "cs-CZ" : "en-US") }));
-    else if (spec.freeLimits) limitBoxes.push(h(doc, "p", { class: "hint", "data-ui": "free-limits-paid" }, t("settings.freeLimitsPaid")));
-    if (spec.freeLimits) limitBoxes.push(modelsBox({ doc, t, provider: spec }));
-    const node = h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, status, colorRow(slotProvider(id)), h(doc, "div", { class: "key-actions" }, replaceButton, checkButton), h(doc, "p", { class: "hint" }, t("settings.checkModelsHint")), checkResult, form, ...limitBoxes);
+    const locale = ctx.lang === "cs" ? "cs-CZ" : "en-US";
+    if (limits) limitBoxes.push(limitsBox({ doc, t, limits, num: (n) => n.toLocaleString(locale), providerName: spec.label, dataKey: spec.text.limitsData }));
+    else if (spec.freeLimits) limitBoxes.push(h(doc, "p", { class: "hint", "data-ui": "free-limits-paid" }, t(spec.text.paidNote ?? "settings.freeLimitsPaid")));
+    // The models of this slot; a model the student chose for a gone free model is shown with a way back.
+    const modelsHost = h(doc, "div", { class: "models-host" });
+    const drawModels = () => modelsHost.replaceChildren(modelsBox({ doc, t, provider: spec, slot: id, locale, overrides: ctx.settings.get().modelOverrides?.[id] ?? {}, onReset: (key) => { ctx.settings.setModelOverride(id, key, null); drawModels(); } }));
+    if (spec.freeLimits) {
+      drawModels();
+      limitBoxes.push(modelsHost);
+    }
+    const node = h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, status, colorRow(slotProvider(id)), h(doc, "div", { class: "key-actions" }, replaceButton, checkButton), h(doc, "p", { class: "hint" }, t(slotIsFree(id) && spec.text.checkHint ? spec.text.checkHint : "settings.checkModelsHint")), checkResult, form, ...limitBoxes);
     const refresh = () => {
       const saved = v.getSessionKey() !== null || v.hasStoredKey();
       form.hidden = saved && !replacing;
@@ -164,8 +181,8 @@ export function renderSettings(ctx) {
       const text = available ? t(v.hasStoredKey() ? "settings.keyAvailableSaved" : "settings.keyAvailable") : v.hasStoredKey() ? t("settings.keyLocked") : t("settings.keyNone");
       const tier = spec.slots.length > 1 && (available || v.hasStoredKey()) ? ` · ${t(slotIsFree(id) ? "settings.freeTierTag" : "settings.paidTierTag")}` : "";
       status.textContent = text + tier;
-      checkButton.disabled = checking || !available;
-      checkButton.setAttribute("title", available ? "" : t("settings.checkNoKey"));
+      checkButton.disabled = checking || (!available && !keyless);
+      checkButton.setAttribute("title", available || keyless ? "" : t("settings.checkNoKey"));
       checkButton.textContent = t(checking ? "settings.checkRunning" : "settings.checkModels");
     };
     return { id, node, refresh, has: () => v.getSessionKey() !== null || v.hasStoredKey() };

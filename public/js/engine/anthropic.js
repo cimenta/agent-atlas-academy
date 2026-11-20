@@ -16,7 +16,9 @@ const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 529]);
 export function redact(text, apiKey) {
   let out = String(text ?? "");
   if (typeof apiKey === "string" && apiKey.length >= 8) out = out.split(apiKey).join("[redacted]");
-  return out.replace(/sk-ant-[A-Za-z0-9_-]+/g, "[redacted]").replace(/AIza[A-Za-z0-9_-]{20,}/g, "[redacted]").replace(/\bAQ\.[A-Za-z0-9_-]{20,}/g, "[redacted]").replace(/\bgsk_[A-Za-z0-9]{20,}/g, "[redacted]");
+  // The account id of a Cloudflare address is hidden like a key.
+  out = out.replace(/(\/accounts\/)[0-9a-f]{32}/gi, "$1[redacted]");
+  return out.replace(/sk-ant-[A-Za-z0-9_-]+/g, "[redacted]").replace(/AIza[A-Za-z0-9_-]{20,}/g, "[redacted]").replace(/\bAQ\.[A-Za-z0-9_-]{20,}/g, "[redacted]").replace(/\bgsk_[A-Za-z0-9]{20,}/g, "[redacted]").replace(/\bsk-or-[A-Za-z0-9_-]{10,}/g, "[redacted]");
 }
 
 // A request that asks for a reply in a shape (body.replySchema) is sent as a forced tool call: the model must "call" the tool
@@ -84,8 +86,8 @@ export async function callAnthropic(body, { apiKey, fetchImpl = fetch, signal, t
 }
 
 // A GET that answers JSON, for the lists of models. Throws AnthropicError (with the status of a refusal), never with the key in it.
-export async function getJson(url, { headers = {}, apiKey, fetchImpl = fetch, signal, timeoutMs = 20000, who = "The provider" } = {}) {
-  if (typeof apiKey !== "string" || apiKey.length === 0) throw new AnthropicError("No API key was given");
+export async function getJson(url, { headers = {}, apiKey, noKey = false, fetchImpl = fetch, signal, timeoutMs = 20000, who = "The provider" } = {}) {
+  if (!noKey && (typeof apiKey !== "string" || apiKey.length === 0)) throw new AnthropicError("No API key was given");
   if (signal?.aborted) throw new AnthropicError("The request was cancelled");
   const timeout = AbortSignal.timeout(timeoutMs);
   const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;

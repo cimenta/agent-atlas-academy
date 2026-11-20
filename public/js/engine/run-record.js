@@ -1,5 +1,6 @@
 // Turns the events of a live run into a stored run: schema v1 plus a few optional fields.
-import { providerCatalog, nodeModel, providersOf } from "./catalog.js";
+import { nodeModel, providersOf } from "./catalog.js";
+import { defaultSlot, modelsOfSlot } from "./providers.js";
 
 const TITLE_MAX = 60;
 
@@ -11,7 +12,7 @@ export function modelsUsed(design, provider = "anthropic") {
     const id = nodeModel(node, provider).id;
     if (!ids.includes(id)) ids.push(id);
   }
-  return ids.length > 0 ? ids.join(", ") : providerCatalog(provider).models[0].id;
+  return ids.length > 0 ? ids.join(", ") : modelsOfSlot(defaultSlot(provider))[0].id;
 }
 
 export function titleFromTask(task) {

@@ -1,6 +1,6 @@
 // One agent in a run: keeps its own conversation, calls the model, reports events.
 import { slotFreeLimits } from "../key-slots.js";
-import { RATE_WAIT_MAX_SEC, RATE_WAITS_MAX, nodeModel, AGENT_TYPES, OUTPUT_TOKENS, RETRIES, RETRY_DELAY_SEC, REPEAT_STOP, MAX_PAUSES, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop, fallbackModelFor } from "./catalog.js";
+import { RATE_WAIT_MAX_SEC, RATE_WAITS_MAX, nodeModel, withTier, AGENT_TYPES, OUTPUT_TOKENS, RETRIES, RETRY_DELAY_SEC, REPEAT_STOP, MAX_PAUSES, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop, fallbackModelFor } from "./catalog.js";
 import { systemPromptFor } from "./prompts.js";
 import { toolsFor } from "./tools.js";
 import { AnthropicError, redact } from "./anthropic.js";
@@ -119,7 +119,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
       } catch (error) {
         if (freeLimited && error instanceof AnthropicError && error.status === 429) {
           const asked = Number.isFinite(error.retryAfterSec) ? error.retryAfterSec : null;
-          if (error.rateKind === "day" || (asked ?? 0) > RATE_WAIT_MAX_SEC || ++rateWaits > RATE_WAITS_MAX) throw new LimitError("rate_day", { agent: node.id, label, value: asked });
+          if (error.rateKind === "day" || (asked ?? 0) > RATE_WAIT_MAX_SEC || ++rateWaits > RATE_WAITS_MAX) throw new LimitError(error.pool === true ? "rate_pool" : "rate_day", { agent: node.id, label, value: asked });
           const seconds = asked ?? retryDelayMs / 1000;
           emit({ type: "warning", agent: node.id, retry: true, rateWait: seconds, message: `The provider asked the app to wait ${seconds} s (too many requests or tokens). Trying again after that.` });
           await sleep(seconds * 1000);
@@ -145,7 +145,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
     }
   }
 
-  const fastNode = { ...node, model: "fast" };
+  const fastNode = withTier(node, "fast");
   const condenseCost = (usage) => usageCostUsd(usage, { ...node, model: nodeModel(fastNode, provider).key }, { provider, freeTier });
 
   // An earlier condensing (recorded in the run that is carried on): charged again so the limits stay honest, nothing is called or sent.
@@ -415,7 +415,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
   // The reviewing model: one call with its own system text, the checked text only in the user message. The call is a step and
   // tokens of the run (not of this agent's own limits). A reply that cannot be read, or a provider that stays down, is a block.
   async function review(g, text) {
-    const reviewer = nodeModel({ ...node, model: g.model ?? "fast" }, provider);
+    const reviewer = nodeModel(withTier(node, g.model ?? "fast"), provider);
     const body = {
       model: reviewer.id,
       max_tokens: Math.max(1, Math.min(300, runBudget.remainingTokens())),

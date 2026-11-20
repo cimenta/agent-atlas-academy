@@ -46,6 +46,8 @@ export function limitMessage(reason, limits, extra = {}) {
       const when = !Number.isFinite(wait) || wait <= 0 ? "later" : wait < 3600 ? `in about ${Math.ceil(wait / 60)} min` : `in about ${Math.round(wait / 3600)} h`;
       return `Limit of the provider reached: it refused more calls from agent ${extra.label}, and its wait is longer than the app waits by itself. The run was stopped, and what happened so far is saved. Continue the run ${when}.`;
     }
+    case "rate_pool":
+      return `Limit of the provider reached: the daily pool of the free account is used up (agent ${extra.label}). The run was stopped, and what happened so far is saved. Continue the run after 00:00 UTC.`;
     case "cost":
       return `Limit reached: estimated cost of the run ($${Number(maxCostUsd).toFixed(2)}, by the prices in the catalog). The run was stopped before it could finish. Raise the cost cap in Settings, Harness, and run again.`;
     case "time":

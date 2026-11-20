@@ -867,6 +867,7 @@ a.art-pill:hover { text-decoration: underline; }
 .pv-mark { flex: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; font-weight: 700; }
 .pv-anthropic { background: #faece7; color: #712b13; }
 .pv-google { background: var(--accent-bg); color: var(--accent); }
+.pv-openrouter { background: #6467f2; color: #fff; }
 .pv-text { display: flex; flex-direction: column; }
 .pv-name { font-weight: 600; }
 .pv-sub { font-size: 0.78rem; color: var(--muted); }
@@ -1466,3 +1467,14 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .limits-box h3 { margin: 0 0 6px; font-size: 1rem; }
 .limits-box table { width: 100%; border-collapse: collapse; margin: 6px 0; }
 .limits-box th, .limits-box td { text-align: left; padding: 4px 8px 4px 0; vertical-align: top; border-bottom: 1px solid var(--border); }
+
+/* Create: the check of the free OpenRouter models (model-gone-view.js). */
+.model-check .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 6px 0; }
+.model-check .model-chip { width: auto; height: auto; padding: 1px 8px; border-radius: 999px; font-size: 0.75rem; }
+.model-check .good { color: var(--done); font-weight: 600; }
+.model-check .box { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 10px 12px; margin: 10px 0; }
+.model-check .box h3 { font-size: 0.95rem; margin: 0 0 6px; }
+.model-check .pick { display: flex; flex-direction: column; gap: 6px; margin: 6px 0; }
+.model-check .pick label { display: flex; gap: 8px; align-items: flex-start; font-size: 0.88rem; }
+.model-check .pick input { min-width: 0; }
+.model-check code { word-break: break-all; }

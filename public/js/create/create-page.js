@@ -11,10 +11,12 @@ import { withCurrentLimits } from "../replay/limits-compare.js";
 import { showCenterTip } from "../center-tip.js";
 import { refreshResultTab } from "../tab-state.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree, slotLabelKey, slotSubKey, slotFreeLimits } from "../key-slots.js";
-import { providerSpec, defaultSlot } from "../engine/providers.js";
-import { TASK_MAX_CHARS, LIMIT_MAX, DEFAULT_MODEL, providerCatalog, paidOnlyModelUsed, providersOf } from "../engine/catalog.js";
+import { providerSpec, defaultSlot, modelsOfSlot } from "../engine/providers.js";
+import { sharedFreeCheck, compareFree, applyOverrides, OVERRIDE_SLOT } from "../engine/free-check.js";
+import { modelGoneView } from "./model-gone-view.js";
+import { TASK_MAX_CHARS, LIMIT_MAX, DEFAULT_MODEL, providerCatalog, paidOnlyModelUsed, providersOf, nodeModel } from "../engine/catalog.js";
 import { PATTERNS, clampLimits } from "../engine/patterns.js";
-import { limitFindings, limitOffers, limitSummary } from "../engine/limits.js";
+import { limitFindings, limitOffers, limitSummary, neuronsByAgent } from "../engine/limits.js";
 import { limitsView } from "./limits-view.js";
 import { buildRunRecord, makeRunId, modelsUsed } from "../engine/run-record.js";
 import { startRun, RunStartError } from "../run-client.js";
@@ -27,7 +29,7 @@ import { createEditor, isUntouched } from "./editor-model.js";
 import { draft, useDefinition, resetDecisions, decideLoaded, resetForLoad, showKeyStep } from "./draft.js";
 import { deriveInspector } from "../replay/inspect-model.js";
 import { mountEditor } from "./editor-view.js";
-import { canRun, reviewSummary, handoffSkipper, createSkipper, resumeAnswers, agentRows } from "./create-model.js";
+import { canRun, reviewSummary, handoffSkipper, createSkipper, resumeAnswers, agentRows, blockedByGoneModel } from "./create-model.js";
 import { buildResultModel } from "../play-model.js";
 import { loadDefinition, definitionFromRun } from "./definition.js";
 import { STEPS, stepStatus, navState, stepAfterChange, missing, footHint, toggleSlot, modelValid, setDefaultKeepingAgents, workspaceLocked, workspaceEstimateUsd, runAllowed } from "./steps-model.js";
@@ -108,6 +110,7 @@ function downloadButton(ctx, run) {
 }
 
 export function renderCreate(ctx) {
+  const freeCheck = ctx.freeCheck ?? sharedFreeCheck;
   const vaultFor = (id) => (ctx.vault.forProvider ? ctx.vault.forProvider(id) : ctx.vault);
   const { doc, t } = ctx;
   // A ? next to a heading: it opens that section of Help.
@@ -117,20 +120,36 @@ export function renderCreate(ctx) {
   const chosenSlots = () => (Array.isArray(draft.slots) && draft.slots.every(isSlot) ? draft.slots : []);
   // The slots the page works with: the chosen ones, or while none is chosen the first one with a key (the diagram stays closed then).
   const workingSlots = () => (chosenSlots().length > 0 ? chosenSlots() : [SLOT_IDS.find(hasKey) ?? "anthropic"]);
+  // The models the student chose for gone free models, and what the check found (null while it has not answered yet).
+  const chosenModels = () => ctx.settings.get().modelOverrides?.[OVERRIDE_SLOT] ?? {};
+  const currentCheck = () => {
+    const last = freeCheck.last();
+    if (last === null) return null;
+    return { check: compareFree({ slotModels: modelsOfSlot(OVERRIDE_SLOT), live: last.live, overrides: chosenModels() }), ageMin: Math.max(0, Math.floor((Date.now() - last.at) / 60000)), overrides: chosenModels() };
+  };
+  // Asks for the check when the free slot is in use (Create opens with it on, or it is switched on); the answer redraws the review.
+  let checkAsked = false;
+  const askFreeCheck = (force = false) => {
+    checkAsked = true;
+    freeCheck.run({ force }).then(() => drawReviewLater());
+  };
+  let drawReviewLater = () => {};
   const slotName = (id) => (slotLabelKey(id) ? t(slotLabelKey(id)) : providerCatalog(slotProvider(id)).label);
   // The models a slot offers: a free Gemini key offers only the models that have a free tier.
-  const modelsOfSlot = (slot) => {
-    const all = providerCatalog(slotProvider(slot)).models;
+  const offeredModels = (slot) => {
+    const all = modelsOfSlot(slot);
     return slotIsFree(slot) ? all.filter((m) => m.freeTier !== false) : all;
   };
+  // The id an agent runs on: the one of its slot, or the model the student chose for a gone free model.
+  const modelIdFor = (slot, key) => nodeModel({ slot, model: key, ...(slot === OVERRIDE_SLOT && chosenModels()[key] ? { modelId: chosenModels()[key] } : {}) }).id;
   const choiceValue = (slot, key) => `${slot}|${key}`;
   const parseChoice = (value) => {
     const [slot, model] = String(value).split("|");
-    return isSlot(slot) && modelsOfSlot(slot).some((m) => m.key === model) ? { slot, model } : null;
+    return isSlot(slot) && offeredModels(slot).some((m) => m.key === model) ? { slot, model } : null;
   };
-  const choiceGroups = () => chosenSlots().map((slot) => ({ label: slotName(slot), options: modelsOfSlot(slot).map((m) => ({ value: choiceValue(slot, m.key), label: `${m.label} (${m.id})` })) }));
+  const choiceGroups = () => chosenSlots().map((slot) => ({ label: slotName(slot), options: offeredModels(slot).map((m) => ({ value: choiceValue(slot, m.key), label: `${m.label} (${m.id})` })) }));
   const choiceLabel = (slot, key) => {
-    const m = providerCatalog(slotProvider(slot)).models.find((x) => x.key === key);
+    const m = modelsOfSlot(slot).find((x) => x.key === key);
     return m ? `${m.label} (${m.id})` : key;
   };
   // The default model must be one of the chosen slots' models; agents whose choice is gone return to it.
@@ -142,17 +161,17 @@ export function renderCreate(ctx) {
     }
     const slots = workingSlots();
     const current = draft.editor.defaultModel();
-    if (!modelValid(current, slots, modelsOfSlot)) {
+    if (!modelValid(current, slots, offeredModels)) {
       const slot = slots[0];
-      const list = modelsOfSlot(slot);
+      const list = offeredModels(slot);
       const choice = { slot, model: (list.find((m) => m.key === DEFAULT_MODEL) ?? list[0]).key };
       // A loaded definition has no default model yet: its agents keep the models they have.
-      if (current === null) setDefaultKeepingAgents(draft.editor, choice, (n) => slots.includes(n.slot) && modelsOfSlot(n.slot).some((m) => m.key === n.model));
+      if (current === null) setDefaultKeepingAgents(draft.editor, choice, (n) => slots.includes(n.slot) && offeredModels(n.slot).some((m) => m.key === n.model));
       else draft.editor.setDefaultModel(choice);
       // The default model the student chose belonged to a provider that is switched off now: they choose again.
       if (current !== null) draft.decisions.model = false;
     }
-    draft.editor.keepSlots((node) => slots.includes(node.slot) && modelsOfSlot(node.slot).some((m) => m.key === node.model));
+    draft.editor.keepSlots((node) => slots.includes(node.slot) && offeredModels(node.slot).some((m) => m.key === node.model));
     if (chosenSlots().length === 0) Object.assign(draft.decisions, { providers: false, model: false });
   };
   // The slots the agents use (the working ones while the diagram is empty), each once.
@@ -268,6 +287,7 @@ export function renderCreate(ctx) {
             // Any number of providers may be on, also none: the student decides.
             draft.slots = toggleSlot(chosen, id, SLOT_IDS);
             draft.decisions.providers = draft.slots.length > 0;
+            if (id === OVERRIDE_SLOT && draft.slots.includes(id)) checkAsked = false;
             keepModels();
             editorHandle.refresh();
             drawReview();
@@ -284,7 +304,7 @@ export function renderCreate(ctx) {
     // The model of an agent: its level (Fast, Balanced, Strong), and the provider when more than one is chosen.
     const nodeModelLabel = (node) => {
       const slot = isSlot(node?.slot) ? node.slot : workingSlots()[0];
-      const level = providerCatalog(slotProvider(slot)).models.find((m) => m.key === node?.model)?.label ?? "";
+      const level = modelsOfSlot(slot).find((m) => m.key === node?.model)?.label ?? "";
       return workingSlots().length > 1 ? `${level} · ${slotName(slot)}` : level;
     };
 
@@ -310,6 +330,7 @@ export function renderCreate(ctx) {
       const kind = footHint(status);
       // Everything is decided but an agent cannot run on a free account: say that instead of Ready to run.
       if (kind === "ready" && lastVerdict?.reasons?.includes("limitsBlocked")) return t("create.reason.limitsBlocked");
+      if (kind === "ready" && lastVerdict?.reasons?.includes("modelGone")) return t("create.reason.modelGone");
       if (workspace && kind === "setup") return t("create.ws.locked");
       return kind === "missing" ? t("create.hint.missing", { items: missing(status).map((k) => t(`create.missing.${k}`)).join(", ") }) : t(`create.hint.${kind}`);
     };
@@ -362,6 +383,7 @@ export function renderCreate(ctx) {
 
     // Review.
     function drawReview() {
+      drawReviewLater = drawReview;
       // The review is rebuilt on every change: the element that had the focus gets it back (found by id or data-ui).
       const focused = reviewHost.contains?.(doc.activeElement) ? doc.activeElement : null;
       const focusKey = focused ? (focused.id ? `#${focused.id}` : focused.getAttribute?.("data-ui") ? `[data-ui="${focused.getAttribute("data-ui")}"]` : focused.getAttribute?.("data-tab") ? `[data-tab="${focused.getAttribute("data-tab")}"]` : null) : null;
@@ -374,7 +396,12 @@ export function renderCreate(ctx) {
       const summary = reviewSummary({ design, limits, provider });
       // Every provider the agents use needs its key.
       const missing = used.filter((s) => vaultFor(s).getSessionKey() === null);
-      const plainVerdict = canRun({ task: taskInput.value, apiKey: missing.length === 0 ? "set" : null, editorErrors: draft.editor.errors(), keyLocked: missing.some((s) => vaultFor(s).hasStoredKey()) });
+      // The free models of OpenRouter are checked once the free slot is in use; a tier that is gone blocks the agents on it.
+      if (used.includes(OVERRIDE_SLOT) && !checkAsked) askFreeCheck();
+      const found = used.includes(OVERRIDE_SLOT) ? currentCheck() : null;
+      const goneKeys = found?.check.state === "gone" ? found.check.gone.map((g) => g.key) : [];
+      const plainVerdict = canRun({ task: taskInput.value, apiKey: missing.length === 0 ? "set" : null, editorErrors: draft.editor.errors(), keyLocked: missing.some((s) => vaultFor(s).hasStoredKey()), modelGone: blockedByGoneModel(design, found?.check) });
+      const checkEl = found ? modelGoneView({ doc, t, result: found, tierName: (key) => t(`settings.tier.${key}`), slotName: slotName(OVERRIDE_SLOT), subText: slotSubKey(OVERRIDE_SLOT) ? t(slotSubKey(OVERRIDE_SLOT)) : "", onPick: (key, id) => { ctx.settings.setModelOverride(OVERRIDE_SLOT, key, id); drawReview(); } }) : null;
       const verdict = limitsBlock(design, limits) ? { ok: false, reasons: [...plainVerdict.reasons, "limitsBlocked"] } : plainVerdict;
       // Keys the visitor saved as being on Google's free tier make the run free, unless a model without a free tier is used.
       const marked = used.every(slotIsFree);
@@ -396,7 +423,8 @@ export function renderCreate(ctx) {
       });
 
       // The agents table: provider and model (a choice for each agent), the real model name, whether it is paid, and search.
-      const rows = agentRows({ design, slotName, slotIsFree, modelInfo: (slot, key) => ({ label: choiceLabel(slot, key), id: providerCatalog(slotProvider(slot)).models.find((m) => m.key === key)?.id ?? key }), fallbackSlot: workingSlots()[0] });
+      const agentNeurons = neuronsByAgent({ design, limits, ...runSettings() });
+      const rows = agentRows({ design, slotName, slotIsFree, modelInfo: (slot, key) => ({ label: choiceLabel(slot, key), id: modelIdFor(slot, key) }), fallbackSlot: workingSlots()[0] });
       const agentsTable = rows.length
         ? h(
             doc,
@@ -415,7 +443,7 @@ export function renderCreate(ctx) {
                   editorHandle.refresh();
                   drawReview();
                 });
-                return h(doc, "tr", {}, h(doc, "th", { scope: "row" }, r.label), h(doc, "td", {}, select), h(doc, "td", {}, h(doc, "code", {}, r.modelId)), h(doc, "td", {}, t(r.paid ? "create.paidYes" : "create.paidNo")), h(doc, "td", {}, t(r.search ? "create.searchOn" : "create.searchOff")));
+                return h(doc, "tr", {}, h(doc, "th", { scope: "row" }, r.label), h(doc, "td", {}, select), h(doc, "td", {}, h(doc, "code", {}, r.modelId), ...(agentNeurons.has(r.id) ? [" ", h(doc, "span", { class: "hint", "data-ui": `agent-neurons-${r.id}` }, t("create.agentNeurons", { n: new Intl.NumberFormat(ctx.lang === "cs" ? "cs-CZ" : "en-US").format(agentNeurons.get(r.id)) }))] : []), ...(r.slot === OVERRIDE_SLOT && goneKeys.includes(node?.model) ? [" ", h(doc, "span", { class: "bad", "data-ui": "model-gone-badge" }, t("create.modelGone.badge"))] : [])), h(doc, "td", {}, t(r.paid ? "create.paidYes" : "create.paidNo")), h(doc, "td", {}, t(r.search ? "create.searchOn" : "create.searchOff")));
               }),
             ),
           )
@@ -428,7 +456,8 @@ export function renderCreate(ctx) {
       const limitFound = limitFindings(limitArgs);
       const limitEl = limitsView({
         doc, t, findings: limitFound, offers: limitOffers({ ...limitArgs, loadedSlots: SLOT_IDS.filter((id) => keyState(vaultFor(id)) !== "none") }), summary: limitSummary(limitArgs),
-        providerName: providerCatalog(slotProvider(design.nodes.find((n) => slotFreeLimits(n.slot))?.slot)).label,
+        providerNameOf: (id) => providerCatalog(id).label,
+        providerName: providerCatalog(slotProvider((design.nodes.find((n) => limitFound[0]?.agents?.includes(n.id) && slotFreeLimits(n.slot)) ?? design.nodes.find((n) => slotFreeLimits(n.slot)))?.slot)).label,
         nameOf: (id) => rows.find((r) => r.id === id)?.label ?? id, slotName, num: (n) => new Intl.NumberFormat(ctx.lang === "cs" ? "cs-CZ" : "en-US").format(n),
         chosen: draft.limitsChoice, onApply: applyOffer,
       });
@@ -516,7 +545,7 @@ export function renderCreate(ctx) {
         cost: design.nodes.length === 0 ? [h(doc, "p", { class: "hint" }, t("create.costNeeds"))] : [h(doc, "h4", {}, t("create.estimateHeading"), help("create-estimate", t("create.estimateHeading"))), ...estimateLines, ...providersOf(design, provider).map((p) => h(doc, "p", { class: "notice" }, t(providerSpec(p).text.dataNotice)))],
         key: [h(doc, "h4", {}, t("create.keyHeading")), ...keyParts],
       }[draft.subTab] ?? [];
-      reviewHost.replaceChildren(workspace ? "" : h(doc, "h3", {}, t("create.step.check"), help("create-run", t("create.step.check"))), tabs.element, h(doc, "div", { class: "inner-pane", role: "tabpanel", "data-ui": `pane-${draft.subTab}` }, ...pane), reasons);
+      reviewHost.replaceChildren(workspace ? "" : h(doc, "h3", {}, t("create.step.check"), help("create-run", t("create.step.check"))), ...(checkEl ? [checkEl] : []), tabs.element, h(doc, "div", { class: "inner-pane", role: "tabpanel", "data-ui": `pane-${draft.subTab}` }, ...pane), reasons);
       if (focusKey) reviewHost.querySelector?.(focusKey)?.focus?.();
       refreshSteps();
     }
@@ -690,7 +719,8 @@ export function renderCreate(ctx) {
   }
 
   function beginRun({ resume = null, approve = false } = {}) {
-    const design = resume ? structuredClone(resume.design) : draft.editor.design();
+    // A new run carries the models the student chose for gone free models (a carried-on run keeps its own design).
+    const design = resume ? structuredClone(resume.design) : applyOverrides(draft.editor.design(), ctx.settings.get().modelOverrides);
     const limits = clampLimits(resume ? resume.limits : draft.limits);
     // Every agent names its key slot; the run gets the key of each slot in use.
     const used = resume ? [] : usedSlots(design);
@@ -700,7 +730,7 @@ export function renderCreate(ctx) {
     const apiKey = resume ? own.apiKey : keys[used[0]];
     const freeTier = resume ? resume.recordedWith?.freeTier === true : used.every(slotIsFree);
     const task = resume ? resume.task : draft.task.trim();
-    if (!canRun({ task, apiKey: Object.values(keys).every((k) => k !== null) ? apiKey : null, editorErrors: resume ? [] : draft.editor.errors() }).ok) return;
+    if (!canRun({ task, apiKey: Object.values(keys).every((k) => k !== null) ? apiKey : null, editorErrors: resume ? [] : draft.editor.errors(), modelGone: !resume && blockedByGoneModel(design, currentCheck()?.check) }).ok) return;
     if (!resume && limitsBlock(design, limits)) return;
 
     // What the earlier try left: its events without the ending (the error and the done), and the answers of the finished agents.

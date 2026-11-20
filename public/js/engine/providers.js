@@ -34,6 +34,26 @@ export const GROQ_MODELS = [
   { key: "strong", id: "openai/gpt-oss-120b", label: "Strong", inputPerMTok: 0.15, outputPerMTok: 0.6, freeTier: true },
 ];
 
+// OpenRouter: one key reaches many models. The free route and the paid route have different model ids, so each model carries
+// the paid id (id, with the prices) and the id for the free slot (freeId, no prices). Read the id of a slot with modelIdOf or modelsOfSlot.
+// forcedFormat: the model accepts a forced reply format; freeForcedFormat says the same of the free id when it differs.
+// The free ids change often: the app checks them against OpenRouter's public list (engine/free-check.js).
+// Prices are per million tokens; check them at https://openrouter.ai/models before every release.
+export const OPENROUTER_MODELS = [
+  { key: "fast", id: "deepseek/deepseek-v4-flash", freeId: "google/gemma-4-26b-a4b-it:free", label: "Fast", inputPerMTok: 0.09, outputPerMTok: 0.18, freeTier: true, forcedFormat: true, freeForcedFormat: true },
+  { key: "balanced", id: "anthropic/claude-haiku-5.5", freeId: "google/gemma-4-31b-it:free", label: "Balanced", inputPerMTok: 0.1, outputPerMTok: 0.5, freeTier: true, forcedFormat: true, freeForcedFormat: true },
+  { key: "strong", id: "anthropic/claude-sonnet-5.5", freeId: "nvidia/nemotron-3-ultra-550b-a55b:free", label: "Strong", inputPerMTok: 2, outputPerMTok: 10, freeTier: true, forcedFormat: true, freeForcedFormat: false },
+];
+
+// Cloudflare Workers AI: the same three ids on the free and the paid slot (the free part is a pool of neurons a day for the whole account,
+// not a different set of models). neuronsInPerM and neuronsOutPerM: neurons per million tokens in and out, from Cloudflare's pricing page;
+// the dollar prices are the same rates for the paid slot. Check both at https://developers.cloudflare.com/workers-ai/platform/pricing/ before every release.
+export const CLOUDFLARE_MODELS = [
+  { key: "fast", id: "@cf/google/gemma-4-26b-a4b-it", label: "Fast", inputPerMTok: 0.1, outputPerMTok: 0.3, neuronsInPerM: 9091, neuronsOutPerM: 27273, freeTier: true, forcedFormat: true },
+  { key: "balanced", id: "@cf/openai/gpt-oss-120b", label: "Balanced", inputPerMTok: 0.35, outputPerMTok: 0.75, neuronsInPerM: 31818, neuronsOutPerM: 68182, freeTier: true, forcedFormat: true },
+  { key: "strong", id: "@cf/qwen/qwen3.8-27b", label: "Strong", inputPerMTok: 0.45, outputPerMTok: 3.2, neuronsInPerM: 40909, neuronsOutPerM: 290909, freeTier: true, forcedFormat: true },
+];
+
 // A key slot is a place for one API key. Anthropic has one; Gemini has two, one for a key on Google's free tier and
 // one for a paid key, so both can be saved side by side. "google" is the paid slot (it is where a Gemini key was
 // always kept); "google-free" is the free one. labelKey: the locale key of the name of the slot (null: the provider's label);
@@ -102,6 +122,57 @@ export const PROVIDERS = {
     wire: { noteKey: "replay.api.noteConverted", map: [["system", "first message with role system"], ["max_tokens", "max_completion_tokens"], ["replySchema", "response_format (json_schema, strict)"], ["tool use, tool result", "tool_calls, role tool"], ["usage input, output tokens", "usage prompt_tokens, completion_tokens"]] },
     text: { estimateFree: "create.estimateFreeGroq", freeWarning: "settings.groqFreeWarning", keyLabel: "settings.groqKeyLabel", keyLink: "settings.groqKeyLink", keyInline: "create.keyInlineGroq", dataNotice: "create.dataNoticeGroq", searchFee: "editor.searchFeeGroq", estimateSearch: "create.estimateSearchGroq", pricingLink: "settings.groqPricingLink" },
   },
+  openrouter: {
+    id: "openrouter",
+    label: "OpenRouter",
+    chipName: "OpenRouter",
+    color: "#6467f2",
+    mark: "Or",
+    models: OPENROUTER_MODELS,
+    searchPriceUsd: 0,
+    pricesAsOf: "2026-11-20",
+    pricingUrl: "https://openrouter.ai/models",
+    keyUrl: "https://openrouter.ai/keys",
+    slots: [
+      { id: "openrouter-free", free: true, labelKey: "create.openrouterFree", subKey: "create.providerFree" },
+      { id: "openrouter", free: false, labelKey: "create.openrouterPaid", subKey: "create.providerPaid" },
+    ],
+    refusedKeyPrefixes: ["sk-ant-"],
+    // Version 1 has no web search on OpenRouter: the editor switches it off and says why.
+    capabilities: { search: false },
+    // The free route: 20 requests a minute and 50 a day for the whole account (1000 a day after buying 10 credits, which the app cannot know,
+    // so it assumes 50), no limits on tokens. Verify them on OpenRouter's pages before every release.
+    freeLimits: { kind: "account-plan", scope: "account", perModel: false, rpm: 20, rpd: 50, tpm: null, tpd: null, creditsRaiseDay: 1000, verifiedOn: "2026-11-20" },
+    wire: { noteKey: "replay.api.noteConverted", map: [["system", "first message with role system"], ["max_tokens", "max_tokens"], ["replySchema", "response_format (json_schema, only for models that accept it)"], ["tool use, tool result", "tool_calls, role tool"], ["usage input, output tokens", "usage prompt_tokens, completion_tokens"]] },
+    text: { estimateFree: "create.estimateFreeOpenrouter", freeWarning: "settings.openrouterFreeWarning", keyLabel: "settings.openrouterKeyLabel", keyLink: "settings.openrouterKeyLink", keyInline: "create.keyInlineOpenrouter", dataNotice: "create.dataNoticeOpenrouter", searchFee: "editor.searchFeeOpenrouter", estimateSearch: "create.estimateSearchOpenrouter", pricingLink: "settings.openrouterPricingLink", limitsData: "settings.freeLimitsDataOpenrouter", paidNote: "settings.openrouterPaidNote", modelsNote: "settings.modelsComeAndGo", checkHint: "settings.checkModelsHintFree" },
+  },
+  cloudflare: {
+    id: "cloudflare",
+    label: "Cloudflare",
+    chipName: "Cloudflare",
+    color: "#f6821f",
+    mark: "Cf",
+    models: CLOUDFLARE_MODELS,
+    searchPriceUsd: 0,
+    pricesAsOf: "2026-11-20",
+    pricingUrl: "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+    keyUrl: "https://dash.cloudflare.com/profile/api-tokens",
+    slots: [
+      { id: "cloudflare-free", free: true, labelKey: "create.cloudflareFree", subKey: "create.providerFree" },
+      { id: "cloudflare", free: false, labelKey: "create.cloudflarePaid", subKey: "create.providerPaid" },
+    ],
+    refusedKeyPrefixes: ["sk-ant-"],
+    // The key is one field: the account id, a colon and the API token (the account id is part of the address).
+    keyPattern: /^[0-9a-f]{32}:[A-Za-z0-9_-]{20,200}$/i,
+    keyPlaceholder: "ACCOUNT_ID:TOKEN",
+    // Version 1 has no web search on Cloudflare: the editor switches it off and says why.
+    capabilities: { search: false },
+    // The free part is a pool of 10000 neurons a day for all models and the whole account (reset at 00:00 UTC); a bigger model uses it faster.
+    // Verify it on Cloudflare's pricing page before every release.
+    freeLimits: { kind: "daily-pool", scope: "account", perModel: false, neuronsPerDay: 10000, rpm: null, rpd: null, tpm: null, tpd: null, resetsAtUtc: "00:00", verifiedOn: "2026-11-20" },
+    wire: { noteKey: "replay.api.noteConverted", map: [["system", "first message with role system"], ["max_tokens", "max_completion_tokens"], ["replySchema", "response_format (json_schema, only for models that accept it)"], ["tool use, tool result", "tool_calls, role tool"], ["usage input, output tokens", "usage prompt_tokens, completion_tokens"]] },
+    text: { estimateFree: "create.estimateFreeCloudflare", freeWarning: "settings.cloudflareFreeWarning", keyLabel: "settings.cloudflareKeyLabel", keyLink: "settings.cloudflareKeyLink", keyInline: "create.keyInlineCloudflare", dataNotice: "create.dataNoticeCloudflare", searchFee: "editor.searchFeeCloudflare", estimateSearch: "create.estimateSearchCloudflare", pricingLink: "settings.cloudflarePricingLink", limitsData: "settings.freeLimitsDataCloudflare", paidNote: "settings.cloudflarePaidNote", checkHint: "settings.checkModelsHint", keyFormat: "settings.cloudflareKeyFormat", modelsNote: "settings.modelsCloudflareNote" },
+  },
 };
 
 export const PROVIDER_IDS = Object.keys(PROVIDERS);
@@ -127,5 +198,23 @@ export const slotsOf = (providerId) => SLOTS.filter((s) => s.provider === provid
 export const freeSlotOf = (providerId) => SLOTS.find((s) => s.provider === providerId && s.free)?.id ?? null;
 
 // A key of a plausible shape for the provider: 20 to 300 characters, and not a key of another provider that is known to be refused.
+// A provider with a keyPattern (Cloudflare: ACCOUNT_ID:TOKEN) must match it as well.
 export const keyShapeOk = (providerId, key) =>
-  typeof key === "string" && key.length >= 20 && key.length <= 300 && !(PROVIDERS[providerId]?.refusedKeyPrefixes ?? []).some((prefix) => key.startsWith(prefix));
+  typeof key === "string" && key.length >= 20 && key.length <= 300 && !(PROVIDERS[providerId]?.refusedKeyPrefixes ?? []).some((prefix) => key.startsWith(prefix)) && (PROVIDERS[providerId]?.keyPattern?.test(key) ?? true);
+
+// The model as one slot sees it: on a free slot of OpenRouter the id is the free id, the prices are 0 and the forced-format flag is the
+// free one; elsewhere the model is as it is in the registry.
+export function resolveModel(slotId, model) {
+  const slot = SLOTS.find((x) => x.id === slotId);
+  if (!slot?.free || typeof model?.freeId !== "string") return model;
+  return { ...model, id: model.freeId, inputPerMTok: 0, outputPerMTok: 0, forcedFormat: model.freeForcedFormat ?? model.forcedFormat };
+}
+// The model id a slot uses for a registry model (the free id for a free slot that has one).
+export const modelIdOf = (slotId, model) => resolveModel(slotId, model)?.id;
+// The three models of a slot, each resolved for the slot (unknown slot: the first provider's models).
+export const modelsOfSlot = (slotId) => {
+  const slot = SLOTS.find((x) => x.id === slotId);
+  return providerSpec(slot?.provider).models.map((m) => resolveModel(slotId, m));
+};
+// An id a student may choose for a vanished free model: a free model id of OpenRouter of a safe shape.
+export const overrideIdOk = (id) => typeof id === "string" && id.length <= 80 && /^[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*:free$/i.test(id);

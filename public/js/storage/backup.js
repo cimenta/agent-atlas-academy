@@ -111,6 +111,12 @@ export async function applyBackup(backup, { runStore, settingsStore, vault, mode
   if (backup.settings?.createLayout === "steps" || backup.settings?.createLayout === "workspace") settingsStore.setCreateLayout(backup.settings.createLayout);
   if (typeof backup.settings?.shortcuts === "boolean") settingsStore.setShortcuts(backup.settings.shortcuts);
   if (isObject(backup.settings?.goKeys)) settingsStore.setGoKeys(backup.settings.goKeys);
+  // The ids a student chose for vanished free models: only a known slot and tier with an id of a safe shape is kept (the store checks).
+  if (isObject(backup.settings?.modelOverrides)) {
+    for (const [slot, tiers] of Object.entries(backup.settings.modelOverrides)) {
+      if (isObject(tiers)) for (const [key, id] of Object.entries(tiers)) settingsStore.setModelOverride(slot, key, id);
+    }
+  }
   if (backup.vault && (mode === "replace" || !vault.hasStoredKey())) vault.importRecord(backup.vault);
   // An older backup marked its one Gemini key as free with a setting; that key goes to the free slot.
   const legacyFree = backup.settings?.freeTier?.google === true && !backup.vaultGoogleFree;

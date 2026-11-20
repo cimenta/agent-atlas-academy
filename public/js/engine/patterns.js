@@ -1,6 +1,7 @@
 // The rules of the four orchestration patterns. validateDesign is used by the
 // editor in the browser and again by the server, which never trusts the browser.
 import { isSlot } from "../key-slots.js";
+import { overrideIdOk } from "./providers.js";
 import { validNodeLimits, ON_LIMIT } from "./agent-limits.js";
 import { NOTEBOOK_CHOICES } from "./notebook.js";
 import { validFormat, mayFormat } from "./format.js";
@@ -58,6 +59,8 @@ export function validateDesign(design) {
     else if (!type.patterns.includes(pattern)) add("node.agentNotAllowed", { id: node.id, agent: node.agent });
     if (!MODEL_KEYS.has(node.model)) add("node.model", { id: node.id });
     if (node.slot !== undefined && !isSlot(node.slot)) add("node.slot", { id: node.id });
+    // The id a student chose for a free OpenRouter model that is gone: only a free id of a safe shape, only on that slot.
+    if (node.modelId !== undefined && !(node.slot === "openrouter-free" && overrideIdOk(node.modelId))) add("node.modelId", { id: node.id });
     if (node.custom !== undefined && typeof node.custom !== "boolean") add("node.custom", { id: node.id });
     if (node.name !== undefined && (typeof node.name !== "string" || node.name.length > NAME_MAX)) add("node.name", { id: node.id });
     if (node.instructions !== undefined) {

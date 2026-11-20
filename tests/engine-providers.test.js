@@ -15,7 +15,7 @@ const design = (model = "fast", search = false) => ({
 });
 
 test("two providers exist and unknown ones fall back to Anthropic", () => {
-  assert.deepEqual(PROVIDER_IDS, ["anthropic", "google", "groq"]);
+  assert.deepEqual(PROVIDER_IDS, ["anthropic", "google", "groq", "openrouter", "cloudflare"]);
   assert.equal(providerCatalog("anthropic").models, MODELS);
   assert.equal(providerCatalog("nope"), providerCatalog("anthropic"));
   assert.equal(providerCatalog("anthropic").searchPriceUsd, SEARCH_PRICE_USD);

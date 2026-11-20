@@ -1,9 +1,9 @@
 // What a design may contain: models, agent types and the hard numbers.
 // Pure data, shared by the browser and the server function.
-import { isSlot, slotProvider } from "../key-slots.js";
+import { isSlot, slotProvider, slotIsFree } from "../key-slots.js";
 
 // The models, prices and providers live in the registry (providers.js); they are re-exported here under their old names.
-import { PROVIDERS, PROVIDER_IDS, PRICES_AS_OF, MODELS, SEARCH_PRICE_USD, GOOGLE_MODELS } from "./providers.js";
+import { PROVIDERS, PROVIDER_IDS, PRICES_AS_OF, MODELS, SEARCH_PRICE_USD, GOOGLE_MODELS, resolveModel, overrideIdOk } from "./providers.js";
 export { PRICES_AS_OF, MODELS, SEARCH_PRICE_USD, GOOGLE_MODELS, PROVIDER_IDS };
 
 export const DEFAULT_MODEL = "fast";
@@ -18,10 +18,18 @@ export const pricesFor = (provider) => {
 };
 // An agent may name its own key slot (and so its provider); one without a slot uses the provider of the whole run.
 export const nodeProvider = (node, fallback = "anthropic") => (isSlot(node?.slot) ? slotProvider(node.slot) : fallback);
+// The model of an agent as its key slot sees it (the free slot of OpenRouter has its own ids). node.modelId is the id a student chose
+// for a free model that OpenRouter no longer offers; it counts only on a free slot that has own ids, and only with a safe shape.
 export const nodeModel = (node, fallback = "anthropic") => {
   const models = providerCatalog(nodeProvider(node, fallback)).models;
-  return models.find((m) => m.key === node?.model) ?? models[0];
+  const slot = isSlot(node?.slot) ? node.slot : null;
+  const found = resolveModel(slot, models.find((m) => m.key === node?.model) ?? models[0]);
+  const own = slot !== null && slotIsFree(slot) && typeof found.freeId === "string" && overrideIdOk(node?.modelId) && found.id !== node.modelId;
+  // A model the student chose may not take a forced reply format; the app repairs the format when needed, so none is forced.
+  return own ? { ...found, id: node.modelId, forcedFormat: false } : found;
 };
+// The same agent asking for another tier (a reviewer, a condensing call): the picked model belongs to the agent's own tier only.
+export const withTier = (node, tier) => (tier === node.model ? node : { ...node, model: tier, modelId: undefined });
 // The providers a design uses, each once, in the order of its agents.
 export const providersOf = (design, fallback = "anthropic") => {
   const out = [];
@@ -155,7 +163,8 @@ const FALLBACK_TIER = { fast: "balanced", balanced: "fast", strong: "balanced" }
 export function fallbackModelFor(node, provider = "anthropic", freeTier = false) {
   const models = providerCatalog(nodeProvider(node, provider)).models;
   const now = nodeModel(node, provider);
-  const target = models.find((m) => m.key === FALLBACK_TIER[now.key]);
+  const found = models.find((m) => m.key === FALLBACK_TIER[now.key]);
+  const target = found && resolveModel(isSlot(node?.slot) ? node.slot : null, found);
   if (!target || target.id === now.id) return null;
   if (target.freeTier === false && (freeTier || node?.slot === "google-free")) return null;
   return target;

@@ -100,5 +100,5 @@ test("the color of a provider is a setting that survives and rejects bad values"
   store.setProviderColor("google", "#112233");
   store.setProviderColor("anthropic", "red");
   store.setProviderColor("nope", "#112233");
-  assert.deepEqual(store.get().providerColors, { anthropic: DEFAULT_PROVIDER_COLORS.anthropic, google: "#112233", groq: DEFAULT_PROVIDER_COLORS.groq });
+  assert.deepEqual(store.get().providerColors, { anthropic: DEFAULT_PROVIDER_COLORS.anthropic, google: "#112233", groq: DEFAULT_PROVIDER_COLORS.groq, openrouter: DEFAULT_PROVIDER_COLORS.openrouter, cloudflare: DEFAULT_PROVIDER_COLORS.cloudflare });
 });

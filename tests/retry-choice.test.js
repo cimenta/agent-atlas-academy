@@ -13,7 +13,7 @@ const design = () => ({
 
 test("the failed model is marked and the Gemini models keep the free slot where they have a free tier", () => {
   const list = retryChoices(design(), "critic");
-  assert.equal(list.length, 9);
+  assert.equal(list.length, 15);
   assert.deepEqual(list.filter((c) => c.current).map((c) => c.id), ["gemini-3.8-flash"]);
   assert.deepEqual(list.find((c) => c.id === "gemini-3.5-flash-lite").value, { slot: "google-free", model: "fast" });
   assert.deepEqual(list.find((c) => c.id === "gemini-4-carbon").value, { slot: "google", model: "strong" });

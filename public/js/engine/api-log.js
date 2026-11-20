@@ -40,7 +40,7 @@ export function recordingFetch(sink, { baseFetch = globalThis.fetch, now = Date.
     const entry = {
       n: ++n,
       method: String(init?.method ?? input?.method ?? "GET").toUpperCase(),
-      url: (typeof input === "string" ? input : String(input?.url ?? input)).slice(0, API_TEXT_MAX),
+      url: (typeof input === "string" ? input : String(input?.url ?? input)).replace(/(\/accounts\/)[0-9a-f]{32}/gi, "$1{account}").slice(0, API_TEXT_MAX),
       request: { headers: hideHeaders(init?.headers), body: "" },
       response: null,
       error: null,

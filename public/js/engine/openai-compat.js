@@ -1,4 +1,4 @@
-// The shared adapter for providers that speak the chat-completions format (Groq now; OpenRouter and Cloudflare later).
+// The shared adapter for providers that speak the chat-completions format (Groq and OpenRouter now; Cloudflare later).
 // It takes the same Anthropic-shaped request the other adapters take and returns the same shape of answer, so the agents,
 // the runners and the replay do not know the difference. The call takes `fetchImpl`, so the API log records it as for every provider.
 import { AnthropicError, redact, getJson } from "./anthropic.js";
@@ -12,7 +12,8 @@ const textOfBlocks = (content) => {
 };
 
 // Anthropic-shaped body -> chat-completions body.
-export function toChatRequest(body, { model = body.model } = {}) {
+// forcedFormat: false leaves out the forced reply format. maxTokensField: the name of the size field. reasoningEffort: null leaves it out.
+export function toChatRequest(body, { model = body.model, forcedFormat = true, maxTokensField = "max_completion_tokens", reasoningEffort = "low" } = {}) {
   const messages = [];
   if (typeof body.system === "string" && body.system !== "") messages.push({ role: "system", content: body.system });
   for (const message of body.messages ?? []) {
@@ -29,11 +30,11 @@ export function toChatRequest(body, { model = body.model } = {}) {
     const text = textOfBlocks(message.content);
     if (text !== "" || !blocks.some((b) => b?.type === "tool_result")) messages.push({ role: "user", content: text === "" ? "(no text)" : text });
   }
-  const request = { model, max_completion_tokens: Math.max(1, Number(body.max_tokens) || 1), reasoning_effort: "low", messages };
+  const request = { model, [maxTokensField]: Math.max(1, Number(body.max_tokens) || 1), ...(reasoningEffort === null ? {} : { reasoning_effort: reasoningEffort }), messages };
   const tools = Array.isArray(body.tools) ? body.tools : [];
   if (tools.length > 0) request.tools = tools.map((tool) => ({ type: "function", function: { name: tool.name, description: tool.description, parameters: tool.input_schema } }));
   // A forced format cannot be combined with tools: the format repair of the engine covers that case.
-  if (body.replySchema && tools.length === 0) request.response_format = { type: "json_schema", json_schema: { name: "reply", strict: false, schema: body.replySchema } };
+  if (body.replySchema && tools.length === 0 && forcedFormat !== false) request.response_format = { type: "json_schema", json_schema: { name: "reply", strict: false, schema: body.replySchema } };
   return request;
 }
 
@@ -69,7 +70,7 @@ export function fromChatResponse(data, { who = "The provider" } = {}) {
 
 const KEPT_HEADERS = /^(x-request-id|retry-after|date|x-ratelimit-.*)$/i;
 
-export async function callChatCompletions(body, { apiKey, fetchImpl = fetch, signal, timeoutMs = 60000, url, who = "The provider" } = {}) {
+export async function callChatCompletions(body, { apiKey, fetchImpl = fetch, signal, timeoutMs = 60000, url, who = "The provider", forcedFormat, maxTokensField, reasoningEffort } = {}) {
   if (typeof apiKey !== "string" || apiKey.length === 0) throw new AnthropicError("No API key was given");
   if (signal?.aborted) throw new AnthropicError("The request was cancelled");
   const timeout = AbortSignal.timeout(timeoutMs);
@@ -81,7 +82,7 @@ export async function callChatCompletions(body, { apiKey, fetchImpl = fetch, sig
     response = await fetchImpl(url, {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify(toChatRequest(body)),
+      body: JSON.stringify(toChatRequest(body, { forcedFormat, ...(maxTokensField ? { maxTokensField } : {}), ...(reasoningEffort === undefined ? {} : { reasoningEffort }) })),
       signal: combined,
     });
   } catch (error) {
@@ -97,13 +98,13 @@ export async function callChatCompletions(body, { apiKey, fetchImpl = fetch, sig
     data = {};
   }
   if (!response.ok) {
-    const message = redact(data?.error?.message, apiKey) || `${who} answered with status ${response.status}`;
+    const message = redact(data?.error?.message ?? data?.errors?.[0]?.message, apiKey) || `${who} answered with status ${response.status}`;
     const error = new AnthropicError(message, { status: response.status, retryable: RETRYABLE_STATUS.has(response.status) });
     if (response.status === 429) {
       const asked = response.headers?.get?.("retry-after");
       const wait = asked === null || asked === undefined || asked === "" ? NaN : Number(asked);
       error.retryAfterSec = Number.isFinite(wait) && wait >= 0 ? wait : null;
-      error.rateKind = /per day|\bTPD\b|\bRPD\b/i.test(message) ? "day" : "minute";
+      error.rateKind = /per[ -]day|\bTPD\b|\bRPD\b/i.test(message) ? "day" : "minute";
     }
     throw error;
   }
@@ -124,6 +125,7 @@ export async function callChatCompletions(body, { apiKey, fetchImpl = fetch, sig
 
 // The ids of the models the provider offers to this key.
 export async function listChatModels({ apiKey, fetchImpl, signal, timeoutMs, url, who } = {}) {
-  const data = await getJson(url, { headers: { authorization: `Bearer ${apiKey}` }, apiKey, fetchImpl, signal, timeoutMs, who });
+  const keyed = typeof apiKey === "string" && apiKey !== "";
+  const data = await getJson(url, { headers: keyed ? { authorization: `Bearer ${apiKey}` } : {}, apiKey, noKey: !keyed, fetchImpl, signal, timeoutMs, who });
   return Array.isArray(data?.data) ? data.data.map((m) => m?.id) : [];
 }

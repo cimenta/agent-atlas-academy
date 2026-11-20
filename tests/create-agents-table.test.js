@@ -70,3 +70,18 @@ test("Use in Create drops the decisions about the limits together with the limit
   assert.equal(draft.decisions.limits.maxSteps, true);
   assert.equal(draft.limitsEdited, false);
 });
+
+test("an agent on a provider without web search shows search off, even when the agent asks for it", () => {
+  const nodes = [{ id: "a", agent: "researcher", slot: "cloudflare-free", model: "fast", search: true }, { id: "b", agent: "researcher", slot: "anthropic", model: "fast", search: true }];
+  const rows = agentRows({ design: { nodes }, slotName: (s) => s, slotIsFree, modelInfo, fallbackSlot: "anthropic" });
+  assert.equal(rows[0].search, false);
+  assert.equal(rows[1].search, true);
+});
+
+test("the search notices and the search fee ignore agents on a provider without web search", async () => {
+  const { reviewSummary } = await import("../public/js/create/create-model.js");
+  const limits = { maxSteps: 10, maxTokens: 20000, maxSearches: 3 };
+  const on = (slot) => ({ nodes: [{ id: "a", agent: "researcher", slot, model: "fast", search: true }], edges: [] });
+  assert.equal(reviewSummary({ design: on("cloudflare-free"), limits, provider: "cloudflare" }).hasSearch, false);
+  assert.equal(reviewSummary({ design: on("anthropic"), limits, provider: "anthropic" }).hasSearch, true);
+});

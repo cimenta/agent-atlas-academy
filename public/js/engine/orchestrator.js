@@ -3,7 +3,7 @@
 import { validateDesign } from "./patterns.js";
 import { createBudget, LimitError } from "./budget.js";
 import { createAgent } from "./agent.js";
-import { nodeProvider, providerCatalog } from "./catalog.js";
+import { nodeProvider, nodeModel } from "./catalog.js";
 import { slotFreeLimits, slotProvider } from "../key-slots.js";
 import { createGate } from "./pacing.js";
 import { loggedCall } from "./api-log.js";
@@ -79,7 +79,8 @@ export async function runDesign({ design, task, limits, language = "en", call, c
     const base = callFor?.(node) ?? call;
     const free = slotFreeLimits(node.slot);
     if (!free) return base;
-    const key = `${node.slot}:${providerCatalog(slotProvider(node.slot)).models.find((m) => m.key === node.model)?.id ?? node.model}`;
+    // One gate for each model of the slot, or one for the whole account when the limits count for the account (OpenRouter).
+    const key = free.perModel === false ? node.slot : `${node.slot}:${nodeModel(node).id}`;
     if (!gates.has(key)) gates.set(key, createGate({ gapMs: Math.ceil(60000 / free.rpm) }));
     return (body, options) => gates.get(key).run(() => base(body, options));
   };

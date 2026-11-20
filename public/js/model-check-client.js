@@ -1,6 +1,6 @@
 // Settings, Check models: asks our server which models a provider offers to a key, and turns the answer into what the page shows.
 // No DOM here. The answer is not stored anywhere.
-import { PROVIDERS } from "./engine/providers.js";
+import { modelsOfSlot } from "./engine/providers.js";
 import { SLOT_IDS, slotProvider, slotIsFree } from "./key-slots.js";
 
 const KNOWN_ERRORS = new Set(["rejected", "rate_limit", "bad_key", "bad_provider"]);
@@ -21,7 +21,7 @@ export async function checkModels({ provider, key, fetchFn = fetch }) {
 // { state: "ok" | "missing" | "error", total, rows: [{ tier, id, label, available }], missing, others, error? }
 export function describeCheck(slotId, result) {
   if (!result?.ok) return { state: "error", total: 0, rows: [], missing: 0, others: 0, error: result?.error ?? "unreachable" };
-  const models = PROVIDERS[slotProvider(slotId)].models.filter((m) => !slotIsFree(slotId) || m.freeTier !== false);
+  const models = modelsOfSlot(slotId).filter((m) => !slotIsFree(slotId) || m.freeTier !== false);
   const rows = [];
   for (const m of models) {
     const same = rows.find((r) => r.id === m.id);

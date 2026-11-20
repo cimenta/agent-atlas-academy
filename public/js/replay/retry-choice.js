@@ -1,6 +1,6 @@
 // Retry with another model: the models a failed agent can be retried with, and a run with that choice applied.
 import { providerCatalog, nodeModel, nodeProvider, fallbackModelFor } from "../engine/catalog.js";
-import { PROVIDER_IDS, slotsOf, freeSlotOf } from "../engine/providers.js";
+import { PROVIDER_IDS, slotsOf, freeSlotOf, resolveModel } from "../engine/providers.js";
 import { isSlot, slotIsFree, slotProvider } from "../key-slots.js";
 
 // The key slot a model is run with: a provider with one slot uses it; a provider with a free and a paid slot (Gemini) keeps the slot
@@ -22,12 +22,14 @@ export function retryChoices(design, nodeId, fallback = "anthropic", { suggest =
   const out = [];
   const suggested = suggest ? fallbackModelFor(node, fallback) : null;
   for (const provider of PROVIDER_IDS) {
-    for (const model of providerCatalog(provider).models) {
+    for (const registered of providerCatalog(provider).models) {
+      const slot = slotFor(provider, registered, node);
+      const model = resolveModel(slot, registered);
       out.push({
         provider,
         id: model.id,
         tier: model.key,
-        value: { slot: slotFor(provider, model, node), model: model.key },
+        value: { slot, model: model.key },
         current: provider === nowProvider && model.id === now.id,
         free: freeSlotOf(provider) !== null && model.freeTier !== false,
         suggested: suggested !== null && provider === nowProvider && model.id === suggested.id,
@@ -42,7 +44,10 @@ export function withRetryChoice(run, nodeId, choice) {
   const copy = structuredClone(run);
   const apply = (design) => {
     const node = design?.nodes?.find((n) => n.id === nodeId);
-    if (node) Object.assign(node, { slot: choice.slot, model: choice.model, custom: true });
+    if (!node) return;
+    // The model the student picked for a gone free model stays only when the agent keeps the same slot and tier.
+    if (node.slot !== choice.slot || node.model !== choice.model) delete node.modelId;
+    Object.assign(node, { slot: choice.slot, model: choice.model, custom: true });
   };
   apply(copy.design);
   for (const e of copy.events ?? []) if (e.type === "run_start") apply(e.design);

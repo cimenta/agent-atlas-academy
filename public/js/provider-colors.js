@@ -33,7 +33,7 @@ const TIER_SHADE = { fast: 0.5, balanced: 0, strong: -0.35 };
 // Which provider and tier a model id belongs to, or null for an unknown id.
 export function modelInfo(modelId) {
   for (const provider of PROVIDER_IDS) {
-    const found = PROVIDERS[provider].models.find((m) => m.id === modelId);
+    const found = PROVIDERS[provider].models.find((m) => m.id === modelId || m.freeId === modelId);
     if (found) return { provider, tier: found.key };
   }
   return null;

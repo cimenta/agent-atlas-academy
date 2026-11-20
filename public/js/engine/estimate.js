@@ -1,6 +1,7 @@
 // A rough upper-bound cost for a run, shown before the visitor presses Run.
-import { MODELS, SEARCH_PRICE_USD, PRICES_AS_OF, pricesFor } from "./catalog.js";
+import { MODELS, SEARCH_PRICE_USD, PRICES_AS_OF, pricesFor, nodeModel } from "./catalog.js";
 import { isSlot, slotProvider } from "../key-slots.js";
+import { resolveModel } from "./providers.js";
 import { clampLimits } from "./patterns.js";
 
 export const TOKENS_PER_ACTIVATION = 3000;
@@ -73,7 +74,8 @@ export function estimateRun(design, limits, prices = { models: MODELS, search: S
   const tokensUpper = Math.min(clamped.maxTokens, activations * TOKENS_PER_ACTIVATION);
   // An agent with its own key slot is priced by that slot's provider; the others by `prices`.
   const pricesOf = (n) => (isSlot(n.slot) ? pricesFor(slotProvider(n.slot)) : prices);
-  const used = design.nodes.map((n) => pricesOf(n).models.find((m) => m.key === n.model)).filter(Boolean);
+  // A free slot with ids of its own (OpenRouter) costs nothing: the model is read as the slot sees it.
+  const used = design.nodes.map((n) => resolveModel(isSlot(n.slot) ? n.slot : null, pricesOf(n).models.find((m) => m.key === n.model))).filter(Boolean);
   const dearest = used.reduce((a, b) => (b.inputPerMTok + b.outputPerMTok > a.inputPerMTok + a.outputPerMTok ? b : a), used[0] ?? prices.models[0]);
   const costUsd = (tokensUpper / 2) * dearest.inputPerMTok / 1e6 + (tokensUpper / 2) * dearest.outputPerMTok / 1e6;
   // Agents created with the search switch on are searchers too, priced like their creator.
@@ -117,6 +119,15 @@ export function callsOf(design, limits, { outputTokens = 4000, handoffChars = 0,
     const input = 300 + Math.ceil((Math.min(taskChars, 1000) + incoming * upstreamChars) / 4);
     // An agent's own lower answer limit counts, as the agent enforces it.
     const own = Math.max(1, Math.min(cap, Number(n.limits?.maxOutputTokens) || cap));
-    return { id: n.id, calls: Math.max(1, Math.ceil((base[i] * total) / weight)), perCallTokens: input + own, typicalTokens: input + Math.min(typical, own) };
+    const output = Math.min(typical, own);
+    return { id: n.id, calls: Math.max(1, Math.ceil((base[i] * total) / weight)), perCallTokens: input + own, typicalTokens: input + output, inputTokens: input, outputTokens: output };
   });
+}
+
+// The neurons an agent may use in a run (Cloudflare counts its free pool in neurons): its calls times the typical tokens of a call by the
+// neuron rates of its model. 0 for a model that has no rates.
+export function neuronsOf(node, row) {
+  const model = nodeModel(node);
+  if (typeof model.neuronsInPerM !== "number" || typeof model.neuronsOutPerM !== "number" || !row) return 0;
+  return (row.calls * (row.inputTokens * model.neuronsInPerM + row.outputTokens * model.neuronsOutPerM)) / 1e6;
 }

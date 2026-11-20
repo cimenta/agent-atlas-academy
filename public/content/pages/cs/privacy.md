@@ -25,7 +25,7 @@ Ve výchozím stavu zůstává váš klíč API jen v paměti otevřené karty a
 
 Když stisknete Spustit, váš úkol, pokyny a zprávy agentů a váš klíč API se odešlou na náš server jen proto, aby se požadavek mohl předat společnosti Anthropic. Server je neukládá a nezapisuje do protokolů. Anthropic je pak zpracuje podle vlastních podmínek a zásad ochrany osobních údajů. Cenu běhu účtuje Anthropic na váš vlastní účet. Je-li zapnuté vyhledávání na webu, dotazy při hledání zpracovává rovněž Anthropic. Nezadávejte do úkolu osobní ani důvěrné údaje.
 
-Totéž platí pro další poskytovatele, které zvolíte: s klíčem Gemini jde váš úkol společnosti Google a s klíčem Groq společnosti Groq, jejíž servery jsou ve Spojených státech. Zpracují ho podle vlastních podmínek, své náklady účtují na váš účet a u bezplatného plánu ho mohou použít způsoby popsanými na svých stránkách. Stránky Groqu jasně neříkají, zda se prompty používají k trénování, proto neposílejte soukromá data.
+Totéž platí pro další poskytovatele, které zvolíte: s klíčem Gemini jde váš úkol společnosti Google a s klíčem Groq společnosti Groq, jejíž servery jsou ve Spojených státech, a s klíčem OpenRouter společnosti OpenRouter, která ho předá firmě, jež provozuje zvolený model. U bezplatného slotu OpenRouteru si tyto firmy mohou vaše zadání ponechat a učit se z něj. S klíčem Cloudflare jde zadání společnosti Cloudflare, jejíž stránky neuvádějí, zda se zadání používají k trénování, takže neposílejte soukromá data. Zpracují ho podle vlastních podmínek, své náklady účtují na váš účet a u bezplatného plánu ho mohou použít způsoby popsanými na svých stránkách. Stránky Groqu jasně neříkají, zda se prompty používají k trénování, proto neposílejte soukromá data.
 
 ## Když odešlete běh do knihovny
 
