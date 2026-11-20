@@ -51,7 +51,7 @@ test("the real English articles are complete and consistent", () => {
   const articlesDir = join(appDir, "public", "content", "articles");
   buildArticleIndexes(articlesDir);
   const index = JSON.parse(readFileSync(join(articlesDir, "en", "index.json"), "utf8"));
-  assert.equal(index.length, 41);
+  assert.equal(index.length, 42);
   const slugs = new Set(index.map((i) => i.slug));
   const sectionKeys = Object.keys(JSON.parse(readFileSync(join(appDir, "public", "locales", "en.json"), "utf8")))
     .filter((k) => k.startsWith("learn.section."))
