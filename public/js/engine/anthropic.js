@@ -82,3 +82,33 @@ export async function callAnthropic(body, { apiKey, fetchImpl = fetch, signal, t
   });
   return data;
 }
+
+// A GET that answers JSON, for the lists of models. Throws AnthropicError (with the status of a refusal), never with the key in it.
+export async function getJson(url, { headers = {}, apiKey, fetchImpl = fetch, signal, timeoutMs = 20000, who = "The provider" } = {}) {
+  if (typeof apiKey !== "string" || apiKey.length === 0) throw new AnthropicError("No API key was given");
+  if (signal?.aborted) throw new AnthropicError("The request was cancelled");
+  const timeout = AbortSignal.timeout(timeoutMs);
+  const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
+  let response;
+  try {
+    response = await fetchImpl(url, { method: "GET", headers, signal: combined });
+  } catch (error) {
+    if (signal?.aborted) throw new AnthropicError("The request was cancelled");
+    if (timeout.aborted) throw new AnthropicError(`Timeout: ${who} did not answer within ${Math.round(timeoutMs / 1000)} seconds.`);
+    throw new AnthropicError(redact(error?.message, apiKey) || "Network error", { retryable: true });
+  }
+  let data = {};
+  try {
+    data = await response.json();
+  } catch {
+    data = {};
+  }
+  if (!response.ok) throw new AnthropicError(redact(data?.error?.message, apiKey) || `${who} answered with status ${response.status}`, { status: response.status });
+  return data;
+}
+
+// The ids of the models Anthropic offers to this key.
+export async function listAnthropicModels({ apiKey, fetchImpl, signal, timeoutMs } = {}) {
+  const data = await getJson("https://api.anthropic.com/v1/models?limit=1000", { headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" }, apiKey, fetchImpl, signal, timeoutMs, who: "Anthropic" });
+  return Array.isArray(data?.data) ? data.data.map((m) => m?.id) : [];
+}

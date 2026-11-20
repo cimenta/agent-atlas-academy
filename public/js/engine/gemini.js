@@ -1,6 +1,6 @@
 // The only place that talks to Google Gemini. It takes the same request the Anthropic call takes and
 // returns the same shape of answer, so the agents, the runners and the replay do not know the difference.
-import { AnthropicError, redact } from "./anthropic.js";
+import { AnthropicError, redact, getJson } from "./anthropic.js";
 
 const API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models";
 const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
@@ -118,4 +118,18 @@ export async function callGemini(body, { apiKey, fetchImpl = fetch, signal, time
     enumerable: false,
   });
   return answer;
+}
+
+// The names of the models Google offers to this key (at most 5 pages of 1000).
+export async function listGeminiModels({ apiKey, fetchImpl, signal, timeoutMs } = {}) {
+  const names = [];
+  let token = "";
+  for (let page = 0; page < 5; page++) {
+    const url = `${API_ROOT}?pageSize=1000${token ? `&pageToken=${encodeURIComponent(token)}` : ""}`;
+    const data = await getJson(url, { headers: { "x-goog-api-key": apiKey }, apiKey, fetchImpl, signal, timeoutMs, who: "Google" });
+    if (Array.isArray(data?.models)) names.push(...data.models.map((m) => m?.name));
+    token = typeof data?.nextPageToken === "string" ? data.nextPageToken : "";
+    if (!token) break;
+  }
+  return names;
 }

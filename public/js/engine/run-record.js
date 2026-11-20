@@ -39,7 +39,8 @@ function sumUsage(events) {
   return usage;
 }
 
-export function buildRunRecord({ id, design, task, events, limits, language, appVersion, startedAt, endedAt, client, provider = "anthropic", freeTier = false }) {
+// apiCalls: the log of the calls to the provider (what was sent, what came back). It is kept beside the events, because the player steps through events.
+export function buildRunRecord({ id, design, task, events, apiCalls = [], apiCallsDropped = false, limits, language, appVersion, startedAt, endedAt, client, provider = "anthropic", freeTier = false }) {
   const done = [...events].reverse().find((e) => e.type === "done");
   return {
     schemaVersion: 1,
@@ -51,6 +52,8 @@ export function buildRunRecord({ id, design, task, events, limits, language, app
     recordedWith: { provider: providersOf(design, provider).join("+"), model: modelsUsed(design, provider), ...(freeTier === true ? { freeTier: true } : {}) },
     appVersion,
     events: [...events],
+    ...(apiCalls.length > 0 ? { apiCalls: [...apiCalls] } : {}),
+    ...(apiCallsDropped === true ? { apiCallsDropped: true } : {}),
     design,
     task,
     limits,

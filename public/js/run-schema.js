@@ -1,3 +1,5 @@
+import { API_LOG_BODY_MAX, API_TEXT_MAX, API_HEADERS_MAX, API_HEADER_VALUE_MAX } from "./engine/api-log.js";
+
 export const RUN_SCHEMA_VERSION = 1;
 
 export const EVENT_TYPES = [
@@ -26,6 +28,37 @@ export const EVENT_TYPES = [
 
 const isText = (value) => typeof value === "string" && value.length > 0;
 const isObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+
+// A call to a provider, as the log records it (the list apiCalls of a run, beside its events). An imported file is untrusted, so every size is bounded.
+const API_CALLS_MAX = 5000;
+function checkHeaders(headers, where, errors) {
+  if (!isObject(headers)) return errors.push(`${where} must be an object`);
+  const names = Object.keys(headers);
+  if (names.length > API_HEADERS_MAX) errors.push(`${where} has more than ${API_HEADERS_MAX} headers`);
+  for (const name of names) if (typeof headers[name] !== "string" || headers[name].length > API_HEADER_VALUE_MAX || name.length > 200) errors.push(`${where}.${name} must be a short string`);
+}
+function checkApiCall(event, at, errors) {
+  if (!isObject(event) || event.type !== "api_call") return errors.push(`${at} must be an api_call`);
+  if (!isText(event.agent)) errors.push(`${at}.agent must be a non-empty string`);
+  if (typeof event.t !== "number" || !Number.isFinite(event.t)) errors.push(`${at}.t must be a finite number`);
+  if (!Number.isInteger(event.n) || event.n < 1) errors.push(`${at}.n must be a whole number from 1`);
+  for (const key of ["method", "url"]) if (typeof event[key] !== "string" || event[key].length > API_TEXT_MAX) errors.push(`${at}.${key} must be a short string`);
+  if (event.provider !== undefined && (typeof event.provider !== "string" || event.provider.length > 50)) errors.push(`${at}.provider must be a short string`);
+  if (event.error !== null && event.error !== undefined && (typeof event.error !== "string" || event.error.length > API_TEXT_MAX)) errors.push(`${at}.error must be a short string or null`);
+  if (!isObject(event.request)) errors.push(`${at}.request must be an object`);
+  else {
+    checkHeaders(event.request.headers, `${at}.request.headers`, errors);
+    if (typeof event.request.body !== "string" || event.request.body.length > API_LOG_BODY_MAX) errors.push(`${at}.request.body must be a string of at most ${API_LOG_BODY_MAX} characters`);
+  }
+  if (event.response !== null && event.response !== undefined) {
+    if (!isObject(event.response) || !Number.isInteger(event.response.status)) errors.push(`${at}.response must have a whole number status`);
+    else {
+      checkHeaders(event.response.headers, `${at}.response.headers`, errors);
+      if (typeof event.response.body !== "string" || event.response.body.length > API_LOG_BODY_MAX) errors.push(`${at}.response.body must be a string of at most ${API_LOG_BODY_MAX} characters`);
+    }
+  }
+  if (typeof event.ms !== "number" || !Number.isFinite(event.ms) || event.ms < 0) errors.push(`${at}.ms must be a number`);
+}
 
 function checkEvent(event, index, previousT, errors, agents) {
   const at = `events[${index}]`;
@@ -130,6 +163,7 @@ export function validateRun(run) {
   if (!isObject(run.recordedWith) || !isText(run.recordedWith.provider) || !isText(run.recordedWith.model)) {
     errors.push("recordedWith must have a provider and a model");
   }
+  if (run.apiCalls !== undefined && !Array.isArray(run.apiCalls)) errors.push("apiCalls must be a list");
   if (!Array.isArray(run.events) || run.events.length === 0) {
     errors.push("events must be a non-empty list");
   } else {
@@ -137,6 +171,14 @@ export function validateRun(run) {
       // An agent that waited for approval and was stopped there never started, but it is part of the run.
       run.events.filter((e) => isObject(e) && (e.type === "agent_start" || e.type === "approval") && isText(e.agent)).map((e) => e.agent),
     );
+    if (Array.isArray(run.apiCalls)) {
+      if (run.apiCalls.length > API_CALLS_MAX) errors.push(`apiCalls must have at most ${API_CALLS_MAX} entries`);
+      run.apiCalls.slice(0, API_CALLS_MAX).forEach((call, index) => {
+        const before = errors.length;
+        checkApiCall(call, `apiCalls[${index}]`, errors);
+        if (errors.length === before && isText(call.agent) && !agents.has(call.agent) && !(call.agent.includes("#") && agents.has(call.agent.split("#")[0]))) errors.push(`apiCalls[${index}].agent "${call.agent}" never starts (no agent_start event)`);
+      });
+    }
     let previousT = null;
     run.events.forEach((event, index) => {
       previousT = checkEvent(event, index, previousT, errors, agents);

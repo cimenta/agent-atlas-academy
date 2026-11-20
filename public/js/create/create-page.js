@@ -10,8 +10,9 @@ import { limitsChoice } from "../replay/limits-choice.js";
 import { withCurrentLimits } from "../replay/limits-compare.js";
 import { showCenterTip } from "../center-tip.js";
 import { refreshResultTab } from "../tab-state.js";
-import { SLOT_IDS, isSlot, slotProvider, slotIsFree } from "../key-slots.js";
-import { TASK_MAX_CHARS, LIMIT_MAX, PRICING_URLS, DEFAULT_MODEL, providerCatalog, paidOnlyModelUsed, providersOf } from "../engine/catalog.js";
+import { SLOT_IDS, isSlot, slotProvider, slotIsFree, slotLabelKey, slotSubKey } from "../key-slots.js";
+import { providerSpec, defaultSlot } from "../engine/providers.js";
+import { TASK_MAX_CHARS, LIMIT_MAX, DEFAULT_MODEL, providerCatalog, paidOnlyModelUsed, providersOf } from "../engine/catalog.js";
 import { PATTERNS, clampLimits } from "../engine/patterns.js";
 import { buildRunRecord, makeRunId, modelsUsed } from "../engine/run-record.js";
 import { startRun, RunStartError } from "../run-client.js";
@@ -114,7 +115,7 @@ export function renderCreate(ctx) {
   const chosenSlots = () => (Array.isArray(draft.slots) && draft.slots.every(isSlot) ? draft.slots : []);
   // The slots the page works with: the chosen ones, or while none is chosen the first one with a key (the diagram stays closed then).
   const workingSlots = () => (chosenSlots().length > 0 ? chosenSlots() : [SLOT_IDS.find(hasKey) ?? "anthropic"]);
-  const slotName = (id) => (slotProvider(id) === "google" ? t(slotIsFree(id) ? "create.geminiFree" : "create.geminiPaid") : providerCatalog(slotProvider(id)).label);
+  const slotName = (id) => (slotLabelKey(id) ? t(slotLabelKey(id)) : providerCatalog(slotProvider(id)).label);
   // The models a slot offers: a free Gemini key offers only the models that have a free tier.
   const modelsOfSlot = (slot) => {
     const all = providerCatalog(slotProvider(slot)).models;
@@ -218,8 +219,7 @@ export function renderCreate(ctx) {
     // Provider: chosen before the agents, because the models of the agents are the models of the provider.
     // One tile for each provider: its mark, its name and a dot (green: key loaded, yellow: key saved but locked, none: no key).
     const providerTiles = h(doc, "div", { class: "provider-tiles", role: "group", "aria-label": t("create.providerLabel"), "data-ui": "provider-tiles" });
-    const MARKS = { anthropic: "A", google: "G" };
-    // The default model: a list of the models of the chosen providers. Agents without a model of their own use it.
+        // The default model: a list of the models of the chosen providers. Agents without a model of their own use it.
     const defaultHost = h(doc, "div", { class: "field default-model", "data-ui": "default-model-field" });
     const drawDefaultModel = () => {
       const current = draft.editor.defaultModel();
@@ -253,10 +253,10 @@ export function renderCreate(ctx) {
           const selected = chosen.includes(id);
           const kind = slotProvider(id);
           const name = slotName(id);
-          const sub = kind === "google" ? t(slotIsFree(id) ? "create.providerFree" : "create.providerPaid") : "";
+          const sub = slotSubKey(id) ? t(slotSubKey(id)) : "";
           const dotText = t(state === "locked" ? "settings.dotLocked" : "settings.dotLoaded");
           const parts = [
-            h(doc, "span", { class: `pv-mark pv-${kind}`, "aria-hidden": "true" }, MARKS[kind]),
+            h(doc, "span", { class: `pv-mark pv-${kind}`, "aria-hidden": "true" }, providerSpec(kind).mark),
             h(doc, "span", { class: "pv-text" }, h(doc, "span", { class: "pv-name" }, name), ...(sub ? [h(doc, "span", { class: "pv-sub" }, sub)] : [])),
             ...(state === "none" ? [] : [h(doc, "span", { class: `pv-dot ${state === "locked" ? "yellow" : "green"}`, role: "img", "aria-label": dotText, title: dotText })]),
             h(doc, "span", { class: "pv-check", "aria-hidden": "true" }, selected ? "✓" : ""),
@@ -411,8 +411,8 @@ export function renderCreate(ctx) {
       if (marked && summary.hasSearch) estimateLines.push(h(doc, "p", { class: "notice", "data-ui": "free-tier-search" }, t("create.freeTierSearch")));
       if (marked && paidOnly) estimateLines.push(h(doc, "p", { class: "notice", "data-ui": "free-tier-no-strong" }, t("create.freeTierNoStrong")));
       if (summary.hasSearch && !isFree) {
-        estimateLines.push(h(doc, "p", { class: "notice" }, t(provider === "google" ? "create.estimateSearchGoogle" : "create.estimateSearch", { usd: est.searchCostUsd.toFixed(2) })));
-        estimateLines.push(h(doc, "p", { class: "notice" }, t(provider === "google" ? "editor.searchFeeGoogle" : "editor.searchFee")));
+        estimateLines.push(h(doc, "p", { class: "notice" }, t(providerSpec(provider).text.estimateSearch, { usd: est.searchCostUsd.toFixed(2) })));
+        estimateLines.push(h(doc, "p", { class: "notice" }, t(providerSpec(provider).text.searchFee)));
       }
 
       // Key: one block for each key slot the agents use.
@@ -457,11 +457,11 @@ export function renderCreate(ctx) {
             pv.setSessionKey(keyInput.value.trim());
             drawReview();
           });
-          keyParts.push(h(doc, "div", { class: "field" }, h(doc, "label", { for: `cr-key${sfx}` }, t(provider === "google" ? "create.keyInlineGoogle" : "create.keyInline")), keyInput), save, h(doc, "p", { class: "hint" }, h(doc, "a", { href: `#/settings/key/${slot}` }, t("create.keySettingsLink"))));
+          keyParts.push(h(doc, "div", { class: "field" }, h(doc, "label", { for: `cr-key${sfx}` }, t(providerSpec(provider).text.keyInline)), keyInput), save, h(doc, "p", { class: "hint" }, h(doc, "a", { href: `#/settings/key/${slot}` }, t("create.keySettingsLink"))));
         }
       } else {
         keyParts.push(h(doc, "p", {}, t("settings.keyAvailable")));
-        if (provider === "google") keyParts.push(h(doc, "p", { class: "hint" }, h(doc, "a", { href: PRICING_URLS.google, target: "_blank", rel: "noopener noreferrer" }, t("settings.googlePricingLink"))));
+        if (providerSpec(provider).text.pricingLink) keyParts.push(h(doc, "p", { class: "hint" }, h(doc, "a", { href: providerSpec(provider).pricingUrl, target: "_blank", rel: "noopener noreferrer" }, t(providerSpec(provider).text.pricingLink))));
       }
       return keyParts;
       };
@@ -478,7 +478,7 @@ export function renderCreate(ctx) {
       const pane = {
         agents: [agentsTable],
         limits: [h(doc, "h4", {}, t("create.limitsHeading"), help("create-limits", t("create.limitsHeading"))), ...limitInputs],
-        cost: design.nodes.length === 0 ? [h(doc, "p", { class: "hint" }, t("create.costNeeds"))] : [h(doc, "h4", {}, t("create.estimateHeading"), help("create-estimate", t("create.estimateHeading"))), ...estimateLines, ...providersOf(design, provider).map((p) => h(doc, "p", { class: "notice" }, t(p === "google" ? "create.dataNoticeGoogle" : "create.dataNotice")))],
+        cost: design.nodes.length === 0 ? [h(doc, "p", { class: "hint" }, t("create.costNeeds"))] : [h(doc, "h4", {}, t("create.estimateHeading"), help("create-estimate", t("create.estimateHeading"))), ...estimateLines, ...providersOf(design, provider).map((p) => h(doc, "p", { class: "notice" }, t(providerSpec(p).text.dataNotice)))],
         key: [h(doc, "h4", {}, t("create.keyHeading")), ...keyParts],
       }[draft.subTab] ?? [];
       reviewHost.replaceChildren(workspace ? "" : h(doc, "h3", {}, t("create.step.check"), help("create-run", t("create.step.check"))), tabs.element, h(doc, "div", { class: "inner-pane", role: "tabpanel", "data-ui": `pane-${draft.subTab}` }, ...pane), reasons);
@@ -627,7 +627,7 @@ export function renderCreate(ctx) {
   }
 
   // The key slot of a recorded run whose agents name none (a run from before agents had slots).
-  const legacySlot = (run) => (String(run?.recordedWith?.provider ?? "").split("+")[0] === "google" ? (run.recordedWith.freeTier === true ? "google-free" : "google") : "anthropic");
+  const legacySlot = (run) => defaultSlot(String(run?.recordedWith?.provider ?? "").split("+")[0], run?.recordedWith?.freeTier === true);
 
   // The keys a recorded run needs again. Null for a key that is not available (not entered, or still locked).
   function keysForRun(run) {
@@ -675,6 +675,8 @@ export function renderCreate(ctx) {
 
     const id = resume ? resume.id : makeRunId(Date.now());
     const events = [...base];
+    // The calls to the provider are kept beside the events (the player steps through events); a carried-on run keeps the earlier calls.
+    const apiCalls = resume ? [...(resume.apiCalls ?? [])] : [];
     if (resume && !approve) events.push({ type: "warning", agent: failedIds[0], message: t("run.retrying", { agent: failedIds.join(", ") }), t: offset - 500, at: Date.now() });
     // The clock of a carried-on run continues from the earlier try, so the times of all events fit together.
     const startedAt = Date.now() - offset;
@@ -690,7 +692,7 @@ export function renderCreate(ctx) {
       })(),
       userAgent: typeof navigator === "undefined" ? undefined : navigator.userAgent,
     };
-    const record = () => buildRunRecord({ id, design, task, events, limits, language: ctx.lang, appVersion: ctx.version, startedAt, endedAt, client, provider, freeTier });
+    const record = () => buildRunRecord({ id, design, task, events, apiCalls, apiCallsDropped: resume?.apiCallsDropped === true, limits, language: ctx.lang, appVersion: ctx.version, startedAt, endedAt, client, provider, freeTier });
     const saver = createBatchedSaver(ctx.runStore);
 
     const host = h(doc, "div", { class: "replay-host", "data-ui": "player-host" });
@@ -713,7 +715,7 @@ export function renderCreate(ctx) {
       live.destroy();
       beginRun({ resume: record2 });
     };
-    const live = mountLiveReplay(host, { title: task.split(/\r?\n/)[0].slice(0, 120), pattern: resume ? resume.pattern : draft.pattern, recordedWith: { provider: providersOf(design, provider).join("+"), model: modelsUsed(design, provider) }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout, providerColors: ctx.settings.get().providerColors, onRetry: retryNow, suggestFallback: ctx.settings.get().fallback !== "off", limitsInfo: () => ({ current: ctx.settings.get().limits, original: finalRecordNow?.limits ?? ctx.settings.get().limits, record: finalRecordNow, repeatStop: ctx.settings.get().repeatStop }) });
+    const live = mountLiveReplay(host, { apiCalls, title: task.split(/\r?\n/)[0].slice(0, 120), pattern: resume ? resume.pattern : draft.pattern, recordedWith: { provider: providersOf(design, provider).join("+"), model: modelsUsed(design, provider) }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout, providerColors: ctx.settings.get().providerColors, onRetry: retryNow, suggestFallback: ctx.settings.get().fallback !== "off", limitsInfo: () => ({ current: ctx.settings.get().limits, original: finalRecordNow?.limits ?? ctx.settings.get().limits, record: finalRecordNow, repeatStop: ctx.settings.get().repeatStop }) });
     ctx.onLeave(live.destroy);
     for (const e of base) live.append(e);
     if (resume && !approve) live.append(events[base.length]);
@@ -804,6 +806,11 @@ export function renderCreate(ctx) {
       approved: approvedAgents(base),
       provider,
       onEvent: (event) => {
+        if (event.type === "api_call") {
+          apiCalls.push(resume ? { ...event, t: (event.t ?? 0) + offset } : event);
+          saver.update(record());
+          return;
+        }
         // Carried on: the clock continues from the earlier try, and a handoff the earlier try already has is not shown twice.
         if (resume && event.type === "handoff" && skipHandoff(event)) return;
         if (resume && (event.type === "agent_created" || event.type === "agent_refused" || event.type === "handoff_refused") && skipCreate(event)) return;

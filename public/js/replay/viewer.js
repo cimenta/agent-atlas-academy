@@ -14,6 +14,15 @@ function tryJson(value) {
 
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+// JSON.stringify that does not throw for a document nested too deep to print: the fallback text is returned instead.
+export function safeStringify(json, fallback) {
+  try {
+    return JSON.stringify(json, null, 2);
+  } catch {
+    return fallback;
+  }
+}
+
 export function createViewer({ doc, t }) {
   const states = new Map(); // id -> { mode, q }
 
@@ -48,10 +57,16 @@ export function createViewer({ doc, t }) {
       if (!states.has(id)) states.set(id, { mode: "raw", q: "" });
       const st = states.get(id);
       const json = tryJson(value);
-      const raw = json !== undefined ? JSON.stringify(json, null, 2) : String(value ?? "");
+      const raw = json !== undefined ? safeStringify(json, String(value ?? "")) : String(value ?? "");
       const bodyBox = h(doc, "div", { class: "pre vbody" });
       const fillBody = () => {
-        bodyBox.replaceChildren(...(json !== undefined && st.mode === "tree" ? [h(doc, "div", { class: "jt" }, tree(json, st.q))] : marked(raw, st.q)));
+        let nodes;
+        try {
+          nodes = json !== undefined && st.mode === "tree" ? [h(doc, "div", { class: "jt" }, tree(json, st.q))] : marked(raw, st.q);
+        } catch {
+          nodes = marked(raw, st.q); // a tree of a document nested too deep
+        }
+        bodyBox.replaceChildren(...nodes);
       };
       const redraw = fillBody;
       const bar = h(doc, "div", { class: "vbar" });

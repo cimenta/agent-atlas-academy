@@ -19,6 +19,8 @@ const toBase64 = (bytes) => {
 };
 const fromBase64 = (text) => Uint8Array.from(atob(text), (c) => c.charCodeAt(0));
 
+import { SLOT_IDS } from "../key-slots.js";
+
 // The first provider (Anthropic) keeps its record under "aa.vault", as before; every other provider has its own
 // record, "aa.vault.<provider>", with its own passphrase and its own key in memory.
 export function createVault({ storage, cryptoImpl = globalThis.crypto, iterations = 600000, storageKey = "aa.vault" }) {
@@ -90,7 +92,7 @@ export function createVault({ storage, cryptoImpl = globalThis.crypto, iteration
 
   const self = {
     forProvider(id) {
-      if (id === "anthropic") return self;
+      if (id === SLOT_IDS[0]) return self;
       if (!others.has(id)) others.set(id, createVault({ storage, cryptoImpl, iterations, storageKey: `aa.vault.${id}` }));
       return others.get(id);
     },
@@ -98,7 +100,7 @@ export function createVault({ storage, cryptoImpl = globalThis.crypto, iteration
     // it is an error only when nothing could be opened.
     async unlockAll(passphrase) {
       let opened = 0;
-      for (const id of ["anthropic", ...others.keys(), "google-free", "google"].filter((v, i, a) => a.indexOf(v) === i)) {
+      for (const id of [...SLOT_IDS, ...others.keys()].filter((v, i, a) => a.indexOf(v) === i)) {
         const v = self.forProvider(id);
         if (!v.hasStoredKey() || v.getSessionKey() !== null) continue;
         try {

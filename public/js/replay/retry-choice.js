@@ -1,15 +1,16 @@
 // Retry with another model: the models a failed agent can be retried with, and a run with that choice applied.
 import { providerCatalog, nodeModel, nodeProvider, fallbackModelFor } from "../engine/catalog.js";
+import { PROVIDER_IDS, slotsOf, freeSlotOf } from "../engine/providers.js";
 import { isSlot, slotIsFree, slotProvider } from "../key-slots.js";
 
-const PROVIDERS = ["anthropic", "google"];
-
-// The key slot a model is run with: Anthropic has one; a Gemini model keeps the slot the agent already has when it fits,
-// else the free slot for a model with a free tier and the paid slot for one without.
+// The key slot a model is run with: a provider with one slot uses it; a provider with a free and a paid slot (Gemini) keeps the slot
+// the agent already has when it fits, else the free slot for a model with a free tier and the paid slot for one without.
 function slotFor(provider, model, node) {
-  if (provider === "anthropic") return "anthropic";
-  if (isSlot(node?.slot) && slotProvider(node.slot) === "google" && (model.freeTier !== false || !slotIsFree(node.slot))) return node.slot;
-  return model.freeTier === false ? "google" : "google-free";
+  const slots = slotsOf(provider);
+  if (slots.length === 1) return slots[0];
+  if (isSlot(node?.slot) && slotProvider(node.slot) === provider && (model.freeTier !== false || !slotIsFree(node.slot))) return node.slot;
+  const free = freeSlotOf(provider);
+  return model.freeTier === false || free === null ? (slots.find((id) => !slotIsFree(id)) ?? slots[0]) : free;
 }
 
 // [{ provider, id, tier, value: { slot, model }, current, free }] for every model, the one that failed marked current.
@@ -20,7 +21,7 @@ export function retryChoices(design, nodeId, fallback = "anthropic", { suggest =
   const nowProvider = nodeProvider(node, fallback);
   const out = [];
   const suggested = suggest ? fallbackModelFor(node, fallback) : null;
-  for (const provider of PROVIDERS) {
+  for (const provider of PROVIDER_IDS) {
     for (const model of providerCatalog(provider).models) {
       out.push({
         provider,
@@ -28,7 +29,7 @@ export function retryChoices(design, nodeId, fallback = "anthropic", { suggest =
         tier: model.key,
         value: { slot: slotFor(provider, model, node), model: model.key },
         current: provider === nowProvider && model.id === now.id,
-        free: provider === "google" && model.freeTier !== false,
+        free: freeSlotOf(provider) !== null && model.freeTier !== false,
         suggested: suggested !== null && provider === nowProvider && model.id === suggested.id,
       });
     }

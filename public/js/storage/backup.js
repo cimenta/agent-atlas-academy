@@ -19,6 +19,9 @@ export function isVaultRecord(record) {
 
 const plainRecord = (r) => ({ v: r.v, kdf: r.kdf, iterations: r.iterations, salt: r.salt, iv: r.iv, ciphertext: r.ciphertext });
 
+// The saved keys a backup may carry, as the backup file names them.
+export const backupVaultRecords = (vaultOf) => ({ googleRecord: vaultOf("google").exportRecord(), googleFreeRecord: vaultOf("google-free").exportRecord() });
+
 export function exportBackup({ runs, settings, vaultRecord = null, googleRecord = null, googleFreeRecord = null, includeKey = false, appVersion }) {
   const backup = { backupVersion: BACKUP_VERSION, appVersion, exportedAt: new Date().toISOString(), settings: settings ?? {}, runs };
   if (includeKey && isVaultRecord(vaultRecord)) {

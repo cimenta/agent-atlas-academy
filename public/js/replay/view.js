@@ -1,5 +1,6 @@
 // The run inspector: agent cards, then Steps / Messages / Output for the chosen agent.
 // A slim player on top decides how much of the run is revealed (replay), the rest is inspection.
+import { providerSpec, freeSlotOf } from "../engine/providers.js";
 import { h } from "../dom.js";
 import { helpIcon } from "../help-popup.js";
 import { validateRun } from "../run-schema.js";
@@ -8,6 +9,9 @@ import { debateProgress, deriveInspector, designLabel, evaluatorProgress, handof
 import { createdPanel } from "./created-view.js";
 import { designWithCreated } from "../engine/created.js";
 import { createViewer } from "./viewer.js";
+import { apiCallsOf, apiView } from "./api-view.js";
+import { PROVIDERS } from "../engine/providers.js";
+import { isSlot, slotIsFree } from "../key-slots.js";
 import { markText, searchBar } from "../text-search.js";
 import { definitionFromRun } from "../create/definition.js";
 import { openInCreate } from "../create/draft.js";
@@ -94,12 +98,12 @@ export function headingOf(run) {
 export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null }) {
   const validation = validateRun(run);
   if (!validation.ok) return mountError(container, doc, t, validation.errors);
-  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout, providerColors, onRetry, suggestFallback, limitsInfo });
+  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, apiCalls: Array.isArray(run.apiCalls) ? run.apiCalls : [], apiCallsDropped: run.apiCallsDropped === true, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout, providerColors, onRetry, suggestFallback, limitsInfo });
 }
 
 // A player that shows a run while it is still arriving. Events are added with append(), end() closes it.
-export function mountLiveReplay(container, { title, pattern, recordedWith, t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null }) {
-  const view = mountView(container, { events: [], pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout, providerColors, onRetry, suggestFallback, limitsInfo });
+export function mountLiveReplay(container, { title, pattern, recordedWith, apiCalls = [], t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null }) {
+  const view = mountView(container, { events: [], apiCalls, pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout, providerColors, onRetry, suggestFallback, limitsInfo });
   return {
     append: (event) => view.player.append(event),
     end: () => view.player.endLive(),
@@ -107,7 +111,7 @@ export function mountLiveReplay(container, { title, pattern, recordedWith, t, do
   };
 }
 
-function mountView(container, { exportRun, pattern, events, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null }) {
+function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCallsDropped = false, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null }) {
   const player = createPlayer({ events, clock, timeScale, live });
   const ui = { agent: null, tab: "steps", step: null, round: null, follow: true };
   const viewer = createViewer({ doc, t });
@@ -179,8 +183,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   const createdHost = h(doc, "div", { class: "dynamic-host", "data-ui": "created-host" });
   const openCondense = new Set();
   const chips = h(doc, "div", { class: "chips", "data-ui": "agent-cards", role: "list", "aria-label": t("player.agents") });
-  const tabButtons = ["steps", "messages", "output", "context"].map((name) => {
-    const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-tab": name, "data-ui": `tab-${name}` }, t({ steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput", context: "player.tabContext" }[name]));
+  const tabButtons = ["steps", "messages", "output", "context", "api"].map((name) => {
+    const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-tab": name, "data-ui": `tab-${name}` }, name === "api" ? t("player.tabApi", { n: 0 }) : t({ steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput", context: "player.tabContext" }[name]));
     button.addEventListener("click", () => {
       ui.tab = name;
       ui.follow = false;
@@ -188,7 +192,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     });
     return button;
   });
-  const tabHelpNames = { steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput", context: "player.tabContext" };
+  const tabHelpNames = { steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput", context: "player.tabContext", api: "player.tabApiName" };
   const tabs = h(doc, "div", { class: "tabs", "data-ui": "inspector-tabs", role: "tablist" }, ...tabButtons.flatMap((button) => {
     const name = button.getAttribute("data-tab");
     return [button, help(`replay-${name}`, t(tabHelpNames[name]))];
@@ -329,8 +333,8 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
             ? {
                 arrowLabel: t("player.retryMenu"),
                 title: t("player.retryMenuTitle"),
-                providerName: (p) => (p === "google" ? "Gemini" : "Anthropic"),
-                tagText: (c) => (c.suggested ? `${t("player.retrySuggested")} · ` : "") + (c.current ? t("player.retryTagFailed") : c.provider === "google" ? t(c.free ? "player.retryTagFree" : "player.retryTagPaid") : t("player.retryTagPaid")),
+                providerName: (p) => providerSpec(p).chipName,
+                tagText: (c) => (c.suggested ? `${t("player.retrySuggested")} · ` : "") + (c.current ? t("player.retryTagFailed") : freeSlotOf(c.provider) !== null ? t(c.free ? "player.retryTagFree" : "player.retryTagPaid") : t("player.retryTagPaid")),
                 choicesOf: (id) => retryChoices(design, id, String(recordedWith?.provider ?? "anthropic").split("+")[0], { suggest: suggestFallback }),
                 extra: limitsInfo ? () => limitsChoice({ doc, t, ...limitsInfo() }) : null,
               }
@@ -627,6 +631,20 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     );
   }
 
+  // The API calls tab: what was sent to the provider and what came back, for the chosen agent. The search box opens the rows that match.
+  const openedCalls = new Map();
+  // The time of the event the player stands on: the tab shows the calls made up to then, as the Context tab does.
+  const playedAt = () => (player.cursor > 0 ? events[Math.min(player.cursor, events.length) - 1]?.t ?? 0 : -1);
+  const agentOnFreeKey = (agentId) => {
+    const node = designOfRun()?.nodes?.find((n) => n.id === agentId || n.id === String(agentId).split("#")[0]);
+    return isSlot(node?.slot) && slotIsFree(node.slot);
+  };
+  const oneDecimal = (n) => new Intl.NumberFormat(doc.documentElement?.lang || undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n);
+  function renderApi(agent) {
+    const calls = apiCallsOf(apiCalls, agent.id, playedAt());
+    return apiView({ doc, t, calls, wire: PROVIDERS[calls[0]?.provider]?.wire ?? null, viewer, query: search.query(), dropped: apiCallsDropped, opened: openedCalls, free: agentOnFreeKey(agent.id), runHasCalls: apiCalls.length > 0, num: oneDecimal });
+  }
+
   function renderContext(agent) {
     return contextView({ doc, t, label: agent.label, rows: contextOf(events, agent.id, player.cursor), num: (n) => new Intl.NumberFormat(doc.documentElement?.lang || undefined).format(n) });
   }
@@ -697,6 +715,10 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
     // With a diagram the round badge sits on the diagram; without one it stays in the status line.
     status.replaceChildren(...(debate && !designOfRun() ? [roundBadge] : []), parts.join(" · "));
     for (const b of tabButtons) b.setAttribute("aria-selected", String(b.getAttribute("data-tab") === ui.tab));
+    // The count of the calls of the chosen agent is part of the name of its tab.
+    const apiTab = tabButtons.find((b) => b.getAttribute("data-tab") === "api");
+    const shownCalls = apiCallsOf(apiCalls, currentAgent()?.id, playedAt()).length;
+    apiTab.replaceChildren(doc.createTextNode(shownCalls > 0 ? t("player.tabApi", { n: shownCalls }) : t("player.tabApiName")));
     renderBanners();
     renderNotebook();
     renderCondense();
@@ -714,7 +736,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
         body.replaceChildren(h(doc, "p", { class: "doc" }, t("insp.waiting")));
         return;
       }
-      body.replaceChildren(ui.tab === "steps" ? renderSteps(agent) : ui.tab === "messages" ? renderMessages(agent) : ui.tab === "context" ? renderContext(agent) : renderOutput(agent));
+      body.replaceChildren(ui.tab === "steps" ? renderSteps(agent) : ui.tab === "messages" ? renderMessages(agent) : ui.tab === "context" ? renderContext(agent) : ui.tab === "api" ? renderApi(agent) : renderOutput(agent));
     };
     if (search.query()) search.run();
     else drawBody();
@@ -759,7 +781,7 @@ function mountView(container, { exportRun, pattern, events, title, recordedWith,
   // Keyboard zones. Tab goes player, Steps, Messages, Output, Context and round again (Shift+Tab goes back, and
   // leaves from the player). In the player the arrows or W A S D move between the agents and Enter inspects
   // the one that has the focus. In Steps and Messages the same keys move between steps or rounds.
-  const ZONES = ["player", "steps", "messages", "output", "context"];
+  const ZONES = ["player", "steps", "messages", "output", "context", "api"];
   const MOVES = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", w: "up", s: "down", a: "left", d: "right" };
   const isLetter = (key) => key.length === 1;
   let lastG = 0;

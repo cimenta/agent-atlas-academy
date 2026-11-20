@@ -3,8 +3,11 @@ import { clampLimits } from "../engine/patterns.js";
 import { clampTimeoutSec, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop, clampHandoffChars, clampFallback } from "../engine/catalog.js";
 import { mergeGoKeys, validateGoKeys } from "../shortcuts.js";
 import { DEFAULT_PROVIDER_COLORS, isColor, mergeProviderColors } from "../provider-colors.js";
+import { PROVIDER_IDS, freeSlotOf } from "../engine/providers.js";
 
 const KEY = "aa.settings";
+// The providers that have a free tier (Gemini): the visitor says whether the key is on it.
+const FREE_PROVIDERS = PROVIDER_IDS.filter((p) => freeSlotOf(p) !== null);
 
 export function createSettingsStore(storage) {
   function get() {
@@ -18,7 +21,7 @@ export function createSettingsStore(storage) {
     // Tooltips are on unless the user turned them off.
     // The player controls sit on one slim bar ("bar") unless the user chose the side column ("side").
     const free = stored?.freeTier;
-    return { freeTier: { google: free?.google === true }, limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, helpButtons: stored?.helpButtons !== false, webSearch: stored?.webSearch !== false, fallback: clampFallback(stored?.fallback), formatEnforcement: stored?.formatEnforcement !== false, playerLayout: stored?.playerLayout === "side" ? "side" : "bar", createLayout: stored?.createLayout === "workspace" ? "workspace" : "steps", shortcuts: stored?.shortcuts !== false, goKeys: mergeGoKeys(stored?.goKeys), providerColors: mergeProviderColors(stored?.providerColors), requestTimeoutSec: clampTimeoutSec(stored?.requestTimeoutSec), maxOutputTokens: clampOutputTokens(stored?.maxOutputTokens), retries: clampRetries(stored?.retries ?? undefined), retryDelaySec: clampRetryDelaySec(stored?.retryDelaySec), repeatStop: clampRepeatStop(stored?.repeatStop), handoffChars: clampHandoffChars(stored?.handoffChars) };
+    return { freeTier: Object.fromEntries(FREE_PROVIDERS.map((p) => [p, free?.[p] === true])), limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, helpButtons: stored?.helpButtons !== false, webSearch: stored?.webSearch !== false, fallback: clampFallback(stored?.fallback), formatEnforcement: stored?.formatEnforcement !== false, playerLayout: stored?.playerLayout === "side" ? "side" : "bar", createLayout: stored?.createLayout === "workspace" ? "workspace" : "steps", shortcuts: stored?.shortcuts !== false, goKeys: mergeGoKeys(stored?.goKeys), providerColors: mergeProviderColors(stored?.providerColors), requestTimeoutSec: clampTimeoutSec(stored?.requestTimeoutSec), maxOutputTokens: clampOutputTokens(stored?.maxOutputTokens), retries: clampRetries(stored?.retries ?? undefined), retryDelaySec: clampRetryDelaySec(stored?.retryDelaySec), repeatStop: clampRepeatStop(stored?.repeatStop), handoffChars: clampHandoffChars(stored?.handoffChars) };
   }
   function save(next) {
     try {
@@ -34,7 +37,7 @@ export function createSettingsStore(storage) {
     },
     // Whether the key of a provider is on the provider's free tier (the visitor ticks it when the key is entered).
     setFreeTier(provider, on) {
-      if (provider !== "google") return;
+      if (!FREE_PROVIDERS.includes(provider)) return;
       save({ ...get(), freeTier: { ...get().freeTier, [provider]: on === true } });
     },
     // The color of a provider in replays (a #rrggbb value). Anything else is ignored.

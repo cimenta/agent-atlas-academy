@@ -1,8 +1,8 @@
 // The color of a provider, chosen in Settings. A model tag in a replay uses it, so a different provider is easy
 // to see; a stronger model of the same provider gets a darker shade, a lighter one a paler shade.
-import { MODELS, GOOGLE_MODELS } from "./engine/catalog.js";
+import { PROVIDERS, PROVIDER_IDS } from "./engine/providers.js";
 
-export const DEFAULT_PROVIDER_COLORS = { anthropic: "#d97757", google: "#4285f4" };
+export const DEFAULT_PROVIDER_COLORS = Object.fromEntries(PROVIDER_IDS.map((id) => [id, PROVIDERS[id].color]));
 export const COLOR_CHOICES = ["#d97757", "#4285f4", "#2e9e6b", "#8b5cf6", "#d4537e", "#c28a00"];
 const HEX = /^#[0-9a-fA-F]{6}$/;
 
@@ -32,8 +32,8 @@ const TIER_SHADE = { fast: 0.5, balanced: 0, strong: -0.35 };
 
 // Which provider and tier a model id belongs to, or null for an unknown id.
 export function modelInfo(modelId) {
-  for (const [provider, models] of [["anthropic", MODELS], ["google", GOOGLE_MODELS]]) {
-    const found = models.find((m) => m.id === modelId);
+  for (const provider of PROVIDER_IDS) {
+    const found = PROVIDERS[provider].models.find((m) => m.id === modelId);
     if (found) return { provider, tier: found.key };
   }
   return null;
@@ -48,7 +48,8 @@ export function modelTagColors(modelId, colors) {
   return { background, color: luminance(background) > 0.4 ? "#1f1f1f" : "#ffffff" };
 }
 
-const CHIP_NAMES = { anthropic: "Anthropic", google: "Gemini", gemini: "Gemini" };
+// "gemini" is an older spelling of the provider "google" in run records.
+const ALIASES = { gemini: "google" };
 
 // The chips for the providers of a run ("anthropic+google" is a run that mixed two): name and colors of each.
 // A provider with no chosen color gets a neutral grey chip.
@@ -56,9 +57,9 @@ export function providerChips(provider, colors) {
   if (typeof provider !== "string" || provider === "") return [];
   const merged = mergeProviderColors(colors);
   return provider.split("+").filter(Boolean).map((id) => {
-    const key = id === "gemini" ? "google" : id;
+    const key = ALIASES[id] ?? id;
     const background = merged[key] ?? "#6b6b66";
-    return { id, name: CHIP_NAMES[id] ?? id[0].toUpperCase() + id.slice(1), background, color: luminance(background) > 0.4 ? "#1f1f1f" : "#ffffff" };
+    return { id, name: PROVIDERS[key]?.chipName ?? id[0].toUpperCase() + id.slice(1), background, color: luminance(background) > 0.4 ? "#1f1f1f" : "#ffffff" };
   });
 }
 

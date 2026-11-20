@@ -2,39 +2,14 @@
 // Pure data, shared by the browser and the server function.
 import { isSlot, slotProvider } from "../key-slots.js";
 
-// Prices are US dollars per million tokens. They are the figures of the current
-// published tiers and are shown to the visitor only as an estimate.
-// Check them against Anthropic's pricing page before every release.
-export const PRICES_AS_OF = "2026-11-09";
-
-export const MODELS = [
-  { key: "fast", id: "claude-haiku-5-5", label: "Fast", inputPerMTok: 1, outputPerMTok: 5 },
-  { key: "balanced", id: "claude-sonnet-5-5", label: "Balanced", inputPerMTok: 3, outputPerMTok: 15 },
-  { key: "strong", id: "claude-opus-5-5", label: "Strong", inputPerMTok: 5, outputPerMTok: 25 },
-];
+// The models, prices and providers live in the registry (providers.js); they are re-exported here under their old names.
+import { PROVIDERS, PROVIDER_IDS, PRICES_AS_OF, MODELS, SEARCH_PRICE_USD, GOOGLE_MODELS } from "./providers.js";
+export { PRICES_AS_OF, MODELS, SEARCH_PRICE_USD, GOOGLE_MODELS, PROVIDER_IDS };
 
 export const DEFAULT_MODEL = "fast";
 
-// Anthropic bills each web search on top of the tokens (10 dollars per 1000).
-export const SEARCH_PRICE_USD = 0.01;
-
-// Google Gemini: the same three choices (fast, balanced, strong) with Google's models and prices.
-// Check them against https://aistudio.google.com/docs/pricing before every release.
-// Google raises some of these prices on 2026-12-01 and 2027-01-01.
-// freeTier: false marks a model that Google does not offer on its free tier.
-export const GOOGLE_MODELS = [
-  { key: "fast", id: "gemini-3.5-flash-lite", label: "Fast", inputPerMTok: 0.3, outputPerMTok: 2.5, freeTier: true },
-  { key: "balanced", id: "gemini-3.8-flash", label: "Balanced", inputPerMTok: 0.75, outputPerMTok: 3.75, freeTier: true },
-  { key: "strong", id: "gemini-4-carbon", label: "Strong", inputPerMTok: 2, outputPerMTok: 10, freeTier: false },
-];
-
-export const PROVIDER_CATALOG = {
-  anthropic: { label: "Anthropic", models: MODELS, searchPriceUsd: SEARCH_PRICE_USD, pricesAsOf: PRICES_AS_OF },
-  // Grounding with Google Search: 14 dollars per 1000 after the free monthly allowance (shown as an upper bound).
-  google: { label: "Google", models: GOOGLE_MODELS, searchPriceUsd: 0.014, pricesAsOf: "2026-11-13" },
-};
-export const PROVIDER_IDS = Object.keys(PROVIDER_CATALOG);
-export const PRICING_URLS = { anthropic: "https://www.anthropic.com/pricing", google: "https://aistudio.google.com/docs/pricing" };
+export const PROVIDER_CATALOG = Object.fromEntries(PROVIDER_IDS.map((id) => [id, { label: PROVIDERS[id].label, models: PROVIDERS[id].models, searchPriceUsd: PROVIDERS[id].searchPriceUsd, pricesAsOf: PROVIDERS[id].pricesAsOf }]));
+export const PRICING_URLS = Object.fromEntries(PROVIDER_IDS.map((id) => [id, PROVIDERS[id].pricingUrl]));
 
 export const providerCatalog = (provider) => PROVIDER_CATALOG[provider] ?? PROVIDER_CATALOG.anthropic;
 export const pricesFor = (provider) => {
@@ -114,6 +89,7 @@ export const clampRetryDelaySec = (value) => {
 export const MAX_PAUSES = 4; // pauses of the model in one agent turn
 export const REQUEST_MAX_BYTES = 65536; // a request to start a run
 export const RESUME_MAX_BYTES = 262144; // a run that is carried on also sends the answers of the agents that finished
+export const MODEL_CHECKS_PER_HOUR = 30; // checks of the list of models one address may make in an hour (Settings, Check models)
 export const DEFAULT_RUNS_PER_HOUR = 10; // runs one address may start in an hour (the site operator can change it)
 export const RUN_STORE_MAX_BYTES = 2 * 1024 * 1024; // one saved run
 

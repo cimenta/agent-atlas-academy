@@ -4,6 +4,7 @@ import { validateDesign } from "./patterns.js";
 import { createBudget, LimitError } from "./budget.js";
 import { createAgent } from "./agent.js";
 import { nodeProvider } from "./catalog.js";
+import { loggedCall } from "./api-log.js";
 import { redact } from "./anthropic.js";
 import { limitMessage } from "./harness.js";
 import { clampLimits } from "./patterns.js";
@@ -68,8 +69,10 @@ export async function runDesign({ design, task, limits, language = "en", call, c
   const notebook = design.memory?.notebook === true ? createNotebook({ emit: send }) : null;
   // One approval of any run of a node covers all runs of it ("worker#1" approved means "worker" is approved).
   const isApproved = (id) => approved.some((a) => nodeIdOf(a) === nodeIdOf(id));
+  // The calls in flight: when the run ends they are cancelled, and their records are written before the run is closed.
+  const pendingCalls = new Set();
   const make = (node) =>
-    createAgent({ node, design, call: callFor?.(node) ?? call, emit: send, budget, signal: control.signal, language, provider: nodeProvider(node, provider), maxOutputTokens, retries, retryDelaySec, freeTier, repeatStop, fallback, askFirst: node.approve === true && !isApproved(node.id), notebook, task, formatEnforcement, cached: resume.filter((r) => r.agent === node.id) });
+    createAgent({ node, design, call: loggedCall(callFor?.(node) ?? call, { agent: node.id, provider: nodeProvider(node, provider), emit: send, pending: pendingCalls }), emit: send, budget, signal: control.signal, language, provider: nodeProvider(node, provider), maxOutputTokens, retries, retryDelaySec, freeTier, repeatStop, fallback, askFirst: node.approve === true && !isApproved(node.id), notebook, task, formatEnforcement, cached: resume.filter((r) => r.agent === node.id) });
   // The node that runs once for every part or step has no agent up front; the runner makes one for each run (spawn).
   const agents = new Map(design.nodes.filter((node) => node.agent !== MULTI_RUN[design.pattern]).map((node) => [node.id, make(node)]));
   const spawn = createSpawner({ design, make });
@@ -107,6 +110,7 @@ export async function runDesign({ design, task, limits, language = "en", call, c
     signal?.removeEventListener("abort", onAbort);
   }
 
+  await Promise.allSettled([...pendingCalls]);
   const usage = budget.usage();
   send({ type: "done", outcome, usage, finalText, ...(reason ? { reason } : {}) });
   return { outcome, finalText, usage, ...(reason ? { reason } : {}) };

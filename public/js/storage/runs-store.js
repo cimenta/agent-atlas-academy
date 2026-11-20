@@ -1,6 +1,7 @@
 // Every run the visitor makes is kept in this browser (IndexedDB). Nothing here is sent anywhere.
 import { validateRun } from "../run-schema.js";
 import { RUN_STORE_MAX_BYTES as MAX_BYTES } from "../engine/catalog.js";
+import { withoutBodies } from "../engine/api-log.js";
 
 const DB_NAME = "aa";
 const STORE = "runs";
@@ -60,10 +61,27 @@ export function createRunStore(backend, { now = Date.now } = {}) {
   return {
     async save(run) {
       try {
-        if (!validateRun(run).ok) return { ok: false, reason: "invalid" };
-        if (JSON.stringify(run).length > MAX_BYTES) return { ok: false, reason: "too_large" };
+        let record = run;
+        // A log that is not valid (an oversize header of a strange answer) must not cost the run: it is saved without the log.
+        if (!validateRun(run).ok) {
+          if (!Array.isArray(run.apiCalls)) return { ok: false, reason: "invalid" };
+          const { apiCalls, ...rest } = run;
+          record = { ...rest, apiCallsDropped: true };
+          if (!validateRun(record).ok) return { ok: false, reason: "invalid" };
+        }
+        // The log of the calls to the provider is the biggest part of a run. When it makes the run too large, the run is saved without it
+        // (and says so), so a long run is never lost because of the log.
+        // First the bodies of the calls that worked go (the failures are what a student needs to read), then the whole log.
+        if (JSON.stringify(record).length > MAX_BYTES && Array.isArray(record.apiCalls)) {
+          record = { ...record, apiCalls: record.apiCalls.map((c) => (c.response && c.response.status < 400 ? withoutBodies(c) : c)) };
+        }
+        if (JSON.stringify(record).length > MAX_BYTES && Array.isArray(record.apiCalls)) {
+          const { apiCalls, ...rest } = record;
+          record = { ...rest, apiCallsDropped: true };
+        }
+        if (JSON.stringify(record).length > MAX_BYTES) return { ok: false, reason: "too_large" };
         const existing = await backend.get(run.id);
-        await backend.put({ id: run.id, createdAt: existing?.createdAt ?? now(), run });
+        await backend.put({ id: run.id, createdAt: existing?.createdAt ?? now(), run: record });
         return { ok: true };
       } catch {
         return { ok: false, reason: "storage" };

@@ -31,6 +31,9 @@
   "functions": {
     "api/run.js": {
       "maxDuration": 300
+    },
+    "api/models.js": {
+      "maxDuration": 30
     }
   }
 }
