@@ -160,7 +160,7 @@ export function limitOffers({ design, limits, outputTokens, handoffChars, loaded
   const fitsTime = findings.every((f) => f.kind !== "slow" || f.numbers.minutes * 60000 <= TIME_LIMIT_MS);
   if (!blocked && fitsTime && findings.some((f) => f.kind === "slow" || (!onlyRequests && (f.kind === "day-tokens" || f.kind === "day-requests")))) offers.push(finish({ id: "slowly", apply: (d, s) => ({ design: d, settings: s }) }));
   if (!blocked && findings.some((f) => f.kind === "day-tokens" || f.kind === "day-requests" || f.kind === "day-neurons")) offers.push(finish({ id: "tomorrow", apply: (d, s) => ({ design: d, settings: s }) }));
-  if (findings.some((f) => (f.kind === "day-tokens" || f.kind === "day-requests" || f.kind === "day-neurons") && (design.pattern === "voting" || design.pattern === "debate"))) {
+  if (findings.some((f) => (f.kind === "day-tokens" || f.kind === "day-requests" || f.kind === "day-neurons") && (design.pattern === "voting" || design.pattern === "debate")) && fewer(design) !== design) {
     offers.push(finish({ id: "fewer", apply: (d, s) => ({ design: fewer(d), settings: s }) }));
   }
   if (findings.length > 0) {

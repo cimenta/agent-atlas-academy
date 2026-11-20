@@ -136,8 +136,8 @@ test("source scan: reads of provider models without the slot are on the checked 
   const CHECKED = new Set([
     // the registry itself and the catalog that resolves the slot
     "engine/providers.js", "engine/catalog.js",
-    // reads the labels, keys or tiers only (never an id): compare view, definition and editor lists, patterns, guardrails
-    "compare-view.js", "create/definition.js", "create/editor-view.js", "engine/patterns.js", "engine/guardrails.js",
+    // reads the labels, keys or tiers only (never an id): compare view, the library detail (run facts: labels of recorded models), definition and editor lists, patterns, guardrails
+    "compare-view.js", "library-detail.js", "create/definition.js", "create/editor-view.js", "engine/patterns.js", "engine/guardrails.js",
     // the Gemini list of names and the shared model check (the catalog of ids to look for is built per slot by its caller)
     "engine/gemini.js", "engine/model-check.js",
     // read the registry model and then resolve it for the slot (resolveModel), or match both the paid and the free id, or only list ids for colour samples

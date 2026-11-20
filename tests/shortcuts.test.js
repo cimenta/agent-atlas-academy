@@ -159,12 +159,12 @@ import { clearPageActions, setPageActions } from "../public/js/shortcuts.js";
 test("b, i and o use the actions of the Play page, and do nothing elsewhere", () => {
   const { handle } = setup();
   const log = [];
-  const actions = { toggleLibrary: () => log.push("toggle"), importFile: () => log.push("import"), loadLast: () => log.push("last") };
+  const actions = { back: () => log.push("back"), importFile: () => log.push("import"), loadLast: () => log.push("last") };
   setPageActions(actions);
   assert.equal(handle(key("b")), true);
   assert.equal(handle(key("i")), true);
   assert.equal(handle(key("o")), true);
-  assert.deepEqual(log, ["toggle", "import", "last"]);
+  assert.deepEqual(log, ["back", "import", "last"]);
   clearPageActions(actions);
   assert.equal(handle(key("b")), false);
 });
@@ -209,4 +209,75 @@ test("W A S D move between the agents from anywhere, but not in the library list
   assert.equal(handle(key("w", { target: inLibrary })), false);
   assert.equal(handle(key("w", { target: { tagName: "INPUT" } })), false);
   assert.equal(moves.length, 5);
+});
+
+test("the library keys l c e u n and Delete call their actions, and Shift+E exports all my runs", () => {
+  const { handle } = setup();
+  const log = [];
+  const names = ["load", "compare", "exportTicked", "useInCreate", "editDescription", "remove", "exportAllMine"];
+  const actions = Object.fromEntries(names.map((n) => [n, () => (log.push(n), true)]));
+  setPageActions(actions);
+  for (const k of ["l", "c", "e", "u", "n", "Delete"]) assert.equal(handle(key(k)), true, k);
+  assert.equal(handle(key("E", { shiftKey: true })), true);
+  assert.deepEqual(log, names);
+  clearPageActions(actions);
+  for (const k of ["l", "c", "e", "u", "n", "Delete"]) assert.equal(handle(key(k)), false, "no page actions: " + k);
+});
+
+test("the library keys are ignored in a field and with Ctrl, Alt or Cmd", () => {
+  const { handle } = setup();
+  const log = [];
+  const actions = { compare: () => (log.push("compare"), true), exportTicked: () => (log.push("export"), true), useInCreate: () => (log.push("use"), true) };
+  setPageActions(actions);
+  for (const tag of ["INPUT", "TEXTAREA", "SELECT"]) assert.equal(handle(key("c", { target: { tagName: tag } })), false);
+  for (const mod of ["ctrlKey", "altKey", "metaKey"]) assert.equal(handle(key("e", { [mod]: true })), false);
+  assert.equal(handle(key("U", { shiftKey: true })), false, "Shift+U is not a key of the library");
+  assert.deepEqual(log, []);
+  clearPageActions(actions);
+});
+
+test("a key whose action has nothing to act on says so, and the key is still used", () => {
+  const { handle } = setup();
+  const said = [];
+  const actions = { compare: () => false, remove: () => false, say: (what) => said.push(what) };
+  setPageActions(actions);
+  assert.equal(handle(key("c")), true);
+  assert.equal(handle(key("Delete")), true);
+  assert.deepEqual(said, ["compare", "remove"]);
+  clearPageActions(actions);
+});
+
+test("a page can limit its keys to where the focus is: outside its scope the key is not used", () => {
+  const { handle } = setup();
+  const log = [];
+  const actions = { load: () => (log.push("load"), true), scope: (target) => target?.tagName !== "NAV" };
+  setPageActions(actions);
+  assert.equal(handle(key("l", { target: { tagName: "NAV" } })), false);
+  assert.equal(handle(key("l")), true);
+  assert.deepEqual(log, ["load"]);
+  clearPageActions(actions);
+});
+
+test("q calls swapFocus of the page with the focused element when the page has it", () => {
+  const { handle } = setup();
+  const seen = [];
+  const actions = { swapFocus: (target) => (seen.push(target.tagName), true) };
+  setPageActions(actions);
+  assert.equal(handle(key("q")), true);
+  assert.deepEqual(seen, ["BODY"]);
+  clearPageActions(actions);
+});
+
+test("the library group lists every key of the library page, with a label in both languages and no Show-or-hide item", async () => {
+  const { readFileSync } = await import("node:fs");
+  const en = JSON.parse(readFileSync(new URL("../public/locales/en.json", import.meta.url), "utf8"));
+  const cs = JSON.parse(readFileSync(new URL("../public/locales/cs.json", import.meta.url), "utf8"));
+  const group = SHORTCUT_GROUPS.find((g) => g.title === "shortcuts.groupLibrary");
+  const labels = group.items.map((i) => i.label);
+  for (const needed of ["shortcuts.libBack", "shortcuts.libLoad", "shortcuts.libTick", "shortcuts.libCompare", "shortcuts.libExport", "shortcuts.libExportAll", "shortcuts.libUse", "shortcuts.libEdit", "shortcuts.libDelete", "shortcuts.libImport", "shortcuts.libLast", "shortcuts.libMove", "shortcuts.libSwitch", "shortcuts.libLeave", "shortcuts.libSwap"]) assert.ok(labels.includes(needed), needed);
+  assert.ok(!labels.includes("shortcuts.libToggle"));
+  for (const l of labels) {
+    assert.ok(typeof en[l] === "string" && en[l], "en " + l);
+    assert.ok(typeof cs[l] === "string" && cs[l] && cs[l] !== en[l], "cs " + l);
+  }
 });

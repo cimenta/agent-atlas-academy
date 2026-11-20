@@ -67,7 +67,7 @@ export function parseBackup(text) {
   if (data.vaultGoogle !== undefined && !isVaultRecord(data.vaultGoogle)) return { ok: false, errors: ["The saved Gemini key in the backup is not valid."] };
   if (data.vaultGoogleFree !== undefined && !isVaultRecord(data.vaultGoogleFree)) return { ok: false, errors: ["The saved free Gemini key in the backup is not valid."] };
   if (data.vaultSlots !== undefined) {
-    if (!isObject(data.vaultSlots) || !Object.values(data.vaultSlots).every(isVaultRecord)) return { ok: false, errors: ["The saved keys of the other providers in the backup are not valid."] };
+    if (!isObject(data.vaultSlots) || !Object.entries(data.vaultSlots).every(([id, record]) => !SLOT_IDS.includes(id) || isVaultRecord(record))) return { ok: false, errors: ["The saved keys of the other providers in the backup are not valid."] };
   }
 
   const errors = [];
@@ -114,7 +114,11 @@ export async function applyBackup(backup, { runStore, settingsStore, vault, mode
   // The ids a student chose for vanished free models: only a known slot and tier with an id of a safe shape is kept (the store checks).
   if (isObject(backup.settings?.modelOverrides)) {
     for (const [slot, tiers] of Object.entries(backup.settings.modelOverrides)) {
-      if (isObject(tiers)) for (const [key, id] of Object.entries(tiers)) settingsStore.setModelOverride(slot, key, id);
+      if (isObject(tiers)) for (const [key, id] of Object.entries(tiers)) {
+        // A merge keeps a pick that was already made here.
+        if (mode !== "replace" && settingsStore.get().modelOverrides?.[slot]?.[key]) continue;
+        settingsStore.setModelOverride(slot, key, id);
+      }
     }
   }
   if (backup.vault && (mode === "replace" || !vault.hasStoredKey())) vault.importRecord(backup.vault);

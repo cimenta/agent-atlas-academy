@@ -121,10 +121,13 @@ export async function callGemini(body, { apiKey, fetchImpl = fetch, signal, time
 }
 
 // The names of the models Google offers to this key (at most 5 pages of 1000).
-export async function listGeminiModels({ apiKey, fetchImpl, signal, timeoutMs } = {}) {
+// The whole list may take totalMs at most (default 20 s, under the 30 s limit of the function), however many pages there are.
+export async function listGeminiModels({ apiKey, fetchImpl, signal, timeoutMs, totalMs = 20000 } = {}) {
   const names = [];
+  const deadline = Date.now() + totalMs;
   let token = "";
   for (let page = 0; page < 5; page++) {
+    if (page > 0 && Date.now() >= deadline) break;
     const url = `${API_ROOT}?pageSize=1000${token ? `&pageToken=${encodeURIComponent(token)}` : ""}`;
     const data = await getJson(url, { headers: { "x-goog-api-key": apiKey }, apiKey, fetchImpl, signal, timeoutMs, who: "Google" });
     if (Array.isArray(data?.models)) names.push(...data.models.map((m) => m?.name));

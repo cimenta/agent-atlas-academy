@@ -1,7 +1,7 @@
 // The harness is everything around the model: the limits, the time and size rules, the retries and the key handling.
 // This file lists the rules the visitor cannot change (shown on the Harness tab in Settings) and words the message
 // that a replay shows when a limit stopped the run.
-import { NODE_MAX, TASK_MAX_CHARS, MAX_PAUSES, REQUEST_MAX_BYTES, RESUME_MAX_BYTES, DEFAULT_RUNS_PER_HOUR } from "./catalog.js";
+import { NODE_MAX, RATE_WAIT_MAX_SEC, TASK_MAX_CHARS, MAX_PAUSES, REQUEST_MAX_BYTES, RESUME_MAX_BYTES, DEFAULT_RUNS_PER_HOUR } from "./catalog.js";
 import { TIME_LIMIT_MS } from "./budget.js";
 
 // The fixed rules, in the order they are shown. The words (label, hint, value) are in the locale files as
@@ -44,7 +44,8 @@ export function limitMessage(reason, limits, extra = {}) {
     case "rate_day": {
       const wait = Number(extra.value);
       const when = !Number.isFinite(wait) || wait <= 0 ? "later" : wait < 3600 ? `in about ${Math.ceil(wait / 60)} min` : `in about ${Math.round(wait / 3600)} h`;
-      return `Limit of the provider reached: it refused more calls from agent ${extra.label}, and its wait is longer than the app waits by itself. The run was stopped, and what happened so far is saved. Continue the run ${when}.`;
+      const why = Number.isFinite(wait) && wait > 0 && wait <= RATE_WAIT_MAX_SEC ? "it kept refusing calls even after the app waited several times" : "its wait is longer than the app waits by itself";
+      return `Limit of the provider reached: it refused more calls from agent ${extra.label}, and ${why}. The run was stopped, and what happened so far is saved. Continue the run ${when}.`;
     }
     case "rate_pool":
       return `Limit of the provider reached: the daily pool of the free account is used up (agent ${extra.label}). The run was stopped, and what happened so far is saved. Continue the run after 00:00 UTC.`;

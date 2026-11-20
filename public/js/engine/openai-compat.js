@@ -42,7 +42,8 @@ const STOP = { stop: "end_turn", length: "max_tokens", tool_calls: "tool_use" };
 const guessTokens = (text) => Math.ceil(String(text ?? "").length / 4);
 
 // Chat-completions answer -> Anthropic-shaped answer (content blocks, stop_reason, usage).
-export function fromChatResponse(data, { who = "The provider" } = {}) {
+// requestText: what was sent, used to estimate the input when the answer does not say how many tokens it was.
+export function fromChatResponse(data, { who = "The provider", requestText = "" } = {}) {
   const choice = data?.choices?.[0];
   if (!choice) throw new AnthropicError(`${who} returned no answer`);
   const message = choice.message ?? {};
@@ -63,7 +64,7 @@ export function fromChatResponse(data, { who = "The provider" } = {}) {
   const outText = content.map((b) => (b.type === "text" ? b.text : JSON.stringify(b.input ?? {}))).join("");
   const inputKnown = Number.isFinite(given.prompt_tokens);
   const outputKnown = Number.isFinite(given.completion_tokens);
-  const usage = { input_tokens: inputKnown ? given.prompt_tokens : 0, output_tokens: outputKnown ? given.completion_tokens : guessTokens(outText) };
+  const usage = { input_tokens: inputKnown ? given.prompt_tokens : guessTokens(requestText), output_tokens: outputKnown ? given.completion_tokens : guessTokens(outText) };
   if (!inputKnown || !outputKnown) usage.estimated = true;
   return { type: "message", role: "assistant", content, stop_reason: STOP[choice.finish_reason] ?? "end_turn", usage };
 }
@@ -76,13 +77,14 @@ export async function callChatCompletions(body, { apiKey, fetchImpl = fetch, sig
   const timeout = AbortSignal.timeout(timeoutMs);
   const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
 
+  const requestText = JSON.stringify(toChatRequest(body, { forcedFormat, ...(maxTokensField ? { maxTokensField } : {}), ...(reasoningEffort === undefined ? {} : { reasoningEffort }) }));
   let response;
   const startedAt = Date.now();
   try {
     response = await fetchImpl(url, {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify(toChatRequest(body, { forcedFormat, ...(maxTokensField ? { maxTokensField } : {}), ...(reasoningEffort === undefined ? {} : { reasoningEffort }) })),
+      body: requestText,
       signal: combined,
     });
   } catch (error) {
@@ -100,6 +102,9 @@ export async function callChatCompletions(body, { apiKey, fetchImpl = fetch, sig
   if (!response.ok) {
     const message = redact(data?.error?.message ?? data?.errors?.[0]?.message, apiKey) || `${who} answered with status ${response.status}`;
     const error = new AnthropicError(message, { status: response.status, retryable: RETRYABLE_STATUS.has(response.status) });
+    // The numeric code of the provider error (Cloudflare uses 4006 for a used-up allocation), so a caller need not search the message.
+    const code = data?.errors?.[0]?.code ?? data?.error?.code;
+    if (typeof code === "number") error.code = code;
     if (response.status === 429) {
       const asked = response.headers?.get?.("retry-after");
       const wait = asked === null || asked === undefined || asked === "" ? NaN : Number(asked);
@@ -108,7 +113,7 @@ export async function callChatCompletions(body, { apiKey, fetchImpl = fetch, sig
     }
     throw error;
   }
-  const answer = fromChatResponse(data, { who });
+  const answer = fromChatResponse(data, { who, requestText });
   answer.model = body.model;
   const headers = {};
   try {

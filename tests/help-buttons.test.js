@@ -50,3 +50,10 @@ test("a warning of a run points at the section that explains it", async () => {
   for (const id of WARNING_HELP_IDS) for (const [lang, locale] of [["en", en], ["cs", cs]]) assert.ok(findSection(locale["help.body"], id), `${lang}: ${id}`);
   assert.ok(en["replay.warningHelp"] && cs["replay.warningHelp"]);
 });
+
+test("a short rate wait opens the Help section of its own provider", async () => {
+  const { warningHelp } = await import("../public/js/help-ids.js");
+  assert.equal(warningHelp({ rateWait: 5, provider: "openrouter" }), "openrouter");
+  assert.equal(warningHelp({ rateWait: 5, provider: "cloudflare" }), "cloudflare");
+  assert.equal(warningHelp({ rateWait: 5 }), "groq");
+});

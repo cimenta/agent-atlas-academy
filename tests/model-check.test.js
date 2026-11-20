@@ -74,3 +74,26 @@ test("a refused list call throws with the status and never the key", async () =>
 test("the catalog ids are the ones the check looks for", () => {
   assert.deepEqual(cleanModelList(GOOGLE_MODELS.map((m) => m.id), "google").catalogFound, GOOGLE_MODELS.map((m) => m.id));
 });
+
+test("the pick list is cut after the models that can use tools come first, so a long list does not push them out", async () => {
+  const { cleanFreeModels, FREE_MODELS_MAX } = await import("../public/js/engine/model-check.js");
+  const models = [];
+  for (let i = 0; i < FREE_MODELS_MAX + 5; i++) models.push({ id: `a/model-${String(i).padStart(3, "0")}:free`, name: "n", tools: false });
+  models.push({ id: "z/last-with-tools:free", name: "t", tools: true });
+  const { freeModels } = cleanFreeModels(models);
+  assert.equal(freeModels.length, FREE_MODELS_MAX);
+  assert.ok(freeModels.some((m) => m.id === "z/last-with-tools:free"));
+});
+
+test("the Gemini model list stops asking for more pages when its total time is used up", async () => {
+  const { listGeminiModels } = await import("../public/js/engine/gemini.js");
+  let calls = 0;
+  const fetchImpl = async () => {
+    calls++;
+    await new Promise((r) => setTimeout(r, 15));
+    return { ok: true, status: 200, headers: new Map(), json: async () => ({ models: [{ name: `models/m${calls}` }], nextPageToken: "more" }) };
+  };
+  const names = await listGeminiModels({ apiKey: "k".repeat(20), fetchImpl, totalMs: 20 });
+  assert.ok(calls < 5, `calls ${calls}`);
+  assert.ok(names.length >= 1);
+});

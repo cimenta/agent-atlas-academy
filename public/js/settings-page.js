@@ -75,7 +75,7 @@ export function renderSettings(ctx) {
       box.append(h(doc, "div", { class: `check-row${row.available ? "" : " check-gone-row"}` }, h(doc, "span", { class: "check-tier" }, (row.tiers ?? [row.tier]).map((k) => t(`settings.tier.${k}`)).join(" / ")), h(doc, "code", {}, row.id), h(doc, "span", { class: row.available ? "check-ok" : "check-gone" }, t(row.available ? "settings.checkAvailable" : "settings.checkMissing"))));
     }
     if (shown.state === "missing") box.append(h(doc, "p", { class: "notice check-warn", role: "status" }, t("settings.checkWarnMissing")));
-    box.append(h(doc, "p", { class: "hint" }, t("settings.checkOthers", { n: shown.others })));
+    box.append(h(doc, "p", { class: "hint" }, t(shown.others === 1 ? "settings.checkOthersOne" : "settings.checkOthers", { n: shown.others })));
     return [box];
   };
   const buildKeyPanel = (id) => {
@@ -115,6 +115,8 @@ export function renderSettings(ctx) {
         say(errorText(error), true);
       }
       replacing = false;
+      // A check result belongs to the key it was made with.
+      checkResult.replaceChildren();
       refreshStatus();
     });
     const entry = [field(`set-key${sfx}`, t(spec.text.keyLabel), keyInput)];
@@ -152,10 +154,10 @@ export function renderSettings(ctx) {
       if (keyless) {
         // The same check Create uses: asking again here also refreshes what Create shows.
         const asked = await (ctx.freeCheck ?? sharedFreeCheck).run({ force: true });
-        result = asked.ok ? { ok: true, total: asked.data.total, ids: asked.data.ids, catalogFound: asked.data.catalogFound } : { ok: false, error: asked.error };
+        result = asked.ok ? { ok: true, total: asked.data.total, ids: asked.data.ids, catalogFound: asked.data.catalogFound, freeIds: asked.data.freeIds } : { ok: false, error: asked.error };
       } else result = await checkModels({ provider: slotProvider(id), key });
       checking = false;
-      checkResult.replaceChildren(...renderCheck(describeCheck(id, result)));
+      checkResult.replaceChildren(...renderCheck(describeCheck(id, result, ctx.settings.get().modelOverrides?.[id])));
       refresh();
     });
     // A provider with free limits explains them next to the key, and which models it is used with.

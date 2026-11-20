@@ -49,6 +49,8 @@ export function modelsBox({ doc, t, provider, slot = null, overrides = {}, onRes
   const typical = (r) => (30000 * r.neuronsInPerM + 10000 * r.neuronsOutPerM) / 1e6;
   const money = (n) => n.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const pair = locale.startsWith("cs") ? "; " : ", ";
+  // Czech has three forms: 1 běh, 2 to 4 běhy, 5 and more běhů.
+  const runsText = (n) => t(n === 1 ? "settings.runsCountOne" : n >= 2 && n <= 4 && locale.startsWith("cs") ? "settings.runsCountFew" : "settings.runsCount", { n: String(n) });
   const head = [h(doc, "th", {}, t("settings.modelsChoice")), h(doc, "th", {}, t("settings.modelsModel")), ...(showForced ? [h(doc, "th", {}, t("settings.modelsForced"))] : []), ...(showNeurons ? [h(doc, "th", {}, t("settings.modelsNeurons")), h(doc, "th", {}, t("settings.modelsTypical"))] : []), ...(showPrices ? [h(doc, "th", {}, t("settings.modelsPrices"))] : [])];
   const table = h(doc, "table", {}, h(doc, "tr", {}, ...head));
   for (const row of rows) {
@@ -59,7 +61,7 @@ export function modelsBox({ doc, t, provider, slot = null, overrides = {}, onRes
     if (showForced) cells.push(h(doc, "td", {}, chosen !== undefined ? "–" : row.forcedFormat === false ? t("settings.modelsForcedNo") : t("settings.modelsForcedYes")));
     if (showNeurons) {
       const n = typical(row);
-      cells.push(h(doc, "td", {}, `${row.neuronsInPerM.toLocaleString(locale)}${pair}${row.neuronsOutPerM.toLocaleString(locale)}`), h(doc, "td", {}, t("settings.modelsTypicalRun", { neurons: (Math.round(n / 10) * 10).toLocaleString(locale), runs: String(Math.floor(pool / n)) })));
+      cells.push(h(doc, "td", {}, `${row.neuronsInPerM.toLocaleString(locale)}${pair}${row.neuronsOutPerM.toLocaleString(locale)}`), h(doc, "td", {}, t("settings.modelsTypicalRun", { neurons: (Math.round(n / 10) * 10).toLocaleString(locale), runs: runsText(Math.floor(pool / n)) })));
     }
     if (showPrices) cells.push(h(doc, "td", {}, `${money(row.inputPerMTok)}${pair}${money(row.outputPerMTok)}`));
     table.append(h(doc, "tr", {}, ...cells));
@@ -72,7 +74,9 @@ export function modelsBox({ doc, t, provider, slot = null, overrides = {}, onRes
   const shared = rows.some((r) => r.keys.length > 1);
   const notes = [];
   if (shared) notes.push(h(doc, "p", { class: "hint" }, t("settings.modelsSharedNote")));
-  if (provider.text?.modelsNote && slot !== null && slotIsFree(slot)) notes.push(h(doc, "p", { class: "hint" }, t(provider.text.modelsNote)));
-  if (provider.capabilities?.search === false) notes.push(h(doc, "p", { class: "hint" }, t("settings.modelsNoSearch", { provider: provider.label })));
+  const listNote = provider.text?.modelsNote && slot !== null && slotIsFree(slot) ? [h(doc, "p", { class: "hint" }, t(provider.text.modelsNote))] : [];
+  const searchNote = provider.capabilities?.search === false ? [h(doc, "p", { class: "hint" }, t("settings.modelsNoSearch", { provider: provider.label }))] : [];
+  // The mockup of Cloudflare says the missing web search first, then that the model list changes; the other providers have it the other way round.
+  notes.push(...(provider.id === "cloudflare" ? [...searchNote, ...listNote] : [...listNote, ...searchNote]));
   return h(doc, "div", { class: "limits-box", "data-ui": "models-note" }, h(doc, "h3", {}, t("settings.modelsTitle", { provider: own && slot !== null && slotLabelKey(slot) ? t(slotLabelKey(slot)) : provider.label })), table, ...notes);
 }

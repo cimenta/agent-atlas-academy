@@ -1478,3 +1478,33 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .model-check .pick label { display: flex; gap: 8px; align-items: flex-start; font-size: 0.88rem; }
 .model-check .pick input { min-width: 0; }
 .model-check code { word-break: break-all; }
+
+/* Library page: the list on the left, the detail of the chosen run on the right. */
+.library-layout .run-row { cursor: pointer; }
+.library-layout .run-row .run-compare { margin-right: 0; }
+.library-layout .library-pane { max-height: none; }
+.library-detail h2 { margin: 4px 0; }
+.library-detail .facts { color: var(--muted); font-size: 0.85rem; margin: 2px 0 8px; }
+.library-detail .actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.library-detail section { margin: 14px 0; }
+.library-detail section h3 { margin: 0 0 2px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.library-detail section p { margin: 2px 0; }
+.lib-diagram { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 6px 0; font-size: 0.82rem; }
+.lib-diagram b { border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 3px 9px; }
+.lib-diagram i { color: var(--muted); font-style: normal; }
+.detail-table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+.detail-table th, .detail-table td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.detail-table th { color: var(--muted); }
+.back-to-list { display: none; }
+.back-link { margin: 0 0 8px; font-size: 0.9rem; }
+@media (max-width: 759px) {
+  .library-layout[data-view="detail"] .library-pane { display: none; }
+  .library-layout[data-view="list"] .library-detail-host { display: none; }
+  .library-layout .back-to-list { display: inline-block; margin-bottom: 8px; }
+}
+.msg { padding: 8px 12px; border-radius: 8px; font-size: 0.9rem; margin: 8px 0; }
+.msg.ok { background: var(--done-bg); color: var(--done); }
+.msg.warn { background: var(--working-bg); color: var(--working); }
+.msg b { display: block; }
+.import-summary { margin-bottom: 12px; }
+.library-detail h2, .library-detail .detail-table td, .run-row .run-title { overflow-wrap: anywhere; }

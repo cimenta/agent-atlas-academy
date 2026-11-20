@@ -71,3 +71,17 @@ test("checkAllModels skips slots without a key, goes one after the other and sur
   assert.equal(order.length, 2);
   assert.deepEqual((await checkAllModels({ keys: {}, fetchFn })).map((o) => o.skipped), [true, true, true, true, true, true, true, true, true]);
 });
+
+test("a model the app uses only with a paid key is not counted among the other models of a free key", () => {
+  const found = { ok: true, total: 30, ids: [], catalogFound: GOOGLE_MODELS.map((m) => m.id) };
+  assert.equal(describeCheck("google-free", found).others, 27);
+  assert.equal(describeCheck("google", found).others, 27);
+});
+
+test("a tier the student replaced with a pick is checked by the picked id, not reported missing", () => {
+  const found = { ok: true, total: 40, ids: [], catalogFound: [], freeIds: ["x/picked:free"] };
+  const shown = describeCheck("openrouter-free", found, { strong: "x/picked:free" });
+  const strong = shown.rows.find((r) => r.tiers.includes("strong"));
+  assert.equal(strong.id, "x/picked:free");
+  assert.equal(strong.available, true);
+});

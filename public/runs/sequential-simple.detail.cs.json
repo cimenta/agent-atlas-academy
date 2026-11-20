@@ -1,0 +1,6 @@
+{
+  "about": "Jedna krátká otázka je zodpovězena řetězcem agentů, z nichž každý navazuje na předchozího.",
+  "how": "Každý agent dostane zadání a text agenta před sebou.",
+  "learns": "Jak sekvenční řetězec předává práci dál a co každý krok přidává.",
+  "watch": "Co každý agent změní v textu, který dostal."
+}

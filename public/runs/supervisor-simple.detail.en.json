@@ -1,0 +1,6 @@
+{
+  "about": "A supervisor splits a small task between workers and puts their answers together.",
+  "how": "The supervisor decides who works next and when the answer is good enough.",
+  "learns": "What a supervisor adds over a plain chain, and what it costs.",
+  "watch": "The supervisor decisions between the worker steps."
+}

@@ -149,3 +149,10 @@ test("formatRunWhen gives the date and time of a run, and nothing when it is unk
   assert.equal(formatRunWhen(undefined, "en"), "");
   assert.equal(formatRunWhen(Number.NaN, "en"), "");
 });
+
+import { filterLibrary as filterLib2 } from "../public/js/play-model.js";
+test("the search finds a run by its provider and by how it ended", () => {
+  const items = [{ id: "a", title: "One", pattern: "debate", provider: "groq", outcome: "failed" }, { id: "b", title: "Two", pattern: "debate", provider: "gemini", outcome: "finished" }];
+  assert.deepEqual(filterLib2(items, "groq").map((i) => i.id), ["a"]);
+  assert.deepEqual(filterLib2(items, "finished").map((i) => i.id), ["b"]);
+});

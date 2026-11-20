@@ -1,6 +1,6 @@
 // One agent in a run: keeps its own conversation, calls the model, reports events.
 import { slotFreeLimits } from "../key-slots.js";
-import { RATE_WAIT_MAX_SEC, RATE_WAITS_MAX, nodeModel, withTier, AGENT_TYPES, OUTPUT_TOKENS, RETRIES, RETRY_DELAY_SEC, REPEAT_STOP, MAX_PAUSES, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop, fallbackModelFor } from "./catalog.js";
+import { RATE_WAIT_MAX_SEC, RATE_WAITS_MAX, nodeProvider, nodeModel, withTier, AGENT_TYPES, OUTPUT_TOKENS, RETRIES, RETRY_DELAY_SEC, REPEAT_STOP, MAX_PAUSES, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop, fallbackModelFor } from "./catalog.js";
 import { systemPromptFor } from "./prompts.js";
 import { toolsFor } from "./tools.js";
 import { AnthropicError, redact } from "./anthropic.js";
@@ -117,11 +117,11 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
         rateWaits = 0;
         return answer;
       } catch (error) {
-        if (freeLimited && error instanceof AnthropicError && error.status === 429) {
+        if ((freeLimited || error.pool === true) && error instanceof AnthropicError && error.status === 429) {
           const asked = Number.isFinite(error.retryAfterSec) ? error.retryAfterSec : null;
           if (error.rateKind === "day" || (asked ?? 0) > RATE_WAIT_MAX_SEC || ++rateWaits > RATE_WAITS_MAX) throw new LimitError(error.pool === true ? "rate_pool" : "rate_day", { agent: node.id, label, value: asked });
-          const seconds = asked ?? retryDelayMs / 1000;
-          emit({ type: "warning", agent: node.id, retry: true, rateWait: seconds, message: `The provider asked the app to wait ${seconds} s (too many requests or tokens). Trying again after that.` });
+          const seconds = Math.max(1, asked ?? retryDelayMs / 1000);
+          emit({ type: "warning", agent: node.id, retry: true, rateWait: seconds, provider: nodeProvider(node, provider), message: `The provider asked the app to wait ${seconds} s (too many requests or tokens). Trying again after that.` });
           await sleep(seconds * 1000);
           tried--; // a wait that was asked for does not use up a try
           continue;
@@ -293,7 +293,6 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
               stop_sequence: response.stop_sequence ?? null,
               usage: copy(response.usage ?? {}),
             },
-            http: response._meta ? copy(response._meta) : null,
           },
         });
         for (const block of response.content ?? []) {

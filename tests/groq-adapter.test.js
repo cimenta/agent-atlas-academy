@@ -145,3 +145,11 @@ test("the model list endpoint serves Groq and refuses an Anthropic key for it", 
   await handler({ method: "POST", headers: {}, socket: {}, body: { provider: "groq", key: `sk-ant-${"x".repeat(30)}` } }, bad);
   assert.equal(bad.statusCode, 400);
 });
+
+test("an answer with no prompt_tokens estimates the input from the request, not 0", async () => {
+  const { callChatCompletions } = await import("../public/js/engine/openai-compat.js");
+  const fetchImpl = async () => ({ ok: true, status: 200, headers: new Map(), json: async () => ({ choices: [{ message: { role: "assistant", content: "hi" }, finish_reason: "stop" }], usage: {} }) });
+  const answer = await callChatCompletions({ model: "m", max_tokens: 50, system: "s".repeat(400), messages: [{ role: "user", content: [{ type: "text", text: "q".repeat(400) }] }] }, { apiKey: "k".repeat(20), fetchImpl, url: "http://x" });
+  assert.ok(answer.usage.input_tokens >= 150, String(answer.usage.input_tokens));
+  assert.equal(answer.usage.estimated, true);
+});

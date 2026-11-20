@@ -41,5 +41,5 @@ export function cleanFreeModels(models, key = "") {
     kept.push({ id: m.id, name: name === "" ? m.id : name, tools: m.tools === true, forcedFormat: m.forcedFormat === true });
   }
   kept.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-  return { freeIds: kept.slice(0, FREE_IDS_MAX).map((m) => m.id), freeModels: kept.slice(0, FREE_MODELS_MAX) };
+  return { freeIds: kept.slice(0, FREE_IDS_MAX).map((m) => m.id), freeModels: [...kept.filter((m) => m.tools), ...kept.filter((m) => !m.tools)].slice(0, FREE_MODELS_MAX) };
 }

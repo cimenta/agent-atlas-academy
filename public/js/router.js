@@ -34,7 +34,9 @@ export function parseRoute(hash) {
 }
 
 function parsePlay(second, third) {
-  if (second === undefined) return { ...PLAY_REPLAY, params: { view: "replay" } };
+  if (second === undefined || (second === "library" && third === undefined)) return { name: "play", params: { view: "library" } };
+  if (second === "library" && SLUG.test(third)) return { name: "play", params: { view: "library", id: third } };
+  if (second === "replay" && third === undefined) return PLAY_REPLAY;
   if (second === "create" && third === undefined) return { name: "play", params: { view: "create" } };
   if (second === "result") {
     if (third === undefined) return { name: "play", params: { view: "result" } };

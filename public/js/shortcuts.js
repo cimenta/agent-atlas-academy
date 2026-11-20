@@ -88,12 +88,20 @@ export const SHORTCUT_GROUPS = [
   {
     title: "shortcuts.groupLibrary",
     items: [
-      { label: "shortcuts.libToggle", combos: [["b"]] },
+      { label: "shortcuts.libMove", combos: [["↑"], ["↓"]] },
+      { label: "shortcuts.libSwitch", combos: [["←"], ["→"]] },
+      { label: "shortcuts.libLoad", combos: [["Enter"], ["l"]] },
+      { label: "shortcuts.libTick", combos: [["Space"]] },
+      { label: "shortcuts.libCompare", combos: [["c"]] },
+      { label: "shortcuts.libExport", combos: [["e"]] },
+      { label: "shortcuts.libExportAll", combos: [["Shift+E"]] },
+      { label: "shortcuts.libUse", combos: [["u"]] },
+      { label: "shortcuts.libEdit", combos: [["n"]] },
+      { label: "shortcuts.libDelete", combos: [["Delete"]] },
       { label: "shortcuts.libImport", combos: [["i"]] },
       { label: "shortcuts.libLast", combos: [["o"]] },
-      { label: "shortcuts.libMove", combos: [["↑"], ["↓"]] },
-      { label: "shortcuts.libOpen", combos: [["Enter"]] },
-      { label: "shortcuts.libSwitch", combos: [["←"], ["→"]] },
+      { label: "shortcuts.libSwap", combos: [["q"]] },
+      { label: "shortcuts.libBack", combos: [["b"]] },
       { label: "shortcuts.libLeave", combos: [["Esc"]] },
     ],
   },
@@ -117,7 +125,9 @@ export function focusActivePlayer() {
   active.focusPlayer();
   return true;
 }
-// The Play page registers what b, i and o do there: show or hide the library, import a file, load the last opened run.
+// The Play pages register what their keys do: { focusLibrary, swapFocus(target), load, compare, exportTicked, exportAllMine, useInCreate,
+// editDescription, remove, importFile, loadLast, back, say(name), scope(target) }. An action returns false when it had nothing to act on;
+// say(name) then tells the visitor. scope(target) false means the focus is somewhere this page does not claim the keys.
 let pageActions = null;
 export function setPageActions(api) {
   pageActions = api;
@@ -139,6 +149,9 @@ export function clearActivePlayer(api) {
   if (active === api) active = null;
 }
 
+// The keys of the Play pages and the action each one calls. Shift+E arrives as E.
+const PAGE_KEYS = { b: "back", i: "importFile", o: "loadLast", l: "load", c: "compare", e: "exportTicked", E: "exportAllMine", u: "useInCreate", n: "editDescription", Delete: "remove" };
+
 const TYPING = new Set(["INPUT", "TEXTAREA", "SELECT"]);
 const ACTIVATES_ON_SPACE = new Set(["BUTTON", "A", "SUMMARY"]);
 
@@ -156,7 +169,7 @@ export function createKeyHandler({ isEnabled, go, showHelp, goKeys = () => DEFAU
     if (isTypingTarget(event.target)) return false;
     const key = event.key;
     // In the library list the arrows move between runs, so they are not player keys there.
-    if (key.startsWith("Arrow") && event.target?.closest?.('[data-ui="library-pane"]')) return false;
+    if (key.startsWith("Arrow") && (event.target?.closest?.('[data-ui="library-pane"]') || event.target?.closest?.('[data-ui="library-layout"]'))) return false;
 
     // g was pressed a moment ago: this key chooses the page.
     if (pendingAt !== null) {
@@ -178,14 +191,15 @@ export function createKeyHandler({ isEnabled, go, showHelp, goKeys = () => DEFAU
       return true;
     }
     if (key === "/") return focusSearch() === true;
-    // q swaps between the library and the player.
+    // q swaps between the list and the detail of the library, or between the library and the player.
     if (key === "q") {
+      if (pageActions?.swapFocus) return pageActions.swapFocus(event.target) === true;
       const inLibrary = Boolean(event.target?.closest?.('[data-ui="library-pane"]'));
       return inLibrary ? focusActivePlayer() : focusLibrary();
     }
-    const pageAction = { b: "toggleLibrary", i: "importFile", o: "loadLast" }[key];
-    if (pageAction && pageActions?.[pageAction]) {
-      pageActions[pageAction]();
+    const pageAction = PAGE_KEYS[key];
+    if (pageAction && pageActions?.[pageAction] && pageActions.scope?.(event.target) !== false) {
+      if (pageActions[pageAction]() === false) pageActions.say?.(pageAction);
       return true;
     }
     if (!active) return false;

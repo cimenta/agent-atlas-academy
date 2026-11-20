@@ -19,17 +19,21 @@ export async function checkModels({ provider, key, fetchFn = fetch }) {
 
 // What to show for one key slot. A free slot is compared with the models that have a free tier only.
 // { state: "ok" | "missing" | "error", total, rows: [{ tier, id, label, available }], missing, others, error? }
-export function describeCheck(slotId, result) {
+// overrides: the ids the student picked for tiers of this slot ({ strong: id }); a picked tier is checked by its picked id (found among result.freeIds).
+export function describeCheck(slotId, result, overrides = {}) {
   if (!result?.ok) return { state: "error", total: 0, rows: [], missing: 0, others: 0, error: result?.error ?? "unreachable" };
   const models = modelsOfSlot(slotId).filter((m) => !slotIsFree(slotId) || m.freeTier !== false);
   const rows = [];
   for (const m of models) {
-    const same = rows.find((r) => r.id === m.id);
+    const picked = typeof overrides?.[m.key] === "string" && overrides[m.key] !== "" ? overrides[m.key] : null;
+    const id = picked ?? m.id;
+    const same = rows.find((r) => r.id === id);
     if (same) same.tiers.push(m.key);
-    else rows.push({ tier: m.key, tiers: [m.key], id: m.id, label: m.label, available: result.catalogFound.includes(m.id) });
+    else rows.push({ tier: m.key, tiers: [m.key], id, label: m.label, available: picked ? Array.isArray(result.freeIds) && result.freeIds.includes(picked) : result.catalogFound.includes(m.id) });
   }
   const available = rows.filter((r) => r.available).length;
-  return { state: available === rows.length ? "ok" : "missing", total: result.total, rows, missing: rows.length - available, others: Math.max(0, result.total - available) };
+  // A model the app uses only with a paid key is still a model of the app, so it is not one of the others.
+  return { state: available === rows.length ? "ok" : "missing", total: result.total, rows, missing: rows.length - available, others: Math.max(0, result.total - new Set(result.catalogFound).size) };
 }
 
 // Checks every key in keys ({ slotId: key or null }), one after the other. A slot without a key is skipped, not an error,

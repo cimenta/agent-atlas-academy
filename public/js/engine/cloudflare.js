@@ -7,7 +7,7 @@ import { AnthropicError, redact, getJson } from "./anthropic.js";
 const ROOT = "https://api.cloudflare.com/client/v4/accounts";
 // The answer when the free pool of neurons of the day is used up. Its exact status and body are not in Cloudflare's pages (the owner's
 // test settles them), so any 4xx that is not a refusal of the key and talks about the allocation or neurons counts as the day limit.
-export const QUOTA_PATTERN = /daily free allocation|neurons|4006/i;
+export const QUOTA_PATTERN = /daily free allocation|neurons/i;
 
 // { accountId, token } of an ACCOUNT_ID:TOKEN key (split at the first colon), or null when it does not have that shape.
 export function splitCloudflareKey(key) {
@@ -17,7 +17,7 @@ export function splitCloudflareKey(key) {
   if (colon < 0) return null;
   const accountId = text.slice(0, colon);
   const token = text.slice(colon + 1);
-  return /^[0-9a-f]{32}$/i.test(accountId) && token !== "" ? { accountId, token } : null;
+  return /^[0-9a-f]{32}$/i.test(accountId) && token !== "" ? { accountId: accountId.toLowerCase(), token } : null;
 }
 
 const hide = (text, { accountId, token }) => redact(redact(text, token), accountId);
@@ -28,7 +28,7 @@ function cleaned(error, parts) {
   if (!(error instanceof AnthropicError)) return error;
   error.message = hide(error.message, parts);
   const refused = error.status === 401 || error.status === 403;
-  if (!refused && error.status >= 400 && error.status < 500 && QUOTA_PATTERN.test(error.message)) {
+  if (!refused && error.status >= 400 && error.status < 500 && (error.code === 4006 || QUOTA_PATTERN.test(error.message))) {
     error.status = 429;
     error.rateKind = "day";
     error.pool = true;

@@ -140,3 +140,20 @@ test("a backup restores the workspace layout, and an unknown layout changes noth
   await applyBackup(parseBackup(JSON.stringify(exportBackup({ runs: [], settings: { createLayout: "grid" }, appVersion: "0.3.0" }))).backup, { ...s, mode: "merge" });
   assert.equal(s.settingsStore.get().createLayout, "workspace");
 });
+
+test("a record under a slot this version does not know no longer makes the whole backup invalid", () => {
+  const data = { backupVersion: BACKUP_VERSION, runs: [], vaultSlots: { "future-slot": { junk: true } } };
+  const parsed = parseBackup(JSON.stringify(data));
+  assert.equal(parsed.ok, true, JSON.stringify(parsed.errors));
+});
+
+test("a merge keeps the model picks already made here; a replace takes the picks of the backup", async () => {
+  const backup = exportBackup({ runs: [], settings: { modelOverrides: { "openrouter-free": { strong: "a/backup:free" } } }, appVersion: "1" });
+  const parsed = parseBackup(JSON.stringify(backup)).backup;
+  const s = stores();
+  s.settingsStore.setModelOverride("openrouter-free", "strong", "c/local:free");
+  await applyBackup(parsed, { ...s, mode: "merge" });
+  assert.equal(s.settingsStore.get().modelOverrides["openrouter-free"].strong, "c/local:free");
+  await applyBackup(parsed, { ...s, mode: "replace" });
+  assert.equal(s.settingsStore.get().modelOverrides["openrouter-free"].strong, "a/backup:free");
+});

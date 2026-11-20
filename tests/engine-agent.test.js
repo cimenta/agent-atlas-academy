@@ -226,16 +226,7 @@ test("a round records the request parameters and every field of the provider's a
   assert.equal(raw.request.model, "claude-haiku-5-5");
   assert.equal(raw.request.tools[0].name, "web_search");
   assert.equal(raw.request.messageCount, 1);
-  assert.equal(raw.http, null);
-});
-
-test("the HTTP details of the provider's answer are recorded when the call supplies them", async () => {
-  const response = { content: [{ type: "text", text: "hi" }], stop_reason: "end_turn", usage: { input_tokens: 1, output_tokens: 1 } };
-  Object.defineProperty(response, "_meta", { value: { status: 200, requestId: "req_9", headers: { "request-id": "req_9" }, ms: 123 }, enumerable: false });
-  const events = [];
-  const agent = createAgent({ node: node(), call: async () => response, emit: (e) => events.push(e), budget: createBudget(LIMIT_DEFAULTS), language: "en", sleep: async () => {} });
-  await agent.run("t");
-  assert.deepEqual(events.find((e) => e.type === "round").raw.http, { status: 200, requestId: "req_9", headers: { "request-id": "req_9" }, ms: 123 });
+  assert.equal("http" in raw, false, "the HTTP details are in the API log now");
 });
 
 test("the number of retries and the delay come from the settings", async () => {

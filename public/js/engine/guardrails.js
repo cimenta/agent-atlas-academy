@@ -109,7 +109,7 @@ function luhn(digits) {
   return sum % 10 === 0;
 }
 
-const KEY_SHAPES = [/sk-ant-[A-Za-z0-9_-]{20,}/, /(?<![A-Za-z0-9])sk-[A-Za-z0-9]{20,}/, /AIza[0-9A-Za-z_-]{35}/, /(?<![A-Za-z0-9])AKIA[0-9A-Z]{16}(?![A-Za-z0-9])/];
+const KEY_SHAPES = [/sk-ant-[A-Za-z0-9_-]{20,}/, /(?<![A-Za-z0-9])sk-[A-Za-z0-9]{20,}/, /AIza[0-9A-Za-z_-]{35}/, /(?<![A-Za-z0-9])gsk_[A-Za-z0-9]{20,}/, /sk-or-v1-[A-Za-z0-9]{20,}/, /(?<![A-Za-z0-9])AKIA[0-9A-Z]{16}(?![A-Za-z0-9])/];
 
 function secretHit(text) {
   if (KEY_SHAPES.some((re) => re.test(text))) return "an API key";

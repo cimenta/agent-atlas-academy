@@ -117,3 +117,10 @@ test("a checked text cannot close the wrapper of the reviewer", () => {
   assert.equal(input.split("</checked_text>").length, 2, "only the real closing tag is left");
   assert.equal(input.toLowerCase().split("</checked_text>").length, 2);
 });
+
+test("the secret rule catches Groq and OpenRouter key shapes", () => {
+  const rule = { kind: "secret", on: "output", action: "stop" };
+  assert.equal(runRule(rule, "my key is gsk_" + "a1B2c3D4e5F6g7H8i9J0k1L2").ok, false);
+  assert.equal(runRule(rule, "my key is sk-or-v1-" + "a1b2c3d4e5f6a7b8c9d0e1f2").ok, false);
+  assert.equal(runRule(rule, "no secret here, gsk is a word").ok, true);
+});

@@ -192,3 +192,13 @@ test("the detailed list reads tools and reply-format support from the supported 
   assert.deepEqual(out.models.slice(0, 3).map((m) => [m.tools, m.forcedFormat]), [[true, true], [false, true], [false, false]]);
   assert.deepEqual((await listOpenrouterDetailed({ fetchImpl: async () => ({ ok: true, status: 200, headers: new Headers(), json: async () => ({}) }) })), { ids: [], models: [] });
 });
+
+test("a later failed check does not wipe what the last good check found: lastGood keeps it", async () => {
+  const replies = [async () => okReply([{ id: "a/b:free", name: "n", tools: true, forcedFormat: true }]), async () => { throw new Error("offline"); }];
+  let i = 0;
+  const check = createFreeCheck({ fetchFn: (...a) => replies[i++](...a), now: () => 5 });
+  await check.run();
+  await check.run({ force: true });
+  assert.equal(check.last().ok, false);
+  assert.equal(check.lastGood().ok, true);
+});

@@ -75,6 +75,8 @@ export function createFreeCheck({ fetchFn = fetch, now = Date.now, ttlMs = 18000
       return pending;
     },
     last: () => latest,
+    // The latest answer that worked, even when a later check failed (a model known to be gone stays gone until a good check says otherwise).
+    lastGood: () => cached,
   };
 }
 

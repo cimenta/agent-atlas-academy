@@ -117,6 +117,11 @@ test("fewer rounds are offered for a debate", () => {
   assert.ok(offerIds(d, ["openrouter-free"]).includes("fewer"));
 });
 
+test("fewer is not offered when the design cannot get smaller (1 round, 2 voters)", () => {
+  const nodes = [{ id: "a", agent: "debater", model: "fast", search: false, slot: "openrouter-free" }, { id: "b", agent: "debater", model: "fast", search: false, slot: "openrouter-free" }, { id: "j", agent: "judge", model: "fast", search: false, slot: "openrouter-free" }];
+  assert.ok(!offerIds({ pattern: "debate", rounds: 1, nodes, edges: [] }, ["openrouter-free"]).includes("fewer"));
+});
+
 test("the offers of the mockup come in its order", () => {
   const d = { pattern: "debate", rounds: 30, nodes: [{ id: "a", agent: "debater", model: "fast", search: false, slot: "openrouter-free" }, { id: "b", agent: "debater", model: "fast", search: false, slot: "openrouter-free" }, { id: "j", agent: "judge", model: "fast", search: false, slot: "openrouter-free" }], edges: [] };
   assert.deepEqual(offerIds(d, ["openrouter-free", "groq-free", "groq"]).filter((id) => id !== "lightest-only"), ["fewer", "tomorrow", "move-agent", "paid-key"]);

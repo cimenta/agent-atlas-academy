@@ -7,8 +7,12 @@ test("empty hashes open the home page", () => {
   assert.deepEqual(parseRoute(undefined), { name: "home", params: {} });
 });
 
-test("#/play opens the replay view of Play", () => {
-  assert.deepEqual(parseRoute("#/play"), { name: "play", params: { view: "replay" } });
+test("#/play opens the Library view of Play", () => {
+  assert.deepEqual(parseRoute("#/play"), { name: "play", params: { view: "library" } });
+  assert.deepEqual(parseRoute("#/play/library"), { name: "play", params: { view: "library" } });
+  assert.deepEqual(parseRoute("#/play/library/local-abc-12"), { name: "play", params: { view: "library", id: "local-abc-12" } });
+  assert.deepEqual(parseRoute("#/play/replay"), { name: "play", params: { view: "replay" } });
+  for (const hash of ["#/play/library/Bad_Id", "#/play/library/a/b", "#/play/replay/x"]) assert.deepEqual(parseRoute(hash), { name: "notfound", params: {} }, hash);
 });
 
 test("the Play sub-tabs have their own routes", () => {

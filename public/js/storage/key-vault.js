@@ -1,5 +1,6 @@
 // Holds the API key in memory, and optionally keeps it in storage encrypted with a passphrase.
 // The passphrase is never stored, so a forgotten passphrase cannot be recovered.
+import { SLOT_IDS } from "../key-slots.js";
 export class VaultError extends Error {
   constructor(code) {
     super(`vault: ${code}`);
@@ -19,7 +20,6 @@ const toBase64 = (bytes) => {
 };
 const fromBase64 = (text) => Uint8Array.from(atob(text), (c) => c.charCodeAt(0));
 
-import { SLOT_IDS } from "../key-slots.js";
 
 // The first provider (Anthropic) keeps its record under "aa.vault", as before; every other provider has its own
 // record, "aa.vault.<provider>", with its own passphrase and its own key in memory.

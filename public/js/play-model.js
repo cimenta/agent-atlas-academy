@@ -17,7 +17,7 @@ export function pickHomeRun(runs) {
 
 export function buildReplayList(gallery, local) {
   return {
-    gallery: gallery.map((r) => ({ id: r.id, title: r.title, pattern: r.pattern, source: "gallery" })),
+    gallery: gallery.map((r) => ({ id: r.id, title: r.title, pattern: r.pattern, ...(r.provider ? { provider: r.provider } : {}), ...(r.outcome ? { outcome: r.outcome } : {}), ...(typeof r.recordedAt === "number" ? { createdAt: r.recordedAt } : {}), source: "gallery" })),
     mine: [...local]
       .sort((a, b) => b.createdAt - a.createdAt)
       .map((r) => ({ id: r.id, title: r.title, pattern: r.pattern, outcome: r.outcome, provider: r.provider, createdAt: r.createdAt, source: "local" })),
@@ -93,11 +93,12 @@ export function buildResultModel(run) {
 }
 
 // Library search: every word typed must appear in the title, the pattern, the id or a tag.
-export function filterLibrary(items, query) {
+// texts: extra text per run id (the detail), searched too.
+export function filterLibrary(items, query, texts = {}) {
   const words = String(query ?? "").toLowerCase().split(/\s+/).filter(Boolean);
   if (words.length === 0) return items;
   return items.filter((item) => {
-    const haystack = [item.title, item.pattern, item.id, ...(Array.isArray(item.tags) ? item.tags : [])].join(" ").toLowerCase();
+    const haystack = [item.title, item.pattern, item.id, item.provider, item.outcome, ...(Array.isArray(item.tags) ? item.tags : []), texts?.[item.id] ?? ""].join(" ").toLowerCase();
     return words.every((w) => haystack.includes(w));
   });
 }

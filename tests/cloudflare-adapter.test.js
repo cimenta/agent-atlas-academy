@@ -17,7 +17,7 @@ test("splitCloudflareKey splits at the first colon and refuses a bad key", () =>
   assert.deepEqual(splitCloudflareKey(KEY), { accountId: ACCOUNT, token: TOKEN });
   assert.deepEqual(splitCloudflareKey(`  ${KEY}\n`), { accountId: ACCOUNT, token: TOKEN });
   assert.deepEqual(splitCloudflareKey(`${ACCOUNT}:ab:cd`), { accountId: ACCOUNT, token: "ab:cd" });
-  assert.deepEqual(splitCloudflareKey(`${ACCOUNT.toUpperCase()}:${TOKEN}`), { accountId: ACCOUNT.toUpperCase(), token: TOKEN });
+  assert.deepEqual(splitCloudflareKey(`${ACCOUNT.toUpperCase()}:${TOKEN}`), { accountId: ACCOUNT, token: TOKEN });
   for (const bad of [TOKEN, ACCOUNT, `${ACCOUNT}:`, `${ACCOUNT.slice(1)}:${TOKEN}`, "", null, undefined, 42]) assert.equal(splitCloudflareKey(bad), null, String(bad));
 });
 
@@ -85,4 +85,9 @@ test("the run handler map has a call for cloudflare and the models route needs a
   const good = await run({ provider: "cloudflare", key: KEY });
   assert.equal(good.status, 200);
   assert.doesNotMatch(JSON.stringify(good.body), new RegExp(`${TOKEN}|${ACCOUNT}`));
+});
+
+test("the code 4006 makes a quota answer; the digits 4006 inside another message do not", async () => {
+  await assert.rejects(() => callCloudflare(body, { apiKey: KEY, fetchImpl: reply(400, { errors: [{ code: 4006, message: "limit reached" }] }) }), (e) => e.status === 429 && e.rateKind === "day");
+  await assert.rejects(() => callCloudflare(body, { apiKey: KEY, fetchImpl: reply(400, { errors: [{ code: 5001, message: "the request is too long: 34006 tokens" }] }) }), (e) => e.status === 400 && e.rateKind === undefined);
 });

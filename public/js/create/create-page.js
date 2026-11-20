@@ -123,8 +123,10 @@ export function renderCreate(ctx) {
   // The models the student chose for gone free models, and what the check found (null while it has not answered yet).
   const chosenModels = () => ctx.settings.get().modelOverrides?.[OVERRIDE_SLOT] ?? {};
   const currentCheck = () => {
-    const last = freeCheck.last();
-    if (last === null) return null;
+    const latest = freeCheck.last();
+    if (latest === null) return null;
+    // A failed check after a good one does not erase what the good one found.
+    const last = latest.ok ? latest : freeCheck.lastGood?.() ?? latest;
     return { check: compareFree({ slotModels: modelsOfSlot(OVERRIDE_SLOT), live: last.live, overrides: chosenModels() }), ageMin: Math.max(0, Math.floor((Date.now() - last.at) / 60000)), overrides: chosenModels() };
   };
   // Asks for the check when the free slot is in use (Create opens with it on, or it is switched on); the answer redraws the review.
@@ -511,17 +513,25 @@ export function renderCreate(ctx) {
           });
           keyParts.push(h(doc, "div", { class: "field" }, h(doc, "label", { for: `cr-unlock${sfx}` }, t("create.unlockLabel")), pass), unlock, message);
         } else {
-          const keyInput = h(doc, "input", { id: `cr-key${sfx}`, type: "password", autocomplete: "off", spellcheck: "false" });
+          const keySpec = providerSpec(provider);
+          const keyInput = h(doc, "input", { id: `cr-key${sfx}`, type: "password", autocomplete: "off", spellcheck: "false", ...(keySpec.keyPlaceholder ? { placeholder: keySpec.keyPlaceholder } : {}) });
+          const keyProblem = h(doc, "p", { class: "notice", role: "alert", hidden: true });
           const save = h(doc, "button", { type: "button" }, t("settings.keySave"));
           keyInput.addEventListener("keydown", (event) => {
             if (event.key === "Enter") save.click();
           });
           save.addEventListener("click", () => {
             if (keyInput.value.trim() === "") return;
+            // A provider with a key shape (Cloudflare: ACCOUNT_ID:TOKEN) refuses a key of another shape, as Settings does.
+            if (keySpec.keyPattern && !keySpec.keyPattern.test(keyInput.value.trim())) {
+              keyProblem.textContent = t(keySpec.text.keyFormat);
+              keyProblem.hidden = false;
+              return;
+            }
             pv.setSessionKey(keyInput.value.trim());
             drawReview();
           });
-          keyParts.push(h(doc, "div", { class: "field" }, h(doc, "label", { for: `cr-key${sfx}` }, t(providerSpec(provider).text.keyInline)), keyInput), save, h(doc, "p", { class: "hint" }, h(doc, "a", { href: `#/settings/key/${slot}` }, t("create.keySettingsLink"))));
+          keyParts.push(h(doc, "div", { class: "field" }, h(doc, "label", { for: `cr-key${sfx}` }, t(providerSpec(provider).text.keyInline)), keyInput), keyProblem, save, h(doc, "p", { class: "hint" }, h(doc, "a", { href: `#/settings/key/${slot}` }, t("create.keySettingsLink"))));
         }
       } else {
         keyParts.push(h(doc, "p", {}, t("settings.keyAvailable")));

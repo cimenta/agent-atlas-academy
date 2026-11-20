@@ -85,3 +85,23 @@ test("the stop is worded and translated", () => {
     assert.notEqual(en[k], cs[k], k);
   }
 });
+
+test("a pool quota answer stops the run even on a paid slot (a free account key saved there)", async () => {
+  const { agent, sleeps } = setup([rate({ rateKind: "day", pool: true, retryAfterSec: null })], "cloudflare");
+  const error = await agent.run("Task: x").catch((e) => e);
+  assert.ok(error instanceof LimitError);
+  assert.equal(error.reason, "rate_pool");
+  assert.deepEqual(sleeps, []);
+});
+
+test("a retry-after of 0 waits at least one second, not zero", async () => {
+  const { agent, sleeps } = setup([rate({ retryAfterSec: 0 }), ok]);
+  await agent.run("Task: x");
+  assert.deepEqual(sleeps, [1000]);
+});
+
+test("after the short waits ran out the message says the provider kept refusing, not that its wait is longer", () => {
+  const text = limitMessage("rate_day", {}, { label: "Writer", value: 5 });
+  assert.doesNotMatch(text, /longer than the app waits/);
+  assert.match(text, /kept refusing/);
+});

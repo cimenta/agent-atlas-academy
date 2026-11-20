@@ -1,0 +1,6 @@
+{
+  "about": "One short question is answered by a chain of agents, each building on the one before.",
+  "how": "Each agent receives the task and the text of the agent before it.",
+  "learns": "How a sequential chain passes work along, and what each step adds.",
+  "watch": "What every agent changes in the text it receives."
+}
