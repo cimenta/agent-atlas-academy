@@ -98,3 +98,25 @@ export function limitWarning(design, limits) {
 export function emptyCriteria(design) {
   return design?.pattern === "evaluator" && (typeof design.criteria !== "string" || design.criteria.trim() === "");
 }
+
+// How many provider calls each agent may make, and how big one call may be, for the limits of a free account.
+// perCallTokens: 300 for the instructions, a quarter of the characters the agent reads (the task, and what each agent before it hands on),
+// and the longest answer it may give (a call reserves it). typicalTokens counts a typical answer instead (at most 1,500 tokens).
+// The sum is an upper bound the owner's real 429 test will tune.
+export function callsOf(design, limits, { outputTokens = 4000, handoffChars = 0, taskChars = 1000 } = {}) {
+  const nodes = design.nodes ?? [];
+  const rounds = Number.isFinite(design.rounds) ? design.rounds : 1;
+  const base = nodes.map((n) => (design.pattern === "evaluator" ? rounds : design.pattern === "debate" && n.agent === "debater" ? rounds : 1));
+  const total = Math.max(1, activationsOf(design, limits));
+  const weight = base.reduce((a, b) => a + b, 0) || 1;
+  const cap = Math.max(1, Math.min(Number(outputTokens) || 4000, 4000));
+  const typical = Math.min(cap, 1500);
+  const upstreamChars = Math.min(handoffChars > 0 ? handoffChars : typical * 4, typical * 4);
+  return nodes.map((n, i) => {
+    const incoming = (design.edges ?? []).filter((e) => e.to === n.id).length;
+    const input = 300 + Math.ceil((Math.min(taskChars, 1000) + incoming * upstreamChars) / 4);
+    // An agent's own lower answer limit counts, as the agent enforces it.
+    const own = Math.max(1, Math.min(cap, Number(n.limits?.maxOutputTokens) || cap));
+    return { id: n.id, calls: Math.max(1, Math.ceil((base[i] * total) / weight)), perCallTokens: input + own, typicalTokens: input + Math.min(typical, own) };
+  });
+}

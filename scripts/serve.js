@@ -7,6 +7,8 @@ import { createModelsHandler } from "../lib/models-handler.js";
 import { PROVIDERS } from "../public/js/engine/providers.js";
 import { createMockCall } from "../public/js/engine/mock-anthropic.js";
 import { AnthropicError } from "../public/js/engine/anthropic.js";
+import { callChatCompletions } from "../public/js/engine/openai-compat.js";
+import { createGroqMock } from "./mock-groq.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 const port = Number(process.env.PORT) || 8080;
@@ -36,8 +38,11 @@ const mockOverFetch = async (body, { signal, fetchImpl } = {}) => {
   if (!res.ok) throw new AnthropicError(data?.error?.message ?? "The mock provider failed", { status: res.status });
   return data;
 };
+// Groq in mock mode: the real chat-completions adapter talks to the local stand-in. MOCK_GROQ_429=minute|day makes every third call a 429.
+const groqMock = createGroqMock({ mockCall });
+const mockGroq = (body, options = {}) => callChatCompletions(body, { ...options, url: `http://localhost:${port}/mock-provider/groq/chat/completions`, who: "Groq" });
 const runHandler = useMock
-  ? createRunHandler({ call: mockOverFetch, rateLimitImpl: () => true })
+  ? createRunHandler({ call: mockOverFetch, callGroq: mockGroq, rateLimitImpl: () => true })
   : createRunHandler();
 
 // Mock mode: the list of models of a provider is its catalog plus a few made-up models, and no provider is asked.
@@ -50,6 +55,19 @@ const server = createServer(async (req, res) => {
   try {
     if (new URL(req.url, "http://localhost").pathname === "/api/run") {
       await runHandler(req, res);
+      return;
+    }
+    if (useMock && req.method === "POST" && new URL(req.url, "http://localhost").pathname === "/mock-provider/groq/chat/completions") {
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      const stopped = new AbortController();
+      res.on("close", () => stopped.abort());
+      try {
+        const made = await groqMock(JSON.parse(Buffer.concat(chunks).toString("utf8")), { signal: stopped.signal });
+        res.writeHead(made.status, { "content-type": "application/json", ...made.headers }).end(JSON.stringify(made.body));
+      } catch (error) {
+        res.writeHead(500, { "content-type": "application/json" }).end(JSON.stringify({ error: { message: String(error?.message ?? error) } }));
+      }
       return;
     }
     if (useMock && req.method === "POST" && new URL(req.url, "http://localhost").pathname === "/mock-provider/v1/messages") {

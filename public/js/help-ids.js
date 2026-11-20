@@ -5,6 +5,7 @@ export function warningHelp(event) {
   if (event?.fallback) return "harness-fallback";
   if (event?.webSearchOff) return "harness-web-search";
   if (event?.handoff) return "harness-handoff";
+  if (event?.rateWait !== undefined) return "groq";
   if (event?.retry) return "harness-retries";
   if (event?.truncated) return "harness-output";
   const limit = String(event?.limit ?? "").replace(/^agent_/, "");
@@ -12,4 +13,4 @@ export function warningHelp(event) {
 }
 
 // Every id warningHelp can return (a test checks each one exists in Help).
-export const WARNING_HELP_IDS = [...Object.values(LIMIT_HELP), "harness-fallback", "harness-web-search", "harness-handoff", "harness-retries", "harness-output", "replay-warnings"];
+export const WARNING_HELP_IDS = [...Object.values(LIMIT_HELP), "harness-fallback", "harness-web-search", "harness-handoff", "harness-retries", "harness-output", "replay-warnings", "groq"];

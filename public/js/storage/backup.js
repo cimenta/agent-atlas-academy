@@ -1,6 +1,7 @@
 // Export and import of everything the app remembers. Run text is data and is never interpreted.
 // A plaintext key is never part of a backup; the key may travel only as its encrypted vault record.
 import { validateRun } from "../run-schema.js";
+import { SLOT_IDS } from "../key-slots.js";
 
 export const BACKUP_VERSION = 1;
 const MAX_TEXT = 25 * 1024 * 1024;
@@ -20,9 +21,15 @@ export function isVaultRecord(record) {
 const plainRecord = (r) => ({ v: r.v, kdf: r.kdf, iterations: r.iterations, salt: r.salt, iv: r.iv, ciphertext: r.ciphertext });
 
 // The saved keys a backup may carry, as the backup file names them.
-export const backupVaultRecords = (vaultOf) => ({ googleRecord: vaultOf("google").exportRecord(), googleFreeRecord: vaultOf("google-free").exportRecord() });
+// The Anthropic and Gemini keys keep their own fields; every other slot (Groq, and the providers to come) travels in slotRecords.
+const OWN_FIELDS = new Set(["anthropic", "google", "google-free"]);
+export const backupVaultRecords = (vaultOf) => ({
+  googleRecord: vaultOf("google").exportRecord(),
+  googleFreeRecord: vaultOf("google-free").exportRecord(),
+  slotRecords: Object.fromEntries(SLOT_IDS.filter((id) => !OWN_FIELDS.has(id)).map((id) => [id, vaultOf(id).exportRecord()])),
+});
 
-export function exportBackup({ runs, settings, vaultRecord = null, googleRecord = null, googleFreeRecord = null, includeKey = false, appVersion }) {
+export function exportBackup({ runs, settings, vaultRecord = null, googleRecord = null, googleFreeRecord = null, slotRecords = null, includeKey = false, appVersion }) {
   const backup = { backupVersion: BACKUP_VERSION, appVersion, exportedAt: new Date().toISOString(), settings: settings ?? {}, runs };
   if (includeKey && isVaultRecord(vaultRecord)) {
     backup.vault = {
@@ -36,6 +43,10 @@ export function exportBackup({ runs, settings, vaultRecord = null, googleRecord 
   }
   if (includeKey && isVaultRecord(googleRecord)) backup.vaultGoogle = plainRecord(googleRecord);
   if (includeKey && isVaultRecord(googleFreeRecord)) backup.vaultGoogleFree = plainRecord(googleFreeRecord);
+  if (includeKey && isObject(slotRecords)) {
+    const slots = Object.fromEntries(Object.entries(slotRecords).filter(([id, r]) => SLOT_IDS.includes(id) && isVaultRecord(r)).map(([id, r]) => [id, plainRecord(r)]));
+    if (Object.keys(slots).length > 0) backup.vaultSlots = slots;
+  }
   return backup;
 }
 
@@ -55,6 +66,9 @@ export function parseBackup(text) {
 
   if (data.vaultGoogle !== undefined && !isVaultRecord(data.vaultGoogle)) return { ok: false, errors: ["The saved Gemini key in the backup is not valid."] };
   if (data.vaultGoogleFree !== undefined && !isVaultRecord(data.vaultGoogleFree)) return { ok: false, errors: ["The saved free Gemini key in the backup is not valid."] };
+  if (data.vaultSlots !== undefined) {
+    if (!isObject(data.vaultSlots) || !Object.values(data.vaultSlots).every(isVaultRecord)) return { ok: false, errors: ["The saved keys of the other providers in the backup are not valid."] };
+  }
 
   const errors = [];
   data.runs.forEach((run, index) => {
@@ -106,5 +120,7 @@ export async function applyBackup(backup, { runStore, settingsStore, vault, mode
   };
   restore(legacyFree ? "google-free" : "google", backup.vaultGoogle);
   restore("google-free", backup.vaultGoogleFree);
+  // Every other provider: a slot this version does not know is ignored.
+  for (const [slot, record] of Object.entries(backup.vaultSlots ?? {})) if (SLOT_IDS.includes(slot)) restore(slot, record);
   return { added, skipped, failed };
 }

@@ -10,10 +10,12 @@ import { limitsChoice } from "../replay/limits-choice.js";
 import { withCurrentLimits } from "../replay/limits-compare.js";
 import { showCenterTip } from "../center-tip.js";
 import { refreshResultTab } from "../tab-state.js";
-import { SLOT_IDS, isSlot, slotProvider, slotIsFree, slotLabelKey, slotSubKey } from "../key-slots.js";
+import { SLOT_IDS, isSlot, slotProvider, slotIsFree, slotLabelKey, slotSubKey, slotFreeLimits } from "../key-slots.js";
 import { providerSpec, defaultSlot } from "../engine/providers.js";
 import { TASK_MAX_CHARS, LIMIT_MAX, DEFAULT_MODEL, providerCatalog, paidOnlyModelUsed, providersOf } from "../engine/catalog.js";
 import { PATTERNS, clampLimits } from "../engine/patterns.js";
+import { limitFindings, limitOffers, limitSummary } from "../engine/limits.js";
+import { limitsView } from "./limits-view.js";
 import { buildRunRecord, makeRunId, modelsUsed } from "../engine/run-record.js";
 import { startRun, RunStartError } from "../run-client.js";
 import { approvalPanel } from "../approval-panel.js";
@@ -306,6 +308,8 @@ export function renderCreate(ctx) {
     };
     const hintText = (status) => {
       const kind = footHint(status);
+      // Everything is decided but an agent cannot run on a free account: say that instead of Ready to run.
+      if (kind === "ready" && lastVerdict?.reasons?.includes("limitsBlocked")) return t("create.reason.limitsBlocked");
       if (workspace && kind === "setup") return t("create.ws.locked");
       return kind === "missing" ? t("create.hint.missing", { items: missing(status).map((k) => t(`create.missing.${k}`)).join(", ") }) : t(`create.hint.${kind}`);
     };
@@ -337,6 +341,25 @@ export function renderCreate(ctx) {
       for (const step of STEPS) panels[step].hidden = step !== draft.step;
     }
 
+    // Pressing an offer: the agents move, the sizes change for this run, and the review is drawn again.
+    function applyOffer(offer) {
+      const before = draft.editor.design();
+      const next = offer.apply(before, runSettings());
+      // An agent moved to another provider needs that provider switched on in step 1, or the page puts it back.
+      const target = next.design.nodes.map((n) => n.slot).filter((id) => isSlot(id) && !chosenSlots().includes(id));
+      if (target.length > 0) draft.slots = [...chosenSlots(), ...new Set(target)];
+      for (const n of next.design.nodes) {
+        const old = before.nodes.find((o) => o.id === n.id);
+        if (old && old.slot !== n.slot) draft.editor.setNodeModel(n.id, { slot: n.slot, model: n.model });
+      }
+      for (const old of before.nodes) if (!next.design.nodes.some((n) => n.id === old.id)) draft.editor.removeNode(old.id);
+      if (next.design.rounds !== before.rounds && Number.isInteger(next.design.rounds)) draft.editor.setRounds(next.design.rounds);
+      draft.runOverrides = { ...draft.runOverrides, outputTokens: next.settings.outputTokens, handoffChars: next.settings.handoffChars };
+      draft.limitsChoice = offer.id === "slowly" || offer.id === "tomorrow" ? offer.id : null;
+      editorHandle.refresh();
+      drawReview();
+    }
+
     // Review.
     function drawReview() {
       // The review is rebuilt on every change: the element that had the focus gets it back (found by id or data-ui).
@@ -351,7 +374,8 @@ export function renderCreate(ctx) {
       const summary = reviewSummary({ design, limits, provider });
       // Every provider the agents use needs its key.
       const missing = used.filter((s) => vaultFor(s).getSessionKey() === null);
-      const verdict = canRun({ task: taskInput.value, apiKey: missing.length === 0 ? "set" : null, editorErrors: draft.editor.errors(), keyLocked: missing.some((s) => vaultFor(s).hasStoredKey()) });
+      const plainVerdict = canRun({ task: taskInput.value, apiKey: missing.length === 0 ? "set" : null, editorErrors: draft.editor.errors(), keyLocked: missing.some((s) => vaultFor(s).hasStoredKey()) });
+      const verdict = limitsBlock(design, limits) ? { ok: false, reasons: [...plainVerdict.reasons, "limitsBlocked"] } : plainVerdict;
       // Keys the visitor saved as being on Google's free tier make the run free, unless a model without a free tier is used.
       const marked = used.every(slotIsFree);
       const paidOnly = paidOnlyModelUsed(design, provider);
@@ -398,10 +422,21 @@ export function renderCreate(ctx) {
         : h(doc, "p", { class: "hint" }, t("editor.empty"));
 
       const est = summary.estimate;
-      lastEstimate = design.nodes.length > 0 && draft.decisions.model ? (isFree ? t("create.estimateFree") : t("create.ws.estimate", { usd: workspaceEstimateUsd(est) })) : "";
+      // The limits of a free account (Groq): what the run may do to them, and the offers that remove it.
+      const runSizes = runSettings();
+      const limitArgs = { design, limits, ...runSizes };
+      const limitFound = limitFindings(limitArgs);
+      const limitEl = limitsView({
+        doc, t, findings: limitFound, offers: limitOffers({ ...limitArgs, loadedSlots: SLOT_IDS.filter((id) => keyState(vaultFor(id)) !== "none") }), summary: limitSummary(limitArgs),
+        providerName: providerCatalog(slotProvider(design.nodes.find((n) => slotFreeLimits(n.slot))?.slot)).label,
+        nameOf: (id) => rows.find((r) => r.id === id)?.label ?? id, slotName, num: (n) => new Intl.NumberFormat(ctx.lang === "cs" ? "cs-CZ" : "en-US").format(n),
+        chosen: draft.limitsChoice, onApply: applyOffer,
+      });
+      lastEstimate = design.nodes.length > 0 && draft.decisions.model ? (isFree ? t(providerSpec(provider).text.estimateFree ?? "create.estimateFree") : t("create.ws.estimate", { usd: workspaceEstimateUsd(est) })) : "";
       const estimateLines = [
-        h(doc, "p", {}, h(doc, "strong", { "data-ui": isFree ? "estimate-free" : "estimate-cost" }, isFree ? t("create.estimateFree") : t("create.estimate", { usd: est.costUsd.toFixed(3), date: est.pricesAsOf }))),
+        h(doc, "p", {}, h(doc, "strong", { "data-ui": isFree ? "estimate-free" : "estimate-cost" }, isFree ? t(providerSpec(provider).text.estimateFree ?? "create.estimateFree") : t("create.estimate", { usd: est.costUsd.toFixed(3), date: est.pricesAsOf }))),
         h(doc, "p", { class: "hint" }, t("create.estimateDetail", { tokens: est.tokensUpper, turns: est.activations })),
+        ...(limitEl ? [limitEl] : []),
       ];
       if (summary.warning) {
         const w = summary.warning;
@@ -620,7 +655,7 @@ export function renderCreate(ctx) {
         draft.editor.setNodeModel(id, choice);
       },
     };
-    editorHandle = mountEditor(editorHost, { editor: draft.editor, t, doc, onChange: drawReview, webSearchAllowed: () => ctx.settings.get().webSearch, modelUi, runLimits: () => ({ ...clampLimits(draft.limits), maxOutputTokens: ctx.settings.get().maxOutputTokens }) });
+    editorHandle = mountEditor(editorHost, { editor: draft.editor, t, doc, onChange: drawReview, webSearchAllowed: () => ctx.settings.get().webSearch, searchAvailable: (node) => (isSlot(node.slot) ? providerSpec(slotProvider(node.slot)).capabilities.search : true), modelUi, runLimits: () => ({ ...clampLimits(draft.limits), maxOutputTokens: ctx.settings.get().maxOutputTokens }) });
     ctx.onLeave(() => editorHandle.destroy());
     drawPatterns();
     drawReview();
@@ -645,6 +680,15 @@ export function renderCreate(ctx) {
 
   // Carries on a run that failed: the agents that finished keep their answers, the failed agent and the rest run again.
   // The new events are added to the same saved run. resume is the run record.
+  // The sizes of an answer and a handoff for this run: what an offer of the free-limits warning set, else Settings.
+  function runSettings() {
+    return { outputTokens: draft.runOverrides.outputTokens ?? ctx.settings.get().maxOutputTokens, handoffChars: draft.runOverrides.handoffChars ?? ctx.settings.get().handoffChars };
+  }
+  // An agent whose single call can never fit the minute limit of a free account blocks the run until an offer is applied.
+  function limitsBlock(design, limits) {
+    return limitFindings({ design, limits, ...runSettings() }).some((f) => f.kind === "call-too-big");
+  }
+
   function beginRun({ resume = null, approve = false } = {}) {
     const design = resume ? structuredClone(resume.design) : draft.editor.design();
     const limits = clampLimits(resume ? resume.limits : draft.limits);
@@ -657,6 +701,7 @@ export function renderCreate(ctx) {
     const freeTier = resume ? resume.recordedWith?.freeTier === true : used.every(slotIsFree);
     const task = resume ? resume.task : draft.task.trim();
     if (!canRun({ task, apiKey: Object.values(keys).every((k) => k !== null) ? apiKey : null, editorErrors: resume ? [] : draft.editor.errors() }).ok) return;
+    if (!resume && limitsBlock(design, limits)) return;
 
     // What the earlier try left: its events without the ending (the error and the done), and the answers of the finished agents.
     const base = resume ? resume.events.filter((e) => e.type !== "done" && e.type !== "error") : [];
@@ -790,12 +835,12 @@ export function renderCreate(ctx) {
       task,
       limits,
       timeoutSec: ctx.settings.get().requestTimeoutSec,
-      outputTokens: ctx.settings.get().maxOutputTokens,
+      outputTokens: resume ? ctx.settings.get().maxOutputTokens : runSettings().outputTokens,
       retries: ctx.settings.get().retries,
       retryDelaySec: ctx.settings.get().retryDelaySec,
       freeTier,
       repeatStop: ctx.settings.get().repeatStop,
-      handoffChars: ctx.settings.get().handoffChars,
+      handoffChars: resume ? ctx.settings.get().handoffChars : runSettings().handoffChars,
       webSearch: ctx.settings.get().webSearch,
       fallback: ctx.settings.get().fallback,
       formatEnforcement: ctx.settings.get().formatEnforcement,

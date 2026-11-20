@@ -1444,3 +1444,25 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .api-calls .conv th { color: var(--muted); font-family: inherit; font-weight: 600; }
 [data-ui="api-none"] { padding: 12px 14px; border: 1px dashed var(--border); border-radius: var(--radius); color: var(--muted); font-size: 0.9rem; }
 @media (max-width: 700px) { .api-calls .cols { grid-template-columns: 1fr; } }
+
+/* Create, the limits of a free account (Groq): findings, the day bar and the offers. */
+.limits { margin: 10px 0; }
+.limits .msg { margin: 8px 0; padding: 10px 12px; border-radius: 8px; font-size: 0.9rem; border: 1px solid transparent; }
+.limits .msg b { display: block; margin-bottom: 2px; }
+.limits .msg.ok { background: var(--done-bg); color: var(--done); border-color: var(--done); }
+.limits .msg.warn { background: var(--warn-bg, #fbf1dc); color: var(--warn-text, #6b4a0a); border-color: var(--warn-line, #d9b36a); }
+.limits .msg.err { background: var(--err-bg); color: var(--err); border-color: var(--err); }
+.limits .bar { height: 8px; border-radius: 4px; background: var(--border); overflow: hidden; margin: 6px 0 2px; }
+.limits .bar i { display: block; height: 100%; background: var(--warn-text, #9a6700); }
+.limits .bar.over i { background: var(--err); }
+.limits .offers { display: flex; flex-direction: column; gap: 8px; margin: 8px 0; }
+.limits .offer { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; border: 1px solid var(--border); background: var(--card); border-radius: 8px; padding: 8px 10px; }
+.limits .offer p { margin: 0; font-size: 0.88rem; flex: 1; min-width: 220px; }
+.limits .offer.chosen { border-color: var(--done); }
+@media (max-width: 700px) { .limits .offer button { width: 100%; } }
+
+/* Settings, Keys: the free limits and models boxes of a provider */
+.limits-box { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; }
+.limits-box h3 { margin: 0 0 6px; font-size: 1rem; }
+.limits-box table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+.limits-box th, .limits-box td { text-align: left; padding: 4px 8px 4px 0; vertical-align: top; border-bottom: 1px solid var(--border); }

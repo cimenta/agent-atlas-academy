@@ -25,6 +25,8 @@ By default your API key is kept only in the memory of the open tab and is gone w
 
 When you press Run, your task, the agents' instructions and messages, and your API key are sent to our server only so that the request can be forwarded to Anthropic. The server does not store them and does not write them to logs. Anthropic then processes them under its own terms and privacy policy. The cost of the run is billed by Anthropic to your own account. If web search is switched on, search queries are handled by Anthropic as well. Do not put personal or confidential data in a task.
 
+The same is true for the other providers you choose: with a Gemini key your task goes to Google, and with a Groq key it goes to Groq, whose servers are in the United States. They process it under their own terms, bill their own costs to your account, and in the case of a free plan may use it in ways described on their pages. Groq's pages do not say clearly whether prompts are used for training, so do not send private data.
+
 ## If you submit a run to the library
 
 If you choose Submit to library in the run menu, the site saves the run as a file on your computer and opens your mail program. The site itself sends nothing. If you send the message, we receive it at submit-run@agentatlas.academy together with your e-mail address, the attached run and whatever you write. We use it only to review the run and to answer you. If the run is not added to the library, we delete the message and the file; we also delete them if you ask. A run that is added is published under CC BY 4.0, with the name you gave or without a name.

@@ -64,10 +64,10 @@ test("checkAllModels skips slots without a key, goes one after the other and sur
   };
   const keys = { anthropic: "BAD".padEnd(25, "b"), "google-free": KEY, google: null };
   const out = await checkAllModels({ keys, fetchFn });
-  assert.deepEqual(out.map((o) => o.slot), ["anthropic", "google-free", "google"]);
+  assert.deepEqual(out.map((o) => o.slot), ["anthropic", "google-free", "google", "groq-free", "groq"]);
   assert.equal(out[0].result.error, "rejected");
   assert.equal(out[1].result.ok, true);
   assert.deepEqual(out[2], { slot: "google", skipped: true });
   assert.equal(order.length, 2);
-  assert.deepEqual((await checkAllModels({ keys: {}, fetchFn })).map((o) => o.skipped), [true, true, true]);
+  assert.deepEqual((await checkAllModels({ keys: {}, fetchFn })).map((o) => o.skipped), [true, true, true, true, true]);
 });

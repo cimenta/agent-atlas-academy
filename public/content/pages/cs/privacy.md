@@ -25,6 +25,8 @@ Ve výchozím stavu zůstává váš klíč API jen v paměti otevřené karty a
 
 Když stisknete Spustit, váš úkol, pokyny a zprávy agentů a váš klíč API se odešlou na náš server jen proto, aby se požadavek mohl předat společnosti Anthropic. Server je neukládá a nezapisuje do protokolů. Anthropic je pak zpracuje podle vlastních podmínek a zásad ochrany osobních údajů. Cenu běhu účtuje Anthropic na váš vlastní účet. Je-li zapnuté vyhledávání na webu, dotazy při hledání zpracovává rovněž Anthropic. Nezadávejte do úkolu osobní ani důvěrné údaje.
 
+Totéž platí pro další poskytovatele, které zvolíte: s klíčem Gemini jde váš úkol společnosti Google a s klíčem Groq společnosti Groq, jejíž servery jsou ve Spojených státech. Zpracují ho podle vlastních podmínek, své náklady účtují na váš účet a u bezplatného plánu ho mohou použít způsoby popsanými na svých stránkách. Stránky Groqu jasně neříkají, zda se prompty používají k trénování, proto neposílejte soukromá data.
+
 ## Když odešlete běh do knihovny
 
 Zvolíte-li v nabídce běhu Odeslat do knihovny, web uloží běh jako soubor do vašeho počítače a otevře váš poštovní program. Samotný web nic neodesílá. Pokud zprávu odešlete, dostaneme ji na submit-run@agentatlas.academy spolu s vaší e-mailovou adresou, přiloženým během a tím, co napíšete. Použijeme ji jen k posouzení běhu a k odpovědi vám. Pokud běh do knihovny nepřidáme, zprávu i soubor smažeme; smažeme je také na vaši žádost. Přidaný běh se zveřejní pod licencí CC BY 4.0, pod jménem, které uvedete, nebo bez jména.

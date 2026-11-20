@@ -1,5 +1,6 @@
 // One agent in a run: keeps its own conversation, calls the model, reports events.
-import { nodeModel, AGENT_TYPES, OUTPUT_TOKENS, RETRIES, RETRY_DELAY_SEC, REPEAT_STOP, MAX_PAUSES, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop, fallbackModelFor } from "./catalog.js";
+import { slotFreeLimits } from "../key-slots.js";
+import { RATE_WAIT_MAX_SEC, RATE_WAITS_MAX, nodeModel, AGENT_TYPES, OUTPUT_TOKENS, RETRIES, RETRY_DELAY_SEC, REPEAT_STOP, MAX_PAUSES, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop, fallbackModelFor } from "./catalog.js";
 import { systemPromptFor } from "./prompts.js";
 import { toolsFor } from "./tools.js";
 import { AnthropicError, redact } from "./anthropic.js";
@@ -88,7 +89,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
   async function request(custom = null, chargeTo = budget) {
     chargeTo.chargeStep();
     if (custom) return call(custom, { signal });
-    const tools = toolsFor(node, budget);
+    const tools = toolsFor(node, budget, provider);
     // With the setting on, a reply that has a fixed shape is asked for as that shape (the provider forces it). An agent that
     // searches the web is not forced: a forced reply and a search tool do not combine on every model. Nor is an agent that writes
     // notes: they go after its answer, and a forced reply can hold nothing else.
@@ -105,12 +106,26 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
     return call(body, { signal });
   }
 
+  // A 429 from a provider that limits a free account: a short wait is waited out, a long one or a day limit stops the run (it is carried on later).
+  const freeLimited = slotFreeLimits(node.slot) !== null;
+  let rateWaits = 0;
   async function requestWithRetry(custom = null, chargeTo = budget) {
     let switched = false;
     for (let tried = 0; ; tried++) {
       try {
-        return await request(custom, chargeTo);
+        const answer = await request(custom, chargeTo);
+        rateWaits = 0;
+        return answer;
       } catch (error) {
+        if (freeLimited && error instanceof AnthropicError && error.status === 429) {
+          const asked = Number.isFinite(error.retryAfterSec) ? error.retryAfterSec : null;
+          if (error.rateKind === "day" || (asked ?? 0) > RATE_WAIT_MAX_SEC || ++rateWaits > RATE_WAITS_MAX) throw new LimitError("rate_day", { agent: node.id, label, value: asked });
+          const seconds = asked ?? retryDelayMs / 1000;
+          emit({ type: "warning", agent: node.id, retry: true, rateWait: seconds, message: `The provider asked the app to wait ${seconds} s (too many requests or tokens). Trying again after that.` });
+          await sleep(seconds * 1000);
+          tried--; // a wait that was asked for does not use up a try
+          continue;
+        }
         if (!(error instanceof AnthropicError) || !error.retryable) throw error;
         if (tried >= retryLimit) {
           // Out of tries. With the automatic fallback, one more try with another model of the same provider.
@@ -225,7 +240,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
         agent: node.id,
         role: label,
         model,
-        tools: toolsFor(node, budget).map((tool) => tool.name),
+        tools: toolsFor(node, budget, provider).map((tool) => tool.name),
         system,
         ...(judging ? { judging: true } : {}),
       });

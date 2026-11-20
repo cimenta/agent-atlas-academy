@@ -147,7 +147,7 @@ export function agentRows({ design, slotName, slotIsFree, modelInfo, fallbackSlo
 
 const OUTCOMES = new Set(["finished", "stopped_user", "stopped_limit", "interrupted", "failed", "waiting_approval"]);
 
-const LIMIT_REASONS = new Set(["time", "steps", "tokens", "searches", "cost", "repeat", "agent_steps", "agent_tokens", "agent_searches"]);
+const LIMIT_REASONS = new Set(["time", "steps", "tokens", "searches", "cost", "repeat", "agent_steps", "agent_tokens", "agent_searches", "rate_day"]);
 
 // A run stopped at a limit says which one when the done event recorded it; older runs keep the general message.
 export function runOutcomeMessageKey(outcome, reason) {

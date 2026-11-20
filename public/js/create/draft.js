@@ -6,7 +6,7 @@ import { emptyDecisions } from "./steps-model.js";
 
 // slots: the key slots chosen on the Create tab (one or more); null while none is chosen (read from the agents of a loaded definition).
 // decisions: what the student has decided (nothing has a default). step and subTab: where the student is on the steps.
-export const draft = { task: "", pattern: "sequential", editor: createEditor("sequential"), limits: null, limitsEdited: false, slots: null, retry: null, approve: false, retryUseCurrent: true, decisions: emptyDecisions(), step: "setup", subTab: "agents", describe: false };
+export const draft = { task: "", pattern: "sequential", editor: createEditor("sequential"), limits: null, limitsEdited: false, runOverrides: {}, limitsChoice: null, slots: null, retry: null, approve: false, retryUseCurrent: true, decisions: emptyDecisions(), step: "setup", subTab: "agents", describe: false };
 
 export function resetDecisions() {
   draft.decisions = emptyDecisions();
@@ -18,6 +18,8 @@ export function resetDecisions() {
 export function decideLoaded() {
   Object.assign(draft.decisions, { pattern: true, providers: true, model: true, memory: true });
 }
+// runOverrides: answer and handoff sizes an offer of the free-limits warning set for this run only ({ outputTokens, handoffChars });
+// limitsChoice: the keep-as-is offer the visitor took (slowly or tomorrow).
 // limitsEdited: the visitor changed the limits of this run by hand; otherwise they are read from Settings each time Create opens.
 // retryUseCurrent: Retry carries on with the limits of Settings (true) or with the limits the run had (false).
 // retry: a failed or paused run (its record) that the Create tab should carry on when it opens.
@@ -45,6 +47,8 @@ export function resetForLoad() {
   draft.step = "setup";
   draft.limits = null;
   draft.limitsEdited = false;
+  draft.runOverrides = {};
+  draft.limitsChoice = null;
   draft.decisions.limits = emptyDecisions().limits;
 }
 

@@ -8,8 +8,8 @@ import { retryChoices } from "../public/js/replay/retry-choice.js";
 
 // These tests pin the behaviour from before the registry: they pass on the old code and must pass on the new.
 test("the providers and the key slots are the same as before the registry", () => {
-  assert.deepEqual(PROVIDER_IDS, ["anthropic", "google"]);
-  assert.deepEqual(SLOT_IDS, ["anthropic", "google-free", "google"]);
+  assert.deepEqual(PROVIDER_IDS, ["anthropic", "google", "groq"]);
+  assert.deepEqual(SLOT_IDS, ["anthropic", "google-free", "google", "groq-free", "groq"]);
   assert.equal(slotProvider("anthropic"), "anthropic");
   assert.equal(slotProvider("google-free"), "google");
   assert.equal(slotProvider("google"), "google");
@@ -27,7 +27,7 @@ test("the cost of a call is the same as before the registry", () => {
 });
 
 test("the colours and the chips are the same as before the registry", () => {
-  assert.deepEqual(DEFAULT_PROVIDER_COLORS, { anthropic: "#d97757", google: "#4285f4" });
+  assert.deepEqual(DEFAULT_PROVIDER_COLORS, { anthropic: "#d97757", google: "#4285f4", groq: "#f55036" });
   assert.deepEqual(providerChips("anthropic+google").map((c) => c.name), ["Anthropic", "Gemini"]);
   assert.equal(providerChips("gemini")[0].name, "Gemini");
 });
@@ -35,7 +35,7 @@ test("the colours and the chips are the same as before the registry", () => {
 test("the retry choices are the same as before the registry", () => {
   const design = { pattern: "sequential", nodes: [{ id: "a", agent: "writer", model: "fast", search: false }], edges: [] };
   const choices = retryChoices(design, "a");
-  assert.equal(choices.length, 6);
+  assert.equal(choices.length, 9);
   assert.equal(choices.filter((c) => c.current).length, 1);
   const strongGoogle = choices.find((c) => c.provider === "google" && c.tier === "strong");
   assert.equal(strongGoogle.value.slot, "google");
@@ -73,11 +73,11 @@ import { backupVaultRecords } from "../public/js/storage/backup.js";
 test("settings saved before the registry still read the same", () => {
   const mem = new Map([["aa.settings", JSON.stringify({ freeTier: { google: true }, providerColors: { google: "#112233" } })]]);
   const store = createSettingsStore({ getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v) });
-  assert.deepEqual(store.get().freeTier, { google: true });
+  assert.deepEqual(store.get().freeTier, { google: true, groq: false });
   assert.equal(store.get().providerColors.google, "#112233");
   assert.equal(store.get().providerColors.anthropic, "#d97757");
   store.setFreeTier("anthropic", true); // Anthropic has no free tier: ignored
-  assert.deepEqual(store.get().freeTier, { google: true });
+  assert.deepEqual(store.get().freeTier, { google: true, groq: false });
 });
 
 test("the vault keeps the records where it kept them", () => {
@@ -85,5 +85,5 @@ test("the vault keeps the records where it kept them", () => {
   const vault = createVault({ storage: { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v), removeItem: (k) => mem.delete(k) }, iterations: 1000 });
   assert.equal(vault.forProvider("anthropic"), vault);
   assert.notEqual(vault.forProvider("google"), vault.forProvider("google-free"));
-  assert.deepEqual(Object.keys(backupVaultRecords((id) => vault.forProvider(id))).sort(), ["googleFreeRecord", "googleRecord"]);
+  assert.deepEqual(Object.keys(backupVaultRecords((id) => vault.forProvider(id))).sort(), ["googleFreeRecord", "googleRecord", "slotRecords"]);
 });

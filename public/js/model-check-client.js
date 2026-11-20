@@ -22,7 +22,12 @@ export async function checkModels({ provider, key, fetchFn = fetch }) {
 export function describeCheck(slotId, result) {
   if (!result?.ok) return { state: "error", total: 0, rows: [], missing: 0, others: 0, error: result?.error ?? "unreachable" };
   const models = PROVIDERS[slotProvider(slotId)].models.filter((m) => !slotIsFree(slotId) || m.freeTier !== false);
-  const rows = models.map((m) => ({ tier: m.key, id: m.id, label: m.label, available: result.catalogFound.includes(m.id) }));
+  const rows = [];
+  for (const m of models) {
+    const same = rows.find((r) => r.id === m.id);
+    if (same) same.tiers.push(m.key);
+    else rows.push({ tier: m.key, tiers: [m.key], id: m.id, label: m.label, available: result.catalogFound.includes(m.id) });
+  }
   const available = rows.filter((r) => r.available).length;
   return { state: available === rows.length ? "ok" : "missing", total: result.total, rows, missing: rows.length - available, others: Math.max(0, result.total - available) };
 }

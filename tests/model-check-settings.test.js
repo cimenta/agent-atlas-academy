@@ -48,7 +48,8 @@ test("the tier names of the check rows are translated, not taken from the Englis
     assert.equal(typeof en[`settings.tier.${tier}`], "string");
     assert.notEqual(en[`settings.tier.${tier}`], cs[`settings.tier.${tier}`], `tier ${tier} is the same in both languages`);
   }
-  assert.match(page, /settings\.tier\.\$\{row\.tier\}/);
+  assert.match(page, /row\.tiers \?\? \[row\.tier\]/);
+  assert.match(page, /settings\.tier\.\$\{k\}/);
   assert.doesNotMatch(page, /check-tier" \}, row\.label/);
 });
 

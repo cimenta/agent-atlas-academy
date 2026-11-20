@@ -19,7 +19,7 @@ import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, ext
 const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, getModels = (node) => MODELS, modelUi = null, webSearchAllowed = () => true, runLimits = () => ({ ...LIMIT_DEFAULTS, maxOutputTokens: OUTPUT_TOKENS.default }) }) {
+export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, getModels = (node) => MODELS, modelUi = null, webSearchAllowed = () => true, searchAvailable = () => true, runLimits = () => ({ ...LIMIT_DEFAULTS, maxOutputTokens: OUTPUT_TOKENS.default }) }) {
   let selectedId = null;
   let settingsTab = "tools"; // the tab of the agent settings that is open, kept while the visitor works on agents
   let connectFrom = null;
@@ -537,7 +537,8 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       else editor.setNode(node.id, { model: model.value });
       changed();
     });
-    const search = h(doc, "input", { id: "ed-search", type: "checkbox", checked: node.search });
+    const searchUnavailable = searchAvailable(node) === false;
+    const search = h(doc, "input", { id: "ed-search", type: "checkbox", checked: node.search && !searchUnavailable, disabled: searchUnavailable });
     search.addEventListener("change", () => {
       editor.setNode(node.id, { search: search.checked });
       changed();
@@ -579,6 +580,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     toolsPane.push(searchRow);
     if (TOOLS.web_search?.extraFee) toolsPane.push(h(doc, "p", { class: "notice" }, t("editor.searchFee")));
     toolsPane.push(h(doc, "p", { class: "hint" }, t("editor.toolsNote")));
+    if (searchUnavailable) toolsPane.push(h(doc, "p", { class: "limit-warning", "data-ui": "search-provider-off" }, t("editor.searchOffProvider")));
     if (node.search === true && !webSearchAllowed()) toolsPane.push(h(doc, "p", { class: "limit-warning", "data-ui": "search-off-warning" }, t("editor.searchOffInSettings")));
     const approvalPane = [];
     // Approval: the run stops before this agent and waits for a click.

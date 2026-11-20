@@ -85,6 +85,11 @@ export const clampRetryDelaySec = (value) => {
   return Number.isFinite(n) && value !== null && value !== "" ? Math.min(RETRY_DELAY_SEC.max, Math.max(RETRY_DELAY_SEC.min, n)) : RETRY_DELAY_SEC.default;
 };
 
+// A provider that limits a free account (Groq) can answer 429 and ask the app to wait. The app waits by itself at most this many
+// seconds, and at most RATE_WAITS_MAX times in a row; after that the run stops and is carried on later.
+export const RATE_WAIT_MAX_SEC = 60;
+export const RATE_WAITS_MAX = 3;
+
 // The fixed rules of the harness: the visitor cannot change them (see the Harness tab in Settings).
 export const MAX_PAUSES = 4; // pauses of the model in one agent turn
 export const REQUEST_MAX_BYTES = 65536; // a request to start a run

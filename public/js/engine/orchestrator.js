@@ -3,7 +3,9 @@
 import { validateDesign } from "./patterns.js";
 import { createBudget, LimitError } from "./budget.js";
 import { createAgent } from "./agent.js";
-import { nodeProvider } from "./catalog.js";
+import { nodeProvider, providerCatalog } from "./catalog.js";
+import { slotFreeLimits, slotProvider } from "../key-slots.js";
+import { createGate } from "./pacing.js";
 import { loggedCall } from "./api-log.js";
 import { redact } from "./anthropic.js";
 import { limitMessage } from "./harness.js";
@@ -71,8 +73,18 @@ export async function runDesign({ design, task, limits, language = "en", call, c
   const isApproved = (id) => approved.some((a) => nodeIdOf(a) === nodeIdOf(id));
   // The calls in flight: when the run ends they are cancelled, and their records are written before the run is closed.
   const pendingCalls = new Set();
+  // Calls to a free account with limits go one at a time, with a gap that keeps the requests a minute under the limit.
+  const gates = new Map();
+  const paced = (node) => {
+    const base = callFor?.(node) ?? call;
+    const free = slotFreeLimits(node.slot);
+    if (!free) return base;
+    const key = `${node.slot}:${providerCatalog(slotProvider(node.slot)).models.find((m) => m.key === node.model)?.id ?? node.model}`;
+    if (!gates.has(key)) gates.set(key, createGate({ gapMs: Math.ceil(60000 / free.rpm) }));
+    return (body, options) => gates.get(key).run(() => base(body, options));
+  };
   const make = (node) =>
-    createAgent({ node, design, call: loggedCall(callFor?.(node) ?? call, { agent: node.id, provider: nodeProvider(node, provider), emit: send, pending: pendingCalls }), emit: send, budget, signal: control.signal, language, provider: nodeProvider(node, provider), maxOutputTokens, retries, retryDelaySec, freeTier, repeatStop, fallback, askFirst: node.approve === true && !isApproved(node.id), notebook, task, formatEnforcement, cached: resume.filter((r) => r.agent === node.id) });
+    createAgent({ node, design, call: loggedCall(paced(node), { agent: node.id, provider: nodeProvider(node, provider), emit: send, pending: pendingCalls }), emit: send, budget, signal: control.signal, language, provider: nodeProvider(node, provider), maxOutputTokens, retries, retryDelaySec, freeTier, repeatStop, fallback, askFirst: node.approve === true && !isApproved(node.id), notebook, task, formatEnforcement, cached: resume.filter((r) => r.agent === node.id) });
   // The node that runs once for every part or step has no agent up front; the runner makes one for each run (spawn).
   const agents = new Map(design.nodes.filter((node) => node.agent !== MULTI_RUN[design.pattern]).map((node) => [node.id, make(node)]));
   const spawn = createSpawner({ design, make });

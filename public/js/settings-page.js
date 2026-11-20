@@ -3,7 +3,8 @@ import { h } from "./dom.js";
 import { helpIcon } from "./help-popup.js";
 import { LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, RETRIES, RETRY_DELAY_SEC, COST_CAP_USD, REPEAT_STOP, HANDOFF_CHARS, PROFILES, matchProfile, PROVIDER_IDS, providerCatalog, FALLBACK_MODES, FALLBACK_DEFAULT } from "./engine/catalog.js";
 import { COLOR_CHOICES, paintModelTag } from "./provider-colors.js";
-import { SLOT_IDS, isSlot, slotProvider, slotIsFree, slotLabelKey } from "./key-slots.js";
+import { SLOT_IDS, isSlot, slotProvider, slotIsFree, slotLabelKey, slotFreeLimits } from "./key-slots.js";
+import { limitsBox, modelsBox } from "./settings-limits-box.js";
 import { PROVIDERS, freeSlotOf } from "./engine/providers.js";
 import { checkModels, describeCheck, checkAllModels } from "./model-check-client.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
@@ -70,7 +71,7 @@ export function renderSettings(ctx) {
     if (shown.state === "error") return [h(doc, "p", { class: "notice check-error", role: "alert" }, t(`settings.checkError.${shown.error}`))];
     const box = h(doc, "div", { class: "check-box" }, h(doc, "h3", {}, t("settings.checkTitle", { n: shown.total })));
     for (const row of shown.rows) {
-      box.append(h(doc, "div", { class: `check-row${row.available ? "" : " check-gone-row"}` }, h(doc, "span", { class: "check-tier" }, t(`settings.tier.${row.tier}`)), h(doc, "code", {}, row.id), h(doc, "span", { class: row.available ? "check-ok" : "check-gone" }, t(row.available ? "settings.checkAvailable" : "settings.checkMissing"))));
+      box.append(h(doc, "div", { class: `check-row${row.available ? "" : " check-gone-row"}` }, h(doc, "span", { class: "check-tier" }, (row.tiers ?? [row.tier]).map((k) => t(`settings.tier.${k}`)).join(" / ")), h(doc, "code", {}, row.id), h(doc, "span", { class: row.available ? "check-ok" : "check-gone" }, t(row.available ? "settings.checkAvailable" : "settings.checkMissing"))));
     }
     if (shown.state === "missing") box.append(h(doc, "p", { class: "notice check-warn", role: "status" }, t("settings.checkWarnMissing")));
     box.append(h(doc, "p", { class: "hint" }, t("settings.checkOthers", { n: shown.others })));
@@ -117,7 +118,7 @@ export function renderSettings(ctx) {
     if (spec.keyUrl) {
       entry.push(h(doc, "p", { class: "provider-links" }, h(doc, "a", { href: spec.keyUrl, target: "_blank", rel: "noopener noreferrer", "data-ui": `${spec.id}-key-link` }, t(spec.text.keyLink)), " · ", h(doc, "a", { href: spec.pricingUrl, target: "_blank", rel: "noopener noreferrer", "data-ui": `${spec.id}-pricing-link` }, t(spec.text.pricingLink))));
     }
-    if (slotIsFree(id)) entry.push(h(doc, "p", { class: "notice", "data-ui": "free-tier-warning" }, t("settings.freeTierWarning")));
+    if (slotIsFree(id)) entry.push(h(doc, "p", { class: "notice", "data-ui": "free-tier-warning" }, t(spec.text.freeWarning ?? "settings.freeTierWarning")));
     entry.push(h(doc, "div", { class: "field checkbox" }, rememberBox, h(doc, "label", { for: `set-remember${sfx}` }, t("settings.rememberLabel"))), passBlock, saveButton);
     // With a key saved the form is hidden, so it cannot be overwritten by accident; Replace key opens it.
     const cancelReplace = h(doc, "button", { type: "button", "data-ui": `replace-cancel-${id}` }, t("settings.replaceCancel"));
@@ -147,7 +148,13 @@ export function renderSettings(ctx) {
       checkResult.replaceChildren(...renderCheck(describeCheck(id, result)));
       refresh();
     });
-    const node = h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, status, colorRow(slotProvider(id)), h(doc, "div", { class: "key-actions" }, replaceButton, checkButton), h(doc, "p", { class: "hint" }, t("settings.checkModelsHint")), checkResult, form);
+    // A provider with free limits explains them next to the key, and which models it is used with.
+    const limits = slotFreeLimits(id);
+    const limitBoxes = [];
+    if (limits) limitBoxes.push(limitsBox({ doc, t, limits, num: (n) => n.toLocaleString(ctx.lang === "cs" ? "cs-CZ" : "en-US") }));
+    else if (spec.freeLimits) limitBoxes.push(h(doc, "p", { class: "hint", "data-ui": "free-limits-paid" }, t("settings.freeLimitsPaid")));
+    if (spec.freeLimits) limitBoxes.push(modelsBox({ doc, t, provider: spec }));
+    const node = h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, status, colorRow(slotProvider(id)), h(doc, "div", { class: "key-actions" }, replaceButton, checkButton), h(doc, "p", { class: "hint" }, t("settings.checkModelsHint")), checkResult, form, ...limitBoxes);
     const refresh = () => {
       const saved = v.getSessionKey() !== null || v.hasStoredKey();
       form.hidden = saved && !replacing;

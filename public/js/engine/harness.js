@@ -41,6 +41,11 @@ export function limitMessage(reason, limits, extra = {}) {
       return `Limit reached: web searches (${maxSearches} per run). The run was stopped before it could finish. Raise the limit in Settings, Harness, and run again.`;
     case "repeat":
       return `Limit reached: repeated answer (the same answer ${extra.value} times in a row from agent ${extra.label}). The run was stopped before it could finish. Change the setting in Settings, Harness, or give the agent a clearer instruction, and run again.`;
+    case "rate_day": {
+      const wait = Number(extra.value);
+      const when = !Number.isFinite(wait) || wait <= 0 ? "later" : wait < 3600 ? `in about ${Math.ceil(wait / 60)} min` : `in about ${Math.round(wait / 3600)} h`;
+      return `Limit of the provider reached: it refused more calls from agent ${extra.label}, and its wait is longer than the app waits by itself. The run was stopped, and what happened so far is saved. Continue the run ${when}.`;
+    }
     case "cost":
       return `Limit reached: estimated cost of the run ($${Number(maxCostUsd).toFixed(2)}, by the prices in the catalog). The run was stopped before it could finish. Raise the cost cap in Settings, Harness, and run again.`;
     case "time":
