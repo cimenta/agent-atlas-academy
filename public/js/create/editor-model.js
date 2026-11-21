@@ -381,7 +381,8 @@ export function isUntouched(design) {
 
 // Places nodes on a small fixed grid. "rank" is the direction of flow; "offset" is across it.
 // Vertical flow goes top to bottom (rank is y), horizontal goes left to right (rank is x).
-export function layoutDesign(design, { orientation = "vertical" } = {}) {
+// maxCols: a line of boxes with more columns than this goes on in the next row (horizontal layout only), in rows of equal length.
+export function layoutDesign(design, { orientation = "vertical", maxCols = Infinity } = {}) {
   const { nodes, edges, pattern } = design;
   const connected = new Set(edges.flatMap((e) => [e.from, e.to]));
   const spots = new Map(); // id -> { rank, offset }
@@ -430,9 +431,15 @@ export function layoutDesign(design, { orientation = "vertical" } = {}) {
   const staged = nodes.filter((n) => !spots.has(n.id));
   staged.forEach((n, offset) => spots.set(n.id, { rank: maxRank < 0 ? 0 : maxRank + 2, offset }));
 
+  // Too many columns for the room: the ranks are cut into bands of equal length, one under the other.
+  const ranks = Math.max(0, ...[...spots.values()].map((s) => s.rank)) + 1;
+  const bands = orientation === "horizontal" && Number.isFinite(maxCols) ? Math.ceil(ranks / Math.max(1, maxCols)) : 1;
+  const cols = Math.ceil(ranks / bands);
+  const bandRows = Math.max(1, ...[...spots.values()].map((s) => s.offset + 1));
   const out = nodes.map((n) => {
     const { rank, offset } = spots.get(n.id);
-    return orientation === "horizontal" ? { id: n.id, x: rank, y: offset } : { id: n.id, x: offset, y: rank };
+    if (orientation !== "horizontal") return { id: n.id, x: offset, y: rank };
+    return bands > 1 ? { id: n.id, x: rank % cols, y: Math.floor(rank / cols) * bandRows + offset } : { id: n.id, x: rank, y: offset };
   });
   return {
     nodes: out,

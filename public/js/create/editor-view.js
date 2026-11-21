@@ -14,7 +14,7 @@ import { mayFormat, validFormat, formatPromptText, FORMAT_TYPES, FORMAT_MAX_FIEL
 import { innerTabs } from "./steps-view.js";
 import { agentTabIds, currentAgentTab } from "./agent-tabs.js";
 import { MULTI_RUN } from "../engine/spawn.js";
-import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, extentOf, isTwoWay, straight, turnArrows, TWO_WAY_GAP } from "./diagram-geometry.js";
+import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, extentOf, isTwoWay, maxColsFor, straight, wrapPath, turnArrows, TWO_WAY_GAP } from "./diagram-geometry.js";
 
 const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -140,7 +140,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     // A chain reads top to bottom on a narrow screen and left to right when there is room.
     const wide = (doc.defaultView?.innerWidth ?? 0) >= 720;
     const stored = editor.positions();
-    const pos = autoPositions(design, { wide }); // id -> { x, y } top-left in px, updated live while dragging
+    const pos = autoPositions(design, { wide, maxCols: maxColsFor(doc.defaultView) }); // id -> { x, y } top-left in px, updated live while dragging
     for (const node of design.nodes) if (stored[node.id]) pos.set(node.id, stored[node.id]);
     livePos = pos;
     const extent = () => extentOf(pos);
@@ -210,16 +210,24 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         const sideBySide = design.pattern === "handoff" && design.edges.some((o) => o.from === edge.to && o.to === edge.from);
         const gap = isTwoWay(design) || sideBySide ? -TWO_WAY_GAP : 0;
         const shown = isTwoWay(design) ? [[edge.from, edge.to], [edge.to, edge.from]] : [[edge.from, edge.to]];
+        const wrapped = wrapPath(design, pos, edge);
         const lines = shown.map(([from, to]) => {
-          const line = doc.createElementNS(SVG_NS, "line");
+          const line = doc.createElementNS(SVG_NS, wrapped ? "path" : "line");
           for (const [k, v] of Object.entries({ "marker-end": "url(#arrowhead)", "stroke-width": selected ? "4" : "2", stroke: selected ? "var(--accent)" : "currentColor" })) line.setAttribute(k, v);
+          if (wrapped) {
+            line.setAttribute("d", wrapped);
+            line.setAttribute("fill", "none");
+            return line;
+          }
           const s2 = straight(pos, from, to, gap);
           setLine(line, { x: s2.x1, y: s2.y1 }, { x: s2.x2, y: s2.y2 });
           return line;
         });
-        const hit = doc.createElementNS(SVG_NS, "line");
-        for (const [k, v] of Object.entries({ stroke: "transparent", "stroke-width": "22", class: "edge-hit" })) hit.setAttribute(k, v);
-        if (sideBySide) {
+        const hit = doc.createElementNS(SVG_NS, wrapped ? "path" : "line");
+        for (const [k, v] of Object.entries({ stroke: "transparent", "stroke-width": "22", class: "edge-hit", ...(wrapped ? { d: wrapped, fill: "none" } : {}) })) hit.setAttribute(k, v);
+        if (wrapped) {
+          // drawn as the path itself
+        } else if (sideBySide) {
           const own = straight(pos, edge.from, edge.to, gap);
           setLine(hit, { x: own.x1, y: own.y1 }, { x: own.x2, y: own.y2 });
         } else setLine(hit, start, end);
@@ -235,7 +243,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         svg.insertBefore(hit, rubber);
         edgeParts.push(hit);
         if (selected) {
-          const mid = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
+          const mid = wrapped ? { x: (pos.get(edge.from).x + pos.get(edge.to).x + BOX_W) / 2, y: pos.get(edge.from).y + BOX_H + 18 } : { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
           const remove = h(doc, "button", { type: "button", class: "edge-remove", "data-focus-key": `edge-x-${key}`, "aria-label": t("editor.removeConnection", { from: label(edge.from), to: label(edge.to) }) }, "×");
           remove.style.left = `${mid.x - 18}px`;
           remove.style.top = `${mid.y - 18}px`;

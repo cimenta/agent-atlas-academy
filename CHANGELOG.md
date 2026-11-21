@@ -6,6 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- A diagram with more agents in a line than fit in the window (for example a chain of eight) goes on in the next row, in Create and in Re-play, so the diagram never shows a scroll bar.
 - Re-play: an agent whose call was refused or failed (a 429, a busy provider, a switch to another model) has a red exclamation mark on its card, next to the orange one for warnings, so one agent can show both.
 - Create: next to Almost there: add your key, a small password box and an Unlock button appear when the key is saved on this device but locked, so it can be unlocked from the footer.
 - When a run ends and is saved, the app switches to Re-play on that run. Create keeps the same run, so clicking Create shows what was just run. A run that waits for your approval stays on Create.

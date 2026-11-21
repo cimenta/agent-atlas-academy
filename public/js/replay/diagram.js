@@ -2,7 +2,7 @@
 // every agent and the data flowing as the replay plays. A box shows the agent's name, its status and time.
 // An arrow is dashed grey until it has carried data, solid after, and blue and blinking when it was just used.
 import { h } from "../dom.js";
-import { BOX_H, BOX_W, arrowsOf, autoPositions, extentOf } from "../create/diagram-geometry.js";
+import { BOX_H, BOX_W, arrowsOf, autoPositions, extentOf, maxColsFor } from "../create/diagram-geometry.js";
 import { flowState } from "./flow.js";
 import { MULTI_RUN, nodeIdOf } from "../engine/spawn.js";
 import { freePlacesOf } from "../engine/created.js";
@@ -28,7 +28,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
   const free = freePlacesOf(design);
   const freeId = (p) => `~free-${p.by}-${p.n}`;
   const layout = free.length === 0 ? design : { ...design, nodes: [...design.nodes, ...free.map((p) => ({ id: freeId(p), agent: "free", model: "fast", search: false }))], edges: [...design.edges, ...free.map((p) => ({ from: p.by, to: freeId(p) }))] };
-  const pos = autoPositions(layout, { wide });
+  const pos = autoPositions(layout, { wide, maxCols: maxColsFor(doc.defaultView) });
   const { width, height } = extentOf(pos);
   const area = h(doc, "div", { class: "diagram replay-diagram", "data-ui": "replay-diagram" });
   const wrap = h(doc, "div", { class: "diagram-wrap replay-diagram-wrap", "data-ui": "replay-diagram-wrap" }, area);

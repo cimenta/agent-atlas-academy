@@ -16,8 +16,8 @@ export function orientationFor(pattern, wide) {
 }
 
 // The top-left corner of every box, as the editor places them before the visitor moves anything.
-export function autoPositions(design, { wide }) {
-  const auto = layoutDesign(design, { orientation: orientationFor(design.pattern, wide) });
+export function autoPositions(design, { wide, maxCols = Infinity }) {
+  const auto = layoutDesign(design, { orientation: orientationFor(design.pattern, wide), maxCols });
   const gutter = design.pattern === "debate" ? DEBATE_GUTTER : 0;
   const pos = new Map();
   for (const node of design.nodes) {
@@ -25,6 +25,12 @@ export function autoPositions(design, { wide }) {
     pos.set(node.id, { x: a.x * CELL_W + (CELL_W - BOX_W) / 2 + gutter, y: a.y * CELL_H + (CELL_H - BOX_H) / 2 });
   }
   return pos;
+}
+
+// How many boxes fit side by side in the window (the diagram goes on in a new row beyond that, so it never needs a scroll bar).
+export function maxColsFor(win) {
+  const width = win?.innerWidth ?? 1024;
+  return Math.max(2, Math.floor((Math.min(width, 1100) - 72) / CELL_W));
 }
 
 export function extentOf(pos) {
@@ -74,6 +80,17 @@ export function straight(pos, from, to, shift = 0) {
 // The data goes both ways between a supervisor and its workers: the instruction down, the result back.
 export const isTwoWay = (design) => design.pattern === "supervisor";
 
+// A line that went on in the next row: the arrow leaves under the last box of the row and comes back to the top of the first box of
+// the next. The path, or null when the edge is an ordinary one.
+export function wrapPath(design, pos, edge) {
+  if (!["sequential", "mapreduce", "planexec"].includes(design.pattern) || !pos.has(edge.from) || !pos.has(edge.to)) return null;
+  const a = pos.get(edge.from);
+  const b = pos.get(edge.to);
+  if (!(b.y >= a.y + BOX_H && b.x < a.x)) return null;
+  const turn = a.y + BOX_H + 18;
+  return `M ${a.x + BOX_W / 2} ${a.y + BOX_H} L ${a.x + BOX_W / 2} ${turn} L ${b.x + BOX_W / 2} ${turn} L ${b.x + BOX_W / 2} ${b.y + TOUCH}`;
+}
+
 // The arrows to draw for a design. Each has a key "from>to" that matches the handoff events of a run
 // (turn arrows of a debate have the key "turn:from>to"), and a path.
 export function arrowsOf(design, pos) {
@@ -87,6 +104,11 @@ export function arrowsOf(design, pos) {
       }
     } else {
       // A handoff with arrows both ways between two agents: each arrow moves aside, so they run side by side.
+      const wrapped = wrapPath(design, pos, edge);
+      if (wrapped) {
+        out.push({ key: `${edge.from}>${edge.to}`, from: edge.from, to: edge.to, kind: "edge", d: wrapped, edge });
+        continue;
+      }
       const bothWays = design.pattern === "handoff" && design.edges.some((o) => o.from === edge.to && o.to === edge.from);
       const s = straight(pos, edge.from, edge.to, bothWays ? -TWO_WAY_GAP : 0);
       out.push({ key: `${edge.from}>${edge.to}`, from: edge.from, to: edge.to, kind: "edge", d: `M ${s.x1} ${s.y1} L ${s.x2} ${s.y2}`, edge });
