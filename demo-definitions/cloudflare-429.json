@@ -6,25 +6,25 @@
     "en": {
       "title": "Cloudflare Workers AI: a run that hits the limit (429)",
       "author": "Agent Atlas Academy",
-      "description": "Six agents answer at the same time, each asked for a long reply, and one agent combines them. The burst of requests and tokens is meant to pass the limit of the free Cloudflare allocation, so the provider answers **429 Too Many Requests**.\n\n**What it shows**\n\n- How the app reacts to the limit: the daily free allocation of neurons, error 4006.\n- A short wait is waited out and the call is tried again. A long wait or a day limit stops the run with a clear reason, so it can be carried on later.\n- The warning in the replay names the provider and how long it asked to wait.\n\n**What to watch**\n\n- The **API calls** tab: the call with status 429, its headers and the retry that follows.\n- Whether the run finishes after the wait, or stops. Both are correct results of this test.\n\nIf no 429 happens, the account had room left. Run it again, or raise the task size."
+      "description": "Eight agents answer one after another on the Strong model, each reads the answer before it and writes a very long reply of its own (up to 4,000 tokens). Together they use more than the 10,000 neurons a day that the free Cloudflare allocation gives, so the provider answers **429 Too Many Requests** with error 4006.\n\n**What it shows**\n\n- How the app reacts to the limit: the daily free allocation of neurons, error 4006.\n- A day limit stops the run with a clear reason and everything saved, so it can be carried on tomorrow.\n- The warning in the replay names the provider and the reason.\n\n**What to watch**\n\n- The **API calls** tab: the call with status 429 and its body.\n- Whether the run stops or finishes. Both are correct results of this test.\n\n**How to get the 429**\n\nOne run is enough on an account that has not used the pool today. The Strong model costs about 291 neurons for every 1,000 tokens it writes, so eight replies of up to 4,000 tokens, with the long text each agent reads, need about 10,500 neurons, a little more than the pool. The 429 comes at the last agents. If the account has already used part of the pool today, it comes sooner; if it has no neurons left, at the first call. The pool resets at 00:00 UTC."
     },
     "cs": {
       "title": "Cloudflare Workers AI: běh, který narazí na limit (429)",
       "author": "Agent Atlas Academy",
-      "description": "Šest agentů odpovídá současně, každý má napsat dlouhou odpověď, a jeden agent je spojí. Nápor požadavků a tokenů má překročit limit (bezplatný příděl Cloudflare), takže poskytovatel odpoví **429 Too Many Requests**.\n\n**Co ukazuje**\n\n- Jak aplikace na limit reaguje. Jde o denní bezplatný příděl neuronů, chyba 4006.\n- Krátké čekání se vyčká a volání se zopakuje. Dlouhé čekání nebo denní limit běh zastaví s jasným důvodem, aby šel později dokončit.\n- Varování v záznamu jmenuje poskytovatele a říká, jak dlouho chtěl čekat.\n\n**Na co se dívat**\n\n- Záložka **Volání API**: volání se stavem 429, jeho hlavičky a následné zopakování.\n- Zda běh po čekání skončí, nebo se zastaví. Obojí je správný výsledek tohoto testu.\n\nKdyž 429 nepřijde, měl účet ještě rezervu. Spusťte běh znovu nebo zvětšete zadání."
+      "description": "Osm agentů odpovídá jeden po druhém na modelu Silný, každý si přečte odpověď před sebou a napíše vlastní velmi dlouhou odpověď (až 4 000 tokenů). Dohromady spotřebují víc než 10 000 neuronů denně, které dává bezplatná alokace Cloudflare, takže poskytovatel odpoví **429 Too Many Requests** s chybou 4006.\n\n**Co ukazuje**\n\n- Jak aplikace na limit reaguje: denní bezplatná alokace neuronů, chyba 4006.\n- Denní limit běh zastaví s jasným důvodem a se vším uloženým, aby šel zítra dokončit.\n- Varování v záznamu jmenuje poskytovatele a důvod.\n\n**Na co se dívat**\n\n- Záložka **Volání API**: volání se stavem 429 a jeho tělo.\n- Zda se běh zastaví, nebo dokončí. Obojí je správný výsledek tohoto testu.\n\n**Jak získat 429**\n\nNa účtu, který dnes alokaci nepoužil, stačí jeden běh. Model Silný stojí asi 291 neuronů za každých 1 000 tokenů, které napíše, takže osm odpovědí až po 4 000 tokenech, s dlouhým textem, který každý agent čte, potřebuje asi 10 500 neuronů, o něco víc než je alokace. 429 přijde u posledních agentů. Pokud účet dnes část alokace už použil, přijde dřív, a bez zbylých neuronů hned u prvního volání. Alokace se obnoví v 00:00 UTC."
     }
   },
   "design": {
-    "pattern": "parallel",
+    "pattern": "sequential",
     "nodes": [
       {
         "id": "free",
         "agent": "free",
-        "model": "fast",
+        "model": "strong",
         "slot": "cloudflare-free",
         "search": false,
         "name": "Historian",
-        "instructions": "Answer as a historian. Write a long, detailed answer of at least 800 words with headings and examples.",
+        "instructions": "Answer as a historian. Write a very long, detailed answer of at least 2500 words with headings and examples.",
         "limits": {
           "maxOutputTokens": 4000
         }
@@ -32,11 +32,11 @@
       {
         "id": "free-2",
         "agent": "free",
-        "model": "fast",
+        "model": "strong",
         "slot": "cloudflare-free",
         "search": false,
         "name": "Engineer",
-        "instructions": "Answer as a engineer. Write a long, detailed answer of at least 800 words with headings and examples.",
+        "instructions": "Read the previous answer. Then answer as a engineer: add what it misses and write a very long, detailed answer of at least 2500 words with headings and examples.",
         "limits": {
           "maxOutputTokens": 4000
         }
@@ -44,11 +44,11 @@
       {
         "id": "free-3",
         "agent": "free",
-        "model": "fast",
+        "model": "strong",
         "slot": "cloudflare-free",
         "search": false,
         "name": "Economist",
-        "instructions": "Answer as a economist. Write a long, detailed answer of at least 800 words with headings and examples.",
+        "instructions": "Read the previous answer. Then answer as a economist: add what it misses and write a very long, detailed answer of at least 2500 words with headings and examples.",
         "limits": {
           "maxOutputTokens": 4000
         }
@@ -56,11 +56,11 @@
       {
         "id": "free-4",
         "agent": "free",
-        "model": "fast",
+        "model": "strong",
         "slot": "cloudflare-free",
         "search": false,
         "name": "Ecologist",
-        "instructions": "Answer as a ecologist. Write a long, detailed answer of at least 800 words with headings and examples.",
+        "instructions": "Read the previous answer. Then answer as a ecologist: add what it misses and write a very long, detailed answer of at least 2500 words with headings and examples.",
         "limits": {
           "maxOutputTokens": 4000
         }
@@ -68,11 +68,11 @@
       {
         "id": "free-5",
         "agent": "free",
-        "model": "fast",
+        "model": "strong",
         "slot": "cloudflare-free",
         "search": false,
-        "name": "Teacher",
-        "instructions": "Answer as a teacher. Write a long, detailed answer of at least 800 words with headings and examples.",
+        "name": "Sociologist",
+        "instructions": "Read the previous answer. Then answer as a sociologist: add what it misses and write a very long, detailed answer of at least 2500 words with headings and examples.",
         "limits": {
           "maxOutputTokens": 4000
         }
@@ -80,47 +80,68 @@
       {
         "id": "free-6",
         "agent": "free",
-        "model": "fast",
+        "model": "strong",
         "slot": "cloudflare-free",
         "search": false,
-        "name": "Lawyer",
-        "instructions": "Answer as a lawyer. Write a long, detailed answer of at least 800 words with headings and examples.",
+        "name": "Doctor",
+        "instructions": "Read the previous answer. Then answer as a doctor: add what it misses and write a very long, detailed answer of at least 2500 words with headings and examples.",
         "limits": {
           "maxOutputTokens": 4000
         }
       },
       {
-        "id": "combiner",
-        "agent": "combiner",
-        "model": "fast",
+        "id": "free-7",
+        "agent": "free",
+        "model": "strong",
         "slot": "cloudflare-free",
-        "search": false
+        "search": false,
+        "name": "Lawyer",
+        "instructions": "Read the previous answer. Then answer as a lawyer: add what it misses and write a very long, detailed answer of at least 2500 words with headings and examples.",
+        "limits": {
+          "maxOutputTokens": 4000
+        }
+      },
+      {
+        "id": "free-8",
+        "agent": "free",
+        "model": "strong",
+        "slot": "cloudflare-free",
+        "search": false,
+        "name": "Architect",
+        "instructions": "Read the previous answer. Then answer as a architect: add what it misses and write a very long, detailed answer of at least 2500 words with headings and examples.",
+        "limits": {
+          "maxOutputTokens": 4000
+        }
       }
     ],
     "edges": [
       {
         "from": "free",
-        "to": "combiner"
+        "to": "free-2"
       },
       {
         "from": "free-2",
-        "to": "combiner"
+        "to": "free-3"
       },
       {
         "from": "free-3",
-        "to": "combiner"
+        "to": "free-4"
       },
       {
         "from": "free-4",
-        "to": "combiner"
+        "to": "free-5"
       },
       {
         "from": "free-5",
-        "to": "combiner"
+        "to": "free-6"
       },
       {
         "from": "free-6",
-        "to": "combiner"
+        "to": "free-7"
+      },
+      {
+        "from": "free-7",
+        "to": "free-8"
       }
     ]
   }

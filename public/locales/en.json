@@ -31,6 +31,7 @@
   "player.next": "Next step",
   "player.speedLabel": "Speed",
   "replay.warningHelp": "Warning",
+  "replay.errorMark": "Error",
   "player.speedOption": "{speed}x",
   "player.progress": "Replay position",
   "player.step": "Step {n} of {total}",

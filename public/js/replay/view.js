@@ -327,6 +327,7 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
           design,
           createdText: t("player.created"),
           warnLabel: t("replay.warningHelp"),
+          errorLabel: t("replay.errorMark"),
           freePlaceText: (n, max) => t("player.freePlace", { n, max }),
           wide,
           boxLabel: (id) => designLabel(design, id),

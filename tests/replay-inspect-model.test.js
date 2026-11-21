@@ -332,3 +332,16 @@ test("a warning starts with the name the agent card shows, and the agent counts 
   assert.deepEqual(s.warnings, ["Historian: The answer was cut.", "A warning of the whole run."]);
   assert.equal(s.agents.free.warnings, 1);
 });
+
+test("a refused call counts as an error of its agent and a cut answer as a warning, so one agent can have both", () => {
+  const design = { pattern: "sequential", nodes: [{ id: "free", agent: "free" }], edges: [] };
+  const ev = [
+    { t: 0, type: "run_start", task: "t", design },
+    { t: 1, type: "agent_start", agent: "free", role: "Free", model: "m", tools: [], system: "s" },
+    { t: 2, type: "warning", agent: "free", retry: true, rateWait: 11, message: "The provider asked the app to wait 11 s." },
+    { t: 3, type: "warning", agent: "free", truncated: true, message: "The answer was cut." },
+  ];
+  const s = deriveInspector(ev, ev.length);
+  assert.equal(s.agents.free.errors, 1);
+  assert.equal(s.agents.free.warnings, 1);
+});

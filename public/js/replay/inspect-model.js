@@ -288,7 +288,11 @@ export function deriveInspector(events, cursor = events.length) {
       case "warning":
         state.warnings.push(event.message ?? "");
         state.warningAgents.push(agent ? event.agent : null);
-        if (agent) agent.warnings = (agent.warnings ?? 0) + 1;
+        // A call the provider refused or that failed (429, busy, a switch to another model) is an error of the agent; the rest are warnings.
+        if (agent) {
+          const bad = event.retry === true || event.fallback !== undefined || event.condense === "failed";
+          agent[bad ? "errors" : "warnings"] = (agent[bad ? "errors" : "warnings"] ?? 0) + 1;
+        }
         state.warningHelps.push(warningHelp(event));
         state.warningTimes.push(typeof event.at === "number" ? event.at : null); // when it happened (clock time), if the run recorded it
         break;

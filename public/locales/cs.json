@@ -31,6 +31,7 @@
   "player.next": "Další krok",
   "player.speedLabel": "Rychlost",
   "replay.warningHelp": "Upozornění",
+  "replay.errorMark": "Chyba",
   "player.speedOption": "{speed}x",
   "player.progress": "Pozice v přehrávání",
   "player.step": "Krok {n} z {total}",
