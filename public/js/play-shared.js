@@ -29,7 +29,9 @@ export function tabBar(ctx, view, { onQuery, onFocusList, intro, resultOpen = fa
     { class: "play-tabs", "aria-label": t("play.tabs") },
     ...PLAY_TABS.map((tab) => h(doc, "a", { href: tab.view === "replay" && rememberedRun() ? `#/play/run/${rememberedRun()}` : tab.href, "data-ui": `tab-${tab.view}`, "aria-current": tab.view === active ? "page" : undefined }, t(tab.key))),
   );
-  const input = h(doc, "input", { type: "search", value: lib.query, placeholder: t("play.search"), "aria-label": t("play.searchLabel"), "data-ui": "library-search", autocomplete: "off" });
+  // On Create there is nothing to search, so the box is greyed out.
+  const none = view === "create";
+  const input = h(doc, "input", { type: "search", value: none ? "" : lib.query, placeholder: t(none ? "play.searchNone" : "play.search"), "aria-label": t(none ? "play.searchNone" : "play.searchLabel"), "data-ui": "library-search", autocomplete: "off", ...(none ? { disabled: true } : {}) });
   const last = h(doc, "button", { type: "button", "data-ui": "load-last", title: t("play.loadLast"), "aria-label": t("play.loadLast") }, "↻");
   const lastId = rememberedRun();
   last.disabled = !lastId;

@@ -571,6 +571,10 @@ export function renderSettings(ctx) {
   });
 
   // Which layout the Create page has: the guided steps or the workspace.
+  // On a phone the EN / CS buttons are not in the header, so the language is chosen here (the section is hidden on wider screens).
+  const languageSelect = h(doc, "select", { id: "set-language", "data-ui": "settings-language" }, ...["en", "cs"].map((code) => h(doc, "option", { value: code }, t(`lang.${code}`))));
+  languageSelect.value = ctx.lang;
+  languageSelect.addEventListener("change", () => ctx.setLanguage?.(languageSelect.value));
   const createLayoutSelect = h(doc, "select", { id: "set-create-layout", "data-ui": "create-layout" }, h(doc, "option", { value: "steps" }, t("settings.createSteps")), h(doc, "option", { value: "workspace" }, t("settings.createWorkspace")));
   createLayoutSelect.value = settings.get().createLayout;
   createLayoutSelect.addEventListener("change", () => {
@@ -842,6 +846,7 @@ export function renderSettings(ctx) {
       "section",
       { class: "settings-section" },
       h(doc, "h2", {}, t("settings.tabGeneral"), help("settings-general", t("settings.tabGeneral"))),
+      h(doc, "div", { class: "phone-only", "data-ui": "language-setting" }, h(doc, "h3", {}, t("settings.languageHeading")), h(doc, "p", {}, t("settings.languageIntro")), field("set-language", t("lang.label"), languageSelect)),
       h(doc, "h3", {}, t("settings.tooltipsHeading"), help("settings-tooltips", t("settings.tooltipsHeading"))),
       h(doc, "p", {}, t("settings.tooltipsIntro")),
       h(doc, "div", { class: "field checkbox" }, tipsBox, h(doc, "label", { for: "set-tooltips" }, t("settings.tooltipsLabel"))),

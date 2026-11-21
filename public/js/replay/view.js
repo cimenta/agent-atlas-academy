@@ -198,18 +198,20 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
     return [button, help(`replay-${name}`, t(tabHelpNames[name]))];
   }));
   const body = h(doc, "div", { class: "inspect-body", "data-ui": "inspector-body", tabindex: "-1" });
-  // One search box next to the tabs: it searches the text of the tab that is open.
+  // The search box in the site header searches the text of the tab that is open.
   let drawBody = () => {};
   const search = searchBar({
     doc,
     t,
     ui: "inspector-search",
+    header: true,
+    placeholder: t("play.searchRun"),
     apply: (q) => {
       drawBody();
       return markText(doc, body, q);
     },
   });
-  const tabRow = h(doc, "div", { class: "tab-row", "data-ui": "inspector-tab-row" }, tabs, search.element);
+  const tabRow = h(doc, "div", { class: "tab-row", "data-ui": "inspector-tab-row" }, tabs);
 
   // A run that did not finish well says so above the player, with the same message the Create tab shows.
   const doneEvent = events.findLast((e) => e?.type === "done");

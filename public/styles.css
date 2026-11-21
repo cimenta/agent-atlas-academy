@@ -733,7 +733,7 @@ kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem;
 @media (max-width: 719px) {
   .brand-block { display: contents; }
   .brand-row { margin-right: auto; }
-  .language-switcher { order: 1; }
+  .language-switcher { display: none; }
   .menu-toggle { order: 2; min-height: 32px; padding: 0 10px; font-size: 1.1rem; line-height: 1; }
   .tagline { order: 3; flex-basis: 100%; }
   .menu { order: 4; }
@@ -1519,3 +1519,9 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .run-menu-item:disabled { opacity: 0.5; cursor: default; }
 .compare-bar .muted { flex-basis: 100%; font-size: 0.75rem; }
 .why-button { min-height: 0; padding: 1px 8px; font-size: 0.8rem; border-radius: 8px; }
+.lib-search .sc { display: flex; align-items: center; gap: 2px; font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+.lib-search .sc .icon-button { min-width: 32px; min-height: 32px; padding: 0 6px; }
+.lib-search input:disabled { opacity: 0.6; cursor: not-allowed; }
+@media (max-width: 599px) { .lib-search { flex-wrap: wrap; } .lib-search .sc { order: 3; flex-basis: 100%; } }
+.phone-only { display: none; }
+@media (max-width: 719px) { .phone-only { display: block; } }

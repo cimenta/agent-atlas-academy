@@ -178,6 +178,7 @@ async function renderRoute(isNavigation) {
     autoStart: !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches),
     isStale: () => mine !== token,
     onLeave: (fn) => cleanups.push(fn),
+    setLanguage: switchLanguage,
   };
   try {
     switch (route.name) {

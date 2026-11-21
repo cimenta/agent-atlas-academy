@@ -76,6 +76,7 @@ export function renderResult(ctx, run) {
       value: ui.q,
       placeholder: t("result.search"),
       ui: "answer-search",
+      header: true,
       apply: (q) => {
         ui.q = q;
         holder.replaceChildren(ui.view === "raw" ? h(doc, "pre", { class: "raw", "data-ui": "answer-raw" }, answer) : cleanArticle());

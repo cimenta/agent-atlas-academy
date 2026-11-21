@@ -43,14 +43,31 @@ export function markText(doc, root, query) {
 
 // The search box with a match counter and previous/next buttons. apply(query) must redraw the
 // text with the matches marked and return the marks.
-export function searchBar({ doc, t, value = "", apply, placeholder, ui = "text-search" }) {
+// header: true puts it in the search box of the site header (the Play tabs) instead of making a box of its own: that box then
+// searches the page that is open. The box is made again each time, so the handlers of an earlier page are gone. element is then empty.
+export function searchBar({ doc, t, value = "", apply, placeholder, ui = "text-search", header = false }) {
   let marks = [];
   let current = 0;
-  const input = h(doc, "input", { class: "vq", type: "search", placeholder: placeholder ?? t("insp.vSearch"), "aria-label": placeholder ?? t("insp.vSearch"), autocomplete: "off" });
-  input.value = value;
+  const form = header ? doc.getElementById?.("play-tabs")?.querySelector?.('[data-ui="library-search-form"]') ?? null : null;
+  const label = placeholder ?? t("insp.vSearch");
   const count = h(doc, "span", { class: "vc", "aria-live": "polite" });
   const prev = h(doc, "button", { type: "button", class: "icon-button", title: t("search.prev"), "aria-label": t("search.prev") }, "↑");
   const next = h(doc, "button", { type: "button", class: "icon-button", title: t("search.next"), "aria-label": t("search.next") }, "↓");
+  let input;
+  if (form) {
+    const old = form.querySelector("input");
+    input = old.cloneNode(false);
+    old.replaceWith(input);
+    input.disabled = false;
+    input.placeholder = label;
+    input.setAttribute("aria-label", label);
+    form.querySelector(".sc")?.remove();
+    const tools = h(doc, "span", { class: "sc", "data-ui": ui }, count, prev, next);
+    form.insertBefore(tools, form.querySelector('[data-ui="load-last"]'));
+  } else {
+    input = h(doc, "input", { class: "vq", type: "search", placeholder: label, "aria-label": label, autocomplete: "off" });
+  }
+  input.value = value;
 
   const show = (scroll) => {
     marks.forEach((m, i) => m.setAttribute("class", i === current ? "cur" : ""));
@@ -82,6 +99,6 @@ export function searchBar({ doc, t, value = "", apply, placeholder, ui = "text-s
   });
   prev.addEventListener("click", () => step(-1));
   next.addEventListener("click", () => step(1));
-  const element = h(doc, "div", { class: "search-bar noprint", "data-ui": ui }, input, prev, next, count);
+  const element = form ? doc.createTextNode("") : h(doc, "div", { class: "search-bar noprint", "data-ui": ui }, input, prev, next, count);
   return { element, run: () => run(false), query: () => input.value.trim() };
 }
