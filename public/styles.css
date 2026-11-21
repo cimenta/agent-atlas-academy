@@ -1541,3 +1541,5 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .replay-diagram .rnode .dnode-err { position: absolute; top: 4px; right: 4px; min-width: 18px; height: 18px; line-height: 18px; text-align: center; border-radius: 50%; background: #dc2626; color: #fff; font-size: 0.75rem; font-weight: 800; pointer-events: none; }
 .replay-diagram .rnode .dnode-err[hidden] { display: none; }
 .replay-diagram .rnode .dnode-err:not([hidden]) ~ .dnode-warn { right: 26px; }
+.replay-diagram .rnode:has(.dnode-warn:not([hidden]), .dnode-err:not([hidden])) > :first-child { padding-right: 24px; }
+.replay-diagram .rnode:has(.dnode-warn:not([hidden])):has(.dnode-err:not([hidden])) > :first-child { padding-right: 46px; }

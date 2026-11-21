@@ -73,7 +73,7 @@ export function deriveInspector(events, cursor = events.length) {
   const agents = {};
   const order = agentIds(events);
   for (const id of order) agents[id] = emptyAgent(id);
-  const state = { task: "", order, agents, warnings: [], warningTimes: [], warningHelps: [], warningAgents: [], error: null, finished: false, outcome: null, reason: null, tokens: { input: 0, output: 0 } };
+  const state = { task: "", order, agents, warnings: [], warningTimes: [], warningHelps: [], warningAgents: [], warningErrors: [], error: null, finished: false, outcome: null, reason: null, tokens: { input: 0, output: 0 } };
 
   applied.forEach((event, index) => {
     const agent = typeof event.agent === "string" ? agents[event.agent] : null;
@@ -289,8 +289,9 @@ export function deriveInspector(events, cursor = events.length) {
         state.warnings.push(event.message ?? "");
         state.warningAgents.push(agent ? event.agent : null);
         // A call the provider refused or that failed (429, busy, a switch to another model) is an error of the agent; the rest are warnings.
+        const bad = event.retry === true || event.fallback !== undefined || event.condense === "failed";
+        state.warningErrors.push(bad);
         if (agent) {
-          const bad = event.retry === true || event.fallback !== undefined || event.condense === "failed";
           agent[bad ? "errors" : "warnings"] = (agent[bad ? "errors" : "warnings"] ?? 0) + 1;
         }
         state.warningHelps.push(warningHelp(event));

@@ -679,7 +679,7 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
     state.warnings.forEach((w, i) => {
       const at = state.warningTimes[i];
       const time = typeof at === "number" ? clockTime(at) : "";
-      items.push(h(doc, "div", { class: "banner warn" }, ...(time ? [h(doc, "time", { class: "banner-time", "data-ui": "banner-time", datetime: new Date(at).toISOString() }, time), " "] : []), `⚠ ${w}`, " ", help(state.warningHelps[i] ?? "replay-warnings", t("replay.warningHelp"))));
+      items.push(h(doc, "div", { class: state.warningErrors[i] ? "banner" : "banner warn", "data-kind": state.warningErrors[i] ? "error" : "warning" }, ...(time ? [h(doc, "time", { class: "banner-time", "data-ui": "banner-time", datetime: new Date(at).toISOString() }, time), " "] : []), `⚠ ${w}`, " ", help(state.warningHelps[i] ?? "replay-warnings", t("replay.warningHelp"))));
     });
     // How an evaluator loop ended shows once the replay has reached that point.
     // A handoff run shows the path so far, and at its end how it ended.
