@@ -547,7 +547,7 @@ export function renderCreate(ctx) {
       // A reason that says the saved key is locked has a small password box and a button right after the words, so it can be unlocked from here.
       const unlockInline = () => {
         const pass = h(doc, "input", { type: "password", class: "inline-unlock-input", autocomplete: "current-password", "aria-label": t("create.unlockLabel"), "data-ui": "inline-unlock-input" });
-        const go = h(doc, "button", { type: "button", class: "inline-unlock-go", title: t("settings.unlock"), "aria-label": t("settings.unlock"), "data-ui": "inline-unlock-go" }, "→");
+        const go = h(doc, "button", { type: "button", class: "inline-unlock-go", title: t("settings.unlock"), "aria-label": t("settings.unlock"), "data-ui": "inline-unlock-go" }, t("settings.unlock"));
         const problem = h(doc, "span", { class: "inline-unlock-problem", role: "alert", hidden: true });
         const submit = async () => {
           if (pass.value === "") return;
@@ -567,12 +567,12 @@ export function renderCreate(ctx) {
           }
         });
         go.addEventListener("click", submit);
-        return h(doc, "span", { class: "inline-unlock" }, " ", pass, go, " ", problem);
+        return h(doc, "span", { class: "inline-unlock" }, pass, go, problem);
       };
       const reasons = verdict.ok ? "" : h(doc, "ul", { class: "reasons", role: "status" }, ...verdict.reasons.map((r) => h(doc, "li", {}, t(`create.reason.${r}`, r === "limitsBlocked" ? { agents: lastBlockedNames } : undefined), ...(r === "keyLocked" && lockedSlots.length > 0 ? [unlockInline()] : []))));
 
       const status = stepsStatus();
-      const tabs = innerTabs({ doc, t, tabs: [{ id: "agents", label: t("create.tab.agents") }, { id: "limits", label: t("create.tab.limits"), state: status.limits }, { id: "cost", label: t("create.tab.cost") }, { id: "key", label: t("create.tab.key"), state: status.key === "done" ? "done" : "attn" }], current: draft.subTab, onSelect: (id) => {
+      const tabs = innerTabs({ doc, t, tabs: [{ id: "agents", label: t("create.tab.agents") }, { id: "limits", label: t("create.tab.limits"), state: status.limits }, { id: "cost", label: t("create.tab.cost") }, { id: "key", label: t("create.tab.key"), state: status.key === "done" ? "done" : "part" }], current: draft.subTab, onSelect: (id) => {
         draft.subTab = id;
         drawReview();
       } });

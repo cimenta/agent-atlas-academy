@@ -1140,7 +1140,6 @@
   "create.step.check": "Check and run",
   "create.step.locked": "Finish step 1 first.",
   "create.status.none": "Not set",
-  "create.status.attn": "A key is needed",
   "create.status.part": "Partly set",
   "create.status.done": "Set",
   "create.status.locked": "Locked",

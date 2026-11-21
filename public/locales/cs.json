@@ -1140,7 +1140,6 @@
   "create.step.check": "Kontrola a spuštění",
   "create.step.locked": "Nejdřív dokončete krok 1.",
   "create.status.none": "Nenastaveno",
-  "create.status.attn": "Je potřeba klíč",
   "create.status.part": "Částečně nastaveno",
   "create.status.done": "Nastaveno",
   "create.status.locked": "Zamčeno",
