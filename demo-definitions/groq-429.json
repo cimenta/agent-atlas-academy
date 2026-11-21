@@ -6,16 +6,16 @@
     "en": {
       "title": "Groq: a run that hits the limit (429)",
       "author": "Agent Atlas Academy",
-      "description": "Four agents answer at the same time, each asked for a long reply (capped so that no single call is too big for the free plan), and one agent combines them. The burst of requests and tokens is meant to pass the limit of the free Groq account, so the provider answers **429 Too Many Requests**.\n\n**What it shows**\n\n- How the app reacts to the limit: a per-minute token limit (the response says how many seconds to wait) or the daily limit.\n- A short wait is waited out and the call is tried again. A long wait or a day limit stops the run with a clear reason, so it can be carried on later.\n- The warning in the replay names the provider and how long it asked to wait.\n\n**What to watch**\n\n- The **API calls** tab: the call with status 429, its headers and the retry that follows.\n- Whether the run finishes after the wait, or stops. Both are correct results of this test.\n\n**How to get the 429**\n\nThe app spaces the calls of a free account on purpose, one at a time about two seconds apart, so this run alone usually stays just under the minute limit (about 7,400 of the 8,000 tokens a minute). Start it a second time right after the first one ends, within the same minute: together they pass the limit and Groq answers 429.\n\nThe warnings that an answer was cut at the token limit are expected: the replies are capped on purpose."
+      "description": "Eight agents answer one after another, each reads the answer before it and writes a long reply of its own (capped, so that no single call is too big for the free plan). The calls together pass the limit of the free Groq account, so the provider answers **429 Too Many Requests**.\n\n**What it shows**\n\n- How the app reacts to the limit: a per-minute token limit (the response says how many seconds to wait) or the daily limit.\n- A short wait is waited out and the call is tried again. A long wait or a day limit stops the run with a clear reason, so it can be carried on later.\n- The warning in the replay names the provider and how long it asked to wait.\n\n**What to watch**\n\n- The **API calls** tab: the call with status 429, its headers and the retry that follows.\n- Whether the run finishes after the wait, or stops. Both are correct results of this test.\n\n**How to get the 429**\n\nOne run is enough. Each agent reads about 1,000 tokens from the one before it and writes up to 1,000 more, so the eight calls need about 15,000 tokens, nearly twice the 8,000 a free Groq account allows in a minute. The app spaces the calls on purpose (about two seconds apart), but the minute is not over yet when the limit is passed, and Groq answers 429 at about the fourth or fifth agent. No single call is too big, so the run is not blocked before it starts.\n\nThe warnings that an answer was cut at the token limit are expected: the replies are capped on purpose."
     },
     "cs": {
       "title": "Groq: běh, který narazí na limit (429)",
       "author": "Agent Atlas Academy",
-      "description": "Čtyři agenti odpovídají současně, každý má napsat dlouhou odpověď (zastropovanou, aby žádné jedno volání nebylo na bezplatný plán příliš velké), a jeden agent je spojí. Nápor požadavků a tokenů má překročit limit (bezplatný účet Groq), takže poskytovatel odpoví **429 Too Many Requests**.\n\n**Co ukazuje**\n\n- Jak aplikace na limit reaguje. Jde o minutový limit tokenů (odpověď říká, kolik sekund čekat) nebo denní limit.\n- Krátké čekání se vyčká a volání se zopakuje. Dlouhé čekání nebo denní limit běh zastaví s jasným důvodem, aby šel později dokončit.\n- Varování v záznamu jmenuje poskytovatele a říká, jak dlouho chtěl čekat.\n\n**Na co se dívat**\n\n- Záložka **Volání API**: volání se stavem 429, jeho hlavičky a následné zopakování.\n- Zda běh po čekání skončí, nebo se zastaví. Obojí je správný výsledek tohoto testu.\n\n**Jak získat 429**\n\nAplikace volání bezplatného účtu záměrně rozkládá, jedno po druhém zhruba po dvou sekundách, takže tento běh sám obvykle zůstane těsně pod minutovým limitem (asi 7 400 z 8 000 tokenů za minutu). Spusťte ho podruhé hned po skončení prvního, ve stejné minutě: dohromady limit překročí a Groq odpoví 429.\n\nVarování, že odpověď byla useknuta na limitu tokenů, jsou očekávaná: odpovědi jsou záměrně omezené."
+      "description": "Osm agentů odpovídá jeden po druhém, každý si přečte odpověď před sebou a napíše vlastní dlouhou odpověď (zastropovanou, aby žádné jedno volání nebylo na bezplatný plán příliš velké). Volání dohromady překročí limit bezplatného účtu Groq, takže poskytovatel odpoví **429 Too Many Requests**.\n\n**Co ukazuje**\n\n- Jak aplikace na limit reaguje. Jde o minutový limit tokenů (odpověď říká, kolik sekund čekat) nebo denní limit.\n- Krátké čekání se vyčká a volání se zopakuje. Dlouhé čekání nebo denní limit běh zastaví s jasným důvodem, aby šel později dokončit.\n- Varování v záznamu jmenuje poskytovatele a říká, jak dlouho chtěl čekat.\n\n**Na co se dívat**\n\n- Záložka **Volání API**: volání se stavem 429, jeho hlavičky a následné zopakování.\n- Zda běh po čekání skončí, nebo se zastaví. Obojí je správný výsledek tohoto testu.\n\n**Jak získat 429**\n\nStačí jeden běh. Každý agent přečte asi 1 000 tokenů od předchozího a napíše až 1 000 dalších, takže osm volání potřebuje asi 15 000 tokenů, skoro dvakrát víc než 8 000, které bezplatný účet Groq dovolí za minutu. Aplikace volání záměrně rozkládá (asi po dvou sekundách), ale minuta ještě neskončila, když se limit překročí, a Groq odpoví 429 asi u čtvrtého nebo pátého agenta. Žádné jednotlivé volání není příliš velké, takže běh není zablokován před spuštěním.\n\nVarování, že odpověď byla useknuta na limitu tokenů, jsou očekávaná: odpovědi jsou záměrně omezené."
     }
   },
   "design": {
-    "pattern": "parallel",
+    "pattern": "sequential",
     "nodes": [
       {
         "id": "free",
@@ -36,7 +36,7 @@
         "slot": "groq-free",
         "search": false,
         "name": "Engineer",
-        "instructions": "Answer as a engineer. Write a long, detailed answer of about 600 words with headings and examples.",
+        "instructions": "Read the previous answer. Then answer as a engineer: add what it misses and write a long, detailed answer of about 600 words with headings and examples.",
         "limits": {
           "maxOutputTokens": 1000
         }
@@ -48,7 +48,7 @@
         "slot": "groq-free",
         "search": false,
         "name": "Economist",
-        "instructions": "Answer as a economist. Write a long, detailed answer of about 600 words with headings and examples.",
+        "instructions": "Read the previous answer. Then answer as a economist: add what it misses and write a long, detailed answer of about 600 words with headings and examples.",
         "limits": {
           "maxOutputTokens": 1000
         }
@@ -60,17 +60,55 @@
         "slot": "groq-free",
         "search": false,
         "name": "Ecologist",
-        "instructions": "Answer as a ecologist. Write a long, detailed answer of about 600 words with headings and examples.",
+        "instructions": "Read the previous answer. Then answer as a ecologist: add what it misses and write a long, detailed answer of about 600 words with headings and examples.",
         "limits": {
           "maxOutputTokens": 1000
         }
       },
       {
-        "id": "combiner",
-        "agent": "combiner",
+        "id": "free-5",
+        "agent": "free",
         "model": "fast",
         "slot": "groq-free",
         "search": false,
+        "name": "Sociologist",
+        "instructions": "Read the previous answer. Then answer as a sociologist: add what it misses and write a long, detailed answer of about 600 words with headings and examples.",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      },
+      {
+        "id": "free-6",
+        "agent": "free",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false,
+        "name": "Doctor",
+        "instructions": "Read the previous answer. Then answer as a doctor: add what it misses and write a long, detailed answer of about 600 words with headings and examples.",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      },
+      {
+        "id": "free-7",
+        "agent": "free",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false,
+        "name": "Lawyer",
+        "instructions": "Read the previous answer. Then answer as a lawyer: add what it misses and write a long, detailed answer of about 600 words with headings and examples.",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      },
+      {
+        "id": "free-8",
+        "agent": "free",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false,
+        "name": "Architect",
+        "instructions": "Read the previous answer. Then answer as a architect: add what it misses and write a long, detailed answer of about 600 words with headings and examples.",
         "limits": {
           "maxOutputTokens": 1000
         }
@@ -79,19 +117,31 @@
     "edges": [
       {
         "from": "free",
-        "to": "combiner"
+        "to": "free-2"
       },
       {
         "from": "free-2",
-        "to": "combiner"
+        "to": "free-3"
       },
       {
         "from": "free-3",
-        "to": "combiner"
+        "to": "free-4"
       },
       {
         "from": "free-4",
-        "to": "combiner"
+        "to": "free-5"
+      },
+      {
+        "from": "free-5",
+        "to": "free-6"
+      },
+      {
+        "from": "free-6",
+        "to": "free-7"
+      },
+      {
+        "from": "free-7",
+        "to": "free-8"
       }
     ]
   }
