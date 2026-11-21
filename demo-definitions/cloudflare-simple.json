@@ -1,0 +1,43 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Explain in two sentences why the sky is blue.",
+  "about": {
+    "en": {
+      "title": "Cloudflare Workers AI: does the provider work?",
+      "author": "Agent Atlas Academy",
+      "description": "The smallest run that shows **Cloudflare Workers AI** answers. Two agents on the free Cloudflare allocation: a writer answers a one-line question, and a critic reads the answer and adds a note.\n\n**What it shows**\n\n- The key works and the model answers.\n- A call to Cloudflare Workers AI is translated from the format the app uses inside, and the answer is translated back. Open the **API calls** tab to see the exact request and answer.\n- A cost of zero or close to it on the free tier.\n\n**What to watch**\n\n- The outcome should be finished, with two agents and about two calls.\n- If it fails, the error text says whether the key, the model or the limit is the cause."
+    },
+    "cs": {
+      "title": "Cloudflare Workers AI: funguje poskytovatel?",
+      "author": "Agent Atlas Academy",
+      "description": "Nejmenší běh, který ukáže, že **Cloudflare Workers AI** odpovídá. Dva agenti na účtu bezplatný příděl Cloudflare: writer odpoví na jednořádkovou otázku a critic odpověď přečte a připojí poznámku.\n\n**Co ukazuje**\n\n- Klíč funguje a model odpovídá.\n- Volání Cloudflare Workers AI aplikace převádí z formátu, který používá uvnitř, a odpověď převádí zpět. Přesný požadavek i odpověď uvidíte na záložce **Volání API**.\n- Nulovou nebo téměř nulovou cenu na bezplatném tarifu.\n\n**Na co se dívat**\n\n- Běh má skončit jako dokončený, se dvěma agenty a zhruba dvěma voláními.\n- Když selže, text chyby říká, zda je příčinou klíč, model, nebo limit."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "cloudflare-free",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "slot": "cloudflare-free",
+        "search": false,
+        "addToPrevious": true
+      }
+    ],
+    "edges": [
+      {
+        "from": "writer",
+        "to": "critic"
+      }
+    ]
+  }
+}

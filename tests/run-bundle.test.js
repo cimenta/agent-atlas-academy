@@ -72,3 +72,8 @@ test("a bundle run whose id is a library id or cannot be opened by the router ge
   assert.ok(plan[1].run.id.startsWith("new-"));
   assert.equal(plan[2].run.id, "fine-id");
 });
+
+test("a run definition file is refused with its own reason", () => {
+  const text = JSON.stringify({ format: "agent-atlas-run-definition", version: 1, task: "t", design: { pattern: "sequential", nodes: [], edges: [] } });
+  assert.deepEqual(readImportText(text), { ok: false, reason: "definition" });
+});

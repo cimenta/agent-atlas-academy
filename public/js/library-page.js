@@ -24,7 +24,7 @@ export { importFiles };
 // The result of an import as a block above the list: the counts, then one row per run with what happened to it.
 function importSummary(ctx, result, onClose) {
   const { doc, t } = ctx;
-  const reasonText = (reason) => (["json", "invalid", "empty", "storage", "too_large"].includes(reason) ? t(`library.import.reason.${reason}`) : t("library.import.reason.other"));
+  const reasonText = (reason) => (["json", "invalid", "empty", "definition", "storage", "too_large"].includes(reason) ? t(`library.import.reason.${reason}`) : t("library.import.reason.other"));
   const resultText = (row) => (row.status === "refused" ? t("library.import.status.refused", { reason: reasonText(row.reason) }) : t(`library.import.status.${row.status}`));
   const files = new Set(result.rows.map((row) => row.file)).size;
   const level = result.counts.refused > 0 ? "warn" : "ok";

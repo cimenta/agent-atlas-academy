@@ -1560,11 +1560,12 @@
   "library.nothing.editDescription": "Only your own runs have a description you can edit.",
   "library.nothing.remove": "Only your own runs can be deleted.",
   "library.import.reason.empty": "the file holds no runs",
+  "library.import.reason.definition": "a run definition, not a recorded run. Open it in Create with Load definition, press Run, then import the result of that run",
   "settings.runsCount": "{n} runs",
   "settings.runsCountOne": "1 run",
   "settings.runsCountFew": "{n} runs",
   "settings.checkOthersOne": "1 other model is offered; the app does not use it.",
   "library.bar.compare": "Compare",
   "library.bar.exportTicked": "Export ticked",
-  "library.bar.exportAll": "Export all mine"
+  "library.bar.exportAll": "Export all"
 }

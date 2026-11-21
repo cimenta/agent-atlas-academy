@@ -41,7 +41,7 @@ function sumUsage(events) {
 }
 
 // apiCalls: the log of the calls to the provider (what was sent, what came back). It is kept beside the events, because the player steps through events.
-export function buildRunRecord({ id, design, task, events, apiCalls = [], apiCallsDropped = false, limits, language, appVersion, startedAt, endedAt, client, provider = "anthropic", freeTier = false }) {
+export function buildRunRecord({ id, design, task, events, apiCalls = [], apiCallsDropped = false, about = null, limits, language, appVersion, startedAt, endedAt, client, provider = "anthropic", freeTier = false }) {
   const done = [...events].reverse().find((e) => e.type === "done");
   return {
     schemaVersion: 1,
@@ -57,6 +57,7 @@ export function buildRunRecord({ id, design, task, events, apiCalls = [], apiCal
     ...(apiCallsDropped === true ? { apiCallsDropped: true } : {}),
     design,
     task,
+    ...(about && typeof about === "object" ? { about } : {}),
     limits,
     outcome: done?.outcome ?? "interrupted",
     usage: done?.usage ?? sumUsage(events),

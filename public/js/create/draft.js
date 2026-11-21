@@ -6,7 +6,7 @@ import { emptyDecisions } from "./steps-model.js";
 
 // slots: the key slots chosen on the Create tab (one or more); null while none is chosen (read from the agents of a loaded definition).
 // decisions: what the student has decided (nothing has a default). step and subTab: where the student is on the steps.
-export const draft = { task: "", pattern: "sequential", editor: createEditor("sequential"), limits: null, limitsEdited: false, runOverrides: {}, limitsChoice: null, slots: null, retry: null, approve: false, retryUseCurrent: true, decisions: emptyDecisions(), step: "setup", subTab: "agents", describe: false };
+export const draft = { task: "", about: null, pattern: "sequential", editor: createEditor("sequential"), limits: null, limitsEdited: false, runOverrides: {}, limitsChoice: null, slots: null, retry: null, approve: false, retryUseCurrent: true, decisions: emptyDecisions(), step: "setup", subTab: "agents", describe: false };
 
 export function resetDecisions() {
   draft.decisions = emptyDecisions();
@@ -34,6 +34,7 @@ export function useDefinition(definition) {
   const loaded = loadDefinition(JSON.stringify(definition));
   if (!loaded.ok) return false;
   draft.task = loaded.task;
+  draft.about = loaded.about;
   draft.pattern = loaded.pattern;
   draft.editor = loaded.editor;
   decideLoaded();

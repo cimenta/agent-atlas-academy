@@ -1560,11 +1560,12 @@
   "library.nothing.editDescription": "Popis jde upravit jen u vlastních běhů.",
   "library.nothing.remove": "Smazat jde jen vlastní běh.",
   "library.import.reason.empty": "soubor neobsahuje žádný běh",
+  "library.import.reason.definition": "definice běhu, ne zaznamenaný běh. Otevřete ji v Create tlačítkem Načíst definici, spusťte ji a importujte výsledek toho běhu",
   "settings.runsCount": "{n} běhů",
   "settings.runsCountOne": "1 běh",
   "settings.runsCountFew": "{n} běhy",
   "settings.checkOthersOne": "Jiný model je nabízen 1; aplikace ho nepoužívá.",
   "library.bar.compare": "Porovnat",
   "library.bar.exportTicked": "Export vybraných",
-  "library.bar.exportAll": "Export všech mých"
+  "library.bar.exportAll": "Export všech"
 }

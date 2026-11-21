@@ -18,6 +18,8 @@ export function readImportText(text) {
     return { ok: false, reason: "json" };
   }
   if (data === null || typeof data !== "object" || Array.isArray(data)) return { ok: false, reason: "invalid" };
+  // A run definition (the task and design, no recording) has a design too, so it would fail later with a vague reason.
+  if (data.format === "agent-atlas-run-definition") return { ok: false, reason: "definition" };
   if (data.format === BUNDLE_FORMAT) {
     return Array.isArray(data.runs) && data.runs.length > 0 ? { ok: true, bundle: true, runs: data.runs } : { ok: false, reason: "empty" };
   }

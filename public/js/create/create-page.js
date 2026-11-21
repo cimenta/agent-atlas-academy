@@ -31,7 +31,7 @@ import { deriveInspector } from "../replay/inspect-model.js";
 import { mountEditor } from "./editor-view.js";
 import { canRun, reviewSummary, handoffSkipper, createSkipper, resumeAnswers, agentRows, blockedByGoneModel } from "./create-model.js";
 import { buildResultModel } from "../play-model.js";
-import { loadDefinition, definitionFromRun } from "./definition.js";
+import { loadDefinition, definitionFromRun, aboutForLanguage } from "./definition.js";
 import { STEPS, stepStatus, navState, stepAfterChange, missing, footHint, toggleSlot, modelValid, setDefaultKeepingAgents, workspaceLocked, workspaceEstimateUsd, runAllowed } from "./steps-model.js";
 import { stepBar, footer, partHeading, innerTabs, workspaceBar, statusIcon } from "./steps-view.js";
 
@@ -586,6 +586,7 @@ export function renderCreate(ctx) {
       if (hasWork && !doc.defaultView.confirm(t("create.clearConfirm"))) return;
       draft.retry = null;
       draft.task = "";
+      draft.about = null;
       draft.pattern = "sequential";
       draft.editor = createEditor("sequential");
       // Back to a page where nothing is decided.
@@ -606,6 +607,7 @@ export function renderCreate(ctx) {
       }
       if (draft.editor.design().nodes.length > 0 && !doc.defaultView.confirm(t("create.loadConfirm"))) return;
       draft.task = loaded.task;
+      draft.about = loaded.about;
       draft.pattern = loaded.pattern;
       draft.editor = loaded.editor;
       // A definition names its pattern, models and memory: loading it is the student deciding them (the providers are read from its agents).
@@ -777,7 +779,7 @@ export function renderCreate(ctx) {
       })(),
       userAgent: typeof navigator === "undefined" ? undefined : navigator.userAgent,
     };
-    const record = () => buildRunRecord({ id, design, task, events, apiCalls, apiCallsDropped: resume?.apiCallsDropped === true, limits, language: ctx.lang, appVersion: ctx.version, startedAt, endedAt, client, provider, freeTier });
+    const record = () => buildRunRecord({ id, design, task, events, apiCalls, apiCallsDropped: resume?.apiCallsDropped === true, about: aboutForLanguage(draft.about, ctx.lang), limits, language: ctx.lang, appVersion: ctx.version, startedAt, endedAt, client, provider, freeTier });
     const saver = createBatchedSaver(ctx.runStore);
 
     const host = h(doc, "div", { class: "replay-host", "data-ui": "player-host" });

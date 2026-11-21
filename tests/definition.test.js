@@ -165,3 +165,42 @@ test("a definition keeps the condense flag of an agent", () => {
   assert.equal(out.editor.design().nodes.find((n) => n.agent === "writer").condense, true);
   assert.equal("condense" in out.editor.design().nodes.find((n) => n.agent === "researcher"), false);
 });
+
+test("a definition keeps its About text and picks the language of the run", async () => {
+  const { aboutForLanguage } = await import("../public/js/create/definition.js");
+  const about = { en: { title: "T", description: "English" }, cs: { title: "Č", description: "Česky", junk: "x" } };
+  const design = { pattern: "sequential", nodes: [{ id: "a", agent: "writer", model: "fast", search: false }], edges: [] };
+  const loaded = loadDefinition(JSON.stringify(buildDefinition({ task: "t", design, about })));
+  assert.equal(loaded.ok, true);
+  assert.deepEqual(loaded.about.cs, { title: "Č", description: "Česky" });
+  assert.equal(aboutForLanguage(loaded.about, "cs").title, "Č");
+  assert.equal(aboutForLanguage(loaded.about, "de").title, "T");
+  assert.deepEqual(aboutForLanguage({ title: "Flat" }, "cs"), { title: "Flat" });
+  assert.equal(loadDefinition(JSON.stringify(buildDefinition({ task: "t", design }))).about, null);
+});
+
+test("a run record carries the About text and a definition made from it does too", async () => {
+  const { buildRunRecord } = await import("../public/js/engine/run-record.js");
+  const { validateRun } = await import("../public/js/run-schema.js");
+  const design = { pattern: "sequential", nodes: [{ id: "a", agent: "writer", model: "fast", search: false }], edges: [] };
+  const events = [{ type: "run_start", t: 0, task: "t", pattern: "sequential", design }, { type: "done", t: 1, outcome: "finished" }];
+  const record = buildRunRecord({ id: "r-1", design, task: "t", events, limits: {}, language: "en", appVersion: "0", about: { title: "T", description: "D" } });
+  assert.deepEqual(record.about, { title: "T", description: "D" });
+  assert.equal(validateRun(record).ok, true);
+  assert.deepEqual(definitionFromRun(record).about, { title: "T", description: "D" });
+  assert.equal("about" in buildRunRecord({ id: "r-2", design, task: "t", events, limits: {}, language: "en", appVersion: "0" }), false);
+});
+
+test("every provider test definition has an About text in English and Czech that differ", async () => {
+  const { readFileSync } = await import("node:fs");
+  for (const provider of ["groq", "openrouter", "cloudflare"]) {
+    for (const kind of ["simple", "429"]) {
+      const loaded = loadDefinition(readFileSync(new URL(`../demo-definitions/${provider}-${kind}.json`, import.meta.url), "utf8"));
+      assert.equal(loaded.ok, true, `${provider}-${kind}`);
+      assert.ok(loaded.about.en.title && loaded.about.en.description, `${provider}-${kind} en`);
+      assert.ok(loaded.about.cs.title && loaded.about.cs.description, `${provider}-${kind} cs`);
+      assert.notEqual(loaded.about.en.description, loaded.about.cs.description);
+      for (const node of loaded.editor.design().nodes) assert.equal(node.slot, `${provider}-free`);
+    }
+  }
+});
