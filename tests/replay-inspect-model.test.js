@@ -319,3 +319,16 @@ test("votingEnd: exactly half of the voters is no majority", async () => {
   assert.equal(end.votes, 2);
   assert.equal(end.result, "none");
 });
+
+test("a warning starts with the name the agent card shows, and the agent counts its warnings", () => {
+  const design = { pattern: "parallel", nodes: [{ id: "free", agent: "free", name: "Historian" }, { id: "combiner", agent: "combiner" }], edges: [{ from: "free", to: "combiner" }] };
+  const ev = [
+    { t: 0, type: "run_start", task: "t", design },
+    { t: 1, type: "agent_start", agent: "free", role: "Free", model: "m", tools: [], system: "s" },
+    { t: 2, type: "warning", agent: "free", truncated: true, message: "The answer was cut." },
+    { t: 3, type: "warning", message: "A warning of the whole run." },
+  ];
+  const s = deriveInspector(ev, ev.length);
+  assert.deepEqual(s.warnings, ["Historian: The answer was cut.", "A warning of the whole run."]);
+  assert.equal(s.agents.free.warnings, 1);
+});

@@ -73,7 +73,7 @@ export function deriveInspector(events, cursor = events.length) {
   const agents = {};
   const order = agentIds(events);
   for (const id of order) agents[id] = emptyAgent(id);
-  const state = { task: "", order, agents, warnings: [], warningTimes: [], warningHelps: [], error: null, finished: false, outcome: null, reason: null, tokens: { input: 0, output: 0 } };
+  const state = { task: "", order, agents, warnings: [], warningTimes: [], warningHelps: [], warningAgents: [], error: null, finished: false, outcome: null, reason: null, tokens: { input: 0, output: 0 } };
 
   applied.forEach((event, index) => {
     const agent = typeof event.agent === "string" ? agents[event.agent] : null;
@@ -286,7 +286,9 @@ export function deriveInspector(events, cursor = events.length) {
         state.tokens.output += Number(event.tokens?.output) || 0;
         break;
       case "warning":
-        state.warnings.push(`${agent ? `${agent.label}: ` : ""}${event.message ?? ""}`);
+        state.warnings.push(event.message ?? "");
+        state.warningAgents.push(agent ? event.agent : null);
+        if (agent) agent.warnings = (agent.warnings ?? 0) + 1;
         state.warningHelps.push(warningHelp(event));
         state.warningTimes.push(typeof event.at === "number" ? event.at : null); // when it happened (clock time), if the run recorded it
         break;
@@ -314,6 +316,11 @@ export function deriveInspector(events, cursor = events.length) {
   const labels = labelsFor(events, order);
   order.forEach((id) => {
     agents[id].label = labels.get(id);
+  });
+  // Each warning starts with the name of its agent, the one the card shows.
+  state.warnings = state.warnings.map((message, i) => {
+    const id = state.warningAgents[i];
+    return id && agents[id] ? `${agents[id].label}: ${message}` : message;
   });
   for (const agent of Object.values(state.agents)) reconstruct(agent, state.task);
   return state;

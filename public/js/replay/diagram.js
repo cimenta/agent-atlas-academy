@@ -23,7 +23,7 @@ const realClock = { setTimeout: (fn, ms) => globalThis.setTimeout(fn, ms), clear
 // onRetry(id): when given, an agent that failed gets a Retry button (retryLabel is its text).
 // retryMenu: { arrowLabel, title, providerName(provider), tagText(choice), choicesOf(id) }; when given, the Retry button has an
 // arrow that opens a list of models, and a pick calls onRetry(id, choice.value).
-export function createReplayDiagram({ doc, design, wide, onSelect, statusText, boxLabel, startLabel = "", onRetry = null, retryLabel = "Retry", retryMenu = null, clock = realClock, now = () => Date.now(), createdText = "created", freePlaceText = (n, max) => `${n}/${max}` }) {
+export function createReplayDiagram({ doc, design, wide, onSelect, statusText, boxLabel, startLabel = "", onRetry = null, retryLabel = "Retry", warnLabel = "Warning", retryMenu = null, clock = realClock, now = () => Date.now(), createdText = "created", freePlaceText = (n, max) => `${n}/${max}` }) {
   // The places still free for created agents are laid out like boxes (an arrow from their creator is used for the layout only).
   const free = freePlacesOf(design);
   const freeId = (p) => `~free-${p.by}-${p.n}`;
@@ -114,7 +114,8 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
     const status = h(doc, "small", {}, "");
     const multi = node.agent === MULTI_RUN[design.pattern];
     const runsBadge = h(doc, "span", { class: "dnode-runs", "data-ui": "diagram-runs", hidden: !multi });
-    const box = h(doc, "button", { type: "button", class: "rnode", "data-node-id": node.id, ...(multi ? { "data-multi": "true" } : {}), ...(node.created === true ? { "data-created": "true" } : {}), "data-ui": `diagram-node-${node.id}`, "data-status": "waiting", "aria-pressed": "false", ...(design.pattern === "handoff" && design.start === node.id && startLabel ? { "data-start": startLabel } : {}) }, name, status, runsBadge);
+    const warnBadge = h(doc, "span", { class: "dnode-warn", "data-ui": "diagram-warn", role: "img", "aria-label": warnLabel, title: warnLabel, hidden: true }, "!");
+    const box = h(doc, "button", { type: "button", class: "rnode", "data-node-id": node.id, ...(multi ? { "data-multi": "true" } : {}), ...(node.created === true ? { "data-created": "true" } : {}), "data-ui": `diagram-node-${node.id}`, "data-status": "waiting", "aria-pressed": "false", ...(design.pattern === "handoff" && design.start === node.id && startLabel ? { "data-start": startLabel } : {}) }, name, status, runsBadge, warnBadge);
     box.style.left = `${pos.get(node.id).x}px`;
     box.style.top = `${pos.get(node.id).y}px`;
     box.style.width = `${BOX_W}px`;
@@ -137,7 +138,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       retry.style.left = `${pos.get(node.id).x + BOX_W - (retryMenu && node.created !== true ? 86 : 64)}px`;
       retry.style.top = `${pos.get(node.id).y + BOX_H - 26}px`;
     }
-    boxes.set(node.id, { box, name, status, retry, runsBadge, multi, created: node.created === true });
+    boxes.set(node.id, { box, name, status, retry, runsBadge, warnBadge, multi, created: node.created === true });
     area.append(box);
     if (retry) area.append(retry);
   }
@@ -168,6 +169,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       const sum = runs.get(id);
       const isFailed = failed?.has(id) === true;
       const agent = sum ? { status: sum.status, ms: null, label: boxLabel(id) } : isFailed ? { ...(state.agents[id] ?? { ms: null }), status: "error" } : state.agents[id];
+      parts.warnBadge.hidden = !(agent?.warnings > 0);
       parts.runsBadge.hidden = !parts.multi;
       parts.runsBadge.textContent = sum ? sum.badge : parts.multi ? "×?" : "";
       const status = agent?.status ?? idleStatus;

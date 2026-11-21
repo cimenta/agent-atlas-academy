@@ -10,6 +10,7 @@ import { createdPanel } from "./created-view.js";
 import { designWithCreated } from "../engine/created.js";
 import { createViewer } from "./viewer.js";
 import { apiCallsOf, apiView } from "./api-view.js";
+import { settingsView } from "./settings-view.js";
 import { PROVIDERS } from "../engine/providers.js";
 import { isSlot, slotIsFree } from "../key-slots.js";
 import { markText, searchBar } from "../text-search.js";
@@ -183,8 +184,8 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
   const createdHost = h(doc, "div", { class: "dynamic-host", "data-ui": "created-host" });
   const openCondense = new Set();
   const chips = h(doc, "div", { class: "chips", "data-ui": "agent-cards", role: "list", "aria-label": t("player.agents") });
-  const tabButtons = ["steps", "messages", "output", "context", "api"].map((name) => {
-    const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-tab": name, "data-ui": `tab-${name}` }, name === "api" ? t("player.tabApi", { n: 0 }) : t({ steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput", context: "player.tabContext" }[name]));
+  const tabButtons = ["steps", "messages", "output", "context", "api", "settings"].map((name) => {
+    const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-tab": name, "data-ui": `tab-${name}` }, name === "api" ? t("player.tabApi", { n: 0 }) : t({ steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput", context: "player.tabContext", settings: "player.tabSettings" }[name]));
     button.addEventListener("click", () => {
       ui.tab = name;
       ui.follow = false;
@@ -192,7 +193,7 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
     });
     return button;
   });
-  const tabHelpNames = { steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput", context: "player.tabContext", api: "player.tabApiName" };
+  const tabHelpNames = { steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput", context: "player.tabContext", api: "player.tabApiName", settings: "player.tabSettings" };
   const tabs = h(doc, "div", { class: "tabs", "data-ui": "inspector-tabs", role: "tablist" }, ...tabButtons.flatMap((button) => {
     const name = button.getAttribute("data-tab");
     return [button, help(`replay-${name}`, t(tabHelpNames[name]))];
@@ -325,6 +326,7 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
           doc,
           design,
           createdText: t("player.created"),
+          warnLabel: t("replay.warningHelp"),
           freePlaceText: (n, max) => t("player.freePlace", { n, max }),
           wide,
           boxLabel: (id) => designLabel(design, id),
@@ -659,6 +661,13 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
     return h(doc, "div", {}, h(doc, "p", { class: "lb" }, `${t("insp.outOf")} ${agent.label}${note}`), viewer.view(`o-${agent.id}`, agent.output ?? t("insp.nothing")));
   }
 
+  // The settings of the chosen agent in this run, read from the design of the run (a created agent is in it too).
+  function renderSettings(agent) {
+    const design = designOfRun();
+    const node = design?.nodes?.find((n) => n.id === agent.id) ?? null;
+    return settingsView({ doc, t, node, design, agent, num: (n) => new Intl.NumberFormat(doc.documentElement?.lang || undefined).format(n) });
+  }
+
   function renderBanners() {
     const items = [];
     if (state.error) {
@@ -738,7 +747,7 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
         body.replaceChildren(h(doc, "p", { class: "doc" }, t("insp.waiting")));
         return;
       }
-      body.replaceChildren(ui.tab === "steps" ? renderSteps(agent) : ui.tab === "messages" ? renderMessages(agent) : ui.tab === "context" ? renderContext(agent) : ui.tab === "api" ? renderApi(agent) : renderOutput(agent));
+      body.replaceChildren(ui.tab === "steps" ? renderSteps(agent) : ui.tab === "messages" ? renderMessages(agent) : ui.tab === "context" ? renderContext(agent) : ui.tab === "api" ? renderApi(agent) : ui.tab === "settings" ? renderSettings(agent) : renderOutput(agent));
     };
     if (search.query()) search.run();
     else drawBody();
@@ -783,7 +792,7 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
   // Keyboard zones. Tab goes player, Steps, Messages, Output, Context and round again (Shift+Tab goes back, and
   // leaves from the player). In the player the arrows or W A S D move between the agents and Enter inspects
   // the one that has the focus. In Steps and Messages the same keys move between steps or rounds.
-  const ZONES = ["player", "steps", "messages", "output", "context", "api"];
+  const ZONES = ["player", "steps", "messages", "output", "context", "api", "settings"];
   const MOVES = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", w: "up", s: "down", a: "left", d: "right" };
   const isLetter = (key) => key.length === 1;
   let lastG = 0;
