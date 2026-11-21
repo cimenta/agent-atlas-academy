@@ -337,6 +337,40 @@ export function renderCreate(ctx) {
       if (workspace && kind === "setup") return t("create.ws.locked");
       return kind === "missing" ? t("create.hint.missing", { items: missing(status).map((k) => t(`create.missing.${k}`)).join(", ") }) : t(`create.hint.${kind}`);
     };
+    // The slots the run uses whose saved key is locked.
+    const lockedNow = () => usedSlots(draft.editor.design()).filter((s) => vaultFor(s).getSessionKey() === null && vaultFor(s).hasStoredKey());
+    // A small password box and an Unlock button; onDone runs after the key is unlocked.
+    const makeUnlock = (onDone) => {
+      const pass = h(doc, "input", { type: "password", class: "inline-unlock-input", autocomplete: "current-password", "aria-label": t("create.unlockLabel"), "data-ui": "inline-unlock-input" });
+      const go = h(doc, "button", { type: "button", class: "inline-unlock-go", title: t("settings.unlock"), "aria-label": t("settings.unlock"), "data-ui": "inline-unlock-go" }, t("settings.unlock"));
+      const problem = h(doc, "span", { class: "inline-unlock-problem", role: "alert", hidden: true });
+      const submit = async () => {
+        if (pass.value === "") return;
+        try {
+          await (ctx.vault.unlockAll ? ctx.vault.unlockAll(pass.value) : vaultFor(lockedNow()[0]).unlock(pass.value));
+          markUnlockAlert(doc, ctx.vault, t);
+          onDone();
+        } catch (error) {
+          problem.textContent = t(`settings.error.${error?.code ?? "storage"}`);
+          problem.hidden = false;
+        }
+      };
+      pass.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          submit();
+        }
+      });
+      go.addEventListener("click", submit);
+      return h(doc, "span", { class: "inline-unlock" }, pass, go, problem);
+    };
+    // Next to "Almost there: add your key" the same box shows when the key is saved but locked. It is kept, so what is typed stays.
+    let hintUnlock = null;
+    const hintExtra = (status) => {
+      if (footHint(status) !== "missing" || !missing(status).includes("key") || lockedNow().length === 0) return null;
+      hintUnlock ??= makeUnlock(() => { refreshSteps(); drawReview(); });
+      return hintUnlock;
+    };
     const panels = { setup: h(doc, "div", { class: "step-panel", "data-ui": "step-setup" }), diagram: h(doc, "div", { class: "step-panel", "data-ui": "step-diagram" }), check: h(doc, "div", { class: "step-panel", "data-ui": "step-check" }) };
     const goStep = (step) => {
       draft.step = step;
@@ -349,7 +383,7 @@ export function renderCreate(ctx) {
       const status = stepsStatus();
       if (workspace) {
         const locked = workspaceLocked(status);
-        wsBar.update({ status, estimate: lastEstimate, hint: hintText(status), runEnabled: runAllowed({ status, verdict: lastVerdict, retryPending: draft.retry !== null }), agents: draft.editor.design().nodes.length });
+        wsBar.update({ status, estimate: lastEstimate, hint: hintText(status), hintExtra: hintExtra(status), runEnabled: runAllowed({ status, verdict: lastVerdict, retryPending: draft.retry !== null }), agents: draft.editor.design().nodes.length });
         for (const [part, heading] of Object.entries(headings)) heading.setState(status.parts[part] ? "done" : "none");
         if (rightColumn) {
           rightColumn.classList.toggle("locked", locked);
@@ -360,7 +394,7 @@ export function renderCreate(ctx) {
       draft.step = stepAfterChange(draft.step, status);
       bar.update(status, draft.step);
       const nav = navState({ step: draft.step, status });
-      foot.update({ nav: { ...nav, run: nav.run && runAllowed({ status, verdict: lastVerdict, retryPending: draft.retry !== null }) }, hint: hintText(status) });
+      foot.update({ nav: { ...nav, run: nav.run && runAllowed({ status, verdict: lastVerdict, retryPending: draft.retry !== null }) }, hint: hintText(status), hintExtra: hintExtra(status) });
       for (const [part, heading] of Object.entries(headings)) heading.setState(status.parts[part] ? "done" : "none");
       for (const step of STEPS) panels[step].hidden = step !== draft.step;
     }
@@ -545,30 +579,7 @@ export function renderCreate(ctx) {
 
       lastVerdict = verdict;
       // A reason that says the saved key is locked has a small password box and a button right after the words, so it can be unlocked from here.
-      const unlockInline = () => {
-        const pass = h(doc, "input", { type: "password", class: "inline-unlock-input", autocomplete: "current-password", "aria-label": t("create.unlockLabel"), "data-ui": "inline-unlock-input" });
-        const go = h(doc, "button", { type: "button", class: "inline-unlock-go", title: t("settings.unlock"), "aria-label": t("settings.unlock"), "data-ui": "inline-unlock-go" }, t("settings.unlock"));
-        const problem = h(doc, "span", { class: "inline-unlock-problem", role: "alert", hidden: true });
-        const submit = async () => {
-          if (pass.value === "") return;
-          try {
-            await (ctx.vault.unlockAll ? ctx.vault.unlockAll(pass.value) : vaultFor(lockedSlots[0]).unlock(pass.value));
-            markUnlockAlert(doc, ctx.vault, t);
-            drawReview();
-          } catch (error) {
-            problem.textContent = t(`settings.error.${error?.code ?? "storage"}`);
-            problem.hidden = false;
-          }
-        };
-        pass.addEventListener("keydown", (event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            submit();
-          }
-        });
-        go.addEventListener("click", submit);
-        return h(doc, "span", { class: "inline-unlock" }, pass, go, problem);
-      };
+      const unlockInline = () => makeUnlock(drawReview);
       const reasons = verdict.ok ? "" : h(doc, "ul", { class: "reasons", role: "status" }, ...verdict.reasons.map((r) => h(doc, "li", {}, t(`create.reason.${r}`, r === "limitsBlocked" ? { agents: lastBlockedNames } : undefined), ...(r === "keyLocked" && lockedSlots.length > 0 ? [unlockInline()] : []))));
 
       const status = stepsStatus();

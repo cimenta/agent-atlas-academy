@@ -42,11 +42,11 @@ export function footer({ doc, t, onBack, onNext, onRun }) {
   const next = button("step-next", t("create.next"), () => onNext(), "step-nav");
   const run = button("run-button", t("create.run"), () => onRun(), "primary run-button");
   const element = h(doc, "div", { class: "step-footer", "data-ui": "step-footer" }, hint, h(doc, "span", { class: "step-footer-buttons" }, back, next, run));
-  function update({ nav, hint: text }) {
+  function update({ nav, hint: text, hintExtra = null }) {
     back.disabled = !nav.back;
     next.disabled = !nav.next;
     run.disabled = !nav.run;
-    hint.replaceChildren(doc.createTextNode(text));
+    hint.replaceChildren(doc.createTextNode(text), ...(hintExtra ? [hintExtra] : []));
   }
   return { element, update };
 }
@@ -102,11 +102,12 @@ export function workspaceBar({ doc, t, onRun }) {
   const hint = h(doc, "p", { class: "hint step-hint workspace-hint", "data-ui": "step-hint", role: "status" });
   const element = h(doc, "div", { class: "workspace-bar", "data-ui": "workspace-bar" }, h(doc, "div", { class: "workspace-chips" }, chipSetup.element, chipDiagram.element, chipCheck.element), estimate, run);
   let lastHint = null;
+  let lastExtra = null;
   const setIcon = (icon, state) => {
     icon.setAttribute("data-s", state);
     icon.setAttribute("aria-label", t(LABEL[state] ?? LABEL.none));
   };
-  function update({ status, estimate: text, hint: hintText, runEnabled, agents = 0 }) {
+  function update({ status, estimate: text, hint: hintText, hintExtra = null, runEnabled, agents = 0 }) {
     agentCount.replaceChildren(doc.createTextNode(t("create.ws.agentMany", { n: agents })));
     setIcon(chipSetup.icon, status.setup);
     setIcon(chipDiagram.icon, status.locked.diagram ? "lock" : status.diagram);
@@ -114,9 +115,10 @@ export function workspaceBar({ doc, t, onRun }) {
     estimate.replaceChildren(doc.createTextNode(text === "" || text === undefined ? t("create.ws.noEstimate") : text));
     run.disabled = !runEnabled;
     // Only when the text changes, so a screen reader does not repeat it on every keystroke.
-    if (hintText !== lastHint) {
-      hint.replaceChildren(doc.createTextNode(hintText));
+    if (hintText !== lastHint || hintExtra !== lastExtra) {
+      hint.replaceChildren(doc.createTextNode(hintText), ...(hintExtra ? [hintExtra] : []));
       lastHint = hintText;
+      lastExtra = hintExtra;
     }
   }
   return { element, hintElement: hint, update };

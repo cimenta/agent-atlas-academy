@@ -6,6 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Create: next to Almost there: add your key, a small password box and an Unlock button appear when the key is saved on this device but locked, so it can be unlocked from the footer.
 - When a run ends and is saved, the app switches to Re-play on that run. Create keeps the same run, so clicking Create shows what was just run. A run that waits for your approval stays on Create.
 - Re-play: a new Settings tab shows how the chosen agent was set up in the run (role, provider, model, web search, instructions, its own limits and what happens at them, and optional parts). Every warning of a run now starts with the name of its agent, and an agent that had a warning has an orange exclamation mark on its card.
 - The search box in the Play header searches what is open: the library, the run on Re-play, or the answer on Result, with a match counter and arrows; on Create it is greyed out. The search box in the row of the replay tabs is removed. On phones the language is chosen in Settings, General instead of the header.
