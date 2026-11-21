@@ -897,6 +897,9 @@ export function renderCreate(ctx) {
       });
       children.push(again);
       after.replaceChildren(...children);
+      // The run is over and saved: Re-play opens on it. The draft is kept, so Create still holds the same run.
+      const win = doc.defaultView;
+      if (result.ok && done?.outcome !== "waiting_approval" && /^#\/play\/create(\?|$)/.test(win.location.hash)) win.location.hash = `#/play/run/${id}`;
     };
 
     activeRun = startRun({
