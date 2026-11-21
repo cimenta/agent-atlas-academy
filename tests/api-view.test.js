@@ -255,3 +255,11 @@ test("the viewer keeps working for a JSON nested too deep to print", async () =>
   assert.equal(typeof safeStringify(deep, "fallback"), "string");
   assert.equal(safeStringify({ a: 1 }, "x"), '{\n  "a": 1\n}');
 });
+
+test("the note about the translated format shows one line and a button that opens the rest; the same format has no button", () => {
+  const g = apiView({ doc, t, calls: [call({ provider: "google" })], wire: wireOf("google"), viewer, query: "" });
+  assert.equal(g.find((e) => e.attrs["data-ui"] === "api-note-toggle").length, 1);
+  assert.equal(g.find((e) => e.attrs["data-ui"] === "api-note-more")[0].attrs.hidden !== undefined, true);
+  const a = apiView({ doc, t, calls: [call()], wire: wireOf("anthropic"), viewer, query: "" });
+  assert.equal(a.find((e) => e.attrs["data-ui"] === "api-note-toggle").length, 0);
+});

@@ -232,6 +232,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Fixed
 
+- API calls tab: the note about the translated format shows one line with a read more button, and the hint under the calls (Czech and English) names the search box in the header.
+
 - Many small review findings since the API log: Library import and detail edge cases, the phone Library (focus, history, long titles), Cloudflare quota detection and texts, Groq waits and token estimates, OpenRouter free-model picks and checks, Check models wording and limits. The old raw.http of the round event is gone (the API log holds it).
 
 - Check models: a Gemini key that Google refuses is now reported as refused, not as the provider not answering; the model names in the result are shown in the language of the page; the Czech all-available line is grammatical.

@@ -68,6 +68,9 @@ const defaultNum = (n) => n.toFixed(1);
 
 // opened: a Map of the rows the student opened or closed (id -> open), so a redraw (every live event) keeps their choice.
 // free: the agent used a key on a free tier. runHasCalls: the run has calls (of some agent). num: writes a number with one decimal.
+// Whether the note about the translated format is open. It stays as it was when the view is drawn again (a new search, a new tab).
+let apiNoteOpen = false;
+
 export function apiView({ doc, t, calls, wire, viewer, query = "", dropped = false, opened = new Map(), free = false, runHasCalls = false, num = defaultNum }) {
   if (!Array.isArray(calls) || calls.length === 0) return h(doc, "div", { class: "empty", "data-ui": "api-none" }, t(dropped ? "replay.api.dropped" : runHasCalls ? "replay.api.none" : "replay.api.old"));
   const q = String(query ?? "").trim().toLowerCase();
@@ -127,11 +130,27 @@ export function apiView({ doc, t, calls, wire, viewer, query = "", dropped = fal
   };
 
   const noteKey = wire?.noteKey ?? "replay.api.noteSame";
-  const note = h(doc, "div", { class: "explain", "data-ui": "api-note" }, h(doc, "p", {}, h(doc, "b", {}, t(`${noteKey}Lead`)), doc.createTextNode(` ${t(noteKey)}`)), h(doc, "p", { class: "hint" }, t("replay.api.hiddenNote")));
-  if (Array.isArray(wire?.map) && wire.map.length > 0) {
-    note.append(
-      h(doc, "table", { class: "conv", "data-ui": "api-table" }, h(doc, "tr", {}, h(doc, "th", {}, t("replay.api.table.inside")), h(doc, "th", {}, t("replay.api.table.sent"))), ...wire.map.map(([inside, sent]) => h(doc, "tr", {}, h(doc, "td", {}, inside), h(doc, "td", {}, sent)))),
-    );
+  const hidden = h(doc, "p", { class: "hint" }, t("replay.api.hiddenNote"));
+  const table = Array.isArray(wire?.map) && wire.map.length > 0
+    ? h(doc, "table", { class: "conv", "data-ui": "api-table" }, h(doc, "tr", {}, h(doc, "th", {}, t("replay.api.table.inside")), h(doc, "th", {}, t("replay.api.table.sent"))), ...wire.map.map(([inside, sent]) => h(doc, "tr", {}, h(doc, "td", {}, inside), h(doc, "td", {}, sent))))
+    : null;
+  let note;
+  if (table) {
+    // A provider with another format: only the first line shows; the button at the right opens the rest (the explanation, the note about the key and the table).
+    const more = h(doc, "div", { class: "note-more", "data-ui": "api-note-more", hidden: !apiNoteOpen }, h(doc, "p", {}, t(noteKey)), hidden, table);
+    const label = () => t(apiNoteOpen ? "replay.api.less" : "replay.api.more");
+    const toggle = h(doc, "button", { type: "button", class: "icon-button note-toggle", "data-ui": "api-note-toggle", "aria-expanded": String(apiNoteOpen), title: label(), "aria-label": label() }, apiNoteOpen ? "▴" : "▾");
+    toggle.addEventListener("click", () => {
+      apiNoteOpen = !apiNoteOpen;
+      more.hidden = !apiNoteOpen;
+      toggle.setAttribute("aria-expanded", String(apiNoteOpen));
+      toggle.title = label();
+      toggle.setAttribute("aria-label", label());
+      toggle.textContent = apiNoteOpen ? "▴" : "▾";
+    });
+    note = h(doc, "div", { class: "explain", "data-ui": "api-note" }, h(doc, "div", { class: "note-head" }, h(doc, "p", {}, h(doc, "b", {}, t(noteKey + "Lead"))), toggle), more);
+  } else {
+    note = h(doc, "div", { class: "explain", "data-ui": "api-note" }, h(doc, "p", {}, h(doc, "b", {}, t(noteKey + "Lead")), doc.createTextNode(" " + t(noteKey))), hidden);
   }
   return h(doc, "div", { class: "api-calls", "data-ui": "api-calls" }, note, ...calls.map(row), h(doc, "p", { class: "hint", "data-ui": "api-hint" }, t("replay.api.hint")));
 }
