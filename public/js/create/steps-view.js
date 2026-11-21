@@ -3,7 +3,7 @@
 import { h } from "../dom.js";
 import { STEPS } from "./steps-model.js";
 
-const LABEL = { none: "create.status.none", part: "create.status.part", done: "create.status.done", lock: "create.status.locked" };
+const LABEL = { attn: "create.status.attn", none: "create.status.none", part: "create.status.part", done: "create.status.done", lock: "create.status.locked" };
 
 // state: "none" (nothing set), "part" (partly set), "done" (set) or "lock" (not open yet).
 export function statusIcon(doc, state, t) {

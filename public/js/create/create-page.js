@@ -317,6 +317,7 @@ export function renderCreate(ctx) {
 
     // The guided steps: which one is open, what is set, what the buttons may do. The rules are in steps-model.js.
     let lastVerdict = null;
+    let lastBlockedNames = ""; // the names of the agents whose call is too big for a free account
     let lastEstimate = "";
     // The layout is read when Create opens: the guided steps, or the workspace with everything on one screen.
     const workspace = ctx.settings.get().createLayout === "workspace";
@@ -331,7 +332,7 @@ export function renderCreate(ctx) {
     const hintText = (status) => {
       const kind = footHint(status);
       // Everything is decided but an agent cannot run on a free account: say that instead of Ready to run.
-      if (kind === "ready" && lastVerdict?.reasons?.includes("limitsBlocked")) return t("create.reason.limitsBlocked");
+      if (kind === "ready" && lastVerdict?.reasons?.includes("limitsBlocked")) return t("create.reason.limitsBlocked", { agents: lastBlockedNames });
       if (kind === "ready" && lastVerdict?.reasons?.includes("modelGone")) return t("create.reason.modelGone");
       if (workspace && kind === "setup") return t("create.ws.locked");
       return kind === "missing" ? t("create.hint.missing", { items: missing(status).map((k) => t(`create.missing.${k}`)).join(", ") }) : t(`create.hint.${kind}`);
@@ -456,6 +457,7 @@ export function renderCreate(ctx) {
       const runSizes = runSettings();
       const limitArgs = { design, limits, ...runSizes };
       const limitFound = limitFindings(limitArgs);
+      lastBlockedNames = [...new Set(limitFound.filter((f) => f.kind === "call-too-big").flatMap((f) => f.agents))].map((id) => rows.find((r) => r.id === id)?.label ?? id).join(", ");
       const limitEl = limitsView({
         doc, t, findings: limitFound, offers: limitOffers({ ...limitArgs, loadedSlots: SLOT_IDS.filter((id) => keyState(vaultFor(id)) !== "none") }), summary: limitSummary(limitArgs),
         providerNameOf: (id) => providerCatalog(id).label,
@@ -542,10 +544,35 @@ export function renderCreate(ctx) {
       const keyParts = used.flatMap((slot, index) => keyBlock(slot, index));
 
       lastVerdict = verdict;
-      const reasons = verdict.ok ? "" : h(doc, "ul", { class: "reasons", role: "status" }, ...verdict.reasons.map((r) => h(doc, "li", {}, t(`create.reason.${r}`))));
+      // A reason that says the saved key is locked has a small password box and a button right after the words, so it can be unlocked from here.
+      const unlockInline = () => {
+        const pass = h(doc, "input", { type: "password", class: "inline-unlock-input", autocomplete: "current-password", "aria-label": t("create.unlockLabel"), "data-ui": "inline-unlock-input" });
+        const go = h(doc, "button", { type: "button", class: "inline-unlock-go", title: t("settings.unlock"), "aria-label": t("settings.unlock"), "data-ui": "inline-unlock-go" }, "→");
+        const problem = h(doc, "span", { class: "inline-unlock-problem", role: "alert", hidden: true });
+        const submit = async () => {
+          if (pass.value === "") return;
+          try {
+            await (ctx.vault.unlockAll ? ctx.vault.unlockAll(pass.value) : vaultFor(lockedSlots[0]).unlock(pass.value));
+            markUnlockAlert(doc, ctx.vault, t);
+            drawReview();
+          } catch (error) {
+            problem.textContent = t(`settings.error.${error?.code ?? "storage"}`);
+            problem.hidden = false;
+          }
+        };
+        pass.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            submit();
+          }
+        });
+        go.addEventListener("click", submit);
+        return h(doc, "span", { class: "inline-unlock" }, " ", pass, go, " ", problem);
+      };
+      const reasons = verdict.ok ? "" : h(doc, "ul", { class: "reasons", role: "status" }, ...verdict.reasons.map((r) => h(doc, "li", {}, t(`create.reason.${r}`, r === "limitsBlocked" ? { agents: lastBlockedNames } : undefined), ...(r === "keyLocked" && lockedSlots.length > 0 ? [unlockInline()] : []))));
 
       const status = stepsStatus();
-      const tabs = innerTabs({ doc, t, tabs: [{ id: "agents", label: t("create.tab.agents") }, { id: "limits", label: t("create.tab.limits"), state: status.limits }, { id: "cost", label: t("create.tab.cost") }, { id: "key", label: t("create.tab.key"), state: status.key }], current: draft.subTab, onSelect: (id) => {
+      const tabs = innerTabs({ doc, t, tabs: [{ id: "agents", label: t("create.tab.agents") }, { id: "limits", label: t("create.tab.limits"), state: status.limits }, { id: "cost", label: t("create.tab.cost") }, { id: "key", label: t("create.tab.key"), state: status.key === "done" ? "done" : "attn" }], current: draft.subTab, onSelect: (id) => {
         draft.subTab = id;
         drawReview();
       } });
