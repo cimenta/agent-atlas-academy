@@ -1531,7 +1531,8 @@
   "library.import.status.added": "added",
   "library.import.status.skipped": "skipped, you already have it",
   "library.import.status.copy": "saved as a copy: a different run had the same id",
-  "library.import.status.refused": "refused: {reason}",
+  "library.import.status.refused": "refused",
+  "library.import.why": "Why?",
   "library.import.reason.json": "not valid JSON",
   "library.import.reason.invalid": "not a run file (the design is missing)",
   "library.import.reason.storage": "it could not be saved in this browser",
@@ -1567,5 +1568,6 @@
   "settings.checkOthersOne": "1 other model is offered; the app does not use it.",
   "library.bar.compare": "Compare",
   "library.bar.exportTicked": "Export ticked",
-  "library.bar.exportAll": "Export all"
+  "library.bar.exportAll": "Export all",
+  "library.bar.menu": "Import and export"
 }

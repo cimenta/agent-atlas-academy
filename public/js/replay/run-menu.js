@@ -4,8 +4,9 @@
 import { h } from "../dom.js";
 
 // getItems() returns (or resolves to) a list of { ui, label, hint, danger, onClick }.
-export function createRunMenu({ doc, t, getItems }) {
-  const cog = h(doc, "button", { type: "button", class: "cog-button", "data-ui": "run-cog", "aria-haspopup": "menu", "aria-expanded": "false", "aria-label": t("player.runMenu"), title: t("player.runMenu") }, "⚙");
+// label: the name of the menu for a screen reader and the tooltip (default: Run menu); ui: its data-ui. An item may be disabled.
+export function createRunMenu({ doc, t, getItems, label = t("player.runMenu"), ui = "run-cog" }) {
+  const cog = h(doc, "button", { type: "button", class: "cog-button", "data-ui": ui, "aria-haspopup": "menu", "aria-expanded": "false", "aria-label": label, title: label }, "⚙");
   const list = h(doc, "div", { class: "run-menu-list", role: "menu", "data-ui": "run-menu", hidden: true });
   const element = h(doc, "div", { class: "run-menu" }, cog, list);
   let leaveTimer;
@@ -34,6 +35,7 @@ export function createRunMenu({ doc, t, getItems }) {
         ? [h(doc, "p", { class: "hint run-menu-empty" }, t("player.menuEmpty"))]
         : items.map((item) => {
             const button = h(doc, "button", { type: "button", role: "menuitem", class: item.danger ? "run-menu-item danger" : "run-menu-item", "data-ui": item.ui, title: item.hint }, item.label);
+            if (item.disabled === true) button.disabled = true;
             button.addEventListener("click", () => {
               close();
               item.onClick();

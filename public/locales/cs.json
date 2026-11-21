@@ -1531,7 +1531,8 @@
   "library.import.status.added": "přidáno",
   "library.import.status.skipped": "přeskočeno, už ho máte",
   "library.import.status.copy": "uloženo jako kopie: jiný běh měl stejné id",
-  "library.import.status.refused": "odmítnuto: {reason}",
+  "library.import.status.refused": "odmítnuto",
+  "library.import.why": "Proč?",
   "library.import.reason.json": "neplatný JSON",
   "library.import.reason.invalid": "není to soubor s během (chybí návrh)",
   "library.import.reason.storage": "nešlo ho uložit v tomto prohlížeči",
@@ -1567,5 +1568,6 @@
   "settings.checkOthersOne": "Jiný model je nabízen 1; aplikace ho nepoužívá.",
   "library.bar.compare": "Porovnat",
   "library.bar.exportTicked": "Export vybraných",
-  "library.bar.exportAll": "Export všech"
+  "library.bar.exportAll": "Export všech",
+  "library.bar.menu": "Import a export"
 }

@@ -11,6 +11,8 @@ import { lib, tabBar, runRow, loadAnyRun, rememberRun, rememberedRun } from "./p
 import { libraryDetail } from "./library-detail.js";
 import { actionList, runFacts, searchText } from "./library-model.js";
 import { definitionFromRun } from "./create/definition.js";
+import { createRunMenu } from "./replay/run-menu.js";
+import { showCenterTip } from "./center-tip.js";
 import { openInCreate } from "./create/draft.js";
 import { downloadFile, safeFileName } from "./download.js";
 import { runForExport } from "./run-export.js";
@@ -25,7 +27,13 @@ export { importFiles };
 function importSummary(ctx, result, onClose) {
   const { doc, t } = ctx;
   const reasonText = (reason) => (["json", "invalid", "empty", "definition", "storage", "too_large"].includes(reason) ? t(`library.import.reason.${reason}`) : t("library.import.reason.other"));
-  const resultText = (row) => (row.status === "refused" ? t("library.import.status.refused", { reason: reasonText(row.reason) }) : t(`library.import.status.${row.status}`));
+  // A refused run says so in a word; the reason opens in a tip, so a long explanation does not squeeze the table.
+  const resultCell = (row) => {
+    if (row.status !== "refused") return h(doc, "td", {}, t(`library.import.status.${row.status}`));
+    const why = h(doc, "button", { type: "button", class: "why-button", "data-ui": "import-why", "aria-label": t("library.import.why") }, t("library.import.why"));
+    why.addEventListener("click", () => showCenterTip({ doc, content: h(doc, "p", {}, reasonText(row.reason).replace(/^./, (c) => c.toUpperCase())), sticky: true, closeLabel: t("about.close"), moveLabel: t("about.move") }));
+    return h(doc, "td", {}, t("library.import.status.refused"), " ", why);
+  };
   const files = new Set(result.rows.map((row) => row.file)).size;
   const level = result.counts.refused > 0 ? "warn" : "ok";
   const close = h(doc, "button", { type: "button", "data-ui": "import-close" }, t("library.import.close"));
@@ -35,7 +43,7 @@ function importSummary(ctx, result, onClose) {
     "div",
     { class: "import-summary", "data-ui": "import-summary" },
     h(doc, "div", { class: `msg ${level}`, role: "status" }, h(doc, "b", {}, t("library.import.title", { files })), t("library.import.counts", result.counts)),
-    h(doc, "table", { class: "detail-table" }, h(doc, "tr", {}, h(doc, "th", {}, t("library.import.colFile")), h(doc, "th", {}, t("library.import.colRun")), h(doc, "th", {}, t("library.import.colResult"))), ...result.rows.map((row) => h(doc, "tr", { "data-status": row.status }, h(doc, "td", {}, row.file), h(doc, "td", {}, row.title || "-"), h(doc, "td", {}, resultText(row))))),
+    h(doc, "table", { class: "detail-table" }, h(doc, "tr", {}, h(doc, "th", {}, t("library.import.colFile")), h(doc, "th", {}, t("library.import.colRun")), h(doc, "th", {}, t("library.import.colResult"))), ...result.rows.map((row) => h(doc, "tr", { "data-status": row.status }, h(doc, "td", {}, row.file), h(doc, "td", {}, row.title || "-"), resultCell(row)))),
     h(doc, "p", { class: "facts" }, t("library.import.note")),
     close,
   );
@@ -178,7 +186,7 @@ export async function renderLibraryTab(ctx, requestedId) {
     compareNote = t("library.exported", { n: runs.length });
     redraw();
   };
-  // The bar under the tabs: small buttons, each with its count in the upper right corner. Shown on both lists.
+  // The bar under the tabs: Compare with its count in the upper right corner, and a cog menu with import and export. Shown on both lists.
   const barButton = (ui, label, count, { primary = false, disabled = false, onClick }) => {
     const button = h(doc, "button", { type: "button", class: `bar-button${primary ? " primary" : ""}`, "data-ui": ui }, label, h(doc, "span", { class: "bar-count", "aria-hidden": "true" }, String(count)));
     button.setAttribute("aria-label", `${label} (${count})`);
@@ -190,8 +198,6 @@ export async function renderLibraryTab(ctx, requestedId) {
     const n = lib.compare.length;
     const buttons = [
       barButton("compare-go", t("library.bar.compare"), n, { primary: true, disabled: n < 2, onClick: () => { location.hash = `#/play/compare?runs=${lib.compare.join(",")}`; } }),
-      barButton("export-ticked", t("library.bar.exportTicked"), n, { disabled: n === 0, onClick: () => exportRuns(lib.compare) }),
-      ...(mineIds.length > 0 ? [barButton("export-all-mine", t("library.bar.exportAll"), mineIds.length, { onClick: () => exportRuns(mineIds) })] : []),
     ];
     if (n > 0) {
       const clear = h(doc, "button", { type: "button", class: "bar-button", "data-ui": "compare-clear" }, t("compare.clear"));
@@ -203,7 +209,19 @@ export async function renderLibraryTab(ctx, requestedId) {
       buttons.push(clear);
     }
     const hint = compareNote || (n > 0 ? t(n === 1 ? "compare.pickOne" : "compare.base") : "");
-    return h(doc, "div", { class: "compare-bar", "data-ui": "compare-bar" }, ...buttons, ...(hint ? [h(doc, "span", { class: "muted" }, hint)] : []));
+    const menu = createRunMenu({
+      doc,
+      t,
+      label: t("library.bar.menu"),
+      ui: "bar-menu",
+      getItems: () => [
+        { ui: "import-run", label: t("play.import"), onClick: () => fileInput.click() },
+        { ui: "export-ticked", label: `${t("library.bar.exportTicked")} (${n})`, disabled: n === 0, onClick: () => exportRuns(lib.compare) },
+        ...(mineIds.length > 0 ? [{ ui: "export-all-mine", label: `${t("library.bar.exportAll")} (${mineIds.length})`, onClick: () => exportRuns(mineIds) }] : []),
+      ],
+    });
+    menu.element.classList.add("bar-menu");
+    return h(doc, "div", { class: "compare-bar", "data-ui": "compare-bar" }, ...buttons, ...(hint ? [h(doc, "span", { class: "muted" }, hint)] : []), menu.element);
   };
 
   // Import: a run file from your computer becomes one of your own runs.
@@ -226,8 +244,6 @@ export async function renderLibraryTab(ctx, requestedId) {
     const first = result.rows.find((row) => row.status === "added" || row.status === "copy");
     if (result.rows.length === 1 && first) await select(first.id);
   });
-  const importButton = h(doc, "button", { type: "button", class: "icon-button", "data-ui": "import-run", title: t("play.import"), "aria-label": t("play.import") }, "⤒");
-  importButton.addEventListener("click", () => fileInput.click());
 
   // A key that had nothing to act on says so here (a live region, so a screen reader reads it).
   const keyNote = h(doc, "p", { class: "kbd-note muted", role: "status", "data-ui": "key-note" });
@@ -310,7 +326,7 @@ export async function renderLibraryTab(ctx, requestedId) {
       (detailHost.querySelector("button") ?? detailHost).focus();
       return true;
     },
-    importFile: () => importButton.click(),
+    importFile: () => fileInput.click(),
     loadLast: () => {
       const last = doc.querySelector('[data-ui="load-last"]');
       if (last && !last.disabled) last.click();
@@ -431,7 +447,7 @@ export async function renderLibraryTab(ctx, requestedId) {
       });
       return button;
     };
-    const paneTabs = h(doc, "div", { class: "tabs", role: "tablist", "data-ui": "pane-tabs" }, tabButton("mine", "play.mine", built.mine.length), tabButton("library", "play.library", built.gallery.length), importButton, fileInput);
+    const paneTabs = h(doc, "div", { class: "tabs", role: "tablist", "data-ui": "pane-tabs" }, tabButton("mine", "play.mine", built.mine.length), tabButton("library", "play.library", built.gallery.length), fileInput);
     pane.replaceChildren(
       paneTabs,
       importNote,
