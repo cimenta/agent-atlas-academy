@@ -679,7 +679,11 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
     state.warnings.forEach((w, i) => {
       const at = state.warningTimes[i];
       const time = typeof at === "number" ? clockTime(at) : "";
-      items.push(h(doc, "div", { class: state.warningErrors[i] ? "banner" : "banner warn", "data-kind": state.warningErrors[i] ? "error" : "warning" }, ...(time ? [h(doc, "time", { class: "banner-time", "data-ui": "banner-time", datetime: new Date(at).toISOString() }, time), " "] : []), `⚠ ${w}`, " ", help(state.warningHelps[i] ?? "replay-warnings", t("replay.warningHelp"))));
+      // The same round mark as on the agent (orange for a warning, red for an error), then the name of the agent and the time on one line and the message under it.
+      const bad = Boolean(state.warningErrors[i]);
+      const label = state.warningLabels?.[i] ?? null;
+      const head = [...(label ? [h(doc, "strong", { class: "banner-who" }, label)] : []), ...(time ? [h(doc, "time", { class: "banner-time", "data-ui": "banner-time", datetime: new Date(at).toISOString() }, time)] : [])];
+      items.push(h(doc, "div", { class: `banner banner-stack${bad ? "" : " warn"}`, "data-kind": bad ? "error" : "warning" }, h(doc, "span", { class: `banner-badge ${bad ? "err" : "warn"}`, "aria-hidden": "true" }, "!"), h(doc, "span", { class: "banner-body" }, ...(head.length ? [h(doc, "span", { class: "banner-head" }, ...head)] : []), h(doc, "span", { class: "banner-text" }, state.warningBare?.[i] ?? w)), help(state.warningHelps[i] ?? "replay-warnings", t("replay.warningHelp"))));
     });
     // How an evaluator loop ended shows once the replay has reached that point.
     // A handoff run shows the path so far, and at its end how it ended.

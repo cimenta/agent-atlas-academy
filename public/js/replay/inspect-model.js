@@ -323,6 +323,9 @@ export function deriveInspector(events, cursor = events.length) {
     agents[id].label = labels.get(id);
   });
   // Each warning starts with the name of its agent, the one the card shows.
+  // The name of the agent and the bare message are kept apart too, for the banner that shows them on two lines.
+  state.warningLabels = state.warningAgents.map((id) => (id && agents[id] ? agents[id].label : null));
+  state.warningBare = state.warnings.slice();
   state.warnings = state.warnings.map((message, i) => {
     const id = state.warningAgents[i];
     return id && agents[id] ? `${agents[id].label}: ${message}` : message;

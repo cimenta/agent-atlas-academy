@@ -616,9 +616,20 @@ export function renderCreate(ctx) {
       beginRun({ resume: run, approve });
     });
     const definitionFile = h(doc, "input", { type: "file", accept: ".json,application/json", hidden: true, "data-ui": "definition-file" });
-    const loadButton = h(doc, "button", { type: "button", "data-ui": "load-definition", title: t("create.loadDefinitionHint") }, t("create.loadDefinition"));
+    // The two buttons of the top row are icons; the name and the hint are in the tooltip.
+    const iconOf = (paths) => {
+      const svg = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
+      for (const [k, v] of Object.entries({ viewBox: "0 0 16 16", width: "16", height: "16", "aria-hidden": "true", fill: "none", stroke: "currentColor", "stroke-width": "1.7", "stroke-linecap": "round", "stroke-linejoin": "round" })) svg.setAttribute(k, v);
+      for (const d of paths) {
+        const path = doc.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", d);
+        svg.append(path);
+      }
+      return svg;
+    };
+    const loadButton = h(doc, "button", { type: "button", class: "head-icon", "data-ui": "load-definition", title: `${t("create.loadDefinition")}: ${t("create.loadDefinitionHint")}`, "aria-label": t("create.loadDefinition") }, iconOf(["M2 13h12", "M8 11V2.5M4.5 6 8 2.5 11.5 6"]));
     loadButton.addEventListener("click", () => definitionFile.click());
-    const clearButton = h(doc, "button", { type: "button", "data-ui": "clear-definition", title: t("create.clearDefinitionHint") }, t("create.clearDefinition"));
+    const clearButton = h(doc, "button", { type: "button", class: "head-icon", "data-ui": "clear-definition", title: `${t("create.clearDefinition")}: ${t("create.clearDefinitionHint")}`, "aria-label": t("create.clearDefinition") }, iconOf(["M3 4h10M6 4V2h4v2M5 4l.7 9h4.6L11 4"]));
     clearButton.addEventListener("click", () => {
       const hasWork = draft.task.trim() !== "" || draft.editor.design().nodes.length > 0;
       if (hasWork && !doc.defaultView.confirm(t("create.clearConfirm"))) return;
@@ -899,7 +910,7 @@ export function renderCreate(ctx) {
         outcomeSlot.append(panel);
       }
       const children = [];
-      if (result.ok) children.push(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${id}` }, t("create.seeResult"))));
+      if (result.ok) children.push(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${id}` }, t("create.seeResult")), " · ", h(doc, "a", { href: `#/play/run/${id}`, "data-ui": "see-replay" }, t("result.watch"))));
       else children.push(h(doc, "p", { class: "notice", role: "alert" }, t("create.saveFailed")), downloadButton(ctx, finalRecord));
       const again = h(doc, "button", { type: "button", class: "primary" }, t("create.newRun"));
       again.addEventListener("click", () => {
@@ -908,9 +919,7 @@ export function renderCreate(ctx) {
       });
       children.push(again);
       after.replaceChildren(...children);
-      // The run is over and saved: Re-play opens on it. The draft is kept, so Create still holds the same run.
-      const win = doc.defaultView;
-      if (result.ok && done?.outcome !== "waiting_approval" && /^#\/play\/create(\?|$)/.test(win.location.hash)) win.location.hash = `#/play/run/${id}`;
+      // The run is over and saved. The screen stays as it is, with its warnings; the links below lead to the result and to the replay.
     };
 
     activeRun = startRun({

@@ -47,6 +47,10 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- The Play menu is now called Lab (Laboratoř in Czech), because it holds the Library, Re-play, Create and Result.
+- Create: Load definition and Clear definition at the top are icons with a tooltip. The Unlock button is a little farther from its box. In the player, the speed buttons are as high as the other player buttons.
+- Re-play: a warning or an error of a run shows the same round mark as the agent (orange or red with an exclamation mark) instead of the warning sign. The first line has the name of the agent and the time, the message is under it.
+- Create: when a run ends the page no longer jumps to Re-play, so the warnings and the diagram stay on the screen. Under the run there are links to the result and to the replay.
 - Library: the buttons of a run are smaller and fit in one row. Load keeps its word and a play icon; Use in Create, Export, Compare, Send, Edit description and Delete are icons with a tooltip that says what they do (English and Czech).
 - Library: coming back to the Library shows the run you had open and the tag cloud switch as you left them, with the filters, the tab and the search. The cloud is on by default only the first time the Library opens after the app starts.
 - Create: a connection line starts and ends in a dot. A dot whose connection goes to another row moves to the bottom or the top of the agent, so the line runs from dot to dot. The list of connections in the corner of the diagram has small remove buttons and grows in columns instead of a scroll bar.

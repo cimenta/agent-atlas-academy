@@ -1659,3 +1659,18 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .library-detail .actions .action.icon { width: 30px; min-width: 30px; padding: 0; justify-content: center; }
 .library-detail .actions .action-icon { flex: none; }
 .library-detail .actions .action-sep { width: 1px; height: 20px; background: var(--border); margin: 0 2px; }
+
+/* Create: the two buttons of the top row are icons; Unlock sits a little farther from its box; speed buttons are as high as the others. */
+.create-head .head-icon { width: 34px; height: 34px; min-height: 0; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.inline-unlock { gap: 12px; }
+.controls-bar .speed button { height: 30px; min-height: 0; line-height: 1; }
+
+/* Warnings and errors of a run: the same round mark as on the agent, the name and the time on one line, the message under them. */
+.banner-stack { display: flex; align-items: flex-start; gap: 10px; }
+.banner-stack .banner-badge { flex: none; width: 26px; height: 26px; line-height: 26px; border-radius: 50%; color: #fff; font-size: 1rem; font-weight: 800; text-align: center; margin-top: 1px; }
+.banner-stack .banner-badge.warn { background: #f59e0b; }
+.banner-stack .banner-badge.err { background: #dc2626; }
+.banner-stack .banner-body { flex: 1; min-width: 0; display: block; }
+.banner-stack .banner-head { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; margin-bottom: 2px; }
+.banner-stack .banner-time { margin: 0; font-weight: 400; opacity: 0.8; }
+.banner-stack .help-icon { flex: none; margin-left: auto; }
