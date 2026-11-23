@@ -47,6 +47,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Library: every icon, chip and tag has a tooltip that says what it is when the mouse rests on it: the status icon (how the run ended), the tick box, the Base badge, the date, the provider chips, the pattern chip (with its one line from Create), the two tabs, Compare and the clear buttons, the cloud switch and the words, chips and colour key of the tag cloud (English and Czech).
 - Library: the Tags switch (a cloud icon) and the cog menu sit in the row of the tabs, next to Your runs and Library, and the blue bar under them shows only when there is something to do (a run ticked or a tag chosen), so the list starts right under the tabs. The tag colour of Start here is orange, so it is not mistaken for the green Kind of task.
 - Library: the Compare button shows only when two or more runs are ticked (with one ticked there is Clear and a hint). On a card the status icon is in the top right corner and the tick box is under it.
 - The providers are one registry in the code (Anthropic and Gemini, with their models, prices, key slots, colours and texts), so a new provider is one entry and one adapter. Nothing changes for students: saved keys, settings, backups and recorded runs work as before.

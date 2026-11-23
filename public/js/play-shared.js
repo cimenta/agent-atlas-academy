@@ -61,9 +61,15 @@ export function tabBar(ctx, view, { onQuery, onFocusList, intro, resultOpen = fa
 }
 
 // The line under the title: how the run ended and when it was made (your own runs).
-export function runMeta({ doc, lang }, item) {
+export function runMeta({ doc, lang, t }, item) {
   const when = formatRunWhen(item.createdAt, lang);
-  return when ? h(doc, "span", { class: "run-meta" }, h(doc, "span", { class: "run-when-text", "data-ui": "run-when" }, when)) : "";
+  return when ? h(doc, "span", { class: "run-meta" }, h(doc, "span", { class: "run-when-text", "data-ui": "run-when", title: t("library.tip.when") }, when)) : "";
+}
+
+// What a pattern chip says when the mouse rests on it: the name and the one line of Create.
+function patternTip(t, pattern) {
+  const about = t(`create.pattern.${pattern}`);
+  return t("library.tip.pattern", { name: t(`pattern.${pattern}`), about: about === `create.pattern.${pattern}` ? "" : about }).trim();
 }
 
 // How the run ended, as a round icon: a check, a stop mark or a cross on a green, amber or red background.
@@ -72,16 +78,16 @@ export function outcomeIcon({ doc, t }, item) {
   if (!item.outcome) return "";
   const level = item.outcome === "finished" ? "ok" : item.outcome === "stopped_user" || item.outcome === "stopped_limit" || item.outcome === "waiting_approval" ? "warn" : "fail";
   const label = t(`result.status.${item.outcome}`);
-  return h(doc, "span", { class: `outcome-icon ${level}`, role: "img", "aria-label": label, title: label, "data-ui": "run-outcome-chip", "data-outcome": item.outcome }, OUTCOME_ICONS[level]);
+  return h(doc, "span", { class: `outcome-icon ${level}`, role: "img", "aria-label": label, title: t("library.tip.outcome", { label }), "data-ui": "run-outcome-chip", "data-outcome": item.outcome }, OUTCOME_ICONS[level]);
 }
 
 // The providers a run used, each a chip in its color from Settings.
-export function providerRow({ doc, settings }, item) {
+export function providerRow({ doc, settings, t }, item) {
   const chips = providerChips(item.provider, settings?.get().providerColors);
   if (!chips.length) return "";
   const out = h(doc, "span", { class: "run-providers", "data-ui": "run-providers" });
   for (const c of chips) {
-    const chip = h(doc, "span", { class: "provider-chip", "data-provider": c.id }, c.name);
+    const chip = h(doc, "span", { class: "provider-chip", "data-provider": c.id, title: t("library.tip.provider", { name: c.name }) }, c.name);
     if (chip.style) {
       chip.style.background = c.background;
       chip.style.color = c.color;
@@ -96,7 +102,7 @@ export function providerRow({ doc, settings }, item) {
 // pick: { checked, base, selected, onToggle(on), onSelect(id) }
 export function runRow(ctx, item, pick) {
   const { doc, t } = ctx;
-  const tick = h(doc, "input", { type: "checkbox", class: "run-compare", "data-ui": "compare-select", checked: pick.checked, "aria-label": t("compare.select", { title: item.title }) });
+  const tick = h(doc, "input", { type: "checkbox", class: "run-compare", "data-ui": "compare-select", title: t("library.tip.tick"), checked: pick.checked, "aria-label": t("compare.select", { title: item.title }) });
   tick.addEventListener("change", () => pick.onToggle(tick.checked));
   const title = h(doc, "a", { href: `#/play/library/${item.id}`, class: "run-title" }, item.title);
   // The link selects without leaving the page; the card's own click would select a second time, so it is told the link did.
@@ -110,11 +116,11 @@ export function runRow(ctx, item, pick) {
     "li",
     { class: "run-row", "data-ui": "run-row", "data-run": item.id, "aria-current": pick.selected ? "true" : undefined },
     title,
-    pick.base ? h(doc, "span", { class: "badge", "data-ui": "compare-base" }, t("compare.baseLib")) : "",
+    pick.base ? h(doc, "span", { class: "badge", "data-ui": "compare-base", title: t("library.tip.base") }, t("compare.baseLib")) : "",
     h(doc, "span", { class: "run-tools" }, outcomeIcon(ctx, item), tick),
     runMeta(ctx, item),
     providerRow(ctx, item),
-    h(doc, "span", { class: `type-chip type-${item.pattern}`, "data-ui": "run-type" }, t(`pattern.${item.pattern}`)),
+    h(doc, "span", { class: `type-chip type-${item.pattern}`, "data-ui": "run-type", title: patternTip(t, item.pattern) }, t(`pattern.${item.pattern}`)),
   );
   li.addEventListener("click", (event) => {
     if (event.target?.closest?.("input")) return;

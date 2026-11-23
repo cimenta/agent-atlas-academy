@@ -191,8 +191,8 @@ export async function renderLibraryTab(ctx, requestedId) {
     redraw();
   };
   // The bar under the tabs: Compare with its count in the upper right corner, and a cog menu with import and export. Shown on both lists.
-  const barButton = (ui, label, count, { primary = false, disabled = false, onClick }) => {
-    const button = h(doc, "button", { type: "button", class: `bar-button${primary ? " primary" : ""}`, "data-ui": ui }, label, h(doc, "span", { class: "bar-count", "aria-hidden": "true" }, String(count)));
+  const barButton = (ui, label, count, { primary = false, disabled = false, tip = "", onClick }) => {
+    const button = h(doc, "button", { type: "button", class: `bar-button${primary ? " primary" : ""}`, "data-ui": ui, title: tip || undefined }, label, h(doc, "span", { class: "bar-count", "aria-hidden": "true" }, String(count)));
     button.setAttribute("aria-label", `${label} (${count})`);
     button.disabled = disabled;
     button.addEventListener("click", onClick);
@@ -201,9 +201,9 @@ export async function renderLibraryTab(ctx, requestedId) {
   const compareBar = (mineIds) => {
     const n = lib.compare.length;
     // Compare is there only when at least two runs are ticked.
-    const buttons = n >= 2 ? [barButton("compare-go", t("library.bar.compare"), n, { primary: true, onClick: () => { location.hash = `#/play/compare?runs=${lib.compare.join(",")}`; } })] : [];
+    const buttons = n >= 2 ? [barButton("compare-go", t("library.bar.compare"), n, { primary: true, tip: t("library.tip.compare"), onClick: () => { location.hash = `#/play/compare?runs=${lib.compare.join(",")}`; } })] : [];
     if (n > 0) {
-      const clear = h(doc, "button", { type: "button", class: "bar-button", "data-ui": "compare-clear" }, t("compare.clear"));
+      const clear = h(doc, "button", { type: "button", class: "bar-button", "data-ui": "compare-clear", title: t("library.tip.clearTicks") }, t("compare.clear"));
       clear.addEventListener("click", () => {
         lib.compare = [];
         compareNote = "";
@@ -214,6 +214,7 @@ export async function renderLibraryTab(ctx, requestedId) {
     if (lib.tags.length > 0) {
       buttons.push(
         barButton("tags-clear", t("library.tags.clear"), lib.tags.length, {
+          tip: t("library.tip.clearTags"),
           onClick: () => {
             lib.tags = [];
             redraw();
@@ -401,7 +402,7 @@ export async function renderLibraryTab(ctx, requestedId) {
       layout.setAttribute("data-view", "list");
     });
     const chips = lib.tags.map((tag) => {
-      const chip = h(doc, "button", { type: "button", class: "tag-chip", "data-ui": "tag-chip", "aria-label": t("library.tags.remove", { tag: tagLabel(tag) }) }, `${tagLabel(tag)} \u00d7`);
+      const chip = h(doc, "button", { type: "button", class: "tag-chip", "data-ui": "tag-chip", "aria-label": t("library.tags.remove", { tag: tagLabel(tag) }), title: t("library.tags.remove", { tag: tagLabel(tag) }) }, `${tagLabel(tag)} \u00d7`);
       chip.addEventListener("click", () => pickTag(tag));
       return chip;
     });
@@ -412,14 +413,14 @@ export async function renderLibraryTab(ctx, requestedId) {
         { class: "tag-row" },
         ...row.map((tag) => {
           const on = lib.tags.includes(tag);
-          const word = h(doc, "button", { type: "button", class: `tag-word tag-${groupOfTag(tag)}${on ? " on" : ""}${!on && !shown.has(tag) ? " dim" : ""}`, "data-ui": "tag-word", "data-tag": tag, "aria-pressed": String(on), title: t("library.tags.wordTitle", { n: all.get(tag) }) }, tagLabel(tag), h(doc, "sup", { class: "tag-count" }, String(all.get(tag))));
+          const word = h(doc, "button", { type: "button", class: `tag-word tag-${groupOfTag(tag)}${on ? " on" : ""}${!on && !shown.has(tag) ? " dim" : ""}`, "data-ui": "tag-word", "data-tag": tag, "aria-pressed": String(on), title: t(on ? "library.tags.wordTitleOn" : "library.tags.wordTitle", { tag: tagLabel(tag), n: all.get(tag) }) }, tagLabel(tag), h(doc, "sup", { class: "tag-count" }, String(all.get(tag))));
           word.style.fontSize = `${(0.9 + tagWeight(all.get(tag), max) * 1.2).toFixed(2)}rem`;
           word.addEventListener("click", () => pickTag(tag));
           return word;
         }),
       ),
     );
-    const key = h(doc, "div", { class: "tag-key" }, ...["pattern", "task", "efficiency", "basics"].map((g) => h(doc, "span", { class: `tag-${g}` }, t(`library.tags.group.${g}`))));
+    const key = h(doc, "div", { class: "tag-key" }, ...["pattern", "task", "efficiency", "basics"].map((g) => h(doc, "span", { class: `tag-${g}`, title: t(`library.tags.groupTip.${g}`) }, t(`library.tags.group.${g}`))));
     detailHost.replaceChildren(
       back,
       h(doc, "h2", { class: "tag-title" }, t("library.tags.title")),
@@ -536,7 +537,7 @@ export async function renderLibraryTab(ctx, requestedId) {
     activeTab = active;
     const focusedId = pane.contains(doc.activeElement) ? doc.activeElement.closest?.("li")?.getAttribute("data-run") : null;
     const tabButton = (name, key, count) => {
-      const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-ui": `pane-tab-${name}`, "aria-selected": String(active === name) }, `${t(key)} (${count})`);
+      const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-ui": `pane-tab-${name}`, title: t(name === "mine" ? "library.tip.tabMine" : "library.tip.tabLibrary"), "aria-selected": String(active === name) }, `${t(key)} (${count})`);
       button.addEventListener("click", () => {
         lib.tab = name;
         lib.tabChosen = true;

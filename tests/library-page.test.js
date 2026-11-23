@@ -54,3 +54,14 @@ test("ticking calls onToggle with the new state, and the selected card is marked
   assert.deepEqual(log, [["tick", true]]);
   assert.equal(li.attrs["aria-current"], "true");
 });
+
+test("every icon and tag of a card says what it is when the mouse rests on it", () => {
+  const { li } = build({ base: true });
+  const tip = (pred) => li.find(pred)[0]?.attrs.title;
+  assert.ok(String(tip((e) => e.attrs["data-ui"] === "run-outcome-chip")).startsWith("library.tip.outcome"));
+  assert.equal(tip((e) => e.attrs["data-ui"] === "compare-select"), "library.tip.tick");
+  assert.equal(tip((e) => e.attrs["data-ui"] === "compare-base"), "library.tip.base");
+  assert.equal(tip((e) => e.attrs["data-ui"] === "run-type"), "library.tip.pattern");
+  assert.equal(tip((e) => e.attrs["data-ui"] === "run-when"), "library.tip.when");
+  assert.equal(tip((e) => String(e.attrs.class) === "provider-chip"), "library.tip.provider");
+});

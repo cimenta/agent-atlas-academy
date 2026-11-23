@@ -1624,3 +1624,7 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 @media (prefers-color-scheme: dark) { :root { --tag-basics: #ff9d5c; } }
 :root[data-theme="dark"] { --tag-basics: #ff9d5c; }
 :root[data-theme="light"] { --tag-basics: #c2570c; }
+/* Library: the heading of the tag cloud is level with the tabs of the list, and the tabs sit closer together */
+.library-pane .tabs .tab { padding: 0 7px; }
+.library-detail-host .tag-title { margin: 12px 0 4px; min-height: 40px; display: flex; align-items: center; }
+@media (max-width: 759px) { .library-detail-host .tag-title { margin-top: 0; min-height: 0; } }
