@@ -1675,5 +1675,6 @@
   "create.legendLoaded": "klíč načtený",
   "create.legendLocked": "klíč uložený, ale není načtený (zamčený)",
   "create.legendMissing": "klíč chybí",
-  "create.legendChosen": "vybraný"
+  "create.legendChosen": "vybraný",
+  "player.titleLive": "Běh: {title}"
 }

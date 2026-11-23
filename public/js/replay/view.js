@@ -229,7 +229,7 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
 
   // The word before the title ("Replay:") is its own span, so it can blink blue while the run plays.
   function headingParts() {
-    const full = t("player.title", { title });
+    const full = t(live ? "player.titleLive" : "player.title", { title });
     const at = typeof title === "string" && title !== "" ? full.indexOf(title) : -1;
     if (at <= 0) return [full];
     return [h(doc, "span", { class: "replay-word", "data-ui": "replay-word" }, full.slice(0, at)), full.slice(at)];
@@ -237,7 +237,7 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
   const root = h(
     doc,
     "section",
-    { class: "replay", "data-ui": "player", "aria-label": t("player.title", { title }) },
+    { class: "replay", "data-ui": "player", "aria-label": t(live ? "player.titleLive" : "player.title", { title }) },
     outcomeBar,
     h(
       doc,

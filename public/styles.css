@@ -1697,7 +1697,7 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .provider-tile .pv-mark { width: 24px; height: 24px; border-radius: 50%; font-size: 0.78rem; }
 .provider-tile .pv-name { font-size: 0.9rem; }
 .provider-tile .pv-paid { position: absolute; top: -8px; right: -6px; margin: 0; width: 17px; height: 17px; background: #d11a2a; color: #fff; line-height: 17px; font-size: 0.7rem; box-shadow: 0 0 0 2px var(--card); z-index: 1; }
-.pv-paid-legend { position: static !important; box-shadow: none !important; width: 15px !important; height: 15px !important; line-height: 15px !important; font-size: 0.64rem !important; }
+.pv-paid-legend { background: #d11a2a !important; color: #fff !important; position: static !important; box-shadow: none !important; width: 15px !important; height: 15px !important; line-height: 15px !important; font-size: 0.64rem !important; }
 .pv-lg.warn { width: 16px; height: 12px; border-radius: 4px; background: #fdf1dc; border: 1px solid #e3a33a; }
 .provider-row .default-model { flex: none; max-width: 340px; margin: 0; }
 .provider-tile.missing { background: #f4c2c2; border-color: #d36a6a; color: #651414; }
