@@ -42,7 +42,7 @@ export function limitMessage(reason, limits, extra = {}) {
     case "repeat":
       return `Limit reached: repeated answer (the same answer ${extra.value} times in a row from agent ${extra.label}). The run was stopped before it could finish. Change the setting in Settings, Harness, or give the agent a clearer instruction, and run again.`;
     case "rate_day": {
-      const wait = Number(extra.value);
+      const wait = extra.value === null || extra.value === undefined ? NaN : Number(extra.value); // no wait given is not a wait of 0
       const when = !Number.isFinite(wait) || wait <= 0 ? "later" : wait < 3600 ? `in about ${Math.ceil(wait / 60)} min` : `in about ${Math.round(wait / 3600)} h`;
       const why = extra.day !== true && (!Number.isFinite(wait) || (wait > 0 && wait <= RATE_WAIT_MAX_SEC)) ? "it kept refusing calls even after the app waited several times" : "its wait is longer than the app waits by itself";
       const shared = extra.shared === true ? " The limit belongs to the model, not to you: the provider shares it among all its users. Try again later, or pick another model." : "";

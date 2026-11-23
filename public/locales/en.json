@@ -1676,5 +1676,6 @@
   "create.legendLocked": "key saved, not loaded (locked)",
   "create.legendMissing": "key missing",
   "create.legendChosen": "chosen",
-  "player.titleLive": "Run: {title}"
+  "player.titleLive": "Run: {title}",
+  "replay.repeatedTimes": "({n} times)"
 }

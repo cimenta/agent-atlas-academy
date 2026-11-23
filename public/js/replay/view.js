@@ -676,14 +676,25 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
       const [first, ...rest] = state.error.split("\n\n");
       items.push(h(doc, "div", { class: "banner" }, ...(rest.length ? [h(doc, "strong", { class: "banner-fix" }, first), rest.join("\n\n")] : [first])));
     }
+    // The same message from the same agent, one after another, shows once with how many times it came, like a browser console: (3×).
+    const sameAs = (i, j) => state.warnings[i] === state.warnings[j] && Boolean(state.warningErrors[i]) === Boolean(state.warningErrors[j]) && (state.warningLabels?.[i] ?? null) === (state.warningLabels?.[j] ?? null);
+    const repeats = new Map();
+    for (let i = 0; i < state.warnings.length; ) {
+      let j = i + 1;
+      while (j < state.warnings.length && sameAs(i, j)) j++;
+      repeats.set(i, j - i);
+      i = j;
+    }
     state.warnings.forEach((w, i) => {
+      if (!repeats.has(i)) return;
+      const count = repeats.get(i);
       const at = state.warningTimes[i];
       const time = typeof at === "number" ? clockTime(at) : "";
       // The same round mark as on the agent (orange for a warning, red for an error), then the name of the agent and the time on one line and the message under it.
       const bad = Boolean(state.warningErrors[i]);
       const label = state.warningLabels?.[i] ?? null;
       const head = [...(label ? [h(doc, "strong", { class: "banner-who" }, label)] : []), ...(time ? [h(doc, "time", { class: "banner-time", "data-ui": "banner-time", datetime: new Date(at).toISOString() }, time)] : [])];
-      items.push(h(doc, "div", { class: `banner banner-stack${bad ? "" : " warn"}`, "data-kind": bad ? "error" : "warning" }, h(doc, "span", { class: `banner-badge ${bad ? "err" : "warn"}`, "aria-hidden": "true" }, "!"), h(doc, "span", { class: "banner-body" }, ...(head.length ? [h(doc, "span", { class: "banner-head" }, ...head)] : []), h(doc, "span", { class: "banner-text" }, state.warningBare?.[i] ?? w)), help(state.warningHelps[i] ?? "replay-warnings", t("replay.warningHelp"))));
+      items.push(h(doc, "div", { class: `banner banner-stack${bad ? "" : " warn"}`, "data-kind": bad ? "error" : "warning" }, h(doc, "span", { class: `banner-badge ${bad ? "err" : "warn"}`, "aria-hidden": "true" }, "!"), h(doc, "span", { class: "banner-body" }, ...(head.length ? [h(doc, "span", { class: "banner-head" }, ...head)] : []), h(doc, "span", { class: "banner-text" }, state.warningBare?.[i] ?? w, ...(count > 1 ? [" ", h(doc, "span", { class: "banner-count", "data-ui": "banner-count" }, t("replay.repeatedTimes", { n: count }))] : []))), help(state.warningHelps[i] ?? "replay-warnings", t("replay.warningHelp"))));
     });
     // How an evaluator loop ended shows once the replay has reached that point.
     // A handoff run shows the path so far, and at its end how it ended.

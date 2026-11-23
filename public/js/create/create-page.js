@@ -962,7 +962,9 @@ export function renderCreate(ctx) {
       });
       children.push(again);
       after.replaceChildren(...children);
-      // The run is over and saved. The screen stays as it is, with its warnings; the links below lead to the result and to the replay.
+      // The run is over and saved: the Replay tab opens with it, so what is shown and the tab that is lit agree. Replay shows the same
+      // warnings and the same message about the end, so nothing is lost. A run waiting for the student's approval stays here, where the choices are.
+      if (result.ok && done?.outcome !== "waiting_approval" && doc.defaultView?.location) doc.defaultView.location.hash = `#/play/run/${id}`;
     };
 
     activeRun = startRun({

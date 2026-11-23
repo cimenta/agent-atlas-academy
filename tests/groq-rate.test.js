@@ -119,3 +119,10 @@ test("a shared-pool 429 stops the run with the provider's own words and says the
   assert.match(text, /shares it among all its users/);
   assert.match(text, /The provider says: Gemma is limited/);
 });
+
+test("a stop without any wait given does not claim the wait is longer than the app waits", () => {
+  const text = limitMessage("rate_day", LIMIT_DEFAULTS, { label: "Writer", value: null, shared: true, providerMessage: "x" });
+  assert.match(text, /kept refusing calls even after the app waited several times/);
+  assert.doesNotMatch(text, /longer than the app waits/);
+  assert.match(limitMessage("rate_day", LIMIT_DEFAULTS, { label: "Writer", value: 600 }), /longer than the app waits/);
+});
