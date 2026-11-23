@@ -1670,7 +1670,10 @@
   "create.missing.unlock": "unlock your key",
   "create.paidMark": "paid key: runs are charged",
   "create.firstStep": "This is the first step",
-  "create.legendWarn": "key missing or locked",
   "create.legendPaid": "paid key",
-  "create.keyMissing": "No key is saved for this provider: add it in Settings"
+  "create.keyMissing": "No key is saved for this provider: add it in Settings",
+  "create.legendLoaded": "key loaded",
+  "create.legendLocked": "key saved, not loaded (locked)",
+  "create.legendMissing": "key missing",
+  "create.legendChosen": "chosen"
 }

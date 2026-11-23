@@ -1691,7 +1691,7 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .provider-tiles { gap: 12px 8px; padding-top: 6px; }
 .provider-tiles > .provider-tile { flex: none; min-width: 0; max-width: none; }
 .provider-tile { display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px 4px 5px; border: 1px solid var(--border); border-radius: 999px; }
-.provider-tile.on { padding: 4px 12px 4px 5px; border: 1px solid var(--accent); background: var(--accent); color: #fff; }
+.provider-tile.on { padding: 4px 12px 4px 5px; border: 1px solid #12427a; background: #12427a; color: #fff; }
 .provider-tile.warn { background: #fdf1dc; border-color: #e3a33a; color: #6b4a00; }
 .provider-tile.warn.on { background: #e3a33a; border-color: #e3a33a; color: #fff; }
 .provider-tile .pv-mark { width: 24px; height: 24px; border-radius: 50%; font-size: 0.78rem; }
@@ -1700,4 +1700,10 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .pv-paid-legend { position: static !important; box-shadow: none !important; width: 15px !important; height: 15px !important; line-height: 15px !important; font-size: 0.64rem !important; }
 .pv-lg.warn { width: 16px; height: 12px; border-radius: 4px; background: #fdf1dc; border: 1px solid #e3a33a; }
 .provider-row .default-model { flex: none; max-width: 340px; margin: 0; }
-@media (prefers-color-scheme: dark) { .provider-tile.warn { background: #3a2d10; border-color: #a8741a; color: #f0c870; } .provider-tile.warn.on { background: #a8741a; color: #fff; } }
+.provider-tile.missing { background: #f4c2c2; border-color: #d36a6a; color: #651414; }
+.provider-tile.missing.on { background: #b84242; border-color: #b84242; color: #fff; }
+.pv-lg.missing { width: 16px; height: 12px; border-radius: 4px; background: #f4c2c2; border: 1px solid #d36a6a; }
+.pv-lg.loaded { width: 16px; height: 12px; border-radius: 4px; background: var(--card); border: 1px solid var(--border); }
+.pv-lg.chosen { width: 16px; height: 12px; border-radius: 4px; background: #12427a; }
+@media (prefers-color-scheme: dark) { .provider-tile.warn { background: #3a2d10; border-color: #a8741a; color: #f0c870; } .provider-tile.warn.on { background: #a8741a; color: #fff; } .provider-tile.missing { background: #5a232a; border-color: #a8474f; color: #ffc4ca; } .provider-tile.on { background: #2f6db5; border-color: #2f6db5; } .provider-tile.missing.on { background: #b84242; } }
+.provider-field { max-width: none; }

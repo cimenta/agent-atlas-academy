@@ -275,18 +275,19 @@ export function renderCreate(ctx) {
           const state = keyState(vaultFor(id));
           const selected = chosen.includes(id);
           const kind = slotProvider(id);
-          // A chip: the mark and the plain name of the provider. An orange chip says the key is missing or locked; a red $ on the
+          // A chip: the mark and the plain name of the provider. An orange chip says the key is saved but not loaded (locked), a red one that it is missing; a red $ on the
           // corner says the key is paid. The tier and the state of the key are in the tooltip.
           const name = providerSpec(kind).chipName;
           const free = slotIsFree(id);
-          const warn = state !== "loaded";
+          const warn = state === "locked";
+          const missingKey = state === "none";
           const stateText = t(state === "locked" ? "settings.dotLocked" : state === "none" ? "create.keyMissing" : "settings.dotLoaded");
           const parts = [
             h(doc, "span", { class: `pv-mark pv-${kind}`, "aria-hidden": "true" }, providerSpec(kind).mark),
             h(doc, "span", { class: "pv-name" }, name),
             ...(free ? [] : [h(doc, "span", { class: "pv-paid", title: t("create.paidMark"), role: "img", "aria-label": t("create.paidMark") }, "$")]),
           ];
-          const tile = h(doc, "button", { type: "button", class: `provider-tile${selected ? " on" : ""}${warn ? " warn" : ""}`, role: "checkbox", "aria-checked": String(selected), "data-ui": `provider-tile-${id}`, title: `${slotName(id)}${free ? ` (${t("create.providerFree")})` : ` (${t("create.paidMark")})`}: ${stateText}` }, ...parts);
+          const tile = h(doc, "button", { type: "button", class: `provider-tile${selected ? " on" : ""}${warn ? " warn" : ""}${missingKey ? " missing" : ""}`, role: "checkbox", "aria-checked": String(selected), "data-ui": `provider-tile-${id}`, title: `${slotName(id)}${free ? ` (${t("create.providerFree")})` : ` (${t("create.paidMark")})`}: ${stateText}` }, ...parts);
           tile.addEventListener("click", () => {
             // Any number of providers may be on, also none: the student decides.
             draft.slots = toggleSlot(chosen, id, SLOT_IDS);
@@ -302,7 +303,7 @@ export function renderCreate(ctx) {
       drawDefaultModel();
     };
     const legendItem = (mark, text) => h(doc, "span", {}, mark, text);
-    const providerLegend = h(doc, "div", { class: "pv-legend", "data-ui": "provider-legend" }, legendItem(h(doc, "i", { class: "pv-lg warn" }), t("create.legendWarn")), legendItem(h(doc, "span", { class: "pv-paid pv-paid-legend", "aria-hidden": "true" }, "$"), t("create.legendPaid")));
+    const providerLegend = h(doc, "div", { class: "pv-legend", "data-ui": "provider-legend" }, legendItem(h(doc, "i", { class: "pv-lg loaded" }), t("create.legendLoaded")), legendItem(h(doc, "i", { class: "pv-lg warn" }), t("create.legendLocked")), legendItem(h(doc, "i", { class: "pv-lg missing" }), t("create.legendMissing")), legendItem(h(doc, "i", { class: "pv-lg chosen" }), t("create.legendChosen")), legendItem(h(doc, "span", { class: "pv-paid pv-paid-legend", "aria-hidden": "true" }, "$"), t("create.legendPaid")));
     const providerField = h(doc, "div", { class: "field provider-field", "data-ui": "provider-field" }, h(doc, "div", { class: "provider-row" }, providerTiles, defaultHost), providerLegend);
 
     // The model of an agent: its level (Fast, Balanced, Strong), and the provider when more than one is chosen.

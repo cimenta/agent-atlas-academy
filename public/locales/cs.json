@@ -1670,7 +1670,10 @@
   "create.missing.unlock": "odemkněte svůj klíč",
   "create.paidMark": "placený klíč: běhy se účtují",
   "create.firstStep": "Toto je první krok",
-  "create.legendWarn": "klíč chybí nebo je zamčený",
   "create.legendPaid": "placený klíč",
-  "create.keyMissing": "Pro tohoto poskytovatele není uložený klíč: přidejte ho v Nastavení"
+  "create.keyMissing": "Pro tohoto poskytovatele není uložený klíč: přidejte ho v Nastavení",
+  "create.legendLoaded": "klíč načtený",
+  "create.legendLocked": "klíč uložený, ale není načtený (zamčený)",
+  "create.legendMissing": "klíč chybí",
+  "create.legendChosen": "vybraný"
 }
