@@ -411,12 +411,13 @@ export async function renderLibraryTab(ctx, requestedId) {
         doc,
         "div",
         { class: "tag-row" },
-        ...row.map((tag) => {
+        ...row.flatMap((tag, i) => {
           const on = lib.tags.includes(tag);
           const word = h(doc, "button", { type: "button", class: `tag-word tag-${groupOfTag(tag)}${on ? " on" : ""}${!on && !shown.has(tag) ? " dim" : ""}`, "data-ui": "tag-word", "data-tag": tag, "aria-pressed": String(on), title: t(on ? "library.tags.wordTitleOn" : "library.tags.wordTitle", { tag: tagLabel(tag), n: all.get(tag) }) }, tagLabel(tag), h(doc, "sup", { class: "tag-count" }, String(all.get(tag))));
           word.style.fontSize = `${(0.9 + tagWeight(all.get(tag), max) * 1.2).toFixed(2)}rem`;
           word.addEventListener("click", () => pickTag(tag));
-          return word;
+          // A small dot between two words, so they read as separate tags.
+          return i === 0 ? [word] : [h(doc, "span", { class: "tag-sep", "aria-hidden": "true" }, "·"), word];
         }),
       ),
     );

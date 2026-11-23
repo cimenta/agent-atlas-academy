@@ -14,7 +14,7 @@ import { mayFormat, validFormat, formatPromptText, FORMAT_TYPES, FORMAT_MAX_FIEL
 import { innerTabs } from "./steps-view.js";
 import { agentTabIds, currentAgentTab } from "./agent-tabs.js";
 import { MULTI_RUN } from "../engine/spawn.js";
-import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, extentOf, isTwoWay, maxColsFor, orientationFor, flippedOf, portPoint, linkBetween, linkPath, PORT_R, turnArrows, TWO_WAY_GAP } from "./diagram-geometry.js";
+import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, extentOf, isTwoWay, maxColsFor, orientationFor, flippedOf, linkBetween, linkPath, portPointAt, portSideOf, PORT_R, turnArrows, TWO_WAY_GAP } from "./diagram-geometry.js";
 
 const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -182,8 +182,10 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     livePos = pos;
     const flips = flippedOf(design, { wide, maxCols: maxColsFor(doc.defaultView) });
     const vertical = orientationFor(design.pattern, wide) === "vertical";
-    const portOf = (id, kind) => portPoint(pos, id, kind, { flipped: flips.has(id), vertical });
-    const sideOf = (id, kind) => (vertical ? (kind === "out" ? "bottom" : "top") : (kind === "out") !== flips.has(id) ? "right" : "left");
+    const usualSide = (id, kind) => (vertical ? (kind === "out" ? "bottom" : "top") : (kind === "out") !== flips.has(id) ? "right" : "left");
+    // A dot is where its line is: at the bottom or the top of the box when the connection goes to another row.
+    const sideOf = (id, kind) => portSideOf(design, pos, id, kind, usualSide(id, kind));
+    const portOf = (id, kind) => portPointAt(pos, id, sideOf(id, kind));
     const extent = () => extentOf(pos);
     const area = h(doc, "div", { class: "diagram", "data-ui": "diagram", role: "group", "aria-label": t("editor.diagram") });
     const wrap = h(doc, "div", { class: "diagram-wrap" }, area);
@@ -243,6 +245,10 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     function drawEdges() {
       for (const part of edgeParts) part.remove();
       edgeParts = [];
+      for (const [id, el] of nodeEls) {
+        el.querySelector(".dnode-dot.out")?.setAttribute("data-side", sideOf(id, "out"));
+        el.querySelector(".dnode-dot.in")?.setAttribute("data-side", sideOf(id, "in"));
+      }
       drawTurns();
       for (const edge of design.edges) {
         const key = `${edge.from}>${edge.to}`;

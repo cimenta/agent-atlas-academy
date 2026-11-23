@@ -68,9 +68,33 @@ export function roundedPath(points, r = 10) {
   return d + ` L${last[0]},${last[1]}`;
 }
 
-// The line of a connection in the editor, and the point where its remove button goes.
+// Where a dot sits when it is on a given side of the box ("left", "right", "top" or "bottom"); the side comes with the point.
+export function portPointAt(pos, id, side) {
+  const p = pos.get(id);
+  if (side === "top" || side === "bottom") return { x: p.x + BOX_W / 2, y: p.y + (side === "bottom" ? BOX_H : 0), side };
+  return { x: p.x + (side === "right" ? BOX_W : 0), y: p.y + BOX_H / 2, side };
+}
+
+const GAP_MIN = 8; // rows closer than this (the boxes nearly overlap) get no vertical line
+
+// The side a dot is on. It follows its line: a dot whose connection goes to another row is at the bottom (the other row is below)
+// or at the top of the box, so the line starts and ends in the dot. Otherwise it keeps its usual side (fallback).
+export function portSideOf(design, pos, id, kind, fallback) {
+  const me = pos.get(id);
+  for (const edge of design.edges) {
+    if ((kind === "out" ? edge.from : edge.to) !== id) continue;
+    const other = pos.get(kind === "out" ? edge.to : edge.from);
+    if (!other) continue;
+    if (other.y >= me.y + BOX_H + GAP_MIN) return "bottom";
+    if (other.y + BOX_H <= me.y - GAP_MIN) return "top";
+  }
+  return fallback;
+}
+
+// The line of a connection in the editor, and the point where its remove button goes. The points are the dots (with their side).
+//  - the dots are at the bottom and the top of two boxes in different rows: down (or up) from the dot, along the gap between the rows, into the other dot;
 //  - two agents in the same row: straight from dot to dot; when another agent stands between them, over the top of the row;
-//  - agents in different rows: down (or up) from the middle of the box, along the gap between the rows, and into the middle of the other box.
+//  - anything else: straight from dot to dot.
 export function linkPath(pos, from, to, outPort, inPort) {
   const a = pos.get(from);
   const b = pos.get(to);
@@ -78,26 +102,30 @@ export function linkPath(pos, from, to, outPort, inPort) {
     const s = linkBetween(outPort, inPort);
     return { d: `M${s.x1},${s.y1} L${s.x2},${s.y2}`, mid: { x: (s.x1 + s.x2) / 2, y: (s.y1 + s.y2) / 2 } };
   };
+  const vertical = (port) => port.side === "top" || port.side === "bottom";
+  if (vertical(outPort) && vertical(inPort)) {
+    const dir = outPort.side === "bottom" ? 1 : -1;
+    const arrives = inPort.side === "top" ? 1 : -1;
+    const sy = outPort.y + dir * PORT_R;
+    const ty = inPort.y - arrives * (PORT_R + 1);
+    if (dir !== arrives || (ty - sy) * dir <= GAP_MIN) return straightLine();
+    const my = (sy + ty) / 2;
+    return { d: roundedPath([[outPort.x, sy], [outPort.x, my], [inPort.x, my], [inPort.x, ty]]), mid: { x: (outPort.x + inPort.x) / 2, y: my } };
+  }
   if (Math.abs(b.y - a.y) < BOX_H / 2) {
     const lo = Math.min(a.x, b.x);
     const hi = Math.max(a.x, b.x);
     const blocked = [...pos].some(([id, p]) => id !== from && id !== to && Math.abs(p.y - a.y) < BOX_H / 2 && p.x > lo && p.x < hi);
-    if (!blocked) return straightLine();
-    const dirOut = outPort.x >= a.x + BOX_W / 2 ? 1 : -1;
-    const dirIn = inPort.x >= b.x + BOX_W / 2 ? 1 : -1;
-    const y = Math.max(5, Math.min(a.y, b.y) - 14);
-    const s1 = outPort.x + dirOut * (PORT_R + 9);
-    const s2 = inPort.x + dirIn * (PORT_R + 9);
-    return { d: roundedPath([[outPort.x + dirOut * PORT_R, outPort.y], [s1, outPort.y], [s1, y], [s2, y], [s2, inPort.y], [inPort.x + dirIn * (PORT_R + 1), inPort.y]]), mid: { x: (s1 + s2) / 2, y } };
+    if (blocked && !vertical(outPort) && !vertical(inPort)) {
+      const dirOut = outPort.x >= a.x + BOX_W / 2 ? 1 : -1;
+      const dirIn = inPort.x >= b.x + BOX_W / 2 ? 1 : -1;
+      const y = Math.max(5, Math.min(a.y, b.y) - 14);
+      const s1 = outPort.x + dirOut * (PORT_R + 9);
+      const s2 = inPort.x + dirIn * (PORT_R + 9);
+      return { d: roundedPath([[outPort.x + dirOut * PORT_R, outPort.y], [s1, outPort.y], [s1, y], [s2, y], [s2, inPort.y], [inPort.x + dirIn * (PORT_R + 1), inPort.y]]), mid: { x: (s1 + s2) / 2, y } };
+    }
   }
-  const down = b.y > a.y;
-  const sx = a.x + BOX_W / 2;
-  const tx = b.x + BOX_W / 2;
-  const sy = down ? a.y + BOX_H : a.y;
-  const ty = down ? b.y - 1 : b.y + BOX_H + 1;
-  if (down ? ty <= sy + 8 : ty >= sy - 8) return straightLine(); // the rows overlap: no room for a bend
-  const my = (sy + ty) / 2;
-  return { d: roundedPath([[sx, sy], [sx, my], [tx, my], [tx, ty]]), mid: { x: (sx + tx) / 2, y: my } };
+  return straightLine();
 }
 
 // How many boxes fit side by side in the window (the diagram goes on in a new row beyond that, so it never needs a scroll bar).
