@@ -6,6 +6,11 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Settings, API keys: the panel of a free key has tabs Key, Models, Limit and Info (the arrow keys move between them). A paid key keeps its single column.
+- Requests left at Groq: read from the headers of the last call to Groq (Groq has no other way to say it), shown as a pill on the card in Create and in a box in Settings with the tokens left this minute and the time of the last call.
+- Before a run, the Cost tab warns when the expected number of calls does not fit, or fits tightly, in the requests left today at Groq or at the free key of OpenRouter. The run is never stopped by it.
+- Free requests at OpenRouter: the number needs a loaded key, so without one the box in Settings (and the tooltip of the card in Create) says so, a locked key is named, and when the number cannot be found out the tooltip says why.
+
 - Free requests left today at OpenRouter: choosing OpenRouter in Create shows a pill on its card (for example 38/50 today, amber at 5 or fewer, red at none) that is asked again at every choice, and its key in Settings shows used and limit, the time of the last update and an Update button. A new server route `/api/quota` asks OpenRouter (`GET /key`) and returns only used, limit, remaining and the reset time; the key is never kept.
 - Settings, provider tabs: the coloured marks of the chips in Create. The soon tabs (OpenAI, Mistral, Llama) are removed. The Check all models button now explains what it does.
 - JSON tree: a click makes the tree the active part (it gets a ring), and then the arrow keys move between its folds, Right opens a fold, Left closes it or goes to the fold above, and Home and End go to the first and the last fold.

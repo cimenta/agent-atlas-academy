@@ -91,3 +91,31 @@ test("the level is out at none left, low at five or fewer, and the tooltip names
   assert.ok(!quotaTitle(t, { at: new Date(), result: { used: 1, limit: 50, remaining: 49, resetsAt: null } }).includes("quota.resets"));
   assert.ok(quotaTitle(t, { at: new Date(), result: { used: 50, limit: 50, remaining: 0, resetsAt: "2026-11-24T00:00:00.000Z" } }).includes("quota.resets"));
 });
+
+import { parseGroqHeaders, runFit } from "../public/js/engine/quota.js";
+import { observeApiCall } from "../public/js/quota-client.js";
+
+test("the requests of Groq are read from the headers of an answer", () => {
+  const got = parseGroqHeaders({ "x-ratelimit-limit-requests": "14400", "x-ratelimit-remaining-requests": "11800", "x-ratelimit-limit-tokens": "6000", "x-ratelimit-remaining-tokens": "5400", "x-ratelimit-reset-requests": "6h0m0s" });
+  assert.deepEqual(got, { used: 2600, limit: 14400, remaining: 11800, tokens: { limit: 6000, remaining: 5400 }, resetText: "6h0m0s" });
+  assert.equal(parseGroqHeaders({ "x-ratelimit-limit-tokens": "8000", "x-ratelimit-remaining-tokens": "0" }), null);
+  assert.equal(parseGroqHeaders({ "x-ratelimit-limit-requests": "abc", "x-ratelimit-remaining-requests": "1" }), null);
+  assert.equal(parseGroqHeaders(null), null);
+  assert.equal(parseGroqHeaders({ "x-ratelimit-limit-requests": "1000", "x-ratelimit-remaining-requests": "0" }).remaining, 0);
+});
+
+test("a call to Groq feeds the store, any other call does not", () => {
+  const store = createQuotaStore({ now: () => new Date("2026-11-23T10:00:00Z") });
+  const call = (provider, headers) => ({ type: "api_call", provider, response: { status: 200, headers, body: "" } });
+  observeApiCall(store, call("openrouter", { "x-ratelimit-limit-requests": "1000", "x-ratelimit-remaining-requests": "5" }));
+  assert.equal(store.get("groq"), null);
+  observeApiCall(store, call("groq", {}));
+  assert.equal(store.get("groq"), null);
+  observeApiCall(store, call("groq", { "x-ratelimit-limit-requests": "1000", "x-ratelimit-remaining-requests": "3" }));
+  assert.equal(store.get("groq").result.remaining, 3);
+  assert.equal(store.get("groq").result.seen, true);
+});
+
+test("a run fits, fits tightly, does not fit, or nothing is known", () => {
+  assert.deepEqual([runFit(12, null), runFit(12, 100), runFit(12, 15), runFit(12, 11), runFit(1, 0)], ["unknown", "ok", "tight", "over", "over"]);
+});

@@ -24,3 +24,36 @@ export function nextResetUtc(now = new Date()) {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)).toISOString();
 }
 
+
+const header = (value) => {
+  const n = typeof value === "string" && value.trim() !== "" ? Number(value) : typeof value === "number" ? value : NaN;
+  return Number.isFinite(n) && n >= 0 && n <= 1e9 ? Math.floor(n) : null;
+};
+
+// Groq cannot say its count without a call to a model: it sends it in the headers of every answer. headers: the headers of one answer (lower-case names).
+// Returns { used, limit, remaining, tokens: { limit, remaining } | null, resetText } for the requests of the day, or null when the answer has no such headers
+// (the answer of a per-minute limit has only the token ones, and is ignored).
+export function parseGroqHeaders(headers) {
+  if (headers === null || typeof headers !== "object") return null;
+  const limit = header(headers["x-ratelimit-limit-requests"]);
+  const remaining = header(headers["x-ratelimit-remaining-requests"]);
+  if (limit === null || remaining === null || limit === 0) return null;
+  const tokenLimit = header(headers["x-ratelimit-limit-tokens"]);
+  const tokenRemaining = header(headers["x-ratelimit-remaining-tokens"]);
+  const reset = headers["x-ratelimit-reset-requests"];
+  return {
+    used: Math.max(0, limit - remaining),
+    limit,
+    remaining: Math.min(remaining, limit),
+    tokens: tokenLimit !== null && tokenRemaining !== null ? { limit: tokenLimit, remaining: tokenRemaining } : null,
+    resetText: typeof reset === "string" && reset.length <= 40 ? reset : null,
+  };
+}
+
+// Before a run: does it fit in what is left today? calls: the calls the run is expected to make to this provider, remaining: what is left, or null when unknown.
+// "unknown" (nothing known yet), "ok", "tight" (more than 70 percent of what is left: a repeated call may break it), "over" (more than is left, also at none left).
+export function runFit(calls, remaining) {
+  if (remaining === null || remaining === undefined) return "unknown";
+  if (remaining <= 0 || calls > remaining) return "over";
+  return calls > remaining * 0.7 ? "tight" : "ok";
+}

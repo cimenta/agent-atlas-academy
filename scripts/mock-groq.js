@@ -20,7 +20,7 @@ export function createGroqMock({ mockCall, mode = process.env.MOCK_GROQ_429 ?? "
     const promptChars = system.length + messages.reduce((n, m) => n + m.content.length, 0);
     return {
       status: 200,
-      headers: { "x-request-id": "req_mock_groq", "x-ratelimit-remaining-requests": "999" },
+      headers: { "x-request-id": "req_mock_groq", "x-ratelimit-limit-requests": "1000", "x-ratelimit-remaining-requests": "999", "x-ratelimit-limit-tokens": "8000", "x-ratelimit-remaining-tokens": "7000" },
       body: { id: "chatcmpl-mock", object: "chat.completion", model: chat.model, choices: [{ index: 0, message: { role: "assistant", content: text }, finish_reason: "stop" }], usage: { prompt_tokens: Math.ceil(promptChars / 4), completion_tokens: Math.ceil(text.length / 4), total_tokens: Math.ceil((promptChars + text.length) / 4) } },
     };
   };

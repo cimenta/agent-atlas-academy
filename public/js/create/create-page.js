@@ -10,7 +10,8 @@ import { limitsChoice } from "../replay/limits-choice.js";
 import { withCurrentLimits } from "../replay/limits-compare.js";
 import { showCenterTip } from "../center-tip.js";
 import { refreshResultTab } from "../tab-state.js";
-import { quotaStore, quotaLevelOf, quotaTitle } from "../quota-client.js";
+import { quotaStore, quotaLevelOf, quotaTitle, quotaSeenTitle, observeApiCall } from "../quota-client.js";
+import { runFit } from "../engine/quota.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree, slotLabelKey, slotSubKey, slotFreeLimits } from "../key-slots.js";
 import { providerSpec, defaultSlot, modelsOfSlot } from "../engine/providers.js";
 import { sharedFreeCheck, compareFree, applyOverrides, OVERRIDE_SLOT } from "../engine/free-check.js";
@@ -268,7 +269,30 @@ export function renderCreate(ctx) {
       const key = vaultFor(id).getSessionKey();
       if (key) quotaStore.refresh(id, key);
     };
-    const offQuota = quotaStore.subscribe(() => drawProviderTiles());
+    // Before a run: does the number of calls it is expected to make fit in the free requests that are left today? Only Groq (the number seen in its last
+    // call) and the free key of OpenRouter (asked when it was chosen) say how many are left. Nothing stops the run: it only warns.
+    const quotaWarnings = (rows, activations) => {
+      if (!(activations > 0) || rows.length === 0) return [];
+      const num = (n) => n.toLocaleString(ctx.lang === "cs" ? "cs-CZ" : "en-US");
+      const out = [];
+      for (const [kind, key, name] of [["groq", "groq", "Groq"], ["openrouter", OVERRIDE_SLOT, "OpenRouter"]]) {
+        const mine = rows.filter((r) => slotProvider(r.slot) === kind && (kind === "groq" || slotIsFree(r.slot)));
+        if (mine.length === 0) continue;
+        const calls = Math.ceil((activations * mine.length) / rows.length);
+        const entry = quotaStore.get(key);
+        const result = entry?.result?.ok ? entry.result : null;
+        const fit = runFit(calls, result ? result.remaining : null);
+        const params = { provider: name, calls, remaining: result ? num(result.remaining) : "0", time: entry ? entry.at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "" };
+        if (fit === "over" || fit === "tight") {
+          const head = result.remaining <= 0 ? "quota.warn.none" : fit === "over" ? "quota.warn.over" : "quota.warn.tight";
+          const tokens = result.tokens && result.remaining > 0 ? ` ${t("quota.warn.tokens", { tokens: `${num(result.tokens.remaining)} / ${num(result.tokens.limit)}` })}` : "";
+          out.push(h(doc, "div", { class: "limit-warning", role: "status", "data-ui": `quota-warning-${kind}` }, h(doc, "b", {}, t(head, params)), " ", t(fit === "over" ? "quota.warn.overTail" : "quota.warn.tightTail"), tokens));
+        } else if (fit === "ok") out.push(h(doc, "p", { class: "hint", "data-ui": `quota-fit-${kind}` }, t("quota.warn.ok", params)));
+        else if (kind === "groq") out.push(h(doc, "p", { class: "hint", "data-ui": "quota-fit-groq" }, t("quota.warn.unknown", params)));
+      }
+      return out;
+    };
+    const offQuota = quotaStore.subscribe(() => { drawProviderTiles(); drawReview(); });
     ctx.onLeave(offQuota);
     const drawProviderTiles = () => keepFocus(doc, providerTiles, drawProviderTilesRaw);
     const drawProviderTilesRaw = () => {
@@ -298,12 +322,16 @@ export function renderCreate(ctx) {
             ...(free ? [] : [h(doc, "span", { class: "pv-paid", title: t("create.paidMark"), role: "img", "aria-label": t("create.paidMark") }, "$")]),
           ];
           // OpenRouter, when chosen: the free requests left today, as a pill with its own colour (normal, low, out). No number when it is not known.
-          const entry = selected && kind === "openrouter" ? quotaStore.get(id) : null;
+          const entry = selected ? (kind === "openrouter" ? quotaStore.get(id) : kind === "groq" ? quotaStore.get("groq") : null) : null;
           let tip = `${slotName(id)}${free ? ` (${t("create.providerFree")})` : ` (${t("create.paidMark")})`}: ${stateText}`;
+          if (selected && kind === "openrouter" && vaultFor(id).getSessionKey() === null) tip = `${tip}. ${t(state === "locked" ? "quota.locked" : "quota.noKey")}`;
           if (selected && kind === "openrouter" && quotaStore.busy(id)) parts.push(h(doc, "span", { class: "quota-pill", "data-ui": `quota-${id}`, "aria-live": "polite" }, "…"));
           else if (entry?.result.ok) {
             parts.push(h(doc, "span", { class: `quota-pill ${quotaLevelOf(entry.result)}`, "data-ui": `quota-${id}`, "aria-live": "polite" }, t("quota.pill", { remaining: entry.result.remaining, limit: entry.result.limit })));
-            tip = `${tip}. ${quotaTitle(t, entry)}`;
+            tip = `${tip}. ${entry.result.seen ? quotaSeenTitle(t, entry) : quotaTitle(t, entry)}`;
+          } else if (entry && !entry.result.ok) {
+            // No number, but the reason is in the tooltip (the card itself stays quiet).
+            tip = `${tip}. ${t(`quota.error.${["rejected", "rate_limit", "unknown"].includes(entry.result.error) ? entry.result.error : "unreachable"}`)}`;
           }
           const tile = h(doc, "button", { type: "button", class: `provider-tile${selected ? " on" : ""}${warn ? " warn" : ""}${missingKey ? " missing" : ""}`, role: "checkbox", "aria-checked": String(selected), "data-ui": `provider-tile-${id}`, title: tip }, ...parts);
           tile.addEventListener("click", () => {
@@ -562,6 +590,7 @@ export function renderCreate(ctx) {
         h(doc, "p", {}, h(doc, "strong", { "data-ui": isFree ? "estimate-free" : "estimate-cost" }, isFree ? t(providerSpec(provider).text.estimateFree ?? "create.estimateFree") : t("create.estimate", { usd: est.costUsd.toFixed(3), date: est.pricesAsOf }))),
         h(doc, "p", { class: "hint" }, t("create.estimateDetail", { tokens: est.tokensUpper, turns: est.activations })),
         ...(limitEl ? [limitEl] : []),
+        ...quotaWarnings(rows, est.activations),
       ];
       if (summary.warning) {
         const w = summary.warning;
@@ -1013,6 +1042,7 @@ export function renderCreate(ctx) {
       provider,
       onEvent: (event) => {
         if (event.type === "api_call") {
+          observeApiCall(quotaStore, event);
           apiCalls.push(resume ? { ...event, t: (event.t ?? 0) + offset } : event);
           saver.update(record());
           return;

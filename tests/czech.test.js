@@ -30,7 +30,7 @@ for (const slug of slugs("en")) {
 test("Czech strings are translated except for an allow-list", () => {
   const en = JSON.parse(readFileSync(new URL("locales/en.json", root), "utf8"));
   const cs = JSON.parse(readFileSync(new URL("locales/cs.json", root), "utf8"));
-  const allowed = new Set(["site.name", "lang.en", "lang.cs", "player.speedOption", "result.agent", "editor.diagram", "editor.model", "kind.model", "stats.agent", "stats.model", "harness.title", "harness.fixed.time.value", "harness.fixed.agents.value", "harness.fixed.request.value", "harness.fixed.pauses.value", "settings.timeoutSeconds", "stats.limits.agent", "stats.limits.ofAgent", "lab.stepTime", "player.stopReason.limit", "create.step.diagram", "create.col.agent", "replay.repeatedTimes", "diagram.hover.arrowTitle"]);
+  const allowed = new Set(["site.name", "lang.en", "lang.cs", "player.speedOption", "result.agent", "editor.diagram", "editor.model", "kind.model", "stats.agent", "stats.model", "harness.title", "harness.fixed.time.value", "harness.fixed.agents.value", "harness.fixed.request.value", "harness.fixed.pauses.value", "settings.timeoutSeconds", "stats.limits.agent", "stats.limits.ofAgent", "lab.stepTime", "player.stopReason.limit", "create.step.diagram", "create.col.agent", "replay.repeatedTimes", "diagram.hover.arrowTitle", "settings.tabLimit", "settings.tabInfo"]);
   const same = Object.keys(en).filter((key) => en[key] === cs[key] && !allowed.has(key));
   assert.deepEqual(same, []);
 });

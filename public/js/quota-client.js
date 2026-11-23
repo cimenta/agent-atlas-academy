@@ -1,3 +1,4 @@
+import { parseGroqHeaders } from "./engine/quota.js";
 // Free requests left today at OpenRouter: asks our server (the page cannot reach the provider) and remembers the last answer in memory only,
 // with the time it was made. No DOM here. Nothing is stored on disk and the key is never kept.
 const KNOWN_ERRORS = new Set(["rejected", "rate_limit", "bad_key", "bad_provider", "unknown"]);
@@ -52,8 +53,23 @@ export function createQuotaStore({ fetchFn = fetch, now = () => new Date() } = {
       return work;
     },
     forget(slot) { entries.delete(slot); notify(slot); },
+    // A number that was not asked for but seen: the headers of the last call to a provider (Groq). Kept under the key given.
+    observe(key, quota, at = now()) {
+      entries.set(key, { at, result: { ok: true, used: quota.used, limit: quota.limit, remaining: quota.remaining, resetsAt: null, tokens: quota.tokens ?? null, resetText: quota.resetText ?? null, seen: true } });
+      notify(key);
+    },
   };
 }
 
 // The store both pages use: the number Create shows and the number Settings shows are the same one.
 export const quotaStore = createQuotaStore();
+
+// An api_call event of a run: a call to Groq with the headers of its answer feeds the store (key "groq"). Anything else is ignored.
+export function observeApiCall(store, event, now = () => new Date()) {
+  if (event?.type !== "api_call" || event.provider !== "groq") return;
+  const quota = parseGroqHeaders(event.response?.headers);
+  if (quota) store.observe("groq", quota, now());
+}
+
+// The tooltip for a number that was seen in the last call, not asked for.
+export const quotaSeenTitle = (t, entry) => t("quota.titleSeen", { remaining: entry.result.remaining, limit: entry.result.limit, time: clock(entry.at) });

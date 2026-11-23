@@ -78,6 +78,36 @@ export function renderSettings(ctx) {
     box.append(h(doc, "p", { class: "hint" }, t(shown.others === 1 ? "settings.checkOthersOne" : "settings.checkOthers", { n: shown.others })));
     return [box];
   };
+  // Tabs inside the panel of a free key. pages: [[name, label key, [nodes]]]. The chosen tab is kept while the page is open.
+  const chosenTab = {};
+  const slotTabs = (id, pages) => {
+    const bar = h(doc, "div", { class: "ptabs", role: "tablist", "data-ui": `slot-tabs-${id}` });
+    const bodies = [];
+    const buttons = pages.map(([name, label, nodes]) => {
+      const body = h(doc, "div", { class: "ptab-body", role: "tabpanel", "data-ui": `slot-tab-${name}-${id}` }, ...nodes);
+      bodies.push([name, body]);
+      return h(doc, "button", { type: "button", class: "ptab", role: "tab", "data-name": name, "data-ui": `slot-tabbtn-${name}-${id}` }, t(label));
+    });
+    const show = (name) => {
+      chosenTab[id] = name;
+      for (const b of buttons) { const on = b.dataset.name === name; b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1; }
+      for (const [n, body] of bodies) body.hidden = n !== name;
+    };
+    buttons.forEach((b, i) => {
+      b.addEventListener("click", () => show(b.dataset.name));
+      b.addEventListener("keydown", (event) => {
+        const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+        if (step === 0) return;
+        const next = buttons[(i + step + buttons.length) % buttons.length];
+        show(next.dataset.name);
+        next.focus();
+        event.preventDefault();
+      });
+    });
+    bar.append(...buttons);
+    show(chosenTab[id] ?? "key");
+    return [bar, ...bodies.map(([, body]) => body)];
+  };
   const buildKeyPanel = (id) => {
     const v = vaultOf(id);
     const spec = PROVIDERS[slotProvider(id)];
@@ -120,10 +150,13 @@ export function renderSettings(ctx) {
       refreshStatus();
     });
     const entry = [field(`set-key${sfx}`, t(spec.text.keyLabel), keyInput)];
+    // A free key has its own Info tab: the links and the warning are there, a paid key keeps them in the form.
+    const infoNodes = [];
+    const aside = slotIsFree(id) ? infoNodes : entry;
     if (spec.keyUrl) {
-      entry.push(h(doc, "p", { class: "provider-links" }, h(doc, "a", { href: spec.keyUrl, target: "_blank", rel: "noopener noreferrer", "data-ui": `${spec.id}-key-link` }, t(spec.text.keyLink)), " · ", h(doc, "a", { href: spec.pricingUrl, target: "_blank", rel: "noopener noreferrer", "data-ui": `${spec.id}-pricing-link` }, t(spec.text.pricingLink))));
+      aside.push(h(doc, "p", { class: "provider-links" }, h(doc, "a", { href: spec.keyUrl, target: "_blank", rel: "noopener noreferrer", "data-ui": `${spec.id}-key-link` }, t(spec.text.keyLink)), " · ", h(doc, "a", { href: spec.pricingUrl, target: "_blank", rel: "noopener noreferrer", "data-ui": `${spec.id}-pricing-link` }, t(spec.text.pricingLink))));
     }
-    if (slotIsFree(id)) entry.push(h(doc, "p", { class: "notice", "data-ui": "free-tier-warning" }, t(spec.text.freeWarning ?? "settings.freeTierWarning")));
+    if (slotIsFree(id)) infoNodes.push(h(doc, "p", { class: "notice", "data-ui": "free-tier-warning" }, t(spec.text.freeWarning ?? "settings.freeTierWarning")));
     entry.push(h(doc, "div", { class: "field checkbox" }, rememberBox, h(doc, "label", { for: `set-remember${sfx}` }, t("settings.rememberLabel"))), passBlock, saveButton);
     // With a key saved the form is hidden, so it cannot be overwritten by accident; Replace key opens it.
     const cancelReplace = h(doc, "button", { type: "button", "data-ui": `replace-cancel-${id}` }, t("settings.replaceCancel"));
@@ -169,16 +202,34 @@ export function renderSettings(ctx) {
     // The models of this slot; a model the student chose for a gone free model is shown with a way back.
     const modelsHost = h(doc, "div", { class: "models-host" });
     const drawModels = () => modelsHost.replaceChildren(modelsBox({ doc, t, provider: spec, slot: id, locale, overrides: ctx.settings.get().modelOverrides?.[id] ?? {}, onReset: (key) => { ctx.settings.setModelOverride(id, key, null); drawModels(); } }));
-    if (spec.freeLimits) {
-      drawModels();
-      limitBoxes.push(modelsHost);
-    }
+    if (spec.freeLimits) drawModels();
+    if (spec.freeLimits && !slotIsFree(id)) limitBoxes.push(modelsHost);
     // OpenRouter: the free requests left today, the time of the last update and a button to ask again. Asked when the key is loaded and nothing is known yet.
     const quotaHost = h(doc, "div", { class: "quota-box", "data-ui": `quota-box-${id}`, "aria-live": "polite", hidden: true });
     const drawQuota = () => {
       const available = v.getSessionKey() !== null;
-      quotaHost.hidden = slotProvider(id) !== "openrouter" || !available;
+      // Groq cannot be asked: its box shows what the last call to it said, with the time, and has no Update button.
+      if (slotProvider(id) === "groq") {
+        quotaHost.hidden = false;
+        const seen = quotaStore.get("groq")?.result?.ok ? quotaStore.get("groq") : null;
+        const parts = [h(doc, "h3", {}, t("quota.seenHeading"))];
+        if (seen) {
+          const r = seen.result;
+          const level = quotaLevelOf(r);
+          const num = (n) => n.toLocaleString(locale);
+          parts.push(h(doc, "div", { class: `quota-bar ${level}`, role: "img", "aria-label": t("quota.seenOf", { remaining: num(r.remaining), limit: num(r.limit) }) }, h(doc, "i", { style: `width:${Math.min(100, (r.used / r.limit) * 100).toFixed(1)}%` })), h(doc, "p", { class: "quota-line", "data-ui": `quota-text-${id}` }, t("quota.seenOf", { remaining: num(r.remaining), limit: num(r.limit) })));
+          if (r.tokens) parts.push(h(doc, "p", { class: "hint" }, t("quota.seenTokens", { remaining: num(r.tokens.remaining), limit: num(r.tokens.limit) })));
+          if (level === "out" && r.resetText) parts.push(h(doc, "p", { class: "notice", role: "status" }, t("quota.seenResets", { text: r.resetText })));
+          parts.push(h(doc, "p", { class: "hint", "data-ui": `quota-stamp-${id}` }, t("quota.seenAt", { time: quotaClock(seen.at) })));
+        } else parts.push(h(doc, "p", { class: "hint", "data-ui": `quota-none-${id}` }, t("quota.seenNone")));
+        parts.push(h(doc, "p", { class: "hint" }, t("quota.seenNote")));
+        quotaHost.replaceChildren(...parts);
+        return;
+      }
+      quotaHost.hidden = slotProvider(id) !== "openrouter";
       if (quotaHost.hidden) return;
+      // The count belongs to a key: without a loaded key there is nobody to ask, and the box says so.
+      if (!available) return quotaHost.replaceChildren(h(doc, "h3", {}, t("quota.heading")), h(doc, "p", { class: "hint", "data-ui": `quota-nokey-${id}` }, t(v.hasStoredKey() ? "quota.locked" : "quota.noKey")));
       const entry = quotaStore.get(id);
       const busy = quotaStore.busy(id);
       const button = h(doc, "button", { type: "button", "data-ui": `quota-update-${id}` }, t(busy ? "quota.updating" : "quota.update"));
@@ -196,9 +247,19 @@ export function renderSettings(ctx) {
       quotaHost.replaceChildren(...parts);
       if (!entry && !busy) quotaStore.refresh(id, v.getSessionKey());
     };
-    const offQuota = quotaStore.subscribe((slot) => { if (slot === id) drawQuota(); });
+    const offQuota = quotaStore.subscribe((slot) => { if (slot === id || (slot === "groq" && slotProvider(id) === "groq")) drawQuota(); });
     ctx.onLeave?.(offQuota);
-    const node = h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, status, colorRow(slotProvider(id)), h(doc, "div", { class: "key-actions" }, replaceButton, checkButton), h(doc, "p", { class: "hint" }, t(slotIsFree(id) && spec.text.checkHint ? spec.text.checkHint : "settings.checkModelsHint")), checkResult, quotaHost, form, ...limitBoxes);
+    const checkHint = h(doc, "p", { class: "hint" }, t(slotIsFree(id) && spec.text.checkHint ? spec.text.checkHint : "settings.checkModelsHint"));
+    const keyActions = h(doc, "div", { class: "key-actions" }, replaceButton, checkButton);
+    // A free key is split into tabs: Key, Models (with the colour), Limit (the number left today and the limits), Info. A paid key stays one column.
+    const node = slotIsFree(id)
+      ? h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, ...slotTabs(id, [
+        ["key", "settings.tabKey", [status, keyActions, checkHint, checkResult, form]],
+        ["models", "settings.tabModels", [colorRow(slotProvider(id)), ...(spec.freeLimits ? [modelsHost] : [])]],
+        ["limit", "settings.tabLimit", [quotaHost, ...limitBoxes]],
+        ["info", "settings.tabInfo", [...infoNodes, h(doc, "p", { class: "hint" }, t("settings.infoLimitRun")), h(doc, "p", { class: "hint" }, t("settings.infoModelsGone"))]],
+      ]))
+      : h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, status, colorRow(slotProvider(id)), keyActions, checkHint, checkResult, quotaHost, form, ...limitBoxes);
     const refresh = () => {
       drawQuota();
       const saved = v.getSessionKey() !== null || v.hasStoredKey();
