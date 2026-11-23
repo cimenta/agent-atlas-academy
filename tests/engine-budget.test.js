@@ -71,3 +71,16 @@ test("remainingTokens counts down and never goes negative", () => {
   assert.throws(() => budget.chargeUsage({ input: 900, output: 0 }));
   assert.equal(budget.remainingTokens(), 0);
 });
+
+test("a refunded step does not use up the steps, for the run and for the agent", () => {
+  const budget = createBudget(limitsOf({ maxSteps: 2 }));
+  const agent = budget.forAgent({ maxSteps: 2 });
+  for (let i = 0; i < 5; i++) {
+    agent.chargeStep();
+    agent.refundStep(); // a call the provider refused with a wait
+  }
+  assert.equal(budget.usage().steps, 0);
+  agent.chargeStep();
+  agent.chargeStep();
+  assert.throws(() => agent.chargeStep(), (e) => e.reason === "steps");
+});
