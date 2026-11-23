@@ -1628,3 +1628,19 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .library-pane .tabs .tab { padding: 0 7px; }
 .library-detail-host .tag-title { margin: 12px 0 4px; min-height: 40px; display: flex; align-items: center; }
 @media (max-width: 759px) { .library-detail-host .tag-title { margin-top: 0; min-height: 0; } }
+
+/* Create: help mark in the tab of the active step, icons in the corners of the diagram, the question before an agent goes. */
+.step-tab .step-help { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; min-width: 20px; margin: 0; cursor: pointer; font-weight: 700; }
+.diagram-frame { position: relative; }
+.diagram-corner { position: absolute; z-index: 6; width: 34px; height: 34px; min-width: 34px; min-height: 34px; padding: 0; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); }
+.diagram-corner:hover { border-color: var(--accent-line); background: var(--accent-bg); }
+.diagram-corner.tr { top: 8px; right: 8px; }
+.diagram-corner.br { bottom: 8px; right: 8px; }
+.corner-badge { position: absolute; top: -7px; right: -7px; min-width: 18px; padding: 0 5px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 0.68rem; line-height: 18px; text-align: center; }
+.connections-pop { position: absolute; z-index: 7; right: 8px; bottom: 50px; width: min(280px, calc(100% - 16px)); max-height: 230px; overflow: auto; padding: 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3); }
+.dnode-body { padding-left: 24px; }
+.dnode-body.flipped { padding-left: 12px; }
+.dnode-remove.flipped { right: -4px; left: auto; }
+.confirm-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.4); }
+.confirm-card { max-width: 340px; padding: 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text); }
+.confirm-buttons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }

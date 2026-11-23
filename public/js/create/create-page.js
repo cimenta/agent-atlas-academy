@@ -377,7 +377,7 @@ export function renderCreate(ctx) {
       refreshSteps();
     };
     const move = (by) => goStep(STEPS[STEPS.indexOf(draft.step) + by] ?? draft.step);
-    const bar = workspace ? null : stepBar({ doc, t, status: stepsStatus(), current: draft.step, onGo: goStep });
+    const bar = workspace ? null : stepBar({ doc, t, status: stepsStatus(), current: draft.step, onGo: goStep, help: { diagram: "create-diagram", check: "create-run" } });
     const foot = workspace ? null : footer({ doc, t, onBack: () => move(-1), onNext: () => move(1), onRun: () => beginRun() });
     function refreshSteps() {
       const status = stepsStatus();
@@ -593,7 +593,7 @@ export function renderCreate(ctx) {
         cost: design.nodes.length === 0 ? [h(doc, "p", { class: "hint" }, t("create.costNeeds"))] : [h(doc, "h4", {}, t("create.estimateHeading"), help("create-estimate", t("create.estimateHeading"))), ...estimateLines, ...providersOf(design, provider).map((p) => h(doc, "p", { class: "notice" }, t(providerSpec(p).text.dataNotice)))],
         key: [h(doc, "h4", {}, t("create.keyHeading")), ...keyParts],
       }[draft.subTab] ?? [];
-      reviewHost.replaceChildren(workspace ? "" : h(doc, "h3", {}, t("create.step.check"), help("create-run", t("create.step.check"))), ...(checkEl ? [checkEl] : []), tabs.element, h(doc, "div", { class: "inner-pane", role: "tabpanel", "data-ui": `pane-${draft.subTab}` }, ...pane), reasons);
+      reviewHost.replaceChildren(workspace ? "" : h(doc, "h3", {}, t("create.step.check")),...(checkEl ? [checkEl] : []), tabs.element, h(doc, "div", { class: "inner-pane", role: "tabpanel", "data-ui": `pane-${draft.subTab}` }, ...pane), reasons);
       if (focusKey) reviewHost.querySelector?.(focusKey)?.focus?.();
       refreshSteps();
     }
@@ -705,7 +705,7 @@ export function renderCreate(ctx) {
       h(doc, "div", { class: "part" }, heads.memory.element, memoryGroup),
     ];
     panels.setup.replaceChildren(...setupParts);
-    panels.diagram.replaceChildren(...(workspace ? [] : [h(doc, "h3", {}, t("create.step.diagram"), help("create-diagram", t("create.step.diagram")))]), editorHost);
+    panels.diagram.replaceChildren(...(workspace ? [] : [h(doc, "h3", {}, t("create.step.diagram"))]), editorHost);
     if (workspace) {
       // Settings on the left; diagram and checks on the right, locked until the four parts are decided.
       rightInner = h(doc, "div", { class: "inner" }, editorHost, reviewHost);

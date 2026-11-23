@@ -1656,5 +1656,7 @@
   "library.tags.groupTip.pattern": "Témata o tom, jak agenti spolupracují",
   "library.tags.groupTip.task": "Témata o druhu úkolu, který běh řeší",
   "library.tags.groupTip.efficiency": "Témata o ceně a rychlosti",
-  "library.tags.groupTip.basics": "Témata pro první seznámení"
+  "library.tags.groupTip.basics": "Témata pro první seznámení",
+  "editor.removeKeep": "Ponechat",
+  "editor.removeYes": "Odebrat agenta"
 }

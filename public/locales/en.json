@@ -1656,5 +1656,7 @@
   "library.tags.groupTip.pattern": "Topics about how the agents work together",
   "library.tags.groupTip.task": "Topics about the kind of task the run solves",
   "library.tags.groupTip.efficiency": "Topics about cost and speed",
-  "library.tags.groupTip.basics": "Topics for a first look"
+  "library.tags.groupTip.basics": "Topics for a first look",
+  "editor.removeKeep": "Keep",
+  "editor.removeYes": "Remove the agent"
 }

@@ -147,3 +147,15 @@ test("updating the workspace bar twice keeps one Run button", () => {
   bar.update({ status: shut(), estimate: "", hint: "b", runEnabled: false });
   assert.equal(find(bar.element, (n) => n.attrs?.["data-ui"] === "run-button").length, 1);
 });
+
+test("the help mark is in the tab of the active step only, and only for a step that has help", () => {
+  const help = { diagram: "create-diagram", check: "create-run" };
+  const bar = stepBar({ doc, t, status: open(), current: "setup", onGo: () => {}, help });
+  assert.equal(find(bar.element, (n) => n.attrs?.class?.includes("step-help")).length, 0);
+  bar.update(open(), "diagram");
+  const marks = find(bar.element, (n) => n.attrs?.class?.includes("step-help"));
+  assert.equal(marks.length, 1);
+  assert.equal(marks[0].getAttribute("data-ui"), "help-create-diagram");
+  bar.update(open(), "check");
+  assert.equal(find(bar.element, (n) => n.attrs?.class?.includes("step-help"))[0].getAttribute("data-ui"), "help-create-run");
+});

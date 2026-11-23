@@ -14,7 +14,7 @@ import { mayFormat, validFormat, formatPromptText, FORMAT_TYPES, FORMAT_MAX_FIEL
 import { innerTabs } from "./steps-view.js";
 import { agentTabIds, currentAgentTab } from "./agent-tabs.js";
 import { MULTI_RUN } from "../engine/spawn.js";
-import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, extentOf, isTwoWay, maxColsFor, orientationFor, flippedOf, portPoint, linkBetween, PORT_R, turnArrows, TWO_WAY_GAP } from "./diagram-geometry.js";
+import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, extentOf, isTwoWay, maxColsFor, orientationFor, flippedOf, portPoint, linkBetween, linkPath, PORT_R, turnArrows, TWO_WAY_GAP } from "./diagram-geometry.js";
 
 const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -89,14 +89,51 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     if (selectedId === null) return;
     // Removing an agent also removes its connections, so ask first (the cross, the button and the Delete key all come here).
     const doomed = editor.design().nodes.find((n) => n.id === selectedId);
-    const ask = doc.defaultView?.confirm;
-    if (doomed && ask && !ask.call(doc.defaultView, t("editor.removeConfirm", { name: nodeLabel(doomed) }))) return;
-    freeze();
-    editor.removeNode(selectedId);
-    selectedId = null;
-    connectFrom = null;
-    selectedEdge = null;
-    changed();
+    const id = selectedId;
+    const remove = () => {
+      freeze();
+      editor.removeNode(id);
+      selectedId = null;
+      connectFrom = null;
+      selectedEdge = null;
+      changed();
+    };
+    if (!doomed) return remove();
+    if (!doc.body) {
+      const ask = doc.defaultView?.confirm;
+      if (ask && !ask.call(doc.defaultView, t("editor.removeConfirm", { name: nodeLabel(doomed) }))) return;
+      return remove();
+    }
+    askRemove(nodeLabel(doomed), remove);
+  }
+
+  // The question before an agent goes: a small dialog over the page, with Keep as the button that has the focus.
+  function askRemove(name, onYes) {
+    const close = () => {
+      overlay.remove();
+      doc.removeEventListener("keydown", onKey, true);
+    };
+    const onKey = (event) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopPropagation();
+      close();
+    };
+    const keep = h(doc, "button", { type: "button", "data-ui": "remove-keep" }, t("editor.removeKeep"));
+    const yes = h(doc, "button", { type: "button", class: "danger", "data-ui": "remove-yes" }, t("editor.removeYes"));
+    keep.addEventListener("click", close);
+    yes.addEventListener("click", () => {
+      close();
+      onYes();
+    });
+    const title = t("editor.removeConfirm", { name });
+    const overlay = h(doc, "div", { class: "confirm-overlay", "data-ui": "remove-confirm" }, h(doc, "div", { class: "confirm-card", role: "alertdialog", "aria-modal": "true", "aria-label": title }, h(doc, "b", {}, title), h(doc, "div", { class: "confirm-buttons" }, keep, yes)));
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) close();
+    });
+    doc.body.append(overlay);
+    doc.addEventListener("keydown", onKey, true);
+    keep.focus();
   }
 
   function onNodeActivate(id) {
@@ -211,13 +248,12 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         const key = `${edge.from}>${edge.to}`;
         const selected = selectedEdge === key;
         // From the dot that sends to the dot that receives; the line stops at the circles, so it touches them.
-        const s2 = linkBetween(portOf(edge.from, "out"), portOf(edge.to, "in"));
-        const line = doc.createElementNS(SVG_NS, "line");
-        for (const [k, v] of Object.entries({ "marker-end": "url(#linkhead)", "stroke-width": selected ? "4" : "2", class: "edge-line", ...(selected ? { stroke: "var(--accent)" } : {}) })) line.setAttribute(k, v);
-        setLine(line, { x: s2.x1, y: s2.y1 }, { x: s2.x2, y: s2.y2 });
-        const hit = doc.createElementNS(SVG_NS, "line");
-        for (const [k, v] of Object.entries({ stroke: "transparent", "stroke-width": "22", class: "edge-hit" })) hit.setAttribute(k, v);
-        setLine(hit, { x: s2.x1, y: s2.y1 }, { x: s2.x2, y: s2.y2 });
+        // Between two rows the line runs down along the gap and into the middle of the other box (see linkPath).
+        const route = linkPath(pos, edge.from, edge.to, portOf(edge.from, "out"), portOf(edge.to, "in"));
+        const line = doc.createElementNS(SVG_NS, "path");
+        for (const [k, v] of Object.entries({ d: route.d, fill: "none", "marker-end": "url(#linkhead)", "stroke-width": selected ? "4" : "2", class: "edge-line", ...(selected ? { stroke: "var(--accent)" } : {}) })) line.setAttribute(k, v);
+        const hit = doc.createElementNS(SVG_NS, "path");
+        for (const [k, v] of Object.entries({ d: route.d, fill: "none", stroke: "transparent", "stroke-width": "22", class: "edge-hit" })) hit.setAttribute(k, v);
         hit.addEventListener("click", () => {
           selectedEdge = selectedEdge === key ? null : key;
           selectedId = null;
@@ -237,7 +273,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         svg.insertBefore(hit, rubber);
         edgeParts.push(hit);
         if (selected) {
-          const mid = { x: (s2.x1 + s2.x2) / 2, y: (s2.y1 + s2.y2) / 2 };
+          const mid = route.mid;
           const remove = h(doc, "button", { type: "button", class: "edge-remove", "data-focus-key": `edge-x-${key}`, "aria-label": t("editor.removeConnection", { from: label(edge.from), to: label(edge.to) }) }, "×");
           remove.style.left = `${mid.x - 18}px`;
           remove.style.top = `${mid.y - 18}px`;
@@ -369,7 +405,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       const body = h(
         doc,
         "button",
-        { type: "button", class: "dnode-body", "data-focus-key": `node-${node.id}`, "aria-pressed": String(selectedId === node.id), "aria-label": t("editor.selectNode", { name: nodeLabel(node) }) },
+        { type: "button", class: flips.has(node.id) ? "dnode-body flipped" : "dnode-body", "data-focus-key": `node-${node.id}`, "aria-pressed": String(selectedId === node.id), "aria-label": t("editor.selectNode", { name: nodeLabel(node) }) },
         h(doc, "strong", {}, nodeLabel(node)),
         h(doc, "small", {}, modelUi ? modelUi.label(node) : (getModels(node).find((m) => m.key === node.model)?.label ?? "")),
         ...(design.memory?.notebook === true ? [h(doc, "small", { class: "dnode-notebook", "data-ui": "node-notebook" }, t(`editor.notebook.short.${node.notebook ?? "both"}`))] : []),
@@ -405,7 +441,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       if (isStart) box.append(h(doc, "span", { class: "dnode-start", "data-ui": "start-flag" }, `▶ ${t("editor.startFlag")}`));
       box.append(port, inPort);
       {
-        const cross = h(doc, "button", { type: "button", class: flips.has(node.id) ? "dnode-remove flipped" : "dnode-remove", "data-focus-key": `delete-${node.id}`, "aria-label": t("editor.removeNamed", { name: nodeLabel(node) }), title: t("editor.remove") }, "×");
+        const cross = h(doc, "button", { type: "button", class: "dnode-remove", "data-focus-key": `delete-${node.id}`, "aria-label": t("editor.removeNamed", { name: nodeLabel(node) }), title: t("editor.remove") }, "×");
         cross.addEventListener("click", () => {
           selectedId = node.id;
           removeSelected();
@@ -453,22 +489,31 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     const connecting = connectFrom
       ? h(doc, "p", { class: "notice", role: "status" }, t("editor.connecting", { name: nodeLabel(design.nodes.find((n) => n.id === connectFrom)) }))
       : "";
-    const tidy = h(doc, "button", { type: "button", "data-focus-key": "tidy" }, t("editor.tidy"));
+    // Two icons in the corners of the diagram: tidy up (top right) and the list of connections (bottom right, with their number).
+    const cornerIcon = (shapes) => {
+      const icon = doc.createElementNS(SVG_NS, "svg");
+      for (const [k, v] of Object.entries({ viewBox: "0 0 16 16", width: "16", height: "16", "aria-hidden": "true", fill: "none", stroke: "currentColor", "stroke-width": "1.6", "stroke-linecap": "round", "stroke-linejoin": "round" })) icon.setAttribute(k, v);
+      for (const d of shapes) {
+        const p = doc.createElementNS(SVG_NS, "path");
+        p.setAttribute("d", d);
+        icon.append(p);
+      }
+      return icon;
+    };
+    const tidy = h(doc, "button", { type: "button", class: "diagram-corner tr", "data-focus-key": "tidy", "data-ui": "diagram-tidy", title: t("editor.tidy"), "aria-label": t("editor.tidy") }, cornerIcon(["M2 2h5v5H2z", "M9 2h5v5H9z", "M2 9h5v5H2z", "M9 9h5v5H9z"]));
     tidy.addEventListener("click", () => {
       editor.clearPositions();
       changed();
     });
-    const head = h(doc, "div", { class: "editor-diagram-head" }, h(doc, "h3", {}, t("editor.diagram")), design.nodes.length ? tidy : "");
-    return h(doc, "section", { class: "editor-diagram", "aria-label": t("editor.diagram") }, head, empty, connecting, wrap);
-  }
-
-  function connectionsSection(design) {
-    const toggle = h(doc, "button", { type: "button", class: "small", "data-focus-key": "connections-toggle", "data-ui": "connections-toggle", "aria-expanded": String(connectionsShown) }, t(connectionsShown ? "editor.hideConnections" : "editor.showConnections", { n: design.edges.length }));
-    toggle.addEventListener("click", () => {
+    const linksTitle = t(connectionsShown ? "editor.hideConnections" : "editor.showConnections", { n: design.edges.length });
+    const links = h(doc, "button", { type: "button", class: "diagram-corner br", "data-focus-key": "connections-toggle", "data-ui": "connections-toggle", "aria-expanded": String(connectionsShown), title: linksTitle, "aria-label": linksTitle }, cornerIcon(["M2 5h10", "M9 2l3 3-3 3", "M14 11H4", "M7 8l-3 3 3 3"]), h(doc, "span", { class: "corner-badge", "aria-hidden": "true" }, String(design.edges.length)));
+    links.addEventListener("click", () => {
       connectionsShown = !connectionsShown;
       changed();
     });
-    return h(doc, "section", { class: "editor-connections", "aria-label": t("editor.connections") }, h(doc, "h4", {}, t("editor.connections"), " ", toggle), connectionsShown ? connectionsBlock(design) : "");
+    const corners = design.nodes.length ? [tidy, links, ...(connectionsShown ? [h(doc, "div", { class: "connections-pop", "data-ui": "connections-list" }, connectionsBlock(design))] : [])] : [];
+    const head = h(doc, "div", { class: "editor-diagram-head" }, h(doc, "h3", {}, t("editor.diagram")));
+    return h(doc, "section", { class: "editor-diagram", "aria-label": t("editor.diagram") }, head, empty, connecting, h(doc, "div", { class: "diagram-frame" }, wrap, ...corners));
   }
 
   function connectionsBlock(design) {
@@ -931,7 +976,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       paletteBlock(design),
       selfCritiqueBlock(design),
       diagramBlock(design),
-      h(doc, "div", { class: "editor-lower" }, settingsBlock(design), connectionsSection(design)),
+      h(doc, "div", { class: "editor-lower" }, settingsBlock(design)),
       roundsBlock(design),
       problemsBlock(),
     );

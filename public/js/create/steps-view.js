@@ -2,6 +2,7 @@
 // comes from steps-model.js and the page decides what a click does.
 import { h } from "../dom.js";
 import { STEPS } from "./steps-model.js";
+import { openHelpPopup } from "../help-popup.js";
 
 const LABEL = { none: "create.status.none", part: "create.status.part", done: "create.status.done", lock: "create.status.locked" };
 
@@ -11,7 +12,8 @@ export function statusIcon(doc, state, t) {
 }
 
 // The three step tabs. A step that is not open yet is disabled and shows the lock.
-export function stepBar({ doc, t, status, current, onGo }) {
+// help: { step: help section id }; the active step with an entry shows a ? in its tab. It is a span, not a button, because it sits in a button.
+export function stepBar({ doc, t, status, current, onGo, help = {} }) {
   const element = h(doc, "div", { class: "step-bar", role: "tablist", "data-ui": "step-bar" });
   function update(next, now) {
     element.replaceChildren(
@@ -22,6 +24,22 @@ export function stepBar({ doc, t, status, current, onGo }) {
         button.addEventListener("click", () => {
           if (!locked) onGo(step);
         });
+        if (help[step] && now === step && !locked) {
+          const name = t(`create.step.${step}`);
+          const open = () => openHelpPopup({ doc, t, id: help[step] });
+          const icon = h(doc, "span", { class: "help-icon step-help", role: "button", tabindex: "0", "data-ui": `help-${help[step]}`, "aria-label": t("help.popup.open", { name }), title: t("help.popup.open", { name }) }, "?");
+          icon.addEventListener("click", (event) => {
+            event.stopPropagation();
+            open();
+          });
+          icon.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            event.stopPropagation();
+            open();
+          });
+          button.append(icon);
+        }
         return button;
       }),
     );
