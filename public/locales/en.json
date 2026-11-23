@@ -609,9 +609,6 @@
   "settings.dotLocked": "Key saved but locked: unlock it to use it",
   "create.providerAddKey": "add key →",
   "create.providerFree": "free tier",
-  "create.legendLoaded": "key loaded",
-  "create.legendLocked": "key saved, locked",
-  "create.legendNone": "no dot: no key",
   "create.geminiFree": "Gemini free",
   "create.geminiPaid": "Gemini paid",
   "create.providerPaid": "all models",
@@ -1669,5 +1666,11 @@
   "limits.languageNote": "The estimate counts tokens from the length of the text, so it differs by language: the same text needs about 1.5 times more tokens in Czech than in English.",
   "create.reason.noKeyGo": "Opens the API key tab, where you add your key",
   "run.outcome.providerSays": "The provider says: {text}",
-  "run.outcome.sharedLimit": "The limit belongs to the model, not to you: the provider shares it among all its users. Try again later, or pick another model."
+  "run.outcome.sharedLimit": "The limit belongs to the model, not to you: the provider shares it among all its users. Try again later, or pick another model.",
+  "create.missing.unlock": "unlock your key",
+  "create.paidMark": "paid key: runs are charged",
+  "create.firstStep": "This is the first step",
+  "create.legendWarn": "key missing or locked",
+  "create.legendPaid": "paid key",
+  "create.keyMissing": "No key is saved for this provider: add it in Settings"
 }

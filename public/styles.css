@@ -1684,3 +1684,20 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .editor-diagram .diagram { cursor: grab; }
 .editor-diagram .dnode, .editor-diagram .diagram-corner { cursor: auto; }
 .outcome-extra { flex: 1 1 100%; font-size: 0.88rem; margin-left: 32px; overflow-wrap: anywhere; }
+.pv-paid { display: inline-flex; align-items: center; justify-content: center; margin-left: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent-bg); color: var(--accent); font-size: 0.72rem; font-weight: 700; }
+
+/* Provider chips (approved mockup A3, the model list under them): one line, filled when chosen, orange when the key is missing or locked, a red $ on the corner of a paid key. */
+.provider-row { flex-direction: column; align-items: stretch; gap: 12px; }
+.provider-tiles { gap: 12px 8px; padding-top: 6px; }
+.provider-tiles > .provider-tile { flex: none; min-width: 0; max-width: none; }
+.provider-tile { display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px 4px 5px; border: 1px solid var(--border); border-radius: 999px; }
+.provider-tile.on { padding: 4px 12px 4px 5px; border: 1px solid var(--accent); background: var(--accent); color: #fff; }
+.provider-tile.warn { background: #fdf1dc; border-color: #e3a33a; color: #6b4a00; }
+.provider-tile.warn.on { background: #e3a33a; border-color: #e3a33a; color: #fff; }
+.provider-tile .pv-mark { width: 24px; height: 24px; border-radius: 50%; font-size: 0.78rem; }
+.provider-tile .pv-name { font-size: 0.9rem; }
+.provider-tile .pv-paid { position: absolute; top: -8px; right: -6px; margin: 0; width: 17px; height: 17px; background: #d11a2a; color: #fff; line-height: 17px; font-size: 0.7rem; box-shadow: 0 0 0 2px var(--card); z-index: 1; }
+.pv-paid-legend { position: static !important; box-shadow: none !important; width: 15px !important; height: 15px !important; line-height: 15px !important; font-size: 0.64rem !important; }
+.pv-lg.warn { width: 16px; height: 12px; border-radius: 4px; background: #fdf1dc; border: 1px solid #e3a33a; }
+.provider-row .default-model { flex: none; max-width: 340px; margin: 0; }
+@media (prefers-color-scheme: dark) { .provider-tile.warn { background: #3a2d10; border-color: #a8741a; color: #f0c870; } .provider-tile.warn.on { background: #a8741a; color: #fff; } }

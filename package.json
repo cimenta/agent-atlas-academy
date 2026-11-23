@@ -1,6 +1,6 @@
 {
   "name": "agentatlasacademy",
-  "version": "1.16.7-dev.5",
+  "version": "1.16.7-dev.6",
   "description": "Agent Atlas: learn how AI agents work, communicate and are orchestrated.",
   "private": true,
   "type": "module",

@@ -8,7 +8,7 @@ const LABEL = { none: "create.status.none", part: "create.status.part", done: "c
 
 // state: "none" (nothing set), "part" (partly set), "done" (set) or "lock" (not open yet).
 export function statusIcon(doc, state, t) {
-  return h(doc, "span", { class: "st", "data-s": state, role: "img", "aria-label": t(LABEL[state] ?? LABEL.none) });
+  return h(doc, "span", { class: "st", "data-s": state, role: "img", "aria-label": t(LABEL[state] ?? LABEL.none), title: t(LABEL[state] ?? LABEL.none) });
 }
 
 // The three step tabs. A step that is not open yet is disabled and shows the lock.
@@ -48,6 +48,9 @@ export function stepBar({ doc, t, status, current, onGo, help = {} }) {
   return { element, update };
 }
 
+// The words of a hint, which may be a node with a link in it.
+const plain = (hint) => (typeof hint === "string" ? hint : hint?.textContent ?? "");
+
 // Back, Next and Run with a line that says what is still missing. nav: what navState gives.
 export function footer({ doc, t, onBack, onNext, onRun }) {
   const hint = h(doc, "p", { class: "hint step-hint", "data-ui": "step-hint", role: "status" });
@@ -64,6 +67,11 @@ export function footer({ doc, t, onBack, onNext, onRun }) {
     back.disabled = !nav.back;
     next.disabled = !nav.next;
     run.disabled = !nav.run;
+    // Hovering a button that cannot be pressed says what is missing.
+    const why = plain(text);
+    back.title = nav.back ? "" : t("create.firstStep");
+    next.title = nav.next ? "" : why;
+    run.title = nav.run ? "" : why;
     hint.replaceChildren(typeof text === "string" ? doc.createTextNode(text) : text, ...(hintExtra ? [hintExtra] : []));
   }
   return { element, update };
@@ -124,6 +132,7 @@ export function workspaceBar({ doc, t, onRun }) {
   const setIcon = (icon, state) => {
     icon.setAttribute("data-s", state);
     icon.setAttribute("aria-label", t(LABEL[state] ?? LABEL.none));
+    icon.setAttribute("title", t(LABEL[state] ?? LABEL.none));
   };
   function update({ status, estimate: text, hint: hintText, hintExtra = null, runEnabled, agents = 0 }) {
     agentCount.replaceChildren(doc.createTextNode(t("create.ws.agentMany", { n: agents })));
@@ -132,6 +141,7 @@ export function workspaceBar({ doc, t, onRun }) {
     setIcon(chipCheck.icon, status.locked.check ? "lock" : status.check);
     estimate.replaceChildren(doc.createTextNode(text === "" || text === undefined ? t("create.ws.noEstimate") : text));
     run.disabled = !runEnabled;
+    run.title = runEnabled ? "" : plain(hintText);
     // Only when the text changes, so a screen reader does not repeat it on every keystroke.
     if (hintText !== lastHint || hintExtra !== lastExtra) {
       hint.replaceChildren(typeof hintText === "string" ? doc.createTextNode(hintText) : hintText, ...(hintExtra ? [hintExtra] : []));

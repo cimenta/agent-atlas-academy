@@ -609,9 +609,6 @@
   "settings.dotLocked": "Klíč je uložený, ale zamčený: odemkněte ho, abyste ho mohli použít",
   "create.providerAddKey": "přidat klíč →",
   "create.providerFree": "bezplatná úroveň",
-  "create.legendLoaded": "klíč načten",
-  "create.legendLocked": "klíč uložen, zamčený",
-  "create.legendNone": "bez tečky: bez klíče",
   "create.geminiFree": "Gemini zdarma",
   "create.geminiPaid": "Gemini placený",
   "create.providerPaid": "všechny modely",
@@ -1669,5 +1666,11 @@
   "limits.languageNote": "Odhad počítá tokeny z délky textu, proto se liší podle jazyka: stejný text potřebuje v češtině asi 1,5krát víc tokenů než v angličtině.",
   "create.reason.noKeyGo": "Otevře záložku Klíč API, kde klíč přidáte",
   "run.outcome.providerSays": "Poskytovatel píše: {text}",
-  "run.outcome.sharedLimit": "Limit patří modelu, ne vám: poskytovatel ho sdílí mezi všechny své uživatele. Zkuste to později nebo zvolte jiný model."
+  "run.outcome.sharedLimit": "Limit patří modelu, ne vám: poskytovatel ho sdílí mezi všechny své uživatele. Zkuste to později nebo zvolte jiný model.",
+  "create.missing.unlock": "odemkněte svůj klíč",
+  "create.paidMark": "placený klíč: běhy se účtují",
+  "create.firstStep": "Toto je první krok",
+  "create.legendWarn": "klíč chybí nebo je zamčený",
+  "create.legendPaid": "placený klíč",
+  "create.keyMissing": "Pro tohoto poskytovatele není uložený klíč: přidejte ho v Nastavení"
 }

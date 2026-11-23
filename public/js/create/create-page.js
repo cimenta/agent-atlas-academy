@@ -275,16 +275,18 @@ export function renderCreate(ctx) {
           const state = keyState(vaultFor(id));
           const selected = chosen.includes(id);
           const kind = slotProvider(id);
-          const name = slotName(id);
-          const sub = slotSubKey(id) ? t(slotSubKey(id)) : "";
-          const dotText = t(state === "locked" ? "settings.dotLocked" : "settings.dotLoaded");
+          // A chip: the mark and the plain name of the provider. An orange chip says the key is missing or locked; a red $ on the
+          // corner says the key is paid. The tier and the state of the key are in the tooltip.
+          const name = providerSpec(kind).chipName;
+          const free = slotIsFree(id);
+          const warn = state !== "loaded";
+          const stateText = t(state === "locked" ? "settings.dotLocked" : state === "none" ? "create.keyMissing" : "settings.dotLoaded");
           const parts = [
             h(doc, "span", { class: `pv-mark pv-${kind}`, "aria-hidden": "true" }, providerSpec(kind).mark),
-            h(doc, "span", { class: "pv-text" }, h(doc, "span", { class: "pv-name" }, name), ...(sub ? [h(doc, "span", { class: "pv-sub" }, sub)] : [])),
-            ...(state === "none" ? [] : [h(doc, "span", { class: `pv-dot ${state === "locked" ? "yellow" : "green"}`, role: "img", "aria-label": dotText, title: dotText })]),
-            h(doc, "span", { class: "pv-check", "aria-hidden": "true" }, selected ? "✓" : ""),
+            h(doc, "span", { class: "pv-name" }, name),
+            ...(free ? [] : [h(doc, "span", { class: "pv-paid", title: t("create.paidMark"), role: "img", "aria-label": t("create.paidMark") }, "$")]),
           ];
-          const tile = h(doc, "button", { type: "button", class: `provider-tile${selected ? " on" : ""}`, role: "checkbox", "aria-checked": String(selected), "data-ui": `provider-tile-${id}` }, ...parts);
+          const tile = h(doc, "button", { type: "button", class: `provider-tile${selected ? " on" : ""}${warn ? " warn" : ""}`, role: "checkbox", "aria-checked": String(selected), "data-ui": `provider-tile-${id}`, title: `${slotName(id)}${free ? ` (${t("create.providerFree")})` : ` (${t("create.paidMark")})`}: ${stateText}` }, ...parts);
           tile.addEventListener("click", () => {
             // Any number of providers may be on, also none: the student decides.
             draft.slots = toggleSlot(chosen, id, SLOT_IDS);
@@ -299,8 +301,8 @@ export function renderCreate(ctx) {
       );
       drawDefaultModel();
     };
-    const legendItem = (cls, text) => h(doc, "span", {}, ...(cls ? [h(doc, "i", { class: `pv-lg ${cls}` })] : []), text);
-    const providerLegend = h(doc, "div", { class: "pv-legend", "data-ui": "provider-legend" }, legendItem("green", t("create.legendLoaded")), legendItem("yellow", t("create.legendLocked")));
+    const legendItem = (mark, text) => h(doc, "span", {}, mark, text);
+    const providerLegend = h(doc, "div", { class: "pv-legend", "data-ui": "provider-legend" }, legendItem(h(doc, "i", { class: "pv-lg warn" }), t("create.legendWarn")), legendItem(h(doc, "span", { class: "pv-paid pv-paid-legend", "aria-hidden": "true" }, "$"), t("create.legendPaid")));
     const providerField = h(doc, "div", { class: "field provider-field", "data-ui": "provider-field" }, h(doc, "div", { class: "provider-row" }, providerTiles, defaultHost), providerLegend);
 
     // The model of an agent: its level (Fast, Balanced, Strong), and the provider when more than one is chosen.
@@ -351,8 +353,10 @@ export function renderCreate(ctx) {
       if (kind === "ready" && lastVerdict?.reasons?.includes("limitsBlocked")) return t("create.reason.limitsBlocked", { agents: lastBlockedNames });
       if (kind === "ready" && lastVerdict?.reasons?.includes("modelGone")) return t("create.reason.modelGone");
       if (workspace && kind === "setup") return t("create.ws.locked");
-      if (kind === "missing" && missing(status).includes("key")) return keyHint(status);
-      return kind === "missing" ? t("create.hint.missing", { items: missing(status).map((k) => t(`create.missing.${k}`)).join(", ") }) : t(`create.hint.${kind}`);
+      // The key is saved but locked: the Unlock box beside the text is the way on, so the words stay plain.
+      if (kind === "missing" && missing(status).includes("key") && lockedNow().length === 0) return keyHint(status);
+      const word = (k) => t(k === "key" && lockedNow().length > 0 ? "create.missing.unlock" : `create.missing.${k}`);
+      return kind === "missing" ? t("create.hint.missing", { items: missing(status).map(word).join(", ") }) : t(`create.hint.${kind}`);
     };
     // The slots the run uses whose saved key is locked.
     const lockedNow = () => usedSlots(draft.editor.design()).filter((s) => vaultFor(s).getSessionKey() === null && vaultFor(s).hasStoredKey());
