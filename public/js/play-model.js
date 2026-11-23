@@ -36,6 +36,17 @@ export function buildResultModel(run) {
     entry.output += Number(e.tokens?.output) || 0;
     byAgent.set(e.agent, entry);
   }
+  // A call that came back after the agent's last answer (the run was stopped, by a limit for example, before the agent finished) spent tokens too,
+  // and the total of the run counts it, so the agent does as well.
+  const lastOutputAt = new Map();
+  events.forEach((e, i) => { if (e.type === "agent_output") lastOutputAt.set(e.agent, i); });
+  events.forEach((e, i) => {
+    if (e.type !== "round" || typeof e.agent !== "string" || i < (lastOutputAt.get(e.agent) ?? -1)) return;
+    const entry = byAgent.get(e.agent) ?? { agent: e.agent, input: 0, output: 0 };
+    entry.input += Number(e.usage?.input) || 0;
+    entry.output += Number(e.usage?.output) || 0;
+    byAgent.set(e.agent, entry);
+  });
   const perAgent = [...byAgent.values()];
 
   const summed = {

@@ -58,6 +58,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- The message of the time limit (270 s per run) says that Settings cannot raise it and what can be done: continue the run, or make it shorter with fewer agents or rounds or a faster model.
+
 - Live player: the status line shows how many steps are finished (Finished steps: 46) instead of Step 46 of 46, because a live run has no fixed total. A recording still shows Step x of y.
 
 - Replay diagram: the ring around the chosen agent is drawn inside its box, so it no longer covers the arrowhead that points at it. The mark before the Replay title has a wider gap. An open hover card follows the replay and changes with the state of the agent or arrow.
@@ -284,6 +286,9 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 - Measure that a 290-second stream survives on Vercel.
 
 ### Fixed
+
+- Statistics: the tokens of a call that came back after an agent's last answer (a run stopped by a limit) now count for that agent, so the agents add up to the total of the run.
+- The round number in the badge flashes only while the replay plays or the run is live, no longer while it waits at its start.
 
 - Hover cards in a debate: the judge is described as it works (no part in the rounds, reads the whole debate once after the last round), the debaters read the whole debate so far, and the arrows say the same. Before, they used generic words that fitted other patterns.
 

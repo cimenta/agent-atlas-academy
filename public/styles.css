@@ -1744,3 +1744,5 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .live-corner[hidden] { display: none; }
 .replay.is-live .controls { display: none; }
 .clk-pill::before { font-size: 0.85rem; line-height: 1; color: #d11a2a; }
+/* The round number flashes only while the replay plays or the run is live, not while it waits at its start or is paused. */
+.replay:not(.is-playing):not(.is-live) .round-badge .round-no { animation: none; }

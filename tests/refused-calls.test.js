@@ -20,3 +20,18 @@ test("a run without a log of calls has no refused calls", () => {
   const stats = buildStatistics(run(undefined));
   assert.equal(stats.refusedCalls, 0);
 });
+
+test("the tokens of a call that came back after the last answer of an agent count for that agent", () => {
+  const r = run([]);
+  r.events = [
+    { type: "run_start", t: 0 },
+    { type: "agent_start", t: 1, agent: "a" },
+    { type: "round", t: 2, agent: "a", round: 1, usage: { input: 10, output: 5 } },
+    { type: "agent_output", t: 3, agent: "a", text: "x", tokens: { input: 10, output: 5 } },
+    { type: "agent_start", t: 4, agent: "a" },
+    { type: "round", t: 5, agent: "a", round: 2, usage: { input: 100, output: 50 } },
+    { type: "done", t: 6, outcome: "stopped_limit", usage: { input: 110, output: 55, searches: 0, steps: 2 } },
+  ];
+  const a = buildStatistics(r).perAgent.find((x) => x.agent === "a");
+  assert.equal(a.input + a.output, 165);
+});

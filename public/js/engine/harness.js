@@ -54,7 +54,7 @@ export function limitMessage(reason, limits, extra = {}) {
     case "cost":
       return `Limit reached: estimated cost of the run ($${Number(maxCostUsd).toFixed(2)}, by the prices in the catalog). The run was stopped before it could finish. Raise the cost cap in Settings, Harness, and run again.`;
     case "time":
-      return `Limit reached: time (${TIME_LIMIT_MS / 1000} seconds per run). This limit is fixed. The run was stopped before it could finish.`;
+      return `Limit reached: time (${TIME_LIMIT_MS / 1000} seconds per run). This limit is fixed in the app, so Settings cannot raise it. The run was stopped before it could finish, and what happened so far is saved. Continue the run (the agents that finished are not asked again, and the clock starts over), or make it shorter: fewer agents or rounds, or a faster model.`;
     default:
       return `Limit reached: ${reason}. The run was stopped before it could finish.`;
   }
