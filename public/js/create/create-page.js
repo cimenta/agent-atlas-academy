@@ -364,10 +364,28 @@ export function renderCreate(ctx) {
       go.addEventListener("click", submit);
       return h(doc, "span", { class: "inline-unlock" }, pass, go, problem);
     };
+    // Opens the API key tab (and its step) and puts the cursor in the key box.
+    function goToKey() {
+      draft.subTab = "key";
+      if (!workspace) draft.step = "check";
+      refreshSteps();
+      drawReview();
+      const toKey = () => {
+        const box = reviewHost.querySelector('[id^="cr-key"]');
+        box?.scrollIntoView?.({ block: "center" });
+        box?.focus?.();
+      };
+      toKey();
+      setTimeout(toKey, 0); // the review may be drawn again once more (key state loaded)
+    }
     // Next to "Almost there: add your key" the same box shows when the key is saved but locked. It is kept, so what is typed stays.
     let hintUnlock = null;
+    let hintGo = null;
     const hintExtra = (status) => {
-      if (footHint(status) !== "missing" || !missing(status).includes("key") || lockedNow().length === 0) return null;
+      if (footHint(status) !== "missing" || !missing(status).includes("key")) return null;
+      hintGo ??= h(doc, "button", { type: "button", class: "linklike hint-go", "data-ui": "hint-go-key", title: t("create.reason.noKeyGo") }, t("create.hint.goKey"));
+      if (!hintGo.dataset?.bound) { hintGo.addEventListener("click", goToKey); if (hintGo.dataset) hintGo.dataset.bound = "1"; }
+      if (lockedNow().length === 0) return hintGo;
       hintUnlock ??= makeUnlock(() => { refreshSteps(); drawReview(); });
       return hintUnlock;
     };
@@ -581,19 +599,9 @@ export function renderCreate(ctx) {
       // A reason that says the saved key is locked has a small password box and a button right after the words, so it can be unlocked from here.
       const unlockInline = () => makeUnlock(drawReview);
       // "Add your API key first." takes the student to the API key tab and into its key box.
-      const keyLink = (text) => {
-        const go = h(doc, "button", { type: "button", class: "linklike", "data-ui": "reason-go-key", title: t("create.reason.noKeyGo") }, text);
-        go.addEventListener("click", () => {
-          draft.subTab = "key";
-          drawReview();
-          const toKey = () => {
-            const box = reviewHost.querySelector('[id^="cr-key"]');
-            box?.scrollIntoView?.({ block: "center" });
-            box?.focus?.();
-          };
-          toKey();
-          setTimeout(toKey, 0); // the review may be drawn again once more (key state loaded)
-        });
+      const keyLink = (text, ui = "reason-go-key") => {
+        const go = h(doc, "button", { type: "button", class: "linklike", "data-ui": ui, title: t("create.reason.noKeyGo") }, text);
+        go.addEventListener("click", goToKey);
         return go;
       };
       const reasons = verdict.ok ? "" : h(doc, "ul", { class: "reasons", role: "status" }, ...verdict.reasons.map((r) => h(doc, "li", {}, r === "noKey" ? keyLink(t(`create.reason.${r}`)) : t(`create.reason.${r}`, r === "limitsBlocked" ? { agents: lastBlockedNames } : undefined), ...(r === "keyLocked" && lockedSlots.length > 0 ? [unlockInline()] : []))));

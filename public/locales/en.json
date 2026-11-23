@@ -1667,5 +1667,6 @@
   "library.tip.action.edit-description": "Edit your description of the run",
   "library.tip.action.delete": "Deletes the run from this browser",
   "limits.languageNote": "The estimate counts tokens from the length of the text, so it differs by language: the same text needs about 1.5 times more tokens in Czech than in English.",
-  "create.reason.noKeyGo": "Opens the API key tab, where you add your key"
+  "create.reason.noKeyGo": "Opens the API key tab, where you add your key",
+  "create.hint.goKey": "Go to the API key"
 }

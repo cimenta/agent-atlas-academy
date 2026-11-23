@@ -26,7 +26,7 @@
         "search": false,
         "name": "Historian",
         "limits": {
-          "maxOutputTokens": 500
+          "maxOutputTokens": 1000
         },
         "stance": "for"
       },
@@ -38,7 +38,7 @@
         "search": false,
         "name": "Engineer",
         "limits": {
-          "maxOutputTokens": 500
+          "maxOutputTokens": 1000
         },
         "stance": "against"
       },
@@ -50,7 +50,7 @@
         "search": false,
         "name": "Economist",
         "limits": {
-          "maxOutputTokens": 500
+          "maxOutputTokens": 1000
         },
         "stance": "for"
       },
@@ -62,7 +62,7 @@
         "search": false,
         "name": "Ecologist",
         "limits": {
-          "maxOutputTokens": 500
+          "maxOutputTokens": 1000
         },
         "stance": "against"
       },
@@ -74,7 +74,7 @@
         "search": false,
         "name": "Sociologist",
         "limits": {
-          "maxOutputTokens": 500
+          "maxOutputTokens": 1000
         },
         "stance": "for"
       },
@@ -86,7 +86,7 @@
         "search": false,
         "name": "Doctor",
         "limits": {
-          "maxOutputTokens": 500
+          "maxOutputTokens": 1000
         },
         "stance": "against"
       },
@@ -98,7 +98,7 @@
         "search": false,
         "name": "Lawyer",
         "limits": {
-          "maxOutputTokens": 500
+          "maxOutputTokens": 1000
         },
         "stance": "for"
       },
@@ -110,7 +110,7 @@
         "search": false,
         "name": "Judge",
         "limits": {
-          "maxOutputTokens": 800
+          "maxOutputTokens": 1000
         }
       }
     ],
