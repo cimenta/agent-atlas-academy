@@ -97,7 +97,6 @@ export async function renderReplayTab(ctx, requestedId) {
           doc.defaultView.location.hash = "#/play/create";
         }
       : null;
-  host.append(h(doc, "p", { class: "back-link" }, h(doc, "a", { href: `#/play/library/${currentId}`, "data-ui": "back-to-library" }, t("play.backToLibrary"))));
   const playerHost = h(doc, "div", { class: "player-mount" });
   host.append(playerHost);
   handle = mountReplay(playerHost, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors, onRetry, suggestFallback: ctx.settings?.get().fallback !== "off", limitsInfo: () => ({ current: ctx.settings.get().limits, original: found.run.limits, record: found.run, repeatStop: ctx.settings.get().repeatStop }) });
@@ -128,7 +127,6 @@ export async function renderReplayTab(ctx, requestedId) {
   }
   // A run from the library is a recording made with its own limits: the limits of Settings apply only to new runs.
   if (found.source === "gallery") host.append(h(doc, "p", { class: "notice recording-note", "data-ui": "recording-note" }, t("play.recordingNote"), " ", h(doc, "a", { href: "#/learn/lab" }, t("play.recordingNoteLink"))));
-  host.append(h(doc, "p", {}, h(doc, "a", { href: `#/play/result/${currentId}` }, t("play.tab.result"))));
 }
 
 export async function renderResultTab(ctx, id) {

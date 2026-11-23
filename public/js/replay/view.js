@@ -34,6 +34,7 @@ import { limitsChoice } from "./limits-choice.js";
 import { canSubmit, submitRun } from "../submit-run.js";
 import { runForExport } from "../run-export.js";
 import { createReplayDiagram, ROUND_MARK } from "./diagram.js";
+import { describeOutcome } from "../create/create-model.js";
 import { outcomeNotice, loopNotice, handoffNotice, handoffPathView, routerNotice, votingNotice, dynamicNotice } from "../outcome-view.js";
 import { buildResultModel } from "../play-model.js";
 import { clearActivePlayer, setActivePlayer } from "../shortcuts.js";
@@ -231,8 +232,12 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
   function headingParts() {
     const full = t(live ? "player.titleLive" : "player.title", { title });
     const at = typeof title === "string" && title !== "" ? full.indexOf(title) : -1;
-    if (at <= 0) return [full];
-    return [h(doc, "span", { class: "replay-word", "data-ui": "replay-word" }, full.slice(0, at)), full.slice(at)];
+    // A finished run starts with a round mark that says how it ended: green tick, orange ! (stopped, a limit) or red cross (failed).
+    const ended = live ? null : events.findLast?.((e) => e?.type === "done")?.outcome;
+    const info = ended ? describeOutcome({ outcome: ended, events, cost: null }) : null;
+    const mark = info ? [h(doc, "span", { class: `outcome-icon ${info.level} title-mark`, role: "img", "aria-label": t(`run.outcome.icon.${info.level}`), title: t(`run.outcome.icon.${info.level}`), "data-ui": "run-ended-mark" }, info.icon)] : [];
+    if (at <= 0) return [...mark, full];
+    return [...mark, h(doc, "span", { class: "replay-word", "data-ui": "replay-word" }, full.slice(0, at)), full.slice(at)];
   }
   const root = h(
     doc,
