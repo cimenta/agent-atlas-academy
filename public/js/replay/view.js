@@ -105,8 +105,8 @@ export function mountReplay(container, { run, explanations = {}, t, doc = docume
 }
 
 // A player that shows a run while it is still arriving. Events are added with append(), end() closes it.
-export function mountLiveReplay(container, { title, pattern, recordedWith, apiCalls = [], t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null }) {
-  const view = mountView(container, { events: [], apiCalls, pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout, providerColors, onRetry, suggestFallback, limitsInfo });
+export function mountLiveReplay(container, { title, pattern, recordedWith, apiCalls = [], t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null, clockStartMs = 0 }) {
+  const view = mountView(container, { clockStartMs, events: [], apiCalls, pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout, providerColors, onRetry, suggestFallback, limitsInfo });
   return {
     append: (event) => view.player.append(event),
     end: () => view.player.endLive(),
@@ -114,7 +114,7 @@ export function mountLiveReplay(container, { title, pattern, recordedWith, apiCa
   };
 }
 
-function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCallsDropped = false, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null }) {
+function mountView(container, { clockStartMs = 0, exportRun, pattern, events, apiCalls = [], apiCallsDropped = false, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null }) {
   const player = createPlayer({ events, clock, timeScale, live });
   const ui = { agent: null, tab: "steps", step: null, round: null, follow: true };
   const viewer = createViewer({ doc, t });
@@ -160,6 +160,21 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
   const playButton = iconButton({ class: "ib primary", "data-ui": "play-button" }, GLYPH.play, t("player.play"));
   const liveBadge = h(doc, "span", { class: "live-badge", "data-ui": "live-badge" }, t("player.live"));
   const stopButton = iconButton({ class: "ib danger", "data-ui": "stop-button" }, GLYPH.stop, t("player.stop"));
+  // The time a live run has taken, ticking next to Stop; it goes away when the run is over (Re-play shows the whole time then).
+  const elapsed = h(doc, "span", { class: "clk-pill", "data-ui": "live-clock", title: t("player.clockHelp"), hidden: !live });
+  const startedAt = Date.now() - clockStartMs;
+  let tickTimer = null;
+  const tick = () => {
+    tickTimer = null;
+    if (!player.live) {
+      elapsed.hidden = true;
+      return;
+    }
+    const sec = Math.floor((Date.now() - startedAt) / 1000);
+    elapsed.textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+    tickTimer = clock.setTimeout(tick, 500);
+  };
+  if (live) tick();
   const restartButton = iconButton({ class: "ib", "data-ui": "restart-button" }, GLYPH.restart, t("player.restart"));
   const previousButton = iconButton({ class: "ib", "data-ui": "previous-button" }, GLYPH.previous, t("player.previous"));
   const nextButton = iconButton({ class: "ib", "data-ui": "next-button" }, GLYPH.next, t("player.next"));
@@ -186,6 +201,10 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
   const createdHost = h(doc, "div", { class: "dynamic-host", "data-ui": "created-host" });
   const openCondense = new Set();
   const chips = h(doc, "div", { class: "chips", "data-ui": "agent-cards", role: "list", "aria-label": t("player.agents") });
+  // While a run is live the diagram carries only the time and Stop, in its top right corner: play, speed, restart, previous, next and the slider
+  // have nothing to do until the run is over.
+  const liveCorner = h(doc, "div", { class: "live-corner", "data-ui": "live-corner", hidden: !live }, elapsed, stopButton);
+  const chipsBox = h(doc, "div", { class: "chips-box" }, chips, liveCorner);
   const tabButtons = ["steps", "messages", "output", "context", "api", "settings"].map((name) => {
     const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-tab": name, "data-ui": `tab-${name}` }, name === "api" ? t("player.tabApi", { n: 0 }) : t({ steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput", context: "player.tabContext", settings: "player.tabSettings" }[name]));
     button.addEventListener("click", () => {
@@ -269,8 +288,8 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
     // Side layout: the buttons form a narrow column to the right of the diagram, slider and status.
     // Bar layout: one slim line under the diagram holds buttons, slider and speed.
     ...(sideLayout
-      ? [h(doc, "div", { class: "player-row", "data-ui": "player-row" }, h(doc, "div", { class: "player-stage" }, chips, range, status), h(doc, "div", { class: "controls controls-col", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, speedGroup, speedHelp))]
-      : [chips, h(doc, "div", { class: "controls controls-bar", "data-ui": "player-controls" }, playButton, stopButton, restartButton, previousButton, nextButton, range, speedGroup, speedMobile, speedHelp), status]),
+      ? [h(doc, "div", { class: "player-row", "data-ui": "player-row" }, h(doc, "div", { class: "player-stage" }, chipsBox, range, status), h(doc, "div", { class: "controls controls-col", "data-ui": "player-controls" }, playButton, restartButton, previousButton, nextButton, speedGroup, speedHelp))]
+      : [chipsBox, h(doc, "div", { class: "controls controls-bar", "data-ui": "player-controls" }, playButton, restartButton, previousButton, nextButton, range, speedGroup, speedMobile, speedHelp), status]),
     createdHost,
     tabRow,
     body,
@@ -330,6 +349,21 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
     if (designMemo.base !== d || designMemo.count !== count) designMemo = { base: d, count, design: designWithCreated(d, events, cursor) };
     return designMemo.design;
   }
+  // In a debate the generic words are wrong: the judge takes no part in the rounds, and every argument goes to the judge but is read only at the end.
+  function debateWords(design, node, status) {
+    if (design.pattern !== "debate" || !node) return null;
+    if (node.agent === "judge") return t(`diagram.hover.debate.judge.${["waiting", "working", "done"].includes(status) ? status : "other"}`);
+    if (node.agent === "debater") return t(`diagram.hover.debate.debater.${["waiting", "working", "done"].includes(status) ? status : "other"}`);
+    return null;
+  }
+  function debateArrow(design, from, to, flow) {
+    if (design.pattern !== "debate") return {};
+    const names = { from: designLabel(design, from), to: designLabel(design, to) };
+    const kindTo = design.nodes.find((n) => n.id === to)?.agent;
+    if (kindTo === "judge") return { text: t(`diagram.hover.debate.toJudge.${flow}`, names) };
+    if (kindTo === "debater") return { text: t("diagram.hover.debate.turn", names) };
+    return {};
+  }
   function renderDiagram() {
     const design = designOfRun();
     if (!design) return false;
@@ -355,12 +389,13 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
                 title: designLabel(design, id),
                 badge: t(STATUS_KEY[status]),
                 text: help,
-                extra: t(`diagram.hover.state.${status}`),
+                extra: debateWords(design, node, status) ?? t(`diagram.hover.state.${status}`),
                 rows: [st.ms ? [t("diagram.hover.time"), fmt(st.ms)] : null, st.errors > 0 ? [t("diagram.hover.errors"), String(st.errors)] : null, st.warnings > 0 ? [t("diagram.hover.warnings"), String(st.warnings)] : null],
               };
             },
             badge: ({ text, help }) => ({ title: text, text: help }),
             arrow: (from, to, flow) => ({
+              ...debateArrow(design, from, to, flow),
               title: t("diagram.hover.arrowTitle", { from: designLabel(design, from), to: designLabel(design, to) }),
               badge: t(`diagram.hover.arrowBadge.${flow}`),
               text: t(`diagram.hover.arrow.${flow}`, { from: designLabel(design, from), to: designLabel(design, to) }),
@@ -769,6 +804,9 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
     playButton.disabled = player.live;
     liveBadge.hidden = !player.live;
     stopButton.hidden = !player.live;
+    liveCorner.hidden = !player.live;
+    range.hidden = player.live;
+    root.classList?.toggle("is-live", player.live);
     // A live run has no fixed total (more steps are still to come), so it counts the steps that are finished; a recording shows where it is in all of them.
     const parts = [live ? t("player.stepsFinished", { n: events.filter((e) => e.type === "agent_output").length }) : t("player.step", { n: player.cursor, total: events.length })];
     if (state.tokens.input || state.tokens.output) parts.push(t("player.tokens", state.tokens));
@@ -955,6 +993,7 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
     openAbout: () => aboutPanel?.open(),
     destroy() {
       clearActivePlayer(keyApi);
+      if (tickTimer !== null) clock.clearTimeout(tickTimer);
       player.pause();
       unsubscribe();
       container.replaceChildren();

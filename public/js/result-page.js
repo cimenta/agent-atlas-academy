@@ -142,6 +142,7 @@ export function renderResult(ctx, run) {
       tile(num(stats.usage.output), t("stats.outputTokens")),
       tile(num(stats.usage.searches), t("stats.searches")),
       tile(num(stats.calls), t("stats.calls")),
+      ...(stats.refusedCalls > 0 ? [tile(num(stats.refusedCalls), t("stats.refused"))] : []),
       ...(metrics.largest > 0 ? [tile(num(metrics.largest), t("stats.largest"), "result-context")] : []),
       ...(metrics.notes > 0 ? [tile(num(metrics.notes), t("stats.notesTile"))] : []),
       ...(metrics.saved > 0 ? [tile(num(metrics.saved), t("stats.savedTile"))] : []),
@@ -162,7 +163,7 @@ export function renderResult(ctx, run) {
         doc,
         "thead",
         {},
-        h(doc, "tr", {}, ...["stats.agent", "stats.model", "stats.agentTime", "stats.input", "stats.output", "stats.share"].map((key) => h(doc, "th", { scope: "col" }, t(key)))),
+        h(doc, "tr", {}, ...["stats.agent", "stats.model", "stats.agentTime", "stats.input", "stats.output", ...(stats.refusedCalls > 0 ? ["stats.refusedShort"] : []), "stats.share"].map((key) => h(doc, "th", { scope: "col" }, t(key)))),
       ),
       h(
         doc,
@@ -182,6 +183,7 @@ export function renderResult(ctx, run) {
             h(doc, "td", {}, a.ms === null ? "—" : formatDuration(a.ms)),
             h(doc, "td", {}, num(a.input)),
             h(doc, "td", {}, num(a.output)),
+            ...(stats.refusedCalls > 0 ? [h(doc, "td", {}, num(a.refused))] : []),
             h(doc, "td", {}, bar),
           );
         }),

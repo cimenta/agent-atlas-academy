@@ -1732,3 +1732,15 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .hover-card dt { opacity: 0.7; }
 .hover-card dd { margin: 0; }
 @media (prefers-color-scheme: dark) { .hover-card { background: #f4f3ee; color: #1f1f1d; } .hover-badge { background: rgba(0, 0, 0, 0.12); } }
+/* The time a live run has taken, next to Stop. */
+.clk-pill { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 10px; border-radius: 999px; background: var(--accent-bg); color: var(--accent); font-size: 0.8rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; align-self: center; }
+.clk-pill[hidden] { display: none; }
+.clk-pill::before { content: "●"; font-size: 0.6rem; animation: clk-blink 1.2s ease-in-out infinite; }
+@keyframes clk-blink { 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) { .clk-pill::before { animation: none; } }
+/* Live run: the time and Stop sit in the top right corner of the diagram; the player controls come back when the run is over. */
+.chips-box { position: relative; }
+.live-corner { position: absolute; top: 10px; right: 10px; z-index: 3; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.live-corner[hidden] { display: none; }
+.replay.is-live .controls { display: none; }
+.clk-pill::before { font-size: 0.85rem; line-height: 1; color: #d11a2a; }

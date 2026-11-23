@@ -6,6 +6,12 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Live player: the time the run has taken (a pill with a larger red blinking dot, for example 1:24) and the red Stop button sit one under the other in the top right corner of the diagram. While the run is live, play, speed, restart, previous, next and the slider are hidden, because they have nothing to do; they come back in Re-play when the run ends. A run carried on from an earlier try continues from its time.
+
+
+- Statistics: a Refused calls tile (and a Refused column in the table of agents) shows how many calls the provider refused, for example with 429. They spend no tokens, so they are not model calls. It shows only when there were some.
+
+
 - Player: the round badge (Round 1 of 4, votes, handoffs, steps), the type chip (Debate) and the Recorded with text open the same hover card as the diagram. The card of the badge follows the replay; the one of Recorded with lists the models.
 
 - Replay and live diagram: resting the pointer on an agent box or an arrow opens a small card after a short pause. A box card says what the agent does, its state in plain words, its time, errors and warnings; an arrow card says whether the answer has gone that way yet. The arrow is lit while its card is open. It also opens when a box is focused with the keyboard.
@@ -278,6 +284,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 - Measure that a 290-second stream survives on Vercel.
 
 ### Fixed
+
+- Hover cards in a debate: the judge is described as it works (no part in the rounds, reads the whole debate once after the last round), the debaters read the whole debate so far, and the arrows say the same. Before, they used generic words that fitted other patterns.
 
 - A debate that was cut off (connection lost, stopped, a limit) before its judge started is now saved whole. Before, the autosave was refused from the first handoff to the judge on, so the Library kept only the first two steps of the run.
 

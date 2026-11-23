@@ -104,7 +104,13 @@ export function filterLibrary(items, query, texts = {}) {
 }
 
 // The numbers on the Statistics tab: how long the run took, what it cost and what each agent used.
+// A call the provider refused: it answered with an error status, or did not answer at all. It spends no tokens, so it is counted apart from the model calls.
+const isRefused = (call) => Boolean(call) && (call.response ? Number(call.response.status) >= 400 : Boolean(call.error));
+
 export function buildStatistics(run) {
+  const log = Array.isArray(run?.apiCalls) ? run.apiCalls : [];
+  const refusedBy = new Map();
+  for (const call of log) if (isRefused(call) && typeof call.agent === "string") refusedBy.set(call.agent, (refusedBy.get(call.agent) ?? 0) + 1);
   const base = buildResultModel(run);
   const events = Array.isArray(run?.events) ? run.events : [];
   const inspector = deriveInspector(events);
@@ -127,6 +133,7 @@ export function buildStatistics(run) {
         input: tokens?.input ?? 0,
         output: tokens?.output ?? 0,
         calls: a.rounds.filter((r) => !r.reconstructed).length,
+        refused: refusedBy.get(id) ?? 0,
         searches: a.steps.filter((s) => s.kind === "tool").length,
         share: agentMs > 0 && a.ms !== null ? a.ms / agentMs : 0,
       };
@@ -150,6 +157,7 @@ export function buildStatistics(run) {
     endedAt: run?.endedAt ?? null,
     appVersion: run?.appVersion ?? null,
     calls: perAgent.reduce((n, a) => n + a.calls, 0),
+    refusedCalls: log.filter(isRefused).length,
     // The limits the run had, and the limit of the run (not of an agent) that stopped it, if one did.
     runLimits: run?.limits !== null && typeof run?.limits === "object" && !Array.isArray(run.limits) ? clampLimits(run.limits) : null,
     runHit: events.find((e) => e.type === "warning" && typeof e.limit === "string" && !e.limit.startsWith("agent_"))?.limit ?? null,

@@ -895,7 +895,7 @@ export function renderCreate(ctx) {
       live.destroy();
       beginRun({ resume: record2 });
     };
-    const live = mountLiveReplay(host, { apiCalls, title: task.split(/\r?\n/)[0].slice(0, 120), pattern: resume ? resume.pattern : draft.pattern, recordedWith: { provider: providersOf(design, provider).join("+"), model: modelsUsed(design, provider) }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout, providerColors: ctx.settings.get().providerColors, onRetry: retryNow, suggestFallback: ctx.settings.get().fallback !== "off", limitsInfo: () => ({ current: ctx.settings.get().limits, original: finalRecordNow?.limits ?? ctx.settings.get().limits, record: finalRecordNow, repeatStop: ctx.settings.get().repeatStop }) });
+    const live = mountLiveReplay(host, { apiCalls, title: task.split(/\r?\n/)[0].slice(0, 120), pattern: resume ? resume.pattern : draft.pattern, recordedWith: { provider: providersOf(design, provider).join("+"), model: modelsUsed(design, provider) }, t, doc, onStop: () => activeRun?.stop(), layout: ctx.settings.get().playerLayout, providerColors: ctx.settings.get().providerColors, clockStartMs: resume ? offset : 0, onRetry: retryNow, suggestFallback: ctx.settings.get().fallback !== "off", limitsInfo: () => ({ current: ctx.settings.get().limits, original: finalRecordNow?.limits ?? ctx.settings.get().limits, record: finalRecordNow, repeatStop: ctx.settings.get().repeatStop }) });
     ctx.onLeave(live.destroy);
     for (const e of base) live.append(e);
     if (resume && !approve) live.append(events[base.length]);
