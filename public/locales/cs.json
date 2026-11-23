@@ -1496,7 +1496,7 @@
   "settings.checkModelsHintFree": "Funguje i bez klíče: seznam bezplatných modelů je veřejný.",
   "create.cloudflareFree": "Cloudflare zdarma",
   "create.cloudflarePaid": "Cloudflare placený",
-  "settings.cloudflareKeyLabel": "Klíč Cloudflare (ACCOUNT_ID:TOKEN)",
+  "settings.cloudflareKeyLabel": "API token Cloudflare",
   "settings.cloudflareKeyLink": "Otevřít panel Cloudflare, zkopírovat ID účtu a vytvořit token s oprávněním Workers AI",
   "settings.cloudflarePricingLink": "Ceník Cloudflare Workers AI",
   "create.keyInlineCloudflare": "Vložte svůj klíč Cloudflare jako ACCOUNT_ID:TOKEN (zůstane jen na této kartě)",
@@ -1515,7 +1515,7 @@
   "limits.offer.lightest-model.title": "Nejlehčí model pro všechny.",
   "limits.offer.lightest-model.body": "Model Rychlý (gemma-4-26b) pro každého agenta z bezplatné zásoby.",
   "limits.offer.estimateNeurons": "Nový odhad asi {neurons} neuronů.",
-  "settings.cloudflareKeyFormat": "Klíč Cloudflare musí mít tvar ACCOUNT_ID:TOKEN: vaše 32znakové ID účtu, dvojtečka a API token.",
+  "settings.cloudflareKeyFormat": "ID účtu má 32 znaků (číslice a písmena a až f) a token je váš API token. Zkontrolujte obě pole. Aplikace si je uloží společně jako jeden klíč.",
   "settings.freeLimitsTitleSingle": "Než použijete bezplatný klíč: jaký je limit",
   "settings.freeLimitsAccountPool": "{provider} počítá jednu zásobu pro všechny modely dohromady a pro celý váš účet, v neuronech, ne v tokenech ani požadavcích.",
   "settings.freeLimits.neurons": "Neurony za den",
@@ -1760,5 +1760,8 @@
   "settings.tabLimit": "Limit",
   "settings.tabInfo": "Info",
   "settings.infoLimitRun": "Když limit dojde, běh se zastaví hláškou poskytovatele a to, co se stihlo, se uloží. Před během záložka Cost v Create porovná odhad volání s tím, co zbývá.",
-  "settings.infoModelsGone": "Free modely se mohou měnit nebo mizet. Zkontrolovat modely na záložce Klíč řekne, které z modelů této aplikace klíč ještě dostane."
+  "settings.infoModelsGone": "Free modely se mohou měnit nebo mizet. Zkontrolovat modely na záložce Klíč řekne, které z modelů této aplikace klíč ještě dostane.",
+  "settings.cloudflareAccountLabel": "ID účtu Cloudflare",
+  "settings.cloudflareAccountPlaceholder": "32 znaků, například 0123456789abcdef0123456789abcdef",
+  "settings.cloudflareTokenPlaceholder": "API token s oprávněním Workers AI"
 }

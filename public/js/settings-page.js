@@ -114,7 +114,10 @@ export function renderSettings(ctx) {
     let replacing = false; // a key is saved and the visitor chose to replace it
     const sfx = id === SLOT_IDS[0] ? "" : `-${id}`;
     const status = h(doc, "p", { class: "key-status" });
-    const keyInput = h(doc, "input", { id: `set-key${sfx}`, type: "password", autocomplete: "off", spellcheck: "false", ...(spec.keyPlaceholder ? { placeholder: spec.keyPlaceholder } : {}) });
+    // Cloudflare has two boxes, the account ID and the token. They are joined into ACCOUNT_ID:TOKEN, the one field the app keeps.
+    const twoBoxes = spec.id === "cloudflare";
+    const keyInput = h(doc, "input", { id: `set-key${sfx}`, type: "password", autocomplete: "off", spellcheck: "false", ...(twoBoxes ? { placeholder: t("settings.cloudflareTokenPlaceholder") } : spec.keyPlaceholder ? { placeholder: spec.keyPlaceholder } : {}) });
+    const accountInput = twoBoxes ? h(doc, "input", { id: `set-account${sfx}`, type: "text", autocomplete: "off", spellcheck: "false", placeholder: t("settings.cloudflareAccountPlaceholder") }) : null;
     const rememberBox = h(doc, "input", { id: `set-remember${sfx}`, type: "checkbox" });
     const passInput = h(doc, "input", { id: `set-pass${sfx}`, type: "password", autocomplete: "new-password" });
     const passBlock = h(doc, "div", { class: "pass-block", hidden: true }, field(`set-pass${sfx}`, t("settings.passphraseLabel"), passInput), h(doc, "p", { class: "notice" }, t("settings.passphraseWarning")));
@@ -124,13 +127,15 @@ export function renderSettings(ctx) {
       saveButton.textContent = t(rememberBox.checked ? "settings.keySaveDevice" : "settings.keySave");
     });
     // Enter in the key or the passphrase box saves the key.
-    for (const input of [keyInput, passInput]) {
+    for (const input of [keyInput, passInput, ...(accountInput ? [accountInput] : [])]) {
       input.addEventListener("keydown", (event) => {
         if (event.key === "Enter") saveButton.click();
       });
     }
     saveButton.addEventListener("click", async () => {
-      const key = keyInput.value.trim();
+      // The token box may hold a whole ACCOUNT_ID:TOKEN that was pasted there: that is accepted as it is.
+      const pasted = accountInput && accountInput.value.trim() === "" && spec.keyPattern?.test(keyInput.value.trim());
+      const key = accountInput && !pasted ? (accountInput.value.trim() === "" && keyInput.value.trim() === "" ? "" : `${accountInput.value.trim()}:${keyInput.value.trim()}`) : keyInput.value.trim();
       if (key === "") return say(t("settings.error.emptyKey"), true);
       // A provider whose key has a fixed shape (Cloudflare: ACCOUNT_ID:TOKEN) names the shape when it is wrong.
       if (spec.keyPattern && !spec.keyPattern.test(key)) return say(t(spec.text.keyFormat), true);
@@ -138,6 +143,7 @@ export function renderSettings(ctx) {
         if (rememberBox.checked) await v.remember(key, passInput.value);
         else v.setSessionKey(key);
         keyInput.value = "";
+        if (accountInput) accountInput.value = "";
         passInput.value = "";
         say(t(rememberBox.checked ? "settings.keyRemembered" : "settings.keySaved"));
       } catch (error) {
@@ -149,7 +155,7 @@ export function renderSettings(ctx) {
       checkResult.replaceChildren();
       refreshStatus();
     });
-    const entry = [field(`set-key${sfx}`, t(spec.text.keyLabel), keyInput)];
+    const entry = [...(accountInput ? [field(`set-account${sfx}`, t("settings.cloudflareAccountLabel"), accountInput)] : []), field(`set-key${sfx}`, t(spec.text.keyLabel), keyInput)];
     // A free key has its own Info tab: the links and the warning are there, a paid key keeps them in the form.
     const infoNodes = [];
     const aside = slotIsFree(id) ? infoNodes : entry;

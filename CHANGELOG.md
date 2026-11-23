@@ -68,6 +68,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Settings, Cloudflare: the account ID and the API token have a box each. The app joins them into ACCOUNT_ID:TOKEN, the one field it keeps, so stored keys and backups are unchanged; a whole ACCOUNT_ID:TOKEN pasted into the token box is still accepted.
 - The message of the time limit (270 s per run) says that Settings cannot raise it and what can be done: continue the run, or make it shorter with fewer agents or rounds or a faster model.
 
 - Live player: the status line shows how many steps are finished (Finished steps: 46) instead of Step 46 of 46, because a live run has no fixed total. A recording still shows Step x of y.

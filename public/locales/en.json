@@ -1496,7 +1496,7 @@
   "settings.checkModelsHintFree": "Works also without a key: the list of free models is public.",
   "create.cloudflareFree": "Cloudflare free",
   "create.cloudflarePaid": "Cloudflare paid",
-  "settings.cloudflareKeyLabel": "Cloudflare key (ACCOUNT_ID:TOKEN)",
+  "settings.cloudflareKeyLabel": "Cloudflare API token",
   "settings.cloudflareKeyLink": "Open the Cloudflare dashboard to copy your account ID and create a token with the Workers AI permission",
   "settings.cloudflarePricingLink": "Cloudflare Workers AI pricing",
   "create.keyInlineCloudflare": "Paste your Cloudflare key as ACCOUNT_ID:TOKEN (kept in this tab only)",
@@ -1515,7 +1515,7 @@
   "limits.offer.lightest-model.title": "Lightest model only.",
   "limits.offer.lightest-model.body": "The Fast model (gemma-4-26b) for every agent of the free pool.",
   "limits.offer.estimateNeurons": "New estimate about {neurons} neurons.",
-  "settings.cloudflareKeyFormat": "The Cloudflare key must be ACCOUNT_ID:TOKEN: your 32-character account ID, a colon, and the API token.",
+  "settings.cloudflareKeyFormat": "The account ID has 32 characters (digits and the letters a to f) and the token is your API token. Check both boxes. The app keeps them together as one key.",
   "settings.freeLimitsTitleSingle": "Before you use a free key: what the limit is",
   "settings.freeLimitsAccountPool": "{provider} counts one pool for all models together and for your whole account, in neurons, not in tokens or requests.",
   "settings.freeLimits.neurons": "Neurons a day",
@@ -1760,5 +1760,8 @@
   "settings.tabLimit": "Limit",
   "settings.tabInfo": "Info",
   "settings.infoLimitRun": "When a limit runs out, the run stops with the words of the provider and what happened so far is saved. Before a run the Cost tab of Create compares the expected number of calls with what is left.",
-  "settings.infoModelsGone": "Free models can change or disappear. Check models on the Key tab says which of the models of this app the key still gets."
+  "settings.infoModelsGone": "Free models can change or disappear. Check models on the Key tab says which of the models of this app the key still gets.",
+  "settings.cloudflareAccountLabel": "Cloudflare account ID",
+  "settings.cloudflareAccountPlaceholder": "32 characters, for example 0123456789abcdef0123456789abcdef",
+  "settings.cloudflareTokenPlaceholder": "API token with the Workers AI permission"
 }

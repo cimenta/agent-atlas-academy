@@ -79,14 +79,16 @@ test("the Groq and OpenRouter tables are unchanged by the neuron columns", () =>
   assert.doesNotMatch(orf.text, /Neurons per million/);
 });
 
-test("the key field of the Cloudflare tab says ACCOUNT_ID:TOKEN and a key of the wrong shape is refused with the format named", () => {
+test("the Cloudflare tab has a box for the account ID and one for the token, joins them as ACCOUNT_ID:TOKEN, and a key of the wrong shape is refused with the format named", () => {
   const page = readFileSync(new URL("../public/js/settings-page.js", import.meta.url), "utf8");
   assert.match(page, /keyPattern/);
   assert.match(page, /keyPlaceholder/);
   assert.equal(cf.keyPlaceholder, "ACCOUNT_ID:TOKEN");
-  assert.match(en[cf.text.keyFormat], /ACCOUNT_ID:TOKEN/);
-  assert.match(cs[cf.text.keyFormat], /ACCOUNT_ID:TOKEN/);
-  assert.match(en[cf.text.keyLabel], /ACCOUNT_ID:TOKEN/);
+  assert.match(page, /set-account/);
+  assert.ok(page.includes("accountInput.value.trim()}:${keyInput.value.trim()"));
+  assert.match(en[cf.text.keyFormat], /32/);
+  assert.match(cs[cf.text.keyFormat], /32/);
+  assert.match(en["settings.cloudflareAccountLabel"], /account ID/);
 });
 
 test("the new texts exist in en and cs, Czech differs, parameters match", () => {
