@@ -6,6 +6,9 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Create: connection dots on the agents. The left dot (blue) receives a connection and the right dot (green) sends one; a dot is only there when that connection is possible in the pattern or already used. Drag from a dot, or tap the sending dot and then the receiving one. A connection that cannot be made shows a red cross with the reason on the line. Right click removes a connection. The little arrow button inside the agent is gone.
+- Create: every agent has a red circle with a white cross at its top right corner that removes it from the diagram.
+- Diagrams: a second row reads right to left (a snake), so the next agent sits directly under the last one of the row above, in Create and in Re-play.
 - A diagram with more agents in a line than fit in the window (for example a chain of eight) goes on in the next row, in Create and in Re-play, so the diagram never shows a scroll bar.
 - Re-play: an agent whose call was refused or failed (a 429, a busy provider, a switch to another model) has a red exclamation mark on its card, next to the orange one for warnings, so one agent can show both.
 - Create: next to Almost there: add your key, a small password box and an Unlock button appear when the key is saved on this device but locked, so it can be unlocked from the footer.

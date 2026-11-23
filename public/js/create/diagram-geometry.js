@@ -2,7 +2,7 @@
 // so both take their sizes, positions and arrows from here. Pure: no DOM.
 import { layoutDesign } from "./editor-model.js";
 
-export const CELL_W = 160;
+export const CELL_W = 180;
 export const CELL_H = 96;
 export const BOX_W = 132;
 export const BOX_H = 60;
@@ -25,6 +25,30 @@ export function autoPositions(design, { wide, maxCols = Infinity }) {
     pos.set(node.id, { x: a.x * CELL_W + (CELL_W - BOX_W) / 2 + gutter, y: a.y * CELL_H + (CELL_H - BOX_H) / 2 });
   }
   return pos;
+}
+
+// The agents of the rows that read right to left (a line cut into rows is a snake): their dots are on the other sides.
+export function flippedOf(design, { wide, maxCols = Infinity }) {
+  return layoutDesign(design, { orientation: orientationFor(design.pattern, wide), maxCols }).flipped ?? new Set();
+}
+
+export const PORT_R = 7; // the dot is 14 px across; the arrow starts and stops at its edge, so it touches the circle
+
+// Where the dot of an agent is: "in" receives, "out" sends. Left and right of the box, swapped in a row that reads right to left;
+// top and bottom when the chain stands up (a narrow screen).
+export function portPoint(pos, id, kind, { flipped = false, vertical = false } = {}) {
+  const p = pos.get(id);
+  if (vertical) return { x: p.x + BOX_W / 2, y: p.y + (kind === "out" ? BOX_H : 0) };
+  const right = (kind === "out") !== flipped;
+  return { x: p.x + (right ? BOX_W : 0), y: p.y + BOX_H / 2 };
+}
+
+// A line from one dot to another, shortened at both ends so that it touches the circles.
+export function linkBetween(a, b) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const length = Math.hypot(dx, dy) || 1;
+  return { x1: a.x + (dx / length) * PORT_R, y1: a.y + (dy / length) * PORT_R, x2: b.x - (dx / length) * (PORT_R + 1), y2: b.y - (dy / length) * (PORT_R + 1) };
 }
 
 // How many boxes fit side by side in the window (the diagram goes on in a new row beyond that, so it never needs a scroll bar).
@@ -80,17 +104,6 @@ export function straight(pos, from, to, shift = 0) {
 // The data goes both ways between a supervisor and its workers: the instruction down, the result back.
 export const isTwoWay = (design) => design.pattern === "supervisor";
 
-// A line that went on in the next row: the arrow leaves under the last box of the row and comes back to the top of the first box of
-// the next. The path, or null when the edge is an ordinary one.
-export function wrapPath(design, pos, edge) {
-  if (!["sequential", "mapreduce", "planexec"].includes(design.pattern) || !pos.has(edge.from) || !pos.has(edge.to)) return null;
-  const a = pos.get(edge.from);
-  const b = pos.get(edge.to);
-  if (!(b.y >= a.y + BOX_H && b.x < a.x)) return null;
-  const turn = a.y + BOX_H + 18;
-  return `M ${a.x + BOX_W / 2} ${a.y + BOX_H} L ${a.x + BOX_W / 2} ${turn} L ${b.x + BOX_W / 2} ${turn} L ${b.x + BOX_W / 2} ${b.y + TOUCH}`;
-}
-
 // The arrows to draw for a design. Each has a key "from>to" that matches the handoff events of a run
 // (turn arrows of a debate have the key "turn:from>to"), and a path.
 export function arrowsOf(design, pos) {
@@ -104,11 +117,6 @@ export function arrowsOf(design, pos) {
       }
     } else {
       // A handoff with arrows both ways between two agents: each arrow moves aside, so they run side by side.
-      const wrapped = wrapPath(design, pos, edge);
-      if (wrapped) {
-        out.push({ key: `${edge.from}>${edge.to}`, from: edge.from, to: edge.to, kind: "edge", d: wrapped, edge });
-        continue;
-      }
       const bothWays = design.pattern === "handoff" && design.edges.some((o) => o.from === edge.to && o.to === edge.from);
       const s = straight(pos, edge.from, edge.to, bothWays ? -TWO_WAY_GAP : 0);
       out.push({ key: `${edge.from}>${edge.to}`, from: edge.from, to: edge.to, kind: "edge", d: `M ${s.x1} ${s.y1} L ${s.x2} ${s.y2}`, edge });

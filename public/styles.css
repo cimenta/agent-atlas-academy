@@ -1543,3 +1543,38 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .replay-diagram .rnode .dnode-err:not([hidden]) ~ .dnode-warn { right: 26px; }
 .replay-diagram .rnode:has(.dnode-warn:not([hidden]), .dnode-err:not([hidden])) > :first-child { padding-right: 24px; }
 .replay-diagram .rnode:has(.dnode-warn:not([hidden])):has(.dnode-err:not([hidden])) > :first-child { padding-right: 46px; }
+
+/* Connection dots on the agents of the Create diagram: blue receives, green sends; the colours never change. */
+:root { --port-in: #2457c5; --port-out: #1c8a3c; --port-bad: #d11a2a; }
+@media (prefers-color-scheme: dark) { :root { --port-in: #7aa5ff; --port-out: #6fd08c; --port-bad: #ff6b78; } }
+:root[data-theme="dark"] { --port-in: #7aa5ff; --port-out: #6fd08c; --port-bad: #ff6b78; }
+:root[data-theme="light"] { --port-in: #2457c5; --port-out: #1c8a3c; --port-bad: #d11a2a; }
+.dnode { overflow: visible; }
+.dnode-dot { position: absolute; z-index: 4; width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; border: 0; border-radius: 50%; background: transparent; touch-action: none; }
+.dnode-dot[hidden] { display: none; }
+.dnode-dot::after { content: ""; position: absolute; left: 9px; top: 9px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--card); }
+.dnode-dot.in::after { background: var(--port-in); box-shadow: 0 0 0 1px var(--port-in); }
+.dnode-dot.out::after { background: var(--port-out); box-shadow: 0 0 0 1px var(--port-out); }
+.dnode-dot.out { cursor: crosshair; }
+.dnode-dot[data-side="left"] { left: -16px; top: 50%; margin-top: -16px; }
+.dnode-dot[data-side="right"] { right: -16px; top: 50%; margin-top: -16px; }
+.dnode-dot[data-side="top"] { top: -16px; left: 50%; margin-left: -16px; }
+.dnode-dot[data-side="bottom"] { bottom: -16px; left: 50%; margin-left: -16px; }
+.dnode-dot[aria-pressed="true"]::before { content: ""; position: absolute; inset: 2px; border-radius: 50%; border: 2px solid var(--port-out); }
+.dnode-dot.target::before { content: ""; position: absolute; inset: 2px; border-radius: 50%; border: 2px solid var(--port-in); box-shadow: 0 0 0 4px color-mix(in srgb, var(--port-in) 25%, transparent); }
+.dnode[data-target="ok"] { border-color: var(--port-in); box-shadow: 0 0 0 3px color-mix(in srgb, var(--port-in) 25%, transparent); }
+.dnode[data-target="no"] { border-color: var(--port-bad); box-shadow: 0 0 0 3px color-mix(in srgb, var(--port-bad) 25%, transparent); }
+.diagram-arrows .edge-line { stroke: var(--port-in); }
+.diagram-arrows .edge-line.hot { stroke: var(--port-bad); }
+.diagram-arrows line[stroke-dasharray] { stroke: var(--port-in); }
+.diagram-arrows line[data-blocked="true"] { stroke: var(--port-bad); }
+.blocked-mark { position: absolute; z-index: 5; display: flex; align-items: center; gap: 6px; transform: translate(-9px, -50%); pointer-events: none; }
+.blocked-cross { width: 18px; height: 18px; line-height: 17px; text-align: center; border-radius: 50%; background: var(--port-bad); color: #fff; font-weight: 800; flex: none; }
+.blocked-why { max-width: 240px; padding: 3px 8px; border-radius: 6px; background: var(--port-bad); color: #fff; font-size: 0.8rem; line-height: 1.25; }
+.dnode-remove { top: -4px; right: -4px; width: 18px; height: 18px; min-width: 18px; min-height: 18px; background: var(--port-bad); font-size: 0; z-index: 5; box-shadow: 0 0 0 1px var(--card); }
+.dnode-remove::before, .dnode-remove::after { content: ""; position: absolute; left: 50%; top: 50%; width: 8px; height: 2.2px; margin: -1.1px 0 0 -4px; background: #fff; border-radius: 1px; transform: rotate(45deg); }
+.dnode-remove::after { transform: rotate(-45deg); }
+.dnode-start { right: auto; left: 8px; top: -9px; }
+.dnode[data-selected="true"] .dnode-body strong { max-width: 100%; }
+.dnode-body small { max-width: 100%; }
+.dnode-remove.flipped { right: auto; left: -4px; }

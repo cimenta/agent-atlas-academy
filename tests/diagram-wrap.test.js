@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { autoPositions, arrowsOf, extentOf, maxColsFor, CELL_W, BOX_H } from "../public/js/create/diagram-geometry.js";
+import { autoPositions, arrowsOf, extentOf, maxColsFor, flippedOf, portPoint, linkBetween, PORT_R, CELL_W, BOX_W, BOX_H } from "../public/js/create/diagram-geometry.js";
 
 const chain = (n) => ({
   pattern: "sequential",
@@ -14,7 +14,15 @@ test("a chain of eight goes on in a second row, four and four, when only six box
   assert.equal(rows.size, 2);
   assert.equal(pos.get("a3").y, pos.get("a0").y);
   assert.ok(pos.get("a4").y > pos.get("a3").y);
-  assert.equal(pos.get("a4").x, pos.get("a0").x);
+});
+
+test("the second row reads right to left, so the next agent is under the last one of the row above", () => {
+  const pos = autoPositions(chain(8), { wide: true, maxCols: 6 });
+  assert.equal(pos.get("a4").x, pos.get("a3").x);
+  assert.ok(pos.get("a5").x < pos.get("a4").x);
+  assert.equal(pos.get("a7").x, pos.get("a0").x);
+  assert.deepEqual([...flippedOf(chain(8), { wide: true, maxCols: 6 })].sort(), ["a4", "a5", "a6", "a7"]);
+  assert.equal(flippedOf(chain(5), { wide: true, maxCols: 6 }).size, 0);
 });
 
 test("a chain that fits keeps one row, and a phone chain stays one column", () => {
@@ -29,14 +37,32 @@ test("the extent of a wrapped chain is not wider than the room", () => {
   assert.ok(extentOf(pos).width <= 4 * CELL_W + 24 + 2 * CELL_W);
 });
 
-test("the arrow that goes on in the next row leaves under the last box and enters the top of the first", () => {
+test("the arrow to the next row is a short one straight down, and the arrows of the second row point left", () => {
   const design = chain(8);
   const pos = autoPositions(design, { wide: true, maxCols: 6 });
-  const arrow = arrowsOf(design, pos).find((a) => a.key === "a3>a4");
-  assert.match(arrow.d, /^M [\d.]+ [\d.]+ L [\d.]+ [\d.]+ L [\d.]+ [\d.]+ L [\d.]+ [\d.]+$/);
-  assert.ok(arrow.d.includes(` ${pos.get("a3").y + BOX_H} `));
-  const straight = arrowsOf(design, pos).find((a) => a.key === "a0>a1");
-  assert.match(straight.d, /^M [\d.]+ [\d.]+ L [\d.]+ [\d.]+$/);
+  const down = arrowsOf(design, pos).find((a) => a.key === "a3>a4");
+  const [dx1, , dx2] = down.d.match(/[\d.]+/g).map(Number);
+  assert.equal(dx1, dx2);
+  const back = arrowsOf(design, pos).find((a) => a.key === "a4>a5");
+  const [x1, , x2] = back.d.match(/[\d.]+/g).map(Number);
+  assert.ok(x2 < x1);
+});
+
+test("the dots: the sending one on the right and the receiving one on the left, swapped in a row that reads right to left", () => {
+  const pos = autoPositions(chain(3), { wide: true });
+  const out = portPoint(pos, "a0", "out");
+  const inn = portPoint(pos, "a0", "in");
+  assert.equal(out.x - inn.x, BOX_W);
+  assert.equal(out.y, inn.y);
+  assert.equal(portPoint(pos, "a0", "out", { flipped: true }).x, inn.x);
+  const up = portPoint(pos, "a0", "out", { vertical: true });
+  assert.equal(up.y - portPoint(pos, "a0", "in", { vertical: true }).y, BOX_H);
+});
+
+test("a link touches the circles: it starts and stops at the edge of the dots", () => {
+  const link = linkBetween({ x: 0, y: 0 }, { x: 100, y: 0 });
+  assert.equal(link.x1, PORT_R);
+  assert.ok(link.x2 < 100 && link.x2 >= 100 - PORT_R - 1);
 });
 
 test("the number of columns follows the window, at least two", () => {

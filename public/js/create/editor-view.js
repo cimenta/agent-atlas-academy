@@ -14,7 +14,7 @@ import { mayFormat, validFormat, formatPromptText, FORMAT_TYPES, FORMAT_MAX_FIEL
 import { innerTabs } from "./steps-view.js";
 import { agentTabIds, currentAgentTab } from "./agent-tabs.js";
 import { MULTI_RUN } from "../engine/spawn.js";
-import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, extentOf, isTwoWay, maxColsFor, straight, wrapPath, turnArrows, TWO_WAY_GAP } from "./diagram-geometry.js";
+import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, extentOf, isTwoWay, maxColsFor, orientationFor, flippedOf, portPoint, linkBetween, PORT_R, turnArrows, TWO_WAY_GAP } from "./diagram-geometry.js";
 
 const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -143,6 +143,10 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     const pos = autoPositions(design, { wide, maxCols: maxColsFor(doc.defaultView) }); // id -> { x, y } top-left in px, updated live while dragging
     for (const node of design.nodes) if (stored[node.id]) pos.set(node.id, stored[node.id]);
     livePos = pos;
+    const flips = flippedOf(design, { wide, maxCols: maxColsFor(doc.defaultView) });
+    const vertical = orientationFor(design.pattern, wide) === "vertical";
+    const portOf = (id, kind) => portPoint(pos, id, kind, { flipped: flips.has(id), vertical });
+    const sideOf = (id, kind) => (vertical ? (kind === "out" ? "bottom" : "top") : (kind === "out") !== flips.has(id) ? "right" : "left");
     const extent = () => extentOf(pos);
     const area = h(doc, "div", { class: "diagram", "data-ui": "diagram", role: "group", "aria-label": t("editor.diagram") });
     const wrap = h(doc, "div", { class: "diagram-wrap" }, area);
@@ -164,7 +168,12 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     tip.setAttribute("d", "M0,0 L10,5 L0,10 z");
     tip.setAttribute("fill", "currentColor");
     marker.append(tip);
-    defs.append(marker);
+    const linkMarker = marker.cloneNode(true);
+    linkMarker.setAttribute("id", "linkhead");
+    linkMarker.setAttribute("markerWidth", "6");
+    linkMarker.setAttribute("markerHeight", "6");
+    linkMarker.firstChild.style.fill = "var(--port-in)";
+    defs.append(marker, linkMarker);
     svg.append(defs);
     area.append(svg);
 
@@ -178,7 +187,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     const nodeEls = new Map();
     let edgeParts = [];
     const rubber = doc.createElementNS(SVG_NS, "line");
-    for (const [k, v] of Object.entries({ "stroke-width": "2", stroke: "currentColor", "stroke-dasharray": "6 4", "marker-end": "url(#arrowhead)", visibility: "hidden" })) rubber.setAttribute(k, v);
+    for (const [k, v] of Object.entries({ "stroke-width": "2", stroke: "currentColor", "stroke-dasharray": "6 4", "marker-end": "url(#linkhead)", visibility: "hidden" })) rubber.setAttribute(k, v);
     svg.append(rubber);
 
     // In a debate the debaters answer each other in turn. The visitor connects each debater to the judge;
@@ -199,51 +208,36 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       edgeParts = [];
       drawTurns();
       for (const edge of design.edges) {
-        const a = centerOf(edge.from);
-        const b = centerOf(edge.to);
-        const start = clip(b, a);
-        const end = clip(a, b);
         const key = `${edge.from}>${edge.to}`;
         const selected = selectedEdge === key;
-        // Between a supervisor and a worker the data goes both ways: one connection, drawn with two arrows side by side.
-        // In a handoff an edge that has a reverse edge moves aside, so the two arrows run side by side.
-        const sideBySide = design.pattern === "handoff" && design.edges.some((o) => o.from === edge.to && o.to === edge.from);
-        const gap = isTwoWay(design) || sideBySide ? -TWO_WAY_GAP : 0;
-        const shown = isTwoWay(design) ? [[edge.from, edge.to], [edge.to, edge.from]] : [[edge.from, edge.to]];
-        const wrapped = wrapPath(design, pos, edge);
-        const lines = shown.map(([from, to]) => {
-          const line = doc.createElementNS(SVG_NS, wrapped ? "path" : "line");
-          for (const [k, v] of Object.entries({ "marker-end": "url(#arrowhead)", "stroke-width": selected ? "4" : "2", stroke: selected ? "var(--accent)" : "currentColor" })) line.setAttribute(k, v);
-          if (wrapped) {
-            line.setAttribute("d", wrapped);
-            line.setAttribute("fill", "none");
-            return line;
-          }
-          const s2 = straight(pos, from, to, gap);
-          setLine(line, { x: s2.x1, y: s2.y1 }, { x: s2.x2, y: s2.y2 });
-          return line;
-        });
-        const hit = doc.createElementNS(SVG_NS, wrapped ? "path" : "line");
-        for (const [k, v] of Object.entries({ stroke: "transparent", "stroke-width": "22", class: "edge-hit", ...(wrapped ? { d: wrapped, fill: "none" } : {}) })) hit.setAttribute(k, v);
-        if (wrapped) {
-          // drawn as the path itself
-        } else if (sideBySide) {
-          const own = straight(pos, edge.from, edge.to, gap);
-          setLine(hit, { x: own.x1, y: own.y1 }, { x: own.x2, y: own.y2 });
-        } else setLine(hit, start, end);
+        // From the dot that sends to the dot that receives; the line stops at the circles, so it touches them.
+        const s2 = linkBetween(portOf(edge.from, "out"), portOf(edge.to, "in"));
+        const line = doc.createElementNS(SVG_NS, "line");
+        for (const [k, v] of Object.entries({ "marker-end": "url(#linkhead)", "stroke-width": selected ? "4" : "2", class: "edge-line", ...(selected ? { stroke: "var(--accent)" } : {}) })) line.setAttribute(k, v);
+        setLine(line, { x: s2.x1, y: s2.y1 }, { x: s2.x2, y: s2.y2 });
+        const hit = doc.createElementNS(SVG_NS, "line");
+        for (const [k, v] of Object.entries({ stroke: "transparent", "stroke-width": "22", class: "edge-hit" })) hit.setAttribute(k, v);
+        setLine(hit, { x: s2.x1, y: s2.y1 }, { x: s2.x2, y: s2.y2 });
         hit.addEventListener("click", () => {
           selectedEdge = selectedEdge === key ? null : key;
           selectedId = null;
           draw();
         });
-        for (const line of lines) {
-          svg.insertBefore(line, rubber);
-          edgeParts.push(line);
-        }
+        // A right click on the connection removes it.
+        hit.addEventListener("contextmenu", (event) => {
+          event.preventDefault();
+          editor.disconnect(edge.from, edge.to);
+          selectedEdge = null;
+          changed();
+        });
+        hit.addEventListener("mouseenter", () => line.classList.add("hot"));
+        hit.addEventListener("mouseleave", () => line.classList.remove("hot"));
+        svg.insertBefore(line, rubber);
+        edgeParts.push(line);
         svg.insertBefore(hit, rubber);
         edgeParts.push(hit);
         if (selected) {
-          const mid = wrapped ? { x: (pos.get(edge.from).x + pos.get(edge.to).x + BOX_W) / 2, y: pos.get(edge.from).y + BOX_H + 18 } : { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
+          const mid = { x: (s2.x1 + s2.x2) / 2, y: (s2.y1 + s2.y2) / 2 };
           const remove = h(doc, "button", { type: "button", class: "edge-remove", "data-focus-key": `edge-x-${key}`, "aria-label": t("editor.removeConnection", { from: label(edge.from), to: label(edge.to) }) }, "×");
           remove.style.left = `${mid.x - 18}px`;
           remove.style.top = `${mid.y - 18}px`;
@@ -304,7 +298,13 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       });
     }
 
-    // Dragging from a node's port draws a line to the pointer; drop it on another node to connect.
+    // Dragging from the dot that sends draws a line to the pointer; drop it on another agent to connect. When the agent cannot
+    // receive it, the line turns red with a cross and the reason on it.
+    let blockedMark = null;
+    const clearBlocked = () => {
+      blockedMark?.remove();
+      blockedMark = null;
+    };
     function wirePort(port, id) {
       let drag = null;
       const areaPoint = (event) => {
@@ -312,7 +312,14 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         return { x: event.clientX - r.left, y: event.clientY - r.top };
       };
       const targetAt = (event) => doc.elementFromPoint(event.clientX, event.clientY)?.closest?.("[data-node-id]")?.getAttribute("data-node-id") ?? null;
-      const clearMarks = () => nodeEls.forEach((el) => el.removeAttribute("data-target"));
+      const clearMarks = () => {
+        nodeEls.forEach((el) => {
+          el.removeAttribute("data-target");
+          el.querySelector(".dnode-dot.in")?.classList.remove("target");
+        });
+        rubber.removeAttribute("data-blocked");
+        clearBlocked();
+      };
       port.addEventListener("pointerdown", (event) => {
         if (event.button !== undefined && event.button > 0) return;
         drag = { px: event.clientX, py: event.clientY, moved: false };
@@ -322,11 +329,27 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         if (!drag) return;
         if (!drag.moved && Math.hypot(event.clientX - drag.px, event.clientY - drag.py) < MOVE_THRESHOLD) return;
         drag.moved = true;
-        setLine(rubber, centerOf(id), areaPoint(event));
-        rubber.setAttribute("visibility", "visible");
+        const from = portOf(id, "out");
         clearMarks();
         const over = targetAt(event);
-        if (over && over !== id) nodeEls.get(over)?.setAttribute("data-target", editor.canConnect(id, over).ok ? "ok" : "no");
+        let end = areaPoint(event);
+        if (over && over !== id) {
+          const verdict = editor.canConnect(id, over);
+          const target = portOf(over, "in");
+          nodeEls.get(over)?.setAttribute("data-target", verdict.ok ? "ok" : "no");
+          end = target;
+          if (verdict.ok) nodeEls.get(over)?.querySelector(".dnode-dot.in")?.classList.add("target");
+          else {
+            rubber.setAttribute("data-blocked", "true");
+            blockedMark = h(doc, "span", { class: "blocked-mark", role: "status", "data-ui": "blocked-mark" }, h(doc, "b", { class: "blocked-cross", "aria-hidden": "true" }, "×"), h(doc, "span", { class: "blocked-why" }, errorText(verdict.code)));
+            blockedMark.style.left = `${(from.x + target.x) / 2}px`;
+            blockedMark.style.top = `${(from.y + target.y) / 2}px`;
+            area.append(blockedMark);
+          }
+        }
+        const s2 = linkBetween(from, end);
+        setLine(rubber, { x: s2.x1, y: s2.y1 }, { x: s2.x2, y: s2.y2 });
+        rubber.setAttribute("visibility", "visible");
       });
       port.addEventListener("pointerup", (event) => {
         if (!drag) return;
@@ -357,7 +380,13 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         selectedEdge = null;
         onNodeActivate(node.id);
       });
-      const port = h(doc, "button", { type: "button", class: AGENT_TYPES[node.agent]?.free ? "dnode-port free" : "dnode-port", "data-focus-key": `connect-${node.id}`, "aria-pressed": String(connectFrom === node.id), "aria-label": t("editor.connectFrom", { name: nodeLabel(node) }), title: t("editor.portHelp") }, "→");
+      // The dots: blue receives, green sends. A dot is there only when that connection is possible or already made; the colour stays.
+      const usedIn = design.edges.some((e) => e.to === node.id);
+      const usedOut = design.edges.some((e) => e.from === node.id);
+      const canIn = usedIn || design.nodes.some((o) => o.id !== node.id && editor.canConnect(o.id, node.id).ok);
+      const canOut = usedOut || design.nodes.some((o) => o.id !== node.id && editor.canConnect(node.id, o.id).ok);
+      const port = h(doc, "button", { type: "button", class: "dnode-dot out", "data-side": sideOf(node.id, "out"), "data-focus-key": `connect-${node.id}`, "aria-pressed": String(connectFrom === node.id), "aria-label": t("editor.connectFrom", { name: nodeLabel(node) }), title: t("editor.portHelp"), ...(canOut ? {} : { hidden: true }) });
+      const inPort = h(doc, "button", { type: "button", class: "dnode-dot in", "data-side": sideOf(node.id, "in"), "data-focus-key": `receive-${node.id}`, "aria-label": t("editor.connectTo", { name: nodeLabel(node) }), ...(canIn ? {} : { hidden: true }) });
       port.addEventListener("click", () => {
         if (suppressClick) return;
         connectFrom = connectFrom === node.id ? null : node.id;
@@ -365,15 +394,22 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
         selectedEdge = null;
         draw();
       });
+      inPort.addEventListener("click", () => {
+        if (connectFrom !== null && connectFrom !== node.id) tryConnect(connectFrom, node.id);
+      });
       const isStart = design.pattern === "handoff" && design.start === node.id;
       // A node that runs once for every part or step is drawn as a stack with a badge (x2-6).
       const multi = node.agent === MULTI_RUN[design.pattern];
       const box = h(doc, "div", { class: "dnode", "data-node-id": node.id, "data-selected": String(selectedId === node.id), "data-connecting": String(connectFrom === node.id), ...(isStart ? { "data-start": "true" } : {}), ...(multi ? { "data-multi": "true" } : {}) }, body, port);
       if (multi) box.append(h(doc, "span", { class: "dnode-runs", "data-ui": "node-runs" }, t("editor.runsRange")));
       if (isStart) box.append(h(doc, "span", { class: "dnode-start", "data-ui": "start-flag" }, `▶ ${t("editor.startFlag")}`));
-      if (selectedId === node.id) {
-        const cross = h(doc, "button", { type: "button", class: "dnode-remove", "data-focus-key": `delete-${node.id}`, "aria-label": t("editor.removeNamed", { name: nodeLabel(node) }), title: t("editor.remove") }, "×");
-        cross.addEventListener("click", () => removeSelected());
+      box.append(port, inPort);
+      {
+        const cross = h(doc, "button", { type: "button", class: flips.has(node.id) ? "dnode-remove flipped" : "dnode-remove", "data-focus-key": `delete-${node.id}`, "aria-label": t("editor.removeNamed", { name: nodeLabel(node) }), title: t("editor.remove") }, "×");
+        cross.addEventListener("click", () => {
+          selectedId = node.id;
+          removeSelected();
+        });
         box.append(cross);
       }
       box.style.left = `${pos.get(node.id).x}px`;

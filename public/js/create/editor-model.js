@@ -439,10 +439,14 @@ export function layoutDesign(design, { orientation = "vertical", maxCols = Infin
   const out = nodes.map((n) => {
     const { rank, offset } = spots.get(n.id);
     if (orientation !== "horizontal") return { id: n.id, x: offset, y: rank };
-    return bands > 1 ? { id: n.id, x: rank % cols, y: Math.floor(rank / cols) * bandRows + offset } : { id: n.id, x: rank, y: offset };
+    if (bands <= 1) return { id: n.id, x: rank, y: offset };
+    // The first row reads left to right, the next right to left, and so on, so the next agent is under the last one of the row above.
+    const row = Math.floor(rank / cols);
+    return { id: n.id, x: row % 2 === 0 ? rank % cols : cols - 1 - (rank % cols), y: row * bandRows + offset, flipped: row % 2 === 1 };
   });
   return {
     nodes: out,
+    flipped: new Set(out.filter((n) => n.flipped).map((n) => n.id)),
     width: out.length ? Math.max(...out.map((n) => n.x)) + 1 : 0,
     height: out.length ? Math.max(...out.map((n) => n.y)) + 1 : 0,
   };
