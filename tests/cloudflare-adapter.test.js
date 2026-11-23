@@ -91,3 +91,16 @@ test("the code 4006 makes a quota answer; the digits 4006 inside another message
   await assert.rejects(() => callCloudflare(body, { apiKey: KEY, fetchImpl: reply(400, { errors: [{ code: 4006, message: "limit reached" }] }) }), (e) => e.status === 429 && e.rateKind === "day");
   await assert.rejects(() => callCloudflare(body, { apiKey: KEY, fetchImpl: reply(400, { errors: [{ code: 5001, message: "the request is too long: 34006 tokens" }] }) }), (e) => e.status === 400 && e.rateKind === undefined);
 });
+
+test("a call that Cloudflare ends after about two minutes (408, code 3046) says why and what to do", async () => {
+  const { callCloudflare } = await import("../public/js/engine/cloudflare.js");
+  const key = `${"a".repeat(32)}:tok`;
+  const fetchImpl = async () => new Response(JSON.stringify({ errors: [{ message: "AiError: AiError: Request timeout (x)", code: 3046 }], success: false }), { status: 408 });
+  await assert.rejects(() => callCloudflare({ model: "m", messages: [{ role: "user", content: "hi" }], max_tokens: 10 }, { apiKey: key, fetchImpl, timeoutMs: 5000 }), (error) => {
+    assert.equal(error.status, 408);
+    assert.match(error.message, /Cloudflare ended the call/);
+    assert.match(error.message, /Retry/);
+    assert.ok(!error.message.includes("AiError"));
+    return true;
+  });
+});

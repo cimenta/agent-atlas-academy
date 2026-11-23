@@ -27,6 +27,11 @@ const hide = (text, { accountId, token }) => redact(redact(text, token), account
 function cleaned(error, parts) {
   if (!(error instanceof AnthropicError)) return error;
   error.message = hide(error.message, parts);
+  // Cloudflare itself ends a call that runs about two minutes (408, code 3046), which a long reply of a slow model reaches.
+  if (error.status === 408 || error.code === 3046) {
+    error.message = "Timeout: Cloudflare ended the call because the answer took about two minutes." + String.fromCharCode(10, 10) + "The model is slow, or the reply is long. Press Retry, pick a faster model with the arrow next to Retry, or lower the output tokens of the agent.";
+    return error;
+  }
   const refused = error.status === 401 || error.status === 403;
   if (!refused && error.status >= 400 && error.status < 500 && (error.code === 4006 || QUOTA_PATTERN.test(error.message))) {
     error.status = 429;
