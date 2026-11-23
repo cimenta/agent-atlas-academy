@@ -64,7 +64,7 @@ export function footer({ doc, t, onBack, onNext, onRun }) {
     back.disabled = !nav.back;
     next.disabled = !nav.next;
     run.disabled = !nav.run;
-    hint.replaceChildren(doc.createTextNode(text), ...(hintExtra ? [hintExtra] : []));
+    hint.replaceChildren(typeof text === "string" ? doc.createTextNode(text) : text, ...(hintExtra ? [hintExtra] : []));
   }
   return { element, update };
 }
@@ -134,7 +134,7 @@ export function workspaceBar({ doc, t, onRun }) {
     run.disabled = !runEnabled;
     // Only when the text changes, so a screen reader does not repeat it on every keystroke.
     if (hintText !== lastHint || hintExtra !== lastExtra) {
-      hint.replaceChildren(doc.createTextNode(hintText), ...(hintExtra ? [hintExtra] : []));
+      hint.replaceChildren(typeof hintText === "string" ? doc.createTextNode(hintText) : hintText, ...(hintExtra ? [hintExtra] : []));
       lastHint = hintText;
       lastExtra = hintExtra;
     }

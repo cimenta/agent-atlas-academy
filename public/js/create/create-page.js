@@ -329,12 +329,29 @@ export function renderCreate(ctx) {
       const design = draft.editor.design();
       return stepStatus({ task: draft.task, decisions: draft.decisions, nodeCount: design.nodes.length, editorOk: draft.editor.errors().length === 0, keysReady: usedSlots(design).every((s) => vaultFor(s).getSessionKey() !== null) });
     };
+    // "Almost there: ..., add your key": the words about the key are a link to the API key box. The node is kept while the text stays the same.
+    let keyHintNode = null;
+    let keyHintText = "";
+    const keyHint = (status) => {
+      const MARK = "";
+      const full = t("create.hint.missing", { items: missing(status).map((k) => (k === "key" ? MARK : t(`create.missing.${k}`))).join(", ") });
+      const keyText = t("create.missing.key");
+      const signature = `${full}|${keyText}`;
+      if (keyHintNode && keyHintText === signature) return keyHintNode;
+      const [before, after = ""] = full.split(MARK);
+      const go = h(doc, "button", { type: "button", class: "linklike hint-go", "data-ui": "hint-go-key", title: t("create.reason.noKeyGo") }, keyText);
+      go.addEventListener("click", goToKey);
+      keyHintNode = h(doc, "span", {}, before, go, after);
+      keyHintText = signature;
+      return keyHintNode;
+    };
     const hintText = (status) => {
       const kind = footHint(status);
       // Everything is decided but an agent cannot run on a free account: say that instead of Ready to run.
       if (kind === "ready" && lastVerdict?.reasons?.includes("limitsBlocked")) return t("create.reason.limitsBlocked", { agents: lastBlockedNames });
       if (kind === "ready" && lastVerdict?.reasons?.includes("modelGone")) return t("create.reason.modelGone");
       if (workspace && kind === "setup") return t("create.ws.locked");
+      if (kind === "missing" && missing(status).includes("key")) return keyHint(status);
       return kind === "missing" ? t("create.hint.missing", { items: missing(status).map((k) => t(`create.missing.${k}`)).join(", ") }) : t(`create.hint.${kind}`);
     };
     // The slots the run uses whose saved key is locked.
@@ -380,12 +397,9 @@ export function renderCreate(ctx) {
     }
     // Next to "Almost there: add your key" the same box shows when the key is saved but locked. It is kept, so what is typed stays.
     let hintUnlock = null;
-    let hintGo = null;
     const hintExtra = (status) => {
       if (footHint(status) !== "missing" || !missing(status).includes("key")) return null;
-      hintGo ??= h(doc, "button", { type: "button", class: "linklike hint-go", "data-ui": "hint-go-key", title: t("create.reason.noKeyGo") }, t("create.hint.goKey"));
-      if (!hintGo.dataset?.bound) { hintGo.addEventListener("click", goToKey); if (hintGo.dataset) hintGo.dataset.bound = "1"; }
-      if (lockedNow().length === 0) return hintGo;
+      if (lockedNow().length === 0) return null;
       hintUnlock ??= makeUnlock(() => { refreshSteps(); drawReview(); });
       return hintUnlock;
     };
