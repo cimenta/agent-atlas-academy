@@ -23,7 +23,7 @@ const realClock = { setTimeout: (fn, ms) => globalThis.setTimeout(fn, ms), clear
 // onRetry(id): when given, an agent that failed gets a Retry button (retryLabel is its text).
 // retryMenu: { arrowLabel, title, providerName(provider), tagText(choice), choicesOf(id) }; when given, the Retry button has an
 // arrow that opens a list of models, and a pick calls onRetry(id, choice.value).
-export function createReplayDiagram({ doc, design, wide, onSelect, statusText, boxLabel, startLabel = "", onRetry = null, retryLabel = "Retry", warnLabel = "Warning", errorLabel = "Error", retryMenu = null, clock = realClock, now = () => Date.now(), createdText = "created", freePlaceText = (n, max) => `${n}/${max}` }) {
+export function createReplayDiagram({ doc, design, wide, onSelect, statusText, boxLabel, startLabel = "", onRetry = null, retryLabel = "Retry", warnLabel = "Warning", errorLabel = "Error", retryMenu = null, clock = realClock, now = () => Date.now(), createdText = "created", freePlaceText = (n, max) => `${n}/${max}`, explain = null }) {
   // The places still free for created agents are laid out like boxes (an arrow from their creator is used for the layout only).
   const free = freePlacesOf(design);
   const freeId = (p) => `~free-${p.by}-${p.n}`;
@@ -51,6 +51,55 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
     const path = svgEl(doc, "path", { d: arrow.d, class: "flow pending", fill: "none", "marker-end": "url(#flow-head-pending)", "data-flow": arrow.key });
     svg.append(path);
     lines.set(arrow.key, path);
+  }
+  // Hovering a box or an arrow opens a card that explains it (after a short pause, so it never gets in the way).
+  // The card sits on the page (fixed), so the diagram's own scrolling cannot cut it off.
+  const arrowState = new Map(); // key -> "pending" | "used" | "lit"
+  const nodeState = new Map(); // id -> { status, ms, errors, warnings, runs }
+  let card = null;
+  let cardTimer = null;
+  let hotLine = null;
+  function hideCard() {
+    if (cardTimer !== null) clock.clearTimeout(cardTimer);
+    cardTimer = null;
+    if (card) card.remove();
+    card = null;
+    if (hotLine) hotLine.classList.remove("hot");
+    hotLine = null;
+  }
+  function showCard(info, anchor, line = null) {
+    if (!explain || !info) return;
+    if (cardTimer !== null) clock.clearTimeout(cardTimer);
+    cardTimer = clock.setTimeout(() => {
+      cardTimer = null;
+      if (card) card.remove();
+      const rows = (info.rows ?? []).filter(Boolean);
+      const el = h(doc, "div", { class: "hover-card", role: "tooltip", "data-ui": "diagram-card" }, h(doc, "h4", {}, info.title, info.badge ? h(doc, "span", { class: "hover-badge" }, info.badge) : ""), ...(info.text ? [h(doc, "p", {}, info.text)] : []), ...(info.extra ? [h(doc, "p", { class: "hover-extra" }, info.extra)] : []), ...(rows.length ? [h(doc, "dl", {}, ...rows.flatMap(([k, v]) => [h(doc, "dt", {}, k), h(doc, "dd", {}, v)]))] : []));
+      (doc.body ?? area).append(el);
+      card = el;
+      if (line) {
+        line.classList.add("hot");
+        hotLine = line;
+      }
+      const rect = anchor.getBoundingClientRect?.();
+      if (rect && el.style) {
+        const vw = doc.defaultView?.innerWidth ?? 1024;
+        const w = el.offsetWidth || 260;
+        const tall = el.offsetHeight || 120;
+        const above = rect.top - tall - 10;
+        el.style.left = `${Math.max(8, Math.min(rect.left + rect.width / 2 - w / 2, vw - w - 8))}px`;
+        el.style.top = `${above >= 8 ? above : rect.bottom + 10}px`;
+      }
+    }, 250);
+  }
+  if (explain) {
+    for (const arrow of arrows) {
+      const line = lines.get(arrow.key);
+      const hit = svgEl(doc, "path", { d: arrow.d, class: "flow-hit", fill: "none" });
+      hit.addEventListener("mouseenter", () => showCard(explain.arrow(arrow.from, arrow.to, arrowState.get(arrow.key) ?? "pending", arrow), hit, line));
+      hit.addEventListener("mouseleave", hideCard);
+      svg.append(hit);
+    }
   }
 
   // The list of models under the arrow of a Retry button. It sits on the page (fixed), so the diagram's own scrolling cannot cut it off.
@@ -121,7 +170,17 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
     box.style.top = `${pos.get(node.id).y}px`;
     box.style.width = `${BOX_W}px`;
     box.style.height = `${BOX_H}px`;
-    box.addEventListener("click", () => onSelect(node.id));
+    box.addEventListener("click", () => {
+      hideCard();
+      onSelect(node.id);
+    });
+    if (explain) {
+      const open = () => showCard(explain.node(node.id, nodeState.get(node.id) ?? { status: "waiting" }, node), box);
+      box.addEventListener("mouseenter", open);
+      box.addEventListener("focus", open);
+      box.addEventListener("mouseleave", hideCard);
+      box.addEventListener("blur", hideCard);
+    }
     // The button sits on the box, not in it (a button cannot hold a button); it shows only while the agent has failed.
     let retry = null;
     if (onRetry) {
@@ -175,6 +234,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       parts.runsBadge.hidden = !parts.multi;
       parts.runsBadge.textContent = sum ? sum.badge : parts.multi ? "×?" : "";
       const status = agent?.status ?? idleStatus;
+      nodeState.set(id, { status, ms: agent?.ms ?? null, errors: agent?.errors ?? 0, warnings: agent?.warnings ?? 0, runs: sum?.text ?? null });
       parts.box.setAttribute("data-status", status);
       parts.box.setAttribute("aria-pressed", String(selectedId === id || (parts.multi && typeof selectedId === "string" && nodeIdOf(selectedId) === id)));
       parts.name.textContent = agent?.label ?? boxLabel(id);
@@ -203,7 +263,8 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       const active = held.get(key);
       const lit = Boolean(active); // blue only while it blinks; afterwards a solid grey arrow
       const state2 = lit ? "lit" : used.has(key) ? "used" : "pending";
-      path.setAttribute("class", `flow ${state2}${active ? " " + active.cls : ""}`);
+      arrowState.set(key, state2);
+      path.setAttribute("class", `flow ${state2}${active ? " " + active.cls : ""}${path === hotLine ? " hot" : ""}`);
       // The arrow of a voter that differs from the result is dashed and dimmed.
       const from = arrows.find((a) => a.key === key)?.from;
       path.setAttribute("data-dissent", String(marks.get(from)?.dissent === true));
@@ -225,5 +286,5 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
     }
   }
 
-  return { element: wrap, update, destroy: () => { if (timer !== null) clock.clearTimeout(timer); timer = null; closeMenu(); } };
+  return { element: wrap, update, destroy: () => { if (timer !== null) clock.clearTimeout(timer); timer = null; closeMenu(); hideCard(); } };
 }

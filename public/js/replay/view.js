@@ -337,6 +337,24 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
           wide,
           boxLabel: (id) => designLabel(design, id),
           statusText: (a) => (a.status === "stopped" ? stoppedText(a) : `${t(STATUS_KEY[a.status])}${a.ms ? ` · ${fmt(a.ms)}` : ""}`),
+          explain: {
+            node: (id, st, node) => {
+              const status = st.status in STATUS_KEY ? st.status : "waiting";
+              const help = node?.agent && node.created !== true && node.agent !== "free" ? t(`agent.${node.agent}.help`) : null;
+              return {
+                title: designLabel(design, id),
+                badge: t(STATUS_KEY[status]),
+                text: help,
+                extra: t(`diagram.hover.state.${status}`),
+                rows: [st.ms ? [t("diagram.hover.time"), fmt(st.ms)] : null, st.errors > 0 ? [t("diagram.hover.errors"), String(st.errors)] : null, st.warnings > 0 ? [t("diagram.hover.warnings"), String(st.warnings)] : null],
+              };
+            },
+            arrow: (from, to, flow) => ({
+              title: t("diagram.hover.arrowTitle", { from: designLabel(design, from), to: designLabel(design, to) }),
+              badge: t(`diagram.hover.arrowBadge.${flow}`),
+              text: t(`diagram.hover.arrow.${flow}`, { from: designLabel(design, from), to: designLabel(design, to) }),
+            }),
+          },
           onRetry,
           retryLabel: t("player.retry"),
           retryMenu: onRetry
