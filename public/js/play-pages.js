@@ -10,7 +10,7 @@ import { pendingApprovals } from "./engine/approval.js";
 import { draft } from "./create/draft.js";
 import { renderCompare } from "./compare-page.js";
 import { refreshResultTab } from "./tab-state.js";
-import { PLAY_TABS, tabBar, rememberRun, loadAnyRun, registerPlayKeys } from "./play-shared.js";
+import { PLAY_TABS, tabBar, rememberRun, loadAnyRun, registerPlayKeys, justFinished } from "./play-shared.js";
 import { renderLibraryTab, removeLocalRun } from "./library-page.js";
 
 // Draws the content area, then fills it. The tab bar is in the site header.
@@ -101,6 +101,11 @@ export async function renderReplayTab(ctx, requestedId) {
   const playerHost = h(doc, "div", { class: "player-mount" });
   host.append(playerHost);
   handle = mountReplay(playerHost, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors, onRetry, suggestFallback: ctx.settings?.get().fallback !== "off", limitsInfo: () => ({ current: ctx.settings.get().limits, original: found.run.limits, record: found.run, repeatStop: ctx.settings.get().repeatStop }) });
+  // A run Create has just finished opens at its end, so its warnings and the message about how it ended are on the screen.
+  if (justFinished.id === currentId) {
+    justFinished.id = null;
+    handle.player?.seek?.(found.run.events.length);
+  }
   // A run that waits for approval shows what the next agent will receive, with Approve and Stop here.
   if (found.source === "local" && found.run.outcome === "waiting_approval") {
     const panel = approvalPanel({

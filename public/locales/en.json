@@ -1677,5 +1677,6 @@
   "create.legendMissing": "key missing",
   "create.legendChosen": "chosen",
   "player.titleLive": "Run: {title}",
-  "replay.repeatedTimes": "({n} times)"
+  "replay.repeatedTimes": "{n}×",
+  "replay.repeatedTitle": "The same message came {n} times in a row"
 }

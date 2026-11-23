@@ -1677,5 +1677,6 @@
   "create.legendMissing": "klíč chybí",
   "create.legendChosen": "vybraný",
   "player.titleLive": "Běh: {title}",
-  "replay.repeatedTimes": "({n}×)"
+  "replay.repeatedTimes": "{n}×",
+  "replay.repeatedTitle": "Stejná zpráva přišla {n}krát po sobě"
 }

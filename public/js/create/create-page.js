@@ -23,6 +23,7 @@ import { startRun, RunStartError } from "../run-client.js";
 import { approvalPanel } from "../approval-panel.js";
 import { pendingApprovals, approvedAgents } from "../engine/approval.js";
 import { mountLiveReplay } from "../replay/view.js";
+import { justFinished } from "../play-shared.js";
 import { createBatchedSaver } from "../storage/runs-store.js";
 import { keepFocus } from "./keep-focus.js";
 import { createEditor, isUntouched } from "./editor-model.js";
@@ -964,7 +965,10 @@ export function renderCreate(ctx) {
       after.replaceChildren(...children);
       // The run is over and saved: the Replay tab opens with it, so what is shown and the tab that is lit agree. Replay shows the same
       // warnings and the same message about the end, so nothing is lost. A run waiting for the student's approval stays here, where the choices are.
-      if (result.ok && done?.outcome !== "waiting_approval" && doc.defaultView?.location) doc.defaultView.location.hash = `#/play/run/${id}`;
+      if (result.ok && done?.outcome !== "waiting_approval" && doc.defaultView?.location) {
+        justFinished.id = id;
+        doc.defaultView.location.hash = `#/play/run/${id}`;
+      }
     };
 
     activeRun = startRun({

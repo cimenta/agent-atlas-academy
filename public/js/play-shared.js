@@ -15,6 +15,8 @@ export const PLAY_TABS = [
 export const TAB_OF_VIEW = { library: "library", replay: "replay", run: "replay", create: "create", result: "result" };
 
 // compare: the runs ticked in the library, in the order they were ticked (the first is the base of a comparison).
+// The run Create has just finished: Re-play opens it at its end, where the warnings and the message about the end are, not at the start.
+export const justFinished = { id: null };
 export const lib = { query: "", tab: null, compare: [], cloud: true, tags: [] };
 
 // The tab bar lives in the site header, with the library search next to it.
