@@ -471,8 +471,8 @@ body[data-show-ui] [data-ui]::after { content: attr(data-ui); position: absolute
 .library-pane .run-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 8px 12px; }
 .library-pane .run-row .run-title { grid-column: 1; }
 .library-pane .run-row .run-title { grid-row: 1; }
-.library-pane .run-row .run-tools { grid-column: 2; grid-row: 1; justify-self: end; display: flex; align-items: center; gap: 6px; }
-.library-pane .run-row .run-meta { grid-column: 1 / -1; grid-row: 2; font-size: 0.8rem; align-self: center; }
+.library-pane .run-row .run-tools { grid-column: 2; grid-row: 1 / span 2; justify-self: end; align-self: start; display: flex; flex-direction: column; align-items: center; gap: 8px; margin: -4px -6px 0 0; }
+.library-pane .run-row .run-meta { grid-column: 1; grid-row: 2; font-size: 0.8rem; align-self: center; }
 .library-pane .run-row .run-providers { grid-column: 1; grid-row: 3; align-self: center; }
 .library-pane .run-row .type-chip { grid-column: 2; grid-row: 3; justify-self: end; align-self: center; }
 .run-providers { display: flex; flex-wrap: wrap; gap: 4px; }

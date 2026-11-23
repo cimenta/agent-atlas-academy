@@ -200,9 +200,8 @@ export async function renderLibraryTab(ctx, requestedId) {
   };
   const compareBar = (mineIds) => {
     const n = lib.compare.length;
-    const buttons = [
-      barButton("compare-go", t("library.bar.compare"), n, { primary: true, disabled: n < 2, onClick: () => { location.hash = `#/play/compare?runs=${lib.compare.join(",")}`; } }),
-    ];
+    // Compare is there only when at least two runs are ticked.
+    const buttons = n >= 2 ? [barButton("compare-go", t("library.bar.compare"), n, { primary: true, onClick: () => { location.hash = `#/play/compare?runs=${lib.compare.join(",")}`; } })] : [];
     if (n > 0) {
       const clear = h(doc, "button", { type: "button", class: "bar-button", "data-ui": "compare-clear" }, t("compare.clear"));
       clear.addEventListener("click", () => {

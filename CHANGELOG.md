@@ -47,6 +47,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Library: the Compare button shows only when two or more runs are ticked (with one ticked there is Clear and a hint). On a card the status icon is in the top right corner and the tick box is under it.
 - The providers are one registry in the code (Anthropic and Gemini, with their models, prices, key slots, colours and texts), so a new provider is one entry and one adapter. Nothing changes for students: saved keys, settings, backups and recorded runs work as before.
 - Create: the Tidy up the diagram button is visible again in both layouts.
 - Create: Run stays off while a failed run waits to be carried on; the key tab opens even when the run definition cannot be loaded; the focus stays on the pattern, provider and memory choice after it redraws; only the right column of the workspace is locked (and ignores the pointer) while step 1 is open; the workspace no longer builds the step bar and footer.
