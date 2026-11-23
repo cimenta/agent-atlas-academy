@@ -1633,7 +1633,7 @@
   "library.tags.remove": "Remove the topic {tag}",
   "library.tags.wordTitle": "In {n} runs",
   "library.tags.clear": "Clear filters",
-  "library.tags.toggle": "Tags",
+  "library.tags.toggle": "Tag cloud",
   "library.tags.toggleTitle": "Show the tag cloud, or the detail of the chosen run (T)",
   "library.tags.group.pattern": "Patterns",
   "library.tags.group.task": "Kind of task",

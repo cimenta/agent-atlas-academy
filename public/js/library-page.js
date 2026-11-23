@@ -235,7 +235,9 @@ export async function renderLibraryTab(ctx, requestedId) {
       ],
     });
     menu.element.classList.add("bar-menu");
-    return h(doc, "div", { class: "compare-bar", "data-ui": "compare-bar" }, ...buttons, ...(hint ? [h(doc, "span", { class: "muted" }, hint)] : []), menu.element);
+    // The blue bar is there only when there is something to do (a run ticked, a tag chosen, a note); the menu is in the row of the tabs.
+    const bar = buttons.length > 0 || hint ? h(doc, "div", { class: "compare-bar", "data-ui": "compare-bar" }, ...buttons, ...(hint ? [h(doc, "span", { class: "muted" }, hint)] : [])) : null;
+    return { bar, menu: menu.element };
   };
 
   // Import: a run file from your computer becomes one of your own runs.
@@ -543,18 +545,19 @@ export async function renderLibraryTab(ctx, requestedId) {
       return button;
     };
     const tagToggle = () => {
-      const button = h(doc, "button", { type: "button", class: "tag-toggle", "data-ui": "tag-cloud-toggle", "aria-pressed": String(showCloud()), title: t("library.tags.toggleTitle"), "aria-keyshortcuts": "t" }, h(doc, "span", { "aria-hidden": "true" }, "\u2601 "), t("library.tags.toggle"));
+      const button = h(doc, "button", { type: "button", class: "tag-toggle", "data-ui": "tag-cloud-toggle", "aria-pressed": String(showCloud()), title: t("library.tags.toggleTitle"), "aria-label": t("library.tags.toggle"), "aria-keyshortcuts": "t" }, h(doc, "span", { "aria-hidden": "true" }, "\u2601"));
       button.addEventListener("click", () => {
         keyNote.textContent = toggleCloud() ? "" : t("library.nothing.toggleTags");
       });
       return button;
     };
-    const paneTabs = h(doc, "div", { class: "tabs", role: "tablist", "data-ui": "pane-tabs" }, tabButton("mine", "play.mine", built.mine.length), tabButton("library", "play.library", built.gallery.length), tagToggle(), fileInput);
+    const bar = compareBar(active === "mine" ? built.mine.map((r) => r.id) : []);
+    const paneTabs = h(doc, "div", { class: "tabs", role: "tablist", "data-ui": "pane-tabs" }, tabButton("mine", "play.mine", built.mine.length), tabButton("library", "play.library", built.gallery.length), h(doc, "span", { class: "tab-tools" }, tagToggle(), bar.menu), fileInput);
     pane.replaceChildren(
       paneTabs,
       importNote,
       keyNote,
-      compareBar(active === "mine" ? built.mine.map((r) => r.id) : []),
+      ...(bar.bar ? [bar.bar] : []),
       ...(active === "mine"
         ? [mine.length === 0 ? none(lib.query && built.mine.length > 0 ? "play.noMatches" : "play.empty") : h(doc, "ul", { class: "run-list", "data-ui": "run-list-mine" }, ...mine.map((item) => row(item)))]
         : [shown.length === 0 ? none("play.noMatches") : h(doc, "ul", { class: "run-list", "data-ui": "run-list-library" }, ...shown.map((item) => row(item)))]),

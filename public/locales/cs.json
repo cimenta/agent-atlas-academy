@@ -1633,7 +1633,7 @@
   "library.tags.remove": "Odebrat téma {tag}",
   "library.tags.wordTitle": "V {n} bězích",
   "library.tags.clear": "Zrušit filtry",
-  "library.tags.toggle": "Tagy",
+  "library.tags.toggle": "Oblak tagů",
   "library.tags.toggleTitle": "Ukázat oblak tagů, nebo detail vybraného běhu (T)",
   "library.tags.group.pattern": "Vzory",
   "library.tags.group.task": "Druh úkolu",
