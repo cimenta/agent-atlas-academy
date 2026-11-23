@@ -6,7 +6,12 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
-- Live player: the time the run has taken (a pill with a larger red blinking dot, for example 1:24) and the red Stop button sit one under the other in the top right corner of the diagram. While the run is live, play, speed, restart, previous, next and the slider are hidden, because they have nothing to do; they come back in Re-play when the run ends. A run carried on from an earlier try continues from its time.
+- Free requests left today at OpenRouter: choosing OpenRouter in Create shows a pill on its card (for example 38/50 today, amber at 5 or fewer, red at none) that is asked again at every choice, and its key in Settings shows used and limit, the time of the last update and an Update button. A new server route `/api/quota` asks OpenRouter (`GET /key`) and returns only used, limit, remaining and the reset time; the key is never kept.
+- Settings, provider tabs: the coloured marks of the chips in Create. The soon tabs (OpenAI, Mistral, Llama) are removed. The Check all models button now explains what it does.
+- JSON tree: a click makes the tree the active part (it gets a ring), and then the arrow keys move between its folds, Right opens a fold, Left closes it or goes to the fold above, and Home and End go to the first and the last fold.
+
+
+- Live player: the time the run has taken (a pill with a larger red blinking dot, for example 1:24) and the Stop button (red with a white square) sit one under the other in the top right corner of the diagram. While the run is live, play, speed, restart, previous, next and the slider are hidden, because they have nothing to do; they come back in Re-play when the run ends. A run carried on from an earlier try continues from its time.
 
 
 - Statistics: a Refused calls tile (and a Refused column in the table of agents) shows how many calls the provider refused, for example with 429. They spend no tokens, so they are not model calls. It shows only when there were some.

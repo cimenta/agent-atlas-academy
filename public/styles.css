@@ -1746,3 +1746,27 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .clk-pill::before { font-size: 0.85rem; line-height: 1; color: #d11a2a; }
 /* The round number flashes only while the replay plays or the run is live, not while it waits at its start or is paused. */
 .replay:not(.is-playing):not(.is-live) .round-badge .round-no { animation: none; }
+/* The Stop button of a live run: a red button with a white square, as in the mockup. */
+.live-corner button.ib.danger { background: var(--err); border-color: var(--err); color: #fff; }
+.live-corner button.ib.danger:hover { background: #a61e1e; border-color: #a61e1e; }
+/* A tree takes the keyboard when it is clicked: the arrows move between its folds. */
+.jt:focus { outline: none; }
+.jt:focus-within { outline: 2px solid var(--accent-line); outline-offset: 2px; border-radius: 4px; }
+.jt summary:focus { outline: none; background: var(--accent-bg); color: var(--accent); border-radius: 3px; }
+
+/* Free requests left today (OpenRouter): a pill on the provider chip and a box in Settings. */
+.quota-pill { font-size: 0.72rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: #ffffff2e; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.quota-pill.low { background: #fdf1dc; color: #6b4a00; }
+.quota-pill.out { background: #fbe4e4; color: #8a1520; }
+.quota-box { margin: 10px 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); max-width: 460px; }
+.quota-box h3 { margin: 0 0 6px; font-size: 0.95rem; }
+.quota-bar { height: 8px; border-radius: 4px; background: var(--accent-bg); overflow: hidden; }
+.quota-bar i { display: block; height: 100%; background: var(--accent); }
+.quota-bar.low i { background: #e3a33a; }
+.quota-bar.out i { background: #d36a6a; }
+.quota-line { margin: 6px 0 2px; font-size: 0.88rem; }
+@media (prefers-color-scheme: dark) { .quota-pill.low { background: #3a2d10; color: #f0c870; } .quota-pill.out { background: #3d1a1e; color: #ffb0b8; } }
+
+/* Settings, provider tabs: the same coloured mark as the provider chip in Create. */
+.provider-tab { display: inline-flex; align-items: center; gap: 7px; }
+.provider-tab .pv-mark { width: 22px; height: 22px; border-radius: 50%; font-size: 0.72rem; }

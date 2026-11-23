@@ -10,6 +10,7 @@ import { limitsChoice } from "../replay/limits-choice.js";
 import { withCurrentLimits } from "../replay/limits-compare.js";
 import { showCenterTip } from "../center-tip.js";
 import { refreshResultTab } from "../tab-state.js";
+import { quotaStore, quotaLevelOf, quotaTitle } from "../quota-client.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree, slotLabelKey, slotSubKey, slotFreeLimits } from "../key-slots.js";
 import { providerSpec, defaultSlot, modelsOfSlot } from "../engine/providers.js";
 import { sharedFreeCheck, compareFree, applyOverrides, OVERRIDE_SLOT } from "../engine/free-check.js";
@@ -261,6 +262,14 @@ export function renderCreate(ctx) {
       });
       defaultHost.replaceChildren(select);
     };
+    // Choosing OpenRouter asks how many free requests are left today (the key goes to our server, which asks OpenRouter). Every choice asks again.
+    const askQuota = (id) => {
+      if (slotProvider(id) !== "openrouter" || !draft.slots.includes(id)) return;
+      const key = vaultFor(id).getSessionKey();
+      if (key) quotaStore.refresh(id, key);
+    };
+    const offQuota = quotaStore.subscribe(() => drawProviderTiles());
+    ctx.onLeave(offQuota);
     const drawProviderTiles = () => keepFocus(doc, providerTiles, drawProviderTilesRaw);
     const drawProviderTilesRaw = () => {
       const chosen = chosenSlots();
@@ -288,11 +297,20 @@ export function renderCreate(ctx) {
             h(doc, "span", { class: "pv-name" }, name),
             ...(free ? [] : [h(doc, "span", { class: "pv-paid", title: t("create.paidMark"), role: "img", "aria-label": t("create.paidMark") }, "$")]),
           ];
-          const tile = h(doc, "button", { type: "button", class: `provider-tile${selected ? " on" : ""}${warn ? " warn" : ""}${missingKey ? " missing" : ""}`, role: "checkbox", "aria-checked": String(selected), "data-ui": `provider-tile-${id}`, title: `${slotName(id)}${free ? ` (${t("create.providerFree")})` : ` (${t("create.paidMark")})`}: ${stateText}` }, ...parts);
+          // OpenRouter, when chosen: the free requests left today, as a pill with its own colour (normal, low, out). No number when it is not known.
+          const entry = selected && kind === "openrouter" ? quotaStore.get(id) : null;
+          let tip = `${slotName(id)}${free ? ` (${t("create.providerFree")})` : ` (${t("create.paidMark")})`}: ${stateText}`;
+          if (selected && kind === "openrouter" && quotaStore.busy(id)) parts.push(h(doc, "span", { class: "quota-pill", "data-ui": `quota-${id}`, "aria-live": "polite" }, "…"));
+          else if (entry?.result.ok) {
+            parts.push(h(doc, "span", { class: `quota-pill ${quotaLevelOf(entry.result)}`, "data-ui": `quota-${id}`, "aria-live": "polite" }, t("quota.pill", { remaining: entry.result.remaining, limit: entry.result.limit })));
+            tip = `${tip}. ${quotaTitle(t, entry)}`;
+          }
+          const tile = h(doc, "button", { type: "button", class: `provider-tile${selected ? " on" : ""}${warn ? " warn" : ""}${missingKey ? " missing" : ""}`, role: "checkbox", "aria-checked": String(selected), "data-ui": `provider-tile-${id}`, title: tip }, ...parts);
           tile.addEventListener("click", () => {
             // Any number of providers may be on, also none: the student decides.
             draft.slots = toggleSlot(chosen, id, SLOT_IDS);
             draft.decisions.providers = draft.slots.length > 0;
+            askQuota(id);
             if (id === OVERRIDE_SLOT && draft.slots.includes(id)) checkAsked = false;
             keepModels();
             editorHandle.refresh();
@@ -302,6 +320,8 @@ export function renderCreate(ctx) {
         }),
       );
       drawDefaultModel();
+      // An OpenRouter that is already chosen (a loaded definition, a visit back to Create) and has no number yet asks once.
+      for (const id of chosen) if (slotProvider(id) === "openrouter" && !quotaStore.get(id) && !quotaStore.busy(id)) askQuota(id);
     };
     const legendItem = (mark, text) => h(doc, "span", {}, mark, text);
     const providerLegend = h(doc, "div", { class: "pv-legend", "data-ui": "provider-legend" }, legendItem(h(doc, "i", { class: "pv-lg loaded" }), t("create.legendLoaded")), legendItem(h(doc, "i", { class: "pv-lg warn" }), t("create.legendLocked")), legendItem(h(doc, "i", { class: "pv-lg missing" }), t("create.legendMissing")), legendItem(h(doc, "i", { class: "pv-lg chosen" }), t("create.legendChosen")), legendItem(h(doc, "span", { class: "pv-paid pv-paid-legend", "aria-hidden": "true" }, "$"), t("create.legendPaid")));

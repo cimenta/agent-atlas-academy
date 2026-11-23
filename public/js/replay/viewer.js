@@ -52,6 +52,40 @@ export function createViewer({ doc, t }) {
     return h(doc, "details", { open }, h(doc, "summary", {}, isArray ? `[${entries.length}]` : `{${entries.length}}`), h(doc, "div", { class: "jk" }, ...rows));
   }
 
+  // The keyboard in a tree: a click makes the tree the active part (it takes the focus), and then the arrows move between its folds,
+  // Right opens a fold and Left closes it (or goes to the fold above), Home and End go to the first and the last fold.
+  function treeKeys(box) {
+    const visible = () => [...box.querySelectorAll("summary")].filter((sm) => {
+      for (let d = sm.parentElement; d && d !== box; d = d.parentElement) if (d.tagName === "DETAILS" && d !== sm.parentElement && !d.open) return false;
+      return true;
+    });
+    box.addEventListener("keydown", (event) => {
+      if (event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) return;
+      const keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"];
+      if (!keys.includes(event.key)) return;
+      const list = visible();
+      if (list.length === 0) return;
+      const at = list.indexOf(doc.activeElement);
+      const go = (i) => list[Math.max(0, Math.min(list.length - 1, i))]?.focus();
+      event.preventDefault();
+      event.stopPropagation();
+      if (at < 0) return go(event.key === "End" ? list.length - 1 : 0);
+      const fold = list[at].parentElement;
+      if (event.key === "ArrowDown") go(at + 1);
+      else if (event.key === "ArrowUp") go(at - 1);
+      else if (event.key === "Home") go(0);
+      else if (event.key === "End") go(list.length - 1);
+      else if (event.key === "ArrowRight") {
+        if (!fold.open) fold.open = true;
+        else go(at + 1);
+      } else if (fold.open) fold.open = false;
+      else {
+        const parent = fold.parentElement?.closest("details");
+        if (parent) parent.querySelector(":scope > summary")?.focus();
+      }
+    });
+  }
+
   return {
     view(id, value) {
       if (!states.has(id)) states.set(id, { mode: "raw", q: "" });
@@ -62,7 +96,11 @@ export function createViewer({ doc, t }) {
       const fillBody = () => {
         let nodes;
         try {
-          nodes = json !== undefined && st.mode === "tree" ? [h(doc, "div", { class: "jt" }, tree(json, st.q))] : marked(raw, st.q);
+          if (json !== undefined && st.mode === "tree") {
+            const box = h(doc, "div", { class: "jt", tabindex: "0", role: "tree", "aria-label": t("insp.vTree") }, tree(json, st.q));
+            treeKeys(box);
+            nodes = [box];
+          } else nodes = marked(raw, st.q);
         } catch {
           nodes = marked(raw, st.q); // a tree of a document nested too deep
         }

@@ -10,6 +10,10 @@ export const callOpenrouter = (body, options = {}) => callChatCompletions(body, 
 // The list of models is public: a key is sent only when one is given.
 export const listOpenrouterModels = (options = {}) => listChatModels({ ...options, url: `${ROOT}/models`, who: "OpenRouter" });
 
+// What OpenRouter says about a key (GET /key): the free calls used today among other things. The caller reads only what it needs.
+export const readOpenrouterKey = ({ apiKey, fetchImpl, signal, timeoutMs } = {}) =>
+  getJson(`${ROOT}/key`, { headers: { authorization: `Bearer ${apiKey}` }, apiKey, fetchImpl, signal, timeoutMs, who: "OpenRouter" });
+
 // The same list with what the free-model check needs: { ids, models: [{ id, name, tools, forcedFormat }] }. The list is foreign data:
 // the server cleans it (engine/model-check.js) before anything leaves it.
 export async function listOpenrouterDetailed({ apiKey, fetchImpl, signal, timeoutMs } = {}) {

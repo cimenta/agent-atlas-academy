@@ -4,6 +4,8 @@ import { dirname, extname, join, normalize, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRunHandler } from "../lib/run-handler.js";
 import { createModelsHandler } from "../lib/models-handler.js";
+import { createQuotaHandler } from "../lib/quota-handler.js";
+import { mockOpenrouterKey } from "./mock-quota.js";
 import { PROVIDERS } from "../public/js/engine/providers.js";
 import { createMockCall } from "../public/js/engine/mock-anthropic.js";
 import { AnthropicError } from "../public/js/engine/anthropic.js";
@@ -59,6 +61,9 @@ const mockList = (id) => id === "openrouter" ? async () => mockOpenrouterList() 
 const modelsHandler = useMock
   ? createModelsHandler({ lists: Object.fromEntries(Object.keys(PROVIDERS).map((id) => [id, mockList(id)])), rateLimitImpl: () => true })
   : createModelsHandler();
+
+// Mock mode: the free requests left are made up, and OpenRouter is not asked.
+const quotaHandler = useMock ? createQuotaHandler({ readKey: async () => mockOpenrouterKey(), rateLimitImpl: () => true }) : createQuotaHandler();
 
 const server = createServer(async (req, res) => {
   try {
@@ -116,6 +121,10 @@ const server = createServer(async (req, res) => {
       } catch (error) {
         res.writeHead(500, { "content-type": "application/json" }).end(JSON.stringify({ error: { message: String(error?.message ?? error) } }));
       }
+      return;
+    }
+    if (new URL(req.url, "http://localhost").pathname === "/api/quota") {
+      await quotaHandler(req, res);
       return;
     }
     if (new URL(req.url, "http://localhost").pathname === "/api/models") {

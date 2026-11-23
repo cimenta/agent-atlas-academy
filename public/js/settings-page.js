@@ -7,6 +7,7 @@ import { SLOT_IDS, isSlot, slotProvider, slotIsFree, slotLabelKey, slotFreeLimit
 import { limitsBox, modelsBox } from "./settings-limits-box.js";
 import { PROVIDERS, freeSlotOf } from "./engine/providers.js";
 import { checkModels, describeCheck, checkAllModels } from "./model-check-client.js";
+import { quotaStore, quotaLevelOf, quotaClock, quotaTime as quotaTitleTime } from "./quota-client.js";
 import { sharedFreeCheck, OVERRIDE_SLOT } from "./engine/free-check.js";
 import { markUnlockAlert, needsUnlock } from "./unlock-alert.js";
 import { keyState, overallKeyState } from "./key-state.js";
@@ -17,7 +18,6 @@ import { VaultError } from "./storage/key-vault.js";
 import { exportBackup, parseBackup, applyBackup, backupVaultRecords } from "./storage/backup.js";
 
 const formatSize = (bytes) => (bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1048576).toFixed(1)} MB`);
-const PROVIDERS_SOON = ["OpenAI", "Mistral", "Llama"];
 
 export function renderSettings(ctx) {
   const { doc, t, vault, settings, runStore } = ctx;
@@ -173,8 +173,34 @@ export function renderSettings(ctx) {
       drawModels();
       limitBoxes.push(modelsHost);
     }
-    const node = h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, status, colorRow(slotProvider(id)), h(doc, "div", { class: "key-actions" }, replaceButton, checkButton), h(doc, "p", { class: "hint" }, t(slotIsFree(id) && spec.text.checkHint ? spec.text.checkHint : "settings.checkModelsHint")), checkResult, form, ...limitBoxes);
+    // OpenRouter: the free requests left today, the time of the last update and a button to ask again. Asked when the key is loaded and nothing is known yet.
+    const quotaHost = h(doc, "div", { class: "quota-box", "data-ui": `quota-box-${id}`, "aria-live": "polite", hidden: true });
+    const drawQuota = () => {
+      const available = v.getSessionKey() !== null;
+      quotaHost.hidden = slotProvider(id) !== "openrouter" || !available;
+      if (quotaHost.hidden) return;
+      const entry = quotaStore.get(id);
+      const busy = quotaStore.busy(id);
+      const button = h(doc, "button", { type: "button", "data-ui": `quota-update-${id}` }, t(busy ? "quota.updating" : "quota.update"));
+      button.disabled = busy;
+      button.addEventListener("click", () => quotaStore.refresh(id, v.getSessionKey()));
+      const parts = [h(doc, "h3", {}, t("quota.heading"))];
+      const result = entry?.result;
+      if (result?.ok) {
+        const level = quotaLevelOf(result);
+        const bar = h(doc, "div", { class: `quota-bar ${level}`, role: "img", "aria-label": t("quota.usedOf", { used: result.used, limit: result.limit, remaining: result.remaining }) }, h(doc, "i", { style: `width:${Math.min(100, (result.used / result.limit) * 100).toFixed(1)}%` }));
+        parts.push(bar, h(doc, "p", { class: "quota-line", "data-ui": `quota-text-${id}` }, t("quota.usedOf", { used: result.used, limit: result.limit, remaining: result.remaining })), h(doc, "p", { class: "hint" }, t(result.limit >= 1000 ? "quota.limitHigh" : "quota.limitLow")));
+        if (level === "out") parts.push(h(doc, "p", { class: "notice", role: "status" }, t("quota.resets", { time: quotaTitleTime(result.resetsAt) })));
+      } else if (result) parts.push(h(doc, "p", { class: "notice check-warn", role: "status", "data-ui": `quota-error-${id}` }, t(`quota.error.${["rejected", "rate_limit", "unknown"].includes(result.error) ? result.error : "unreachable"}`)));
+      parts.push(h(doc, "div", { class: "key-actions" }, button, entry ? h(doc, "span", { class: "hint", "data-ui": `quota-stamp-${id}` }, t("quota.updated", { time: quotaClock(entry.at) })) : ""));
+      quotaHost.replaceChildren(...parts);
+      if (!entry && !busy) quotaStore.refresh(id, v.getSessionKey());
+    };
+    const offQuota = quotaStore.subscribe((slot) => { if (slot === id) drawQuota(); });
+    ctx.onLeave?.(offQuota);
+    const node = h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, status, colorRow(slotProvider(id)), h(doc, "div", { class: "key-actions" }, replaceButton, checkButton), h(doc, "p", { class: "hint" }, t(slotIsFree(id) && spec.text.checkHint ? spec.text.checkHint : "settings.checkModelsHint")), checkResult, quotaHost, form, ...limitBoxes);
     const refresh = () => {
+      drawQuota();
       const saved = v.getSessionKey() !== null || v.hasStoredKey();
       form.hidden = saved && !replacing;
       replaceButton.hidden = !saved || replacing;
@@ -802,7 +828,7 @@ export function renderSettings(ctx) {
   };
   const providerButtons = PROVIDER_IDS.map((id) => {
     providerDots[id] = h(doc, "span", { class: "key-dot", "data-ui": `provider-dot-${id}`, role: "img", hidden: true });
-    const button = h(doc, "button", { type: "button", class: "tab provider-tab", role: "tab", "data-provider": id, "data-ui": `provider-tab-${id}` }, PROVIDERS[id].chipName, providerDots[id]);
+    const button = h(doc, "button", { type: "button", class: "tab provider-tab", role: "tab", "data-provider": id, "data-ui": `provider-tab-${id}` }, h(doc, "span", { class: `pv-mark pv-${PROVIDERS[id].id}`, "aria-hidden": "true" }, PROVIDERS[id].mark), PROVIDERS[id].chipName, providerDots[id]);
     button.addEventListener("click", () => showProvider(id));
     return button;
   });
@@ -811,7 +837,6 @@ export function renderSettings(ctx) {
     "div",
     { class: "provider-tabs", role: "tablist", "data-ui": "provider-tabs" },
     ...providerButtons,
-    ...PROVIDERS_SOON.map((name) => h(doc, "button", { type: "button", class: "tab", role: "tab", disabled: true, "aria-disabled": "true", "data-ui": `provider-tab-${name.toLowerCase()}` }, name, h(doc, "span", { class: "tag-soon" }, t("settings.providerSoon")))),
   );
   // A link such as #/settings/key/google opens that key slot directly.
   const wanted = isSlot(ctx.slot) ? ctx.slot : null;
