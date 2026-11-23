@@ -35,16 +35,49 @@ function diagram(doc, design) {
 const section = (doc, t, key, ...content) => h(doc, "section", { "data-ui": `detail-${key}` }, h(doc, "h3", {}, t(`library.detail.${key}`)), ...content);
 const paragraph = (doc, text) => h(doc, "p", {}, text);
 
+const ACTION_ICONS = {
+  load: ["M5 3l8 5-8 5z"],
+  "use-in-create": ["M5 7.3l6-3M5 8.7l6 3"],
+  export: ["M8 10V2M4.5 5 8 1.5 11.5 5M3 10v3h10v-3"],
+  compare: ["M2 5h10M9 2l3 3-3 3M14 11H4M7 8l-3 3 3 3"],
+  send: ["M2 8 14 2l-3 12-3-5z"],
+  "edit-description": ["M2 14h3l8-8-3-3-8 8zM9 4l3 3"],
+  delete: ["M3 4h10M6 4V2h4v2M5 4l.7 9h4.6L11 4"],
+};
+function actionIcon(doc, paths) {
+  const svg = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
+  for (const [k, v] of Object.entries({ viewBox: "0 0 16 16", width: "16", height: "16", "aria-hidden": "true", fill: "none", stroke: "currentColor", "stroke-width": "1.7", "stroke-linecap": "round", "stroke-linejoin": "round", class: "action-icon" })) svg.setAttribute(k, v);
+  for (const d of paths) {
+    const path = doc.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", d);
+    svg.append(path);
+  }
+  if (paths === ACTION_ICONS["use-in-create"]) {
+    for (const [cx, cy] of [[3.5, 8], [12.5, 3.5], [12.5, 12.5]]) {
+      const dot = doc.createElementNS("http://www.w3.org/2000/svg", "circle");
+      dot.setAttribute("cx", String(cx));
+      dot.setAttribute("cy", String(cy));
+      dot.setAttribute("r", "1.6");
+      svg.append(dot);
+    }
+  }
+  return svg;
+}
+
 // actions: [{ ui, label, primary?, danger?, onClick }]. aboutPanel: the description panel of your own run, shown as a section.
 export function libraryDetail({ doc, t, item, run, source, detail, facts, actions = [], aboutPanel = null, num = (n) => String(n) }) {
   const text = (key) => (typeof detail?.[key] === "string" && detail[key].trim() !== "" ? detail[key] : "");
   const articles = Array.isArray(detail?.articles) ? detail.articles.filter((a) => a && typeof a.slug === "string" && /^[a-z0-9-]+$/.test(a.slug)) : [];
   const hasText = Boolean(text("about") || text("how") || text("learns") || text("watch") || articles.length > 0);
 
-  const buttons = actions.map((a) => {
-    const button = h(doc, "button", { type: "button", class: a.primary ? "primary" : a.danger ? "danger" : undefined, "data-ui": `detail-${a.ui}` }, a.label);
+  // Small buttons: Load keeps its words, the others are icons with the name and what they do as a tooltip.
+  const buttons = [...actions.filter((a) => a.ui !== "delete"), ...actions.filter((a) => a.ui === "delete")].flatMap((a) => {
+    const iconOnly = !a.primary;
+    const cls = ["action", iconOnly ? "icon" : "", a.primary ? "primary" : a.danger ? "danger" : ""].filter(Boolean).join(" ");
+    const tip = t(`library.tip.action.${a.ui}`);
+    const button = h(doc, "button", { type: "button", class: cls, "data-ui": `detail-${a.ui}`, title: tip.startsWith("library.tip.") ? a.label : `${a.label}: ${tip}`, ...(iconOnly ? { "aria-label": a.label } : {}) }, ...(ACTION_ICONS[a.ui] ? [actionIcon(doc, ACTION_ICONS[a.ui])] : []), ...(iconOnly ? [] : [a.label]));
     button.addEventListener("click", () => a.onClick());
-    return button;
+    return a.ui === "edit-description" ? [h(doc, "span", { class: "action-sep", "aria-hidden": "true" }), button] : [button];
   });
 
   const outcome = facts.outcome ? t(`result.status.${facts.outcome}`) : "";

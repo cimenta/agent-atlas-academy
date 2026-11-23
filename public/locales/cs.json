@@ -1658,5 +1658,12 @@
   "library.tags.groupTip.efficiency": "Témata o ceně a rychlosti",
   "library.tags.groupTip.basics": "Témata pro první seznámení",
   "editor.removeKeep": "Ponechat",
-  "editor.removeYes": "Odebrat agenta"
+  "editor.removeYes": "Odebrat agenta",
+  "library.tip.action.load": "Otevře běh v přehrávání",
+  "library.tip.action.use-in-create": "Otevře definici běhu v Create",
+  "library.tip.action.export": "Uloží běh do souboru",
+  "library.tip.action.compare": "Porovná tento běh s jiným",
+  "library.tip.action.send": "Odešle běh k zařazení do knihovny",
+  "library.tip.action.edit-description": "Upraví váš popis běhu",
+  "library.tip.action.delete": "Smaže běh z tohoto prohlížeče"
 }

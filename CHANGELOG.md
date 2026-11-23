@@ -47,6 +47,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Library: the buttons of a run are smaller and fit in one row. Load keeps its word and a play icon; Use in Create, Export, Compare, Send, Edit description and Delete are icons with a tooltip that says what they do (English and Czech).
+- Library: coming back to the Library shows the run you had open and the tag cloud switch as you left them, with the filters, the tab and the search. The cloud is on by default only the first time the Library opens after the app starts.
 - Create: a connection line starts and ends in a dot. A dot whose connection goes to another row moves to the bottom or the top of the agent, so the line runs from dot to dot. The list of connections in the corner of the diagram has small remove buttons and grows in columns instead of a scroll bar.
 - Library: a small dot between the words of the tag cloud makes the tags easier to tell apart.
 - release.bat now follows the Vercel production build after the release, like test.bat follows the preview: it says when the build started and finished, and warns when it failed or did not start (it needs the GitHub CLI, gh).

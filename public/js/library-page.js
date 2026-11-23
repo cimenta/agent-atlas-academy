@@ -100,8 +100,11 @@ export async function renderLibraryTab(ctx, requestedId) {
   let local = await listLocal();
   if (ctx.isStale()) return;
 
-  let selected = requestedId ?? null;
-  // A run opened from a link shows its detail; otherwise the tag cloud is on (it is on the first time the Library opens).
+  // A run opened from a link shows its detail. Coming back to the Library shows the run and the cloud switch as they were
+  // (a run that is gone is forgotten); the tag cloud is on only the first time the Library opens after the app starts.
+  const stillThere = (id) => Boolean(id) && (gallery.some((r) => r.id === id) || local.some((r) => r.id === id));
+  let selected = requestedId ?? (stillThere(lib.selected) ? lib.selected : null);
+  if (!selected) lib.selected = null;
   if (requestedId) lib.cloud = false;
   let detailToken = 0;
   // What the chosen run offers to the letter keys (set when its detail is drawn), and which list is shown.

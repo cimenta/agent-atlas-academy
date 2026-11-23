@@ -1658,5 +1658,12 @@
   "library.tags.groupTip.efficiency": "Topics about cost and speed",
   "library.tags.groupTip.basics": "Topics for a first look",
   "editor.removeKeep": "Keep",
-  "editor.removeYes": "Remove the agent"
+  "editor.removeYes": "Remove the agent",
+  "library.tip.action.load": "Opens the run in Re-play",
+  "library.tip.action.use-in-create": "Opens the definition of the run in Create",
+  "library.tip.action.export": "Saves the run to a file",
+  "library.tip.action.compare": "Compares this run with another one",
+  "library.tip.action.send": "Sends the run to be added to the Library",
+  "library.tip.action.edit-description": "Edit your description of the run",
+  "library.tip.action.delete": "Deletes the run from this browser"
 }

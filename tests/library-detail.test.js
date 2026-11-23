@@ -15,7 +15,7 @@ class El {
   find(pred, out = []) { for (const c of this.children) if (c instanceof El) { if (pred(c)) out.push(c); c.find(pred, out); } return out; }
   get text() { return this.children.map((c) => c.text).join(" "); }
 }
-const doc = { createElement: (tag) => new El(tag), createTextNode: (text) => ({ text }) };
+const doc = { createElement: (tag) => new El(tag), createElementNS: (ns, tag) => new El(tag), createTextNode: (text) => ({ text }) };
 const tOf = (dict) => (key, params = {}) => String(dict[key] ?? `MISSING ${key}`).replace(/\{(\w+)\}/g, (_, k) => params[k] ?? `{${k}}`);
 const facts = { pattern: "sequential", language: "en", agents: 2, providers: ["groq"], models: [{ agent: "planner", provider: "groq", model: "openai/gpt-oss-20b" }, { agent: "writer", provider: "groq", model: "openai/gpt-oss-120b" }], limits: { maxSteps: 20, maxTokens: 40000, maxSearches: 3 }, hasApiLog: true, calls: 3, outcome: "finished" };
 const item = { id: "r1", title: "One task, two models", pattern: "sequential", source: "gallery" };
@@ -77,4 +77,17 @@ test("the detail texts exist in both languages, differ, and share their paramete
     assert.notEqual(en[k], cs[k], k);
   }
   assert.match(make({}, cs).text, /O čem to je/);
+});
+
+test("only Load has words; the other buttons are icons with a name and a tooltip, and Delete comes last", () => {
+  const actions = actionList({ source: "local", hasDefinition: true, canSubmit: true }).map((ui) => ({ ui, label: `L-${ui}`, primary: ui === "load", danger: ui === "delete", onClick() {} }));
+  const buttons = make({ actions }).find((e) => e.tag === "button");
+  assert.equal(buttons.at(-1).attrs["data-ui"], "detail-delete");
+  assert.ok(buttons.findIndex((b) => b.attrs["data-ui"] === "detail-edit-description") < buttons.length - 1);
+  assert.ok(buttons[0].text.includes("L-load"));
+  for (const b of buttons.slice(1)) {
+    assert.equal(b.attrs["aria-label"], b.attrs["data-ui"] === undefined ? undefined : `L-${b.attrs["data-ui"].slice(7)}`);
+    assert.ok(b.attrs.title.startsWith("L-"), b.attrs.title);
+    assert.doesNotMatch(b.text, /L-/);
+  }
 });
