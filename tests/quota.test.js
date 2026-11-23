@@ -119,3 +119,33 @@ test("a call to Groq feeds the store, any other call does not", () => {
 test("a run fits, fits tightly, does not fit, or nothing is known", () => {
   assert.deepEqual([runFit(12, null), runFit(12, 100), runFit(12, 15), runFit(12, 11), runFit(1, 0)], ["unknown", "ok", "tight", "over", "over"]);
 });
+
+import { parseCloudflareNeurons } from "../public/js/engine/quota.js";
+
+test("the neurons of a call to Cloudflare are read from the header or the body", () => {
+  assert.equal(parseCloudflareNeurons({ status: 200, headers: { "cf-ai-neurons": "41.8" }, body: "" }), 41.8);
+  assert.equal(parseCloudflareNeurons({ status: 200, headers: { "cf-ai-neurons": "(hidden)" }, body: JSON.stringify({ usage: { neurons: 80.9 } }) }), 80.9);
+  assert.equal(parseCloudflareNeurons({ status: 200, headers: {}, body: "not json" }), null);
+  assert.equal(parseCloudflareNeurons({ status: 200, headers: {}, body: JSON.stringify({ usage: { neurons: -1 } }) }), null);
+  assert.equal(parseCloudflareNeurons(null), null);
+});
+
+test("the neurons of the calls are added up for the day and start again the next UTC day", () => {
+  let now = new Date("2026-11-23T20:00:00Z");
+  const store = createQuotaStore({ now: () => now });
+  const call = (neurons) => ({ type: "api_call", provider: "cloudflare", response: { status: 200, headers: {}, body: JSON.stringify({ usage: { neurons } }) } });
+  observeApiCall(store, call(41.8), () => now);
+  observeApiCall(store, call(80.9), () => now);
+  assert.equal(store.get("cloudflare").result.used, 122.7);
+  assert.equal(store.get("cloudflare").result.remaining, 9877);
+  observeApiCall(store, { type: "api_call", provider: "cloudflare", response: { status: 429, headers: {}, body: "{}" } }, () => now);
+  assert.equal(store.get("cloudflare").result.used, 122.7);
+  now = new Date("2026-11-24T00:00:05Z");
+  observeApiCall(store, call(10), () => now);
+  assert.equal(store.get("cloudflare").result.used, 10);
+  store.addNeurons("cloudflare", 20000, now);
+  assert.equal(store.get("cloudflare").result.remaining, 0);
+  assert.equal(quotaLevelOf(store.get("cloudflare").result), "out");
+  assert.equal(quotaLevelOf({ neurons: true, limit: 10000, remaining: 900 }), "low");
+  assert.equal(quotaLevelOf({ neurons: true, limit: 10000, remaining: 5000 }), "ok");
+});

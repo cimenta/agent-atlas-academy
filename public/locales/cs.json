@@ -1763,5 +1763,19 @@
   "settings.infoModelsGone": "Free modely se mohou měnit nebo mizet. Zkontrolovat modely na záložce Klíč řekne, které z modelů této aplikace klíč ještě dostane.",
   "settings.cloudflareAccountLabel": "ID účtu Cloudflare",
   "settings.cloudflareAccountPlaceholder": "32 znaků, například 0123456789abcdef0123456789abcdef",
-  "settings.cloudflareTokenPlaceholder": "API token s oprávněním Workers AI"
+  "settings.cloudflareTokenPlaceholder": "API token s oprávněním Workers AI",
+  "settings.infoSlowProvider": "Modely tohoto poskytovatele mohou být pomalé, proto volání čeká {factor}krát déle, než je časový limit požadavku na záložce Harness.",
+  "quota.pillNeurons": "{remaining}/{limit} neuronů",
+  "quota.titleNeurons": "Neurony Cloudflare dnes použité: aspoň {used} z {limit}, spočteno z volání v této kartě (poslední v {time}). Použití mimo tuto aplikaci se nepočítá.",
+  "quota.neuronsHeading": "Neurony dnes (počítané v této kartě)",
+  "quota.neuronsOf": "Dnes použito v této kartě: {used} z {limit} neuronů.",
+  "quota.neuronsAt": "Poslední volání Cloudflare v této kartě: {time}.",
+  "quota.neuronsNone": "Cloudflare ještě nebyl v této kartě volán, takže se nic nepočítá. Počítání začne prvním během, který ho používá.",
+  "quota.neuronsNote": "Cloudflare neumí říct, kolik neuronů zbývá, ale každá odpověď říká, kolik jich to volání spotřebovalo, a aplikace je sčítá. Použití mimo tuto aplikaci nevidí, takže skutečné číslo může být vyšší. Počítání začíná znovu o 00:00 UTC.",
+  "quota.warnN.none": "Dnešní neurony poskytovatele {provider} jsou nejspíš vyčerpané.",
+  "quota.warnN.over": "Běh má podle odhadu spotřebovat asi {need} neuronů poskytovatele {provider}, ale aspoň {used} se dnes už použilo, takže zbývá asi {remaining}.",
+  "quota.warnN.tight": "Běh má podle odhadu spotřebovat asi {need} neuronů a u poskytovatele {provider} dnes zbývá asi {remaining}.",
+  "quota.warnN.overTail": "Běh se pravděpodobně zastaví na limitu. Zkraťte ho, použijte rychlejší model, nebo počkejte do 00:00 UTC. Spustit ho můžete i tak.",
+  "quota.warnN.tightTail": "Vejde se, ale s malou rezervou, a použití mimo tuto aplikaci se nepočítá.",
+  "quota.warnN.ok": "{provider}: běh má podle odhadu spotřebovat asi {need} neuronů a dnes zbývá asi {remaining} (aspoň {used} už použito)."
 }

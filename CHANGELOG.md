@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Cloudflare neurons used today: counted from what every answer reports (header cf-ai-neurons or usage.neurons) and shown as a pill on the Cloudflare card in Create, in a box on the Limit tab in Settings, and as a warning on the Cost tab when the run is expected not to fit in the 10,000 free neurons a day. It counts only calls made in this tab and starts again at 00:00 UTC.
+- Settings, Cloudflare key: two boxes, the account ID and the API token, kept together as ACCOUNT_ID:TOKEN. A whole ACCOUNT_ID:TOKEN pasted into the token box is still accepted.
 - Settings, API keys: the panel of a free key has tabs Key, Models, Limit and Info (the arrow keys move between them). A paid key keeps its single column.
 - Requests left at Groq: read from the headers of the last call to Groq (Groq has no other way to say it), shown as a pill on the card in Create and in a box in Settings with the tokens left this minute and the time of the last call.
 - Before a run, the Cost tab warns when the expected number of calls does not fit, or fits tightly, in the requests left today at Groq or at the free key of OpenRouter. The run is never stopped by it.
@@ -298,6 +300,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Fixed
 
+- Cloudflare: a call waits twice as long as the request timeout (the Strong model often needs more than a minute), and the Info tab says so.
+- Demo definition Cloudflare 429: seven Strong agents answering at the same time plus a combiner, so one run can reach the 10,000 free neurons a day. The About text has measured numbers.
 - Statistics: the tokens of a call that came back after an agent's last answer (a run stopped by a limit) now count for that agent, so the agents add up to the total of the run.
 - The round number in the badge flashes only while the replay plays or the run is live, no longer while it waits at its start.
 

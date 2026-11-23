@@ -6,16 +6,16 @@
     "en": {
       "title": "Cloudflare Workers AI: a run that hits the limit (429)",
       "author": "Agent Atlas Academy",
-      "description": "Eight agents answer one after another on the Strong model, each reads the answer before it and writes a very long reply of its own (up to 4,000 tokens). Together they use more than the 10,000 neurons a day that the free Cloudflare allocation gives, so the provider answers **429 Too Many Requests** with error 4006.\n\n**What it shows**\n\n- How the app reacts to the limit: the daily free allocation of neurons, error 4006.\n- A day limit stops the run with a clear reason and everything saved, so it can be carried on tomorrow.\n- The warning in the replay names the provider and the reason.\n\n**What to watch**\n\n- The **API calls** tab: the call with status 429 and its body.\n- Whether the run stops or finishes. Both are correct results of this test.\n\n**How to get the 429**\n\nOne run is enough on an account that has not used the pool today. The Strong model costs about 291 neurons for every 1,000 tokens it writes, so eight replies of up to 4,000 tokens, with the long text each agent reads, need about 10,500 neurons, a little more than the pool. The 429 comes at the last agents. If the account has already used part of the pool today, it comes sooner; if it has no neurons left, at the first call. The pool resets at 00:00 UTC."
+      "description": "Seven agents answer at the same time on the Strong model, each writes a long reply of its own (up to 4,000 tokens), and a combiner reads all of them. Together they can come close to, or pass, the 10,000 neurons a day that the free Cloudflare allocation gives. Then the provider answers **429 Too Many Requests** with error 4006.\n\n**What it shows**\n\n- How the app reacts to the limit: the daily free allocation of neurons, error 4006.\n- A day limit stops the run with a clear reason and everything saved, so it can be carried on tomorrow.\n- The warning in the replay names the provider and the reason.\n\n**What to watch**\n\n- The **API calls** tab: the call with status 429 and its body, and the neurons that every answer reports.\n- The neurons used today in Settings, tab Limit of the Cloudflare key, and on the card of Cloudflare in Create. The app adds up what every answer says.\n- Whether the run stops or finishes. Both are correct results of this test.\n\n**How to get the 429**\n\nThe Strong model uses about 291 neurons for every 1,000 tokens it writes (its thinking counts too), so one reply of up to 4,000 tokens is about 1,160 neurons at most, and the seven together about 8,100, plus about 2,300 for the combiner that reads them and writes its own answer. How much a reply really writes differs from run to run, so one run may stay under the pool. Run it again: the count in Settings shows how close you are, and the warning before the run says when the rest of the day is not enough. If the account has no neurons left, the 429 comes at the first call. The pool resets at 00:00 UTC.\n\n**Note**\n\nThe agents run at the same time, so one run lasts about as long as the slowest reply (the Strong model can take more than a minute; a call to Cloudflare waits twice as long as the request timeout of the Harness tab)."
     },
     "cs": {
       "title": "Cloudflare Workers AI: běh, který narazí na limit (429)",
       "author": "Agent Atlas Academy",
-      "description": "Osm agentů odpovídá jeden po druhém na modelu Silný, každý si přečte odpověď před sebou a napíše vlastní velmi dlouhou odpověď (až 4 000 tokenů). Dohromady spotřebují víc než 10 000 neuronů denně, které dává bezplatná alokace Cloudflare, takže poskytovatel odpoví **429 Too Many Requests** s chybou 4006.\n\n**Co ukazuje**\n\n- Jak aplikace na limit reaguje: denní bezplatná alokace neuronů, chyba 4006.\n- Denní limit běh zastaví s jasným důvodem a se vším uloženým, aby šel zítra dokončit.\n- Varování v záznamu jmenuje poskytovatele a důvod.\n\n**Na co se dívat**\n\n- Záložka **Volání API**: volání se stavem 429 a jeho tělo.\n- Zda se běh zastaví, nebo dokončí. Obojí je správný výsledek tohoto testu.\n\n**Jak získat 429**\n\nNa účtu, který dnes alokaci nepoužil, stačí jeden běh. Model Silný stojí asi 291 neuronů za každých 1 000 tokenů, které napíše, takže osm odpovědí až po 4 000 tokenech, s dlouhým textem, který každý agent čte, potřebuje asi 10 500 neuronů, o něco víc než je alokace. 429 přijde u posledních agentů. Pokud účet dnes část alokace už použil, přijde dřív, a bez zbylých neuronů hned u prvního volání. Alokace se obnoví v 00:00 UTC."
+      "description": "Sedm agentů odpovídá současně na modelu Silný, každý napíše vlastní dlouhou odpověď (až 4 000 tokenů) a slučovač je všechny přečte. Dohromady se mohou přiblížit k limitu 10 000 neuronů denně, který dává bezplatná alokace Cloudflare, nebo ho překročit. Pak poskytovatel odpoví **429 Too Many Requests** s chybou 4006.\n\n**Co ukazuje**\n\n- Jak aplikace na limit reaguje: denní bezplatná alokace neuronů, chyba 4006.\n- Denní limit běh zastaví s jasným důvodem a se vším uloženým, aby šel zítra dokončit.\n- Varování v záznamu jmenuje poskytovatele a důvod.\n\n**Na co se dívat**\n\n- Záložka **Volání API**: volání se stavem 429 a jeho tělo a neurony, které hlásí každá odpověď.\n- Dnes použité neurony v Settings, na záložce Limit klíče Cloudflare, a na kartě Cloudflare v Create. Aplikace sčítá, co říká každá odpověď.\n- Zda se běh zastaví, nebo dokončí. Obojí je správný výsledek tohoto testu.\n\n**Jak získat 429**\n\nModel Silný spotřebuje asi 291 neuronů za každých 1 000 tokenů, které napíše (počítá se i jeho přemýšlení), takže jedna odpověď až o 4 000 tokenech je nejvýš asi 1 160 neuronů a sedm dohromady asi 8 100, plus asi 2 300 pro slučovač, který je přečte a napíše vlastní odpověď. Kolik odpověď skutečně napíše, je při každém běhu jiné, takže jeden běh může zůstat pod limitem. Spusťte ho znovu: počet v Settings ukazuje, jak blízko jste, a varování před během řekne, že zbytek dne nestačí. Pokud účet nemá žádné neurony, přijde 429 už u prvního volání. Alokace se obnoví v 00:00 UTC.\n\n**Poznámka**\n\nAgenti běží současně, takže jeden běh trvá zhruba jako nejpomalejší odpověď (model Silný může trvat přes minutu; volání Cloudflare čeká dvakrát déle, než je časový limit požadavku na záložce Harness)."
     }
   },
   "design": {
-    "pattern": "sequential",
+    "pattern": "parallel",
     "nodes": [
       {
         "id": "free",
@@ -24,7 +24,7 @@
         "slot": "cloudflare-free",
         "search": false,
         "name": "Historian",
-        "instructions": "Answer as a historian. Write a very long, detailed answer of at least 2500 words with headings and examples.",
+        "instructions": "Answer as a historian. Write a long, detailed answer with headings and examples, and use all the room you have.",
         "limits": {
           "maxOutputTokens": 4000
         }
@@ -36,7 +36,7 @@
         "slot": "cloudflare-free",
         "search": false,
         "name": "Engineer",
-        "instructions": "Read the previous answer. Then answer as a engineer: add what it misses and write a very long, detailed answer of at least 2500 words with headings and examples.",
+        "instructions": "Answer as an engineer. Write a long, detailed answer with headings and examples, and use all the room you have.",
         "limits": {
           "maxOutputTokens": 4000
         }
@@ -48,7 +48,7 @@
         "slot": "cloudflare-free",
         "search": false,
         "name": "Economist",
-        "instructions": "Read the previous answer. Then answer as a economist: add what it misses and write a very long, detailed answer of at least 2500 words with headings and examples.",
+        "instructions": "Answer as an economist. Write a long, detailed answer with headings and examples, and use all the room you have.",
         "limits": {
           "maxOutputTokens": 4000
         }
@@ -60,7 +60,7 @@
         "slot": "cloudflare-free",
         "search": false,
         "name": "Ecologist",
-        "instructions": "Read the previous answer. Then answer as a ecologist: add what it misses and write a very long, detailed answer of at least 2500 words with headings and examples.",
+        "instructions": "Answer as an ecologist. Write a long, detailed answer with headings and examples, and use all the room you have.",
         "limits": {
           "maxOutputTokens": 4000
         }
@@ -72,7 +72,7 @@
         "slot": "cloudflare-free",
         "search": false,
         "name": "Sociologist",
-        "instructions": "Read the previous answer. Then answer as a sociologist: add what it misses and write a very long, detailed answer of at least 2500 words with headings and examples.",
+        "instructions": "Answer as a sociologist. Write a long, detailed answer with headings and examples, and use all the room you have.",
         "limits": {
           "maxOutputTokens": 4000
         }
@@ -84,7 +84,7 @@
         "slot": "cloudflare-free",
         "search": false,
         "name": "Doctor",
-        "instructions": "Read the previous answer. Then answer as a doctor: add what it misses and write a very long, detailed answer of at least 2500 words with headings and examples.",
+        "instructions": "Answer as a doctor. Write a long, detailed answer with headings and examples, and use all the room you have.",
         "limits": {
           "maxOutputTokens": 4000
         }
@@ -96,52 +96,47 @@
         "slot": "cloudflare-free",
         "search": false,
         "name": "Lawyer",
-        "instructions": "Read the previous answer. Then answer as a lawyer: add what it misses and write a very long, detailed answer of at least 2500 words with headings and examples.",
+        "instructions": "Answer as a lawyer. Write a long, detailed answer with headings and examples, and use all the room you have.",
         "limits": {
           "maxOutputTokens": 4000
         }
       },
       {
-        "id": "free-8",
-        "agent": "free",
+        "id": "combiner",
+        "agent": "combiner",
         "model": "strong",
         "slot": "cloudflare-free",
-        "search": false,
-        "name": "Architect",
-        "instructions": "Read the previous answer. Then answer as a architect: add what it misses and write a very long, detailed answer of at least 2500 words with headings and examples.",
-        "limits": {
-          "maxOutputTokens": 4000
-        }
+        "search": false
       }
     ],
     "edges": [
       {
         "from": "free",
-        "to": "free-2"
+        "to": "combiner"
       },
       {
         "from": "free-2",
-        "to": "free-3"
+        "to": "combiner"
       },
       {
         "from": "free-3",
-        "to": "free-4"
+        "to": "combiner"
       },
       {
         "from": "free-4",
-        "to": "free-5"
+        "to": "combiner"
       },
       {
         "from": "free-5",
-        "to": "free-6"
+        "to": "combiner"
       },
       {
         "from": "free-6",
-        "to": "free-7"
+        "to": "combiner"
       },
       {
         "from": "free-7",
-        "to": "free-8"
+        "to": "combiner"
       }
     ]
   }

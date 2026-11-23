@@ -1,4 +1,4 @@
-import { parseGroqHeaders } from "./engine/quota.js";
+import { parseGroqHeaders, parseCloudflareNeurons, CLOUDFLARE_DAILY_NEURONS } from "./engine/quota.js";
 // Free requests left today at OpenRouter: asks our server (the page cannot reach the provider) and remembers the last answer in memory only,
 // with the time it was made. No DOM here. Nothing is stored on disk and the key is never kept.
 const KNOWN_ERRORS = new Set(["rejected", "rate_limit", "bad_key", "bad_provider", "unknown"]);
@@ -16,7 +16,7 @@ export async function fetchQuota({ provider = "openrouter", key, fetchFn = fetch
 }
 
 // One reading of an answer for both pages, so they cannot disagree: "out" at 0 left, "low" at 5 or fewer, "ok" otherwise.
-export const quotaLevelOf = (quota) => (!quota || quota.remaining > 5 ? "ok" : quota.remaining <= 0 ? "out" : "low");
+export const quotaLevelOf = (quota) => (!quota ? "ok" : quota.remaining <= 0 ? "out" : quota.neurons ? (quota.remaining <= quota.limit * 0.1 ? "low" : "ok") : quota.remaining > 5 ? "ok" : "low");
 
 const clock = (date) => (date instanceof Date && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "");
 const clockShort = (iso) => { const d = new Date(iso); return Number.isNaN(d.getTime()) ? "" : d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); };
@@ -53,6 +53,14 @@ export function createQuotaStore({ fetchFn = fetch, now = () => new Date() } = {
       return work;
     },
     forget(slot) { entries.delete(slot); notify(slot); },
+    // The neurons of one more call to Cloudflare are added to what the tab has seen today (a new UTC day starts again at 0). Kept under the key given.
+    addNeurons(key, amount, at = now(), limit = CLOUDFLARE_DAILY_NEURONS) {
+      const day = at.toISOString().slice(0, 10);
+      const before = entries.get(key)?.result;
+      const used = Math.round(((before?.day === day ? before.used : 0) + amount) * 100) / 100;
+      entries.set(key, { at, result: { ok: true, neurons: true, seen: true, day, used, limit, remaining: Math.max(0, Math.floor(limit - used)), resetsAt: null } });
+      notify(key);
+    },
     // A number that was not asked for but seen: the headers of the last call to a provider (Groq). Kept under the key given.
     observe(key, quota, at = now()) {
       entries.set(key, { at, result: { ok: true, used: quota.used, limit: quota.limit, remaining: quota.remaining, resetsAt: null, tokens: quota.tokens ?? null, resetText: quota.resetText ?? null, seen: true } });
@@ -66,10 +74,16 @@ export const quotaStore = createQuotaStore();
 
 // An api_call event of a run: a call to Groq with the headers of its answer feeds the store (key "groq"). Anything else is ignored.
 export function observeApiCall(store, event, now = () => new Date()) {
-  if (event?.type !== "api_call" || event.provider !== "groq") return;
-  const quota = parseGroqHeaders(event.response?.headers);
-  if (quota) store.observe("groq", quota, now());
+  if (event?.type !== "api_call") return;
+  if (event.provider === "groq") {
+    const quota = parseGroqHeaders(event.response?.headers);
+    if (quota) store.observe("groq", quota, now());
+  } else if (event.provider === "cloudflare" && event.response?.status === 200) {
+    // A call to Cloudflare says how many neurons it used: they are added up (key "cloudflare").
+    const neurons = parseCloudflareNeurons(event.response);
+    if (neurons !== null) store.addNeurons("cloudflare", neurons, now());
+  }
 }
 
 // The tooltip for a number that was seen in the last call, not asked for.
-export const quotaSeenTitle = (t, entry) => t("quota.titleSeen", { remaining: entry.result.remaining, limit: entry.result.limit, time: clock(entry.at) });
+export const quotaSeenTitle = (t, entry) => entry.result.neurons ? t("quota.titleNeurons", { used: Math.round(entry.result.used).toLocaleString(), limit: entry.result.limit.toLocaleString(), time: clock(entry.at) }) : t("quota.titleSeen", { remaining: entry.result.remaining, limit: entry.result.limit, time: clock(entry.at) });

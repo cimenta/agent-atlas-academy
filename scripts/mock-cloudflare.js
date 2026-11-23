@@ -20,7 +20,7 @@ export function createCloudflareMock({ mockCall, mode = process.env.MOCK_CF_429 
     return {
       status: 200,
       headers: { "cf-ray": "mock-ray" },
-      body: { id: "chatcmpl-mock", object: "chat.completion", model: chat.model, choices: [{ index: 0, message: { role: "assistant", content: text }, finish_reason: "stop" }], usage: { prompt_tokens: Math.ceil(promptChars / 4), completion_tokens: Math.ceil(text.length / 4), total_tokens: Math.ceil((promptChars + text.length) / 4) } },
+      body: { id: "chatcmpl-mock", object: "chat.completion", model: chat.model, choices: [{ index: 0, message: { role: "assistant", content: text }, finish_reason: "stop" }], usage: { prompt_tokens: Math.ceil(promptChars / 4), completion_tokens: Math.ceil(text.length / 4), total_tokens: Math.ceil((promptChars + text.length) / 4), neurons: Math.round((Math.ceil(promptChars / 4) * 0.0409 + Math.ceil(text.length / 4) * 0.2909) * 10) / 10 } },
     };
   };
 }

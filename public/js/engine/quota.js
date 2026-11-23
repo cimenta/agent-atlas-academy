@@ -57,3 +57,24 @@ export function runFit(calls, remaining) {
   if (remaining <= 0 || calls > remaining) return "over";
   return calls > remaining * 0.7 ? "tight" : "ok";
 }
+
+// Cloudflare: the free allocation is 10,000 neurons a day, reset at 00:00 UTC. Cloudflare cannot say how many are left, but every answer
+// says how many neurons that call used (the header cf-ai-neurons and usage.neurons in the body). The app adds them up.
+export const CLOUDFLARE_DAILY_NEURONS = 10000;
+
+// response: the recorded answer of a call ({ status, headers, body }). The neurons of that call, or null when it does not say.
+export function parseCloudflareNeurons(response) {
+  if (response === null || typeof response !== "object") return null;
+  const asNumber = (value) => (typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1e7 ? value : null);
+  const given = response.headers?.["cf-ai-neurons"];
+  const fromHeader = typeof given === "string" && given !== "(hidden)" && given.trim() !== "" ? asNumber(Number(given)) : null;
+  if (fromHeader !== null) return fromHeader;
+  if (typeof response.body === "string" && response.body.length < 400000) {
+    try {
+      return asNumber(JSON.parse(response.body)?.usage?.neurons);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}

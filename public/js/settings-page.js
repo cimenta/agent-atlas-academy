@@ -1,7 +1,7 @@
 // The settings page: API key handling, the harness (limits and fixed rules) and local data.
 import { h } from "./dom.js";
 import { helpIcon } from "./help-popup.js";
-import { LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, RETRIES, RETRY_DELAY_SEC, COST_CAP_USD, REPEAT_STOP, HANDOFF_CHARS, PROFILES, matchProfile, PROVIDER_IDS, providerCatalog, FALLBACK_MODES, FALLBACK_DEFAULT } from "./engine/catalog.js";
+import { SLOW_PROVIDER_TIMEOUT_FACTOR, LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, RETRIES, RETRY_DELAY_SEC, COST_CAP_USD, REPEAT_STOP, HANDOFF_CHARS, PROFILES, matchProfile, PROVIDER_IDS, providerCatalog, FALLBACK_MODES, FALLBACK_DEFAULT } from "./engine/catalog.js";
 import { COLOR_CHOICES, paintModelTag } from "./provider-colors.js";
 import { SLOT_IDS, isSlot, slotProvider, slotIsFree, slotLabelKey, slotFreeLimits } from "./key-slots.js";
 import { limitsBox, modelsBox } from "./settings-limits-box.js";
@@ -215,6 +215,19 @@ export function renderSettings(ctx) {
     const drawQuota = () => {
       const available = v.getSessionKey() !== null;
       // Groq cannot be asked: its box shows what the last call to it said, with the time, and has no Update button.
+      if (slotProvider(id) === "cloudflare") {
+        quotaHost.hidden = false;
+        const seen = quotaStore.get("cloudflare")?.result?.ok ? quotaStore.get("cloudflare") : null;
+        const parts = [h(doc, "h3", {}, t("quota.neuronsHeading"))];
+        if (seen) {
+          const r = seen.result;
+          const num = (n) => n.toLocaleString(locale);
+          parts.push(h(doc, "div", { class: `quota-bar ${quotaLevelOf(r)}`, role: "img", "aria-label": t("quota.neuronsOf", { used: num(Math.round(r.used)), limit: num(r.limit) }) }, h(doc, "i", { style: `width:${Math.min(100, (r.used / r.limit) * 100).toFixed(1)}%` })), h(doc, "p", { class: "quota-line", "data-ui": `quota-text-${id}` }, t("quota.neuronsOf", { used: num(Math.round(r.used)), limit: num(r.limit) })), h(doc, "p", { class: "hint", "data-ui": `quota-stamp-${id}` }, t("quota.neuronsAt", { time: quotaClock(seen.at) })));
+        } else parts.push(h(doc, "p", { class: "hint", "data-ui": `quota-none-${id}` }, t("quota.neuronsNone")));
+        parts.push(h(doc, "p", { class: "hint" }, t("quota.neuronsNote")));
+        quotaHost.replaceChildren(...parts);
+        return;
+      }
       if (slotProvider(id) === "groq") {
         quotaHost.hidden = false;
         const seen = quotaStore.get("groq")?.result?.ok ? quotaStore.get("groq") : null;
@@ -253,7 +266,7 @@ export function renderSettings(ctx) {
       quotaHost.replaceChildren(...parts);
       if (!entry && !busy) quotaStore.refresh(id, v.getSessionKey());
     };
-    const offQuota = quotaStore.subscribe((slot) => { if (slot === id || (slot === "groq" && slotProvider(id) === "groq")) drawQuota(); });
+    const offQuota = quotaStore.subscribe((slot) => { if (slot === id || (slot === "groq" && slotProvider(id) === "groq") || (slot === "cloudflare" && slotProvider(id) === "cloudflare")) drawQuota(); });
     ctx.onLeave?.(offQuota);
     const checkHint = h(doc, "p", { class: "hint" }, t(slotIsFree(id) && spec.text.checkHint ? spec.text.checkHint : "settings.checkModelsHint"));
     const keyActions = h(doc, "div", { class: "key-actions" }, replaceButton, checkButton);
@@ -263,7 +276,7 @@ export function renderSettings(ctx) {
         ["key", "settings.tabKey", [status, keyActions, checkHint, checkResult, form]],
         ["models", "settings.tabModels", [colorRow(slotProvider(id)), ...(spec.freeLimits ? [modelsHost] : [])]],
         ["limit", "settings.tabLimit", [quotaHost, ...limitBoxes]],
-        ["info", "settings.tabInfo", [...infoNodes, h(doc, "p", { class: "hint" }, t("settings.infoLimitRun")), h(doc, "p", { class: "hint" }, t("settings.infoModelsGone"))]],
+        ["info", "settings.tabInfo", [...infoNodes, h(doc, "p", { class: "hint" }, t("settings.infoLimitRun")), h(doc, "p", { class: "hint" }, t("settings.infoModelsGone")), ...(SLOW_PROVIDER_TIMEOUT_FACTOR[slotProvider(id)] ? [h(doc, "p", { class: "hint", "data-ui": `slow-provider-${id}` }, t("settings.infoSlowProvider", { factor: SLOW_PROVIDER_TIMEOUT_FACTOR[slotProvider(id)] }))] : [])]],
       ]))
       : h(doc, "div", { class: "provider-panel", "data-ui": `provider-panel-${id}` }, status, colorRow(slotProvider(id)), keyActions, checkHint, checkResult, quotaHost, form, ...limitBoxes);
     const refresh = () => {

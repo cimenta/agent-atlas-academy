@@ -271,7 +271,7 @@ export function renderCreate(ctx) {
     };
     // Before a run: does the number of calls it is expected to make fit in the free requests that are left today? Only Groq (the number seen in its last
     // call) and the free key of OpenRouter (asked when it was chosen) say how many are left. Nothing stops the run: it only warns.
-    const quotaWarnings = (rows, activations) => {
+    const quotaWarnings = (rows, activations, neuronsOfAgent = new Map()) => {
       if (!(activations > 0) || rows.length === 0) return [];
       const num = (n) => n.toLocaleString(ctx.lang === "cs" ? "cs-CZ" : "en-US");
       const out = [];
@@ -289,6 +289,17 @@ export function renderCreate(ctx) {
           out.push(h(doc, "div", { class: "limit-warning", role: "status", "data-ui": `quota-warning-${kind}` }, h(doc, "b", {}, t(head, params)), " ", t(fit === "over" ? "quota.warn.overTail" : "quota.warn.tightTail"), tokens));
         } else if (fit === "ok") out.push(h(doc, "p", { class: "hint", "data-ui": `quota-fit-${kind}` }, t("quota.warn.ok", params)));
         else if (kind === "groq") out.push(h(doc, "p", { class: "hint", "data-ui": "quota-fit-groq" }, t("quota.warn.unknown", params)));
+      }
+      // Cloudflare counts neurons, not calls: the neurons the run is expected to use against the neurons the tab has not yet seen used today.
+      const cf = rows.filter((r) => slotProvider(r.slot) === "cloudflare" && slotIsFree(r.slot));
+      const seenNeurons = quotaStore.get("cloudflare")?.result;
+      if (cf.length > 0 && seenNeurons?.ok) {
+        const need = Math.round(cf.reduce((sum, r) => sum + (neuronsOfAgent.get(r.id) ?? 0), 0));
+        const fit = runFit(need, seenNeurons.remaining);
+        const numN = (n) => n.toLocaleString(ctx.lang === "cs" ? "cs-CZ" : "en-US");
+        const paramsN = { provider: "Cloudflare", need: numN(need), remaining: numN(seenNeurons.remaining), used: numN(Math.round(seenNeurons.used)) };
+        if (need > 0 && (fit === "over" || fit === "tight")) out.push(h(doc, "div", { class: "limit-warning", role: "status", "data-ui": "quota-warning-cloudflare" }, h(doc, "b", {}, t(seenNeurons.remaining <= 0 ? "quota.warnN.none" : fit === "over" ? "quota.warnN.over" : "quota.warnN.tight", paramsN)), " ", t(fit === "over" ? "quota.warnN.overTail" : "quota.warnN.tightTail")));
+        else if (need > 0) out.push(h(doc, "p", { class: "hint", "data-ui": "quota-fit-cloudflare" }, t("quota.warnN.ok", paramsN)));
       }
       return out;
     };
@@ -322,12 +333,12 @@ export function renderCreate(ctx) {
             ...(free ? [] : [h(doc, "span", { class: "pv-paid", title: t("create.paidMark"), role: "img", "aria-label": t("create.paidMark") }, "$")]),
           ];
           // OpenRouter, when chosen: the free requests left today, as a pill with its own colour (normal, low, out). No number when it is not known.
-          const entry = selected ? (kind === "openrouter" ? quotaStore.get(id) : kind === "groq" ? quotaStore.get("groq") : null) : null;
+          const entry = selected ? (kind === "openrouter" ? quotaStore.get(id) : kind === "groq" ? quotaStore.get("groq") : kind === "cloudflare" ? quotaStore.get("cloudflare") : null) : null;
           let tip = `${slotName(id)}${free ? ` (${t("create.providerFree")})` : ` (${t("create.paidMark")})`}: ${stateText}`;
           if (selected && kind === "openrouter" && vaultFor(id).getSessionKey() === null) tip = `${tip}. ${t(state === "locked" ? "quota.locked" : "quota.noKey")}`;
           if (selected && kind === "openrouter" && quotaStore.busy(id)) parts.push(h(doc, "span", { class: "quota-pill", "data-ui": `quota-${id}`, "aria-live": "polite" }, "…"));
           else if (entry?.result.ok) {
-            parts.push(h(doc, "span", { class: `quota-pill ${quotaLevelOf(entry.result)}`, "data-ui": `quota-${id}`, "aria-live": "polite" }, t("quota.pill", { remaining: entry.result.remaining, limit: entry.result.limit })));
+            parts.push(h(doc, "span", { class: `quota-pill ${quotaLevelOf(entry.result)}`, "data-ui": `quota-${id}`, "aria-live": "polite" }, entry.result.neurons ? t("quota.pillNeurons", { remaining: entry.result.remaining.toLocaleString(ctx.lang === "cs" ? "cs-CZ" : "en-US"), limit: entry.result.limit.toLocaleString(ctx.lang === "cs" ? "cs-CZ" : "en-US") }) : t("quota.pill", { remaining: entry.result.remaining, limit: entry.result.limit })));
             tip = `${tip}. ${entry.result.seen ? quotaSeenTitle(t, entry) : quotaTitle(t, entry)}`;
           } else if (entry && !entry.result.ok) {
             // No number, but the reason is in the tooltip (the card itself stays quiet).
@@ -590,7 +601,7 @@ export function renderCreate(ctx) {
         h(doc, "p", {}, h(doc, "strong", { "data-ui": isFree ? "estimate-free" : "estimate-cost" }, isFree ? t(providerSpec(provider).text.estimateFree ?? "create.estimateFree") : t("create.estimate", { usd: est.costUsd.toFixed(3), date: est.pricesAsOf }))),
         h(doc, "p", { class: "hint" }, t("create.estimateDetail", { tokens: est.tokensUpper, turns: est.activations })),
         ...(limitEl ? [limitEl] : []),
-        ...quotaWarnings(rows, est.activations),
+        ...quotaWarnings(rows, est.activations, agentNeurons),
       ];
       if (summary.warning) {
         const w = summary.warning;

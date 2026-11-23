@@ -1763,5 +1763,19 @@
   "settings.infoModelsGone": "Free models can change or disappear. Check models on the Key tab says which of the models of this app the key still gets.",
   "settings.cloudflareAccountLabel": "Cloudflare account ID",
   "settings.cloudflareAccountPlaceholder": "32 characters, for example 0123456789abcdef0123456789abcdef",
-  "settings.cloudflareTokenPlaceholder": "API token with the Workers AI permission"
+  "settings.cloudflareTokenPlaceholder": "API token with the Workers AI permission",
+  "settings.infoSlowProvider": "Models of this provider can be slow, so a call waits {factor} times as long as the request timeout of the Harness tab.",
+  "quota.pillNeurons": "{remaining}/{limit} neurons",
+  "quota.titleNeurons": "Neurons of Cloudflare used today: at least {used} of {limit}, counted from the calls made in this tab (last at {time}). Use outside this app is not counted.",
+  "quota.neuronsHeading": "Neurons today (counted in this tab)",
+  "quota.neuronsOf": "Used today in this tab: {used} of {limit} neurons.",
+  "quota.neuronsAt": "The last call to Cloudflare in this tab: {time}.",
+  "quota.neuronsNone": "Cloudflare has not been called in this tab yet, so nothing is counted. The count starts with the first run that uses it.",
+  "quota.neuronsNote": "Cloudflare cannot say how many neurons are left, but every answer says how many that call used, and the app adds them up. It does not see use outside this app, so the real number can be higher. The count starts again at 00:00 UTC.",
+  "quota.warnN.none": "The neurons of {provider} for today seem to be used up.",
+  "quota.warnN.over": "This run is expected to use about {need} neurons of {provider}, but at least {used} are already used today, so only about {remaining} are left.",
+  "quota.warnN.tight": "This run is expected to use about {need} neurons and about {remaining} are left today at {provider}.",
+  "quota.warnN.overTail": "The run will probably stop at the limit. Make it shorter, use a faster model, or wait until 00:00 UTC. You can still run it.",
+  "quota.warnN.tightTail": "It fits, but with little room, and use outside this app is not counted.",
+  "quota.warnN.ok": "{provider}: this run is expected to use about {need} neurons, and about {remaining} are left today (at least {used} used so far)."
 }
