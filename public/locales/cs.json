@@ -541,7 +541,7 @@
   "design.error.node.agentNotAllowed": "Tento agent do tohoto vzoru orchestrace nepatří.",
   "design.error.node.model": "Některý agent má neznámý model.",
   "design.error.node.name": "Jméno agenta je příliš dlouhé (nejvýše 40 znaků).",
-  "design.error.node.instructions": "Pokyny smí mít jen volný agent, nejvýše 2000 znaků.",
+  "design.error.node.instructions": "Pokyny smí mít jen volný agent, nejvýše 2000 znaků (agent: {id}).",
   "design.error.node.search": "Některý agent má neplatné nastavení vyhledávání.",
   "design.error.node.stance": "Některý debatér má neplatnou stranu.",
   "design.error.node.addToPrevious": "Kritik může přidávat své poznámky jen v sekvenčním nebo paralelním návrhu.",
@@ -1666,5 +1666,6 @@
   "library.tip.action.send": "Odešle běh k zařazení do knihovny",
   "library.tip.action.edit-description": "Upraví váš popis běhu",
   "library.tip.action.delete": "Smaže běh z tohoto prohlížeče",
-  "limits.languageNote": "Odhad počítá tokeny z délky textu, proto se liší podle jazyka: stejný text potřebuje v češtině asi 1,5krát víc tokenů než v angličtině."
+  "limits.languageNote": "Odhad počítá tokeny z délky textu, proto se liší podle jazyka: stejný text potřebuje v češtině asi 1,5krát víc tokenů než v angličtině.",
+  "create.reason.noKeyGo": "Otevře záložku Klíč API, kde klíč přidáte"
 }

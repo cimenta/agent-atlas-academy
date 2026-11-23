@@ -580,7 +580,23 @@ export function renderCreate(ctx) {
       lastVerdict = verdict;
       // A reason that says the saved key is locked has a small password box and a button right after the words, so it can be unlocked from here.
       const unlockInline = () => makeUnlock(drawReview);
-      const reasons = verdict.ok ? "" : h(doc, "ul", { class: "reasons", role: "status" }, ...verdict.reasons.map((r) => h(doc, "li", {}, t(`create.reason.${r}`, r === "limitsBlocked" ? { agents: lastBlockedNames } : undefined), ...(r === "keyLocked" && lockedSlots.length > 0 ? [unlockInline()] : []))));
+      // "Add your API key first." takes the student to the API key tab and into its key box.
+      const keyLink = (text) => {
+        const go = h(doc, "button", { type: "button", class: "linklike", "data-ui": "reason-go-key", title: t("create.reason.noKeyGo") }, text);
+        go.addEventListener("click", () => {
+          draft.subTab = "key";
+          drawReview();
+          const toKey = () => {
+            const box = reviewHost.querySelector('[id^="cr-key"]');
+            box?.scrollIntoView?.({ block: "center" });
+            box?.focus?.();
+          };
+          toKey();
+          setTimeout(toKey, 0); // the review may be drawn again once more (key state loaded)
+        });
+        return go;
+      };
+      const reasons = verdict.ok ? "" : h(doc, "ul", { class: "reasons", role: "status" }, ...verdict.reasons.map((r) => h(doc, "li", {}, r === "noKey" ? keyLink(t(`create.reason.${r}`)) : t(`create.reason.${r}`, r === "limitsBlocked" ? { agents: lastBlockedNames } : undefined), ...(r === "keyLocked" && lockedSlots.length > 0 ? [unlockInline()] : []))));
 
       const status = stepsStatus();
       const tabs = innerTabs({ doc, t, tabs: [{ id: "agents", label: t("create.tab.agents") }, { id: "limits", label: t("create.tab.limits"), state: status.limits }, { id: "cost", label: t("create.tab.cost") }, { id: "key", label: t("create.tab.key"), state: status.key === "done" ? "done" : "part" }], current: draft.subTab, onSelect: (id) => {

@@ -541,7 +541,7 @@
   "design.error.node.agentNotAllowed": "That agent does not belong in this orchestration pattern.",
   "design.error.node.model": "An agent has an unknown model.",
   "design.error.node.name": "An agent name is too long (40 characters at most).",
-  "design.error.node.instructions": "Instructions are allowed only for the free agent, up to 2000 characters.",
+  "design.error.node.instructions": "Instructions are allowed only for the free agent, up to 2000 characters (agent: {id}).",
   "design.error.node.search": "An agent has an invalid search setting.",
   "design.error.node.stance": "A debater has an invalid side.",
   "design.error.node.addToPrevious": "A critic can add its notes only in a sequential or parallel design.",
@@ -1666,5 +1666,6 @@
   "library.tip.action.send": "Sends the run to be added to the Library",
   "library.tip.action.edit-description": "Edit your description of the run",
   "library.tip.action.delete": "Deletes the run from this browser",
-  "limits.languageNote": "The estimate counts tokens from the length of the text, so it differs by language: the same text needs about 1.5 times more tokens in Czech than in English."
+  "limits.languageNote": "The estimate counts tokens from the length of the text, so it differs by language: the same text needs about 1.5 times more tokens in Czech than in English.",
+  "create.reason.noKeyGo": "Opens the API key tab, where you add your key"
 }

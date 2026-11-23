@@ -47,6 +47,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Create: when a loaded definition is refused because of instructions on an agent that cannot have them, the message names the agent (English and Czech).
+- Create: the reason "Add your API key first." is now a link; it opens the API key tab and puts the cursor in the key box (English and Czech tooltip).
 - Create: the estimate of tokens for the free limits (Groq, Cloudflare) counts the language of the run: Czech text is about 2.6 characters a token, English about 4, and the real length of your task is used instead of a fixed 1,000 characters. Checked against a real Groq run with 429: the estimate is now about 15 percent over the real total (it was 24 percent), still an upper bound. The limits box says that the estimate differs by language.
 - The Play menu is now called Lab (Laboratoř in Czech), because it holds the Library, Re-play, Create and Result.
 - Create: Load definition and Clear definition at the top are icons with a tooltip. The Unlock button is a little farther from its box. In the player, the speed buttons are as high as the other player buttons.
