@@ -20,6 +20,7 @@ import { canSubmit, submitRun } from "./submit-run.js";
 import { createAboutPanel } from "./replay/about.js";
 import { MAX_COMPARE } from "./compare-model.js";
 import { clearPageActions, setPageActions } from "./shortcuts.js";
+import { groupOfTag, tagCounts, filterByTags, cloudRows, tagWeight } from "./library-tags.js";
 
 export { importFiles };
 
@@ -100,6 +101,8 @@ export async function renderLibraryTab(ctx, requestedId) {
   if (ctx.isStale()) return;
 
   let selected = requestedId ?? null;
+  // A run opened from a link shows its detail; otherwise the tag cloud is on (it is on the first time the Library opens).
+  if (requestedId) lib.cloud = false;
   let detailToken = 0;
   // What the chosen run offers to the letter keys (set when its detail is drawn), and which list is shown.
   let detailState = null;
@@ -156,6 +159,7 @@ export async function renderLibraryTab(ctx, requestedId) {
   const select = (id, { keepList = false } = {}) => {
     selected = id;
     lib.selected = id;
+    lib.cloud = !id;
     setAddress(id, Boolean(id) && layout.getAttribute("data-view") === "list" && !keepList);
     // On a phone the page scrolls: the list position is kept while the detail is shown, and Back returns to it.
     const win = doc.defaultView;
@@ -207,6 +211,17 @@ export async function renderLibraryTab(ctx, requestedId) {
         redraw();
       });
       buttons.push(clear);
+    }
+    if (lib.tags.length > 0) {
+      buttons.push(
+        barButton("tags-clear", t("library.tags.clear"), lib.tags.length, {
+          onClick: () => {
+            lib.tags = [];
+            redraw();
+            if (showCloud()) drawDetail();
+          },
+        }),
+      );
     }
     const hint = compareNote || (n > 0 ? t(n === 1 ? "compare.pickOne" : "compare.base") : "");
     const menu = createRunMenu({
@@ -326,6 +341,7 @@ export async function renderLibraryTab(ctx, requestedId) {
       (detailHost.querySelector("button") ?? detailHost).focus();
       return true;
     },
+    toggleTags: withNoteCleared(() => toggleCloud()),
     importFile: () => fileInput.click(),
     loadLast: () => {
       const last = doc.querySelector('[data-ui="load-last"]');
@@ -335,11 +351,91 @@ export async function renderLibraryTab(ctx, requestedId) {
   setPageActions(pageActions);
   ctx.onLeave(() => clearPageActions(pageActions));
 
+  // The tag cloud: on the right when it is switched on or when no run is chosen. The switch sits in the tab row of the list.
+  const showCloud = () => !selected || lib.cloud;
+  const tagLabel = (id) => {
+    const text = t(`tag.${id}`);
+    return text === `tag.${id}` ? id : text;
+  };
+  // On a phone the list and the detail take turns; the detail is the one that is hidden while the list shows.
+  const detailHidden = () => doc.defaultView.getComputedStyle?.(detailHost).display === "none";
+  const syncToggle = () => {
+    const button = pane.querySelector('[data-ui="tag-cloud-toggle"]');
+    if (button) button.setAttribute("aria-pressed", String(showCloud()));
+  };
+  const toggleCloud = () => {
+    // On a phone the switch brings the cloud in place of the list.
+    if (detailHidden()) {
+      lib.cloud = true;
+      layout.setAttribute("data-view", "detail");
+    } else if (selected) {
+      lib.cloud = !lib.cloud;
+    } else {
+      return false;
+    }
+    drawDetail();
+    return true;
+  };
+  const pickTag = (tag) => {
+    lib.tags = lib.tags.includes(tag) ? lib.tags.filter((x) => x !== tag) : [...lib.tags, tag];
+    if (lib.tags.length > 0 && activeTab !== "library") {
+      lib.tab = "library";
+      lib.tabChosen = true;
+    }
+    // On a phone the cloud hides the list: show the list the choice has narrowed down.
+    if (layout.getAttribute("data-view") === "detail" && doc.defaultView.matchMedia?.("(max-width: 759px)").matches) layout.setAttribute("data-view", "list");
+    redraw();
+    if (showCloud()) drawDetail();
+  };
+  const drawCloud = () => {
+    const had = detailHost.contains(doc.activeElement) ? doc.activeElement.getAttribute?.("data-tag") : null;
+    const items = buildReplayList(gallery, []).gallery;
+    const all = tagCounts(items);
+    const left = filterByTags(items, lib.tags);
+    const shown = tagCounts(left);
+    const max = Math.max(0, ...all.values());
+    const back = h(doc, "a", { href: "#/play", class: "back-to-list", "data-ui": "back-to-list" }, t("library.backToList"));
+    back.addEventListener("click", (event) => {
+      event.preventDefault();
+      layout.setAttribute("data-view", "list");
+    });
+    const chips = lib.tags.map((tag) => {
+      const chip = h(doc, "button", { type: "button", class: "tag-chip", "data-ui": "tag-chip", "aria-label": t("library.tags.remove", { tag: tagLabel(tag) }) }, `${tagLabel(tag)} \u00d7`);
+      chip.addEventListener("click", () => pickTag(tag));
+      return chip;
+    });
+    const rows = cloudRows(all).map((row) =>
+      h(
+        doc,
+        "div",
+        { class: "tag-row" },
+        ...row.map((tag) => {
+          const on = lib.tags.includes(tag);
+          const word = h(doc, "button", { type: "button", class: `tag-word tag-${groupOfTag(tag)}${on ? " on" : ""}${!on && !shown.has(tag) ? " dim" : ""}`, "data-ui": "tag-word", "data-tag": tag, "aria-pressed": String(on), title: t("library.tags.wordTitle", { n: all.get(tag) }) }, tagLabel(tag), h(doc, "sup", { class: "tag-count" }, String(all.get(tag))));
+          word.style.fontSize = `${(0.9 + tagWeight(all.get(tag), max) * 1.2).toFixed(2)}rem`;
+          word.addEventListener("click", () => pickTag(tag));
+          return word;
+        }),
+      ),
+    );
+    const key = h(doc, "div", { class: "tag-key" }, ...["pattern", "task", "efficiency", "basics"].map((g) => h(doc, "span", { class: `tag-${g}` }, t(`library.tags.group.${g}`))));
+    detailHost.replaceChildren(
+      back,
+      h(doc, "h2", { class: "tag-title" }, t("library.tags.title")),
+      h(doc, "p", { class: "muted" }, all.size === 0 ? t("library.tags.none") : lib.tags.length > 0 ? t("library.tags.result", { n: left.length }) : t("library.tags.hint", { runs: items.length, tags: all.size })),
+      ...(chips.length > 0 ? [h(doc, "div", { class: "tag-chips" }, ...chips)] : []),
+      ...(rows.length > 0 ? [h(doc, "div", { class: "tag-cloud", role: "group", "aria-label": t("library.tags.title"), "data-ui": "tag-cloud" }, ...rows), key] : []),
+      ...(selected ? [] : [h(doc, "p", { class: "library-hint", "data-ui": "library-hint" }, t("library.selectHint"))]),
+    );
+    if (had) detailHost.querySelector(`[data-tag="${had}"]`)?.focus();
+  };
+
   async function drawDetail() {
     const token = ++detailToken;
     detailState = null;
-    if (!selected) {
-      detailHost.replaceChildren(h(doc, "p", { class: "library-hint", "data-ui": "library-hint" }, t("library.selectHint")));
+    syncToggle();
+    if (showCloud()) {
+      drawCloud();
       return;
     }
     const found = await loadAnyRun(ctx, selected);
@@ -411,7 +507,7 @@ export async function renderLibraryTab(ctx, requestedId) {
     local = await listLocal();
     if (ctx.isStale()) return;
     const built = buildReplayList(gallery, local);
-    const shown = filterLibrary(built.gallery, lib.query, texts ?? {});
+    const shown = filterLibrary(filterByTags(built.gallery, lib.tags), lib.query, texts ?? {});
     const mine = filterLibrary(built.mine, lib.query, texts ?? {});
     const none = (key) => h(doc, "p", { class: "notice" }, t(key));
     const row = (item) =>
@@ -447,7 +543,14 @@ export async function renderLibraryTab(ctx, requestedId) {
       });
       return button;
     };
-    const paneTabs = h(doc, "div", { class: "tabs", role: "tablist", "data-ui": "pane-tabs" }, tabButton("mine", "play.mine", built.mine.length), tabButton("library", "play.library", built.gallery.length), fileInput);
+    const tagToggle = () => {
+      const button = h(doc, "button", { type: "button", class: "tag-toggle", "data-ui": "tag-cloud-toggle", "aria-pressed": String(showCloud()), title: t("library.tags.toggleTitle"), "aria-keyshortcuts": "t" }, h(doc, "span", { "aria-hidden": "true" }, "\u2601 "), t("library.tags.toggle"));
+      button.addEventListener("click", () => {
+        keyNote.textContent = toggleCloud() ? "" : t("library.nothing.toggleTags");
+      });
+      return button;
+    };
+    const paneTabs = h(doc, "div", { class: "tabs", role: "tablist", "data-ui": "pane-tabs" }, tabButton("mine", "play.mine", built.mine.length), tabButton("library", "play.library", built.gallery.length), tagToggle(), fileInput);
     pane.replaceChildren(
       paneTabs,
       importNote,

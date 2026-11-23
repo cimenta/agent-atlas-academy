@@ -281,3 +281,14 @@ test("the library group lists every key of the library page, with a label in bot
     assert.ok(typeof cs[l] === "string" && cs[l] && cs[l] !== en[l], "cs " + l);
   }
 });
+
+test("t switches the tag cloud, says so when there is nothing to switch, and does nothing off the Library", () => {
+  const { handle } = setup();
+  const log = [];
+  const actions = { toggleTags: () => (log.push("tags"), false), say: (name) => log.push(`say ${name}`) };
+  setPageActions(actions);
+  assert.equal(handle(key("t")), true);
+  assert.deepEqual(log, ["tags", "say toggleTags"]);
+  clearPageActions(actions);
+  assert.equal(handle(key("t")), false);
+});

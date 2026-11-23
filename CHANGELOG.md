@@ -6,6 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Library: a tag cloud fills the right side while no run is chosen, and it is on the first time the Library opens. Each library run has tags (what it is about and what the student can learn); a tag is bigger the more runs carry it, the number is next to it, the most frequent one is in the middle and related tags share a colour. Clicking tags narrows the list to the runs that have all of them; Clear filters sits next to Compare. The Tags switch at the right end of the tab row, or the T key, swaps the cloud and the detail of the chosen run.
 - Create: connection dots on the agents. The left dot (blue) receives a connection and the right dot (green) sends one; a dot is only there when that connection is possible in the pattern or already used. Drag from a dot, or tap the sending dot and then the receiving one. A connection that cannot be made shows a red cross with the reason on the line. Right click removes a connection. The little arrow button inside the agent is gone.
 - Create: every agent has a red circle with a white cross at its top right corner that removes it from the diagram.
 - Diagrams: a second row reads right to left (a snake), so the next agent sits directly under the last one of the row above, in Create and in Re-play.

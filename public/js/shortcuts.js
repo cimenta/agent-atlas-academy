@@ -100,6 +100,7 @@ export const SHORTCUT_GROUPS = [
       { label: "shortcuts.libDelete", combos: [["Delete"]] },
       { label: "shortcuts.libImport", combos: [["i"]] },
       { label: "shortcuts.libLast", combos: [["o"]] },
+      { label: "shortcuts.libTags", combos: [["t"]] },
       { label: "shortcuts.libSwap", combos: [["q"]] },
       { label: "shortcuts.libBack", combos: [["b"]] },
       { label: "shortcuts.libLeave", combos: [["Esc"]] },
@@ -150,7 +151,7 @@ export function clearActivePlayer(api) {
 }
 
 // The keys of the Play pages and the action each one calls. Shift+E arrives as E.
-const PAGE_KEYS = { b: "back", i: "importFile", o: "loadLast", l: "load", c: "compare", e: "exportTicked", E: "exportAllMine", u: "useInCreate", n: "editDescription", Delete: "remove" };
+const PAGE_KEYS = { b: "back", i: "importFile", o: "loadLast", t: "toggleTags", l: "load", c: "compare", e: "exportTicked", E: "exportAllMine", u: "useInCreate", n: "editDescription", Delete: "remove" };
 
 const TYPING = new Set(["INPUT", "TEXTAREA", "SELECT"]);
 const ACTIVATES_ON_SPACE = new Set(["BUTTON", "A", "SUMMARY"]);
