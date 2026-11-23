@@ -5,6 +5,9 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 ## [Unreleased]
 
 ### Added
+
+- Player: the round badge (Round 1 of 4, votes, handoffs, steps), the type chip (Debate) and the Recorded with text open the same hover card as the diagram. The card of the badge follows the replay; the one of Recorded with lists the models.
+
 - Replay and live diagram: resting the pointer on an agent box or an arrow opens a small card after a short pause. A box card says what the agent does, its state in plain words, its time, errors and warnings; an arrow card says whether the answer has gone that way yet. The arrow is lit while its card is open. It also opens when a box is focused with the keyboard.
 
 
@@ -48,6 +51,10 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 - Evaluator loop: a fifth pattern in Create. A writer drafts, an evaluator judges the draft against criteria that you write, and the writer revises, for 1 to 4 rounds. The evaluator accepts or sends feedback, and the program reads that verdict. A loop ends accepted, not accepted (the rounds ran out, the last draft is the result and is marked), or stopped by a limit. The replay shows the round and a notice at the end, the Result tab shows the notice and a Loop tile, and Create warns when no criteria are written. The Learn article Evaluator loop is written (English and Czech) and is no longer marked coming.
 
 ### Changed
+
+- Live player: the status line shows how many steps are finished (Finished steps: 46) instead of Step 46 of 46, because a live run has no fixed total. A recording still shows Step x of y.
+
+- Replay diagram: the ring around the chosen agent is drawn inside its box, so it no longer covers the arrowhead that points at it. The mark before the Replay title has a wider gap. An open hover card follows the replay and changes with the state of the agent or arrow.
 
 - Player title: the Live mark, the type chip and "Recorded with" sit together on one line under the title, however long the title is.
 - Create: when a loaded definition is refused because of instructions on an agent that cannot have them, the message names the agent (English and Czech).
@@ -271,6 +278,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 - Measure that a 290-second stream survives on Vercel.
 
 ### Fixed
+
+- A debate that was cut off (connection lost, stopped, a limit) before its judge started is now saved whole. Before, the autosave was refused from the first handoff to the judge on, so the Library kept only the first two steps of the run.
 
 - API calls tab: the note about the translated format shows one line with a read more button, and the hint under the calls (Czech and English) names the search box in the header.
 

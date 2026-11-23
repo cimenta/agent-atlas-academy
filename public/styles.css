@@ -592,7 +592,7 @@ mark.cur { background: #ffb74d; outline: 2px solid #f57c00; }
 .replay-diagram .rnode[data-status="error"] { background: var(--working-bg); border-color: var(--working); }
 .replay-diagram .rnode[data-dissent="true"] { opacity: 0.6; border-style: dashed; }
 .flow[data-dissent="true"] { stroke-dasharray: 6 5; opacity: 0.6; }
-.replay-diagram .rnode[aria-pressed="true"] { outline: 3px solid var(--accent); outline-offset: 1px; }
+.replay-diagram .rnode[aria-pressed="true"] { outline: 3px solid var(--accent); outline-offset: -5px; }
 .replay-diagram-wrap { display: flex; flex-direction: column; }
 .replay-diagram-wrap .diagram-badge { order: -1; align-self: flex-start; margin: 8px 0 0 8px; }
 .replay-diagram-wrap .diagram-badge[hidden] { display: none; }
@@ -1719,7 +1719,7 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .player-title .live-badge { margin-left: 0; vertical-align: baseline; }
 .player-title .live-badge, .player-title .type-chip { box-sizing: border-box; padding: 0 10px; line-height: 22px; height: 22px; }
 .player-title .recorded { line-height: 22px; }
-.player-title h2 .title-mark { margin-right: 0; }
+.player-title h2 .title-mark { margin-right: 12px; }
 /* The card that explains a box or an arrow of the replay diagram when the pointer rests on it. */
 .flow-hit { stroke: transparent; stroke-width: 16px; pointer-events: stroke; cursor: help; }
 .flow.hot { stroke: var(--accent); stroke-width: 3; opacity: 1; }

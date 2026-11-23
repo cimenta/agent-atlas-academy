@@ -6,6 +6,7 @@ import { BOX_H, BOX_W, arrowsOf, autoPositions, extentOf, maxColsFor } from "../
 import { flowState } from "./flow.js";
 import { MULTI_RUN, nodeIdOf } from "../engine/spawn.js";
 import { freePlacesOf } from "../engine/created.js";
+import { createHoverCard } from "./hover-card.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const HEADS = ["pending", "used", "lit"];
@@ -56,47 +57,15 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
   // The card sits on the page (fixed), so the diagram's own scrolling cannot cut it off.
   const arrowState = new Map(); // key -> "pending" | "used" | "lit"
   const nodeState = new Map(); // id -> { status, ms, errors, warnings, runs }
-  let card = null;
-  let cardTimer = null;
-  let hotLine = null;
-  function hideCard() {
-    if (cardTimer !== null) clock.clearTimeout(cardTimer);
-    cardTimer = null;
-    if (card) card.remove();
-    card = null;
-    if (hotLine) hotLine.classList.remove("hot");
-    hotLine = null;
-  }
-  function showCard(info, anchor, line = null) {
-    if (!explain || !info) return;
-    if (cardTimer !== null) clock.clearTimeout(cardTimer);
-    cardTimer = clock.setTimeout(() => {
-      cardTimer = null;
-      if (card) card.remove();
-      const rows = (info.rows ?? []).filter(Boolean);
-      const el = h(doc, "div", { class: "hover-card", role: "tooltip", "data-ui": "diagram-card" }, h(doc, "h4", {}, info.title, info.badge ? h(doc, "span", { class: "hover-badge" }, info.badge) : ""), ...(info.text ? [h(doc, "p", {}, info.text)] : []), ...(info.extra ? [h(doc, "p", { class: "hover-extra" }, info.extra)] : []), ...(rows.length ? [h(doc, "dl", {}, ...rows.flatMap(([k, v]) => [h(doc, "dt", {}, k), h(doc, "dd", {}, v)]))] : []));
-      (doc.body ?? area).append(el);
-      card = el;
-      if (line) {
-        line.classList.add("hot");
-        hotLine = line;
-      }
-      const rect = anchor.getBoundingClientRect?.();
-      if (rect && el.style) {
-        const vw = doc.defaultView?.innerWidth ?? 1024;
-        const w = el.offsetWidth || 260;
-        const tall = el.offsetHeight || 120;
-        const above = rect.top - tall - 10;
-        el.style.left = `${Math.max(8, Math.min(rect.left + rect.width / 2 - w / 2, vw - w - 8))}px`;
-        el.style.top = `${above >= 8 ? above : rect.bottom + 10}px`;
-      }
-    }, 250);
-  }
+  const hover = createHoverCard({ doc, clock });
+  const showCard = (get, anchor, line) => { if (explain) hover.show(get, anchor, line); };
+  const hideCard = hover.hide;
+  const refreshCard = hover.refresh;
   if (explain) {
     for (const arrow of arrows) {
       const line = lines.get(arrow.key);
       const hit = svgEl(doc, "path", { d: arrow.d, class: "flow-hit", fill: "none" });
-      hit.addEventListener("mouseenter", () => showCard(explain.arrow(arrow.from, arrow.to, arrowState.get(arrow.key) ?? "pending", arrow), hit, line));
+      hit.addEventListener("mouseenter", () => showCard(() => explain.arrow(arrow.from, arrow.to, arrowState.get(arrow.key) ?? "pending", arrow), hit, line));
       hit.addEventListener("mouseleave", hideCard);
       svg.append(hit);
     }
@@ -175,7 +144,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       onSelect(node.id);
     });
     if (explain) {
-      const open = () => showCard(explain.node(node.id, nodeState.get(node.id) ?? { status: "waiting" }, node), box);
+      const open = () => showCard(() => explain.node(node.id, nodeState.get(node.id) ?? { status: "waiting" }, node), box);
       box.addEventListener("mouseenter", open);
       box.addEventListener("focus", open);
       box.addEventListener("mouseleave", hideCard);
@@ -212,6 +181,8 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
   }
   const badge = h(doc, "span", { class: "round-badge diagram-badge", "data-ui": "debate-round", hidden: true });
   wrap.append(badge); // shown above the boxes, so it never covers one
+  let badgeInfo = null; // what the round badge explains, set by update()
+  if (explain?.badge) hover.attach(badge, () => (badgeInfo ? explain.badge(badgeInfo) : null));
 
   let lastIndex = null;
   let blinkPhase = false;
@@ -222,7 +193,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
   // events: all events of the run; cursor: how many are applied; state: the inspector state; selectedId: the agent shown below.
   function update(args) {
     lastArgs = args;
-    const { events, cursor, state, selectedId, badgeText, badgeNumber, failed, marks = new Map(), notes = new Map(), runs = new Map(), idleStatus = "waiting" } = args;
+    const { events, cursor, state, selectedId, badgeText, badgeNumber, badgeHelp, failed, marks = new Map(), notes = new Map(), runs = new Map(), idleStatus = "waiting" } = args;
     for (const [id, parts] of boxes) {
       // An agent that failed in a recorded run shows as failed from the start, before the replay reaches the failure.
       // A node that runs once for every part or step is one box: its runs are summed up in `runs` (status, text and count).
@@ -264,7 +235,7 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       const lit = Boolean(active); // blue only while it blinks; afterwards a solid grey arrow
       const state2 = lit ? "lit" : used.has(key) ? "used" : "pending";
       arrowState.set(key, state2);
-      path.setAttribute("class", `flow ${state2}${active ? " " + active.cls : ""}${path === hotLine ? " hot" : ""}`);
+      path.setAttribute("class", `flow ${state2}${active ? " " + active.cls : ""}${path === hover.litLine() ? " hot" : ""}`);
       // The arrow of a voter that differs from the result is dashed and dimmed.
       const from = arrows.find((a) => a.key === key)?.from;
       path.setAttribute("data-dissent", String(marks.get(from)?.dissent === true));
@@ -276,6 +247,8 @@ export function createReplayDiagram({ doc, design, wide, onSelect, statusText, b
       timer = null;
       if (lastArgs) update(lastArgs);
     }, Math.max(0, nextExpiry - time) + 20);
+    badgeInfo = badgeText ? { text: badgeText.split(ROUND_MARK).join(badgeNumber === undefined ? "" : String(badgeNumber)), help: badgeHelp } : null;
+    refreshCard();
     badge.hidden = !badgeText;
     // The number of the current round flashes. badgeText holds it as a marker (RN) where the number goes.
     const pieces = typeof badgeText === "string" && badgeNumber !== undefined ? badgeText.split(ROUND_MARK) : null;

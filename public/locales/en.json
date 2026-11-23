@@ -1696,5 +1696,17 @@
   "diagram.hover.arrow.lit": "The answer of {from} is going to {to} right now.",
   "diagram.hover.arrowBadge.pending": "not yet",
   "diagram.hover.arrowBadge.used": "passed",
-  "diagram.hover.arrowBadge.lit": "now"
+  "diagram.hover.arrowBadge.lit": "now",
+  "diagram.hover.badge.round": "A debate runs in rounds. In each round every debater answers once and reads the answers of the others. After the last round the judge gives the verdict.",
+  "diagram.hover.badge.verdict": "The rounds are over. The judge has read the whole debate and gives the verdict.",
+  "diagram.hover.badge.votes": "Every voter answered on its own. The answer most of them agree on wins.",
+  "diagram.hover.badge.routed": "The router read the task and chose this specialist. The others do not run.",
+  "diagram.hover.badge.handoff": "Agents pass the task to each other. This is the agent that holds it now and how many times it has been handed over.",
+  "diagram.hover.badge.loop": "A draft is judged and, if it is not good enough, sent back with feedback. This is the round the loop is in.",
+  "diagram.hover.badge.parts": "The task was cut into parts that are worked on at the same time. This is how many.",
+  "diagram.hover.badge.steps": "The plan has several steps that run one after another. This is the step that is running.",
+  "diagram.hover.typeChip": "The pattern of this run: how its agents work together.",
+  "diagram.hover.recorded": "The provider that answered when this run was made. Replaying it does not call the provider again.",
+  "diagram.hover.model": "Models",
+  "player.stepsFinished": "Finished steps: {n}"
 }

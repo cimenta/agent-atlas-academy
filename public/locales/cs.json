@@ -1696,5 +1696,17 @@
   "diagram.hover.arrow.lit": "Odpověď agenta {from} právě jde k agentovi {to}.",
   "diagram.hover.arrowBadge.pending": "zatím ne",
   "diagram.hover.arrowBadge.used": "předáno",
-  "diagram.hover.arrowBadge.lit": "právě teď"
+  "diagram.hover.arrowBadge.lit": "právě teď",
+  "diagram.hover.badge.round": "Debata běží po kolech. V každém kole každý debatér jednou odpoví a přečte si odpovědi ostatních. Po posledním kole vynese soudce verdikt.",
+  "diagram.hover.badge.verdict": "Kola skončila. Soudce přečetl celou debatu a vynáší verdikt.",
+  "diagram.hover.badge.votes": "Každý hlasující odpověděl sám za sebe. Vyhrává odpověď, na které se shodne nejvíc z nich.",
+  "diagram.hover.badge.routed": "Směrovač přečetl úkol a vybral tohoto specialistu. Ostatní se nespustí.",
+  "diagram.hover.badge.handoff": "Agenti si předávají úkol. Tohle je agent, který ho drží teď, a kolikrát už byl předán.",
+  "diagram.hover.badge.loop": "Návrh se posoudí a když nestačí, vrátí se s připomínkami. Tohle je kolo, ve kterém smyčka je.",
+  "diagram.hover.badge.parts": "Úkol byl rozdělen na části, které se zpracovávají současně. Tohle je jejich počet.",
+  "diagram.hover.badge.steps": "Plán má několik kroků, které jdou jeden po druhém. Tohle je krok, který běží.",
+  "diagram.hover.typeChip": "Vzor tohoto běhu: jak spolu agenti spolupracují.",
+  "diagram.hover.recorded": "Poskytovatel, který odpovídal, když tento běh vznikl. Přehrání ho znovu nevolá.",
+  "diagram.hover.model": "Modely",
+  "player.stepsFinished": "Dokončené kroky: {n}"
 }

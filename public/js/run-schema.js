@@ -60,7 +60,7 @@ function checkApiCall(event, at, errors) {
   if (typeof event.ms !== "number" || !Number.isFinite(event.ms) || event.ms < 0) errors.push(`${at}.ms must be a number`);
 }
 
-function checkEvent(event, index, previousT, errors, agents) {
+function checkEvent(event, index, previousT, errors, agents, planned = new Set()) {
   const at = `events[${index}]`;
   if (!isObject(event)) {
     errors.push(`${at} must be an object`);
@@ -87,7 +87,8 @@ function checkEvent(event, index, previousT, errors, agents) {
   if (event.type === "handoff") {
     for (const key of ["from", "to"]) {
       if (!isText(event[key])) errors.push(`${at}.${key} must be a non-empty string`);
-      else if (!agents.has(event[key])) errors.push(`${at}.${key} "${event[key]}" never starts (no agent_start event)`);
+      // The agent a handoff goes to may not have started yet when the run was cut off (a debate hands its rounds to the judge before the judge starts).
+      else if (!agents.has(event[key]) && !(key === "to" && planned.has(event[key]))) errors.push(`${at}.${key} "${event[key]}" never starts (no agent_start event)`);
     }
   }
   if (event.tokens !== undefined) {
@@ -179,9 +180,10 @@ export function validateRun(run) {
         if (errors.length === before && isText(call.agent) && !agents.has(call.agent) && !(call.agent.includes("#") && agents.has(call.agent.split("#")[0]))) errors.push(`apiCalls[${index}].agent "${call.agent}" never starts (no agent_start event)`);
       });
     }
+    const planned = new Set((Array.isArray(run.design?.nodes) ? run.design.nodes : []).map((n) => n?.id).filter(isText));
     let previousT = null;
     run.events.forEach((event, index) => {
-      previousT = checkEvent(event, index, previousT, errors, agents);
+      previousT = checkEvent(event, index, previousT, errors, agents, planned);
     });
   }
   return { ok: errors.length === 0, errors };

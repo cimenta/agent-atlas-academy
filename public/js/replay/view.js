@@ -34,6 +34,7 @@ import { limitsChoice } from "./limits-choice.js";
 import { canSubmit, submitRun } from "../submit-run.js";
 import { runForExport } from "../run-export.js";
 import { createReplayDiagram, ROUND_MARK } from "./diagram.js";
+import { createHoverCard } from "./hover-card.js";
 import { describeOutcome } from "../create/create-model.js";
 import { outcomeNotice, loopNotice, handoffNotice, handoffPathView, routerNotice, votingNotice, dynamicNotice } from "../outcome-view.js";
 import { buildResultModel } from "../play-model.js";
@@ -239,6 +240,15 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
     if (at <= 0) return [...mark, full];
     return [...mark, h(doc, "span", { class: "replay-word", "data-ui": "replay-word" }, full.slice(0, at)), full.slice(at)];
   }
+  // The type chip and the "recorded with" text explain themselves when the pointer rests on them.
+  const chipCard = createHoverCard({ doc });
+  const patternChip = pattern ? h(doc, "span", { class: `type-chip type-${pattern}`, "data-ui": "player-pattern", tabindex: "0" }, t(`pattern.${pattern}`)) : "";
+  if (pattern) {
+    const about = t(`create.pattern.${pattern}`);
+    chipCard.attach(patternChip, () => ({ title: t(`pattern.${pattern}`), text: about === `create.pattern.${pattern}` ? t("diagram.hover.typeChip") : about }));
+  }
+  const recordedText = h(doc, "span", { class: "recorded", "data-ui": "recorded-with", tabindex: "0" }, t("player.recordedWith", { provider: providerName(recordedWith.provider) }));
+  chipCard.attach(recordedText, () => ({ title: t("player.recordedWith", { provider: providerName(recordedWith.provider) }), text: t("diagram.hover.recorded"), rows: [recordedWith.model ? [t("diagram.hover.model"), String(recordedWith.model)] : null] }));
   const root = h(
     doc,
     "section",
@@ -248,7 +258,7 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
       doc,
       "div",
       { class: "player-head", "data-ui": "player-head" },
-      h(doc, "div", { class: "player-title" }, h(doc, "h2", {}, ...headingParts()), h(doc, "div", { class: "player-chips" }, liveBadge, pattern ? h(doc, "span", { class: `type-chip type-${pattern}`, "data-ui": "player-pattern" }, t(`pattern.${pattern}`)) : "", h(doc, "span", { class: "recorded", "data-ui": "recorded-with" }, t("player.recordedWith", { provider: providerName(recordedWith.provider) })))),
+      h(doc, "div", { class: "player-title" }, h(doc, "h2", {}, ...headingParts()), h(doc, "div", { class: "player-chips" }, liveBadge, patternChip, recordedText)),
       exportButton,
     ),
     aboutPanel ? aboutPanel.element : "",
@@ -349,6 +359,7 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
                 rows: [st.ms ? [t("diagram.hover.time"), fmt(st.ms)] : null, st.errors > 0 ? [t("diagram.hover.errors"), String(st.errors)] : null, st.warnings > 0 ? [t("diagram.hover.warnings"), String(st.warnings)] : null],
               };
             },
+            badge: ({ text, help }) => ({ title: text, text: help }),
             arrow: (from, to, flow) => ({
               title: t("diagram.hover.arrowTitle", { from: designLabel(design, from), to: designLabel(design, to) }),
               badge: t(`diagram.hover.arrowBadge.${flow}`),
@@ -438,6 +449,7 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
           : evaluating
           ? t("player.debateRound", { n: ROUND_MARK, total: evaluating.rounds }) + (evaluating.phase === "judging" ? ` · ${t(diagramDesign.selfCritique === true ? "player.selfJudging" : "player.evaluatorJudging")}` : "")
           : dynBadge,
+      badgeHelp: voted ? t("diagram.hover.badge.votes") : routing ? t("diagram.hover.badge.routed") : debate ? t(debate.verdict ? "diagram.hover.badge.verdict" : "diagram.hover.badge.round") : handing ? t("diagram.hover.badge.handoff") : evaluating ? t("diagram.hover.badge.loop") : dynBadge ? t(diagramDesign.pattern === "mapreduce" ? "diagram.hover.badge.parts" : "diagram.hover.badge.steps") : "",
       badgeNumber: debate ? (debate.verdict ? undefined : debate.round) : evaluating ? evaluating.round : undefined,
     });
     return true;
@@ -757,7 +769,8 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
     playButton.disabled = player.live;
     liveBadge.hidden = !player.live;
     stopButton.hidden = !player.live;
-    const parts = [t("player.step", { n: player.cursor, total: events.length })];
+    // A live run has no fixed total (more steps are still to come), so it counts the steps that are finished; a recording shows where it is in all of them.
+    const parts = [live ? t("player.stepsFinished", { n: events.filter((e) => e.type === "agent_output").length }) : t("player.step", { n: player.cursor, total: events.length })];
     if (state.tokens.input || state.tokens.output) parts.push(t("player.tokens", state.tokens));
     if (player.finished) parts.push(t("player.finished"));
     const debate = debateProgress(events, player.cursor);

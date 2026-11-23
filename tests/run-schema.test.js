@@ -109,6 +109,15 @@ test("rejects events that mention an agent that never starts", () => {
   assert.ok(result.errors.some((e) => e.includes("nobody")));
 });
 
+test("a handoff to an agent of the design that never started is valid (a debate cut off before its judge)", () => {
+  const run = sample();
+  const last = run.events[run.events.length - 1].t;
+  run.design = { pattern: "debate", nodes: [{ id: "late-judge", agent: "judge", model: "fast", search: false }], edges: [] };
+  const from = run.events.find((e) => e.type === "agent_start").agent;
+  run.events.push({ t: last, type: "handoff", from, to: "late-judge" });
+  assert.deepEqual(validateRun(run).errors, []);
+});
+
 test("rejects negative or non-finite token counts", () => {
   const run = sample();
   const event = run.events.find((e) => e.tokens);
