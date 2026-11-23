@@ -50,6 +50,10 @@ export function createBudget(limits, { now = Date.now, timeLimitMs = TIME_LIMIT_
       used.steps += 1;
       check();
     },
+    // A call the provider refused with a wait (nothing was done) is given back, so a wait does not use up the steps.
+    refundStep() {
+      used.steps = Math.max(0, used.steps - 1);
+    },
     chargeUsage({ input, output, searches, cost } = {}) {
       spentUsd += amount(cost);
       used.input += amount(input);
@@ -77,6 +81,10 @@ export function createBudget(limits, { now = Date.now, timeLimitMs = TIME_LIMIT_
           if (own.steps + 1 > ceiling.steps) throw new AgentLimitError("steps");
           budget.chargeStep();
           own.steps += 1;
+        },
+        refundStep() {
+          own.steps = Math.max(0, own.steps - 1);
+          budget.refundStep();
         },
         chargeUsage(charge = {}) {
           own.input += amount(charge.input);

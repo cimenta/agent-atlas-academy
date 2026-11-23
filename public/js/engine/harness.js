@@ -44,7 +44,7 @@ export function limitMessage(reason, limits, extra = {}) {
     case "rate_day": {
       const wait = Number(extra.value);
       const when = !Number.isFinite(wait) || wait <= 0 ? "later" : wait < 3600 ? `in about ${Math.ceil(wait / 60)} min` : `in about ${Math.round(wait / 3600)} h`;
-      const why = Number.isFinite(wait) && wait > 0 && wait <= RATE_WAIT_MAX_SEC ? "it kept refusing calls even after the app waited several times" : "its wait is longer than the app waits by itself";
+      const why = extra.day !== true && (!Number.isFinite(wait) || (wait > 0 && wait <= RATE_WAIT_MAX_SEC)) ? "it kept refusing calls even after the app waited several times" : "its wait is longer than the app waits by itself";
       return `Limit of the provider reached: it refused more calls from agent ${extra.label}, and ${why}. The run was stopped, and what happened so far is saved. Continue the run ${when}.`;
     }
     case "rate_pool":

@@ -119,9 +119,10 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
       } catch (error) {
         if ((freeLimited || error.pool === true) && error instanceof AnthropicError && error.status === 429) {
           const asked = Number.isFinite(error.retryAfterSec) ? error.retryAfterSec : null;
-          if (error.rateKind === "day" || (asked ?? 0) > RATE_WAIT_MAX_SEC || ++rateWaits > RATE_WAITS_MAX) throw new LimitError(error.pool === true ? "rate_pool" : "rate_day", { agent: node.id, label, value: asked });
+          if (error.rateKind === "day" || (asked ?? 0) > RATE_WAIT_MAX_SEC || ++rateWaits > RATE_WAITS_MAX) throw new LimitError(error.pool === true ? "rate_pool" : "rate_day", { agent: node.id, label, value: asked, day: error.rateKind === "day" });
           const seconds = Math.max(1, asked ?? retryDelayMs / 1000);
-          emit({ type: "warning", agent: node.id, retry: true, rateWait: seconds, provider: nodeProvider(node, provider), message: `The provider asked the app to wait ${seconds} s (too many requests or tokens). Trying again after that.` });
+          emit({ type: "warning", agent: node.id, retry: true, rateWait: seconds, provider: nodeProvider(node, provider), message: asked === null ? `The provider refused the call (too many requests or tokens) and did not say how long to wait. The app waits ${seconds} s and tries again.` : `The provider asked the app to wait ${seconds} s (too many requests or tokens). Trying again after that.` });
+          chargeTo.refundStep?.(); // the refused call did nothing: its step is given back
           await sleep(seconds * 1000);
           tried--; // a wait that was asked for does not use up a try
           continue;

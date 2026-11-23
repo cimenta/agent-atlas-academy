@@ -340,6 +340,38 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       });
     }
 
+    // Dragging the empty background pans the diagram (the wheel scrolls it as well).
+    {
+      let pan = null;
+      const isBackground = (target) => target === area || (target?.tagName?.toLowerCase?.() === "svg" && area.contains?.(target));
+      area.addEventListener("pointerdown", (event) => {
+        if ((event.button !== undefined && event.button > 0) || !isBackground(event.target)) return;
+        pan = { px: event.clientX, py: event.clientY, left: wrap.scrollLeft, top: wrap.scrollTop, moved: false };
+        area.setPointerCapture?.(event.pointerId);
+      });
+      area.addEventListener("pointermove", (event) => {
+        if (!pan) return;
+        const dx = event.clientX - pan.px;
+        const dy = event.clientY - pan.py;
+        if (!pan.moved && Math.hypot(dx, dy) < MOVE_THRESHOLD) return;
+        pan.moved = true;
+        wrap.scrollLeft = pan.left - dx;
+        wrap.scrollTop = pan.top - dy;
+        area.classList.add("panning");
+      });
+      const endPan = () => {
+        if (!pan) return;
+        if (pan.moved) {
+          suppressClick = true;
+          setTimeout(() => (suppressClick = false), 0);
+        }
+        pan = null;
+        area.classList.remove("panning");
+      };
+      area.addEventListener("pointerup", endPan);
+      area.addEventListener("pointercancel", endPan);
+    }
+
     // Dragging from the dot that sends draws a line to the pointer; drop it on another agent to connect. When the agent cannot
     // receive it, the line turns red with a cross and the reason on it.
     let blockedMark = null;

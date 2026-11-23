@@ -1680,3 +1680,6 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .step-footer .hint-go { min-height: 0; min-width: 0; padding: 0; font-size: inherit; }
 /* The diagram never runs under the sticky Back/Next bar: a tall one scrolls inside its box. */
 .step-panel .diagram-wrap { max-height: max(260px, calc(100vh - 390px)); }
+.diagram.panning { cursor: grabbing; user-select: none; }
+.editor-diagram .diagram { cursor: grab; }
+.editor-diagram .dnode, .editor-diagram .diagram-corner { cursor: auto; }

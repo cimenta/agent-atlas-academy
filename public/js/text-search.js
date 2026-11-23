@@ -68,12 +68,15 @@ export function searchBar({ doc, t, value = "", apply, placeholder, ui = "text-s
     input = h(doc, "input", { class: "vq", type: "search", placeholder: label, "aria-label": label, autocomplete: "off" });
   }
   input.value = value;
+  prev.hidden = next.hidden = true;
 
   const show = (scroll) => {
     marks.forEach((m, i) => m.setAttribute("class", i === current ? "cur" : ""));
     const q = input.value.trim();
     count.textContent = marks.length ? t("search.count", { n: current + 1, total: marks.length }) : q ? t("search.none") : "";
     prev.disabled = next.disabled = marks.length < 2;
+    // The buttons are only there when there is somewhere to go: two matches or more.
+    prev.hidden = next.hidden = marks.length < 2;
     if (scroll && marks[current]) {
       // A match inside a closed JSON branch is opened first, so it can be seen.
       for (let n = marks[current].parentElement; n; n = n.parentElement) if (n.tagName === "DETAILS") n.open = true;
