@@ -71,7 +71,7 @@ export const AGENT_TYPES = {
 export const TIMEOUT_SEC = { min: 30, max: 120, step: 10, default: 60 };
 // A provider whose models answer slowly waits longer: the wait of Settings is multiplied by this (Cloudflare: its Strong model writes a long
 // answer in more than a minute, and a call that is cut off at 60 seconds is lost together with the neurons it used).
-export const SLOW_PROVIDER_TIMEOUT_FACTOR = { cloudflare: 2 };
+export const SLOW_PROVIDER_TIMEOUT_FACTOR = { cloudflare: 3 };
 export const timeoutMsFor = (provider, timeoutMs) => timeoutMs * (SLOW_PROVIDER_TIMEOUT_FACTOR[provider] ?? 1);
 export const clampTimeoutSec = (value) => {
   const n = Math.round(Number(value));

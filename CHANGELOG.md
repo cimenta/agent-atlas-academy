@@ -300,7 +300,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Fixed
 
-- Cloudflare: a call waits twice as long as the request timeout (the Strong model often needs more than a minute), and the Info tab says so.
+- Cloudflare: a call waits three times as long as the request timeout (the Strong model writes about 33 tokens a second, so a 4,000-token reply needs two minutes), and the Info tab says so.
 - Demo definition Cloudflare 429: seven Strong agents answering at the same time plus a combiner, so one run can reach the 10,000 free neurons a day. The About text has measured numbers.
 - Statistics: the tokens of a call that came back after an agent's last answer (a run stopped by a limit) now count for that agent, so the agents add up to the total of the run.
 - The round number in the badge flashes only while the replay plays or the run is live, no longer while it waits at its start.
