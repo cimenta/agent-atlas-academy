@@ -105,3 +105,17 @@ test("after the short waits ran out the message says the provider kept refusing,
   assert.doesNotMatch(text, /longer than the app waits/);
   assert.match(text, /kept refusing/);
 });
+
+test("a shared-pool 429 stops the run with the provider's own words and says the limit is not the student's", async () => {
+  const same = () => rate({ retryAfterSec: null, sharedPool: true, message: "gemma is temporarily rate-limited upstream" });
+  const { agent, events } = setup([same(), same(), same(), same()]);
+  const error = await agent.run("Task: x").catch((e) => e);
+  assert.ok(error instanceof LimitError);
+  assert.equal(error.shared, true);
+  assert.match(error.providerMessage, /gemma is temporarily/);
+  const warning = events.find((e) => e.type === "warning" && e.rateWait);
+  assert.match(warning.message, /The provider says: gemma is temporarily/);
+  const text = limitMessage("rate_day", LIMIT_DEFAULTS, { label: "Writer", value: null, shared: error.shared, providerMessage: "Gemma is limited" });
+  assert.match(text, /shares it among all its users/);
+  assert.match(text, /The provider says: Gemma is limited/);
+});

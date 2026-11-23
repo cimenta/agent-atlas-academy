@@ -22,6 +22,12 @@ export function outcomeNotice({ doc, t, outcome, events, cost, durationMs, free 
     h(doc, "span", { class: "outcome-icon", role: "img", "aria-label": t(`run.outcome.icon.${info.level}`) }, info.icon),
     h(doc, "span", { class: "outcome-text" }, t(runOutcomeMessageKey(outcome, reason))),
   );
+  // A run stopped by the provider's limit says what the provider answered and, for a limit shared among its users, that it is not the student's.
+  const limitEvent = Array.isArray(events) ? events.findLast?.((e) => e?.type === "warning" && typeof e.providerMessage === "string" && e.limit) : undefined;
+  if (limitEvent) {
+    if (limitEvent.shared === true) notice.append(h(doc, "span", { class: "outcome-extra", "data-ui": "outcome-shared" }, t("run.outcome.sharedLimit")));
+    notice.append(h(doc, "span", { class: "outcome-extra outcome-provider", "data-ui": "outcome-provider" }, t("run.outcome.providerSays", { text: limitEvent.providerMessage })));
+  }
   if (meta.length) notice.append(h(doc, "span", { class: "outcome-meta", title: info.cost !== null ? t("run.outcome.costHint") : undefined }, meta.join(" · ")));
   return notice;
 }

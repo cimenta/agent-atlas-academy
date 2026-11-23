@@ -100,11 +100,14 @@ export async function callChatCompletions(body, { apiKey, fetchImpl = fetch, sig
     data = {};
   }
   if (!response.ok) {
-    const message = redact(data?.error?.message ?? data?.errors?.[0]?.message, apiKey) || `${who} answered with status ${response.status}`;
+    // OpenRouter says only "Provider returned error" and puts the words of the model's own provider in metadata.raw: those are the useful ones.
+    const raw = typeof data?.error?.metadata?.raw === "string" && data.error.metadata.raw.trim() !== "" ? data.error.metadata.raw.trim() : null;
+    const message = redact(raw ?? data?.error?.message ?? data?.errors?.[0]?.message, apiKey) || `${who} answered with status ${response.status}`;
     const error = new AnthropicError(message, { status: response.status, retryable: RETRYABLE_STATUS.has(response.status) });
     // The numeric code of the provider error (Cloudflare uses 4006 for a used-up allocation), so a caller need not search the message.
     const code = data?.errors?.[0]?.code ?? data?.error?.code;
     if (typeof code === "number") error.code = code;
+    if (data?.error?.metadata?.limit_source === "upstream_provider_shared_pool") error.sharedPool = true;
     if (response.status === 429) {
       const asked = response.headers?.get?.("retry-after");
       const wait = asked === null || asked === undefined || asked === "" ? NaN : Number(asked);

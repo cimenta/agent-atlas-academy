@@ -1667,5 +1667,7 @@
   "library.tip.action.edit-description": "Upraví váš popis běhu",
   "library.tip.action.delete": "Smaže běh z tohoto prohlížeče",
   "limits.languageNote": "Odhad počítá tokeny z délky textu, proto se liší podle jazyka: stejný text potřebuje v češtině asi 1,5krát víc tokenů než v angličtině.",
-  "create.reason.noKeyGo": "Otevře záložku Klíč API, kde klíč přidáte"
+  "create.reason.noKeyGo": "Otevře záložku Klíč API, kde klíč přidáte",
+  "run.outcome.providerSays": "Poskytovatel píše: {text}",
+  "run.outcome.sharedLimit": "Limit patří modelu, ne vám: poskytovatel ho sdílí mezi všechny své uživatele. Zkuste to později nebo zvolte jiný model."
 }

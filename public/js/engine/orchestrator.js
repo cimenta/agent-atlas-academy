@@ -109,7 +109,7 @@ export async function runDesign({ design, task, limits, language = "en", call, c
       // A runner may hand back what it had written so far (the evaluator loop returns its last draft).
       finalText = error.partialText ?? "";
       // The replay keeps a line that says which limit of the harness stopped the run.
-      send({ type: "warning", ...(error.agent ? { agent: error.agent } : {}), limit: reason, message: limitMessage(reason, clampLimits(limits), { label: error.label, value: error.value }) });
+      send({ type: "warning", ...(error.agent ? { agent: error.agent } : {}), limit: reason, ...(error.providerMessage ? { providerMessage: error.providerMessage, shared: error.shared === true } : {}), message: limitMessage(reason, clampLimits(limits), { label: error.label, value: error.value, providerMessage: error.providerMessage, shared: error.shared, day: error.day }) });
     } else if (signal?.aborted) {
       outcome = "stopped_user";
       finalText = error?.partialText ?? "";

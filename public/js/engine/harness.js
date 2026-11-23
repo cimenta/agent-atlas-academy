@@ -45,10 +45,12 @@ export function limitMessage(reason, limits, extra = {}) {
       const wait = Number(extra.value);
       const when = !Number.isFinite(wait) || wait <= 0 ? "later" : wait < 3600 ? `in about ${Math.ceil(wait / 60)} min` : `in about ${Math.round(wait / 3600)} h`;
       const why = extra.day !== true && (!Number.isFinite(wait) || (wait > 0 && wait <= RATE_WAIT_MAX_SEC)) ? "it kept refusing calls even after the app waited several times" : "its wait is longer than the app waits by itself";
-      return `Limit of the provider reached: it refused more calls from agent ${extra.label}, and ${why}. The run was stopped, and what happened so far is saved. Continue the run ${when}.`;
+      const shared = extra.shared === true ? " The limit belongs to the model, not to you: the provider shares it among all its users. Try again later, or pick another model." : "";
+      const said = extra.providerMessage ? ` The provider says: ${extra.providerMessage}` : "";
+      return `Limit of the provider reached: it refused more calls from agent ${extra.label}, and ${why}. The run was stopped, and what happened so far is saved. Continue the run ${when}.${shared}${said}`;
     }
     case "rate_pool":
-      return `Limit of the provider reached: the daily pool of the free account is used up (agent ${extra.label}). The run was stopped, and what happened so far is saved. Continue the run after 00:00 UTC.`;
+      return `Limit of the provider reached: the daily pool of the free account is used up (agent ${extra.label}). The run was stopped, and what happened so far is saved. Continue the run after 00:00 UTC.${extra.providerMessage ? ` The provider says: ${extra.providerMessage}` : ""}`;
     case "cost":
       return `Limit reached: estimated cost of the run ($${Number(maxCostUsd).toFixed(2)}, by the prices in the catalog). The run was stopped before it could finish. Raise the cost cap in Settings, Harness, and run again.`;
     case "time":
