@@ -12,6 +12,12 @@
       "detail": [
         "en",
         "cs"
+      ],
+      "tags": [
+        "basics",
+        "prompt-chaining",
+        "handoff",
+        "explaining"
       ]
     },
     {
@@ -21,7 +27,13 @@
       "language": "en",
       "timeScale": 3,
       "provider": "anthropic",
-      "outcome": "finished"
+      "outcome": "finished",
+      "tags": [
+        "prompt-chaining",
+        "handoff",
+        "decision-making",
+        "cost"
+      ]
     },
     {
       "id": "supervisor-simple",
@@ -34,6 +46,11 @@
       "detail": [
         "en",
         "cs"
+      ],
+      "tags": [
+        "supervisor",
+        "tool-choice",
+        "explaining"
       ]
     },
     {
@@ -43,7 +60,13 @@
       "language": "en",
       "timeScale": 3,
       "provider": "anthropic",
-      "outcome": "finished"
+      "outcome": "finished",
+      "tags": [
+        "supervisor",
+        "tool-choice",
+        "planning",
+        "risk-analysis"
+      ]
     },
     {
       "id": "parallel-simple",
@@ -52,7 +75,13 @@
       "language": "en",
       "timeScale": 2,
       "provider": "anthropic",
-      "outcome": "finished"
+      "outcome": "finished",
+      "tags": [
+        "basics",
+        "parallel-work",
+        "combining-answers",
+        "speed"
+      ]
     },
     {
       "id": "parallel-complex",
@@ -61,7 +90,14 @@
       "language": "en",
       "timeScale": 3,
       "provider": "anthropic",
-      "outcome": "finished"
+      "outcome": "finished",
+      "tags": [
+        "parallel-work",
+        "combining-answers",
+        "speed",
+        "decision-making",
+        "risk-analysis"
+      ]
     },
     {
       "id": "debate-complex",
@@ -70,7 +106,13 @@
       "language": "en",
       "timeScale": 3,
       "provider": "anthropic",
-      "outcome": "finished"
+      "outcome": "finished",
+      "tags": [
+        "debate",
+        "disagreement",
+        "decision-making",
+        "cost"
+      ]
     },
     {
       "id": "debate-simple",
@@ -79,7 +121,13 @@
       "language": "en",
       "timeScale": 2,
       "provider": "anthropic",
-      "outcome": "finished"
+      "outcome": "finished",
+      "tags": [
+        "basics",
+        "debate",
+        "disagreement",
+        "decision-making"
+      ]
     },
     {
       "id": "supervisor-parallel",
@@ -88,7 +136,13 @@
       "language": "en",
       "timeScale": 3,
       "provider": "anthropic",
-      "outcome": "finished"
+      "outcome": "finished",
+      "tags": [
+        "supervisor",
+        "parallel-work",
+        "speed",
+        "planning"
+      ]
     }
   ]
 }

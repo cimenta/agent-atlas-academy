@@ -17,7 +17,7 @@ export function pickHomeRun(runs) {
 
 export function buildReplayList(gallery, local) {
   return {
-    gallery: gallery.map((r) => ({ id: r.id, title: r.title, pattern: r.pattern, ...(r.provider ? { provider: r.provider } : {}), ...(r.outcome ? { outcome: r.outcome } : {}), ...(typeof r.recordedAt === "number" ? { createdAt: r.recordedAt } : {}), source: "gallery" })),
+    gallery: gallery.map((r) => ({ id: r.id, title: r.title, pattern: r.pattern, ...(Array.isArray(r.tags) ? { tags: r.tags } : {}), ...(r.provider ? { provider: r.provider } : {}), ...(r.outcome ? { outcome: r.outcome } : {}), ...(typeof r.recordedAt === "number" ? { createdAt: r.recordedAt } : {}), source: "gallery" })),
     mine: [...local]
       .sort((a, b) => b.createdAt - a.createdAt)
       .map((r) => ({ id: r.id, title: r.title, pattern: r.pattern, outcome: r.outcome, provider: r.provider, createdAt: r.createdAt, source: "local" })),
