@@ -8,6 +8,8 @@ const KEEP_AS_IS = new Set(["slowly", "tomorrow"]);
 // slotName(slotId): the name of a key slot. num(n): a number as the page writes it. chosen: the id of the keep-as-is offer the student took.
 export function limitsView({ doc, t, findings, offers, summary, providerName: fallbackName, providerNameOf = null, nameOf, slotName, num, chosen = null, onApply }) {
   if (summary === null || summary === undefined) return null;
+  // The estimate counts tokens from the length of the text, and a token is shorter in some languages (Czech needs more tokens than English).
+  const languageNote = () => (summary.tpm === null && !summary.pool ? "" : h(doc, "p", { class: "hint", "data-ui": "limits-language-note" }, t("limits.languageNote")));
   const figures = (numbers) => Object.fromEntries(Object.entries(numbers ?? {}).map(([k, v]) => [k, num(v)]));
   const names = (ids) => (ids ?? []).map(nameOf).join(", ");
   // Each block names the provider whose limit it is about; offers name the provider of the first finding.
@@ -24,10 +26,10 @@ export function limitsView({ doc, t, findings, offers, summary, providerName: fa
 
   if (findings.length === 0 && summary.pool) {
     const percent = Math.round((summary.neurons / summary.pool) * 100);
-    return h(doc, "div", { class: "limits", "data-ui": "limits" }, h(doc, "div", { class: "msg ok", role: "status", "data-ui": "limits-fits" }, h(doc, "b", {}, t("limits.fits.title.neurons", { provider: nameFor(summary.provider) })), t("limits.fits.bodyNeurons", { neurons: num(Math.ceil(summary.neurons)), pool: num(summary.pool), percent: String(percent) })), ...poolBar(summary.neurons, summary.pool));
+    return h(doc, "div", { class: "limits", "data-ui": "limits" }, h(doc, "div", { class: "msg ok", role: "status", "data-ui": "limits-fits" }, h(doc, "b", {}, t("limits.fits.title.neurons", { provider: nameFor(summary.provider) })), t("limits.fits.bodyNeurons", { neurons: num(Math.ceil(summary.neurons)), pool: num(summary.pool), percent: String(percent) })), ...poolBar(summary.neurons, summary.pool), languageNote());
   }
   if (findings.length === 0) {
-    return h(doc, "div", { class: "limits", "data-ui": "limits" }, h(doc, "div", { class: "msg ok", role: "status", "data-ui": "limits-fits" }, h(doc, "b", {}, t("limits.fits.title", { provider: nameFor(summary.provider) })), t(summary.tpm === null ? "limits.fits.bodyRequests" : "limits.fits.body", { ...figures(summary), provider: providerName })));
+    return h(doc, "div", { class: "limits", "data-ui": "limits" }, h(doc, "div", { class: "msg ok", role: "status", "data-ui": "limits-fits" }, h(doc, "b", {}, t("limits.fits.title", { provider: nameFor(summary.provider) })), t(summary.tpm === null ? "limits.fits.bodyRequests" : "limits.fits.body", { ...figures(summary), provider: providerName })), languageNote());
   }
 
   // Requests-only findings (OpenRouter) have their own texts: no tokens, and the limit counts for the whole account.
@@ -72,5 +74,5 @@ export function limitsView({ doc, t, findings, offers, summary, providerName: fa
     return h(doc, "div", { class: "offer" }, h(doc, "p", {}, h(doc, "b", {}, t(`limits.offer.${offer.id}.title`, params)), " ", t(bodyKey, params), ...estimate), button);
   };
 
-  return h(doc, "div", { class: "limits", "data-ui": "limits" }, ...blocks, ...(bar ?? []), ...(offers.length > 0 ? [h(doc, "div", { class: "offers", "data-ui": "limits-offers" }, ...offers.map(offerRow))] : []));
+  return h(doc, "div", { class: "limits", "data-ui": "limits" }, ...blocks, ...(bar ?? []), ...(offers.length > 0 ? [h(doc, "div", { class: "offers", "data-ui": "limits-offers" }, ...offers.map(offerRow))] : []), languageNote());
 }

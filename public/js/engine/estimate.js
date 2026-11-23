@@ -105,7 +105,12 @@ export function emptyCriteria(design) {
 // perCallTokens: 300 for the instructions, a quarter of the characters the agent reads (the task, and what each agent before it hands on),
 // and the longest answer it may give (a call reserves it). typicalTokens counts a typical answer instead (at most 1,500 tokens).
 // The sum is an upper bound the owner's real 429 test will tune.
-export function callsOf(design, limits, { outputTokens = 4000, handoffChars = 0, taskChars = 1000 } = {}) {
+// How many characters make one token. English is about 4; Czech is about 2.6 (a real Groq run: 2,700 to 3,000 characters were 1,000 to 1,100 tokens),
+// so the same text costs more tokens in Czech. Another language counts as English.
+export const CHARS_PER_TOKEN = { en: 4, cs: 2.6 };
+export const charsPerToken = (language) => CHARS_PER_TOKEN[language] ?? CHARS_PER_TOKEN.en;
+
+export function callsOf(design, limits, { outputTokens = 4000, handoffChars = 0, taskChars = 1000, language = "en" } = {}) {
   const nodes = design.nodes ?? [];
   const rounds = Number.isFinite(design.rounds) ? design.rounds : 1;
   const base = nodes.map((n) => (design.pattern === "evaluator" ? rounds : design.pattern === "debate" && n.agent === "debater" ? rounds : 1));
@@ -113,10 +118,11 @@ export function callsOf(design, limits, { outputTokens = 4000, handoffChars = 0,
   const weight = base.reduce((a, b) => a + b, 0) || 1;
   const cap = Math.max(1, Math.min(Number(outputTokens) || 4000, 4000));
   const typical = Math.min(cap, 1500);
-  const upstreamChars = Math.min(handoffChars > 0 ? handoffChars : typical * 4, typical * 4);
+  const perToken = charsPerToken(language);
+  const upstreamChars = Math.min(handoffChars > 0 ? handoffChars : typical * perToken, typical * perToken);
   return nodes.map((n, i) => {
     const incoming = (design.edges ?? []).filter((e) => e.to === n.id).length;
-    const input = 300 + Math.ceil((Math.min(taskChars, 1000) + incoming * upstreamChars) / 4);
+    const input = 300 + Math.ceil((Math.min(taskChars, 1000) + incoming * upstreamChars) / perToken);
     // An agent's own lower answer limit counts, as the agent enforces it.
     const own = Math.max(1, Math.min(cap, Number(n.limits?.maxOutputTokens) || cap));
     const output = Math.min(typical, own);

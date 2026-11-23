@@ -141,3 +141,21 @@ test("limitOffers", async (t) => {
     assert.deepEqual(limitOffers({ design: d, limits: LIMITS, ...settings, loadedSlots: ["anthropic"] }), []);
   });
 });
+
+import { charsPerToken } from "../public/js/engine/estimate.js";
+
+test("the estimate counts more tokens for Czech than for English when the text is capped in characters", () => {
+  assert.equal(charsPerToken("en"), 4);
+  assert.ok(charsPerToken("cs") < charsPerToken("en"));
+  assert.equal(charsPerToken("de"), 4, "another language counts as English");
+  const en = callsOf(chain(3), LIMITS, { handoffChars: 2000, language: "en" })[1];
+  const cs = callsOf(chain(3), LIMITS, { handoffChars: 2000, language: "cs" })[1];
+  assert.ok(cs.inputTokens > en.inputTokens, `${cs.inputTokens} should be more than ${en.inputTokens}`);
+  assert.equal(callsOf(chain(3), LIMITS)[1].perCallTokens, callsOf(chain(3), LIMITS, { language: "en" })[1].perCallTokens, "English is the default");
+});
+
+test("a short task makes a smaller estimate than a long one, and the language reaches the findings", () => {
+  const short = callsOf(chain(3), LIMITS, { taskChars: 100, language: "cs" })[1].inputTokens;
+  const long = callsOf(chain(3), LIMITS, { taskChars: 1000, language: "cs" })[1].inputTokens;
+  assert.ok(short < long);
+});

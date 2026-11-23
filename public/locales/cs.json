@@ -1665,5 +1665,6 @@
   "library.tip.action.compare": "Porovná tento běh s jiným",
   "library.tip.action.send": "Odešle běh k zařazení do knihovny",
   "library.tip.action.edit-description": "Upraví váš popis běhu",
-  "library.tip.action.delete": "Smaže běh z tohoto prohlížeče"
+  "library.tip.action.delete": "Smaže běh z tohoto prohlížeče",
+  "limits.languageNote": "Odhad počítá tokeny z délky textu, proto se liší podle jazyka: stejný text potřebuje v češtině asi 1,5krát víc tokenů než v angličtině."
 }

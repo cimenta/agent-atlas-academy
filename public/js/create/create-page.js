@@ -772,7 +772,7 @@ export function renderCreate(ctx) {
   // The new events are added to the same saved run. resume is the run record.
   // The sizes of an answer and a handoff for this run: what an offer of the free-limits warning set, else Settings.
   function runSettings() {
-    return { outputTokens: draft.runOverrides.outputTokens ?? ctx.settings.get().maxOutputTokens, handoffChars: draft.runOverrides.handoffChars ?? ctx.settings.get().handoffChars };
+    return { outputTokens: draft.runOverrides.outputTokens ?? ctx.settings.get().maxOutputTokens, handoffChars: draft.runOverrides.handoffChars ?? ctx.settings.get().handoffChars, language: ctx.lang, taskChars: Math.max(draft.task.trim().length, 200) };
   }
   // An agent whose single call can never fit the minute limit of a free account blocks the run until an offer is applied.
   function limitsBlock(design, limits) {

@@ -37,8 +37,8 @@ function bucketsOf(design, limits, settings) {
 }
 
 // Finding = { kind: "call-too-big" | "slow" | "day-tokens" | "day-requests", agents: string[], numbers: {...} }.
-export function limitFindings({ design, limits, outputTokens, handoffChars }) {
-  const buckets = bucketsOf(design, limits, { outputTokens, handoffChars });
+export function limitFindings({ design, limits, outputTokens, handoffChars, language, taskChars }) {
+  const buckets = bucketsOf(design, limits, { outputTokens, handoffChars, language, taskChars });
   const findings = [];
   const worst = (kind, pick) => {
     let best = null;
@@ -101,9 +101,9 @@ const elsewhereList = (loadedSlots, poolProvider) => (loadedSlots ?? []).filter(
   .sort((a, b) => Number(Boolean(slotFreeLimits(a))) - Number(Boolean(slotFreeLimits(b))));
 
 // Offer = { id, agents?, disabled?, apply(design, settings) -> { design, settings }, after: Finding[] }.
-export function limitOffers({ design, limits, outputTokens, handoffChars, loadedSlots }) {
+export function limitOffers({ design, limits, outputTokens, handoffChars, language, taskChars, loadedSlots }) {
   if (freeSlotsIn(design).length === 0) return [];
-  const settings = { outputTokens, handoffChars };
+  const settings = { outputTokens, handoffChars, language, taskChars };
   const findings = limitFindings({ design, limits, ...settings });
   const poolHit = findings.some((f) => f.kind === "day-neurons");
   const hitIds0 = new Set(findings.flatMap((f) => f.agents ?? []));
@@ -178,8 +178,8 @@ export function limitOffers({ design, limits, outputTokens, handoffChars, loaded
 }
 
 // The neurons each agent on a free pool of neurons may use in a run, by agent id (the numbers of the agents table in Create).
-export function neuronsByAgent({ design, limits, outputTokens, handoffChars }) {
-  const rows = new Map(callsOf(design, limits, { outputTokens, handoffChars }).map((r) => [r.id, r]));
+export function neuronsByAgent({ design, limits, outputTokens, handoffChars, language, taskChars }) {
+  const rows = new Map(callsOf(design, limits, { outputTokens, handoffChars, language, taskChars }).map((r) => [r.id, r]));
   const out = new Map();
   for (const node of design.nodes ?? []) {
     const spent = rows.has(node.id) ? neuronsOf(node, rows.get(node.id)) : 0;
@@ -202,8 +202,8 @@ function fewer(design) {
 export { slotIsFree };
 
 // The numbers behind the "fits" line (and the worst bucket in general): null when no agent runs on a slot with free limits.
-export function limitSummary({ design, limits, outputTokens, handoffChars }) {
-  const buckets = bucketsOf(design, limits, { outputTokens, handoffChars });
+export function limitSummary({ design, limits, outputTokens, handoffChars, language, taskChars }) {
+  const buckets = bucketsOf(design, limits, { outputTokens, handoffChars, language, taskChars });
   if (buckets.length === 0) return null;
   // The worst bucket: by the share of the day's tokens, or of the day's requests when the bucket has no token limits.
   const share = (b) => (hasPool(b.free) ? b.neurons / b.free.neuronsPerDay : hasTokens(b.free) ? b.total / b.free.tpd : b.calls / b.free.rpd);
