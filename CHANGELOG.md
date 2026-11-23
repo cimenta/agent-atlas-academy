@@ -47,6 +47,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Player title: the Live mark, the type chip and "Recorded with" sit together on one line under the title, however long the title is.
 - Create: when a loaded definition is refused because of instructions on an agent that cannot have them, the message names the agent (English and Czech).
 - Create: the reason "Add your API key first." is now a link; it opens the API key tab and puts the cursor in the key box; the words "add your key" in the footer hint do the same (English and Czech); when the key is saved but locked, they stay plain text beside the Unlock box and say "unlock your key".
 - Create: the Back, Next and Run buttons and the language buttons are as high as the other compact buttons (32 px), and a tall diagram scrolls inside its box instead of running under the Back and Next bar.

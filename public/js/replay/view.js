@@ -248,7 +248,7 @@ function mountView(container, { exportRun, pattern, events, apiCalls = [], apiCa
       doc,
       "div",
       { class: "player-head", "data-ui": "player-head" },
-      h(doc, "div", { class: "player-title" }, h(doc, "h2", {}, ...headingParts(), liveBadge), pattern ? h(doc, "span", { class: `type-chip type-${pattern}`, "data-ui": "player-pattern" }, t(`pattern.${pattern}`)) : "", h(doc, "span", { class: "recorded", "data-ui": "recorded-with" }, t("player.recordedWith", { provider: providerName(recordedWith.provider) }))),
+      h(doc, "div", { class: "player-title" }, h(doc, "h2", {}, ...headingParts()), h(doc, "div", { class: "player-chips" }, liveBadge, pattern ? h(doc, "span", { class: `type-chip type-${pattern}`, "data-ui": "player-pattern" }, t(`pattern.${pattern}`)) : "", h(doc, "span", { class: "recorded", "data-ui": "recorded-with" }, t("player.recordedWith", { provider: providerName(recordedWith.provider) })))),
       exportButton,
     ),
     aboutPanel ? aboutPanel.element : "",
