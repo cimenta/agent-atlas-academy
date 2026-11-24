@@ -1,0 +1,65 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write a short welcome message for new members of a school coding club.",
+  "about": {
+    "en": {
+      "title": "Supervisor: a boss who gives out the work",
+      "author": "Agent Atlas Academy",
+      "description": "A supervisor decides which worker does each part and puts the results together.\n\n**What it teaches**\n\nWith a supervisor every result returns to the boss, who decides what happens next.\n\n**What to watch**\n\nWhich worker the supervisor picks first, and what it asks of each.\n\nRead more: [Supervisor and workers](#/learn/supervisor-and-workers)"
+    },
+    "cs": {
+      "title": "Supervizor: šéf, který rozdává práci",
+      "author": "Agent Atlas Academy",
+      "description": "Supervizor rozhoduje, který pracovník udělá kterou část, a výsledky složí.\n\n**Čemu se naučíte**\n\nU supervizora se každý výsledek vrací šéfovi, který rozhodne, co dál.\n\n**Na co se dívat**\n\nKterého pracovníka supervizor vybere jako prvního a co po každém chce.\n\nVíce si přečtěte: [Supervizor a pracovníci](#/learn/supervisor-and-workers)"
+    }
+  },
+  "library": {
+    "level": 1,
+    "paths": {
+      "patterns": 3
+    },
+    "tags": [
+      "basics",
+      "supervisor",
+      "planning"
+    ],
+    "teaches": {
+      "en": "With a supervisor every result returns to the boss, who decides what happens next.",
+      "cs": "U supervizora se každý výsledek vrací šéfovi, který rozhodne, co dál."
+    }
+  },
+  "design": {
+    "pattern": "supervisor",
+    "nodes": [
+      {
+        "id": "supervisor",
+        "agent": "supervisor",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "supervisor",
+        "to": "researcher"
+      },
+      {
+        "from": "supervisor",
+        "to": "writer"
+      }
+    ]
+  }
+}

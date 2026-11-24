@@ -1,0 +1,78 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Should our class replace paper textbooks with tablets?",
+  "about": {
+    "en": {
+      "title": "Debate: three debaters and two rounds",
+      "author": "Agent Atlas Academy",
+      "description": "Two debaters take sides, a third looks for the middle, and they answer each other for two rounds before the judge decides.\n\n**What it teaches**\n\nMore rounds make the arguments answer each other, but they repeat themselves and cost tokens.\n\n**What to watch**\n\nWhat changes between round one and round two, and whether the judge follows the strongest side.\n\nRead more: [Debate](#/learn/debate)"
+    },
+    "cs": {
+      "title": "Debata: tři debatéři a dvě kola",
+      "author": "Agent Atlas Academy",
+      "description": "Dva debatéři zaujmou strany, třetí hledá střed a po dvě kola si odpovídají, než rozhodne soudce.\n\n**Čemu se naučíte**\n\nVíc kol způsobí, že si argumenty odpovídají, ale opakují se a stojí tokeny.\n\n**Na co se dívat**\n\nCo se změní mezi prvním a druhým kolem a zda soudce následuje silnější stranu.\n\nVíce si přečtěte: [Debata](#/learn/debate)"
+    }
+  },
+  "library": {
+    "level": 3,
+    "paths": {
+      "patterns": 16
+    },
+    "tags": [
+      "debate",
+      "disagreement",
+      "decision-making"
+    ],
+    "teaches": {
+      "en": "More rounds make the arguments answer each other, but they repeat themselves and cost tokens.",
+      "cs": "Víc kol způsobí, že si argumenty odpovídají, ale opakují se a stojí tokeny."
+    }
+  },
+  "design": {
+    "pattern": "debate",
+    "nodes": [
+      {
+        "id": "debater",
+        "agent": "debater",
+        "model": "fast",
+        "search": false,
+        "stance": "for"
+      },
+      {
+        "id": "debater-2",
+        "agent": "debater",
+        "model": "fast",
+        "search": false,
+        "stance": "against"
+      },
+      {
+        "id": "debater-3",
+        "agent": "debater",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "judge",
+        "agent": "judge",
+        "model": "balanced",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "debater",
+        "to": "judge"
+      },
+      {
+        "from": "debater-2",
+        "to": "judge"
+      },
+      {
+        "from": "debater-3",
+        "to": "judge"
+      }
+    ],
+    "rounds": 2
+  }
+}

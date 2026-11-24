@@ -1,0 +1,104 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "A town of 20,000 people wants to reduce car traffic in its centre. Suggest a plan.",
+  "about": {
+    "en": {
+      "title": "Parallel: four points of view and a critic",
+      "author": "Agent Atlas Academy",
+      "description": "Four agents answer at once from four points of view, a combiner merges them and a critic checks the result.\n\n**What it teaches**\n\nMore agents in parallel bring more views for about the same waiting time, and cost more in tokens.\n\n**What to watch**\n\nThe time of the whole run against the sum of the agents, and what the combiner drops.\n\nRead more: [Parallel fan-out and fan-in](#/learn/parallel-fan-out-fan-in)"
+    },
+    "cs": {
+      "title": "Paralelně: čtyři pohledy a kritik",
+      "author": "Agent Atlas Academy",
+      "description": "Čtyři agenti odpovídají současně ze čtyř pohledů, slučovač je spojí a kritik výsledek zkontroluje.\n\n**Čemu se naučíte**\n\nVíc paralelních agentů přinese víc pohledů za zhruba stejnou dobu čekání, ale stojí víc tokenů.\n\n**Na co se dívat**\n\nČas celého běhu proti součtu časů agentů a co slučovač vynechá.\n\nVíce si přečtěte: [Paralelní rozvětvení a sloučení](#/learn/parallel-fan-out-fan-in)"
+    }
+  },
+  "library": {
+    "level": 2,
+    "paths": {
+      "patterns": 8
+    },
+    "tags": [
+      "parallel-work",
+      "combining-answers",
+      "decision-making",
+      "speed"
+    ],
+    "teaches": {
+      "en": "More agents in parallel bring more views for about the same waiting time, and cost more in tokens.",
+      "cs": "Víc paralelních agentů přinese víc pohledů za zhruba stejnou dobu čekání, ale stojí víc tokenů."
+    }
+  },
+  "design": {
+    "pattern": "parallel",
+    "nodes": [
+      {
+        "id": "resident",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Resident",
+        "instructions": "Answer as a resident who lives in the town centre."
+      },
+      {
+        "id": "shop",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Shop owner",
+        "instructions": "Answer as the owner of a small shop in the centre."
+      },
+      {
+        "id": "planner",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "City planner",
+        "instructions": "Answer as a city planner who knows what other towns tried."
+      },
+      {
+        "id": "cyclist",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Cyclist",
+        "instructions": "Answer as a daily cyclist and walker."
+      },
+      {
+        "id": "combiner",
+        "agent": "combiner",
+        "model": "balanced",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "resident",
+        "to": "combiner"
+      },
+      {
+        "from": "shop",
+        "to": "combiner"
+      },
+      {
+        "from": "planner",
+        "to": "combiner"
+      },
+      {
+        "from": "cyclist",
+        "to": "combiner"
+      },
+      {
+        "from": "combiner",
+        "to": "critic"
+      }
+    ]
+  }
+}

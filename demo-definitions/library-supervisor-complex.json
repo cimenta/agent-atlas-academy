@@ -1,0 +1,87 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Prepare a one-page plan for a school charity bake sale: a budget, who does what, and the main risks.",
+  "about": {
+    "en": {
+      "title": "Supervisor: four workers and many turns",
+      "author": "Agent Atlas Academy",
+      "description": "The supervisor chooses among four workers in turn and decides when the plan is done.\n\n**What it teaches**\n\nA supervisor sees everything, which is useful and expensive: every turn returns to it, and its context grows.\n\n**What to watch**\n\nThe order in which the workers are called, and how the supervisor decides to stop.\n\nRead more: [Supervisor and workers](#/learn/supervisor-and-workers)"
+    },
+    "cs": {
+      "title": "Supervizor: čtyři pracovníci a mnoho tahů",
+      "author": "Agent Atlas Academy",
+      "description": "Supervizor postupně vybírá ze čtyř pracovníků a rozhoduje, kdy je plán hotový.\n\n**Čemu se naučíte**\n\nSupervizor vidí všechno, což je užitečné a drahé: každý tah se k němu vrací a jeho kontext roste.\n\n**Na co se dívat**\n\nV jakém pořadí jsou pracovníci volání a jak supervizor rozhodne skončit.\n\nVíce si přečtěte: [Supervizor a pracovníci](#/learn/supervisor-and-workers)"
+    }
+  },
+  "library": {
+    "level": 3,
+    "paths": {
+      "patterns": 15
+    },
+    "tags": [
+      "supervisor",
+      "planning",
+      "risk-analysis"
+    ],
+    "teaches": {
+      "en": "A supervisor sees everything, which is useful and expensive: every turn returns to it, and its context grows.",
+      "cs": "Supervizor vidí všechno, což je užitečné a drahé: každý tah se k němu vrací a jeho kontext roste."
+    }
+  },
+  "design": {
+    "pattern": "supervisor",
+    "nodes": [
+      {
+        "id": "supervisor",
+        "agent": "supervisor",
+        "model": "balanced",
+        "search": false
+      },
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "treasurer",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Treasurer",
+        "instructions": "You keep the budget. Give a simple budget with amounts in euros."
+      }
+    ],
+    "edges": [
+      {
+        "from": "supervisor",
+        "to": "researcher"
+      },
+      {
+        "from": "supervisor",
+        "to": "writer"
+      },
+      {
+        "from": "supervisor",
+        "to": "critic"
+      },
+      {
+        "from": "supervisor",
+        "to": "treasurer"
+      }
+    ]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Which came first, the printing press or the telescope, and how did printing change schools?",
+  "about": {
+    "en": {
+      "title": "Router: four specialists, an unclear question",
+      "author": "Agent Atlas Academy",
+      "description": "The question fits two specialists, so the router has to choose, and the choice changes the answer.\n\n**What it teaches**\n\nA router can choose wrongly when a question fits more than one specialist; one choice, no second opinion.\n\n**What to watch**\n\nThe reason the router gives, and what the unchosen specialist would have said.\n\nRead more: [Router](#/learn/router)"
+    },
+    "cs": {
+      "title": "Směrovač: čtyři specialisté, nejasná otázka",
+      "author": "Agent Atlas Academy",
+      "description": "Otázka sedí dvěma specialistům, směrovač proto musí vybrat a výběr změní odpověď.\n\n**Čemu se naučíte**\n\nSměrovač se může splést, když otázka sedí víc specialistům; jedna volba a žádný druhý názor.\n\n**Na co se dívat**\n\nDůvod, který směrovač uvede, a co by řekl nevybraný specialista.\n\nVíce si přečtěte: [Směrovač](#/learn/router)"
+    }
+  },
+  "library": {
+    "level": 2,
+    "paths": {
+      "patterns": 10
+    },
+    "tags": [
+      "tool-choice",
+      "decision-making"
+    ],
+    "teaches": {
+      "en": "A router can choose wrongly when a question fits more than one specialist; one choice, no second opinion.",
+      "cs": "Směrovač se může splést, když otázka sedí víc specialistům; jedna volba a žádný druhý názor."
+    }
+  },
+  "design": {
+    "pattern": "router",
+    "nodes": [
+      {
+        "id": "router",
+        "agent": "router",
+        "model": "balanced",
+        "search": false
+      },
+      {
+        "id": "maths",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Maths tutor",
+        "instructions": "You are a maths tutor. Answer questions about numbers and calculation."
+      },
+      {
+        "id": "history",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "History tutor",
+        "instructions": "You are a history tutor. Answer questions about dates, events and their effects."
+      },
+      {
+        "id": "language",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Language tutor",
+        "instructions": "You are a language tutor. Answer questions about words, grammar and writing."
+      },
+      {
+        "id": "science",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Science tutor",
+        "instructions": "You are a science tutor. Answer questions about nature, instruments and discoveries."
+      }
+    ],
+    "edges": [
+      {
+        "from": "router",
+        "to": "maths"
+      },
+      {
+        "from": "router",
+        "to": "history"
+      },
+      {
+        "from": "router",
+        "to": "language"
+      },
+      {
+        "from": "router",
+        "to": "science"
+      }
+    ]
+  }
+}

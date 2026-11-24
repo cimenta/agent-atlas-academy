@@ -1,0 +1,68 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "How do I turn the fraction 3/4 into a percentage?",
+  "about": {
+    "en": {
+      "title": "Router: choose the right specialist",
+      "author": "Agent Atlas Academy",
+      "description": "A router reads the question and sends it to one of two specialists.\n\n**What it teaches**\n\nA router chooses one path and the others are never started, so it saves work.\n\n**What to watch**\n\nWhich specialist is chosen and why, and which one stays idle.\n\nRead more: [Router](#/learn/router)"
+    },
+    "cs": {
+      "title": "Směrovač: vyber správného specialistu",
+      "author": "Agent Atlas Academy",
+      "description": "Směrovač přečte otázku a pošle ji jednomu ze dvou specialistů.\n\n**Čemu se naučíte**\n\nSměrovač zvolí jednu cestu a ostatní se vůbec nespustí, takže šetří práci.\n\n**Na co se dívat**\n\nKdo je vybrán a proč, a který specialista zůstane nečinný.\n\nVíce si přečtěte: [Směrovač](#/learn/router)"
+    }
+  },
+  "library": {
+    "level": 1,
+    "paths": {
+      "patterns": 5
+    },
+    "tags": [
+      "basics",
+      "tool-choice"
+    ],
+    "teaches": {
+      "en": "A router chooses one path and the others are never started, so it saves work.",
+      "cs": "Směrovač zvolí jednu cestu a ostatní se vůbec nespustí, takže šetří práci."
+    }
+  },
+  "design": {
+    "pattern": "router",
+    "nodes": [
+      {
+        "id": "router",
+        "agent": "router",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "maths",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Maths tutor",
+        "instructions": "You are a patient maths tutor. Explain step by step with one worked example."
+      },
+      {
+        "id": "language",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Language tutor",
+        "instructions": "You are a patient language tutor. Explain grammar and writing questions with one example."
+      }
+    ],
+    "edges": [
+      {
+        "from": "router",
+        "to": "maths"
+      },
+      {
+        "from": "router",
+        "to": "language"
+      }
+    ]
+  }
+}

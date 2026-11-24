@@ -19,11 +19,11 @@ const build = (over = {}) => {
   return { li, log };
 };
 
-test("the card has no cog and no menu, and the tick box sits in the tools at the right of the top row", () => {
+test("the card has no cog and no menu, and the tick box sits in the top row before the title", () => {
   const { li } = build();
   assert.equal(li.find((e) => e.attrs["data-ui"] === "run-cog").length, 0);
-  const tools = li.find((e) => String(e.attrs.class) === "run-tools")[0];
-  assert.equal(tools.find((e) => e.attrs["data-ui"] === "compare-select").length, 1);
+  const top = li.find((e) => String(e.attrs.class) === "run-top")[0];
+  assert.equal(top.find((e) => e.attrs["data-ui"] === "compare-select").length, 1);
 });
 
 test("a click anywhere on the card selects the run once, but a click that starts in the tick box does not", () => {
@@ -58,7 +58,6 @@ test("ticking calls onToggle with the new state, and the selected card is marked
 test("every icon and tag of a card says what it is when the mouse rests on it", () => {
   const { li } = build({ base: true });
   const tip = (pred) => li.find(pred)[0]?.attrs.title;
-  assert.ok(String(tip((e) => e.attrs["data-ui"] === "run-outcome-chip")).startsWith("library.tip.outcome"));
   assert.equal(tip((e) => e.attrs["data-ui"] === "compare-select"), "library.tip.tick");
   assert.equal(tip((e) => e.attrs["data-ui"] === "compare-base"), "library.tip.base");
   assert.equal(tip((e) => e.attrs["data-ui"] === "run-type"), "library.tip.pattern");

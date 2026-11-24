@@ -21,6 +21,9 @@ import { createAboutPanel } from "./replay/about.js";
 import { MAX_COMPARE } from "./compare-model.js";
 import { clearPageActions, setPageActions } from "./shortcuts.js";
 import { groupOfTag, tagCounts, filterByTags, cloudRows, tagWeight } from "./library-tags.js";
+import { stepOf } from "./library-path.js";
+import { loadProgress, setDone, isDone } from "./library-progress.js";
+import { drawPath, drawFilterBar } from "./library-path-view.js";
 
 export { importFiles };
 
@@ -100,12 +103,14 @@ export async function renderLibraryTab(ctx, requestedId) {
   let local = await listLocal();
   if (ctx.isStale()) return;
 
-  // A run opened from a link shows its detail. Coming back to the Library shows the run and the cloud switch as they were
-  // (a run that is gone is forgotten); the tag cloud is on only the first time the Library opens after the app starts.
+  // A run opened from a link shows its detail. Coming back to the Library shows the run and the tab of the right side as they were
+  // (a run that is gone is forgotten); the first visit shows the recommended path with no run chosen.
   const stillThere = (id) => Boolean(id) && (gallery.some((r) => r.id === id) || local.some((r) => r.id === id));
   let selected = requestedId ?? (stillThere(lib.selected) ? lib.selected : null);
   if (!selected) lib.selected = null;
-  if (requestedId) lib.cloud = false;
+  if (requestedId) lib.right = "detail";
+  else if (!selected && (lib.right === "detail" || !lib.right)) lib.right = "path";
+  else if (!lib.right) lib.right = "detail";
   let detailToken = 0;
   // What the chosen run offers to the letter keys (set when its detail is drawn), and which list is shown.
   let detailState = null;
@@ -162,7 +167,7 @@ export async function renderLibraryTab(ctx, requestedId) {
   const select = (id, { keepList = false } = {}) => {
     selected = id;
     lib.selected = id;
-    lib.cloud = !id;
+    lib.right = id ? "detail" : "path";
     setAddress(id, Boolean(id) && layout.getAttribute("data-view") === "list" && !keepList);
     // On a phone the page scrolls: the list position is kept while the detail is shown, and Back returns to it.
     const win = doc.defaultView;
@@ -177,7 +182,7 @@ export async function renderLibraryTab(ctx, requestedId) {
       if (row.getAttribute("data-run") === id) row.setAttribute("aria-current", "true");
       else row.removeAttribute("aria-current");
     }
-    return drawDetail();
+    return drawRight();
   };
 
   let compareNote = "";
@@ -221,7 +226,7 @@ export async function renderLibraryTab(ctx, requestedId) {
           onClick: () => {
             lib.tags = [];
             redraw();
-            if (showCloud()) drawDetail();
+            refreshRight();
           },
         }),
       );
@@ -346,7 +351,7 @@ export async function renderLibraryTab(ctx, requestedId) {
       (detailHost.querySelector("button") ?? detailHost).focus();
       return true;
     },
-    toggleTags: withNoteCleared(() => toggleCloud()),
+    toggleTags: withNoteCleared(() => showTags()),
     importFile: () => fileInput.click(),
     loadLast: () => {
       const last = doc.querySelector('[data-ui="load-last"]');
@@ -356,30 +361,37 @@ export async function renderLibraryTab(ctx, requestedId) {
   setPageActions(pageActions);
   ctx.onLeave(() => clearPageActions(pageActions));
 
-  // The tag cloud: on the right when it is switched on or when no run is chosen. The switch sits in the tab row of the list.
-  const showCloud = () => !selected || lib.cloud;
+  // The right side has three tabs: the recommended path (what a first visit shows), the tag cloud and the detail of the chosen run.
   const tagLabel = (id) => {
     const text = t(`tag.${id}`);
     return text === `tag.${id}` ? id : text;
   };
-  // On a phone the list and the detail take turns; the detail is the one that is hidden while the list shows.
-  const detailHidden = () => doc.defaultView.getComputedStyle?.(detailHost).display === "none";
-  const syncToggle = () => {
-    const button = pane.querySelector('[data-ui="tag-cloud-toggle"]');
-    if (button) button.setAttribute("aria-pressed", String(showCloud()));
-  };
-  const toggleCloud = () => {
-    // On a phone the switch brings the cloud in place of the list.
-    if (detailHidden()) {
-      lib.cloud = true;
-      layout.setAttribute("data-view", "detail");
-    } else if (selected) {
-      lib.cloud = !lib.cloud;
-    } else {
-      return false;
+  const storage = () => {
+    try {
+      return doc.defaultView?.localStorage ?? null;
+    } catch {
+      return null;
     }
-    drawDetail();
+  };
+  const progressNow = () => {
+    try {
+      return loadProgress(storage());
+    } catch {
+      return new Set();
+    }
+  };
+  // The one line of what a library run teaches, in the language of the page.
+  const teachesOf = (item) => item?.teaches?.[ctx.lang] ?? item?.teaches?.en ?? "";
+  // On a phone the list and the right side take turns; the right side is the one that is hidden while the list shows.
+  const detailHidden = () => doc.defaultView.getComputedStyle?.(detailHost).display === "none";
+  const showTags = () => {
+    lib.right = "tags";
+    if (detailHidden()) layout.setAttribute("data-view", "detail");
+    drawRight();
     return true;
+  };
+  const refreshRight = () => {
+    if (lib.right !== "detail") drawRight();
   };
   const pickTag = (tag) => {
     lib.tags = lib.tags.includes(tag) ? lib.tags.filter((x) => x !== tag) : [...lib.tags, tag];
@@ -390,25 +402,49 @@ export async function renderLibraryTab(ctx, requestedId) {
     // On a phone the cloud hides the list: show the list the choice has narrowed down.
     if (layout.getAttribute("data-view") === "detail" && doc.defaultView.matchMedia?.("(max-width: 759px)").matches) layout.setAttribute("data-view", "list");
     redraw();
-    if (showCloud()) drawDetail();
+    refreshRight();
   };
-  const drawCloud = () => {
-    const had = detailHost.contains(doc.activeElement) ? doc.activeElement.getAttribute?.("data-tag") : null;
+  const filterBar = () =>
+    drawFilterBar({
+      doc,
+      t,
+      tags: lib.tags,
+      goal: lib.goal,
+      onlyGoal: lib.onlyGoal,
+      tagLabel,
+      onRemove: pickTag,
+      onClear: () => {
+        lib.tags = [];
+        redraw();
+        refreshRight();
+      },
+      onOnlyGoal: (on) => {
+        lib.onlyGoal = on;
+        redraw();
+        refreshRight();
+      },
+    });
+  // What has the focus on the right (a tag, a goal, a button of a step), so it can get it back when the side is drawn again.
+  const focusKey = () => {
+    const el = doc.activeElement;
+    if (!el || !detailHost.contains(el)) return null;
+    const tag = el.getAttribute?.("data-tag");
+    if (tag) return `[data-tag="${tag}"]`;
+    const goal = el.getAttribute?.("data-goal");
+    if (goal) return `[data-goal="${goal}"]`;
+    const run = el.closest?.("li")?.getAttribute?.("data-run");
+    const ui = el.getAttribute?.("data-ui");
+    return run && ui ? `li[data-run="${run}"] [data-ui="${ui}"]` : null;
+  };
+
+  const drawCloud = (body) => {
     const items = buildReplayList(gallery, []).gallery;
-    const all = tagCounts(items);
-    const left = filterByTags(items, lib.tags);
+    // With the switch on, the cloud counts only the runs of the chosen goal.
+    const pool = lib.onlyGoal ? items.filter((item) => stepOf(item, lib.goal)) : items;
+    const all = tagCounts(pool);
+    const left = filterByTags(pool, lib.tags);
     const shown = tagCounts(left);
     const max = Math.max(0, ...all.values());
-    const back = h(doc, "a", { href: "#/play", class: "back-to-list", "data-ui": "back-to-list" }, t("library.backToList"));
-    back.addEventListener("click", (event) => {
-      event.preventDefault();
-      layout.setAttribute("data-view", "list");
-    });
-    const chips = lib.tags.map((tag) => {
-      const chip = h(doc, "button", { type: "button", class: "tag-chip", "data-ui": "tag-chip", "aria-label": t("library.tags.remove", { tag: tagLabel(tag) }), title: t("library.tags.remove", { tag: tagLabel(tag) }) }, `${tagLabel(tag)} \u00d7`);
-      chip.addEventListener("click", () => pickTag(tag));
-      return chip;
-    });
     const rows = cloudRows(all).map((row) =>
       h(
         doc,
@@ -425,34 +461,64 @@ export async function renderLibraryTab(ctx, requestedId) {
       ),
     );
     const key = h(doc, "div", { class: "tag-key" }, ...["pattern", "task", "efficiency", "basics"].map((g) => h(doc, "span", { class: `tag-${g}`, title: t(`library.tags.groupTip.${g}`) }, t(`library.tags.group.${g}`))));
-    detailHost.replaceChildren(
-      back,
+    body.replaceChildren(
       h(doc, "h2", { class: "tag-title" }, t("library.tags.title")),
-      h(doc, "p", { class: "muted" }, all.size === 0 ? t("library.tags.none") : lib.tags.length > 0 ? t("library.tags.result", { n: left.length }) : t("library.tags.hint", { runs: items.length, tags: all.size })),
-      ...(chips.length > 0 ? [h(doc, "div", { class: "tag-chips" }, ...chips)] : []),
+      h(doc, "p", { class: "muted" }, all.size === 0 ? t("library.tags.none") : lib.tags.length > 0 ? t("path.cloudResult", { n: left.length }) : t("path.cloudHint")),
+      filterBar(),
       ...(rows.length > 0 ? [h(doc, "div", { class: "tag-cloud", role: "group", "aria-label": t("library.tags.title"), "data-ui": "tag-cloud" }, ...rows), key] : []),
-      ...(selected ? [] : [h(doc, "p", { class: "library-hint", "data-ui": "library-hint" }, t("library.selectHint"))]),
     );
-    if (had) detailHost.querySelector(`[data-tag="${had}"]`)?.focus();
   };
 
-  async function drawDetail() {
-    const token = ++detailToken;
-    detailState = null;
-    syncToggle();
-    if (showCloud()) {
-      drawCloud();
+  // Opening a step shows the run in the list (the library's list) and its detail on the right.
+  const openRun = (id) => {
+    if (activeTab !== "library") {
+      lib.tab = "library";
+      lib.tabChosen = true;
+    }
+    const shown = select(id);
+    redraw();
+    return shown;
+  };
+  const drawPathPane = (body) => {
+    body.replaceChildren(
+      drawPath({
+        doc,
+        t,
+        items: buildReplayList(gallery, []).gallery,
+        goal: lib.goal,
+        tags: lib.tags,
+        done: progressNow(),
+        tagLabel,
+        teachesOf,
+        filterBar: filterBar(),
+        onGoal: (goal) => {
+          lib.goal = goal;
+          redraw();
+          drawRight();
+        },
+        onToggleDone: (goal, id, on) => {
+          try {
+            setDone(storage(), goal, id, on);
+          } catch {
+            // the mark is not kept; the page still works
+          }
+          redraw();
+          drawRight();
+        },
+        onOpen: openRun,
+      }),
+    );
+  };
+
+  async function drawDetail(body, token) {
+    if (!selected) {
+      body.replaceChildren(h(doc, "p", { class: "library-hint", "data-ui": "library-hint" }, t("path.detailHint")));
       return;
     }
     const found = await loadAnyRun(ctx, selected);
     if (ctx.isStale() || token !== detailToken) return;
-    const back = h(doc, "a", { href: "#/play", class: "back-to-list", "data-ui": "back-to-list" }, t("library.backToList"));
-    back.addEventListener("click", (event) => {
-      event.preventDefault();
-      select(null);
-    });
     if (!found) {
-      detailHost.replaceChildren(back, h(doc, "p", { class: "notice", role: "alert", "data-ui": "library-not-found" }, t("library.notFound")));
+      body.replaceChildren(h(doc, "p", { class: "notice", role: "alert", "data-ui": "library-not-found" }, t("library.notFound")));
       return;
     }
     const { run, source } = found;
@@ -506,18 +572,80 @@ export async function renderLibraryTab(ctx, requestedId) {
     const labels = { load: "library.action.load", "use-in-create": "library.action.useInCreate", export: "library.action.export", compare: "library.action.compare", send: "library.action.send", delete: "library.action.delete", "edit-description": "library.action.editDescription" };
     const actions = actionList({ source, hasDefinition: Boolean(definition), canSubmit: own && canSubmit(run) }).map((ui) => ({ ui, label: t(labels[ui]), primary: ui === "load", danger: ui === "delete", onClick: handlers[ui] }));
     const view = libraryDetail({ doc, t, item, run, source, detail, facts: runFacts(run), actions, aboutPanel: panel?.element ?? null, num: (n) => new Intl.NumberFormat(ctx.lang === "cs" ? "cs-CZ" : "en-US").format(n) });
-    detailHost.replaceChildren(back, view);
+    body.replaceChildren(view);
+  }
+
+  let focusRightTab = false;
+  const RIGHT_TABS = ["path", "tags", "detail"];
+  const rightTabs = () => {
+    const label = { path: "path.tab", tags: "path.tags", detail: "path.detail" };
+    const list = h(
+      doc,
+      "div",
+      { class: "tabs right-tabs", role: "tablist", "aria-label": t("path.tabs"), "data-ui": "right-tabs" },
+      ...RIGHT_TABS.map((name) => {
+        const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-ui": `right-tab-${name}`, "aria-selected": String(lib.right === name), tabindex: lib.right === name ? "0" : "-1" }, t(label[name]));
+        button.addEventListener("click", () => {
+          lib.right = name;
+          focusRightTab = true;
+          drawRight();
+        });
+        return button;
+      }),
+    );
+    list.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+      event.preventDefault();
+      const at = RIGHT_TABS.indexOf(lib.right);
+      lib.right = RIGHT_TABS[(at + (event.key === "ArrowRight" ? 1 : RIGHT_TABS.length - 1)) % RIGHT_TABS.length];
+      focusRightTab = true;
+      drawRight();
+    });
+    return list;
+  };
+
+  async function drawRight() {
+    const token = ++detailToken;
+    detailState = null;
+    const key = focusKey();
+    // On a phone the right side comes with a link back to the list.
+    const back = h(doc, "a", { href: "#/play", class: "back-to-list", "data-ui": "back-to-list" }, t("library.backToList"));
+    back.addEventListener("click", (event) => {
+      event.preventDefault();
+      if (lib.right === "detail" && selected) select(null);
+      else layout.setAttribute("data-view", "list");
+    });
+    const body = h(doc, "div", { class: "right-body", "data-ui": "right-body" });
+    const tabs = rightTabs();
+    detailHost.replaceChildren(back, tabs, body);
+    if (focusRightTab) {
+      focusRightTab = false;
+      tabs.querySelector('[aria-selected="true"]')?.focus();
+    }
+    if (lib.right === "path") drawPathPane(body);
+    else if (lib.right === "tags") drawCloud(body);
+    else {
+      await drawDetail(body, token);
+      return;
+    }
+    if (key) body.querySelector(key)?.focus();
   }
 
   const draw = async () => {
     local = await listLocal();
     if (ctx.isStale()) return;
     const built = buildReplayList(gallery, local);
-    const shown = filterLibrary(filterByTags(built.gallery, lib.tags), lib.query, texts ?? {});
+    // With the switch on the right, the library list holds only the runs of the chosen goal.
+    const ofGoal = lib.onlyGoal ? built.gallery.filter((item) => stepOf(item, lib.goal)) : built.gallery;
+    const shown = filterLibrary(filterByTags(ofGoal, lib.tags), lib.query, texts ?? {});
     const mine = filterLibrary(built.mine, lib.query, texts ?? {});
     const none = (key) => h(doc, "p", { class: "notice" }, t(key));
+    // The steps of the goal that is chosen on the path: a run of that goal shows its number, done or not.
+    const progress = progressNow();
     const row = (item) =>
       runRow(ctx, item, {
+        goal: lib.goal,
+        step: stepOf(item, lib.goal) ? { n: stepOf(item, lib.goal), done: isDone(progress, lib.goal, item.id) } : null,
         checked: lib.compare.includes(item.id),
         base: lib.compare[0] === item.id,
         selected: item.id === selected,
@@ -549,15 +677,8 @@ export async function renderLibraryTab(ctx, requestedId) {
       });
       return button;
     };
-    const tagToggle = () => {
-      const button = h(doc, "button", { type: "button", class: "tag-toggle", "data-ui": "tag-cloud-toggle", "aria-pressed": String(showCloud()), title: t("library.tags.toggleTitle"), "aria-label": t("library.tags.toggle"), "aria-keyshortcuts": "t" }, h(doc, "span", { "aria-hidden": "true" }, "\u2601"));
-      button.addEventListener("click", () => {
-        keyNote.textContent = toggleCloud() ? "" : t("library.nothing.toggleTags");
-      });
-      return button;
-    };
     const bar = compareBar(active === "mine" ? built.mine.map((r) => r.id) : []);
-    const paneTabs = h(doc, "div", { class: "tabs", role: "tablist", "data-ui": "pane-tabs" }, tabButton("mine", "play.mine", built.mine.length), tabButton("library", "play.library", built.gallery.length), h(doc, "span", { class: "tab-tools" }, tagToggle(), bar.menu), fileInput);
+    const paneTabs = h(doc, "div", { class: "tabs", role: "tablist", "data-ui": "pane-tabs" }, tabButton("mine", "play.mine", built.mine.length), tabButton("library", "play.library", built.gallery.length), h(doc, "span", { class: "tab-tools" }, bar.menu), fileInput);
     pane.replaceChildren(
       paneTabs,
       importNote,
@@ -577,5 +698,5 @@ export async function renderLibraryTab(ctx, requestedId) {
   };
   redraw = draw;
   await draw();
-  await drawDetail();
+  await drawRight();
 }

@@ -1,0 +1,59 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "My laptop connects to the school Wi-Fi, but no web page opens.",
+  "about": {
+    "en": {
+      "title": "Handoff: control moves to the expert",
+      "author": "Agent Atlas Academy",
+      "description": "The first agent decides it is not the right one and hands the problem to an expert with a note.\n\n**What it teaches**\n\nIn a handoff control moves forward and nothing stands above it; the note is all the next agent knows.\n\n**What to watch**\n\nWhat exactly is in the note, and what the expert received.\n\nRead more: [Handoff](#/learn/handoff)"
+    },
+    "cs": {
+      "title": "Předání: řízení přejde na experta",
+      "author": "Agent Atlas Academy",
+      "description": "První agent usoudí, že není ten pravý, a předá problém expertovi s poznámkou.\n\n**Čemu se naučíte**\n\nU předání řízení postupuje dopředu a nic nad ním nestojí; poznámka je vše, co další agent ví.\n\n**Na co se dívat**\n\nCo přesně je v poznámce a co expert dostal.\n\nVíce si přečtěte: [Předání](#/learn/handoff)"
+    }
+  },
+  "library": {
+    "level": 2,
+    "paths": {
+      "patterns": 11
+    },
+    "tags": [
+      "handoff",
+      "tool-choice"
+    ],
+    "teaches": {
+      "en": "In a handoff control moves forward and nothing stands above it; the note is all the next agent knows.",
+      "cs": "U předání řízení postupuje dopředu a nic nad ním nestojí; poznámka je vše, co další agent ví."
+    }
+  },
+  "design": {
+    "pattern": "handoff",
+    "start": "helpdesk",
+    "nodes": [
+      {
+        "id": "helpdesk",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Help desk",
+        "instructions": "You answer first. If the problem is about the network, hand over to the network expert with a short note. Otherwise answer yourself."
+      },
+      {
+        "id": "network",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Network expert",
+        "instructions": "You fix network problems. Give clear steps a student can try."
+      }
+    ],
+    "edges": [
+      {
+        "from": "helpdesk",
+        "to": "network"
+      }
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Make a packing list for a weekend camping trip: first plan the groups of things, then fill each group.",
+  "about": {
+    "en": {
+      "title": "Plan and execute: a plan first, then the steps",
+      "author": "Agent Atlas Academy",
+      "description": "A planner writes the steps and an executor does them one by one.\n\n**What it teaches**\n\nA plan made first gives the run a shape, and the executor follows it even when a step turns out to be needless.\n\n**What to watch**\n\nThe steps of the plan, and whether the executor changes anything.\n\nRead more: [Plan and execute](#/learn/plan-and-execute)"
+    },
+    "cs": {
+      "title": "Plánuj a proveď: nejdřív plán, pak kroky",
+      "author": "Agent Atlas Academy",
+      "description": "Plánovač napíše kroky a vykonavatel je provede jeden po druhém.\n\n**Čemu se naučíte**\n\nPlán vytvořený předem dává běhu tvar a vykonavatel ho následuje, i když se krok ukáže jako zbytečný.\n\n**Na co se dívat**\n\nKroky plánu a zda vykonavatel něco změní.\n\nVíce si přečtěte: [Plánuj a proveď](#/learn/plan-and-execute)"
+    }
+  },
+  "library": {
+    "level": 2,
+    "paths": {
+      "patterns": 14
+    },
+    "tags": [
+      "planning",
+      "prompt-chaining"
+    ],
+    "teaches": {
+      "en": "A plan made first gives the run a shape, and the executor follows it even when a step turns out to be needless.",
+      "cs": "Plán vytvořený předem dává běhu tvar a vykonavatel ho následuje, i když se krok ukáže jako zbytečný."
+    }
+  },
+  "design": {
+    "pattern": "planexec",
+    "nodes": [
+      {
+        "id": "planner",
+        "agent": "planner",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "executor",
+        "agent": "executor",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "planner",
+        "to": "executor"
+      }
+    ]
+  }
+}

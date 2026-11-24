@@ -6,6 +6,7 @@ import { PATTERNS } from "../engine/patterns.js";
 import { isSlot } from "../key-slots.js";
 import { createEditor } from "./editor-model.js";
 import { ABOUT_FIELDS, ABOUT_LIMITS } from "../run-schema.js";
+import { GOALS } from "../library-path.js";
 
 export const DEFINITION_FORMAT = "agent-atlas-run-definition";
 export const DEFINITION_VERSION = 1;
@@ -44,13 +45,41 @@ export function aboutForLanguage(about, language) {
   return isObject(chosen) ? { ...chosen } : null;
 }
 
-export function buildDefinition({ task, design, about }) {
+// What the Library needs to place a run: level (1 to 3), kind (pair or bad), twin (the id of the other run of a pair), paths ({ goal: step }),
+// tags and teaches ({ en, cs }, one line each). Optional, so a definition made by hand or exported from a run has none. Only known, valid
+// parts are kept; null when nothing is left.
+const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+export function cleanLibraryMeta(meta) {
+  if (!isObject(meta)) return null;
+  const out = {};
+  if (Number.isInteger(meta.level) && meta.level >= 1 && meta.level <= 3) out.level = meta.level;
+  if (meta.kind === "pair" || meta.kind === "bad") out.kind = meta.kind;
+  if (typeof meta.twin === "string" && SLUG.test(meta.twin)) out.twin = meta.twin;
+  if (isObject(meta.paths)) {
+    const paths = Object.fromEntries(Object.entries(meta.paths).filter(([goal, step]) => GOALS.includes(goal) && Number.isInteger(step) && step > 0));
+    if (Object.keys(paths).length > 0) out.paths = paths;
+  }
+  if (Array.isArray(meta.tags)) {
+    const tags = meta.tags.filter((tag) => typeof tag === "string" && SLUG.test(tag));
+    if (tags.length > 0) out.tags = tags;
+  }
+  if (isObject(meta.teaches)) {
+    const teaches = {};
+    for (const lang of ["en", "cs"]) if (typeof meta.teaches[lang] === "string" && meta.teaches[lang].trim() !== "") teaches[lang] = meta.teaches[lang].trim().slice(0, 200);
+    if (Object.keys(teaches).length > 0) out.teaches = teaches;
+  }
+  return Object.keys(out).length > 0 ? out : null;
+}
+
+export function buildDefinition({ task, design, about, library }) {
   const cleaned = cleanDefinitionAbout(about);
+  const placed = cleanLibraryMeta(library);
   return {
     format: DEFINITION_FORMAT,
     version: DEFINITION_VERSION,
     task: typeof task === "string" ? task : "",
     ...(cleaned ? { about: cleaned } : {}),
+    ...(placed ? { library: placed } : {}),
     design: structuredClone(design),
   };
 }
@@ -133,5 +162,5 @@ export function loadDefinition(text) {
 
   const problems = editor.errors();
   if (problems.length > 0) return fail("invalid", problems);
-  return { ok: true, task, pattern: design.pattern, editor, notes, about: cleanDefinitionAbout(data.about) };
+  return { ok: true, task, pattern: design.pattern, editor, notes, about: cleanDefinitionAbout(data.about), library: cleanLibraryMeta(data.library) };
 }

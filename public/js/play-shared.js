@@ -3,6 +3,7 @@ import { h } from "./dom.js";
 import { providerChips } from "./provider-colors.js";
 import { getJson } from "./pages.js";
 import { formatRunWhen } from "./play-model.js";
+import { levelOf, kindOf } from "./library-path.js";
 import { refreshResultTab } from "./tab-state.js";
 import { clearPageActions, setPageActions } from "./shortcuts.js";
 
@@ -17,7 +18,7 @@ export const TAB_OF_VIEW = { library: "library", replay: "replay", run: "replay"
 // compare: the runs ticked in the library, in the order they were ticked (the first is the base of a comparison).
 // The run Create has just finished: Re-play opens it at its end, where the warnings and the message about the end are, not at the start.
 export const justFinished = { id: null };
-export const lib = { query: "", tab: null, compare: [], cloud: true, tags: [] };
+export const lib = { query: "", tab: null, compare: [], right: null, tags: [], goal: "patterns", onlyGoal: false };
 
 // The tab bar lives in the site header, with the library search next to it.
 export function tabBar(ctx, view, { onQuery, onFocusList, intro, resultOpen = false } = {}) {
@@ -74,14 +75,8 @@ function patternTip(t, pattern) {
   return t("library.tip.pattern", { name: t(`pattern.${pattern}`), about: about === `create.pattern.${pattern}` ? "" : about }).trim();
 }
 
-// How the run ended, as a round icon: a check, a stop mark or a cross on a green, amber or red background.
-const OUTCOME_ICONS = { ok: "✓", warn: "■", fail: "✕" };
-export function outcomeIcon({ doc, t }, item) {
-  if (!item.outcome) return "";
-  const level = item.outcome === "finished" ? "ok" : item.outcome === "stopped_user" || item.outcome === "stopped_limit" || item.outcome === "waiting_approval" ? "warn" : "fail";
-  const label = t(`result.status.${item.outcome}`);
-  return h(doc, "span", { class: `outcome-icon ${level}`, role: "img", "aria-label": label, title: t("library.tip.outcome", { label }), "data-ui": "run-outcome-chip", "data-outcome": item.outcome }, OUTCOME_ICONS[level]);
-}
+// How the run ended, as the colour of its card: finished green, stopped amber, failed red.
+export const outcomeLevel = (outcome) => (!outcome ? "" : outcome === "finished" ? "ok" : outcome === "stopped_user" || outcome === "stopped_limit" || outcome === "waiting_approval" ? "warn" : "fail");
 
 // The providers a run used, each a chip in its color from Settings.
 export function providerRow({ doc, settings, t }, item) {
@@ -99,9 +94,11 @@ export function providerRow({ doc, settings, t }, item) {
   return out;
 }
 
-// A card of the library: the title with the outcome icon and the tick box on top, the time below, then the providers and the pattern tag.
-// The whole card selects its run (show the detail); a click that starts in the tick box only ticks. The title is a link to the run in the Library.
-// pick: { checked, base, selected, onToggle(on), onSelect(id) }
+// A card of the library: the tick box and the title on top, the number of the step of the path in the top right corner, below the chips
+// (pattern, providers, before and after or bad on purpose) and the level as dots in the bottom right corner. The colour of the card is how
+// the run ended (the words are there for a screen reader). The whole card selects its run (show the detail); a click that starts in the
+// tick box only ticks. The title is a link to the run in the Library.
+// pick: { checked, base, selected, onToggle(on), onSelect(id), step?: { n, done }, goal? }
 export function runRow(ctx, item, pick) {
   const { doc, t } = ctx;
   const tick = h(doc, "input", { type: "checkbox", class: "run-compare", "data-ui": "compare-select", title: t("library.tip.tick"), checked: pick.checked, "aria-label": t("compare.select", { title: item.title }) });
@@ -113,16 +110,37 @@ export function runRow(ctx, item, pick) {
     event.stopPropagation?.();
     pick.onSelect(item.id);
   });
+  const outcome = outcomeLevel(item.outcome);
+  const level = levelOf(item);
+  const kind = kindOf(item);
+  const step = pick.step
+    ? h(doc, "span", { class: `step-icon${pick.step.done ? " done" : ""}`, "data-ui": "run-step", role: "img", "aria-label": t(pick.step.done ? "path.stepDone" : "path.step", { n: pick.step.n }), title: t("path.stepTip", { n: pick.step.n, goal: pick.goal ? t(`path.goal.${pick.goal}`) : "" }) }, pick.step.done ? `✓ ${pick.step.n}` : String(pick.step.n))
+    : "";
+  const dots = level
+    ? h(doc, "span", { class: `lv-dots l${level}`, "data-ui": "run-level", role: "img", "aria-label": t("path.level.label", { level: t(`path.level.${level}`) }), title: t(`path.level.${level}`) }, ...[1, 2, 3].map((n) => h(doc, "i", { class: n <= level ? "on" : undefined })))
+    : "";
   const li = h(
     doc,
     "li",
-    { class: "run-row", "data-ui": "run-row", "data-run": item.id, "aria-current": pick.selected ? "true" : undefined },
-    title,
-    pick.base ? h(doc, "span", { class: "badge", "data-ui": "compare-base", title: t("library.tip.base") }, t("compare.baseLib")) : "",
-    h(doc, "span", { class: "run-tools" }, outcomeIcon(ctx, item), tick),
+    { class: `run-row${outcome ? ` out-${outcome}` : ""}`, "data-ui": "run-row", "data-run": item.id, "aria-current": pick.selected ? "true" : undefined },
+    h(doc, "div", { class: "run-top" }, tick, title, pick.base ? h(doc, "span", { class: "badge", "data-ui": "compare-base", title: t("library.tip.base") }, t("compare.baseLib")) : ""),
+    step,
     runMeta(ctx, item),
-    providerRow(ctx, item),
-    h(doc, "span", { class: `type-chip type-${item.pattern}`, "data-ui": "run-type", title: patternTip(t, item.pattern) }, t(`pattern.${item.pattern}`)),
+    h(
+      doc,
+      "div",
+      { class: "run-bottom" },
+      h(
+        doc,
+        "span",
+        { class: "run-chips" },
+        h(doc, "span", { class: `type-chip type-${item.pattern}`, "data-ui": "run-type", title: patternTip(t, item.pattern) }, t(`pattern.${item.pattern}`)),
+        providerRow(ctx, item),
+        kind ? h(doc, "span", { class: `chip-kind ${kind}`, "data-ui": "run-kind", title: t(`path.kindTip.${kind}`) }, t(`path.kind.${kind}`)) : "",
+      ),
+      dots,
+    ),
+    outcome ? h(doc, "span", { class: "visually-hidden", "data-ui": "run-outcome", "data-outcome": item.outcome }, t(`result.status.${item.outcome}`)) : "",
   );
   li.addEventListener("click", (event) => {
     if (event.target?.closest?.("input")) return;

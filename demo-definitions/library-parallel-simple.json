@@ -1,0 +1,69 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Name three ways to reduce food waste at home.",
+  "about": {
+    "en": {
+      "title": "Parallel: two points of view, one answer",
+      "author": "Agent Atlas Academy",
+      "description": "Two agents answer at the same time from different points of view, and a combiner merges their answers.\n\n**What it teaches**\n\nAgents that work at the same time do not wait for each other, and a combiner joins what they found.\n\n**What to watch**\n\nBoth answers start together; compare the time with the sequential chain.\n\nRead more: [Parallel fan-out and fan-in](#/learn/parallel-fan-out-fan-in)"
+    },
+    "cs": {
+      "title": "Paralelně: dva pohledy, jedna odpověď",
+      "author": "Agent Atlas Academy",
+      "description": "Dva agenti odpovídají současně z různých pohledů a slučovač jejich odpovědi spojí.\n\n**Čemu se naučíte**\n\nAgenti pracující současně na sebe nečekají a slučovač spojí, co našli.\n\n**Na co se dívat**\n\nObě odpovědi začnou společně; porovnejte čas se sekvenčním řetězem.\n\nVíce si přečtěte: [Paralelní rozvětvení a sloučení](#/learn/parallel-fan-out-fan-in)"
+    }
+  },
+  "library": {
+    "level": 1,
+    "paths": {
+      "patterns": 2
+    },
+    "tags": [
+      "basics",
+      "parallel-work",
+      "combining-answers"
+    ],
+    "teaches": {
+      "en": "Agents that work at the same time do not wait for each other, and a combiner joins what they found.",
+      "cs": "Agenti pracující současně na sebe nečekají a slučovač spojí, co našli."
+    }
+  },
+  "design": {
+    "pattern": "parallel",
+    "nodes": [
+      {
+        "id": "cook",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Home cook",
+        "instructions": "Answer as an experienced home cook. Give practical ways to waste less food in a normal kitchen."
+      },
+      {
+        "id": "shopper",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Shopper",
+        "instructions": "Answer as a careful shopper. Give ways to buy only what gets eaten."
+      },
+      {
+        "id": "combiner",
+        "agent": "combiner",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "cook",
+        "to": "combiner"
+      },
+      {
+        "from": "shopper",
+        "to": "combiner"
+      }
+    ]
+  }
+}

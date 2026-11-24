@@ -6,6 +6,15 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Library, recommended path: a new tab on the right side with four goals (Patterns of teamwork, Cost and speed, Reliability, What goes wrong), each with steps in three levels (beginner, advanced, expert). A step has a number, Open and Done; done steps are kept on this device, and a Continue box points to the next step. Tags filter the path and the list together, and a switch limits the list on the left to the chosen goal.
+- Library, right side: three tabs, Recommended path (shown on the first visit, with no run chosen), Tags and Detail. The arrow keys move between them, and the letter T opens Tags.
+- Library, run card: the result is the colour of the whole card (green finished, amber stopped, red failed) instead of an icon, the level is three dots at the bottom right, the step number sits at the top right, and a chip says whether a run is one of a before and after pair or bad on purpose.
+- Home: a Start here card leads to the recommended path, or continues with the next step (Start, Continue, or a word that the goal is done).
+- Library data: the runs in runs/index.json may carry level, kind (pair or bad), twin, paths (goal and step) and teaches (EN and CS); tests check that every goal has at least two runs on each level and that twins name each other.
+- Run definitions may carry a library section (level, kind, twin, path, tags and a one-line teaches in English and Czech), so a shared definition holds everything the Library needs. Create ignores it; scripts/add-library-run.js reads it with --definition.
+- scripts/add-library-run.js adds one exported run to the library: it checks the run (size, script tags, goal, level, twin) and writes the run file and its index entry.
+- Twenty run definitions for wave 1 of the Library revamp (ten patterns, a simple and a complex run each), with About texts in English and Czech, and docs/library-recording.md, the checklist for recording them with a paid Anthropic key.
+
 - Cloudflare neurons used today: counted from what every answer reports (header cf-ai-neurons or usage.neurons) and shown as a pill on the Cloudflare card in Create, in a box on the Limit tab in Settings, and as a warning on the Cost tab when the run is expected not to fit in the 10,000 free neurons a day. It counts only calls made in this tab and starts again at 00:00 UTC.
 - Settings, Cloudflare key: two boxes, the account ID and the API token, kept together as ACCOUNT_ID:TOKEN. A whole ACCOUNT_ID:TOKEN pasted into the token box is still accepted.
 - Settings, API keys: the panel of a free key has tabs Key, Models, Limit and Info (the arrow keys move between them). A paid key keeps its single column.
@@ -70,6 +79,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Library: the tag cloud button next to the cog is gone; the tag cloud is the Tags tab of the right side. The first visit shows the recommended path instead of the tag cloud.
 - Settings, Cloudflare: the account ID and the API token have a box each. The app joins them into ACCOUNT_ID:TOKEN, the one field it keeps, so stored keys and backups are unchanged; a whole ACCOUNT_ID:TOKEN pasted into the token box is still accepted.
 - The message of the time limit (270 s per run) says that Settings cannot raise it and what can be done: continue the run, or make it shorter with fewer agents or rounds or a faster model.
 

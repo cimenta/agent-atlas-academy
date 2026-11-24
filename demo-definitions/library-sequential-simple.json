@@ -1,0 +1,55 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Explain in three sentences, for a ten-year-old, why the sky is blue.",
+  "about": {
+    "en": {
+      "title": "Sequential chain: two agents, one after the other",
+      "author": "Agent Atlas Academy",
+      "description": "A researcher collects the facts and a writer turns them into a short explanation.\n\n**What it teaches**\n\nHow a chain passes work along: each agent gets the text of the one before it.\n\n**What to watch**\n\nWhat the writer received from the researcher, and what it changed.\n\nRead more: [Sequential chain](#/learn/sequential-chain)"
+    },
+    "cs": {
+      "title": "Sekvenční řetěz: dva agenti za sebou",
+      "author": "Agent Atlas Academy",
+      "description": "Výzkumník sesbírá fakta a pisatel z nich napíše krátké vysvětlení.\n\n**Čemu se naučíte**\n\nJak řetěz předává práci dál: každý agent dostane text toho před sebou.\n\n**Na co se dívat**\n\nCo pisatel dostal od výzkumníka a co na tom změnil.\n\nVíce si přečtěte: [Sekvenční řetěz](#/learn/sequential-chain)"
+    }
+  },
+  "library": {
+    "level": 1,
+    "paths": {
+      "patterns": 1
+    },
+    "tags": [
+      "basics",
+      "prompt-chaining",
+      "explaining"
+    ],
+    "teaches": {
+      "en": "How a chain passes work along: each agent gets the text of the one before it.",
+      "cs": "Jak řetěz předává práci dál: každý agent dostane text toho před sebou."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "researcher",
+        "to": "writer"
+      }
+    ]
+  }
+}

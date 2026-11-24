@@ -53,3 +53,22 @@ test("exactly one library run is marked for the home page, and it is the sky run
   assert.equal(marked.length, 1);
   assert.equal(marked[0].id, "sequential-simple");
 });
+
+import { GOALS, levelOf, stepOf, coverageErrors, twinOf } from "../public/js/library-path.js";
+
+test("the path of the library: every goal has two runs on every level, steps are unique, twins name each other", () => {
+  assert.deepEqual(coverageErrors(index), []);
+  for (const entry of index) {
+    if (entry.level !== undefined) assert.ok(levelOf(entry) > 0, `${entry.id} level`);
+    for (const goal of Object.keys(entry.paths ?? {})) assert.ok(GOALS.includes(goal), `${entry.id} goal ${goal}`);
+    if (entry.twin !== undefined) {
+      const twin = twinOf(index, entry);
+      assert.ok(twin, `${entry.id} twin exists`);
+      assert.equal(twin.twin, entry.id, `${entry.id} twin names it back`);
+    }
+  }
+  for (const goal of GOALS) {
+    const steps = index.map((e) => stepOf(e, goal)).filter(Boolean);
+    assert.equal(new Set(steps).size, steps.length, `${goal} steps are unique`);
+  }
+});

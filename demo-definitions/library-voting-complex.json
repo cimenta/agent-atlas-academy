@@ -1,0 +1,105 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Which is the best first programming language for a 12-year-old: Python, JavaScript or Scratch? Pick one and give one reason.",
+  "about": {
+    "en": {
+      "title": "Voting: five voters and a split vote",
+      "author": "Agent Atlas Academy",
+      "description": "Five agents with different views vote, and the tally has to deal with a split.\n\n**What it teaches**\n\nMore voters make the result steadier and cost more; a split vote is information, not an error.\n\n**What to watch**\n\nHow the votes split, and what the tally says about the minority.\n\nRead more: [Voting](#/learn/voting)"
+    },
+    "cs": {
+      "title": "Hlasování: pět hlasujících a rozdělené hlasy",
+      "author": "Agent Atlas Academy",
+      "description": "Pět agentů s různými pohledy hlasuje a sčítání se musí vypořádat s rozdělenými hlasy.\n\n**Čemu se naučíte**\n\nVíc hlasujících činí výsledek stabilnější a stojí víc; rozdělené hlasy jsou informace, ne chyba.\n\n**Na co se dívat**\n\nJak se hlasy rozdělí a co sčítání řekne o menšině.\n\nVíce si přečtěte: [Hlasování](#/learn/voting)"
+    }
+  },
+  "library": {
+    "level": 3,
+    "paths": {
+      "patterns": 18
+    },
+    "tags": [
+      "decision-making",
+      "disagreement",
+      "cost"
+    ],
+    "teaches": {
+      "en": "More voters make the result steadier and cost more; a split vote is information, not an error.",
+      "cs": "Víc hlasujících činí výsledek stabilnější a stojí víc; rozdělené hlasy jsou informace, ne chyba."
+    }
+  },
+  "design": {
+    "pattern": "voting",
+    "nodes": [
+      {
+        "id": "voter-1",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Teacher",
+        "instructions": "Answer as a school teacher. Start with your single choice."
+      },
+      {
+        "id": "voter-2",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Developer",
+        "instructions": "Answer as a professional developer. Start with your single choice."
+      },
+      {
+        "id": "voter-3",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Parent",
+        "instructions": "Answer as a parent of a 12-year-old. Start with your single choice."
+      },
+      {
+        "id": "voter-4",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Student",
+        "instructions": "Answer as a 12-year-old who wants to build a game. Start with your single choice."
+      },
+      {
+        "id": "voter-5",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Skeptic",
+        "instructions": "Answer as a skeptic who doubts the usual advice. Start with your single choice."
+      },
+      {
+        "id": "tally",
+        "agent": "tally",
+        "model": "balanced",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "voter-1",
+        "to": "tally"
+      },
+      {
+        "from": "voter-2",
+        "to": "tally"
+      },
+      {
+        "from": "voter-3",
+        "to": "tally"
+      },
+      {
+        "from": "voter-4",
+        "to": "tally"
+      },
+      {
+        "from": "voter-5",
+        "to": "tally"
+      }
+    ]
+  }
+}

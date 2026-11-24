@@ -1,0 +1,65 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write one sentence of study advice for each of these eight subjects: maths, history, biology, chemistry, geography, art, music, English.",
+  "about": {
+    "en": {
+      "title": "Map-reduce: eight parts",
+      "author": "Agent Atlas Academy",
+      "description": "The same design as the simple run with twice as many parts, so the work and the cost grow.\n\n**What it teaches**\n\nMap-reduce scales with the number of parts: the steps, the tokens and the cost, while the design stays the same.\n\n**What to watch**\n\nHow many steps the run needs, and whether the reducer keeps all eight parts.\n\nRead more: [Map-reduce](#/learn/map-reduce)"
+    },
+    "cs": {
+      "title": "Map-reduce: osm částí",
+      "author": "Agent Atlas Academy",
+      "description": "Stejný návrh jako u jednoduchého běhu, ale s dvojnásobkem částí, takže práce i cena rostou.\n\n**Čemu se naučíte**\n\nMap-reduce roste s počtem částí: kroky, tokeny i cena, zatímco návrh zůstává stejný.\n\n**Na co se dívat**\n\nKolik kroků běh potřebuje a zda redukce zachová všech osm částí.\n\nVíce si přečtěte: [Map-reduce](#/learn/map-reduce)"
+    }
+  },
+  "library": {
+    "level": 3,
+    "paths": {
+      "patterns": 19
+    },
+    "tags": [
+      "parallel-work",
+      "combining-answers",
+      "cost"
+    ],
+    "teaches": {
+      "en": "Map-reduce scales with the number of parts: the steps, the tokens and the cost, while the design stays the same.",
+      "cs": "Map-reduce roste s počtem částí: kroky, tokeny i cena, zatímco návrh zůstává stejný."
+    }
+  },
+  "design": {
+    "pattern": "mapreduce",
+    "nodes": [
+      {
+        "id": "splitter",
+        "agent": "splitter",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "worker",
+        "agent": "worker",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "reducer",
+        "agent": "reducer",
+        "model": "balanced",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "splitter",
+        "to": "worker"
+      },
+      {
+        "from": "worker",
+        "to": "reducer"
+      }
+    ]
+  }
+}

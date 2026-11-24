@@ -1,0 +1,64 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write one sentence of study advice for each of these subjects: maths, history, biology, art.",
+  "about": {
+    "en": {
+      "title": "Map-reduce: split, work on each part, join",
+      "author": "Agent Atlas Academy",
+      "description": "A splitter cuts the task into parts, one worker runs for every part, and a reducer joins the results.\n\n**What it teaches**\n\nOne worker design runs many times on different parts, so the work grows with the task, not with the number of agents.\n\n**What to watch**\n\nHow many parts the splitter makes, and how the reducer puts them in order.\n\nRead more: [Map-reduce](#/learn/map-reduce)"
+    },
+    "cs": {
+      "title": "Map-reduce: rozděl, zpracuj každou část, spoj",
+      "author": "Agent Atlas Academy",
+      "description": "Dělič rozdělí úkol na části, pro každou část běží jeden pracovník a redukce výsledky spojí.\n\n**Čemu se naučíte**\n\nJeden návrh pracovníka běží opakovaně na různých částech, takže práce roste s úkolem, ne s počtem agentů.\n\n**Na co se dívat**\n\nKolik částí dělič vytvoří a jak je redukce seřadí.\n\nVíce si přečtěte: [Map-reduce](#/learn/map-reduce)"
+    }
+  },
+  "library": {
+    "level": 2,
+    "paths": {
+      "patterns": 13
+    },
+    "tags": [
+      "parallel-work",
+      "combining-answers"
+    ],
+    "teaches": {
+      "en": "One worker design runs many times on different parts, so the work grows with the task, not with the number of agents.",
+      "cs": "Jeden návrh pracovníka běží opakovaně na různých částech, takže práce roste s úkolem, ne s počtem agentů."
+    }
+  },
+  "design": {
+    "pattern": "mapreduce",
+    "nodes": [
+      {
+        "id": "splitter",
+        "agent": "splitter",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "worker",
+        "agent": "worker",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "reducer",
+        "agent": "reducer",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "splitter",
+        "to": "worker"
+      },
+      {
+        "from": "worker",
+        "to": "reducer"
+      }
+    ]
+  }
+}

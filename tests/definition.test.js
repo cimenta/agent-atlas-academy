@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildDefinition, definitionFromRun, loadDefinition, DEFINITION_FORMAT, DEFINITION_VERSION } from "../public/js/create/definition.js";
+import { buildDefinition, cleanLibraryMeta, definitionFromRun, loadDefinition, DEFINITION_FORMAT, DEFINITION_VERSION } from "../public/js/create/definition.js";
 import { validateDesign } from "../public/js/engine/patterns.js";
 
 import { createEditor } from "../public/js/create/editor-model.js";
@@ -203,4 +203,17 @@ test("every provider test definition has an About text in English and Czech that
       for (const node of loaded.editor.design().nodes) assert.equal(node.slot, `${provider}-free`);
     }
   }
+});
+
+test("the library section of a definition keeps only valid parts and travels through build and load", () => {
+  assert.equal(cleanLibraryMeta(undefined), null);
+  assert.equal(cleanLibraryMeta({ level: 9, kind: "odd", paths: { nowhere: 1, save: 0 }, tags: ["Bad Tag"], teaches: { en: " " } }), null);
+  const meta = { level: 2, kind: "pair", twin: "a-b", paths: { patterns: 3, nowhere: 1 }, tags: ["basics", "Bad Tag"], teaches: { en: " One ", cs: "Jedna" } };
+  assert.deepEqual(cleanLibraryMeta(meta), { level: 2, kind: "pair", twin: "a-b", paths: { patterns: 3 }, tags: ["basics"], teaches: { en: "One", cs: "Jedna" } });
+  const def = buildDefinition({ task: "T", design: definitionFromRun(runs[0]).design, library: meta });
+  assert.deepEqual(def.library.paths, { patterns: 3 });
+  const loaded = loadDefinition(JSON.stringify(def));
+  assert.equal(loaded.ok, true);
+  assert.equal(loaded.library.level, 2);
+  assert.equal(buildDefinition({ task: "T", design: def.design }).library, undefined);
 });

@@ -1,0 +1,75 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Plan a one-day school trip to a science museum for 30 students: a schedule and the main risks.",
+  "about": {
+    "en": {
+      "title": "Sequential chain: four steps",
+      "author": "Agent Atlas Academy",
+      "description": "A planner, a researcher, a writer and a critic each work on the result of the one before.\n\n**What it teaches**\n\nA longer chain adds quality at each step, but also time and cost, and an early mistake travels down the line.\n\n**What to watch**\n\nHow the text grows from step to step, and where the critic finds a problem.\n\nRead more: [Sequential chain](#/learn/sequential-chain)"
+    },
+    "cs": {
+      "title": "Sekvenční řetěz: čtyři kroky",
+      "author": "Agent Atlas Academy",
+      "description": "Plánovač, výzkumník, pisatel a kritik pracují každý na výsledku toho před sebou.\n\n**Čemu se naučíte**\n\nDelší řetěz přidává v každém kroku kvalitu, ale i čas a cenu, a chyba z počátku se táhne dál.\n\n**Na co se dívat**\n\nJak text roste od kroku ke kroku a kde kritik najde problém.\n\nVíce si přečtěte: [Sekvenční řetěz](#/learn/sequential-chain)"
+    }
+  },
+  "library": {
+    "level": 2,
+    "paths": {
+      "patterns": 7
+    },
+    "tags": [
+      "prompt-chaining",
+      "planning",
+      "risk-analysis"
+    ],
+    "teaches": {
+      "en": "A longer chain adds quality at each step, but also time and cost, and an early mistake travels down the line.",
+      "cs": "Delší řetěz přidává v každém kroku kvalitu, ale i čas a cenu, a chyba z počátku se táhne dál."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "planner",
+        "agent": "planner",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "balanced",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "planner",
+        "to": "researcher"
+      },
+      {
+        "from": "researcher",
+        "to": "writer"
+      },
+      {
+        "from": "writer",
+        "to": "critic"
+      }
+    ]
+  }
+}

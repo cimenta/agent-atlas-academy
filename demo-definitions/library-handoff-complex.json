@@ -1,0 +1,92 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "I cannot log in to the school portal, and my laptop has also become very slow.",
+  "about": {
+    "en": {
+      "title": "Handoff: a path through four agents",
+      "author": "Agent Atlas Academy",
+      "description": "Two problems in one question: control may pass through several agents, and each sees only the note and the task.\n\n**What it teaches**\n\nA poor note starves the next agent, and a path with many handoffs can lose the second problem.\n\n**What to watch**\n\nWhich problem each agent solves, and whether the second problem is ever answered.\n\nRead more: [Handoff](#/learn/handoff)"
+    },
+    "cs": {
+      "title": "Předání: cesta přes čtyři agenty",
+      "author": "Agent Atlas Academy",
+      "description": "Dva problémy v jedné otázce: řízení může projít několika agenty a každý vidí jen poznámku a zadání.\n\n**Čemu se naučíte**\n\nŠpatná poznámka připraví dalšího agenta o informace a cesta s mnoha předáními může druhý problém ztratit.\n\n**Na co se dívat**\n\nKterý problém každý agent řeší a zda je druhý problém vůbec zodpovězen.\n\nVíce si přečtěte: [Předání](#/learn/handoff)"
+    }
+  },
+  "library": {
+    "level": 3,
+    "paths": {
+      "patterns": 17
+    },
+    "tags": [
+      "handoff",
+      "tool-choice",
+      "decision-making"
+    ],
+    "teaches": {
+      "en": "A poor note starves the next agent, and a path with many handoffs can lose the second problem.",
+      "cs": "Špatná poznámka připraví dalšího agenta o informace a cesta s mnoha předáními může druhý problém ztratit."
+    }
+  },
+  "design": {
+    "pattern": "handoff",
+    "start": "helpdesk",
+    "nodes": [
+      {
+        "id": "helpdesk",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Help desk",
+        "instructions": "You answer first. Hand over to the best expert with a short note, or answer yourself when it is simple."
+      },
+      {
+        "id": "accounts",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Accounts expert",
+        "instructions": "You fix login and password problems. If the problem is not about accounts, hand over."
+      },
+      {
+        "id": "network",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Network expert",
+        "instructions": "You fix network and connection problems. If the problem is about the device itself, hand over."
+      },
+      {
+        "id": "hardware",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Hardware expert",
+        "instructions": "You fix slow or broken devices. Give clear steps a student can try."
+      }
+    ],
+    "edges": [
+      {
+        "from": "helpdesk",
+        "to": "accounts"
+      },
+      {
+        "from": "helpdesk",
+        "to": "network"
+      },
+      {
+        "from": "helpdesk",
+        "to": "hardware"
+      },
+      {
+        "from": "accounts",
+        "to": "network"
+      },
+      {
+        "from": "network",
+        "to": "hardware"
+      }
+    ]
+  }
+}

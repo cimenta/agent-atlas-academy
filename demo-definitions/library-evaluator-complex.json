@@ -1,0 +1,56 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write an email to the head teacher asking for a longer lunch break. It must be polite and give three reasons.",
+  "about": {
+    "en": {
+      "title": "Evaluator loop: strict criteria, three rounds",
+      "author": "Agent Atlas Academy",
+      "description": "A stricter evaluator checks every round, and the writer has up to three tries.\n\n**What it teaches**\n\nGood criteria decide the quality; every extra round costs tokens, and the loop stops when the work is accepted.\n\n**What to watch**\n\nWhich criterion fails first, and in which round the evaluator accepts.\n\nRead more: [Evaluator loop](#/learn/evaluator-loop)"
+    },
+    "cs": {
+      "title": "Smyčka s hodnotitelem: přísná kritéria, tři kola",
+      "author": "Agent Atlas Academy",
+      "description": "Přísnější hodnotitel kontroluje každé kolo a pisatel má až tři pokusy.\n\n**Čemu se naučíte**\n\nKvalitu určují dobrá kritéria; každé další kolo stojí tokeny a smyčka skončí, když je práce přijata.\n\n**Na co se dívat**\n\nKteré kritérium selže jako první a v kterém kole hodnotitel práci přijme.\n\nVíce si přečtěte: [Smyčka s hodnotitelem](#/learn/evaluator-loop)"
+    }
+  },
+  "library": {
+    "level": 2,
+    "paths": {
+      "patterns": 9
+    },
+    "tags": [
+      "explaining",
+      "decision-making"
+    ],
+    "teaches": {
+      "en": "Good criteria decide the quality; every extra round costs tokens, and the loop stops when the work is accepted.",
+      "cs": "Kvalitu určují dobrá kritéria; každé další kolo stojí tokeny a smyčka skončí, když je práce přijata."
+    }
+  },
+  "design": {
+    "pattern": "evaluator",
+    "nodes": [
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "evaluator",
+        "agent": "evaluator",
+        "model": "balanced",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "writer",
+        "to": "evaluator"
+      }
+    ],
+    "rounds": 3,
+    "criteria": "Polite and respectful. Exactly three reasons, each in one sentence. Under 150 words. A clear request in the first two sentences. No exaggeration."
+  }
+}

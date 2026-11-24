@@ -1,0 +1,56 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write a short note that explains what a password manager is.",
+  "about": {
+    "en": {
+      "title": "Evaluator loop: write, check, improve",
+      "author": "Agent Atlas Academy",
+      "description": "A writer drafts, an evaluator checks the draft against the criteria, and the writer improves it.\n\n**What it teaches**\n\nA loop with a clear check makes the answer better, but only as far as the criteria say.\n\n**What to watch**\n\nWhat the evaluator asks to change, and whether round two fixes it.\n\nRead more: [Evaluator loop](#/learn/evaluator-loop)"
+    },
+    "cs": {
+      "title": "Smyčka s hodnotitelem: napiš, zkontroluj, vylepši",
+      "author": "Agent Atlas Academy",
+      "description": "Pisatel napíše návrh, hodnotitel ho zkontroluje podle kritérií a pisatel ho vylepší.\n\n**Čemu se naučíte**\n\nSmyčka s jasnou kontrolou zlepší odpověď, ale jen tak, jak říkají kritéria.\n\n**Na co se dívat**\n\nCo hodnotitel žádá změnit a zda to druhé kolo opraví.\n\nVíce si přečtěte: [Smyčka s hodnotitelem](#/learn/evaluator-loop)"
+    }
+  },
+  "library": {
+    "level": 1,
+    "paths": {
+      "patterns": 6
+    },
+    "tags": [
+      "basics",
+      "explaining"
+    ],
+    "teaches": {
+      "en": "A loop with a clear check makes the answer better, but only as far as the criteria say.",
+      "cs": "Smyčka s jasnou kontrolou zlepší odpověď, ale jen tak, jak říkají kritéria."
+    }
+  },
+  "design": {
+    "pattern": "evaluator",
+    "nodes": [
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false
+      },
+      {
+        "id": "evaluator",
+        "agent": "evaluator",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "writer",
+        "to": "evaluator"
+      }
+    ],
+    "rounds": 2,
+    "criteria": "Clear for a ten-year-old. At most 80 words. Contains one everyday example."
+  }
+}

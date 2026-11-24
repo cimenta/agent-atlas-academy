@@ -7,6 +7,8 @@ import { mountReplay } from "./replay/view.js";
 import { blocksToText, readingMinutes, searchArticles } from "./learn-search.js";
 import { markText } from "./text-search.js";
 import { createMiniReplay } from "./mini-replay.js";
+import { LEVELS, goalLevels, nextStep } from "./library-path.js";
+import { loadProgress } from "./library-progress.js";
 
 const RUN_ID = /^[a-z0-9-]+$/;
 const LOOP_WAIT_MS = 5000;
@@ -46,7 +48,27 @@ export function renderNotFound(ctx) {
   );
 }
 
-// The home page: what the site is about, and a simple run that plays by itself. Nothing else.
+// The card of the home page that sends a student to the recommended path: Start, Continue with the next step, or a word that the goal is done.
+// Null when the library has no run on the goal Patterns of teamwork. done: Set of "<goal>:<runId>".
+export function startCard({ doc, t, items, done, onStart }) {
+  const steps = goalLevels(items, "patterns");
+  const all = LEVELS.flatMap((level) => steps[level]);
+  if (all.length === 0) return null;
+  const finished = all.filter((item) => done.has(`patterns:${item.id}`)).length;
+  const next = nextStep(items, "patterns", done);
+  const text = !next ? t("home.start.done") : finished === 0 ? t("home.start.empty") : t("home.start.next", { done: finished, total: all.length, title: next.title });
+  const go = h(doc, "button", { type: "button", class: "primary", "data-ui": "start-go" }, t(finished > 0 && next ? "home.start.continue" : "home.start.button"));
+  const more = h(doc, "a", { href: "#/play", "data-ui": "start-more" }, t("home.start.more"));
+  for (const control of [go, more]) {
+    control.addEventListener("click", (event) => {
+      event?.preventDefault?.();
+      onStart();
+    });
+  }
+  return h(doc, "section", { class: "home-start", "data-ui": "home-start", "aria-label": t("home.start.title") }, h(doc, "div", {}, h(doc, "b", {}, t("home.start.title")), h(doc, "p", { class: "muted" }, text)), h(doc, "div", { class: "home-start-actions" }, go, more));
+}
+
+// The home page: what the site is about, the way into the recommended path, and a simple run that plays by itself.
 export async function renderLanding(ctx) {
   const { doc, t } = ctx;
   setTitle(ctx, "");
@@ -68,9 +90,29 @@ export async function renderLanding(ctx) {
   // On a phone a small decorative replay sits above the headline (hidden on wide screens).
   const mini = createMiniReplay({ doc, t, h });
   ctx.onLeave(mini.destroy);
-  show(ctx, mini.element, h(doc, "h1", {}, t("landing.title")), h(doc, "p", { class: "lead lead-wide" }, t("landing.intro")), about, taskBar, host);
+  const startHost = h(doc, "div", { "data-ui": "home-start-host" });
+  show(ctx, mini.element, h(doc, "h1", {}, t("landing.title")), h(doc, "p", { class: "lead lead-wide" }, t("landing.intro")), about, startHost, taskBar, host);
   try {
     const index = await getJson(ctx, "/runs/index.json");
+    let done = new Set();
+    try {
+      done = loadProgress(doc.defaultView?.localStorage);
+    } catch {
+      done = new Set();
+    }
+    const start = startCard({
+      doc,
+      t,
+      items: index.runs,
+      done,
+      onStart: async () => {
+        const { lib } = await import("./play-shared.js");
+        lib.goal = "patterns";
+        lib.right = "path";
+        doc.defaultView.location.hash = "#/play";
+      },
+    });
+    if (start && !ctx.isStale()) startHost.replaceChildren(start);
     const first = pickHomeRun(index.runs);
     if (!first || !RUN_ID.test(first.id)) throw new Error("no run");
     const run = await getJson(ctx, `/runs/${first.id}.json`);

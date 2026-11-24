@@ -1,0 +1,55 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Plan a ten-minute class presentation about renewable energy and write the text for each part.",
+  "about": {
+    "en": {
+      "title": "Plan and execute: a longer plan",
+      "author": "Agent Atlas Academy",
+      "description": "A stronger planner writes a longer plan, and the executor works through every step.\n\n**What it teaches**\n\nThe quality of the whole run depends on the plan, and a step that was not needed is still done.\n\n**What to watch**\n\nWhether every step of the plan was needed, and how the executor uses earlier steps.\n\nRead more: [Plan and execute](#/learn/plan-and-execute)"
+    },
+    "cs": {
+      "title": "Plánuj a proveď: delší plán",
+      "author": "Agent Atlas Academy",
+      "description": "Silnější plánovač napíše delší plán a vykonavatel projde každý krok.\n\n**Čemu se naučíte**\n\nKvalita celého běhu závisí na plánu a krok, který nebyl potřeba, se přesto provede.\n\n**Na co se dívat**\n\nZda byl každý krok plánu potřeba a jak vykonavatel využívá předchozí kroky.\n\nVíce si přečtěte: [Plánuj a proveď](#/learn/plan-and-execute)"
+    }
+  },
+  "library": {
+    "level": 3,
+    "paths": {
+      "patterns": 20
+    },
+    "tags": [
+      "planning",
+      "decision-making",
+      "cost"
+    ],
+    "teaches": {
+      "en": "The quality of the whole run depends on the plan, and a step that was not needed is still done.",
+      "cs": "Kvalita celého běhu závisí na plánu a krok, který nebyl potřeba, se přesto provede."
+    }
+  },
+  "design": {
+    "pattern": "planexec",
+    "nodes": [
+      {
+        "id": "planner",
+        "agent": "planner",
+        "model": "balanced",
+        "search": false
+      },
+      {
+        "id": "executor",
+        "agent": "executor",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "planner",
+        "to": "executor"
+      }
+    ]
+  }
+}

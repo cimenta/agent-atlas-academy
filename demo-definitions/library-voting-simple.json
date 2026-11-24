@@ -1,0 +1,80 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Is a tomato a fruit or a vegetable? Answer with one word and give one reason.",
+  "about": {
+    "en": {
+      "title": "Voting: three voters and a tally",
+      "author": "Agent Atlas Academy",
+      "description": "Three agents answer alone and the tally counts the votes.\n\n**What it teaches**\n\nIndependent answers can disagree; a vote shows how sure the group is, not who is right.\n\n**What to watch**\n\nWhether the voters agree, and how the tally handles a split.\n\nRead more: [Voting](#/learn/voting)"
+    },
+    "cs": {
+      "title": "Hlasování: tři hlasující a sčítání",
+      "author": "Agent Atlas Academy",
+      "description": "Tři agenti odpoví každý sám a sčítání spočítá hlasy.\n\n**Čemu se naučíte**\n\nNezávislé odpovědi se mohou lišit; hlasování ukáže, jak jistá je skupina, ne kdo má pravdu.\n\n**Na co se dívat**\n\nZda se hlasující shodnou a jak sčítání naloží s rozdělenými hlasy.\n\nVíce si přečtěte: [Hlasování](#/learn/voting)"
+    }
+  },
+  "library": {
+    "level": 2,
+    "paths": {
+      "patterns": 12
+    },
+    "tags": [
+      "decision-making",
+      "disagreement"
+    ],
+    "teaches": {
+      "en": "Independent answers can disagree; a vote shows how sure the group is, not who is right.",
+      "cs": "Nezávislé odpovědi se mohou lišit; hlasování ukáže, jak jistá je skupina, ne kdo má pravdu."
+    }
+  },
+  "design": {
+    "pattern": "voting",
+    "nodes": [
+      {
+        "id": "voter-1",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Botanist",
+        "instructions": "Answer as a botanist. Start with your single choice."
+      },
+      {
+        "id": "voter-2",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Cook",
+        "instructions": "Answer as a cook. Start with your single choice."
+      },
+      {
+        "id": "voter-3",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Child",
+        "instructions": "Answer as a curious ten-year-old. Start with your single choice."
+      },
+      {
+        "id": "tally",
+        "agent": "tally",
+        "model": "fast",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "voter-1",
+        "to": "tally"
+      },
+      {
+        "from": "voter-2",
+        "to": "tally"
+      },
+      {
+        "from": "voter-3",
+        "to": "tally"
+      }
+    ]
+  }
+}
