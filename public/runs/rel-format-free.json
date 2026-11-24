@@ -1,0 +1,376 @@
+{
+  "schemaVersion": 1,
+  "id": "rel-format-free",
+  "title": "From this note take the name of the dish, the number of serv…",
+  "language": "en",
+  "pattern": "sequential",
+  "recordedWith": {
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "appVersion": "1.16.10-dev.7",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "From this note take the name of the dish, the number of servings and whether it contains nuts, and write a label: Grandma's apple cake serves eight and has walnuts on top.",
+      "pattern": "sequential",
+      "design": {
+        "pattern": "sequential",
+        "nodes": [
+          {
+            "id": "free",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Reader",
+            "instructions": "Find the facts that are asked for in the note.",
+            "slot": "anthropic"
+          },
+          {
+            "id": "writer",
+            "agent": "writer",
+            "model": "fast",
+            "search": false,
+            "slot": "anthropic"
+          }
+        ],
+        "edges": [
+          {
+            "from": "free",
+            "to": "writer"
+          }
+        ]
+      },
+      "t": 1
+    },
+    {
+      "type": "agent_start",
+      "agent": "free",
+      "role": "Reader",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Reader. Find the facts that are asked for in the note.\nKeep every reply under 300 words. Answer in English.",
+      "t": 1
+    },
+    {
+      "type": "round",
+      "agent": "free",
+      "round": 1,
+      "ms": 751,
+      "stop": "end_turn",
+      "usage": {
+        "input": 109,
+        "output": 88
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: From this note take the name of the dish, the number of servings and whether it contains nuts, and write a label: Grandma's apple cake serves eight and has walnuts on top."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "**Dish name:** Grandma's apple cake\n**Servings:** 8\n**Contains nuts:** Yes (walnuts on top)\n\n**Label:**\nGrandma's Apple Cake\nServes: 8\nContains: Nuts (walnuts)"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMmwtEWLcme7dxgKBzro",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 109,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 88,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 752
+    },
+    {
+      "type": "agent_output",
+      "agent": "free",
+      "text": "**Dish name:** Grandma's apple cake\n**Servings:** 8\n**Contains nuts:** Yes (walnuts on top)\n\n**Label:**\nGrandma's Apple Cake\nServes: 8\nContains: Nuts (walnuts)",
+      "tokens": {
+        "input": 109,
+        "output": 88
+      },
+      "t": 752
+    },
+    {
+      "type": "handoff",
+      "from": "free",
+      "to": "writer",
+      "note": "**Dish name:** Grandma's apple cake\n**Servings:** 8\n**Contains nuts:** Yes (walnuts on top)\n\n**Label:**\nGrandma's Apple Cake\nServes: 8\nContains: Nuts (walnuts)",
+      "t": 752
+    },
+    {
+      "type": "agent_start",
+      "agent": "writer",
+      "role": "Writer",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: writer\nYou are the Writer. Write the final answer for the user from the material you were given. Be clear and short, with no filler.\nKeep every reply under 300 words. Answer in English.",
+      "t": 752
+    },
+    {
+      "type": "round",
+      "agent": "writer",
+      "round": 1,
+      "ms": 670,
+      "stop": "end_turn",
+      "usage": {
+        "input": 225,
+        "output": 88
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: From this note take the name of the dish, the number of servings and whether it contains nuts, and write a label: Grandma's apple cake serves eight and has walnuts on top.\n\nThe previous agent (free) wrote:\n**Dish name:** Grandma's apple cake\n**Servings:** 8\n**Contains nuts:** Yes (walnuts on top)\n\n**Label:**\nGrandma's Apple Cake\nServes: 8\nContains: Nuts (walnuts)"
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "**Dish name:** Grandma's apple cake\n**Servings:** 8\n**Contains nuts:** Yes (walnuts on top)\n\n**Label:**\nGrandma's Apple Cake\nServes: 8\nContains: Nuts (walnuts)"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMmww7sx1roQwResSLEh",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 225,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 88,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 1422
+    },
+    {
+      "type": "agent_output",
+      "agent": "writer",
+      "text": "**Dish name:** Grandma's apple cake\n**Servings:** 8\n**Contains nuts:** Yes (walnuts on top)\n\n**Label:**\nGrandma's Apple Cake\nServes: 8\nContains: Nuts (walnuts)",
+      "tokens": {
+        "input": 225,
+        "output": 88
+      },
+      "t": 1422
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 334,
+        "output": 176,
+        "searches": 0,
+        "steps": 2
+      },
+      "finalText": "**Dish name:** Grandma's apple cake\n**Servings:** 8\n**Contains nuts:** Yes (walnuts on top)\n\n**Label:**\nGrandma's Apple Cake\nServes: 8\nContains: Nuts (walnuts)",
+      "t": 1423
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "free",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Reader. Find the facts that are asked for in the note.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: From this note take the name of the dish, the number of servings and whether it contains nuts, and write a label: Grandma's apple cake serves eight and has walnuts on top.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T12:45:38Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T12:45:38Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T12:45:38Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "12000000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T12:45:38Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 12:45:38 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMmwtEWLcme7dxgKBzro\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"**Dish name:** Grandma's apple cake\\n**Servings:** 8\\n**Contains nuts:** Yes (walnuts on top)\\n\\n**Label:**\\nGrandma's Apple Cake\\nServes: 8\\nContains: Nuts (walnuts)\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":109,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":88,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 751,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 752
+    },
+    {
+      "type": "api_call",
+      "agent": "writer",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: writer\\nYou are the Writer. Write the final answer for the user from the material you were given. Be clear and short, with no filler.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: From this note take the name of the dish, the number of servings and whether it contains nuts, and write a label: Grandma's apple cake serves eight and has walnuts on top.\\n\\nThe previous agent (free) wrote:\\n**Dish name:** Grandma's apple cake\\n**Servings:** 8\\n**Contains nuts:** Yes (walnuts on top)\\n\\n**Label:**\\nGrandma's Apple Cake\\nServes: 8\\nContains: Nuts (walnuts)\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T12:45:39Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T12:45:39Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T12:45:39Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "12000000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T12:45:39Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 12:45:39 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMmww7sx1roQwResSLEh\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"**Dish name:** Grandma's apple cake\\n**Servings:** 8\\n**Contains nuts:** Yes (walnuts on top)\\n\\n**Label:**\\nGrandma's Apple Cake\\nServes: 8\\nContains: Nuts (walnuts)\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":225,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":88,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 670,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 1422
+    }
+  ],
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Reader",
+        "instructions": "Find the facts that are asked for in the note.",
+        "slot": "anthropic"
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false,
+        "slot": "anthropic"
+      }
+    ],
+    "edges": [
+      {
+        "from": "free",
+        "to": "writer"
+      }
+    ]
+  },
+  "task": "From this note take the name of the dish, the number of servings and whether it contains nuts, and write a label: Grandma's apple cake serves eight and has walnuts on top.",
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 334,
+    "output": 176,
+    "searches": 0,
+    "steps": 2
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T12:45:37.969Z",
+  "endedAt": "2026-11-24T12:45:39.596Z",
+  "durationMs": 1627
+}

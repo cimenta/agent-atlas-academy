@@ -1,0 +1,6 @@
+{
+  "about": "The same question, but the researcher may search the web, up to two searches.",
+  "how": "The researcher decides whether to search; the search result comes back as extra input for the next answer.",
+  "learns": "A search has its own price: the result is added to the input, here about 15,000 tokens instead of 600. The answer gets sources.",
+  "watch": "The search step in the middle, the input of the run in Statistics, and the sources named in the answer."
+}

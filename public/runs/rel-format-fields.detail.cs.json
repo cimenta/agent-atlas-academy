@@ -1,0 +1,6 @@
+{
+  "about": "Stejní dva agenti, ale čtenář musí odpovědět třemi poli: jídlo (text), porce (číslo) a ořechy (ano nebo ne).",
+  "how": "Odpověď se kontroluje proti polím. Špatná odpověď by se vyžádala znovu.",
+  "learns": "Pevný formát odpovědi usnadní nalezení údajů a kontroluje se; špatná odpověď se vyžádá znovu.",
+  "watch": "Krok kontroly formátu s fajfkou a odpověď čtenáře jako krátký objekt JSON."
+}

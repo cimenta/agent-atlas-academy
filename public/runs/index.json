@@ -500,6 +500,174 @@
         "en": "Working side by side shortens the time; the cost stays almost the same.",
         "cs": "Souběžná práce zkrátí čas; cena zůstane skoro stejná."
       }
+    },
+    {
+      "id": "save-search-off",
+      "title": "Find out which building is the tallest in the world and how …",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "cost",
+        "explaining",
+        "prompt-chaining"
+      ],
+      "level": 2,
+      "kind": "pair",
+      "twin": "save-search-on",
+      "paths": {
+        "save": 7
+      },
+      "teaches": {
+        "en": "Without search a run is cheap, but the answer has no sources.",
+        "cs": "Bez hledání je běh levný, ale odpověď nemá zdroje."
+      }
+    },
+    {
+      "id": "save-search-on",
+      "title": "Find out which building is the tallest in the world and how …",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "cost",
+        "explaining",
+        "prompt-chaining"
+      ],
+      "level": 2,
+      "kind": "pair",
+      "twin": "save-search-off",
+      "paths": {
+        "save": 8
+      },
+      "teaches": {
+        "en": "A search has its own price for every query; the answer gets sources.",
+        "cs": "Hledání má vlastní cenu za každý dotaz; odpověď dostane zdroje."
+      }
+    },
+    {
+      "id": "rel-format-free",
+      "title": "From this note take the name of the dish, the number of serv…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "basics",
+        "risk-analysis",
+        "prompt-chaining"
+      ],
+      "level": 1,
+      "kind": "pair",
+      "twin": "rel-format-fields",
+      "paths": {
+        "reliable": 1
+      },
+      "teaches": {
+        "en": "Free text is easy to read for a person, but the next agent must guess where each fact is.",
+        "cs": "Volný text se člověku dobře čte, ale další agent musí hádat, kde je který údaj."
+      }
+    },
+    {
+      "id": "rel-format-fields",
+      "title": "From this note take the name of the dish, the number of serv…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "basics",
+        "risk-analysis",
+        "prompt-chaining"
+      ],
+      "level": 1,
+      "kind": "pair",
+      "twin": "rel-format-free",
+      "paths": {
+        "reliable": 2
+      },
+      "teaches": {
+        "en": "A fixed answer format makes the facts easy to find and checked; a wrong answer is asked for again.",
+        "cs": "Pevný formát odpovědi usnadní nalezení údajů a kontroluje se; špatná odpověď se vyžádá znovu."
+      }
+    },
+    {
+      "id": "rel-eval-vague",
+      "title": "Write an invitation to a school concert.",
+      "pattern": "evaluator",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "basics",
+        "decision-making",
+        "risk-analysis"
+      ],
+      "level": 1,
+      "kind": "pair",
+      "twin": "rel-eval-good",
+      "paths": {
+        "reliable": 3
+      },
+      "teaches": {
+        "en": "Vague criteria give the evaluator nothing to measure; it accepts at once or asks for changes without a reason.",
+        "cs": "Vágní kritéria nedají hodnotiteli nic k měření; přijme hned, nebo žádá změny bez důvodu."
+      }
+    },
+    {
+      "id": "rel-eval-good",
+      "title": "Write an invitation to a school concert.",
+      "pattern": "evaluator",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "basics",
+        "decision-making",
+        "risk-analysis"
+      ],
+      "level": 1,
+      "kind": "pair",
+      "twin": "rel-eval-vague",
+      "paths": {
+        "reliable": 4
+      },
+      "teaches": {
+        "en": "Measurable criteria let the evaluator find a real fault and say exactly what to change.",
+        "cs": "Měřitelná kritéria umožní hodnotiteli najít skutečnou chybu a říct, co změnit."
+      }
     }
   ]
 }

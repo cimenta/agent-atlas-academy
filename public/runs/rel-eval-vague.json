@@ -1,0 +1,389 @@
+{
+  "schemaVersion": 1,
+  "id": "rel-eval-vague",
+  "title": "Write an invitation to a school concert.",
+  "language": "en",
+  "pattern": "evaluator",
+  "recordedWith": {
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "appVersion": "1.16.10-dev.7",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "Write an invitation to a school concert.",
+      "pattern": "evaluator",
+      "design": {
+        "pattern": "evaluator",
+        "nodes": [
+          {
+            "id": "writer",
+            "agent": "writer",
+            "model": "fast",
+            "search": false,
+            "slot": "anthropic"
+          },
+          {
+            "id": "evaluator",
+            "agent": "evaluator",
+            "model": "fast",
+            "search": false,
+            "slot": "anthropic"
+          }
+        ],
+        "edges": [
+          {
+            "from": "writer",
+            "to": "evaluator"
+          }
+        ],
+        "rounds": 2,
+        "criteria": "Write it nicely."
+      },
+      "t": 0
+    },
+    {
+      "type": "agent_start",
+      "agent": "writer",
+      "role": "Writer",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: writer\nYou are the Writer. Write the final answer for the user from the material you were given. Be clear and short, with no filler.\nKeep every reply under 300 words. Answer in English.",
+      "t": 0
+    },
+    {
+      "type": "round",
+      "agent": "writer",
+      "round": 1,
+      "ms": 2532,
+      "stop": "end_turn",
+      "usage": {
+        "input": 84,
+        "output": 388
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write an invitation to a school concert."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQS7gUKEAgUGAI4AUIIdGhpbmtpbmcSDJmAKZItVc7hWGydaBoMwCZiEc6yvkqnGG24IjBKSxPRZnCUq0QRM4mBc+nHnBZX3hsFnuyic3AVD6nlhwQR//FEdfbjmzs45jNmPN0qiwVxCc5P2nP24zQ6HcZkJMlC+tHBMjbUqbjqL6uM/zC61tkMdBERmzG/MwSK/9e2w6V+L5r7jMHqUvpm+9gzmrnV4BIhxGikZCJlnZZPSq9yhgjJUB0sy7ol2ZJRgP7khm7QrELFifoCQHpjV8Ra3hCXjo7c1ZBkmk3aN/kSc+mBtJklJkIHa7+YbAu6+MQlGrbCRzumihe4k9mtvPnMEDvRQQGnJOqXYvUu68aaZsWAMNehl0jcwbFMkgR5rfI4cAv8/x5Vba5PXdZa3dqh2pvm9j8Lpg/X0IQl4BkmySOdfAYdvm8Ug3M41VO72MerT00HNcr5ZRsWiobi6+xAKt1HN7QGI0a+39D1x7IDMJpo4A9hnoBqhz8q39vedJH2HABnLRhn5JAo3Wzel7xOlCD/8TRJR59j7jE4HKpop5iwUYe94FM+8Uez3Q6JT91/eC5DmhcQS4qFb9ixUREW/o7O48NIk4Az4Atr5SnTGfoJySACGhkdz137JWmODWrK78NJnOaNNVUOcjq5CXroHpUTSZqkBIwUWNlb5+gaLfqJm0oSV4dg6TlaNtfBJuXX3C1QMLtRINE7Erqc6UeetYFy/+Mvd9886GddxGUTfZ4NVsZjXi4MY6uocwFFDse0vk0LDtFM3JcX6mC4WPt8Lzjb2R4KkRBxbhFmYQO0gqwxIcu5oCa925Go1875K6O13/DwiQtd0sEIWE54WOn65tpgX46t4nLP8niGd/1D/7m5oaoxz1bydwcL+KEx2ZwyiWnOxmDGhW7L89j6SOkVokgRxMDZCTfl5iwGCxyWzVHE5geAZgDfiqmDBZBcTDXqdxmzy+SlI947UvZvunya+FdheZ2RZok6xetHFeYYAQ=="
+        },
+        {
+          "type": "text",
+          "text": "**You're Invited to the Spring School Concert!**\n\nDear Families and Friends,\n\nPlease join us for an evening of music performed by the students of [School Name]. Our choir, orchestra, and solo performers have been practicing all term, and we would love to share their hard work with you.\n\n**Date:** [Day, Month Date, Year]\n**Time:** [Start Time] (doors open at [Door Time])\n**Venue:** [School Name] Main Hall, [Address]\n\n**Program highlights:**\n- School Choir: spring selections\n- Junior and Senior Orchestra\n- Solo and ensemble performances from students across all grades\n\nAdmission is free, and all are welcome. Seating is available on a first-come basis, so we recommend arriving a little early. Light refreshments will be served in the lobby after the performance.\n\nPlease RSVP by [RSVP Date] to [Contact Name] at [Email or Phone Number] so we can plan seating.\n\nWe look forward to celebrating our students' talents with you.\n\nWarm regards,\n\n[Your Name]\n[Your Title]\n[School Name]"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMn16mA4XeyXAmZXtA79",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 84,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 388,
+            "output_tokens_details": {
+              "thinking_tokens": 38
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 2533
+    },
+    {
+      "type": "agent_output",
+      "agent": "writer",
+      "text": "**You're Invited to the Spring School Concert!**\n\nDear Families and Friends,\n\nPlease join us for an evening of music performed by the students of [School Name]. Our choir, orchestra, and solo performers have been practicing all term, and we would love to share their hard work with you.\n\n**Date:** [Day, Month Date, Year]\n**Time:** [Start Time] (doors open at [Door Time])\n**Venue:** [School Name] Main Hall, [Address]\n\n**Program highlights:**\n- School Choir: spring selections\n- Junior and Senior Orchestra\n- Solo and ensemble performances from students across all grades\n\nAdmission is free, and all are welcome. Seating is available on a first-come basis, so we recommend arriving a little early. Light refreshments will be served in the lobby after the performance.\n\nPlease RSVP by [RSVP Date] to [Contact Name] at [Email or Phone Number] so we can plan seating.\n\nWe look forward to celebrating our students' talents with you.\n\nWarm regards,\n\n[Your Name]\n[Your Title]\n[School Name]",
+      "tokens": {
+        "input": 84,
+        "output": 388
+      },
+      "t": 2533
+    },
+    {
+      "type": "handoff",
+      "from": "writer",
+      "to": "evaluator",
+      "note": "**You're Invited to the Spring School Concert!**\n\nDear Families and Friends,\n\nPlease join us for an evening of music performed by the students of [School Name]. Our choir, orchestra, and solo performers have been practicing all term, and we would love to share their hard work with you.\n\n**Date:** [Day, Month Date, Year]\n**Time:** [Start Time] (doors open at [Door Time])\n**Venue:** [School Name] Main Hall, [Address]\n\n**Program highlights:**\n- School Choir: spring selections\n- Junior and Senior Orchestra\n- Solo and ensemble performances from students across all grades\n\nAdmission is free, and all are welcome. Seating is available on a first-come basis, so we recommend arriving a little early. Light refreshments will be served in the lobby after the performance.\n\nPlease RSVP by [RSVP Date] to [Contact Name] at [Email or Phone Number] so we can plan seating.\n\nWe look forward to celebrating our students' talents with you.\n\nWarm regards,\n\n[Your Name]\n[Your Title]\n[School Name]",
+      "t": 2533
+    },
+    {
+      "type": "agent_start",
+      "agent": "evaluator",
+      "role": "Evaluator",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: evaluator\nYou are the Evaluator. You judge a draft only against the criteria given in the message. If no criteria are given, judge whether the draft answers the task clearly and correctly. If the draft is good enough, accept it. If not, ask for a revision and give specific feedback (what is wrong and what to change), not only a score.\nReply with JSON only, in one of these forms:\n{\"verdict\":\"accept\"}\n{\"verdict\":\"revise\",\"feedback\":\"<what to change>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 2533
+    },
+    {
+      "type": "round",
+      "agent": "evaluator",
+      "round": 1,
+      "ms": 467,
+      "stop": "end_turn",
+      "usage": {
+        "input": 1090,
+        "output": 35
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write an invitation to a school concert.\n\nCriteria:\nWrite it nicely.\n\nDraft:\n**You're Invited to the Spring School Concert!**\n\nDear Families and Friends,\n\nPlease join us for an evening of music performed by the students of [School Name]. Our choir, orchestra, and solo performers have been practicing all term, and we would love to share their hard work with you.\n\n**Date:** [Day, Month Date, Year]\n**Time:** [Start Time] (doors open at [Door Time])\n**Venue:** [School Name] Main Hall, [Address]\n\n**Program highlights:**\n- School Choir: spring selections\n- Junior and Senior Orchestra\n- Solo and ensemble performances from students across all grades\n\nAdmission is free, and all are welcome. Seating is available on a first-come basis, so we recommend arriving a little early. Light refreshments will be served in the lobby after the performance.\n\nPlease RSVP by [RSVP Date] to [Contact Name] at [Email or Phone Number] so we can plan seating.\n\nWe look forward to celebrating our students' talents with you.\n\nWarm regards,\n\n[Your Name]\n[Your Title]\n[School Name]\n\nGive your verdict now."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"verdict\":\"accept\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1,
+          "forced": true
+        },
+        "response": {
+          "id": "msg_011ChMn1HRr8asVP39x8EbDQ",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 1090,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 35,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 3000
+    },
+    {
+      "type": "agent_output",
+      "agent": "evaluator",
+      "text": "{\"verdict\":\"accept\"}",
+      "tokens": {
+        "input": 1090,
+        "output": 35
+      },
+      "t": 3000
+    },
+    {
+      "type": "loop_end",
+      "result": "accepted",
+      "round": 1,
+      "judged": true,
+      "t": 3001
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 1174,
+        "output": 423,
+        "searches": 0,
+        "steps": 2
+      },
+      "finalText": "**You're Invited to the Spring School Concert!**\n\nDear Families and Friends,\n\nPlease join us for an evening of music performed by the students of [School Name]. Our choir, orchestra, and solo performers have been practicing all term, and we would love to share their hard work with you.\n\n**Date:** [Day, Month Date, Year]\n**Time:** [Start Time] (doors open at [Door Time])\n**Venue:** [School Name] Main Hall, [Address]\n\n**Program highlights:**\n- School Choir: spring selections\n- Junior and Senior Orchestra\n- Solo and ensemble performances from students across all grades\n\nAdmission is free, and all are welcome. Seating is available on a first-come basis, so we recommend arriving a little early. Light refreshments will be served in the lobby after the performance.\n\nPlease RSVP by [RSVP Date] to [Contact Name] at [Email or Phone Number] so we can plan seating.\n\nWe look forward to celebrating our students' talents with you.\n\nWarm regards,\n\n[Your Name]\n[Your Title]\n[School Name]",
+      "t": 3001
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "writer",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: writer\\nYou are the Writer. Write the final answer for the user from the material you were given. Be clear and short, with no filler.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Write an invitation to a school concert.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T12:46:22Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T12:46:24Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T12:46:21Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "12000000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T12:46:22Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 12:46:24 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMn16mA4XeyXAmZXtA79\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"CAQS7gUKEAgUGAI4AUIIdGhpbmtpbmcSDJmAKZItVc7hWGydaBoMwCZiEc6yvkqnGG24IjBKSxPRZnCUq0QRM4mBc+nHnBZX3hsFnuyic3AVD6nlhwQR//FEdfbjmzs45jNmPN0qiwVxCc5P2nP24zQ6HcZkJMlC+tHBMjbUqbjqL6uM/zC61tkMdBERmzG/MwSK/9e2w6V+L5r7jMHqUvpm+9gzmrnV4BIhxGikZCJlnZZPSq9yhgjJUB0sy7ol2ZJRgP7khm7QrELFifoCQHpjV8Ra3hCXjo7c1ZBkmk3aN/kSc+mBtJklJkIHa7+YbAu6+MQlGrbCRzumihe4k9mtvPnMEDvRQQGnJOqXYvUu68aaZsWAMNehl0jcwbFMkgR5rfI4cAv8/x5Vba5PXdZa3dqh2pvm9j8Lpg/X0IQl4BkmySOdfAYdvm8Ug3M41VO72MerT00HNcr5ZRsWiobi6+xAKt1HN7QGI0a+39D1x7IDMJpo4A9hnoBqhz8q39vedJH2HABnLRhn5JAo3Wzel7xOlCD/8TRJR59j7jE4HKpop5iwUYe94FM+8Uez3Q6JT91/eC5DmhcQS4qFb9ixUREW/o7O48NIk4Az4Atr5SnTGfoJySACGhkdz137JWmODWrK78NJnOaNNVUOcjq5CXroHpUTSZqkBIwUWNlb5+gaLfqJm0oSV4dg6TlaNtfBJuXX3C1QMLtRINE7Erqc6UeetYFy/+Mvd9886GddxGUTfZ4NVsZjXi4MY6uocwFFDse0vk0LDtFM3JcX6mC4WPt8Lzjb2R4KkRBxbhFmYQO0gqwxIcu5oCa925Go1875K6O13/DwiQtd0sEIWE54WOn65tpgX46t4nLP8niGd/1D/7m5oaoxz1bydwcL+KEx2ZwyiWnOxmDGhW7L89j6SOkVokgRxMDZCTfl5iwGCxyWzVHE5geAZgDfiqmDBZBcTDXqdxmzy+SlI947UvZvunya+FdheZ2RZok6xetHFeYYAQ==\"},{\"type\":\"text\",\"text\":\"**You're Invited to the Spring School Concert!**\\n\\nDear Families and Friends,\\n\\nPlease join us for an evening of music performed by the students of [School Name]. Our choir, orchestra, and solo performers have been practicing all term, and we would love to share their hard work with you.\\n\\n**Date:** [Day, Month Date, Year]\\n**Time:** [Start Time] (doors open at [Door Time])\\n**Venue:** [School Name] Main Hall, [Address]\\n\\n**Program highlights:**\\n- School Choir: spring selections\\n- Junior and Senior Orchestra\\n- Solo and ensemble performances from students across all grades\\n\\nAdmission is free, and all are welcome. Seating is available on a first-come basis, so we recommend arriving a little early. Light refreshments will be served in the lobby after the performance.\\n\\nPlease RSVP by [RSVP Date] to [Contact Name] at [Email or Phone Number] so we can plan seating.\\n\\nWe look forward to celebrating our students' talents with you.\\n\\nWarm regards,\\n\\n[Your Name]\\n[Your Title]\\n[School Name]\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":84,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":388,\"output_tokens_details\":{\"thinking_tokens\":38},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 2532,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 2533
+    },
+    {
+      "type": "api_call",
+      "agent": "evaluator",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: evaluator\\nYou are the Evaluator. You judge a draft only against the criteria given in the message. If no criteria are given, judge whether the draft answers the task clearly and correctly. If the draft is good enough, accept it. If not, ask for a revision and give specific feedback (what is wrong and what to change), not only a score.\\nReply with JSON only, in one of these forms:\\n{\\\"verdict\\\":\\\"accept\\\"}\\n{\\\"verdict\\\":\\\"revise\\\",\\\"feedback\\\":\\\"<what to change>\\\"}\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Write an invitation to a school concert.\\n\\nCriteria:\\nWrite it nicely.\\n\\nDraft:\\n**You're Invited to the Spring School Concert!**\\n\\nDear Families and Friends,\\n\\nPlease join us for an evening of music performed by the students of [School Name]. Our choir, orchestra, and solo performers have been practicing all term, and we would love to share their hard work with you.\\n\\n**Date:** [Day, Month Date, Year]\\n**Time:** [Start Time] (doors open at [Door Time])\\n**Venue:** [School Name] Main Hall, [Address]\\n\\n**Program highlights:**\\n- School Choir: spring selections\\n- Junior and Senior Orchestra\\n- Solo and ensemble performances from students across all grades\\n\\nAdmission is free, and all are welcome. Seating is available on a first-come basis, so we recommend arriving a little early. Light refreshments will be served in the lobby after the performance.\\n\\nPlease RSVP by [RSVP Date] to [Contact Name] at [Email or Phone Number] so we can plan seating.\\n\\nWe look forward to celebrating our students' talents with you.\\n\\nWarm regards,\\n\\n[Your Name]\\n[Your Title]\\n[School Name]\\n\\nGive your verdict now.\"}],\"tools\":[{\"name\":\"reply\",\"description\":\"Give your reply in this shape.\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"verdict\":{\"type\":\"string\",\"enum\":[\"accept\",\"revise\"]},\"feedback\":{\"type\":\"string\"}},\"required\":[\"verdict\"]}}],\"tool_choice\":{\"type\":\"tool\",\"name\":\"reply\"}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "9999000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T12:46:24Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T12:46:24Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T12:46:24Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11999000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T12:46:24Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 12:46:24 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMn1HRr8asVP39x8EbDQ\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"toolu_01V4KGmgVmKXhPoUjbcmWfnG\",\"name\":\"reply\",\"input\":{\"verdict\":\"accept\"},\"caller\":{\"type\":\"direct\"}}],\"container\":null,\"stop_reason\":\"tool_use\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":1090,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":35,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 467,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 3000
+    }
+  ],
+  "design": {
+    "pattern": "evaluator",
+    "nodes": [
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false,
+        "slot": "anthropic"
+      },
+      {
+        "id": "evaluator",
+        "agent": "evaluator",
+        "model": "fast",
+        "search": false,
+        "slot": "anthropic"
+      }
+    ],
+    "edges": [
+      {
+        "from": "writer",
+        "to": "evaluator"
+      }
+    ],
+    "rounds": 2,
+    "criteria": "Write it nicely."
+  },
+  "task": "Write an invitation to a school concert.",
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 1174,
+    "output": 423,
+    "searches": 0,
+    "steps": 2
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T12:46:21.636Z",
+  "endedAt": "2026-11-24T12:46:24.865Z",
+  "durationMs": 3229
+}

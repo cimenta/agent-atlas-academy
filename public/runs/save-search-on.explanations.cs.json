@@ -1,0 +1,7 @@
+{
+  "3": "Výzkumník udělá jedno hledání na webu.",
+  "4": "Výsledek hledání se vrací. Tento text se přidá do vstupu další odpovědi, proto vstup roste.",
+  "5": "Výzkumník odpoví z výsledku hledání a uvede zdroje.",
+  "9": "Pisatel z toho udělá dvě věty se zdrojem.",
+  "10": "Běh končí: jedno hledání, asi 15 000 vstupních tokenů, o pár sekund déle než dvojče bez hledání."
+}

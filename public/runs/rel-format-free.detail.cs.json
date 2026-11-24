@@ -1,0 +1,6 @@
+{
+  "about": "Čtenář vezme z poznámky o koláči jídlo, počet porcí a ořechy a pisatel udělá štítek. Čtenář odpovídá volným textem.",
+  "how": "Řetěz dvou agentů; odpověď čtenáře je takový text, jaký model zvolí.",
+  "learns": "Volný text se člověku dobře čte, ale další agent v něm musí fakta najít sám.",
+  "watch": "Tvar odpovědi čtenáře a porovnejte s dvojčetem, které musí vyplnit tři pole."
+}

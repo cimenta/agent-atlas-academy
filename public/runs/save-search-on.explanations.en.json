@@ -1,0 +1,7 @@
+{
+  "3": "The researcher makes one web search.",
+  "4": "The search result comes back. This text is added to the input of the next answer, which is why the input grows.",
+  "5": "The researcher answers from the search result and names its sources.",
+  "9": "The writer turns it into two sentences with the source named.",
+  "10": "The run ends: one search, about 15,000 input tokens, a few seconds longer than the twin without search."
+}

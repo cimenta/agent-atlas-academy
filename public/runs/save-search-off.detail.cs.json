@@ -1,0 +1,6 @@
+{
+  "about": "Výzkumník a pisatel odpovídají, která budova je na světě nejvyšší, bez webového hledání. Oba běží na Anthropicu Fast.",
+  "how": "Řetěz dvou agentů; hledání je vypnuté, takže výzkumník odpovídá z toho, co model ví.",
+  "learns": "Bez hledání je běh levný a rychlý, ale odpověď nemá za sebou zdroje.",
+  "watch": "Vstup běhu: asi 600 tokenů. Porovnejte s dvojčetem, které smí hledat."
+}

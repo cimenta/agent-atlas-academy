@@ -1,0 +1,6 @@
+{
+  "about": "Stejná otázka, ale výzkumník smí hledat na webu, nejvýš dvakrát.",
+  "how": "Výzkumník se rozhodne, zda bude hledat; výsledek hledání se vrací jako další vstup pro další odpověď.",
+  "learns": "Hledání má vlastní cenu: výsledek se přidá do vstupu, tady asi 15 000 tokenů místo 600. Odpověď dostane zdroje.",
+  "watch": "Krok hledání uprostřed, vstup běhu ve Statistice a zdroje uvedené v odpovědi."
+}

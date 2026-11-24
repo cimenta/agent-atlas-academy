@@ -1,0 +1,6 @@
+{
+  "about": "The same two agents, but the reader must answer with three fields: dish (text), servings (number) and nuts (yes or no).",
+  "how": "The answer is checked against the fields. A wrong answer would be asked for again.",
+  "learns": "A fixed answer format makes the facts easy to find and is checked; a wrong answer is asked for again.",
+  "watch": "The format check step with its tick, and the reader's answer as a short JSON object."
+}

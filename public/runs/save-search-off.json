@@ -1,0 +1,382 @@
+{
+  "schemaVersion": 1,
+  "id": "save-search-off",
+  "title": "Find out which building is the tallest in the world and how …",
+  "language": "en",
+  "pattern": "sequential",
+  "recordedWith": {
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "appVersion": "1.16.10-dev.7",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "Find out which building is the tallest in the world and how tall it is, and write two sentences for a school report that say where the facts come from.",
+      "pattern": "sequential",
+      "design": {
+        "pattern": "sequential",
+        "nodes": [
+          {
+            "id": "researcher",
+            "agent": "researcher",
+            "model": "fast",
+            "search": false,
+            "slot": "anthropic"
+          },
+          {
+            "id": "writer",
+            "agent": "writer",
+            "model": "fast",
+            "search": false,
+            "slot": "anthropic"
+          }
+        ],
+        "edges": [
+          {
+            "from": "researcher",
+            "to": "writer"
+          }
+        ]
+      },
+      "t": 0
+    },
+    {
+      "type": "agent_start",
+      "agent": "researcher",
+      "role": "Researcher",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: researcher\nYou are the Researcher. Collect the facts the task needs. If you have a web search tool, use it, and state only facts you found or know. Name your sources when you have them. Keep it brief.\nKeep every reply under 300 words. Answer in English.",
+      "t": 0
+    },
+    {
+      "type": "round",
+      "agent": "researcher",
+      "round": 1,
+      "ms": 3995,
+      "stop": "end_turn",
+      "usage": {
+        "input": 135,
+        "output": 795
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Find out which building is the tallest in the world and how tall it is, and write two sentences for a school report that say where the facts come from."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "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"
+        },
+        {
+          "type": "text",
+          "text": "**Finding (from my own knowledge, not a live search):**\n\n- **Building:** Burj Khalifa, Dubai, United Arab Emirates\n- **Height:** 828 metres (2,717 feet) to the top of its spire, completed in 2010\n- **Likely source of the ranking:** The Council on Tall Buildings and Urban Habitat (CTBUH), which sets the official height rules and maintains the list of the world's tallest buildings. The developer, Emaar Properties, also publishes the building's figures.\n\n**Suggested report sentences:**\n\n\"The tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates, which stands 828 metres (2,717 feet) tall including its spire. These facts are based on height rankings from the Council on Tall Buildings and Urban Habitat (CTBUH), the organization that officially measures the world's tallest buildings.\"\n\n**Caution:** I could not check a live source, so please confirm on the CTBUH website (skyscrapercenter.com) before submitting. Rankings can change when a new tower is completed, and a report should cite the date it was checked."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMmhGEAMk8osWkEj4b6j",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 135,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 795,
+            "output_tokens_details": {
+              "thinking_tokens": 426
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 3996
+    },
+    {
+      "type": "agent_output",
+      "agent": "researcher",
+      "text": "**Finding (from my own knowledge, not a live search):**\n\n- **Building:** Burj Khalifa, Dubai, United Arab Emirates\n- **Height:** 828 metres (2,717 feet) to the top of its spire, completed in 2010\n- **Likely source of the ranking:** The Council on Tall Buildings and Urban Habitat (CTBUH), which sets the official height rules and maintains the list of the world's tallest buildings. The developer, Emaar Properties, also publishes the building's figures.\n\n**Suggested report sentences:**\n\n\"The tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates, which stands 828 metres (2,717 feet) tall including its spire. These facts are based on height rankings from the Council on Tall Buildings and Urban Habitat (CTBUH), the organization that officially measures the world's tallest buildings.\"\n\n**Caution:** I could not check a live source, so please confirm on the CTBUH website (skyscrapercenter.com) before submitting. Rankings can change when a new tower is completed, and a report should cite the date it was checked.",
+      "tokens": {
+        "input": 135,
+        "output": 795
+      },
+      "t": 3996
+    },
+    {
+      "type": "handoff",
+      "from": "researcher",
+      "to": "writer",
+      "note": "**Finding (from my own knowledge, not a live search):**\n\n- **Building:** Burj Khalifa, Dubai, United Arab Emirates\n- **Height:** 828 metres (2,717 feet) to the top of its spire, completed in 2010\n- **Likely source of the ranking:** The Council on Tall Buildings and Urban Habitat (CTBUH), which sets the official height rules and maintains the list of the world's tallest buildings. The developer, Emaar Properties, also publishes the building's figures.\n\n**Suggested report sentences:**\n\n\"The tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates, which stands 828 metres (2,717 feet) tall including its spire. These facts are based on height rankings from the Council on Tall Buildings and Urban Habitat (CTBUH), the organization that officially measures the world's tallest buildings.\"\n\n**Caution:** I could not check a live source, so please confirm on the CTBUH website (skyscrapercenter.com) before submitting. Rankings can change when a new tower is completed, and a report should cite the date it was checked.",
+      "t": 3996
+    },
+    {
+      "type": "agent_start",
+      "agent": "writer",
+      "role": "Writer",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: writer\nYou are the Writer. Write the final answer for the user from the material you were given. Be clear and short, with no filler.\nKeep every reply under 300 words. Answer in English.",
+      "t": 3996
+    },
+    {
+      "type": "round",
+      "agent": "writer",
+      "round": 1,
+      "ms": 2642,
+      "stop": "end_turn",
+      "usage": {
+        "input": 494,
+        "output": 553
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Find out which building is the tallest in the world and how tall it is, and write two sentences for a school report that say where the facts come from.\n\nThe previous agent (researcher) wrote:\n**Finding (from my own knowledge, not a live search):**\n\n- **Building:** Burj Khalifa, Dubai, United Arab Emirates\n- **Height:** 828 metres (2,717 feet) to the top of its spire, completed in 2010\n- **Likely source of the ranking:** The Council on Tall Buildings and Urban Habitat (CTBUH), which sets the official height rules and maintains the list of the world's tallest buildings. The developer, Emaar Properties, also publishes the building's figures.\n\n**Suggested report sentences:**\n\n\"The tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates, which stands 828 metres (2,717 feet) tall including its spire. These facts are based on height rankings from the Council on Tall Buildings and Urban Habitat (CTBUH), the organization that officially measures the world's tallest buildings.\"\n\n**Caution:** I could not check a live source, so please confirm on the CTBUH website (skyscrapercenter.com) before submitting. Rankings can change when a new tower is completed, and a report should cite the date it was checked."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQStwsKEAgUGAI4AUIIdGhpbmtpbmcSDAiTxPFEXq/bYbQIwBoMSY5U6pijpomQrqy0IjCJiQ37CLmHofcOywzeZ++5aU19QvgiPHLBitP2Niu8sUkbj+G3V3/QW9h+xRIwpMAq1Ao/5VDlKoMBk0TGcKUS9M4v8Qr6YO2JCm7vjqVhg+TsetOJY6RYewy0Qel/Bj5ISNWJYPSu8USPB7Q5ubGirGjVxS2fvwCYlkGLUFNEgFtIgS/WuN/h7uaQrKjkJcr63eObWbgWwdMxjeyZJ0cmDVklanhqeR8cxYRV3f876mItZj8dRwSi28oZW1zEPrQ0FfYktPK79bSu4vv8jtQZtHiWYDJsSYogWIYYsqu8uJvKdVFS4Kxa0h6LLkXFtu/OqfWUWuzGfeA2f+e16xwBEZ3mrBdo/jTOzvCXJcryVzAOzHa12oMtgnXE+s3+1DyjIg+Yo2tl9cXwg/DDQehh4vRf+SJst2GtP8RRO70LMxjiAL2X+/7FMuVoxAqoKjqDIz/FFcjT/mhQG+RZ0vpJnjUjetu/har3U2pvsxLsoySYlcbX4Anab0d5HtS7gS9wCZou/QB/ddQHZjihsUwPk+XORXZFB/yvs7hS3AvPtP1SJDZFyDAcVtZcXe2rBhTSaYCSYiGFEGeITckyUiCDpktmZOvfRNXKne6vnyexSOh1l7IvECneNI3gE2jlb9heD/67eRjSf1dG0Z2918ml91nkfXTI5IapXz/PwkWXbHpHkvCVjmetRTbJ6xsdYYSV3ypFq2qKTKt5L/8IwZjT2usK2GMGv+Poau06K2yGaw4UAe4Nnthz6SYFqBMPf+k1ES0tjBTVgpQ4Rm4eleZjHP0/QfCn5m9TBbS/uQVK5Aoo/I1/w4wXVYJJ02hVj7HAwwEmkaAdNou1yml8UIALFtob0Wi8N2RAgMRlqqQslES97KOCUI/4I4fTp8re2zSvAsOFG+0SxImySlBotsLgFsVNaM21Ta3zU+cVLt5CLSYoKEc1DAs3RTvTl2Ztueb8wUcMfLxPlbqzQdmZ4EieOvfxOfeMeym/QGjjrFpFmelQJFRByTNB89wR6PnKMttKh5VMJgnQeGAW59nOR4wCyysV9kC+GUDYixoLmqeMKCfGc6G1jaSZ3e+hzSs9ekF4ppx9qReOYRwEynFUxd9lFKOCCfVAv18GoeN7C0wFMI4MpwGoqkPQHXKgRyyuZTKNgnKyIod75xHPAxW1vcaQrY2e+KmuuuAo+DBwnFK/yyzpEzFAMRJzBCjqUtyxdCTB7fsmv4n7Q21KFe47UfnK5r0DmmQV7KyBg6Vig5wyDi3xZeFA1wXnFj3+pfIuXOjn/DpyMAltagmrNgBLw6vfXfbtrwn9reFI1VDTvzrT+b9/d8rLqXbYxZu4KNld+Z/3o0Bxoge6WNYUwzKTKb+uPjcT+ew1iJWfhBGr5S6nl0liBp7g39PP/tE65nRlyhGVwC4z8h70hqh2UWTplIDSMM2W+DwI/S7uEAUTYbK7WkmNIgkUEbCRrtAmLgeal0jqIvG3sdFWFlx7rZDJb6N33rYWINAsfd+IRypo2Cbs4JI2uZF89xgiNM+D1jV/akzt1BAwYMuJmMPXGrSFwhWHfO1WUvOWNpE7sLghxl8mZ2DrkpmtiXtucgZBVCIhXR7vNzSFZcO89BieS5XD8NgCq8pqOMUHqgdtSyIcenOQqjpmeIc6rOWOPNYiOU5wNICBfM7xg7uaaDisyKNNDJhoBpMIkr3D1nJHXsTRhX3dI/JqN81pyWYq6pd4a02mx0uB/4ORMl4cPnyZc9yXVeQvWaUNFFLNXjv1o1f8fTvNo3MIpi+dKPJrstG2cd0K4im2cmBjhlYzG2uMuchkwLSpjce/y8LFBDjXu/PwFeiCl96hzXy9fnaDpY1TbrXEP7mckhnLbCCaNscpZ70WkiQFJGday/SH9RgB"
+        },
+        {
+          "type": "text",
+          "text": "**Answer:** The tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates. It is 828 metres (2,717 feet) tall to the top of its spire.\n\n**Report sentences:**\n\n1. The tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates, which stands 828 metres (2,717 feet) tall including its spire.\n2. These facts come from the Council on Tall Buildings and Urban Habitat (CTBUH), the organization that maintains the official list of the world's tallest buildings, and were checked on [insert date].\n\n**Before you submit:** These facts come from memory, not a live check. Confirm them on the CTBUH website (skyscrapercenter.com), then fill in the date you checked. Rankings can change when a taller building is completed."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMmhZBPrYRXqxzvg3wvF",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 494,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 553,
+            "output_tokens_details": {
+              "thinking_tokens": 282
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 6638
+    },
+    {
+      "type": "agent_output",
+      "agent": "writer",
+      "text": "**Answer:** The tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates. It is 828 metres (2,717 feet) tall to the top of its spire.\n\n**Report sentences:**\n\n1. The tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates, which stands 828 metres (2,717 feet) tall including its spire.\n2. These facts come from the Council on Tall Buildings and Urban Habitat (CTBUH), the organization that maintains the official list of the world's tallest buildings, and were checked on [insert date].\n\n**Before you submit:** These facts come from memory, not a live check. Confirm them on the CTBUH website (skyscrapercenter.com), then fill in the date you checked. Rankings can change when a taller building is completed.",
+      "tokens": {
+        "input": 494,
+        "output": 553
+      },
+      "t": 6638
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 629,
+        "output": 1348,
+        "searches": 0,
+        "steps": 2
+      },
+      "finalText": "**Answer:** The tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates. It is 828 metres (2,717 feet) tall to the top of its spire.\n\n**Report sentences:**\n\n1. The tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates, which stands 828 metres (2,717 feet) tall including its spire.\n2. These facts come from the Council on Tall Buildings and Urban Habitat (CTBUH), the organization that maintains the official list of the world's tallest buildings, and were checked on [insert date].\n\n**Before you submit:** These facts come from memory, not a live check. Confirm them on the CTBUH website (skyscrapercenter.com), then fill in the date you checked. Rankings can change when a taller building is completed.",
+      "t": 6639
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "researcher",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: researcher\\nYou are the Researcher. Collect the facts the task needs. If you have a web search tool, use it, and state only facts you found or know. Name your sources when you have them. Keep it brief.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Find out which building is the tallest in the world and how tall it is, and write two sentences for a school report that say where the facts come from.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T12:42:20Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "1999000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T12:42:23Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T12:42:20Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11999000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T12:42:20Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 12:42:23 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMmhGEAMk8osWkEj4b6j\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"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\"},{\"type\":\"text\",\"text\":\"**Finding (from my own knowledge, not a live search):**\\n\\n- **Building:** Burj Khalifa, Dubai, United Arab Emirates\\n- **Height:** 828 metres (2,717 feet) to the top of its spire, completed in 2010\\n- **Likely source of the ranking:** The Council on Tall Buildings and Urban Habitat (CTBUH), which sets the official height rules and maintains the list of the world's tallest buildings. The developer, Emaar Properties, also publishes the building's figures.\\n\\n**Suggested report sentences:**\\n\\n\\\"The tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates, which stands 828 metres (2,717 feet) tall including its spire. These facts are based on height rankings from the Council on Tall Buildings and Urban Habitat (CTBUH), the organization that officially measures the world's tallest buildings.\\\"\\n\\n**Caution:** I could not check a live source, so please confirm on the CTBUH website (skyscrapercenter.com) before submitting. Rankings can change when a new tower is completed, and a report should cite the date it was checked.\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":135,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":795,\"output_tokens_details\":{\"thinking_tokens\":426},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 3994,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 3996
+    },
+    {
+      "type": "api_call",
+      "agent": "writer",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: writer\\nYou are the Writer. Write the final answer for the user from the material you were given. Be clear and short, with no filler.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Find out which building is the tallest in the world and how tall it is, and write two sentences for a school report that say where the facts come from.\\n\\nThe previous agent (researcher) wrote:\\n**Finding (from my own knowledge, not a live search):**\\n\\n- **Building:** Burj Khalifa, Dubai, United Arab Emirates\\n- **Height:** 828 metres (2,717 feet) to the top of its spire, completed in 2010\\n- **Likely source of the ranking:** The Council on Tall Buildings and Urban Habitat (CTBUH), which sets the official height rules and maintains the list of the world's tallest buildings. The developer, Emaar Properties, also publishes the building's figures.\\n\\n**Suggested report sentences:**\\n\\n\\\"The tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates, which stands 828 metres (2,717 feet) tall including its spire. These facts are based on height rankings from the Council on Tall Buildings and Urban Habitat (CTBUH), the organization that officially measures the world's tallest buildings.\\\"\\n\\n**Caution:** I could not check a live source, so please confirm on the CTBUH website (skyscrapercenter.com) before submitting. Rankings can change when a new tower is completed, and a report should cite the date it was checked.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T12:42:24Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "1999000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T12:42:26Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T12:42:23Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11999000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T12:42:24Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 12:42:26 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMmhZBPrYRXqxzvg3wvF\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"CAQStwsKEAgUGAI4AUIIdGhpbmtpbmcSDAiTxPFEXq/bYbQIwBoMSY5U6pijpomQrqy0IjCJiQ37CLmHofcOywzeZ++5aU19QvgiPHLBitP2Niu8sUkbj+G3V3/QW9h+xRIwpMAq1Ao/5VDlKoMBk0TGcKUS9M4v8Qr6YO2JCm7vjqVhg+TsetOJY6RYewy0Qel/Bj5ISNWJYPSu8USPB7Q5ubGirGjVxS2fvwCYlkGLUFNEgFtIgS/WuN/h7uaQrKjkJcr63eObWbgWwdMxjeyZJ0cmDVklanhqeR8cxYRV3f876mItZj8dRwSi28oZW1zEPrQ0FfYktPK79bSu4vv8jtQZtHiWYDJsSYogWIYYsqu8uJvKdVFS4Kxa0h6LLkXFtu/OqfWUWuzGfeA2f+e16xwBEZ3mrBdo/jTOzvCXJcryVzAOzHa12oMtgnXE+s3+1DyjIg+Yo2tl9cXwg/DDQehh4vRf+SJst2GtP8RRO70LMxjiAL2X+/7FMuVoxAqoKjqDIz/FFcjT/mhQG+RZ0vpJnjUjetu/har3U2pvsxLsoySYlcbX4Anab0d5HtS7gS9wCZou/QB/ddQHZjihsUwPk+XORXZFB/yvs7hS3AvPtP1SJDZFyDAcVtZcXe2rBhTSaYCSYiGFEGeITckyUiCDpktmZOvfRNXKne6vnyexSOh1l7IvECneNI3gE2jlb9heD/67eRjSf1dG0Z2918ml91nkfXTI5IapXz/PwkWXbHpHkvCVjmetRTbJ6xsdYYSV3ypFq2qKTKt5L/8IwZjT2usK2GMGv+Poau06K2yGaw4UAe4Nnthz6SYFqBMPf+k1ES0tjBTVgpQ4Rm4eleZjHP0/QfCn5m9TBbS/uQVK5Aoo/I1/w4wXVYJJ02hVj7HAwwEmkaAdNou1yml8UIALFtob0Wi8N2RAgMRlqqQslES97KOCUI/4I4fTp8re2zSvAsOFG+0SxImySlBotsLgFsVNaM21Ta3zU+cVLt5CLSYoKEc1DAs3RTvTl2Ztueb8wUcMfLxPlbqzQdmZ4EieOvfxOfeMeym/QGjjrFpFmelQJFRByTNB89wR6PnKMttKh5VMJgnQeGAW59nOR4wCyysV9kC+GUDYixoLmqeMKCfGc6G1jaSZ3e+hzSs9ekF4ppx9qReOYRwEynFUxd9lFKOCCfVAv18GoeN7C0wFMI4MpwGoqkPQHXKgRyyuZTKNgnKyIod75xHPAxW1vcaQrY2e+KmuuuAo+DBwnFK/yyzpEzFAMRJzBCjqUtyxdCTB7fsmv4n7Q21KFe47UfnK5r0DmmQV7KyBg6Vig5wyDi3xZeFA1wXnFj3+pfIuXOjn/DpyMAltagmrNgBLw6vfXfbtrwn9reFI1VDTvzrT+b9/d8rLqXbYxZu4KNld+Z/3o0Bxoge6WNYUwzKTKb+uPjcT+ew1iJWfhBGr5S6nl0liBp7g39PP/tE65nRlyhGVwC4z8h70hqh2UWTplIDSMM2W+DwI/S7uEAUTYbK7WkmNIgkUEbCRrtAmLgeal0jqIvG3sdFWFlx7rZDJb6N33rYWINAsfd+IRypo2Cbs4JI2uZF89xgiNM+D1jV/akzt1BAwYMuJmMPXGrSFwhWHfO1WUvOWNpE7sLghxl8mZ2DrkpmtiXtucgZBVCIhXR7vNzSFZcO89BieS5XD8NgCq8pqOMUHqgdtSyIcenOQqjpmeIc6rOWOPNYiOU5wNICBfM7xg7uaaDisyKNNDJhoBpMIkr3D1nJHXsTRhX3dI/JqN81pyWYq6pd4a02mx0uB/4ORMl4cPnyZc9yXVeQvWaUNFFLNXjv1o1f8fTvNo3MIpi+dKPJrstG2cd0K4im2cmBjhlYzG2uMuchkwLSpjce/y8LFBDjXu/PwFeiCl96hzXy9fnaDpY1TbrXEP7mckhnLbCCaNscpZ70WkiQFJGday/SH9RgB\"},{\"type\":\"text\",\"text\":\"**Answer:** The tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates. It is 828 metres (2,717 feet) tall to the top of its spire.\\n\\n**Report sentences:**\\n\\n1. The tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates, which stands 828 metres (2,717 feet) tall including its spire.\\n2. These facts come from the Council on Tall Buildings and Urban Habitat (CTBUH), the organization that maintains the official list of the world's tallest buildings, and were checked on [insert date].\\n\\n**Before you submit:** These facts come from memory, not a live check. Confirm them on the CTBUH website (skyscrapercenter.com), then fill in the date you checked. Rankings can change when a taller building is completed.\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":494,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":553,\"output_tokens_details\":{\"thinking_tokens\":282},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 2641,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 6638
+    }
+  ],
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "search": false,
+        "slot": "anthropic"
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false,
+        "slot": "anthropic"
+      }
+    ],
+    "edges": [
+      {
+        "from": "researcher",
+        "to": "writer"
+      }
+    ]
+  },
+  "task": "Find out which building is the tallest in the world and how tall it is, and write two sentences for a school report that say where the facts come from.",
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 629,
+    "output": 1348,
+    "searches": 0,
+    "steps": 2
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T12:42:19.703Z",
+  "endedAt": "2026-11-24T12:42:26.542Z",
+  "durationMs": 6839
+}

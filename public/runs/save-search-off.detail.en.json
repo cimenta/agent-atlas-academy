@@ -1,0 +1,6 @@
+{
+  "about": "A researcher and a writer answer which building is the tallest in the world, with no web search. Both run on Anthropic Fast.",
+  "how": "A chain of two agents; search is off, so the researcher answers from what the model knows.",
+  "learns": "Without search a run is cheap and fast, but the answer has no sources behind it.",
+  "watch": "The input of the run: about 600 tokens. Compare with the twin that may search."
+}

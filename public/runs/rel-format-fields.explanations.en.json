@@ -1,0 +1,5 @@
+{
+  "3": "The reader answers with exactly three fields as a JSON object.",
+  "4": "The format check: all three fields are there and have the right type, so the run goes on.",
+  "8": "The writer gets a clean set of facts and makes the label."
+}

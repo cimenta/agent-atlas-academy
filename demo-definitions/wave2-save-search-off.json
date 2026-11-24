@@ -1,7 +1,7 @@
 {
   "format": "agent-atlas-run-definition",
   "version": 1,
-  "task": "Explain how a bill becomes a law in a parliament, for a student who writes a school report. Name what a student should check in a source.",
+  "task": "Find out which building is the tallest in the world and how tall it is, and write two sentences for a school report that say where the facts come from.",
   "about": {
     "en": {
       "title": "Cost: no web search",

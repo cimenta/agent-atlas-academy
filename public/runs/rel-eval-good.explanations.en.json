@@ -1,0 +1,8 @@
+{
+  "3": "The writer's first draft, far longer than 50 words.",
+  "7": "The evaluator says revise and names the fault: about 120 words, and no real call to come.",
+  "8": "The loop sends the draft back with this feedback.",
+  "11": "The second draft is shorter and ends with a call to come.",
+  "15": "The evaluator accepts it.",
+  "16": "The loop ends in round 2 of 2."
+}

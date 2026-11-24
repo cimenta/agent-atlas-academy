@@ -1,0 +1,6 @@
+{
+  "about": "A reader takes the dish, the servings and the nuts from a note about a cake and a writer makes a label. The reader answers in free text.",
+  "how": "A chain of two agents; the reader's answer is whatever text the model chooses.",
+  "learns": "Free text is easy for a person to read, but the next agent must find the facts in it by itself.",
+  "watch": "The shape of the reader's answer, and compare with the twin that must fill three fields."
+}
