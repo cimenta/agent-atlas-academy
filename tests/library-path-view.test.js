@@ -133,12 +133,12 @@ test("a goal card has a count chip and a chip with the study time that is left, 
   const card = (done) => ui(drawPath(base({ items: withTime, done })), "path-goal")[0];
   const none = card(new Set());
   assert.equal(ui(none, "path-count")[0].text.trim(), "4", "only the number when nothing is done");
-  assert.equal(ui(none, "path-time")[0].text.trim(), "1 h 40 min");
-  assert.equal(ui(none, "path-time")[0].attrs["data-hover-badge"], "1 h 40 min");
+  assert.equal(ui(none, "path-time")[0].text.trim(), "1:40");
+  assert.equal(ui(none, "path-time")[0].attrs["data-hover-badge"], "1:40");
   assert.equal(ui(none, "path-count")[0].attrs.tabindex, "0");
   const some = card(new Set(["patterns:a", "patterns:d"]));
   assert.match(ui(some, "path-count")[0].text, /path\.card\.someDone\|2,4/);
-  assert.equal(ui(some, "path-time")[0].text.trim(), "50 min", "the time of Beta and Gamma is left");
+  assert.equal(ui(some, "path-time")[0].text.trim(), "0:50", "the time of Beta and Gamma is left");
   const all = card(new Set(["patterns:a", "patterns:b", "patterns:c", "patterns:d"]));
   assert.match(ui(all, "path-count")[0].text, /path\.card\.allDone/);
   assert.equal(ui(all, "path-time").length, 0);

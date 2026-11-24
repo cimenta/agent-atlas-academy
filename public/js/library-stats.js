@@ -23,6 +23,12 @@ export function formatMinutes(minutes) {
   return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")} min`;
 }
 
+// Hours and minutes as on a clock: 2:35, and 0:45 under an hour. For the small chips of the goal cards.
+export function formatClock(minutes) {
+  const m = Math.max(0, Math.round(minutes));
+  return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")}`;
+}
+
 export function statsTable({ doc, t, items }) {
   const stats = libraryStats(items);
   const cell = (tag, text, attrs = {}) => h(doc, tag, { class: "num", ...attrs }, text);

@@ -2,7 +2,7 @@
 // Pure drawing: the rules are in library-path.js, the marks of done steps come in as a Set of "<goal>:<runId>".
 import { h } from "./dom.js";
 import { GOALS, LEVELS, goalLevels, nextStep, stepOf, levelOf, kindOf } from "./library-path.js";
-import { formatMinutes } from "./library-stats.js";
+import { formatClock } from "./library-stats.js";
 
 // The two small icons of the goal card: a list (how many examples) and a cap (the study time that is left), and a tick for a finished goal.
 const CARD_ICONS = {
@@ -70,7 +70,7 @@ export function drawPath({ doc, t, items, goal, tags, done, tagLabel, teachesOf,
       const chip = (kind, label, hover, cls = "") => h(doc, "span", { class: `pchip${cls}`, tabindex: "0", "data-ui": `path-${kind}`, ...hover }, cardIcon(doc, kind === "count" ? (finished ? "tick" : "list") : "cap"), label);
       const meta = count > 0 ? h(doc, "div", { class: "pmeta" },
         chip("count", finished ? t("path.card.allDone") : doneCount > 0 ? t("path.card.someDone", { done: doneCount, total: count }) : String(count), { "data-hover-title": t("path.card.countTitle"), "data-hover-text": doneCount > 0 ? t("path.card.countSome", { done: doneCount, total: count }) : t("path.card.countNone", { total: count }), "data-hover-hint": t("path.card.countHint") }, finished ? " done" : ""),
-        ...(!finished && left > 0 ? [chip("time", formatMinutes(left), { "data-hover-title": t("path.card.timeTitle"), "data-hover-badge": formatMinutes(left), "data-hover-text": t("path.card.timeText"), "data-hover-hint": t("path.card.timeHint") })] : []),
+        ...(!finished && left > 0 ? [chip("time", formatClock(left), { "data-hover-title": t("path.card.timeTitle"), "data-hover-badge": formatClock(left), "data-hover-text": t("path.card.timeText"), "data-hover-hint": t("path.card.timeHint") })] : []),
       ) : "";
       const button = h(
         doc,

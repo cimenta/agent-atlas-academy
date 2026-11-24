@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { formatMinutes, libraryStats, statsTable } from "../public/js/library-stats.js";
+import { formatClock, formatMinutes, libraryStats, statsTable } from "../public/js/library-stats.js";
 
 const items = [
   { id: "a", level: 1, paths: { patterns: 1 }, runSeconds: 30, studyMinutes: 10 },
@@ -49,4 +49,11 @@ test("the table has a row per goal, a total, a Study column and a study header t
   assert.equal(head.attrs.tabindex, "0");
   assert.match(head.attrs["data-hover-text"], /160 words a minute/);
   assert.equal(table.find((e) => e.attrs["data-ui"] === "stats-total")[0].find((e) => e.attrs["data-ui"] === "stats-study")[0].text, "35 min");
+});
+
+test("formatClock writes hours and minutes like a clock", () => {
+  assert.equal(formatClock(155), "2:35");
+  assert.equal(formatClock(45), "0:45");
+  assert.equal(formatClock(60), "1:00");
+  assert.equal(formatClock(-3), "0:00");
 });

@@ -1833,7 +1833,7 @@
   "path.card.countNone": "Tento cíl má {total} příkladů.",
   "path.card.countHint": "Hotový příklad označíte v cestě níže.",
   "path.card.timeTitle": "Čas na dokončení",
-  "path.card.timeText": "Odhad, jak dlouho potrvá projít a pochopit zbývající příklady. Počítá se z doby studia každého příkladu.",
+  "path.card.timeText": "Hodiny a minuty. Odhad, jak dlouho potrvá projít a pochopit zbývající příklady. Počítá se z doby studia každého příkladu.",
   "path.card.timeHint": "Metodika je v článku Jak odhadnout dobu studia běhu.",
   "path.goalSub.patterns": "Jak agenti spolupracují",
   "path.goalSub.save": "Jak ušetřit a zrychlit",
