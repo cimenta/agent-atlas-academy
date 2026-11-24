@@ -1593,6 +1593,9 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .tag-word.tag-task { color: var(--tag-task); }
 .tag-word.tag-efficiency { color: var(--tag-efficiency); }
 .tag-word:hover { text-decoration: underline; background: none; }
+.detail-tags { display: flex; flex-wrap: wrap; gap: 2px 10px; margin: 0 0 8px; }
+.detail-tags .tag-word { cursor: default; }
+.detail-tags .tag-word:hover { text-decoration: none; }
 .tag-word.dim { opacity: 0.3; }
 .tag-word.on { background: currentColor; border-radius: 8px; padding: 0 8px; }
 .tag-word.on { color: var(--bg); }

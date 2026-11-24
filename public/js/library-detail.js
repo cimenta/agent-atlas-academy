@@ -2,6 +2,7 @@
 // its settings and the articles that explain it. Pure drawing: the texts come from the detail file of the run, the facts from the run.
 import { h } from "./dom.js";
 import { AGENT_TYPES, providerCatalog } from "./engine/catalog.js";
+import { groupOfTag } from "./library-tags.js";
 
 const nameOf = (node) => node.name || AGENT_TYPES[node.agent]?.label || node.id;
 
@@ -64,10 +65,11 @@ function actionIcon(doc, paths) {
   return svg;
 }
 
-// actions: [{ ui, label, primary?, danger?, onClick }]. aboutPanel: the description panel of your own run, shown as a section.
-export function libraryDetail({ doc, t, item, run, source, detail, facts, actions = [], aboutPanel = null, num = (n) => String(n) }) {
+// actions: [{ ui, label, primary?, danger?, onClick }]. tagLabel(tag): the word of a tag in the language of the page. aboutPanel: the description panel of your own run, shown as a section.
+export function libraryDetail({ doc, t, item, run, source, detail, facts, actions = [], aboutPanel = null, num = (n) => String(n), tagLabel = (tag) => tag }) {
   const text = (key) => (typeof detail?.[key] === "string" && detail[key].trim() !== "" ? detail[key] : "");
   const articles = Array.isArray(detail?.articles) ? detail.articles.filter((a) => a && typeof a.slug === "string" && /^[a-z0-9-]+$/.test(a.slug)) : [];
+  const tags = Array.isArray(item?.tags) ? item.tags.filter((x) => typeof x === "string" && x !== "") : [];
   const hasText = Boolean(text("about") || text("how") || text("learns") || text("watch") || articles.length > 0);
 
   // Small buttons: Load keeps its words, the others are icons with the name and what they do as a tooltip.
@@ -91,6 +93,7 @@ export function libraryDetail({ doc, t, item, run, source, detail, facts, action
   const parts = [
     h(doc, "h2", {}, item.title),
     h(doc, "p", { class: "facts", "data-ui": "detail-facts" }, factsLine),
+    ...(tags.length > 0 ? [h(doc, "div", { class: "detail-tags", "data-ui": "detail-tags" }, ...tags.map((tag) => h(doc, "span", { class: `tag-word tag-${groupOfTag(tag)}`, "data-ui": "detail-tag" }, tagLabel(tag))))] : []),
     h(doc, "div", { class: "actions", "data-ui": "detail-actions" }, ...buttons),
     ...(aboutPanel ? [section(doc, t, source === "local" ? "yours" : "authorNote", aboutPanel)] : []),
     ...(text("about") ? [section(doc, t, "about", paragraph(doc, text("about")))] : []),

@@ -1809,7 +1809,7 @@
   "path.filterTags": "Tags:",
   "path.clearTags": "Clear all",
   "path.removeTag": "Remove the tag {tag}",
-  "path.onlyGoal": "The list on the left only from the goal {goal}",
+  "path.onlyGoal": "Show only runs of this goal in the list on the left ({goal})",
   "path.onlyGoalNote": "Only runs of the goal {goal}.",
   "path.kind.pair": "Before and after",
   "path.kind.bad": "Bad on purpose",

@@ -91,3 +91,13 @@ test("only Load has words; the other buttons are icons with a name and a tooltip
     assert.doesNotMatch(b.text, /L-/);
   }
 });
+
+test("the detail shows the tags of the run under the facts, each word in the colour of its group", () => {
+  const view = make({ item: { ...item, tags: ["basics", "speed", "tool-choice"] }, tagLabel: (x) => x.toUpperCase() });
+  const words = view.find((e) => e.attrs["data-ui"] === "detail-tag");
+  assert.deepEqual(words.map((e) => e.text), ["BASICS", "SPEED", "TOOL-CHOICE"]);
+  assert.deepEqual(words.map((e) => e.attrs.class), ["tag-word tag-basics", "tag-word tag-efficiency", "tag-word tag-pattern"]);
+  const row = view.find((e) => e.attrs["data-ui"] === "detail-tags");
+  assert.equal(row.length, 1);
+  assert.equal(make().find((e) => e.attrs["data-ui"] === "detail-tags").length, 0, "no row when the run has no tags");
+});

@@ -1809,7 +1809,7 @@
   "path.filterTags": "Štítky:",
   "path.clearTags": "Zrušit vše",
   "path.removeTag": "Zrušit štítek {tag}",
-  "path.onlyGoal": "Seznam vlevo jen z cíle {goal}",
+  "path.onlyGoal": "Zobrazit v seznamu vlevo jen běhy tohoto cíle ({goal})",
   "path.onlyGoalNote": "Jen běhy z cíle {goal}.",
   "path.kind.pair": "Před a po",
   "path.kind.bad": "Schválně špatně",

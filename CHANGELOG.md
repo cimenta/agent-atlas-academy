@@ -6,6 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Library, detail: the tags of the run are shown under the facts, each word in the colour of its group.
 - Library, recommended path: a new tab on the right side with four goals (Patterns of teamwork, Cost and speed, Reliability, What goes wrong), each with steps in three levels (beginner, advanced, expert). A step has a number, Open and Done; done steps are kept on this device, and a Continue box points to the next step. Tags filter the path and the list together, and a switch limits the list on the left to the chosen goal.
 - Library, right side: three tabs, Recommended path (shown on the first visit, with no run chosen), Tags and Detail. The arrow keys move between them, and the letter T opens Tags.
 - Library, run card: the result is the colour of the whole card (green finished, amber stopped, red failed) instead of an icon, the level is three dots at the bottom right, the step number sits at the top right, and a chip says whether a run is one of a before and after pair or bad on purpose.
@@ -79,6 +80,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Library, path: the switch that limits the list on the left now reads Show only runs of this goal in the list on the left (goal name).
 - Library, first recorded runs: sequential-simple (Cloudflare), supervisor-simple (Anthropic), router-complex (Groq) and the new mix-router-specialists (Groq, Gemini and OpenRouter in one run) are in the library with details and explanations in English and Czech. The add-library-run script now accepts a run without a path (it is then only in the list). Every library definition has at least three tags. The seven older example runs are removed from the library; only the new ones stay.
 - Library, wave 1 definitions: the ten patterns are spread evenly over the five providers (two each: Cloudflare, OpenRouter, Anthropic, Gemini, Groq) with a key slot on every agent instead of Anthropic only; only the supervisor and handoff runs are paid.
 - Settings, Security: the provider chips wrap to a second row instead of shrinking, so the word Anthropic is no longer cut off at the edge of its chip.
