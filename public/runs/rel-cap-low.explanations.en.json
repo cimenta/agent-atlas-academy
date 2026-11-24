@@ -1,0 +1,6 @@
+{
+  "5": "All five agents start at once, each on the Strong model and each asked for about 400 words.",
+  "14": "The last worker finishes. The estimated cost of the five answers is now over the cap of 0.10 USD.",
+  "15": "The run stops: the warning names the cost cap and says what was done so far is saved.",
+  "16": "The run ends as stopped by a limit, with no final answer. Compare with the twin that has a higher cap."
+}

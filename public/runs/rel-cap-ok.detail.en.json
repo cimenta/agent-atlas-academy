@@ -1,0 +1,6 @@
+{
+  "about": "The same five Strong agents and the same combiner, but the cost cap is 0.50 USD.",
+  "how": "The estimated price stays under the cap all the way, so the run is not stopped.",
+  "learns": "A cap above what the run needs changes nothing: it only stops a run that would cost too much. This run costs about 0.15 USD.",
+  "watch": "The five answers handed to the combiner and the finished combined report. Compare with the twin that was stopped."
+}

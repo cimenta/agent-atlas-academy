@@ -1,0 +1,6 @@
+{
+  "about": "Five Strong agents (architect, librarian, teacher, accountant, neighbour) each write about 400 words on a new town library, and a combiner is to join them. The cost cap of the run is only 0.10 USD.",
+  "how": "The five run side by side. After every answer the run adds up the estimated price from the catalog; when the sum passes the cap, the run stops before the combiner.",
+  "learns": "A cost cap is a hard stop: the run ends with what was done so far and says so. It protects the budget, but there is no combined report.",
+  "watch": "The warning near the end that names the cost cap, the status stopped, and the empty final answer."
+}

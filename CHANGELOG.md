@@ -4,8 +4,13 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ## [Unreleased]
 
+### Fixed
+
+- Create: loading a definition from a file while the Create page is open ran the next run with the built-in limits instead of the limits of Settings, so a cost cap was ignored. The limits are now read from Settings when the file is loaded.
+
 ### Changed
 
+- Library, wave 2: rel-cap-low and rel-cap-ok are recorded (five Strong agents and a combiner with a cost cap of 0.10 USD, which stops the run, and of 0.50 USD, which lets it finish), with details and explanations in English and Czech. The unused definition wave2-save-provider-anthropic is removed.
 - Home: more compact. The heading is See and learn how AI agents work together, the Task line above the player is gone, and the Start here card is one blue line; the whole card is clickable (and opens with Enter or Space), More goals stays a link.
 
 ### Added

@@ -832,6 +832,62 @@
         "en": "Self-critique costs one agent less, but it shares the writer's blind spots.",
         "cs": "Sebekritika stojí o agenta méně, ale sdílí slepá místa pisatele."
       }
+    },
+    {
+      "id": "rel-cap-low",
+      "title": "A town wants to plan a new public library. Give a full repor…",
+      "pattern": "parallel",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "stopped_limit",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "cost",
+        "risk-analysis",
+        "parallel-work"
+      ],
+      "level": 3,
+      "kind": "pair",
+      "twin": "rel-cap-ok",
+      "paths": {
+        "reliable": 11
+      },
+      "teaches": {
+        "en": "A cost cap stops an expensive run before it can finish; you keep what was done and no more is spent.",
+        "cs": "Strop ceny zastaví drahý běh dřív, než doběhne; zachová se, co se udělalo, a víc se neutratí."
+      }
+    },
+    {
+      "id": "rel-cap-ok",
+      "title": "A town wants to plan a new public library. Give a full repor…",
+      "pattern": "parallel",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "cost",
+        "risk-analysis",
+        "parallel-work"
+      ],
+      "level": 3,
+      "kind": "pair",
+      "twin": "rel-cap-low",
+      "paths": {
+        "reliable": 12
+      },
+      "teaches": {
+        "en": "With a cap above what the run needs, it finishes; the cap costs nothing until it is reached.",
+        "cs": "Se stropem nad potřebou běhu doběhne; strop nic nestojí, dokud se nedosáhne."
+      }
     }
   ]
 }

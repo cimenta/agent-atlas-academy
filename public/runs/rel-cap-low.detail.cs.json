@@ -1,0 +1,6 @@
+{
+  "about": "Pět agentů na modelu Strong (architekt, knihovnice, učitel, účetní, soused) napíše každý asi 400 slov o nové městské knihovně a slučovač je má spojit. Strop ceny běhu je jen 0,10 USD.",
+  "how": "Pětice běží vedle sebe. Po každé odpovědi běh sečte odhad ceny z katalogu; když součet překročí strop, běh se zastaví před slučovačem.",
+  "learns": "Strop ceny je tvrdá zarážka: běh skončí s tím, co se stihlo, a řekne to. Chrání rozpočet, ale společná zpráva nevznikne.",
+  "watch": "Varování ke konci, které jmenuje strop ceny, stav zastaveno a prázdnou konečnou odpověď."
+}

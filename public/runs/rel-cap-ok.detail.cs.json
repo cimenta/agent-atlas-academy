@@ -1,0 +1,6 @@
+{
+  "about": "Stejných pět agentů na modelu Strong a stejný slučovač, ale strop ceny je 0,50 USD.",
+  "how": "Odhad ceny zůstane po celou dobu pod stropem, takže se běh nezastaví.",
+  "learns": "Strop nad tím, co běh potřebuje, nic nezmění: zastaví jen běh, který by stál příliš. Tento běh stojí asi 0,15 USD.",
+  "watch": "Pět odpovědí předaných slučovači a hotovou společnou zprávu. Porovnejte s dvojčetem, které bylo zastaveno."
+}

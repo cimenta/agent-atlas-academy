@@ -766,6 +766,8 @@ export function renderCreate(ctx) {
       // A definition names its pattern, models and memory: loading it is the student deciding them (the providers are read from its agents).
       decideLoaded();
       resetForLoad();
+      // The page stays open, so the limits are read from Settings now (resetForLoad leaves them empty for the next opening).
+      draft.limits = { ...ctx.settings.get().limits };
       const notes = loaded.notes.map((n) => t(`create.definition.note.${n}`)).join(" ");
       showForm(`${t("create.definition.loaded")} ${notes}`.trim(), "status");
     });
@@ -886,7 +888,7 @@ export function renderCreate(ctx) {
   function beginRun({ resume = null, approve = false } = {}) {
     // A new run carries the models the student chose for gone free models (a carried-on run keeps its own design).
     const design = resume ? structuredClone(resume.design) : applyOverrides(draft.editor.design(), ctx.settings.get().modelOverrides);
-    const limits = clampLimits(resume ? resume.limits : draft.limits);
+    const limits = clampLimits(resume ? resume.limits : (draft.limits ?? ctx.settings.get().limits));
     // Every agent names its key slot; the run gets the key of each slot in use.
     const used = resume ? [] : usedSlots(design);
     const own = resume ? keysForRun(resume) : null;
