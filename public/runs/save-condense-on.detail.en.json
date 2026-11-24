@@ -1,0 +1,6 @@
+{
+  "about": "The same debate, but every agent may have a long input condensed by an extra call before it reads it.",
+  "how": "From the second round on, each agent first sends the earlier text to a short summary call and then answers from the summary.",
+  "learns": "Condensing keeps the input shorter (about 30,000 instead of 33,700 input tokens), but it adds calls and time: 18 steps and 55 seconds instead of 10 steps and 43 seconds. On a short debate the saving is small.",
+  "watch": "The condense steps before the answers, and how long each summary is. Compare the totals in Statistics with the twin."
+}

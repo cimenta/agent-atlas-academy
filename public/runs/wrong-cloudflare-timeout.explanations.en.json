@@ -1,0 +1,6 @@
+{
+  "3": "The first agent reaches the limit of 2,500 tokens after 119.9 seconds, so even a successful call is almost at the edge of what Cloudflare allows.",
+  "6": "The second agent starts to write the next chapter, but the model is slow and busy.",
+  "7": "Cloudflare did not answer within 120 seconds: the call ends with a timeout. The message says to press Retry or pick another model.",
+  "8": "The run ends as failed after about 4 minutes. What was written is saved, and the last three agents were never reached."
+}

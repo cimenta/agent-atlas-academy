@@ -1,0 +1,6 @@
+{
+  "about": "The same question, but now two debaters (one has to argue for, one against) and a judge, for two rounds.",
+  "how": "The debaters answer in turn, the judge reads everything and decides.",
+  "learns": "The wrong pattern for the task: a question with one correct answer has no second side. The debater that must argue against cannot do it honestly, and the run costs many times more: 3,900 input and 2,200 output tokens instead of 81 and 62.",
+  "watch": "The against debater that refuses to pretend, and the verdict of the judge. Compare the numbers in Statistics with the single agent."
+}

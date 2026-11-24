@@ -2,6 +2,12 @@
 import { nodeModel, nodeProvider, providersOf } from "./engine/catalog.js";
 
 // The facts of the Settings section of the detail, read from the run itself.
+// How long the recorded run took, in seconds: the latest event time. 0 when the run has no event times.
+export function runSeconds(run) {
+  const times = Array.isArray(run?.events) ? run.events.map((e) => e?.t).filter((x) => Number.isFinite(x) && x >= 0) : [];
+  return times.length > 0 ? Math.max(...times) / 1000 : 0;
+}
+
 export function runFacts(run) {
   const nodes = Array.isArray(run?.design?.nodes) ? run.design.nodes.filter((n) => n !== null && typeof n === "object") : [];
   const recorded = typeof run?.recordedWith?.provider === "string" && run.recordedWith.provider !== "" ? run.recordedWith.provider.split("+")[0] : "anthropic";
@@ -17,6 +23,7 @@ export function runFacts(run) {
     calls: Array.isArray(run?.apiCalls) ? run.apiCalls.length : 0,
     outcome: run?.outcome ?? "",
     createdAt: run?.createdAt ?? null,
+    seconds: runSeconds(run),
   };
 }
 

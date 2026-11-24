@@ -1,0 +1,213 @@
+{
+  "schemaVersion": 1,
+  "id": "wrong-single",
+  "title": "Is Canberra the capital of Australia? Answer yes or no and g…",
+  "language": "en",
+  "pattern": "sequential",
+  "recordedWith": {
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "appVersion": "1.17.1-dev.0",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "Is Canberra the capital of Australia? Answer yes or no and give one reason.",
+      "pattern": "sequential",
+      "design": {
+        "pattern": "sequential",
+        "nodes": [
+          {
+            "id": "free",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Answerer",
+            "instructions": "Answer briefly and correctly.",
+            "slot": "anthropic"
+          }
+        ],
+        "edges": []
+      },
+      "t": 2
+    },
+    {
+      "type": "agent_start",
+      "agent": "free",
+      "role": "Answerer",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Answerer. Answer briefly and correctly.\nKeep every reply under 300 words. Answer in English.",
+      "t": 3
+    },
+    {
+      "type": "round",
+      "agent": "free",
+      "round": 1,
+      "ms": 810,
+      "stop": "end_turn",
+      "usage": {
+        "input": 81,
+        "output": 62
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Is Canberra the capital of Australia? Answer yes or no and give one reason."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes. Canberra was purpose-built as Australia's capital and has been the seat of the federal government since 1927, following a compromise between Sydney and Melbourne as rival candidates."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMqxvDoYKC7KRMHCFugN",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 81,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 62,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 813
+    },
+    {
+      "type": "agent_output",
+      "agent": "free",
+      "text": "Yes. Canberra was purpose-built as Australia's capital and has been the seat of the federal government since 1927, following a compromise between Sydney and Melbourne as rival candidates.",
+      "tokens": {
+        "input": 81,
+        "output": 62
+      },
+      "t": 814
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 81,
+        "output": 62,
+        "searches": 0,
+        "steps": 1
+      },
+      "finalText": "Yes. Canberra was purpose-built as Australia's capital and has been the seat of the federal government since 1927, following a compromise between Sydney and Melbourne as rival candidates.",
+      "t": 815
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "free",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Answerer. Answer briefly and correctly.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Is Canberra the capital of Australia? Answer yes or no and give one reason.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T13:38:19Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T13:38:20Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T13:38:19Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "12000000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T13:38:19Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 13:38:20 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMqxvDoYKC7KRMHCFugN\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Yes. Canberra was purpose-built as Australia's capital and has been the seat of the federal government since 1927, following a compromise between Sydney and Melbourne as rival candidates.\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":81,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":62,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 809,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 813
+    }
+  ],
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Answerer",
+        "instructions": "Answer briefly and correctly.",
+        "slot": "anthropic"
+      }
+    ],
+    "edges": []
+  },
+  "task": "Is Canberra the capital of Australia? Answer yes or no and give one reason.",
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 100000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 81,
+    "output": 62,
+    "searches": 0,
+    "steps": 1
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T13:38:19.006Z",
+  "endedAt": "2026-11-24T13:38:20.286Z",
+  "durationMs": 1280
+}

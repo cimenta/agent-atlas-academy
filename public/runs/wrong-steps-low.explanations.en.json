@@ -1,0 +1,7 @@
+{
+  "3": "The supervisor decides to call the researcher. That already costs one step.",
+  "7": "The researcher answers.",
+  "11": "The supervisor decides again, using up another step, and calls the writer.",
+  "14": "The limit of 3 steps per run is reached just as the writer starts: the run is stopped before it can finish.",
+  "15": "The run ends as stopped by a limit, with nothing to hand over. Nothing was wrong with the agents: the limit was too low for this design."
+}

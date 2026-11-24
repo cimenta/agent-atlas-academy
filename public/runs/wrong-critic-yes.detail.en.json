@@ -1,0 +1,6 @@
+{
+  "about": "A writer writes two sentences about why the sky is blue, and a reviewer reads them. The reviewer is told to be encouraging and to say the text is great.",
+  "how": "A chain of two agents; the second one judges the first one's text.",
+  "learns": "A reviewer that is told to praise adds a step and a cost, but no quality: what it can find is decided by its instruction.",
+  "watch": "The reviewer's answer: it calls the text great and needs no changes, whatever it said."
+}

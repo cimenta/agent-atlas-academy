@@ -1,0 +1,6 @@
+{
+  "3": "První agent dosáhne limitu 2500 tokenů za 119,9 sekundy, takže i úspěšné volání je skoro na hranici toho, co Cloudflare dovolí.",
+  "6": "Druhý agent začne psát další kapitolu, ale model je pomalý a vytížený.",
+  "7": "Cloudflare neodpověděl do 120 sekund: volání skončí timeoutem. Hlášení radí stisknout Retry nebo zvolit jiný model.",
+  "8": "Běh končí jako selhal asi po 4 minutách. Co se napsalo, je uloženo, a poslední tři agenti nedostali řadu."
+}

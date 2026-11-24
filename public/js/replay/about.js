@@ -17,13 +17,13 @@ export function cleanAbout(values) {
 
 export const isHttpUrl = (text) => /^https?:\/\/\S+$/i.test(text) && isSafeHref(text);
 
-export function createAboutPanel({ doc, t, getAbout, editable, onSave }) {
-  const element = h(doc, "section", { class: "about-panel", "data-ui": "run-about", "aria-label": t("about.heading"), hidden: true });
+export function createAboutPanel({ doc, t, getAbout, editable, onSave, headingKey = "about.heading", closable = true }) {
+  const element = h(doc, "section", { class: "about-panel", "data-ui": "run-about", "aria-label": t(headingKey), hidden: true });
   let editing = false;
 
   function viewMode() {
     const about = getAbout();
-    const parts = [h(doc, "h3", {}, t("about.heading"))];
+    const parts = [h(doc, "h3", {}, t(headingKey))];
     if (!about) {
       parts.push(h(doc, "p", { class: "hint" }, t(editable ? "about.empty" : "about.emptyReadonly")));
     } else {
@@ -41,10 +41,12 @@ export function createAboutPanel({ doc, t, getAbout, editable, onSave }) {
       });
       buttons.push(edit);
     }
-    const close = h(doc, "button", { type: "button", "data-ui": "about-close" }, t("about.close"));
-    close.addEventListener("click", () => api.close());
-    buttons.push(close);
-    parts.push(h(doc, "div", { class: "about-buttons" }, ...buttons));
+    if (closable) {
+      const close = h(doc, "button", { type: "button", "data-ui": "about-close" }, t("about.close"));
+      close.addEventListener("click", () => api.close());
+      buttons.push(close);
+    }
+    if (buttons.length > 0) parts.push(h(doc, "div", { class: "about-buttons" }, ...buttons));
     return parts;
   }
 
@@ -76,7 +78,7 @@ export function createAboutPanel({ doc, t, getAbout, editable, onSave }) {
       draw();
     });
     return [
-      h(doc, "h3", {}, t("about.heading")),
+      h(doc, "h3", {}, t(headingKey)),
       field("about-title", t("about.titleLabel"), title),
       field("about-author", t("about.authorLabel"), author),
       field("about-url", t("about.urlLabel"), url),

@@ -1,0 +1,6 @@
+{
+  "about": "Supervizor pošle výzkumníka, pisatele, kritika a pokladníka připravit jednostránkový plán pro prodej koláčů, ale celý běh smí mít jen 3 kroky.",
+  "how": "Každé volání agenta je krok. Supervizor sám kroky spotřebuje na rozhodování, takže na pomocníky nezbydou.",
+  "learns": "Příliš nízký limit zastaví práci v půlce: běh skončí zastavený limitem, bez plánu, a varování řekne, který limit byl dosažen.",
+  "watch": "Varování blízko konce, které jmenuje limit kroků, pisatele, který začal, ale nedokončil, a prázdnou konečnou odpověď."
+}

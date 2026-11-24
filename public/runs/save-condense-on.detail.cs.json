@@ -1,0 +1,6 @@
+{
+  "about": "Stejná debata, ale každý agent může nechat dlouhý vstup před čtením zhutnit extra voláním.",
+  "how": "Od druhého kola každý agent nejdřív pošle dřívější text do krátkého shrnutí a odpoví podle shrnutí.",
+  "learns": "Zhutnění drží vstup kratší (asi 30 000 místo 33 700 vstupních tokenů), ale přidává volání a čas: 18 kroků a 55 sekund místo 10 kroků a 43 sekund. U krátké debaty je úspora malá.",
+  "watch": "Kroky zhutnění před odpověďmi a délku každého shrnutí. Porovnejte součty ve Statistice s dvojčetem."
+}

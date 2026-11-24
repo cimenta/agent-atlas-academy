@@ -1,0 +1,6 @@
+{
+  "about": "Pět agentů na modelu Strong od Cloudflare píše za sebou po jedné kapitole příručky školního šachového kroužku. Každý má napsat asi 1500 slov a smí napsat až 2500 tokenů.",
+  "how": "Řetěz agentů na pomalém modelu. Cloudflare ukončí každé volání, které trvá déle než 120 sekund.",
+  "learns": "Dlouhá odpověď na pomalém modelu může trvat déle, než poskytovatel počká. První agent potřeboval na 2500 tokenů 119,9 sekundy a druhé volání bylo po 120 sekundách ukončeno: běh selhal na timeoutu a tři agenti se nedostali na řadu.",
+  "watch": "První kapitolu useknutou limitem tokenů, která trvala skoro 120 sekund, chybu, která jmenuje Cloudflare a 120 sekund, a tři agenty označené jako nedosažení."
+}

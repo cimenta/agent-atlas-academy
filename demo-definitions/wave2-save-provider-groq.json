@@ -1,0 +1,70 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Explain to a ten-year-old why the moon has phases, then check the text for mistakes.",
+  "about": {
+    "en": {
+      "title": "Cost: the same task on a free provider",
+      "author": "Agent Atlas Academy",
+      "description": "The same three steps, all on a free Groq model.\n\n**What it teaches**\n\nA free provider costs nothing, but the app spaces its calls and the answers can differ."
+    },
+    "cs": {
+      "title": "Cena: stejné zadání u bezplatného poskytovatele",
+      "author": "Agent Atlas Academy",
+      "description": "Stejné tři kroky, vše na bezplatném modelu Groq.\n\n**Čemu se naučíte**\n\nBezplatný poskytovatel nestojí nic, ale aplikace jeho volání rozkládá v čase a odpovědi se mohou lišit."
+    }
+  },
+  "library": {
+    "level": 2,
+    "kind": "pair",
+    "twin": "save-provider-anthropic",
+    "paths": {
+      "save": 13
+    },
+    "tags": [
+      "cost",
+      "speed",
+      "basics"
+    ],
+    "teaches": {
+      "en": "The same task on a free provider costs nothing, but its calls are spaced and the answers differ.",
+      "cs": "Stejné zadání u bezplatného poskytovatele nestojí nic, ale jeho volání jsou rozložená v čase a odpovědi se liší."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "researcher",
+        "to": "writer"
+      },
+      {
+        "from": "writer",
+        "to": "critic"
+      }
+    ]
+  }
+}

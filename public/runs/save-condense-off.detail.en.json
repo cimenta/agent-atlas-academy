@@ -1,0 +1,6 @@
+{
+  "about": "Three debaters (for, against, free) argue for three rounds whether a school day should start later, and a judge decides. Each agent gets all the text written so far.",
+  "how": "In every round the debaters read the whole history of the debate, so the input of each call grows. The run uses 10 steps and about 33,700 input tokens.",
+  "learns": "In a long debate every round carries all the earlier text, so the input grows round after round and the cost with it.",
+  "watch": "The input of the run in Statistics, and compare it with the twin that condenses the input."
+}

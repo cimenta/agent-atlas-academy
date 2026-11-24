@@ -67,3 +67,11 @@ test("runFacts survives a design whose nodes are not objects", async () => {
   assert.equal(facts.agents, 1);
   assert.equal(facts.models.length, 1);
 });
+
+import { runSeconds } from "../public/js/library-model.js";
+test("runSeconds is the latest event time in seconds, and 0 without event times", () => {
+  assert.equal(runSeconds({ events: [{ t: 0 }, { type: "x" }, { t: 63216 }, { t: 1000 }] }), 63.216);
+  assert.equal(runSeconds({ events: [] }), 0);
+  assert.equal(runSeconds({}), 0);
+  assert.equal(runSeconds({ events: [{ t: "5" }] }), 0);
+});

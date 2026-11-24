@@ -1,0 +1,92 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Prepare a one-page plan for a school charity bake sale: a budget, who does what, and the main risks.",
+  "about": {
+    "en": {
+      "title": "What goes wrong: a step limit that is too low",
+      "author": "Agent Atlas Academy",
+      "description": "A supervisor with four helpers, and a limit of only 3 steps for the whole run.\n\n**What it teaches**\n\nA limit that is too low stops the work half way: the result is incomplete and the replay says which limit was reached."
+    },
+    "cs": {
+      "title": "Co se pokazí: příliš nízký limit kroků",
+      "author": "Agent Atlas Academy",
+      "description": "Supervizor se čtyřmi pomocníky a limit jen 3 kroky na celý běh.\n\n**Čemu se naučíte**\n\nPříliš nízký limit zastaví práci v půlce: výsledek je neúplný a replay říká, který limit byl dosažen."
+    }
+  },
+  "library": {
+    "level": 2,
+    "paths": {
+      "wrong": 5
+    },
+    "tags": [
+      "supervisor",
+      "risk-analysis",
+      "planning"
+    ],
+    "teaches": {
+      "en": "A limit that is too low stops the work half way: the result is incomplete and the replay says which limit was reached.",
+      "cs": "Příliš nízký limit zastaví práci v půlce: výsledek je neúplný a replay říká, který limit byl dosažen."
+    }
+  },
+  "design": {
+    "pattern": "supervisor",
+    "nodes": [
+      {
+        "id": "supervisor",
+        "agent": "supervisor",
+        "model": "balanced",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "treasurer",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Treasurer",
+        "instructions": "You keep the budget. Give a simple budget with amounts in euros."
+      }
+    ],
+    "edges": [
+      {
+        "from": "supervisor",
+        "to": "researcher"
+      },
+      {
+        "from": "supervisor",
+        "to": "writer"
+      },
+      {
+        "from": "supervisor",
+        "to": "critic"
+      },
+      {
+        "from": "supervisor",
+        "to": "treasurer"
+      }
+    ]
+  }
+}

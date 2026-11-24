@@ -1,0 +1,6 @@
+{
+  "about": "Three planners (date, stalls, budget) plan a school fair side by side, and a combiner joins their plans. But the stalls depend on the date and the budget on the stalls.",
+  "how": "The parallel pattern: all three start at once, and none sees what the others write.",
+  "learns": "The wrong pattern: agents that work side by side cannot build on each other, so each one invents its own date. The combiner has to join parts that do not fit.",
+  "watch": "The three plans with different dates (14 June, 16 May, 14 June) and the note of the combiner that the agents disagree."
+}

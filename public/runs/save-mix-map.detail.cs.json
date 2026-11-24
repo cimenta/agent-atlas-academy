@@ -1,0 +1,6 @@
+{
+  "about": "Šest vět studijní rady (matematika, dějepis, biologie, výtvarka, hudba, zeměpis) napíše šest pracovníků a slučovač je spojí. Rozdělovač a slučovač běží na Anthropicu Fast, šest pracovníků na bezplatném modelu Groq.",
+  "how": "Vzor map-reduce s jiným poskytovatelem u každé části: rozdělovač vytvoří šest malých úkolů, šest pracovníků napíše po jedné větě a slučovač věty spojí do jednoho seznamu.",
+  "learns": "Každý agent může mít vlastního poskytovatele. Mnoho malých volání jde na bezplatný model a nestojí nic, a placený model dělá jen dva kroky, které vyžadují péči: rozdělení a závěrečný seznam. Celý běh má 8 kroků a asi 3100 tokenů.",
+  "watch": "Poskytovatele u každého agenta (Anthropic u rozdělovače a slučovače, Groq u pracovníků) a tabulku podle poskytovatele ve Statistice."
+}

@@ -1,0 +1,69 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write a detailed guide of about 1200 words for new students on how to prepare for a test, with a worked example for every tip.",
+  "about": {
+    "en": {
+      "title": "Cost: a short reply limit (1000 tokens)",
+      "author": "Agent Atlas Academy",
+      "description": "Every agent may write up to 1000 tokens.\n\n**What it teaches**\n\nA low limit shortens the answer and the cost, but may cut a sentence; choose it by the task."
+    },
+    "cs": {
+      "title": "Cena: nízký strop odpovědi (1000 tokenů)",
+      "author": "Agent Atlas Academy",
+      "description": "Každý agent smí napsat nejvýš 1000 tokenů.\n\n**Čemu se naučíte**\n\nNízký strop zkrátí odpověď i cenu, ale může useknout větu; volí se podle úkolu."
+    }
+  },
+  "library": {
+    "level": 1,
+    "kind": "pair",
+    "twin": "save-tokens-4000",
+    "paths": {
+      "save": 4
+    },
+    "tags": [
+      "cost",
+      "speed",
+      "basics"
+    ],
+    "teaches": {
+      "en": "A low limit shortens the answer and the cost, but may cut a sentence; choose it by the task.",
+      "cs": "Nízký strop zkrátí odpověď i cenu, ale může useknout větu; volí se podle úkolu."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "guide",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Guide writer",
+        "instructions": "Write the guide in full. Always write at least 1500 words and never shorten it.",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      },
+      {
+        "id": "editor",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Editor",
+        "instructions": "Rewrite the guide in full and add a worked example to every tip. Always write at least 1500 words.",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "guide",
+        "to": "editor"
+      }
+    ]
+  }
+}

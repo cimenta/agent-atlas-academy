@@ -1,0 +1,7 @@
+{
+  "3": "The first agent answers as a historian. Each later agent adds its own view and reads the whole text before it.",
+  "7": "An answer is cut by the limit of 1000 tokens for one reply. The run only warns and goes on.",
+  "28": "Groq says the tokens-per-minute limit is reached and asks the app to wait 5 seconds. The app waits and tries the seventh agent again.",
+  "33": "The same happens before the eighth agent, now with a wait of 11 seconds: the input has grown, so the limit comes sooner.",
+  "37": "The run ends as finished, with about 6,600 input and 6,500 output tokens. The limit cost some waiting, not the answer."
+}

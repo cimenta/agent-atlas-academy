@@ -1,0 +1,1037 @@
+{
+  "schemaVersion": 1,
+  "id": "wrong-voting-same",
+  "title": "Should a school ban phones in class? Answer yes or no and gi…",
+  "language": "en",
+  "pattern": "voting",
+  "recordedWith": {
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "appVersion": "1.17.1-dev.0",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "Should a school ban phones in class? Answer yes or no and give one reason.",
+      "pattern": "voting",
+      "design": {
+        "pattern": "voting",
+        "nodes": [
+          {
+            "id": "free",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Voter 1",
+            "instructions": "Answer the question. Start with your single choice.",
+            "slot": "anthropic"
+          },
+          {
+            "id": "free-2",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Voter 2",
+            "instructions": "Answer the question. Start with your single choice.",
+            "slot": "anthropic"
+          },
+          {
+            "id": "free-3",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Voter 3",
+            "instructions": "Answer the question. Start with your single choice.",
+            "slot": "anthropic"
+          },
+          {
+            "id": "free-4",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Voter 4",
+            "instructions": "Answer the question. Start with your single choice.",
+            "slot": "anthropic"
+          },
+          {
+            "id": "free-5",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Voter 5",
+            "instructions": "Answer the question. Start with your single choice.",
+            "slot": "anthropic"
+          },
+          {
+            "id": "tally",
+            "agent": "tally",
+            "model": "fast",
+            "search": false,
+            "slot": "anthropic"
+          }
+        ],
+        "edges": [
+          {
+            "from": "free",
+            "to": "tally"
+          },
+          {
+            "from": "free-2",
+            "to": "tally"
+          },
+          {
+            "from": "free-3",
+            "to": "tally"
+          },
+          {
+            "from": "free-4",
+            "to": "tally"
+          },
+          {
+            "from": "free-5",
+            "to": "tally"
+          }
+        ]
+      },
+      "t": 2
+    },
+    {
+      "type": "agent_start",
+      "agent": "free",
+      "role": "Voter 1",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Voter 1. Answer the question. Start with your single choice.\nYou are one of several voters who answer the same task, each on its own. Answer the whole task yourself, in your own words. Do not only make a plan or review other work: give the answer.\nKeep every reply under 300 words. Answer in English.",
+      "t": 3
+    },
+    {
+      "type": "agent_start",
+      "agent": "free-2",
+      "role": "Voter 2",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Voter 2. Answer the question. Start with your single choice.\nYou are one of several voters who answer the same task, each on its own. Answer the whole task yourself, in your own words. Do not only make a plan or review other work: give the answer.\nKeep every reply under 300 words. Answer in English.",
+      "t": 13
+    },
+    {
+      "type": "agent_start",
+      "agent": "free-3",
+      "role": "Voter 3",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Voter 3. Answer the question. Start with your single choice.\nYou are one of several voters who answer the same task, each on its own. Answer the whole task yourself, in your own words. Do not only make a plan or review other work: give the answer.\nKeep every reply under 300 words. Answer in English.",
+      "t": 14
+    },
+    {
+      "type": "agent_start",
+      "agent": "free-4",
+      "role": "Voter 4",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Voter 4. Answer the question. Start with your single choice.\nYou are one of several voters who answer the same task, each on its own. Answer the whole task yourself, in your own words. Do not only make a plan or review other work: give the answer.\nKeep every reply under 300 words. Answer in English.",
+      "t": 15
+    },
+    {
+      "type": "agent_start",
+      "agent": "free-5",
+      "role": "Voter 5",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Voter 5. Answer the question. Start with your single choice.\nYou are one of several voters who answer the same task, each on its own. Answer the whole task yourself, in your own words. Do not only make a plan or review other work: give the answer.\nKeep every reply under 300 words. Answer in English.",
+      "t": 16
+    },
+    {
+      "type": "round",
+      "agent": "free-5",
+      "round": 1,
+      "ms": 715,
+      "stop": "end_turn",
+      "usage": {
+        "input": 136,
+        "output": 49
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Should a school ban phones in class? Answer yes or no and give one reason."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.\n\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMsZH7xqrYBNzUxtreJ6",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 136,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 49,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 731
+    },
+    {
+      "type": "agent_output",
+      "agent": "free-5",
+      "text": "Yes.\n\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.",
+      "tokens": {
+        "input": 136,
+        "output": 49
+      },
+      "t": 731
+    },
+    {
+      "type": "round",
+      "agent": "free",
+      "round": 1,
+      "ms": 732,
+      "stop": "end_turn",
+      "usage": {
+        "input": 136,
+        "output": 36
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Should a school ban phones in class? Answer yes or no and give one reason."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes. Phones distract students and reduce their focus during lessons, so limiting them in class helps learning."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMsZH4W2QJSwtnedHNjC",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 136,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 36,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 736
+    },
+    {
+      "type": "agent_output",
+      "agent": "free",
+      "text": "Yes. Phones distract students and reduce their focus during lessons, so limiting them in class helps learning.",
+      "tokens": {
+        "input": 136,
+        "output": 36
+      },
+      "t": 737
+    },
+    {
+      "type": "round",
+      "agent": "free-3",
+      "round": 1,
+      "ms": 732,
+      "stop": "end_turn",
+      "usage": {
+        "input": 136,
+        "output": 49
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Should a school ban phones in class? Answer yes or no and give one reason."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.\n\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMsZH8ijoB1HoH5tHYed",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 136,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 49,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 746
+    },
+    {
+      "type": "agent_output",
+      "agent": "free-3",
+      "text": "Yes.\n\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.",
+      "tokens": {
+        "input": 136,
+        "output": 49
+      },
+      "t": 746
+    },
+    {
+      "type": "round",
+      "agent": "free-2",
+      "round": 1,
+      "ms": 842,
+      "stop": "end_turn",
+      "usage": {
+        "input": 136,
+        "output": 55
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Should a school ban phones in class? Answer yes or no and give one reason."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.\n\nReason: Phones are a major source of distraction, and removing them from the classroom helps students stay focused on learning and interacting with their teachers and peers."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMsZH4zB7PY5DCnuhu34",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 136,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 55,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 855
+    },
+    {
+      "type": "agent_output",
+      "agent": "free-2",
+      "text": "Yes.\n\nReason: Phones are a major source of distraction, and removing them from the classroom helps students stay focused on learning and interacting with their teachers and peers.",
+      "tokens": {
+        "input": 136,
+        "output": 55
+      },
+      "t": 855
+    },
+    {
+      "type": "round",
+      "agent": "free-4",
+      "round": 1,
+      "ms": 848,
+      "stop": "end_turn",
+      "usage": {
+        "input": 136,
+        "output": 49
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Should a school ban phones in class? Answer yes or no and give one reason."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.\n\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMsZH4F3xe6TDpcnrf5B",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 136,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 49,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 863
+    },
+    {
+      "type": "agent_output",
+      "agent": "free-4",
+      "text": "Yes.\n\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.",
+      "tokens": {
+        "input": 136,
+        "output": 49
+      },
+      "t": 863
+    },
+    {
+      "type": "handoff",
+      "from": "free",
+      "to": "tally",
+      "note": "Yes. Phones distract students and reduce their focus during lessons, so limiting them in class helps learning.",
+      "t": 863
+    },
+    {
+      "type": "handoff",
+      "from": "free-2",
+      "to": "tally",
+      "note": "Yes.\n\nReason: Phones are a major source of distraction, and removing them from the classroom helps students stay focused on learning and interacting with their teachers and peers.",
+      "t": 863
+    },
+    {
+      "type": "handoff",
+      "from": "free-3",
+      "to": "tally",
+      "note": "Yes.\n\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.",
+      "t": 863
+    },
+    {
+      "type": "handoff",
+      "from": "free-4",
+      "to": "tally",
+      "note": "Yes.\n\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.",
+      "t": 863
+    },
+    {
+      "type": "handoff",
+      "from": "free-5",
+      "to": "tally",
+      "note": "Yes.\n\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.",
+      "t": 863
+    },
+    {
+      "type": "agent_start",
+      "agent": "tally",
+      "role": "Tally",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: tally\nYou are the Tally. Several voters answered the same task, each on its own. You read all the answers and find the answer most of them agree on. Two answers agree when they say the same thing, even in different words. You do not add your own answer to the vote. If no answers agree, give the answer that the largest group is closest to. The list agree must name at least one voter: the voters whose answer matches yours, or, if all answers differ, the voter whose answer you chose.\nReply with JSON only, in this form:\n{\"answer\":\"<the answer most voters agree on>\",\"agree\":[\"<id of each voter that agrees with it>\"],\"note\":\"<what the other voters said differently, or empty>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 863
+    },
+    {
+      "type": "round",
+      "agent": "tally",
+      "round": 1,
+      "ms": 772,
+      "stop": "end_turn",
+      "usage": {
+        "input": 1077,
+        "output": 139
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Should a school ban phones in class? Answer yes or no and give one reason.\n\nAnswers of the voters:\n--- free ---\nYes. Phones distract students and reduce their focus during lessons, so limiting them in class helps learning.\n\n--- free-2 ---\nYes.\n\nReason: Phones are a major source of distraction, and removing them from the classroom helps students stay focused on learning and interacting with their teachers and peers.\n\n--- free-3 ---\nYes.\n\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.\n\n--- free-4 ---\nYes.\n\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.\n\n--- free-5 ---\nYes.\n\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"answer\":\"Yes. Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.\",\"agree\":[\"free\",\"free-2\",\"free-3\",\"free-4\",\"free-5\"],\"note\":\"\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1,
+          "forced": true
+        },
+        "response": {
+          "id": "msg_011ChMsZLBXP1oWvyPSPQcGj",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 1077,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 139,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 1635
+    },
+    {
+      "type": "agent_output",
+      "agent": "tally",
+      "text": "{\"answer\":\"Yes. Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.\",\"agree\":[\"free\",\"free-2\",\"free-3\",\"free-4\",\"free-5\"],\"note\":\"\"}",
+      "tokens": {
+        "input": 1077,
+        "output": 139
+      },
+      "t": 1635
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 1757,
+        "output": 377,
+        "searches": 0,
+        "steps": 6
+      },
+      "finalText": "Yes. Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.",
+      "t": 1636
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "free-5",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Voter 5. Answer the question. Start with your single choice.\\nYou are one of several voters who answer the same task, each on its own. Answer the whole task yourself, in your own words. Do not only make a plan or review other work: give the answer.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Should a school ban phones in class? Answer yes or no and give one reason.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T13:59:12Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T13:59:13Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T13:59:12Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "12000000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T13:59:12Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 13:59:13 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMsZH7xqrYBNzUxtreJ6\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Yes.\\n\\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":136,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":49,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 713,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 731
+    },
+    {
+      "type": "api_call",
+      "agent": "free",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Voter 1. Answer the question. Start with your single choice.\\nYou are one of several voters who answer the same task, each on its own. Answer the whole task yourself, in your own words. Do not only make a plan or review other work: give the answer.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Should a school ban phones in class? Answer yes or no and give one reason.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T13:59:12Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T13:59:13Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12992",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T13:59:12Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "12000000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T13:59:12Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 13:59:13 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMsZH4W2QJSwtnedHNjC\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Yes. Phones distract students and reduce their focus during lessons, so limiting them in class helps learning.\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":136,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":36,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 731,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 736
+    },
+    {
+      "type": "api_call",
+      "agent": "free-3",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Voter 3. Answer the question. Start with your single choice.\\nYou are one of several voters who answer the same task, each on its own. Answer the whole task yourself, in your own words. Do not only make a plan or review other work: give the answer.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Should a school ban phones in class? Answer yes or no and give one reason.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T13:59:12Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T13:59:13Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12997",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T13:59:12Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "12000000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T13:59:12Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 13:59:13 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMsZH8ijoB1HoH5tHYed\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Yes.\\n\\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":136,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":49,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 732,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 746
+    },
+    {
+      "type": "api_call",
+      "agent": "free-2",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Voter 2. Answer the question. Start with your single choice.\\nYou are one of several voters who answer the same task, each on its own. Answer the whole task yourself, in your own words. Do not only make a plan or review other work: give the answer.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Should a school ban phones in class? Answer yes or no and give one reason.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T13:59:12Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T13:59:13Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12995",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T13:59:12Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "12000000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T13:59:12Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 13:59:13 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMsZH4zB7PY5DCnuhu34\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Yes.\\n\\nReason: Phones are a major source of distraction, and removing them from the classroom helps students stay focused on learning and interacting with their teachers and peers.\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":136,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":55,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 842,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 855
+    },
+    {
+      "type": "api_call",
+      "agent": "free-4",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Voter 4. Answer the question. Start with your single choice.\\nYou are one of several voters who answer the same task, each on its own. Answer the whole task yourself, in your own words. Do not only make a plan or review other work: give the answer.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Should a school ban phones in class? Answer yes or no and give one reason.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T13:59:12Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T13:59:13Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12992",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T13:59:12Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "12000000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T13:59:12Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 13:59:13 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMsZH4F3xe6TDpcnrf5B\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Yes.\\n\\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":136,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":49,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 848,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 863
+    },
+    {
+      "type": "api_call",
+      "agent": "tally",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: tally\\nYou are the Tally. Several voters answered the same task, each on its own. You read all the answers and find the answer most of them agree on. Two answers agree when they say the same thing, even in different words. You do not add your own answer to the vote. If no answers agree, give the answer that the largest group is closest to. The list agree must name at least one voter: the voters whose answer matches yours, or, if all answers differ, the voter whose answer you chose.\\nReply with JSON only, in this form:\\n{\\\"answer\\\":\\\"<the answer most voters agree on>\\\",\\\"agree\\\":[\\\"<id of each voter that agrees with it>\\\"],\\\"note\\\":\\\"<what the other voters said differently, or empty>\\\"}\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Should a school ban phones in class? Answer yes or no and give one reason.\\n\\nAnswers of the voters:\\n--- free ---\\nYes. Phones distract students and reduce their focus during lessons, so limiting them in class helps learning.\\n\\n--- free-2 ---\\nYes.\\n\\nReason: Phones are a major source of distraction, and removing them from the classroom helps students stay focused on learning and interacting with their teachers and peers.\\n\\n--- free-3 ---\\nYes.\\n\\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.\\n\\n--- free-4 ---\\nYes.\\n\\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.\\n\\n--- free-5 ---\\nYes.\\n\\nReason: Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.\"}],\"tools\":[{\"name\":\"reply\",\"description\":\"Give your reply in this shape.\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"answer\":{\"type\":\"string\"},\"agree\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"note\":{\"type\":\"string\"}},\"required\":[\"answer\",\"agree\"]}}],\"tool_choice\":{\"type\":\"tool\",\"name\":\"reply\"}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "9999000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T13:59:13Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T13:59:13Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T13:59:13Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11999000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T13:59:13Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 13:59:13 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMsZLBXP1oWvyPSPQcGj\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"toolu_01EvUAMR1kK1Q6fP4GPx6Vrc\",\"name\":\"reply\",\"input\":{\"answer\":\"Yes. Phones in class are a constant source of distraction, pulling students' attention away from lessons and reducing their learning and focus.\",\"agree\":[\"free\",\"free-2\",\"free-3\",\"free-4\",\"free-5\"],\"note\":\"\"},\"caller\":{\"type\":\"direct\"}}],\"container\":null,\"stop_reason\":\"tool_use\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":1077,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":139,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 771,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 1635
+    }
+  ],
+  "design": {
+    "pattern": "voting",
+    "nodes": [
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Voter 1",
+        "instructions": "Answer the question. Start with your single choice.",
+        "slot": "anthropic"
+      },
+      {
+        "id": "free-2",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Voter 2",
+        "instructions": "Answer the question. Start with your single choice.",
+        "slot": "anthropic"
+      },
+      {
+        "id": "free-3",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Voter 3",
+        "instructions": "Answer the question. Start with your single choice.",
+        "slot": "anthropic"
+      },
+      {
+        "id": "free-4",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Voter 4",
+        "instructions": "Answer the question. Start with your single choice.",
+        "slot": "anthropic"
+      },
+      {
+        "id": "free-5",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Voter 5",
+        "instructions": "Answer the question. Start with your single choice.",
+        "slot": "anthropic"
+      },
+      {
+        "id": "tally",
+        "agent": "tally",
+        "model": "fast",
+        "search": false,
+        "slot": "anthropic"
+      }
+    ],
+    "edges": [
+      {
+        "from": "free",
+        "to": "tally"
+      },
+      {
+        "from": "free-2",
+        "to": "tally"
+      },
+      {
+        "from": "free-3",
+        "to": "tally"
+      },
+      {
+        "from": "free-4",
+        "to": "tally"
+      },
+      {
+        "from": "free-5",
+        "to": "tally"
+      }
+    ]
+  },
+  "task": "Should a school ban phones in class? Answer yes or no and give one reason.",
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 100000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 1757,
+    "output": 377,
+    "searches": 0,
+    "steps": 6
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T13:59:11.950Z",
+  "endedAt": "2026-11-24T13:59:14.031Z",
+  "durationMs": 2081
+}

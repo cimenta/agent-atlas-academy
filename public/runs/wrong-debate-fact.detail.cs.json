@@ -1,0 +1,6 @@
+{
+  "about": "Stejná otázka, ale teď dva debatéři (jeden musí hájit ano, druhý ne) a soudce, dvě kola.",
+  "how": "Debatéři odpovídají střídavě, soudce přečte všechno a rozhodne.",
+  "learns": "Špatný vzor pro úkol: otázka s jedinou správnou odpovědí nemá druhou stranu. Debatér, který má hájit ne, to nedokáže poctivě, a běh stojí mnohonásobně víc: 3900 vstupních a 2200 výstupních tokenů místo 81 a 62.",
+  "watch": "Debatéra proti, který odmítne předstírat, a verdikt soudce. Porovnejte čísla ve Statistice s jedním agentem."
+}

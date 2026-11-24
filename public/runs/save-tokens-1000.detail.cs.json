@@ -1,0 +1,6 @@
+{
+  "about": "Stejný pisatel návodu a redaktor, ale každý agent smí v jedné odpovědi napsat jen 1000 tokenů.",
+  "how": "Nízký strop jedné odpovědi text při dosažení utne a běh přidá varování.",
+  "learns": "Nízký strop drží výstup krátký, a tedy levnější, ale text může skončit uprostřed: strop se musí hodit k úkolu.",
+  "watch": "Varování po každé odpovědi, že odpověď byla useknuta, a náhlý konec textu."
+}

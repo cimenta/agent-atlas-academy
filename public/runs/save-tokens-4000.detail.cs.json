@@ -1,0 +1,6 @@
+{
+  "about": "Pisatel návodu a redaktor připraví studijní návod pro nové studenty. Každý agent smí v jedné odpovědi napsat až 4000 tokenů. Oba běží na Anthropicu Fast.",
+  "how": "Řetěz dvou agentů s vysokým stropem délky jedné odpovědi.",
+  "learns": "S vysokým stropem agent text dopíše: dohromady asi 2300 výstupních tokenů a nic se neusekne.",
+  "watch": "Obě odpovědi končí celou větou a běh nemá žádné varování. Porovnejte s dvojčetem se stropem 1000."
+}

@@ -1,0 +1,6 @@
+{
+  "about": "The same task and the same three agents, but all on a free Groq model.",
+  "how": "A chain of three agents on one free provider.",
+  "learns": "The free provider costs nothing and is quicker here: 5.9 seconds, 1,220 input and 1,223 output tokens. The answers are shorter, so the quality differs, and a free account has limits.",
+  "watch": "The totals in Statistics against the twin: about a third of the time and a third of the output tokens, with no price."
+}

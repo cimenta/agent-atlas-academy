@@ -1,0 +1,49 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Is Canberra the capital of Australia? Answer yes or no and give one reason.",
+  "about": {
+    "en": {
+      "title": "What goes wrong: one agent for a simple question",
+      "author": "Agent Atlas Academy",
+      "description": "One agent answers a question with a single known answer.\n\n**What it teaches**\n\nFor a simple question one agent is enough: it is quick and cheap."
+    },
+    "cs": {
+      "title": "Co se pokazí: jeden agent na jednoduchou otázku",
+      "author": "Agent Atlas Academy",
+      "description": "Jeden agent odpoví na otázku s jedinou známou odpovědí.\n\n**Čemu se naučíte**\n\nNa jednoduchou otázku stačí jeden agent: je rychlý a levný."
+    }
+  },
+  "library": {
+    "level": 1,
+    "kind": "pair",
+    "twin": "wrong-debate-fact",
+    "paths": {
+      "wrong": 1
+    },
+    "tags": [
+      "basics",
+      "decision-making",
+      "cost"
+    ],
+    "teaches": {
+      "en": "For a simple question one agent is enough: it is quick and cheap.",
+      "cs": "Na jednoduchou otázku stačí jeden agent: je rychlý a levný."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "answerer",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Answerer",
+        "instructions": "Answer briefly and correctly."
+      }
+    ],
+    "edges": []
+  }
+}

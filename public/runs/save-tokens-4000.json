@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 1,
+  "id": "save-tokens-4000",
+  "title": "Write a detailed guide of about 1200 words for new students …",
+  "language": "en",
+  "pattern": "sequential",
+  "recordedWith": {
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "appVersion": "1.17.1-dev.0",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "Write a detailed guide of about 1200 words for new students on how to prepare for a test, with a worked example for every tip.",
+      "pattern": "sequential",
+      "design": {
+        "pattern": "sequential",
+        "nodes": [
+          {
+            "id": "free",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Guide writer",
+            "instructions": "Write the guide in full. Always write at least 1500 words and never shorten it.",
+            "slot": "anthropic",
+            "limits": {
+              "maxOutputTokens": 4000
+            }
+          },
+          {
+            "id": "free-2",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Editor",
+            "instructions": "Rewrite the guide in full and add a worked example to every tip. Always write at least 1500 words.",
+            "slot": "anthropic",
+            "limits": {
+              "maxOutputTokens": 4000
+            }
+          }
+        ],
+        "edges": [
+          {
+            "from": "free",
+            "to": "free-2"
+          }
+        ]
+      },
+      "t": 2
+    },
+    {
+      "type": "agent_start",
+      "agent": "free",
+      "role": "Guide writer",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Guide writer. Write the guide in full. Always write at least 1500 words and never shorten it.\nKeep every reply under 300 words. Answer in English.",
+      "t": 4
+    },
+    {
+      "type": "round",
+      "agent": "free",
+      "round": 1,
+      "ms": 5481,
+      "stop": "end_turn",
+      "usage": {
+        "input": 107,
+        "output": 955
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write a detailed guide of about 1200 words for new students on how to prepare for a test, with a worked example for every tip."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQSjg4KEAgUGAI4AUIIdGhpbmtpbmcSDLB2+rcGpCQV9+dFlRoMzVSPRNYBSFbo66H2IjAlIN69AAvrRrBd8p33nayZNy3mm6iQFEGfURCohnMCvbPcYjlVbIoIu+08TD2J+N8qqw3jBgfv3C8O61vEPSW3z3WJnFAjILX7TMvEUPPs4sotvcAjhqXNDdfPoyYfS7EviVWNlDNyI5JGtCVlyYqb/Ie/dYHkUjMFqIGfpj7iAuaQX6DF6rwJj6NLwzrXXqSFKUtNz/NGdw8c3/p6BjCmQ+1T0jbD8X59YA9QW+7RUc80P3Bn9FkcG1ixNsLZZqsLtkyT8PeTIU5pbcJ2eETGdjb73R6HtdnZolh5j1cQW5yBkX8o9YlNBWlfi41MgSj995sM2yNN0BmJ3ZOJBF4NPOIuzqebr5ckx/9PJGTyNeCu9sQ8KrHCq9n3hSbym5kcHtv7z4ktvBNhpc3oNVf4TP6Ziu/nXyDhx2JK2PGs5Agdw1i//rLRH9FQF+GIZnF1L/JF71BvxcU9WAsP1LPLVOj+UcM4iEn7PaDdjNHKDgIH7jUvybQJIaiAcbrviGvoVKYW9l17QP16zP4bDItNq5UZsSjnRxvovbzJXMEEqBKfWXbzKb/0EzgDLowXtd2fnpdhnx9//64rcGcg8prkL6BCyjhgYnGT0rn3TfayzCQlP1P2b8rc58gbHdtsuEpgbqyn9Wpw0+gz2k9clBh0IRywuZdAdM+FTXRVRUyHv+lAIxcxG0DK8YfnRZi66/nhf4EobwI8A3nlybkFAE9EXRB16J3iZlEUXsJ5C2ULc0aMlv118ygcDiMY8qiPslH1TpY9IzqGtrVifQm7OXZbnw1V2Z2cQprOqwbgg1rJsZSQm2vMIBF3wzo+tXLBOu5I0ytNGQV9dHyq7rcnjbi0pSSHYedsl0swP7aGwbep2nenzv1Y+50Q6ipUqqd9Bzt5v8l4sMsFFCAs+yUS+77J+ze6J4tqBHqz1SX/I8UndR8fyDr8NS4baDuEyePyBkZDjXmDVsQS624bVgC7zjq5fvAwZPV+sxUZAKgBFshuMdLtzQqoVq5xdggeigmpG1alAW4yjuYyAAvcHq+0AkIEjBV+9V2Uw8GoOomIquli5zY5zE25/LCm9/qARmzLPSFgXH6+4bEAVAnhjm4iAfuLEUE014CWVWXhRoBXON6sdBpMqlaGap26rH0yBrbrPk+mk82k+OAJbdoVsChx883GRaMmcNdMscesi69AHh7/3DrPvkJAQG6QC5DIHmq39sfk85yHeWhI8H0kUrXFp93Cdj5HlGE/qxd7jFobgLTljNyF+GSRurGZwfcNCoQMSUDQjB15qtX8GebfZVKVXM6PkCr+LvykIT1xudBY4mFgbYUS3Q4OwZjkWSZEAIxmhNT1I3UzPVNssqsulkf11JqAJv4s964fpofpYOqdBIAcplzdq9hj6edjQTFJKktUTQ8R0ooPLZBXoSYCb6HdmIMPrrenLkft3a4IOZdbFkj1MajrElR393FHe0hDBt8cD6pqYFFIsTsgYNWdyv9uaveCSjUDqdZaJF7t0quejHbMItAXGnA6MyrzoluCO3JrXxSt8OL/Ze6743m1vK4hkChHJ+Xxfw4jIfZXFvXkPeS7Ag8WYqJpWQMQQBWidAGq+fufetblhPNyB0P/y7OH7VzU5j1tv8Efd3p4ukbv96eliyQTja08KFxB/dz8hG2ROHt8eWurjF2p7NyStTbclngZttLEIlSO9j9dFxTRrQNPhiox6PfbJt0aOGSRVLQH3N303x8jSy4+1TxjpG1L/l0IAMEzXu2Vrlpan+GS1nDQMQgCLHtATzo8XDrbKlaWJDwi2hxMcRtXvaNN/5k7FimPU7qURQsZNXhtpFIDKI6+3Qonml0WUZPtLokV1VNLqh2/SYZY3G5+yHDfpMd1ighVU8ul8Nj+v1L+olZL8VZXZrysX+x8jba2GQb/G01apHYmcC/eQRZRhgUe9V0W9wcv5SC6maqSgjBaFCUb4v7FpWSD+p/ceYmOxI7pReqCJjQMXMly7WBX8h74PdcugP9xw2U5xu7xqlG+VWaNXOgZIEzqahKuWneMzg5u2Vn90sCPd9HM52pxijMAmcpGLVIGOQIV0iIqeN8QqlrXfJAOwBpKns1xKKqsKl6IhfrrBpj+NGpCaUxB0YTq/ez1ewkgsRNpwCDX9z2N4qU4YQdZLmUOyrXPKxs6dQLZppBxsEQTXYlmB2SXZbs+3YROmcsO/d75AL3085b6C9Ak47kNAG6SCS5PLYHp1FePkUjce0fXccFFt7qPbI6wtIcl5BmCJ6o3ACvKNuC/4A29zUzMhyLtUqmjRhv62gkcpy6JSXAcRfL8TEPySA8ycw/mPeUnbvj6roYkRutf5QTlxoAYAQ=="
+        },
+        {
+          "type": "text",
+          "text": "*Note: The length requirements conflict (at least 1,500 words versus under 300 per reply), so this guide stays under 300 words.*\n\n**How to Prepare for a Test: A Quick Guide for New Students**\n\n**1. Find out what the test covers.**\nCheck the syllabus and past papers to see topics and question types.\n*Example:* Your history test lists \"causes of World War I\" and \"Treaty of Versailles.\" You note that both will likely need short essays, so you plan to write two practice paragraphs.\n\n**2. Make a study schedule.**\nSpread your review over several days instead of cramming.\n*Example:* With a test in six days, you assign two topics per day: Monday covers chapters 1–2, Tuesday chapters 3–4, and so on, leaving Saturday for review.\n\n**3. Use active recall.**\nTest yourself rather than rereading notes.\n*Example:* After reading a biology section on photosynthesis, you close the book and write the equation from memory. You check your answer and correct any gaps.\n\n**4. Practice with real questions.**\nWork through past papers under timed conditions.\n*Example:* You set a 30-minute timer and answer ten algebra questions from last year's paper. You find you run out of time on word problems, so you practice those separately.\n\n**5. Review your mistakes.**\nTrack errors and revisit them.\n*Example:* You keep a list of wrong answers. After three chemistry quizzes, you see that you often mix up molarity and molality, so you write a one-line definition of each on a flashcard.\n\n**6. Rest before the test.**\nSleep well and avoid last-minute cramming.\n*Example:* The night before your exam, you do a 20-minute review of your flashcards, then go to bed at your usual time."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMqUnbtGuyuYBPfUqu8d",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 107,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 955,
+            "output_tokens_details": {
+              "thinking_tokens": 391
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 5485
+    },
+    {
+      "type": "agent_output",
+      "agent": "free",
+      "text": "*Note: The length requirements conflict (at least 1,500 words versus under 300 per reply), so this guide stays under 300 words.*\n\n**How to Prepare for a Test: A Quick Guide for New Students**\n\n**1. Find out what the test covers.**\nCheck the syllabus and past papers to see topics and question types.\n*Example:* Your history test lists \"causes of World War I\" and \"Treaty of Versailles.\" You note that both will likely need short essays, so you plan to write two practice paragraphs.\n\n**2. Make a study schedule.**\nSpread your review over several days instead of cramming.\n*Example:* With a test in six days, you assign two topics per day: Monday covers chapters 1–2, Tuesday chapters 3–4, and so on, leaving Saturday for review.\n\n**3. Use active recall.**\nTest yourself rather than rereading notes.\n*Example:* After reading a biology section on photosynthesis, you close the book and write the equation from memory. You check your answer and correct any gaps.\n\n**4. Practice with real questions.**\nWork through past papers under timed conditions.\n*Example:* You set a 30-minute timer and answer ten algebra questions from last year's paper. You find you run out of time on word problems, so you practice those separately.\n\n**5. Review your mistakes.**\nTrack errors and revisit them.\n*Example:* You keep a list of wrong answers. After three chemistry quizzes, you see that you often mix up molarity and molality, so you write a one-line definition of each on a flashcard.\n\n**6. Rest before the test.**\nSleep well and avoid last-minute cramming.\n*Example:* The night before your exam, you do a 20-minute review of your flashcards, then go to bed at your usual time.",
+      "tokens": {
+        "input": 107,
+        "output": 955
+      },
+      "t": 5486
+    },
+    {
+      "type": "handoff",
+      "from": "free",
+      "to": "free-2",
+      "note": "*Note: The length requirements conflict (at least 1,500 words versus under 300 per reply), so this guide stays under 300 words.*\n\n**How to Prepare for a Test: A Quick Guide for New Students**\n\n**1. Find out what the test covers.**\nCheck the syllabus and past papers to see topics and question types.\n*Example:* Your history test lists \"causes of World War I\" and \"Treaty of Versailles.\" You note that both will likely need short essays, so you plan to write two practice paragraphs.\n\n**2. Make a study schedule.**\nSpread your review over several days instead of cramming.\n*Example:* With a test in six days, you assign two topics per day: Monday covers chapters 1–2, Tuesday chapters 3–4, and so on, leaving Saturday for review.\n\n**3. Use active recall.**\nTest yourself rather than rereading notes.\n*Example:* After reading a biology section on photosynthesis, you close the book and write the equation from memory. You check your answer and correct any gaps.\n\n**4. Practice with real questions.**\nWork through past papers under timed conditions.\n*Example:* You set a 30-minute timer and answer ten algebra questions from last year's paper. You find you run out of time on word problems, so you practice those separately.\n\n**5. Review your mistakes.**\nTrack errors and revisit them.\n*Example:* You keep a list of wrong answers. After three chemistry quizzes, you see that you often mix up molarity and molality, so you write a one-line definition of each on a flashcard.\n\n**6. Rest before the test.**\nSleep well and avoid last-minute cramming.\n*Example:* The night before your exam, you do a 20-minute review of your flashcards, then go to bed at your usual time.",
+      "t": 5487
+    },
+    {
+      "type": "agent_start",
+      "agent": "free-2",
+      "role": "Editor",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Editor. Rewrite the guide in full and add a worked example to every tip. Always write at least 1500 words.\nKeep every reply under 300 words. Answer in English.",
+      "t": 5488
+    },
+    {
+      "type": "round",
+      "agent": "free-2",
+      "round": 1,
+      "ms": 5266,
+      "stop": "end_turn",
+      "usage": {
+        "input": 688,
+        "output": 1387
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write a detailed guide of about 1200 words for new students on how to prepare for a test, with a worked example for every tip.\n\nThe previous agent (free) wrote:\n*Note: The length requirements conflict (at least 1,500 words versus under 300 per reply), so this guide stays under 300 words.*\n\n**How to Prepare for a Test: A Quick Guide for New Students**\n\n**1. Find out what the test covers.**\nCheck the syllabus and past papers to see topics and question types.\n*Example:* Your history test lists \"causes of World War I\" and \"Treaty of Versailles.\" You note that both will likely need short essays, so you plan to write two practice paragraphs.\n\n**2. Make a study schedule.**\nSpread your review over several days instead of cramming.\n*Example:* With a test in six days, you assign two topics per day: Monday covers chapters 1–2, Tuesday chapters 3–4, and so on, leaving Saturday for review.\n\n**3. Use active recall.**\nTest yourself rather than rereading notes.\n*Example:* After reading a biology section on photosynthesis, you close the book and write the equation from memory. You check your answer and correct any gaps.\n\n**4. Practice with real questions.**\nWork through past papers under timed conditions.\n*Example:* You set a 30-minute timer and answer ten algebra questions from last year's paper. You find you run out of time on word problems, so you practice those separately.\n\n**5. Review your mistakes.**\nTrack errors and revisit them.\n*Example:* You keep a list of wrong answers. After three chemistry quizzes, you see that you often mix up molarity and molality, so you write a one-line definition of each on a flashcard.\n\n**6. Rest before the test.**\nSleep well and avoid last-minute cramming.\n*Example:* The night before your exam, you do a 20-minute review of your flashcards, then go to bed at your usual time."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "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"
+        },
+        {
+          "type": "text",
+          "text": "*Note: Your instructions ask for at least 1,500 words but also limit each reply to under 300 words. I've kept this reply under 300 words.*\n\n**How to Prepare for a Test: A Guide for New Students**\n\n**1. Learn what the test covers.** Check the syllabus and past papers for topics and question types.\n*Example:* Your history syllabus lists \"causes of World War I\" and \"Treaty of Versailles.\" You expect short essays, so you draft one practice paragraph for each.\n\n**2. Plan a study schedule.** Spread review across several days instead of cramming.\n*Example:* With six days until the test, Monday covers chapters 1–2, Tuesday covers chapters 3–4, and Saturday is reserved for review.\n\n**3. Use active recall.** Quiz yourself instead of rereading.\n*Example:* After reading about photosynthesis, you close the book and write the equation from memory. You check it and fix any gaps.\n\n**4. Practise with real questions.** Work through past papers under timed conditions.\n*Example:* You set a 30-minute timer and answer ten algebra questions from last year's paper. You run out of time on word problems, so you practise those separately.\n\n**5. Review your mistakes.** Keep a log of errors and revisit them.\n*Example:* After three chemistry quizzes, you notice you often confuse molarity and molality. You write a one-line definition of each on a flashcard.\n\n**6. Rest before the test.** Sleep well and avoid last-minute cramming.\n*Example:* The night before the exam, you spend 20 minutes on your flashcards, then go to bed at your usual time."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMqVBNrEQuVDFA2DxSLb",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 688,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 1387,
+            "output_tokens_details": {
+              "thinking_tokens": 858
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 10754
+    },
+    {
+      "type": "agent_output",
+      "agent": "free-2",
+      "text": "*Note: Your instructions ask for at least 1,500 words but also limit each reply to under 300 words. I've kept this reply under 300 words.*\n\n**How to Prepare for a Test: A Guide for New Students**\n\n**1. Learn what the test covers.** Check the syllabus and past papers for topics and question types.\n*Example:* Your history syllabus lists \"causes of World War I\" and \"Treaty of Versailles.\" You expect short essays, so you draft one practice paragraph for each.\n\n**2. Plan a study schedule.** Spread review across several days instead of cramming.\n*Example:* With six days until the test, Monday covers chapters 1–2, Tuesday covers chapters 3–4, and Saturday is reserved for review.\n\n**3. Use active recall.** Quiz yourself instead of rereading.\n*Example:* After reading about photosynthesis, you close the book and write the equation from memory. You check it and fix any gaps.\n\n**4. Practise with real questions.** Work through past papers under timed conditions.\n*Example:* You set a 30-minute timer and answer ten algebra questions from last year's paper. You run out of time on word problems, so you practise those separately.\n\n**5. Review your mistakes.** Keep a log of errors and revisit them.\n*Example:* After three chemistry quizzes, you notice you often confuse molarity and molality. You write a one-line definition of each on a flashcard.\n\n**6. Rest before the test.** Sleep well and avoid last-minute cramming.\n*Example:* The night before the exam, you spend 20 minutes on your flashcards, then go to bed at your usual time.",
+      "tokens": {
+        "input": 688,
+        "output": 1387
+      },
+      "t": 10754
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 795,
+        "output": 2342,
+        "searches": 0,
+        "steps": 2
+      },
+      "finalText": "*Note: Your instructions ask for at least 1,500 words but also limit each reply to under 300 words. I've kept this reply under 300 words.*\n\n**How to Prepare for a Test: A Guide for New Students**\n\n**1. Learn what the test covers.** Check the syllabus and past papers for topics and question types.\n*Example:* Your history syllabus lists \"causes of World War I\" and \"Treaty of Versailles.\" You expect short essays, so you draft one practice paragraph for each.\n\n**2. Plan a study schedule.** Spread review across several days instead of cramming.\n*Example:* With six days until the test, Monday covers chapters 1–2, Tuesday covers chapters 3–4, and Saturday is reserved for review.\n\n**3. Use active recall.** Quiz yourself instead of rereading.\n*Example:* After reading about photosynthesis, you close the book and write the equation from memory. You check it and fix any gaps.\n\n**4. Practise with real questions.** Work through past papers under timed conditions.\n*Example:* You set a 30-minute timer and answer ten algebra questions from last year's paper. You run out of time on word problems, so you practise those separately.\n\n**5. Review your mistakes.** Keep a log of errors and revisit them.\n*Example:* After three chemistry quizzes, you notice you often confuse molarity and molality. You write a one-line definition of each on a flashcard.\n\n**6. Rest before the test.** Sleep well and avoid last-minute cramming.\n*Example:* The night before the exam, you spend 20 minutes on your flashcards, then go to bed at your usual time.",
+      "t": 10755
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "free",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Guide writer. Write the guide in full. Always write at least 1500 words and never shorten it.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Write a detailed guide of about 1200 words for new students on how to prepare for a test, with a worked example for every tip.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T13:31:58Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "1999000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T13:32:03Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T13:31:58Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11999000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T13:31:58Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 13:32:03 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMqUnbtGuyuYBPfUqu8d\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"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\"},{\"type\":\"text\",\"text\":\"*Note: The length requirements conflict (at least 1,500 words versus under 300 per reply), so this guide stays under 300 words.*\\n\\n**How to Prepare for a Test: A Quick Guide for New Students**\\n\\n**1. Find out what the test covers.**\\nCheck the syllabus and past papers to see topics and question types.\\n*Example:* Your history test lists \\\"causes of World War I\\\" and \\\"Treaty of Versailles.\\\" You note that both will likely need short essays, so you plan to write two practice paragraphs.\\n\\n**2. Make a study schedule.**\\nSpread your review over several days instead of cramming.\\n*Example:* With a test in six days, you assign two topics per day: Monday covers chapters 1–2, Tuesday chapters 3–4, and so on, leaving Saturday for review.\\n\\n**3. Use active recall.**\\nTest yourself rather than rereading notes.\\n*Example:* After reading a biology section on photosynthesis, you close the book and write the equation from memory. You check your answer and correct any gaps.\\n\\n**4. Practice with real questions.**\\nWork through past papers under timed conditions.\\n*Example:* You set a 30-minute timer and answer ten algebra questions from last year's paper. You find you run out of time on word problems, so you practice those separately.\\n\\n**5. Review your mistakes.**\\nTrack errors and revisit them.\\n*Example:* You keep a list of wrong answers. After three chemistry quizzes, you see that you often mix up molarity and molality, so you write a one-line definition of each on a flashcard.\\n\\n**6. Rest before the test.**\\nSleep well and avoid last-minute cramming.\\n*Example:* The night before your exam, you do a 20-minute review of your flashcards, then go to bed at your usual time.\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":107,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":955,\"output_tokens_details\":{\"thinking_tokens\":391},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 5478,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 5485
+    },
+    {
+      "type": "api_call",
+      "agent": "free-2",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Editor. Rewrite the guide in full and add a worked example to every tip. Always write at least 1500 words.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Write a detailed guide of about 1200 words for new students on how to prepare for a test, with a worked example for every tip.\\n\\nThe previous agent (free) wrote:\\n*Note: The length requirements conflict (at least 1,500 words versus under 300 per reply), so this guide stays under 300 words.*\\n\\n**How to Prepare for a Test: A Quick Guide for New Students**\\n\\n**1. Find out what the test covers.**\\nCheck the syllabus and past papers to see topics and question types.\\n*Example:* Your history test lists \\\"causes of World War I\\\" and \\\"Treaty of Versailles.\\\" You note that both will likely need short essays, so you plan to write two practice paragraphs.\\n\\n**2. Make a study schedule.**\\nSpread your review over several days instead of cramming.\\n*Example:* With a test in six days, you assign two topics per day: Monday covers chapters 1–2, Tuesday chapters 3–4, and so on, leaving Saturday for review.\\n\\n**3. Use active recall.**\\nTest yourself rather than rereading notes.\\n*Example:* After reading a biology section on photosynthesis, you close the book and write the equation from memory. You check your answer and correct any gaps.\\n\\n**4. Practice with real questions.**\\nWork through past papers under timed conditions.\\n*Example:* You set a 30-minute timer and answer ten algebra questions from last year's paper. You find you run out of time on word problems, so you practice those separately.\\n\\n**5. Review your mistakes.**\\nTrack errors and revisit them.\\n*Example:* You keep a list of wrong answers. After three chemistry quizzes, you see that you often mix up molarity and molality, so you write a one-line definition of each on a flashcard.\\n\\n**6. Rest before the test.**\\nSleep well and avoid last-minute cramming.\\n*Example:* The night before your exam, you do a 20-minute review of your flashcards, then go to bed at your usual time.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T13:32:03Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "1999000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T13:32:08Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T13:32:03Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11999000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T13:32:03Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 13:32:08 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMqVBNrEQuVDFA2DxSLb\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"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\"},{\"type\":\"text\",\"text\":\"*Note: Your instructions ask for at least 1,500 words but also limit each reply to under 300 words. I've kept this reply under 300 words.*\\n\\n**How to Prepare for a Test: A Guide for New Students**\\n\\n**1. Learn what the test covers.** Check the syllabus and past papers for topics and question types.\\n*Example:* Your history syllabus lists \\\"causes of World War I\\\" and \\\"Treaty of Versailles.\\\" You expect short essays, so you draft one practice paragraph for each.\\n\\n**2. Plan a study schedule.** Spread review across several days instead of cramming.\\n*Example:* With six days until the test, Monday covers chapters 1–2, Tuesday covers chapters 3–4, and Saturday is reserved for review.\\n\\n**3. Use active recall.** Quiz yourself instead of rereading.\\n*Example:* After reading about photosynthesis, you close the book and write the equation from memory. You check it and fix any gaps.\\n\\n**4. Practise with real questions.** Work through past papers under timed conditions.\\n*Example:* You set a 30-minute timer and answer ten algebra questions from last year's paper. You run out of time on word problems, so you practise those separately.\\n\\n**5. Review your mistakes.** Keep a log of errors and revisit them.\\n*Example:* After three chemistry quizzes, you notice you often confuse molarity and molality. You write a one-line definition of each on a flashcard.\\n\\n**6. Rest before the test.** Sleep well and avoid last-minute cramming.\\n*Example:* The night before the exam, you spend 20 minutes on your flashcards, then go to bed at your usual time.\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":688,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":1387,\"output_tokens_details\":{\"thinking_tokens\":858},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 5265,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 10753
+    }
+  ],
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Guide writer",
+        "instructions": "Write the guide in full. Always write at least 1500 words and never shorten it.",
+        "slot": "anthropic",
+        "limits": {
+          "maxOutputTokens": 4000
+        }
+      },
+      {
+        "id": "free-2",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Editor",
+        "instructions": "Rewrite the guide in full and add a worked example to every tip. Always write at least 1500 words.",
+        "slot": "anthropic",
+        "limits": {
+          "maxOutputTokens": 4000
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "free",
+        "to": "free-2"
+      }
+    ]
+  },
+  "task": "Write a detailed guide of about 1200 words for new students on how to prepare for a test, with a worked example for every tip.",
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 100000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 795,
+    "output": 2342,
+    "searches": 0,
+    "steps": 2
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T13:31:57.224Z",
+  "endedAt": "2026-11-24T13:32:08.566Z",
+  "durationMs": 11342
+}

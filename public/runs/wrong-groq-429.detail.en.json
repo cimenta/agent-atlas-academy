@@ -1,0 +1,6 @@
+{
+  "about": "Eight agents on a free Groq account answer one after another about whether a town should ban cars from its centre. Each reads the answer before it and writes a long reply of its own.",
+  "how": "A chain of eight agents. All calls go to one free model, which allows only 8,000 tokens a minute, and the run needs about 13,000 tokens in all.",
+  "learns": "A free plan has a limit per minute. When the run passes it, the provider answers 429 (too many requests) and says how long to wait. The app waits 5 and then 11 seconds and tries again, so the run still finishes, only slower.",
+  "watch": "The two warnings that name Groq and a wait (5 s before the seventh agent, 11 s before the eighth), and the warnings that some answers were cut by the limit of 1000 tokens."
+}

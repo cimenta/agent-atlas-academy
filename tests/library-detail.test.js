@@ -22,10 +22,10 @@ const item = { id: "r1", title: "One task, two models", pattern: "sequential", s
 const detail = { about: "About text", how: "How text", learns: "Learns text", watch: "Watch text", articles: [{ slug: "choosing-a-model", title: "Choosing a model" }] };
 const make = (over = {}, dict = en) => libraryDetail({ doc, t: tOf(dict), item, run: { design: { pattern: "sequential", nodes: [{ id: "planner" }, { id: "writer" }], edges: [{ from: "planner", to: "writer" }] } }, source: "gallery", detail, facts, actions: [{ ui: "load", label: "Load", primary: true, onClick() {} }], ...over });
 
-test("the detail shows the title, the facts and the sections in the order of the mockup", () => {
+test("the detail shows the title, the facts and the sections in the order of the tabs: about, settings", () => {
   const text = make().text.replace(/\s+/g, " ");
-  const at = (s) => text.indexOf(s);
-  const names = ["What it is about", "How it works", "What the student learns", "What to watch for in the replay", "Settings", "Related articles"];
+  const at = (s) => text.lastIndexOf(s);
+  const names = ["What the student learns", "What it is about", "How it works", "What to watch for in the replay", "Related articles", "Settings"];
   assert.ok(at("One task, two models") >= 0);
   for (const s of names) assert.ok(at(s) >= 0, s);
   const order = names.map(at);
@@ -81,7 +81,7 @@ test("the detail texts exist in both languages, differ, and share their paramete
 
 test("only Load has words; the other buttons are icons with a name and a tooltip, and Delete comes last", () => {
   const actions = actionList({ source: "local", hasDefinition: true, canSubmit: true }).map((ui) => ({ ui, label: `L-${ui}`, primary: ui === "load", danger: ui === "delete", onClick() {} }));
-  const buttons = make({ actions }).find((e) => e.tag === "button");
+  const buttons = make({ actions }).find((e) => e.tag === "button" && e.attrs.role !== "tab");
   assert.equal(buttons.at(-1).attrs["data-ui"], "detail-delete");
   assert.ok(buttons.findIndex((b) => b.attrs["data-ui"] === "detail-edit-description") < buttons.length - 1);
   assert.ok(buttons[0].text.includes("L-load"));
@@ -100,4 +100,38 @@ test("the detail shows the tags of the run under the facts, each word in the col
   const row = view.find((e) => e.attrs["data-ui"] === "detail-tags");
   assert.equal(row.length, 1);
   assert.equal(make().find((e) => e.attrs["data-ui"] === "detail-tags").length, 0, "no row when the run has no tags");
+});
+
+test("the time of the run and its study time are chips before the tags, and a tab opens its pane only", () => {
+  const view = make({ item: { ...item, tags: ["basics"], studyMinutes: 7.4 }, facts: { ...facts, seconds: 63 } });
+  const meta = view.find((e) => e.attrs["data-ui"] === "detail-meta")[0];
+  assert.ok(meta, "one row for time and tags");
+  const kinds = meta.children.map((c) => c.attrs?.["data-ui"]);
+  assert.deepEqual(kinds, ["detail-time-run", "detail-time-study", "detail-tags"]);
+  assert.match(meta.text, /63 s/);
+  assert.match(meta.text, /about 7 min/);
+  const runChip = view.find((e) => e.attrs["data-ui"] === "detail-time-run")[0];
+  assert.equal(runChip.attrs.title, en["library.detail.runTime"]);
+  assert.match(make({ item, facts: { ...facts, seconds: 150 } }).text, /2 min 30 s/);
+  assert.equal(view.find((e) => e.attrs["data-ui"] === "detail-time-study").length, 1);
+  assert.equal(make({ facts: { ...facts, seconds: 0 } }).find((e) => String(e.attrs["data-ui"]).startsWith("detail-time-")).length, 0, "no time chip when nothing is known");
+});
+
+const isHidden = (p) => (p.hidden !== undefined ? p.hidden : p.attrs.hidden !== undefined);
+test("there are tabs About, Settings and, with a note, About the pattern (About this run for your own run); a click shows one pane", () => {
+  const panel = new El("section");
+  const lib = make({ aboutPanel: panel });
+  const tabs = lib.find((e) => e.attrs.role === "tab");
+  assert.deepEqual(tabs.map((e) => e.text), ["What it is about", "Settings", "About the pattern"]);
+  assert.deepEqual(tabs.map((e) => e.attrs["aria-selected"]), ["true", "false", "false"]);
+  const panes = lib.find((e) => e.attrs.role === "tabpanel");
+  assert.deepEqual(panes.map((p) => isHidden(p)), [false, true, true]);
+  assert.ok(panes[2].children.includes(panel), "the note is in the last pane");
+  tabs[2].listeners.click();
+  assert.deepEqual(panes.map((p) => isHidden(p)), [true, true, false]);
+  assert.deepEqual(tabs.map((e) => e.attrs["aria-selected"]), ["false", "false", "true"]);
+  const own = make({ source: "local", aboutPanel: panel }).find((e) => e.attrs.role === "tab");
+  assert.equal(own.at(-1).text, "About this run");
+  assert.deepEqual(make({}).find((e) => e.attrs.role === "tab").map((e) => e.text), ["What it is about", "Settings"]);
+  assert.match(make({ aboutPanel: panel }, cs).find((e) => e.attrs.role === "tab").map((e) => e.text).join("|"), /O čem to je|Nastavení|O vzoru/);
 });

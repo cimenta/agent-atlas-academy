@@ -1,0 +1,6 @@
+{
+  "about": "Jeden agent odpoví na otázku s jedinou známou odpovědí: je Canberra hlavní město Austrálie? Běží na Anthropicu Fast.",
+  "how": "Řetěz s jedním agentem. Běh má jeden krok.",
+  "learns": "Na jednoduchou otázku stačí jeden agent: tady to trvá asi 1 sekundu a dohromady 140 tokenů.",
+  "watch": "Velmi malá čísla ve Statistice: 81 vstupních tokenů, 62 výstupních, jeden krok. Porovnejte s debatou o téže otázce."
+}

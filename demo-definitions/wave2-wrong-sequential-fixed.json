@@ -1,0 +1,76 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Plan a school fair. First choose the date, then choose the stalls that suit that date, then set a budget for exactly those stalls. Give one plan.",
+  "about": {
+    "en": {
+      "title": "The fix: the same three steps, one after another",
+      "author": "Agent Atlas Academy",
+      "description": "The same planners in a chain: each reads what the one before decided.\n\n**What it teaches**\n\nThe right pattern for steps that depend on each other: a chain passes the result on, so the plan fits together."
+    },
+    "cs": {
+      "title": "Oprava: stejné tři kroky za sebou",
+      "author": "Agent Atlas Academy",
+      "description": "Stejní plánovači v řetězu: každý čte, co rozhodl ten před ním.\n\n**Čemu se naučíte**\n\nSprávný vzor pro kroky, které na sobě závisejí: řetěz předává výsledek dál, takže plán drží pohromadě."
+    }
+  },
+  "library": {
+    "level": 2,
+    "kind": "pair",
+    "twin": "wrong-parallel-dependent",
+    "paths": {
+      "wrong": 4
+    },
+    "tags": [
+      "prompt-chaining",
+      "planning",
+      "basics"
+    ],
+    "teaches": {
+      "en": "The right pattern for steps that depend on each other: a chain passes the result on, so the plan fits together.",
+      "cs": "Správný vzor pro kroky, které na sobě závisejí: řetěz předává výsledek dál, takže plán drží pohromadě."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "date",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Date planner",
+        "instructions": "Choose the date of the school fair and say why."
+      },
+      {
+        "id": "stalls",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Stall planner",
+        "instructions": "Choose the stalls for the school fair, based on the date that was chosen."
+      },
+      {
+        "id": "budget",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Budget planner",
+        "instructions": "Set a budget in euros for the stalls of the school fair."
+      }
+    ],
+    "edges": [
+      {
+        "from": "date",
+        "to": "stalls"
+      },
+      {
+        "from": "stalls",
+        "to": "budget"
+      }
+    ]
+  }
+}

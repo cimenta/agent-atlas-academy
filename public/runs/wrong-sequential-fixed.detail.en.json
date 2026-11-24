@@ -1,0 +1,6 @@
+{
+  "about": "The same three planners and the same task, but in a chain: each reads what the one before decided.",
+  "how": "The sequential pattern: date, then stalls, then budget.",
+  "learns": "The right pattern for steps that depend on each other: the chain passes the result on, so one date runs through the whole plan, and the run costs fewer tokens: 1,800 input and 3,500 output instead of 2,300 and 5,400.",
+  "watch": "The same date in all three answers (20 September) and the budget built on the chosen stalls."
+}

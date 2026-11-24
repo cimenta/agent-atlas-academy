@@ -1,0 +1,6 @@
+{
+  "about": "Stejné zadání a stejní tři agenti, ale všichni na bezplatném modelu Groq.",
+  "how": "Řetěz tří agentů u jednoho bezplatného poskytovatele.",
+  "learns": "Bezplatný poskytovatel nestojí nic a je tu rychlejší: 5,9 sekundy, 1220 vstupních a 1223 výstupních tokenů. Odpovědi jsou kratší, takže se liší kvalita, a bezplatný účet má limity.",
+  "watch": "Součty ve Statistice proti dvojčeti: asi třetina času a třetina výstupních tokenů, bez ceny."
+}

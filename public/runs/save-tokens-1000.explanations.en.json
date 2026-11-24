@@ -1,0 +1,6 @@
+{
+  "3": "The guide writer reaches the limit of 1000 tokens, and the run warns that the answer was cut.",
+  "4": "The cut guide is the answer; the rest of the text is lost.",
+  "8": "The editor is cut by the same limit, so the finished guide is shorter and incomplete.",
+  "10": "The run ends as finished, yet the guide is incomplete: a finished run is not always a whole answer."
+}

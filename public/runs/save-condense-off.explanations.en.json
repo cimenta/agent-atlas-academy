@@ -1,0 +1,7 @@
+{
+  "3": "The first debater opens round 1 with a short argument.",
+  "11": "The third debater has read both earlier answers; the input of each call grows.",
+  "27": "In round 3 every debater reads the arguments of two full rounds before it writes.",
+  "39": "The judge reads the whole debate and decides.",
+  "40": "The run ends after 10 steps with about 33,700 input tokens and 6,900 output tokens."
+}

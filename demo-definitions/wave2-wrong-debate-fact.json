@@ -1,0 +1,73 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Is Canberra the capital of Australia? Answer yes or no and give one reason.",
+  "about": {
+    "en": {
+      "title": "What goes wrong: a debate about a plain fact",
+      "author": "Agent Atlas Academy",
+      "description": "Two debaters and a judge argue about a question that has one correct answer.\n\n**What it teaches**\n\nThe wrong pattern for the task: a debate is for questions with two sides, and here it only repeats a known fact at many times the cost."
+    },
+    "cs": {
+      "title": "Co se pokazí: debata o prostém faktu",
+      "author": "Agent Atlas Academy",
+      "description": "Dva debatéři a soudce se přou o otázce, která má jedinou správnou odpověď.\n\n**Čemu se naučíte**\n\nŠpatný vzor pro úkol: debata je pro otázky se dvěma stranami, a tady jen mnohonásobně dráž opakuje známý fakt."
+    }
+  },
+  "library": {
+    "level": 1,
+    "kind": "pair",
+    "twin": "wrong-single",
+    "paths": {
+      "wrong": 2
+    },
+    "tags": [
+      "debate",
+      "decision-making",
+      "cost"
+    ],
+    "teaches": {
+      "en": "The wrong pattern for the task: a debate is for questions with two sides, and here it only repeats a known fact at many times the cost.",
+      "cs": "Špatný vzor pro úkol: debata je pro otázky se dvěma stranami, a tady jen mnohonásobně dráž opakuje známý fakt."
+    }
+  },
+  "design": {
+    "pattern": "debate",
+    "nodes": [
+      {
+        "id": "debater",
+        "agent": "debater",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "stance": "for"
+      },
+      {
+        "id": "debater-2",
+        "agent": "debater",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "stance": "against"
+      },
+      {
+        "id": "judge",
+        "agent": "judge",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "debater",
+        "to": "judge"
+      },
+      {
+        "from": "debater-2",
+        "to": "judge"
+      }
+    ],
+    "rounds": 2
+  }
+}

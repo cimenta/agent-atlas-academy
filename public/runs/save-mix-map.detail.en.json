@@ -1,0 +1,6 @@
+{
+  "about": "Six study-advice sentences (maths, history, biology, art, music, geography) are written by six workers, and a reducer joins them. The splitter and the reducer run on Anthropic Fast, the six workers on a free Groq model.",
+  "how": "The map-reduce pattern with a different provider on each part: the splitter makes six small tasks, six workers write one sentence each, and the reducer joins the sentences into one list.",
+  "learns": "Each agent can have its own provider. The many small calls go to a free model and cost nothing, and the paid model does only the two steps that need care: the split and the final list. The whole run needs 8 steps and about 3,100 tokens.",
+  "watch": "The provider named on each agent (Anthropic for the splitter and the reducer, Groq for the workers) and the table by provider in Statistics."
+}

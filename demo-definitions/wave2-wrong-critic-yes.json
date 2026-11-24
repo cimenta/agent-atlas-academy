@@ -1,0 +1,59 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write two sentences that explain why the sky is blue.",
+  "about": {
+    "en": {
+      "title": "What goes wrong: a reviewer who only praises",
+      "author": "Agent Atlas Academy",
+      "description": "A writer and a reviewer that is told to be encouraging and to say the text is great.\n\n**What it teaches**\n\nA reviewer that praises everything adds a step and a cost, but no quality: the instruction decides what it can find."
+    },
+    "cs": {
+      "title": "Co se pokazí: recenzent, který jen chválí",
+      "author": "Agent Atlas Academy",
+      "description": "Pisatel a recenzent, kterému je řečeno, aby povzbuzoval a říkal, že text je skvělý.\n\n**Čemu se naučíte**\n\nRecenzent, který všechno chválí, přidá krok a cenu, ale ne kvalitu: instrukce rozhoduje, co může najít."
+    }
+  },
+  "library": {
+    "level": 2,
+    "paths": {
+      "wrong": 7
+    },
+    "tags": [
+      "decision-making",
+      "disagreement",
+      "explaining"
+    ],
+    "teaches": {
+      "en": "A reviewer that praises everything adds a step and a cost, but no quality: the instruction decides what it can find.",
+      "cs": "Recenzent, který všechno chválí, přidá krok a cenu, ale ne kvalitu: instrukce rozhoduje, co může najít."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "reviewer",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Reviewer",
+        "instructions": "Be encouraging. Always say the text is great and needs no changes."
+      }
+    ],
+    "edges": [
+      {
+        "from": "writer",
+        "to": "reviewer"
+      }
+    ]
+  }
+}

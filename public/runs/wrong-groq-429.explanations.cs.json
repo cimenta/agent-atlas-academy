@@ -1,0 +1,7 @@
+{
+  "3": "První agent odpoví jako historik. Každý další přidá svůj pohled a čte celý text před sebou.",
+  "7": "Odpověď utne limit 1000 tokenů na jednu odpověď. Běh jen varuje a pokračuje.",
+  "28": "Groq říká, že je dosažen limit tokenů za minutu, a žádá aplikaci o čekání 5 sekund. Aplikace počká a sedmého agenta zkusí znovu.",
+  "33": "Totéž se stane před osmým agentem, teď s čekáním 11 sekund: vstup vyrostl, takže limit přijde dřív.",
+  "37": "Běh končí jako hotovo, s asi 6600 vstupními a 6500 výstupními tokeny. Limit stál čekání, ne odpověď."
+}

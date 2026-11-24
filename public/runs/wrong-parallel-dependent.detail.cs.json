@@ -1,0 +1,6 @@
+{
+  "about": "Tři plánovači (datum, stánky, rozpočet) plánují školní slavnost vedle sebe a slučovač jejich plány spojí. Jenže stánky závisejí na datu a rozpočet na stáncích.",
+  "how": "Souběžný vzor: všichni tři začnou naráz a nikdo nevidí, co píšou ostatní.",
+  "learns": "Špatný vzor: agenti pracující vedle sebe na sebe nemohou navázat, takže si každý vymyslí vlastní datum. Slučovač musí spojit části, které k sobě nesedí.",
+  "watch": "Tři plány s různými daty (14. června, 16. května, 14. června) a poznámku slučovače, že se agenti neshodují."
+}

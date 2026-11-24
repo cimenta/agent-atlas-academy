@@ -1,0 +1,7 @@
+{
+  "3": "The splitter, on Anthropic, cuts the task into six small tasks, one for each subject.",
+  "17": "The first worker, on the free Groq model, writes one sentence of advice for maths.",
+  "27": "The sixth worker finishes. The app spaces the calls to a free account, so the six answers arrive over about 11 seconds.",
+  "36": "The reducer, on Anthropic again, joins the six sentences into one list under a heading.",
+  "37": "The run ends after 8 steps with about 2,200 input and 1,000 output tokens, and the paid part is only the first and the last step."
+}

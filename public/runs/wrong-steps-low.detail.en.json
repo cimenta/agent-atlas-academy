@@ -1,0 +1,6 @@
+{
+  "about": "A supervisor sends a researcher, a writer, a critic and a treasurer to prepare a one-page plan for a bake sale, but the whole run may take only 3 steps.",
+  "how": "Every agent call is a step. The supervisor itself uses steps to decide, so the helpers run out of them.",
+  "learns": "A limit that is too low stops the work half way: the run ends as stopped by a limit, with no plan, and the warning tells which limit was reached.",
+  "watch": "The warning near the end that names the limit of steps, the writer that started but never finished, and the empty final answer."
+}

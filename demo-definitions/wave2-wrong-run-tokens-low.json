@@ -1,0 +1,111 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "A town wants to plan a new public library. Give a full report.",
+  "about": {
+    "en": {
+      "title": "What goes wrong: a token limit that is too low",
+      "author": "Agent Atlas Academy",
+      "description": "Five agents and a combiner write a report, but the whole run may use only 3,000 tokens.\n\n**What it teaches**\n\nA limit on all tokens of a run stops it when the agents have used them up, even if the last one never ran: the report is missing."
+    },
+    "cs": {
+      "title": "Co se pokazí: příliš nízký limit tokenů",
+      "author": "Agent Atlas Academy",
+      "description": "Pět agentů a slučovač píšou zprávu, ale celý běh smí použít jen 3000 tokenů.\n\n**Čemu se naučíte**\n\nLimit tokenů celého běhu ho zastaví, když je agenti spotřebují, i když poslední vůbec neběžel: zpráva chybí."
+    }
+  },
+  "library": {
+    "level": 3,
+    "paths": {
+      "wrong": 10
+    },
+    "tags": [
+      "parallel-work",
+      "risk-analysis",
+      "cost"
+    ],
+    "teaches": {
+      "en": "A limit on all tokens of a run stops it when the agents have used them up, even if the last one never ran: the report is missing.",
+      "cs": "Limit tokenů celého běhu ho zastaví, když je agenti spotřebují, i když poslední vůbec neběžel: zpráva chybí."
+    }
+  },
+  "design": {
+    "pattern": "parallel",
+    "nodes": [
+      {
+        "id": "w1",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Architect",
+        "instructions": "Answer as an architect. Write about 300 words."
+      },
+      {
+        "id": "w2",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Librarian",
+        "instructions": "Answer as a librarian. Write about 300 words."
+      },
+      {
+        "id": "w3",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Teacher",
+        "instructions": "Answer as a teacher. Write about 300 words."
+      },
+      {
+        "id": "w4",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Accountant",
+        "instructions": "Answer as an accountant. Write about 300 words."
+      },
+      {
+        "id": "w5",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Neighbour",
+        "instructions": "Answer as a neighbour. Write about 300 words."
+      },
+      {
+        "id": "combiner",
+        "agent": "combiner",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "w1",
+        "to": "combiner"
+      },
+      {
+        "from": "w2",
+        "to": "combiner"
+      },
+      {
+        "from": "w3",
+        "to": "combiner"
+      },
+      {
+        "from": "w4",
+        "to": "combiner"
+      },
+      {
+        "from": "w5",
+        "to": "combiner"
+      }
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Explain to a ten-year-old why the moon has phases, then check the text for mistakes.",
+  "about": {
+    "en": {
+      "title": "Cost: the same task on a paid provider",
+      "author": "Agent Atlas Academy",
+      "description": "Research, writing and a check, all on Anthropic Fast.\n\n**What it teaches**\n\nThe paid provider is fast and reliable, and every call has a price."
+    },
+    "cs": {
+      "title": "Cena: stejné zadání u placeného poskytovatele",
+      "author": "Agent Atlas Academy",
+      "description": "Rešerše, psaní a kontrola, vše na Anthropicu Fast.\n\n**Čemu se naučíte**\n\nPlacený poskytovatel je rychlý a spolehlivý a každé volání má cenu."
+    }
+  },
+  "library": {
+    "level": 2,
+    "kind": "pair",
+    "twin": "save-provider-groq",
+    "paths": {
+      "save": 12
+    },
+    "tags": [
+      "cost",
+      "speed",
+      "basics"
+    ],
+    "teaches": {
+      "en": "The same task on a paid provider is fast and every call has a price.",
+      "cs": "Stejné zadání u placeného poskytovatele je rychlé a každé volání má cenu."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "researcher",
+        "to": "writer"
+      },
+      {
+        "from": "writer",
+        "to": "critic"
+      }
+    ]
+  }
+}

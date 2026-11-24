@@ -1,0 +1,6 @@
+{
+  "about": "Tři debatéři (pro, proti, volný) se tři kola přou, zda má školní den začínat později, a soudce rozhodne. Každý agent dostane všechen dosud napsaný text.",
+  "how": "V každém kole čtou debatéři celou historii debaty, takže vstup každého volání roste. Běh má 10 kroků a asi 33 700 vstupních tokenů.",
+  "learns": "V dlouhé debatě nese každé kolo všechen dřívější text, takže vstup roste kolo od kola a s ním cena.",
+  "watch": "Vstup běhu ve Statistice a porovnejte ho s dvojčetem, které vstup zhutňuje."
+}

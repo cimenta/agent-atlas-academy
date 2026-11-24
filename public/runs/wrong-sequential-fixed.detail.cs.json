@@ -1,0 +1,6 @@
+{
+  "about": "Stejní tři plánovači a stejné zadání, ale v řetězu: každý čte, co rozhodl ten před ním.",
+  "how": "Sekvenční vzor: datum, pak stánky, pak rozpočet.",
+  "learns": "Správný vzor pro kroky, které na sobě závisejí: řetěz předává výsledek dál, takže jedno datum prochází celým plánem, a běh stojí méně tokenů: 1800 vstupních a 3500 výstupních místo 2300 a 5400.",
+  "watch": "Stejné datum ve všech třech odpovědích (20. září) a rozpočet postavený na zvolených stáncích."
+}

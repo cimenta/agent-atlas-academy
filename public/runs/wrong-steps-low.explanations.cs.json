@@ -1,0 +1,7 @@
+{
+  "3": "Supervizor se rozhodne zavolat výzkumníka. To už stojí jeden krok.",
+  "7": "Výzkumník odpoví.",
+  "11": "Supervizor se rozhodne znovu, spotřebuje další krok, a zavolá pisatele.",
+  "14": "Limit 3 kroků na běh je dosažen právě ve chvíli, kdy pisatel začíná: běh je zastaven dřív, než skončí.",
+  "15": "Běh končí jako zastavený limitem a nemá co předat. S agenty nebylo nic špatně: limit byl pro tento návrh příliš nízký."
+}

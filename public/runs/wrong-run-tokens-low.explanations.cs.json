@@ -1,0 +1,6 @@
+{
+  "7": "První odpověď je hotová: asi 780 tokenů, čtvrtina limitu.",
+  "11": "Tři odpovědi jsou hotové: asi 2400 tokenů, blízko limitu.",
+  "13": "Limit 3000 tokenů na běh je dosažen, při započítání čtvrté odpovědi.",
+  "14": "Běh končí jako zastavený limitem: slučovač nikdy nezačal, takže části nic nespojí. Limit chrání rozpočet, ale takto nízký dělá běh zbytečným."
+}

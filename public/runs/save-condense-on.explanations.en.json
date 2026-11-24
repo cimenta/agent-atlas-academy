@@ -1,0 +1,7 @@
+{
+  "10": "The third debater has a long input, so it is condensed first: a summary of about 1,100 characters.",
+  "15": "In round 2 the first debater reads a summary of the debate instead of the whole text.",
+  "30": "In round 3 the summaries are shorter still, but every one is an extra call.",
+  "45": "The judge also condenses before it decides.",
+  "48": "The run ends after 18 steps: the input is about 11 percent smaller, but the extra calls add output tokens and time."
+}

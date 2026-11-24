@@ -1,0 +1,6 @@
+{
+  "about": "Stejné zadání a stejní tři agenti, ale všichni na bezplatném modelu Cloudflare Workers AI.",
+  "how": "Řetěz tří agentů u jednoho bezplatného poskytovatele, třetí poskytovatel téhož zadání.",
+  "learns": "Stejný úkol tu trval 63 sekund, proti 18 sekundám na Anthropicu a 6 sekundám na Groq, s 812 vstupními a 3467 výstupními tokeny. Rychlost patří poskytovateli, ne jen modelu, a bezplatný plán neznamená rychlý.",
+  "watch": "Čas běhu ve Statistice proti dvojčatům na Anthropicu a Groq a jak dlouho pracuje každý agent."
+}

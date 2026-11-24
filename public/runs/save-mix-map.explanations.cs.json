@@ -1,0 +1,7 @@
+{
+  "3": "Rozdělovač na Anthropicu rozdělí úkol na šest malých úkolů, po jednom na předmět.",
+  "17": "První pracovník na bezplatném modelu Groq napíše jednu větu rady pro matematiku.",
+  "27": "Šestý pracovník skončí. Aplikace volání na bezplatný účet rozkládá, takže šest odpovědí přijde během asi 11 sekund.",
+  "36": "Slučovač, znovu na Anthropicu, spojí šest vět do jednoho seznamu s nadpisem.",
+  "37": "Běh končí po 8 krocích s asi 2200 vstupními a 1000 výstupními tokeny a placený je jen první a poslední krok."
+}

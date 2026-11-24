@@ -1,0 +1,7 @@
+{
+  "5": "One planner makes a full plan with 14 June and its own stalls and budgets.",
+  "7": "Another chooses 16 May: it did not see the other plans.",
+  "9": "The third also chooses 14 June, for its own reasons.",
+  "15": "The combiner has to pick: it notes that two agents chose June and one May, and merges stalls that appeared in two plans. The date was never really decided by anyone.",
+  "16": "The run ends as finished, but the plan was stitched together, not built step by step."
+}

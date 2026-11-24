@@ -1,0 +1,6 @@
+{
+  "about": "A guide writer and an editor prepare a study guide for new students. Each agent may write up to 4000 tokens in one reply. Both run on Anthropic Fast.",
+  "how": "A chain of two agents with a high limit on the length of one reply.",
+  "learns": "With a high limit the agent finishes its text: about 2,300 output tokens in all, and nothing is cut.",
+  "watch": "The two answers end with a complete sentence and the run has no warning. Compare with the twin that has a limit of 1000."
+}

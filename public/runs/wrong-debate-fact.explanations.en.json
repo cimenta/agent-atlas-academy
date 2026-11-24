@@ -1,0 +1,7 @@
+{
+  "3": "The first debater answers yes, as the single agent did.",
+  "7": "The debater that must argue against says it cannot honestly argue that Canberra is not the capital.",
+  "15": "In round 2 it still cannot find an argument: there is no second side to this question.",
+  "19": "The judge declares the debater that argued for the stronger one, although both agree.",
+  "20": "The run ends after 5 steps with about 3,900 input and 2,200 output tokens: the same answer at about 40 times the tokens."
+}

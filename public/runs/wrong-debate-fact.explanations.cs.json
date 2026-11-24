@@ -1,0 +1,7 @@
+{
+  "3": "První debatér odpoví ano, stejně jako jediný agent.",
+  "7": "Debatér, který má hájit ne, říká, že nemůže poctivě tvrdit, že Canberra není hlavní město.",
+  "15": "Ve 2. kole pořád nenajde argument: tahle otázka nemá druhou stranu.",
+  "19": "Soudce prohlásí za silnějšího debatéra, který hájil ano, ačkoli se oba shodují.",
+  "20": "Běh končí po 5 krocích s asi 3900 vstupními a 2200 výstupními tokeny: tatáž odpověď asi za 40násobek tokenů."
+}

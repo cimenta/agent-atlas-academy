@@ -1,0 +1,6 @@
+{
+  "about": "Pět agentů na modelu Fast (architekt, knihovnice, učitel, účetní, soused) píše o nové městské knihovně a slučovač má odpovědi spojit, ale celý běh smí použít jen 3000 tokenů.",
+  "how": "Pětice běží vedle sebe. Tokeny všech volání se sčítají; když součet překročí limit, běh se zastaví.",
+  "learns": "Limit tokenů celého běhu ho zastaví, když je agenti spotřebují: tady slučovač nikdy neběžel, takže není zpráva, jen tři hotové části z pěti.",
+  "watch": "Varování, které jmenuje limit tokenů, agenty, kteří nedokončili, a prázdnou konečnou odpověď."
+}

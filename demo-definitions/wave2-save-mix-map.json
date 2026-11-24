@@ -1,0 +1,68 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write one sentence of study advice for each of these subjects: maths, history, biology, art, music, geography.",
+  "about": {
+    "en": {
+      "title": "Cost: free workers, a paid model only where it matters",
+      "author": "Agent Atlas Academy",
+      "description": "A splitter and a reducer on Anthropic, the workers on a free Groq account.\n\n**What it teaches**\n\nMixing providers in one run: the many small worker calls cost nothing, the paid model does only the two steps that need care."
+    },
+    "cs": {
+      "title": "Cena: zdarma pracovníci, placený model jen tam, kde záleží",
+      "author": "Agent Atlas Academy",
+      "description": "Rozdělovač a slučovač na Anthropicu, pracovníci na bezplatném účtu Groq.\n\n**Čemu se naučíte**\n\nMíchání poskytovatelů v jednom běhu: mnoho malých volání pracovníků nestojí nic, placený model dělá jen dva kroky, které vyžadují péči."
+    }
+  },
+  "library": {
+    "level": 3,
+    "paths": {
+      "save": 9
+    },
+    "tags": [
+      "parallel-work",
+      "combining-answers",
+      "cost"
+    ],
+    "teaches": {
+      "en": "Each agent can use its own provider: free workers do the many small calls and a paid model does only the two steps that need care.",
+      "cs": "Každý agent může mít vlastního poskytovatele: zdarma pracovníci dělají mnoho malých volání a placený model jen dva kroky, které vyžadují péči."
+    }
+  },
+  "design": {
+    "pattern": "mapreduce",
+    "nodes": [
+      {
+        "id": "splitter",
+        "agent": "splitter",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "worker",
+        "agent": "worker",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false
+      },
+      {
+        "id": "reducer",
+        "agent": "reducer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "splitter",
+        "to": "worker"
+      },
+      {
+        "from": "worker",
+        "to": "reducer"
+      }
+    ]
+  }
+}

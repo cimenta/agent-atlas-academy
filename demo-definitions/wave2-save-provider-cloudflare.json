@@ -1,0 +1,68 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Explain to a ten-year-old why the moon has phases, then check the text for mistakes.",
+  "about": {
+    "en": {
+      "title": "Cost: the same task on a free Cloudflare model",
+      "author": "Agent Atlas Academy",
+      "description": "The same three steps, all on a free Cloudflare model.\n\n**What it teaches**\n\nProviders differ in speed: compare the time with the twins on Anthropic and Groq."
+    },
+    "cs": {
+      "title": "Cena: stejné zadání na bezplatném modelu Cloudflare",
+      "author": "Agent Atlas Academy",
+      "description": "Stejné tři kroky, vše na bezplatném modelu Cloudflare.\n\n**Čemu se naučíte**\n\nPoskytovatelé se liší rychlostí: porovnejte čas s dvojčaty na Anthropicu a Groq."
+    }
+  },
+  "library": {
+    "level": 2,
+    "paths": {
+      "save": 14
+    },
+    "tags": [
+      "cost",
+      "speed",
+      "basics"
+    ],
+    "teaches": {
+      "en": "The same task takes seconds on one provider and much longer on another: speed is a property of the provider, not only of the model.",
+      "cs": "Stejný úkol trvá na jednom poskytovateli sekundy a na jiném mnohem déle: rychlost je vlastnost poskytovatele, ne jen modelu."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "slot": "cloudflare-free",
+        "search": false
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "cloudflare-free",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "fast",
+        "slot": "cloudflare-free",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "researcher",
+        "to": "writer"
+      },
+      {
+        "from": "writer",
+        "to": "critic"
+      }
+    ]
+  }
+}

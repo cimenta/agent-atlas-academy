@@ -1,0 +1,6 @@
+{
+  "about": "Osm agentů na bezplatném účtu Groq odpovídá za sebou na otázku, zda má město zakázat auta v centru. Každý čte odpověď toho před sebou a píše vlastní dlouhou odpověď.",
+  "how": "Řetěz osmi agentů. Všechna volání jdou na jeden bezplatný model, který dovolí jen 8000 tokenů za minutu, a běh jich potřebuje dohromady asi 13 000.",
+  "learns": "Bezplatný plán má limit za minutu. Když ho běh překročí, poskytovatel odpoví 429 (příliš mnoho požadavků) a řekne, jak dlouho čekat. Aplikace počká 5 a pak 11 sekund a zkusí to znovu, takže běh přesto doběhne, jen pomaleji.",
+  "watch": "Dvě varování, která jmenují Groq a čekání (5 s před sedmým agentem, 11 s před osmým), a varování, že některé odpovědi utnul limit 1000 tokenů."
+}

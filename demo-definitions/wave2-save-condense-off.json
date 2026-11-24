@@ -1,0 +1,84 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Should a school day start later in the morning?",
+  "about": {
+    "en": {
+      "title": "Cost: a three-round debate, input as it is",
+      "author": "Agent Atlas Academy",
+      "description": "Each round the debaters get everything written so far.\n\n**What it teaches**\n\nIn a long debate every round carries all the earlier text, so the input grows and the cost with it."
+    },
+    "cs": {
+      "title": "Cena: tříkolová debata, vstup beze změny",
+      "author": "Agent Atlas Academy",
+      "description": "V každém kole dostanou debatéři všechno, co bylo napsáno.\n\n**Čemu se naučíte**\n\nV dlouhé debatě nese každé kolo všechen dřívější text, takže vstup roste a s ním cena."
+    }
+  },
+  "library": {
+    "level": 3,
+    "kind": "pair",
+    "twin": "save-condense-on",
+    "paths": {
+      "save": 10
+    },
+    "tags": [
+      "cost",
+      "debate",
+      "speed"
+    ],
+    "teaches": {
+      "en": "In a long debate every round carries all the earlier text, so the input grows and the cost with it.",
+      "cs": "V dlouhé debatě nese každé kolo všechen dřívější text, takže vstup roste a s ním cena."
+    }
+  },
+  "design": {
+    "pattern": "debate",
+    "nodes": [
+      {
+        "id": "debater",
+        "agent": "debater",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "stance": "for"
+      },
+      {
+        "id": "debater-2",
+        "agent": "debater",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "stance": "against"
+      },
+      {
+        "id": "debater-3",
+        "agent": "debater",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "judge",
+        "agent": "judge",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "debater",
+        "to": "judge"
+      },
+      {
+        "from": "debater-2",
+        "to": "judge"
+      },
+      {
+        "from": "debater-3",
+        "to": "judge"
+      }
+    ],
+    "rounds": 3
+  }
+}

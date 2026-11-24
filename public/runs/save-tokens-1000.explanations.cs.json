@@ -1,0 +1,6 @@
+{
+  "3": "Pisatel návodu dosáhne stropu 1000 tokenů a běh varuje, že odpověď byla useknuta.",
+  "4": "Useknutý návod je odpovědí; zbytek textu je ztracen.",
+  "8": "Redaktora utne stejný strop, takže hotový návod je kratší a neúplný.",
+  "10": "Běh končí jako hotovo, přesto je návod neúplný: hotový běh není vždy celá odpověď."
+}

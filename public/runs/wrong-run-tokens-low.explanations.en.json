@@ -1,0 +1,6 @@
+{
+  "7": "The first answer is in: about 780 tokens, a quarter of the limit.",
+  "11": "Three answers are in: about 2,400 tokens, close to the limit.",
+  "13": "The limit of 3,000 tokens per run is reached as the fourth answer is counted.",
+  "14": "The run ends as stopped by a limit: the combiner never started, so nothing joins the parts. The limit protects the budget, but a limit this low makes the run useless."
+}

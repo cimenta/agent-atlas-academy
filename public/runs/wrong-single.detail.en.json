@@ -1,0 +1,6 @@
+{
+  "about": "One agent answers a question with a single known answer: is Canberra the capital of Australia? It runs on Anthropic Fast.",
+  "how": "A chain of one agent. The run has one step.",
+  "learns": "For a simple question one agent is enough: here it takes about 1 second and 140 tokens in all.",
+  "watch": "The very small numbers in Statistics: 81 input tokens, 62 output tokens, one step. Compare with the debate of the same question."
+}

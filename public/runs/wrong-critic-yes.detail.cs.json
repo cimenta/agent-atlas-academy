@@ -1,0 +1,6 @@
+{
+  "about": "Pisatel napíše dvě věty o tom, proč je obloha modrá, a recenzent je přečte. Recenzentovi je řečeno, aby povzbuzoval a říkal, že text je skvělý.",
+  "how": "Řetěz dvou agentů; druhý posuzuje text prvního.",
+  "learns": "Recenzent, kterému je řečeno chválit, přidá krok a cenu, ale ne kvalitu: co může najít, určuje jeho instrukce.",
+  "watch": "Odpověď recenzenta: označí text za skvělý a bez potřeby změn, ať je napsáno cokoli."
+}

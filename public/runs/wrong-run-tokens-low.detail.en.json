@@ -1,0 +1,6 @@
+{
+  "about": "Five Fast agents (architect, librarian, teacher, accountant, neighbour) write about a new town library and a combiner is to join the answers, but the whole run may use only 3,000 tokens.",
+  "how": "The five run side by side. The tokens of all calls are added up; when the sum passes the limit, the run stops.",
+  "learns": "A limit on the tokens of the whole run stops it when the agents have used them up: here the combiner never ran, so there is no report, only three finished parts of five.",
+  "watch": "The warning that names the limit of tokens, the agents that never finished, and the empty final answer."
+}

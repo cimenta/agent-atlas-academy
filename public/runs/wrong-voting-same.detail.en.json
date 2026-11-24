@@ -1,0 +1,6 @@
+{
+  "about": "Five voters with exactly the same instruction and the same model answer whether a school should ban phones in class, and a tally counts the votes.",
+  "how": "The five voters work side by side; the tally collects their answers and names the winner.",
+  "learns": "Voting needs different views. Five copies of one agent give the same answer five times: the vote is unanimous, but it tells you no more than one voter would, and you paid for all five.",
+  "watch": "The five answers that all start with Yes, and the tally with all five voters in agreement."
+}

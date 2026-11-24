@@ -1,0 +1,87 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Plan a school fair. First choose the date, then choose the stalls that suit that date, then set a budget for exactly those stalls. Give one plan.",
+  "about": {
+    "en": {
+      "title": "What goes wrong: side by side, but each step needs the one before",
+      "author": "Agent Atlas Academy",
+      "description": "Three planners work at the same time, although the stalls depend on the date and the budget on the stalls.\n\n**What it teaches**\n\nThe wrong pattern: agents side by side do not see each other's results, so the combiner joins parts that do not fit."
+    },
+    "cs": {
+      "title": "Co se pokazí: vedle sebe, ale každý krok potřebuje ten předchozí",
+      "author": "Agent Atlas Academy",
+      "description": "Tři plánovači pracují současně, přestože stánky závisí na datu a rozpočet na stáncích.\n\n**Čemu se naučíte**\n\nŠpatný vzor: agenti vedle sebe nevidí výsledky ostatních, takže slučovač spojí části, které k sobě nesedí."
+    }
+  },
+  "library": {
+    "level": 2,
+    "kind": "pair",
+    "twin": "wrong-sequential-fixed",
+    "paths": {
+      "wrong": 3
+    },
+    "tags": [
+      "parallel-work",
+      "planning",
+      "combining-answers"
+    ],
+    "teaches": {
+      "en": "The wrong pattern: agents side by side do not see each other's results, so the combiner joins parts that do not fit.",
+      "cs": "Špatný vzor: agenti vedle sebe nevidí výsledky ostatních, takže slučovač spojí části, které k sobě nesedí."
+    }
+  },
+  "design": {
+    "pattern": "parallel",
+    "nodes": [
+      {
+        "id": "date",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Date planner",
+        "instructions": "Choose the date of the school fair and say why."
+      },
+      {
+        "id": "stalls",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Stall planner",
+        "instructions": "Choose the stalls for the school fair, based on the date that was chosen."
+      },
+      {
+        "id": "budget",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Budget planner",
+        "instructions": "Set a budget in euros for the stalls of the school fair."
+      },
+      {
+        "id": "combiner",
+        "agent": "combiner",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "date",
+        "to": "combiner"
+      },
+      {
+        "from": "stalls",
+        "to": "combiner"
+      },
+      {
+        "from": "budget",
+        "to": "combiner"
+      }
+    ]
+  }
+}

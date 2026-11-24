@@ -888,6 +888,494 @@
         "en": "With a cap above what the run needs, it finishes; the cap costs nothing until it is reached.",
         "cs": "Se stropem nad potřebou běhu doběhne; strop nic nestojí, dokud se nedosáhne."
       }
+    },
+    {
+      "id": "save-tokens-4000",
+      "title": "Write a detailed guide of about 1200 words for new students …",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "cost",
+        "speed",
+        "basics"
+      ],
+      "level": 1,
+      "kind": "pair",
+      "twin": "save-tokens-1000",
+      "paths": {
+        "save": 3
+      },
+      "teaches": {
+        "en": "Agents write at length when they may; a longer reply costs more tokens and more time.",
+        "cs": "Agenti píší dlouho, když smějí; delší odpověď stojí víc tokenů i času."
+      }
+    },
+    {
+      "id": "save-tokens-1000",
+      "title": "Write a detailed guide of about 1200 words for new students …",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "cost",
+        "speed",
+        "basics"
+      ],
+      "level": 1,
+      "kind": "pair",
+      "twin": "save-tokens-4000",
+      "paths": {
+        "save": 4
+      },
+      "teaches": {
+        "en": "A low limit shortens the answer and the cost, but may cut a sentence; choose it by the task.",
+        "cs": "Nízký strop zkrátí odpověď i cenu, ale může useknout větu; volí se podle úkolu."
+      }
+    },
+    {
+      "id": "save-condense-off",
+      "title": "Should a school day start later in the morning?",
+      "pattern": "debate",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "cost",
+        "debate",
+        "speed"
+      ],
+      "level": 3,
+      "kind": "pair",
+      "twin": "save-condense-on",
+      "paths": {
+        "save": 10
+      },
+      "teaches": {
+        "en": "In a long debate every round carries all the earlier text, so the input grows and the cost with it.",
+        "cs": "V dlouhé debatě nese každé kolo všechen dřívější text, takže vstup roste a s ním cena."
+      }
+    },
+    {
+      "id": "save-condense-on",
+      "title": "Should a school day start later in the morning?",
+      "pattern": "debate",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "cost",
+        "debate",
+        "speed"
+      ],
+      "level": 3,
+      "kind": "pair",
+      "twin": "save-condense-off",
+      "paths": {
+        "save": 11
+      },
+      "teaches": {
+        "en": "Condensing keeps the input short and cheaper, at the price of an extra call and some lost detail.",
+        "cs": "Zhutnění drží vstup krátký a levnější, za cenu extra volání a ztráty části detailů."
+      }
+    },
+    {
+      "id": "wrong-single",
+      "title": "Is Canberra the capital of Australia? Answer yes or no and g…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "basics",
+        "decision-making",
+        "cost"
+      ],
+      "level": 1,
+      "kind": "pair",
+      "twin": "wrong-debate-fact",
+      "paths": {
+        "wrong": 1
+      },
+      "teaches": {
+        "en": "For a simple question one agent is enough: it is quick and cheap.",
+        "cs": "Na jednoduchou otázku stačí jeden agent: je rychlý a levný."
+      }
+    },
+    {
+      "id": "wrong-debate-fact",
+      "title": "Is Canberra the capital of Australia? Answer yes or no and g…",
+      "pattern": "debate",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "debate",
+        "decision-making",
+        "cost"
+      ],
+      "level": 1,
+      "kind": "pair",
+      "twin": "wrong-single",
+      "paths": {
+        "wrong": 2
+      },
+      "teaches": {
+        "en": "The wrong pattern for the task: a debate is for questions with two sides, and here it only repeats a known fact at many times the cost.",
+        "cs": "Špatný vzor pro úkol: debata je pro otázky se dvěma stranami, a tady jen mnohonásobně dráž opakuje známý fakt."
+      }
+    },
+    {
+      "id": "wrong-parallel-dependent",
+      "title": "Plan a school fair. First choose the date, then choose the s…",
+      "pattern": "parallel",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "parallel-work",
+        "planning",
+        "combining-answers"
+      ],
+      "level": 2,
+      "kind": "pair",
+      "twin": "wrong-sequential-fixed",
+      "paths": {
+        "wrong": 3
+      },
+      "teaches": {
+        "en": "The wrong pattern: agents side by side do not see each other's results, so the combiner joins parts that do not fit.",
+        "cs": "Špatný vzor: agenti vedle sebe nevidí výsledky ostatních, takže slučovač spojí části, které k sobě nesedí."
+      }
+    },
+    {
+      "id": "wrong-sequential-fixed",
+      "title": "Plan a school fair. First choose the date, then choose the s…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "prompt-chaining",
+        "planning",
+        "basics"
+      ],
+      "level": 2,
+      "kind": "pair",
+      "twin": "wrong-parallel-dependent",
+      "paths": {
+        "wrong": 4
+      },
+      "teaches": {
+        "en": "The right pattern for steps that depend on each other: a chain passes the result on, so the plan fits together.",
+        "cs": "Správný vzor pro kroky, které na sobě závisejí: řetěz předává výsledek dál, takže plán drží pohromadě."
+      }
+    },
+    {
+      "id": "wrong-steps-low",
+      "title": "Prepare a one-page plan for a school charity bake sale: a bu…",
+      "pattern": "supervisor",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "stopped_limit",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "supervisor",
+        "risk-analysis",
+        "planning"
+      ],
+      "level": 2,
+      "paths": {
+        "wrong": 5
+      },
+      "teaches": {
+        "en": "A limit that is too low stops the work half way: the result is incomplete and the replay says which limit was reached.",
+        "cs": "Příliš nízký limit zastaví práci v půlce: výsledek je neúplný a replay říká, který limit byl dosažen."
+      }
+    },
+    {
+      "id": "wrong-voting-same",
+      "title": "Should a school ban phones in class? Answer yes or no and gi…",
+      "pattern": "voting",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "decision-making",
+        "disagreement",
+        "cost"
+      ],
+      "level": 2,
+      "paths": {
+        "wrong": 6
+      },
+      "teaches": {
+        "en": "Voting needs different views: five copies of the same agent only repeat the same answer five times, and you pay for all five.",
+        "cs": "Hlasování potřebuje různé pohledy: pět kopií téhož agenta jen pětkrát zopakuje tutéž odpověď a platíte za všech pět."
+      }
+    },
+    {
+      "id": "wrong-critic-yes",
+      "title": "Write two sentences that explain why the sky is blue.",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "decision-making",
+        "disagreement",
+        "explaining"
+      ],
+      "level": 2,
+      "paths": {
+        "wrong": 7
+      },
+      "teaches": {
+        "en": "A reviewer that praises everything adds a step and a cost, but no quality: the instruction decides what it can find.",
+        "cs": "Recenzent, který všechno chválí, přidá krok a cenu, ale ne kvalitu: instrukce rozhoduje, co může najít."
+      }
+    },
+    {
+      "id": "wrong-run-tokens-low",
+      "title": "A town wants to plan a new public library. Give a full repor…",
+      "pattern": "parallel",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "stopped_limit",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "parallel-work",
+        "risk-analysis",
+        "cost"
+      ],
+      "level": 3,
+      "paths": {
+        "wrong": 10
+      },
+      "teaches": {
+        "en": "A limit on all tokens of a run stops it when the agents have used them up, even if the last one never ran: the report is missing.",
+        "cs": "Limit tokenů celého běhu ho zastaví, když je agenti spotřebují, i když poslední vůbec neběžel: zpráva chybí."
+      }
+    },
+    {
+      "id": "wrong-groq-429",
+      "title": "Should a town of 20000 people ban cars from its centre? Cove…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "groq",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "prompt-chaining",
+        "speed",
+        "cost"
+      ],
+      "level": 3,
+      "paths": {
+        "wrong": 8
+      },
+      "teaches": {
+        "en": "A free plan has a limit per minute: a long chain can hit it, and the app waits and tries again instead of failing at once.",
+        "cs": "Bezplatný plán má limit za minutu: dlouhý řetěz na něj může narazit a aplikace počká a zkusí to znovu, místo aby hned selhala."
+      }
+    },
+    {
+      "id": "wrong-cloudflare-timeout",
+      "title": "Write a handbook for a school chess club, one chapter at a t…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "cloudflare",
+      "outcome": "failed",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "prompt-chaining",
+        "speed",
+        "basics"
+      ],
+      "level": 3,
+      "paths": {
+        "wrong": 9
+      },
+      "teaches": {
+        "en": "A provider ends a call that lasts too long: a slow model with a long reply fails with a timeout, and the replay keeps what was written before.",
+        "cs": "Poskytovatel ukončí volání, které trvá příliš dlouho: pomalý model s dlouhou odpovědí skončí chybou timeout a replay zachová, co se napsalo předtím."
+      }
+    },
+    {
+      "id": "save-mix-map",
+      "title": "Write one sentence of study advice for each of these subject…",
+      "pattern": "mapreduce",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic+groq",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "parallel-work",
+        "combining-answers",
+        "cost"
+      ],
+      "level": 3,
+      "paths": {
+        "save": 9
+      },
+      "teaches": {
+        "en": "Each agent can use its own provider: free workers do the many small calls and a paid model does only the two steps that need care.",
+        "cs": "Každý agent může mít vlastního poskytovatele: zdarma pracovníci dělají mnoho malých volání a placený model jen dva kroky, které vyžadují péči."
+      }
+    },
+    {
+      "id": "save-provider-anthropic",
+      "title": "Explain to a ten-year-old why the moon has phases, then chec…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "cost",
+        "speed",
+        "basics"
+      ],
+      "level": 2,
+      "kind": "pair",
+      "twin": "save-provider-groq",
+      "paths": {
+        "save": 12
+      },
+      "teaches": {
+        "en": "The same task on a paid provider is fast and every call has a price.",
+        "cs": "Stejné zadání u placeného poskytovatele je rychlé a každé volání má cenu."
+      }
+    },
+    {
+      "id": "save-provider-groq",
+      "title": "Explain to a ten-year-old why the moon has phases, then chec…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "groq",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "cost",
+        "speed",
+        "basics"
+      ],
+      "level": 2,
+      "kind": "pair",
+      "twin": "save-provider-anthropic",
+      "paths": {
+        "save": 13
+      },
+      "teaches": {
+        "en": "The same task on a free provider costs nothing, but its calls are spaced and the answers differ.",
+        "cs": "Stejné zadání u bezplatného poskytovatele nestojí nic, ale jeho volání jsou rozložená v čase a odpovědi se liší."
+      }
+    },
+    {
+      "id": "save-provider-cloudflare",
+      "title": "Explain to a ten-year-old why the moon has phases, then chec…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "cloudflare",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "cost",
+        "speed",
+        "basics"
+      ],
+      "level": 2,
+      "paths": {
+        "save": 14
+      },
+      "teaches": {
+        "en": "The same task takes seconds on one provider and much longer on another: speed is a property of the provider, not only of the model.",
+        "cs": "Stejný úkol trvá na jednom poskytovateli sekundy a na jiném mnohem déle: rychlost je vlastnost poskytovatele, ne jen modelu."
+      }
     }
   ]
 }

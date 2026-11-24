@@ -1,0 +1,6 @@
+{
+  "about": "The same task and the same three agents, but all on a free Cloudflare Workers AI model.",
+  "how": "A chain of three agents on one free provider, the third provider of the same task.",
+  "learns": "The same task took 63 seconds here, against 18 seconds on Anthropic and 6 seconds on Groq, with 812 input and 3,467 output tokens. Speed belongs to the provider, not only to the model, and a free plan does not mean a quick one.",
+  "watch": "The time of the run in Statistics against the twins on Anthropic and Groq, and how long each agent works."
+}

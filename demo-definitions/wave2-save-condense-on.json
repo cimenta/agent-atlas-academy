@@ -1,0 +1,88 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Should a school day start later in the morning?",
+  "about": {
+    "en": {
+      "title": "Cost: a three-round debate, input condensed",
+      "author": "Agent Atlas Academy",
+      "description": "Long input is shortened by an extra call before an agent reads it.\n\n**What it teaches**\n\nCondensing keeps the input short and cheaper, at the price of an extra call and some lost detail."
+    },
+    "cs": {
+      "title": "Cena: tříkolová debata, vstup zhutněný",
+      "author": "Agent Atlas Academy",
+      "description": "Dlouhý vstup se před čtením zkrátí extra voláním.\n\n**Čemu se naučíte**\n\nZhutnění drží vstup krátký a levnější, za cenu extra volání a ztráty části detailů."
+    }
+  },
+  "library": {
+    "level": 3,
+    "kind": "pair",
+    "twin": "save-condense-off",
+    "paths": {
+      "save": 11
+    },
+    "tags": [
+      "cost",
+      "debate",
+      "speed"
+    ],
+    "teaches": {
+      "en": "Condensing keeps the input short and cheaper, at the price of an extra call and some lost detail.",
+      "cs": "Zhutnění drží vstup krátký a levnější, za cenu extra volání a ztráty části detailů."
+    }
+  },
+  "design": {
+    "pattern": "debate",
+    "nodes": [
+      {
+        "id": "debater",
+        "agent": "debater",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "stance": "for",
+        "condense": true
+      },
+      {
+        "id": "debater-2",
+        "agent": "debater",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "stance": "against",
+        "condense": true
+      },
+      {
+        "id": "debater-3",
+        "agent": "debater",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "condense": true
+      },
+      {
+        "id": "judge",
+        "agent": "judge",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "condense": true
+      }
+    ],
+    "edges": [
+      {
+        "from": "debater",
+        "to": "judge"
+      },
+      {
+        "from": "debater-2",
+        "to": "judge"
+      },
+      {
+        "from": "debater-3",
+        "to": "judge"
+      }
+    ],
+    "rounds": 3
+  }
+}

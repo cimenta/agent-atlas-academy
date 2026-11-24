@@ -1,0 +1,163 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Should a town of 20000 people ban cars from its centre? Cover traffic, shops, health, cost, fairness and the first year of a trial.",
+  "about": {
+    "en": {
+      "title": "What goes wrong: the free plan says Too Many Requests (429)",
+      "author": "Agent Atlas Academy",
+      "description": "Eight agents answer one after another on a free Groq account, each reading the answer before it.\n\n**What it teaches**\n\nA free plan has a limit on tokens per minute. When the run passes it, the provider answers 429 and the app waits and tries again."
+    },
+    "cs": {
+      "title": "Co se pokazí: bezplatný plán řekne Too Many Requests (429)",
+      "author": "Agent Atlas Academy",
+      "description": "Osm agentů odpovídá za sebou na bezplatném účtu Groq, každý čte odpověď toho před sebou.\n\n**Čemu se naučíte**\n\nBezplatný plán má limit tokenů za minutu. Když ho běh překročí, poskytovatel odpoví 429 a aplikace počká a zkusí to znovu."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false,
+        "name": "Historian",
+        "instructions": "Answer as a historian. Write a long, detailed answer of about 600 words with headings and examples.",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      },
+      {
+        "id": "free-2",
+        "agent": "free",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false,
+        "name": "Engineer",
+        "instructions": "Read the previous answer. Then answer as a engineer: add what it misses and write a long, detailed answer of about 600 words with headings and examples.",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      },
+      {
+        "id": "free-3",
+        "agent": "free",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false,
+        "name": "Economist",
+        "instructions": "Read the previous answer. Then answer as a economist: add what it misses and write a long, detailed answer of about 600 words with headings and examples.",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      },
+      {
+        "id": "free-4",
+        "agent": "free",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false,
+        "name": "Ecologist",
+        "instructions": "Read the previous answer. Then answer as a ecologist: add what it misses and write a long, detailed answer of about 600 words with headings and examples.",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      },
+      {
+        "id": "free-5",
+        "agent": "free",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false,
+        "name": "Sociologist",
+        "instructions": "Read the previous answer. Then answer as a sociologist: add what it misses and write a long, detailed answer of about 600 words with headings and examples.",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      },
+      {
+        "id": "free-6",
+        "agent": "free",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false,
+        "name": "Doctor",
+        "instructions": "Read the previous answer. Then answer as a doctor: add what it misses and write a long, detailed answer of about 600 words with headings and examples.",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      },
+      {
+        "id": "free-7",
+        "agent": "free",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false,
+        "name": "Lawyer",
+        "instructions": "Read the previous answer. Then answer as a lawyer: add what it misses and write a long, detailed answer of about 600 words with headings and examples.",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      },
+      {
+        "id": "free-8",
+        "agent": "free",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false,
+        "name": "Architect",
+        "instructions": "Read the previous answer. Then answer as a architect: add what it misses and write a long, detailed answer of about 600 words with headings and examples.",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "free",
+        "to": "free-2"
+      },
+      {
+        "from": "free-2",
+        "to": "free-3"
+      },
+      {
+        "from": "free-3",
+        "to": "free-4"
+      },
+      {
+        "from": "free-4",
+        "to": "free-5"
+      },
+      {
+        "from": "free-5",
+        "to": "free-6"
+      },
+      {
+        "from": "free-6",
+        "to": "free-7"
+      },
+      {
+        "from": "free-7",
+        "to": "free-8"
+      }
+    ]
+  },
+  "library": {
+    "level": 3,
+    "paths": {
+      "wrong": 8
+    },
+    "tags": [
+      "prompt-chaining",
+      "speed",
+      "cost"
+    ],
+    "teaches": {
+      "en": "A free plan has a limit per minute: a long chain can hit it, and the app waits and tries again instead of failing at once.",
+      "cs": "Bezplatný plán má limit za minutu: dlouhý řetěz na něj může narazit a aplikace počká a zkusí to znovu, místo aby hned selhala."
+    }
+  }
+}

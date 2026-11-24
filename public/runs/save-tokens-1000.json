@@ -1,0 +1,418 @@
+{
+  "schemaVersion": 1,
+  "id": "save-tokens-1000",
+  "title": "Write a detailed guide of about 1200 words for new students …",
+  "language": "en",
+  "pattern": "sequential",
+  "recordedWith": {
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "appVersion": "1.17.1-dev.0",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "Write a detailed guide of about 1200 words for new students on how to prepare for a test, with a worked example for every tip.",
+      "pattern": "sequential",
+      "design": {
+        "pattern": "sequential",
+        "nodes": [
+          {
+            "id": "free",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Guide writer",
+            "instructions": "Write the guide in full. Always write at least 1500 words and never shorten it.",
+            "slot": "anthropic",
+            "limits": {
+              "maxOutputTokens": 1000
+            }
+          },
+          {
+            "id": "free-2",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Editor",
+            "instructions": "Rewrite the guide in full and add a worked example to every tip. Always write at least 1500 words.",
+            "slot": "anthropic",
+            "limits": {
+              "maxOutputTokens": 1000
+            }
+          }
+        ],
+        "edges": [
+          {
+            "from": "free",
+            "to": "free-2"
+          }
+        ]
+      },
+      "t": 0
+    },
+    {
+      "type": "agent_start",
+      "agent": "free",
+      "role": "Guide writer",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Guide writer. Write the guide in full. Always write at least 1500 words and never shorten it.\nKeep every reply under 300 words. Answer in English.",
+      "t": 0
+    },
+    {
+      "type": "round",
+      "agent": "free",
+      "round": 1,
+      "ms": 5400,
+      "stop": "max_tokens",
+      "usage": {
+        "input": 107,
+        "output": 1000
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write a detailed guide of about 1200 words for new students on how to prepare for a test, with a worked example for every tip."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "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"
+        },
+        {
+          "type": "text",
+          "text": "*Note: Your request for a 1,200-word guide conflicts with the length limit for this reply, so here is a condensed version.*\n\n**How to Prepare for a Test: A Guide for New Students**\n\n**1. Plan backward from the test date.**\n"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 1000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMqWYqhpnVyzZQaj8xHP",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "max_tokens",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 107,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 1000,
+            "output_tokens_details": {
+              "thinking_tokens": 920
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 5400
+    },
+    {
+      "type": "warning",
+      "agent": "free",
+      "truncated": true,
+      "message": "The answer was cut because it reached the token limit for one reply.",
+      "t": 5400,
+      "at": 1795527147135
+    },
+    {
+      "type": "agent_output",
+      "agent": "free",
+      "text": "*Note: Your request for a 1,200-word guide conflicts with the length limit for this reply, so here is a condensed version.*\n\n**How to Prepare for a Test: A Guide for New Students**\n\n**1. Plan backward from the test date.**",
+      "tokens": {
+        "input": 107,
+        "output": 1000
+      },
+      "t": 5400
+    },
+    {
+      "type": "handoff",
+      "from": "free",
+      "to": "free-2",
+      "note": "*Note: Your request for a 1,200-word guide conflicts with the length limit for this reply, so here is a condensed version.*\n\n**How to Prepare for a Test: A Guide for New Students**\n\n**1. Plan backward from the test date.**",
+      "t": 5400
+    },
+    {
+      "type": "agent_start",
+      "agent": "free-2",
+      "role": "Editor",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Editor. Rewrite the guide in full and add a worked example to every tip. Always write at least 1500 words.\nKeep every reply under 300 words. Answer in English.",
+      "t": 5401
+    },
+    {
+      "type": "round",
+      "agent": "free-2",
+      "round": 1,
+      "ms": 5422,
+      "stop": "max_tokens",
+      "usage": {
+        "input": 204,
+        "output": 1000
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write a detailed guide of about 1200 words for new students on how to prepare for a test, with a worked example for every tip.\n\nThe previous agent (free) wrote:\n*Note: Your request for a 1,200-word guide conflicts with the length limit for this reply, so here is a condensed version.*\n\n**How to Prepare for a Test: A Guide for New Students**\n\n**1. Plan backward from the test date.**"
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "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"
+        },
+        {
+          "type": "text",
+          "text": "**How to Prepare for a Test: A Guide for New Students**\n\n*Note: The 1,500-word minimum conflicts with the 300-word reply limit, so this is a compact version.*\n\n**1. Plan backward from the test date.**\nSplit your material into daily chunks and finish all new study one day early.\n*Example:* Your test is Friday and covers 10 chapters. Read two chapters each day Monday through Wednesday, quiz yourself Thursday,"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 1000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMqWwGKz3DHWZHeXMHVr",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "max_tokens",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 204,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 1000,
+            "output_tokens_details": {
+              "thinking_tokens": 852
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 10823
+    },
+    {
+      "type": "warning",
+      "agent": "free-2",
+      "truncated": true,
+      "message": "The answer was cut because it reached the token limit for one reply.",
+      "t": 10823,
+      "at": 1795527152537
+    },
+    {
+      "type": "agent_output",
+      "agent": "free-2",
+      "text": "**How to Prepare for a Test: A Guide for New Students**\n\n*Note: The 1,500-word minimum conflicts with the 300-word reply limit, so this is a compact version.*\n\n**1. Plan backward from the test date.**\nSplit your material into daily chunks and finish all new study one day early.\n*Example:* Your test is Friday and covers 10 chapters. Read two chapters each day Monday through Wednesday, quiz yourself Thursday,",
+      "tokens": {
+        "input": 204,
+        "output": 1000
+      },
+      "t": 10823
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 311,
+        "output": 2000,
+        "searches": 0,
+        "steps": 2
+      },
+      "finalText": "**How to Prepare for a Test: A Guide for New Students**\n\n*Note: The 1,500-word minimum conflicts with the 300-word reply limit, so this is a compact version.*\n\n**1. Plan backward from the test date.**\nSplit your material into daily chunks and finish all new study one day early.\n*Example:* Your test is Friday and covers 10 chapters. Read two chapters each day Monday through Wednesday, quiz yourself Thursday,",
+      "t": 10824
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "free",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":1000,\"system\":\"Role: free\\nYou are Guide writer. Write the guide in full. Always write at least 1500 words and never shorten it.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Write a detailed guide of about 1200 words for new students on how to prepare for a test, with a worked example for every tip.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T13:32:22Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "1999000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T13:32:27Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T13:32:21Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11999000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T13:32:22Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 13:32:27 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMqWYqhpnVyzZQaj8xHP\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"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\"},{\"type\":\"text\",\"text\":\"*Note: Your request for a 1,200-word guide conflicts with the length limit for this reply, so here is a condensed version.*\\n\\n**How to Prepare for a Test: A Guide for New Students**\\n\\n**1. Plan backward from the test date.**\\n\"}],\"container\":null,\"stop_reason\":\"max_tokens\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":107,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":1000,\"output_tokens_details\":{\"thinking_tokens\":920},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 5400,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 5400
+    },
+    {
+      "type": "api_call",
+      "agent": "free-2",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":1000,\"system\":\"Role: free\\nYou are Editor. Rewrite the guide in full and add a worked example to every tip. Always write at least 1500 words.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Write a detailed guide of about 1200 words for new students on how to prepare for a test, with a worked example for every tip.\\n\\nThe previous agent (free) wrote:\\n*Note: Your request for a 1,200-word guide conflicts with the length limit for this reply, so here is a condensed version.*\\n\\n**How to Prepare for a Test: A Guide for New Students**\\n\\n**1. Plan backward from the test date.**\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T13:32:27Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "1999000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T13:32:32Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T13:32:27Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11999000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T13:32:27Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 13:32:32 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMqWwGKz3DHWZHeXMHVr\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"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\"},{\"type\":\"text\",\"text\":\"**How to Prepare for a Test: A Guide for New Students**\\n\\n*Note: The 1,500-word minimum conflicts with the 300-word reply limit, so this is a compact version.*\\n\\n**1. Plan backward from the test date.**\\nSplit your material into daily chunks and finish all new study one day early.\\n*Example:* Your test is Friday and covers 10 chapters. Read two chapters each day Monday through Wednesday, quiz yourself Thursday,\"}],\"container\":null,\"stop_reason\":\"max_tokens\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":204,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":1000,\"output_tokens_details\":{\"thinking_tokens\":852},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 5422,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 10823
+    }
+  ],
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Guide writer",
+        "instructions": "Write the guide in full. Always write at least 1500 words and never shorten it.",
+        "slot": "anthropic",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      },
+      {
+        "id": "free-2",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Editor",
+        "instructions": "Rewrite the guide in full and add a worked example to every tip. Always write at least 1500 words.",
+        "slot": "anthropic",
+        "limits": {
+          "maxOutputTokens": 1000
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "free",
+        "to": "free-2"
+      }
+    ]
+  },
+  "task": "Write a detailed guide of about 1200 words for new students on how to prepare for a test, with a worked example for every tip.",
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 100000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 311,
+    "output": 2000,
+    "searches": 0,
+    "steps": 2
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T13:32:21.510Z",
+  "endedAt": "2026-11-24T13:32:32.543Z",
+  "durationMs": 11033
+}

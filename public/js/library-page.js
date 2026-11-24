@@ -561,6 +561,8 @@ export async function renderLibraryTab(ctx, requestedId) {
         t,
         getAbout: () => run.about ?? null,
         editable: own,
+        closable: false,
+        headingKey: own ? "about.heading" : "about.headingPattern",
         onSave: async (about) => {
           const next = { ...run };
           if (about) next.about = about;
@@ -593,7 +595,10 @@ export async function renderLibraryTab(ctx, requestedId) {
           await redraw();
         }
       },
-      "edit-description": () => panel?.element.querySelector('[data-ui="about-edit"]')?.click(),
+      "edit-description": () => {
+        body.querySelector('[data-ui="detail-tab-pattern"]')?.click();
+        panel?.element.querySelector('[data-ui="about-edit"]')?.click();
+      },
     };
     detailState = { id: selected, definition, panel };
     const labels = { load: "library.action.load", "use-in-create": "library.action.useInCreate", export: "library.action.export", compare: "library.action.compare", send: "library.action.send", delete: "library.action.delete", "edit-description": "library.action.editDescription" };

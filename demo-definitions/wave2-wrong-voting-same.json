@@ -1,0 +1,111 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Should a school ban phones in class? Answer yes or no and give one reason.",
+  "about": {
+    "en": {
+      "title": "What goes wrong: five identical voters",
+      "author": "Agent Atlas Academy",
+      "description": "Five voters with the same instruction and the same model, and a tally.\n\n**What it teaches**\n\nVoting needs different views: five copies of the same agent only repeat the same answer five times, and you pay for all five."
+    },
+    "cs": {
+      "title": "Co se pokazí: pět stejných hlasujících",
+      "author": "Agent Atlas Academy",
+      "description": "Pět hlasujících se stejnou instrukcí a stejným modelem a sčítání hlasů.\n\n**Čemu se naučíte**\n\nHlasování potřebuje různé pohledy: pět kopií téhož agenta jen pětkrát zopakuje tutéž odpověď a platíte za všech pět."
+    }
+  },
+  "library": {
+    "level": 2,
+    "paths": {
+      "wrong": 6
+    },
+    "tags": [
+      "decision-making",
+      "disagreement",
+      "cost"
+    ],
+    "teaches": {
+      "en": "Voting needs different views: five copies of the same agent only repeat the same answer five times, and you pay for all five.",
+      "cs": "Hlasování potřebuje různé pohledy: pět kopií téhož agenta jen pětkrát zopakuje tutéž odpověď a platíte za všech pět."
+    }
+  },
+  "design": {
+    "pattern": "voting",
+    "nodes": [
+      {
+        "id": "voter-1",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Voter 1",
+        "instructions": "Answer the question. Start with your single choice."
+      },
+      {
+        "id": "voter-2",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Voter 2",
+        "instructions": "Answer the question. Start with your single choice."
+      },
+      {
+        "id": "voter-3",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Voter 3",
+        "instructions": "Answer the question. Start with your single choice."
+      },
+      {
+        "id": "voter-4",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Voter 4",
+        "instructions": "Answer the question. Start with your single choice."
+      },
+      {
+        "id": "voter-5",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Voter 5",
+        "instructions": "Answer the question. Start with your single choice."
+      },
+      {
+        "id": "tally",
+        "agent": "tally",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "voter-1",
+        "to": "tally"
+      },
+      {
+        "from": "voter-2",
+        "to": "tally"
+      },
+      {
+        "from": "voter-3",
+        "to": "tally"
+      },
+      {
+        "from": "voter-4",
+        "to": "tally"
+      },
+      {
+        "from": "voter-5",
+        "to": "tally"
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "about": "The same guide writer and editor, but each agent may write only 1000 tokens in one reply.",
+  "how": "A low limit on one reply cuts the text when it is reached, and the run adds a warning.",
+  "learns": "A low limit keeps the output short, and so cheaper, but the text can end in the middle: the limit has to fit the task.",
+  "watch": "The warning after each answer that says the answer was cut, and the abrupt end of the text."
+}

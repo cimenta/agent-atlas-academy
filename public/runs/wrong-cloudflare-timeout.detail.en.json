@@ -1,0 +1,6 @@
+{
+  "about": "Five agents on the Cloudflare Strong model write one chapter each of a school chess club handbook, one after another. Each is asked for about 1,500 words and may write up to 2,500 tokens.",
+  "how": "A chain of agents on a slow model. Cloudflare ends any call that takes more than 120 seconds.",
+  "learns": "A long reply on a slow model can take longer than the provider will wait. The first agent needed 119.9 seconds for its 2,500 tokens, and the second call was ended after 120 seconds: the run failed with a timeout and three agents were never reached.",
+  "watch": "The first chapter that is cut by the token limit and took almost 120 seconds, the error naming Cloudflare and 120 seconds, and the three agents marked as not reached."
+}

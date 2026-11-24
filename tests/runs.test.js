@@ -59,7 +59,7 @@ import { GOALS, levelOf, stepOf, coverageErrors, twinOf } from "../public/js/lib
 test("the path of the library: every goal has two runs on every level, steps are unique, twins name each other", () => {
   // Wave 1 is being recorded run by run (4 of 20 so far), so the goal patterns is not checked for two runs per level yet.
   // Remove "patterns" from this list when wave 1 is complete; the other goals are checked as always.
-  const NOT_COMPLETE_YET = ["patterns", "save", "reliable", "wrong"];
+  const NOT_COMPLETE_YET = ["patterns"];
   assert.deepEqual(coverageErrors(index).filter((e) => !NOT_COMPLETE_YET.some((g) => e.startsWith(`${g} `))), []);
   for (const entry of index) {
     if (entry.level !== undefined) assert.ok(levelOf(entry) > 0, `${entry.id} level`);

@@ -1,0 +1,6 @@
+{
+  "about": "A researcher, a writer and a critic explain to a ten-year-old why the moon has phases. All three run on Anthropic Fast, a paid provider.",
+  "how": "A chain of three agents on one provider.",
+  "learns": "The paid provider answers with a good, long text: 17.9 seconds, 1,453 input and 3,619 output tokens, and every call has a price.",
+  "watch": "The totals in Statistics and the length of each answer. Compare with the twin that runs on a free provider."
+}

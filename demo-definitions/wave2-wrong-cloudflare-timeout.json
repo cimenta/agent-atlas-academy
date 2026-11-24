@@ -1,0 +1,115 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write a handbook for a school chess club, one chapter at a time: rules, openings, tactics, endgames and tournaments.",
+  "about": {
+    "en": {
+      "title": "What goes wrong: the provider gives up waiting (timeout)",
+      "author": "Agent Atlas Academy",
+      "description": "Five agents on a slow model write one long chapter each, one after another.\n\n**What it teaches**\n\nA provider ends a call that lasts too long. A slow model with a long reply can pass that time, and the run fails with a timeout, with what was written so far saved."
+    },
+    "cs": {
+      "title": "Co se pokazí: poskytovatel přestane čekat (timeout)",
+      "author": "Agent Atlas Academy",
+      "description": "Pět agentů na pomalém modelu píše jednu dlouhou kapitolu za druhou.\n\n**Čemu se naučíte**\n\nPoskytovatel ukončí volání, které trvá příliš dlouho. Pomalý model s dlouhou odpovědí může ten čas překročit a běh skončí chybou timeout, s uloženým tím, co se zatím napsalo."
+    }
+  },
+  "library": {
+    "level": 3,
+    "paths": {
+      "wrong": 9
+    },
+    "tags": [
+      "prompt-chaining",
+      "speed",
+      "basics"
+    ],
+    "teaches": {
+      "en": "A provider ends a call that lasts too long: a slow model with a long reply fails with a timeout, and the replay keeps what was written before.",
+      "cs": "Poskytovatel ukončí volání, které trvá příliš dlouho: pomalý model s dlouhou odpovědí skončí chybou timeout a replay zachová, co se napsalo předtím."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "strong",
+        "slot": "cloudflare-free",
+        "search": false,
+        "name": "Rules writer",
+        "instructions": "Write the first chapter of a handbook for a school chess club: rules. Make it long and detailed, about 1500 words, with headings and worked examples.",
+        "limits": {
+          "maxOutputTokens": 2500
+        }
+      },
+      {
+        "id": "free-2",
+        "agent": "free",
+        "model": "strong",
+        "slot": "cloudflare-free",
+        "search": false,
+        "name": "Openings writer",
+        "instructions": "Read the previous chapter. Then write the next chapter of a handbook for a school chess club: openings. Make it long and detailed, about 1500 words, with headings and worked examples.",
+        "limits": {
+          "maxOutputTokens": 2500
+        }
+      },
+      {
+        "id": "free-3",
+        "agent": "free",
+        "model": "strong",
+        "slot": "cloudflare-free",
+        "search": false,
+        "name": "Tactics writer",
+        "instructions": "Read the previous chapter. Then write the next chapter of a handbook for a school chess club: tactics. Make it long and detailed, about 1500 words, with headings and worked examples.",
+        "limits": {
+          "maxOutputTokens": 2500
+        }
+      },
+      {
+        "id": "free-4",
+        "agent": "free",
+        "model": "strong",
+        "slot": "cloudflare-free",
+        "search": false,
+        "name": "Endgames writer",
+        "instructions": "Read the previous chapter. Then write the next chapter of a handbook for a school chess club: endgames. Make it long and detailed, about 1500 words, with headings and worked examples.",
+        "limits": {
+          "maxOutputTokens": 2500
+        }
+      },
+      {
+        "id": "free-5",
+        "agent": "free",
+        "model": "strong",
+        "slot": "cloudflare-free",
+        "search": false,
+        "name": "Tournaments writer",
+        "instructions": "Read the previous chapter. Then write the next chapter of a handbook for a school chess club: tournaments. Make it long and detailed, about 1500 words, with headings and worked examples.",
+        "limits": {
+          "maxOutputTokens": 2500
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "free",
+        "to": "free-2"
+      },
+      {
+        "from": "free-2",
+        "to": "free-3"
+      },
+      {
+        "from": "free-3",
+        "to": "free-4"
+      },
+      {
+        "from": "free-4",
+        "to": "free-5"
+      }
+    ]
+  }
+}
