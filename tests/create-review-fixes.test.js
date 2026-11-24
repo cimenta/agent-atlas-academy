@@ -49,7 +49,7 @@ test("a retry that needs a key opens the key tab of step 3", () => {
 });
 
 test("giving a loaded definition a default model keeps the model of each of its agents", () => {
-  const loaded = loadDefinition(JSON.stringify(definitionFromRun(run("debate-complex"))));
+  const loaded = loadDefinition(JSON.stringify(definitionFromRun(run("mix-router-specialists"))));
   assert.equal(loaded.ok, true);
   const editor = loaded.editor;
   const before = editor.design().nodes.map((n) => n.model);

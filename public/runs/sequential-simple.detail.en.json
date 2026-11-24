@@ -1,6 +1,6 @@
 {
-  "about": "One short question is answered by a chain of agents, each building on the one before.",
-  "how": "Each agent receives the task and the text of the agent before it.",
-  "learns": "How a sequential chain passes work along, and what each step adds.",
-  "watch": "What every agent changes in the text it receives."
+  "about": "A researcher collects the facts on why the sky is blue and a writer turns them into three sentences for a ten-year-old. Both agents run on Cloudflare.",
+  "how": "The researcher gets the task; the writer gets the task and the text of the researcher.",
+  "learns": "How a chain passes work along: each agent gets the text of the one before it.",
+  "watch": "What the writer received from the researcher, and what it changed."
 }

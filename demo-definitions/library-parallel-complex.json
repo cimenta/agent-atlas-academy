@@ -37,6 +37,7 @@
         "id": "resident",
         "agent": "free",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false,
         "name": "Resident",
         "instructions": "Answer as a resident who lives in the town centre."
@@ -45,6 +46,7 @@
         "id": "shop",
         "agent": "free",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false,
         "name": "Shop owner",
         "instructions": "Answer as the owner of a small shop in the centre."
@@ -53,6 +55,7 @@
         "id": "planner",
         "agent": "free",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false,
         "name": "City planner",
         "instructions": "Answer as a city planner who knows what other towns tried."
@@ -61,6 +64,7 @@
         "id": "cyclist",
         "agent": "free",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false,
         "name": "Cyclist",
         "instructions": "Answer as a daily cyclist and walker."
@@ -69,12 +73,14 @@
         "id": "combiner",
         "agent": "combiner",
         "model": "balanced",
+        "slot": "openrouter-free",
         "search": false
       },
       {
         "id": "critic",
         "agent": "critic",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false
       }
     ],

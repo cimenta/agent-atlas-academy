@@ -20,7 +20,7 @@ test("a good run is written under its slug and listed with the fields of the lib
   assert.deepEqual(index.runs[0], result.entry);
   assert.deepEqual(result.entry, {
     id: "debate-simple", title: "A recorded run", pattern: "sequential", language: "en", timeScale: 3, home: true,
-    provider: "anthropic", outcome: "finished", tags: ["debate", "basics"], level: 1, kind: "pair", twin: "debate-complex", paths: { patterns: 2 },
+    provider: sample.recordedWith.provider, outcome: "finished", tags: ["debate", "basics"], level: 1, kind: "pair", twin: "debate-complex", paths: { patterns: 2 },
   });
 });
 
@@ -54,7 +54,6 @@ test("a run that is not valid, too big, or has a script tag is refused", () => {
 test("an unknown goal, a step that is not a whole number, a level outside 1 to 3 and a bad kind are refused", () => {
   assert.throws(() => add(good(), opts({ paths: { nowhere: 1 } }), setup()), /goal/i);
   assert.throws(() => add(good(), opts({ paths: { patterns: 0 } }), setup()), /step/i);
-  assert.throws(() => add(good(), opts({ paths: {} }), setup()), /path/i);
   assert.throws(() => add(good(), opts({ level: 4 }), setup()), /level/i);
   assert.throws(() => add(good(), opts({ kind: "odd" }), setup()), /kind/i);
   assert.throws(() => add(good(), opts({ id: "Bad Id" }), setup()), /id/i);
@@ -85,4 +84,10 @@ test("a definition file fills what the command line leaves out, and the command 
 
 test("the options of the command line include the definition file", () => {
   assert.equal(parseArgs(["f.json", "--definition", "d.json", "--id", "x"]).options.definition, "d.json");
+});
+
+test("a run with no path is allowed: it is only in the list of the library, not on the recommended path", () => {
+  const { entry } = add(good(), opts({ paths: {} }), setup());
+  assert.deepEqual(entry.paths, {});
+  assert.equal(entry.level, 1);
 });

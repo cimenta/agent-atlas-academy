@@ -1,0 +1,421 @@
+{
+  "schemaVersion": 1,
+  "id": "router-complex",
+  "title": "Which came first, the printing press or the telescope, and h…",
+  "language": "en",
+  "pattern": "router",
+  "recordedWith": {
+    "provider": "groq",
+    "model": "openai/gpt-oss-120b, openai/gpt-oss-20b",
+    "freeTier": true
+  },
+  "appVersion": "1.16.10-dev.0",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "Which came first, the printing press or the telescope, and how did printing change schools?",
+      "pattern": "router",
+      "design": {
+        "pattern": "router",
+        "nodes": [
+          {
+            "id": "router",
+            "agent": "router",
+            "model": "balanced",
+            "search": false,
+            "slot": "groq-free",
+            "custom": true
+          },
+          {
+            "id": "free",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Maths tutor",
+            "instructions": "You are a maths tutor. Answer questions about numbers and calculation.",
+            "slot": "groq-free"
+          },
+          {
+            "id": "free-2",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "History tutor",
+            "instructions": "You are a history tutor. Answer questions about dates, events and their effects.",
+            "slot": "groq-free"
+          },
+          {
+            "id": "free-3",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Language tutor",
+            "instructions": "You are a language tutor. Answer questions about words, grammar and writing.",
+            "slot": "groq-free"
+          },
+          {
+            "id": "free-4",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Science tutor",
+            "instructions": "You are a science tutor. Answer questions about nature, instruments and discoveries.",
+            "slot": "groq-free"
+          }
+        ],
+        "edges": [
+          {
+            "from": "router",
+            "to": "free"
+          },
+          {
+            "from": "router",
+            "to": "free-2"
+          },
+          {
+            "from": "router",
+            "to": "free-3"
+          },
+          {
+            "from": "router",
+            "to": "free-4"
+          }
+        ]
+      },
+      "t": 2
+    },
+    {
+      "type": "agent_start",
+      "agent": "router",
+      "role": "Router",
+      "model": "openai/gpt-oss-120b",
+      "tools": [],
+      "system": "Role: router\nYou are the Router. You read the task and choose exactly one specialist to answer it. The first message lists the specialist ids and what each one is for. You do not answer the task yourself, and you will not see the specialist's answer. Choose the specialist whose role fits the task best.\nReply with JSON only, in this form:\n{\"route\":\"<specialist id>\",\"reason\":\"<why this specialist fits the task>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 3
+    },
+    {
+      "type": "round",
+      "agent": "router",
+      "round": 1,
+      "ms": 496,
+      "stop": "end_turn",
+      "usage": {
+        "input": 332,
+        "output": 75
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Which came first, the printing press or the telescope, and how did printing change schools?\n\nYou may route to: free (Maths tutor: You are a maths tutor. Answer questions about numbers and calculation.), free-2 (History tutor: You are a history tutor. Answer questions about dates; events and their effects.), free-3 (Language tutor: You are a language tutor. Answer questions about words; grammar and writing.), free-4 (Science tutor: You are a science tutor. Answer questions about nature; instruments and discover)"
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"route\":\"free-2\",\"reason\":\"The question asks about chronological order of historical inventions (printing press and telescope) and the societal impact of printing on education, which fits the History tutor's expertise.\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "openai/gpt-oss-120b",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1,
+          "forced": true
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "openai/gpt-oss-120b",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 332,
+            "output_tokens": 75
+          }
+        }
+      },
+      "t": 500
+    },
+    {
+      "type": "agent_output",
+      "agent": "router",
+      "text": "{\"route\":\"free-2\",\"reason\":\"The question asks about chronological order of historical inventions (printing press and telescope) and the societal impact of printing on education, which fits the History tutor's expertise.\"}",
+      "tokens": {
+        "input": 332,
+        "output": 75
+      },
+      "t": 500
+    },
+    {
+      "type": "handoff",
+      "from": "router",
+      "to": "free-2",
+      "note": "The question asks about chronological order of historical inventions (printing press and telescope) and the societal impact of printing on education, which fits the History tutor's expertise.",
+      "t": 501
+    },
+    {
+      "type": "agent_start",
+      "agent": "free-2",
+      "role": "History tutor",
+      "model": "openai/gpt-oss-20b",
+      "tools": [],
+      "system": "Role: free\nYou are History tutor. You are a history tutor. Answer questions about dates, events and their effects.\nKeep every reply under 300 words. Answer in English.",
+      "t": 501
+    },
+    {
+      "type": "round",
+      "agent": "free-2",
+      "round": 1,
+      "ms": 552,
+      "stop": "end_turn",
+      "usage": {
+        "input": 131,
+        "output": 446
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Which came first, the printing press or the telescope, and how did printing change schools?"
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "The printing press predates the telescope by more than a century.  \n\n**Printing press**  \n- Johannes Gutenberg’s movable‑type press was perfected around 1440 in Mainz, Germany.  \n- The first major printed book, the *Erasmus Biblia* (1455), shows the technology was already in use.\n\n**Telescope**  \n- The first practical telescope appeared in 1608 in the Netherlands, credited to Hans Lippershey (though the Dutch optician Jacob Metius also applied for a patent the same year).  \n- Galileo’s improvements in 1609–1610 made it a scientific instrument.\n\nSo, Gutenberg’s press came first by about 160 years.\n\n---\n\n### How printing changed schools\n\n| Area | Before printing | After printing |\n|------|-----------------|----------------|\n| **Curriculum** | Textbooks were rare, handwritten manuscripts; knowledge varied by region. | Standardized books (e.g., Latin manuals, catechisms) were widely available, allowing a more uniform curriculum. |\n| **Teaching methods** | Oral transmission and individual copying; teachers were sole custodians of knowledge. | Teachers could rely on printed texts as authoritative references, freeing them to focus on explanation rather than copying. |\n| **Student access** | Limited to a few copies per classroom; learning often required copying. | Larger classes could all read the same material simultaneously, encouraging active reading and discussion. |\n| **Intellectual exchange** | Ideas circulated slowly via manuscripts. | Rapid dissemination of new theories (e.g., Copernican astronomy, humanist studies) fostered scholarly debate and quicker progress. |\n| **Linguistic impact** | Latin dominated, with local scripts for religious texts. | Vernacular books appeared (e.g., Luther’s Bible in German), making education accessible beyond elites. |\n\nIn short, the printing press transformed schools by providing standardized, affordable, and widely accessible texts, shifting teaching from memorization and copying to interpretation and critical analysis. This laid the groundwork for the modern educational system and accelerated the spread of scientific ideas, including the eventual invention and use of the telescope."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "openai/gpt-oss-20b",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "openai/gpt-oss-20b",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 131,
+            "output_tokens": 446
+          }
+        }
+      },
+      "t": 1053
+    },
+    {
+      "type": "agent_output",
+      "agent": "free-2",
+      "text": "The printing press predates the telescope by more than a century.  \n\n**Printing press**  \n- Johannes Gutenberg’s movable‑type press was perfected around 1440 in Mainz, Germany.  \n- The first major printed book, the *Erasmus Biblia* (1455), shows the technology was already in use.\n\n**Telescope**  \n- The first practical telescope appeared in 1608 in the Netherlands, credited to Hans Lippershey (though the Dutch optician Jacob Metius also applied for a patent the same year).  \n- Galileo’s improvements in 1609–1610 made it a scientific instrument.\n\nSo, Gutenberg’s press came first by about 160 years.\n\n---\n\n### How printing changed schools\n\n| Area | Before printing | After printing |\n|------|-----------------|----------------|\n| **Curriculum** | Textbooks were rare, handwritten manuscripts; knowledge varied by region. | Standardized books (e.g., Latin manuals, catechisms) were widely available, allowing a more uniform curriculum. |\n| **Teaching methods** | Oral transmission and individual copying; teachers were sole custodians of knowledge. | Teachers could rely on printed texts as authoritative references, freeing them to focus on explanation rather than copying. |\n| **Student access** | Limited to a few copies per classroom; learning often required copying. | Larger classes could all read the same material simultaneously, encouraging active reading and discussion. |\n| **Intellectual exchange** | Ideas circulated slowly via manuscripts. | Rapid dissemination of new theories (e.g., Copernican astronomy, humanist studies) fostered scholarly debate and quicker progress. |\n| **Linguistic impact** | Latin dominated, with local scripts for religious texts. | Vernacular books appeared (e.g., Luther’s Bible in German), making education accessible beyond elites. |\n\nIn short, the printing press transformed schools by providing standardized, affordable, and widely accessible texts, shifting teaching from memorization and copying to interpretation and critical analysis. This laid the groundwork for the modern educational system and accelerated the spread of scientific ideas, including the eventual invention and use of the telescope.",
+      "tokens": {
+        "input": 131,
+        "output": 446
+      },
+      "t": 1054
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 463,
+        "output": 521,
+        "searches": 0,
+        "steps": 2
+      },
+      "finalText": "The printing press predates the telescope by more than a century.  \n\n**Printing press**  \n- Johannes Gutenberg’s movable‑type press was perfected around 1440 in Mainz, Germany.  \n- The first major printed book, the *Erasmus Biblia* (1455), shows the technology was already in use.\n\n**Telescope**  \n- The first practical telescope appeared in 1608 in the Netherlands, credited to Hans Lippershey (though the Dutch optician Jacob Metius also applied for a patent the same year).  \n- Galileo’s improvements in 1609–1610 made it a scientific instrument.\n\nSo, Gutenberg’s press came first by about 160 years.\n\n---\n\n### How printing changed schools\n\n| Area | Before printing | After printing |\n|------|-----------------|----------------|\n| **Curriculum** | Textbooks were rare, handwritten manuscripts; knowledge varied by region. | Standardized books (e.g., Latin manuals, catechisms) were widely available, allowing a more uniform curriculum. |\n| **Teaching methods** | Oral transmission and individual copying; teachers were sole custodians of knowledge. | Teachers could rely on printed texts as authoritative references, freeing them to focus on explanation rather than copying. |\n| **Student access** | Limited to a few copies per classroom; learning often required copying. | Larger classes could all read the same material simultaneously, encouraging active reading and discussion. |\n| **Intellectual exchange** | Ideas circulated slowly via manuscripts. | Rapid dissemination of new theories (e.g., Copernican astronomy, humanist studies) fostered scholarly debate and quicker progress. |\n| **Linguistic impact** | Latin dominated, with local scripts for religious texts. | Vernacular books appeared (e.g., Luther’s Bible in German), making education accessible beyond elites. |\n\nIn short, the printing press transformed schools by providing standardized, affordable, and widely accessible texts, shifting teaching from memorization and copying to interpretation and critical analysis. This laid the groundwork for the modern educational system and accelerated the spread of scientific ideas, including the eventual invention and use of the telescope.",
+      "t": 1055
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "router",
+      "provider": "groq",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.groq.com/openai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"openai/gpt-oss-120b\",\"max_completion_tokens\":4000,\"reasoning_effort\":\"low\",\"messages\":[{\"role\":\"system\",\"content\":\"Role: router\\nYou are the Router. You read the task and choose exactly one specialist to answer it. The first message lists the specialist ids and what each one is for. You do not answer the task yourself, and you will not see the specialist's answer. Choose the specialist whose role fits the task best.\\nReply with JSON only, in this form:\\n{\\\"route\\\":\\\"<specialist id>\\\",\\\"reason\\\":\\\"<why this specialist fits the task>\\\"}\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Which came first, the printing press or the telescope, and how did printing change schools?\\n\\nYou may route to: free (Maths tutor: You are a maths tutor. Answer questions about numbers and calculation.), free-2 (History tutor: You are a history tutor. Answer questions about dates; events and their effects.), free-3 (Language tutor: You are a language tutor. Answer questions about words; grammar and writing.), free-4 (Science tutor: You are a science tutor. Answer questions about nature; instruments and discover)\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"reply\",\"strict\":false,\"schema\":{\"type\":\"object\",\"properties\":{\"route\":{\"type\":\"string\"},\"reason\":{\"type\":\"string\"}},\"required\":[\"route\",\"reason\"]}}}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "alt-svc": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 10:44:39 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "vary": "(hidden)",
+          "x-groq-region": "(hidden)",
+          "x-ratelimit-limit-requests": "1000",
+          "x-ratelimit-limit-tokens": "8000",
+          "x-ratelimit-remaining-requests": "999",
+          "x-ratelimit-remaining-tokens": "7529",
+          "x-ratelimit-reset-requests": "1m26.4s",
+          "x-ratelimit-reset-tokens": "3.532s",
+          "x-request-id": "(hidden)"
+        },
+        "body": "{\"id\":\"chatcmpl-e886dd07-fce6-4633-bb1d-b26a1615646c\",\"object\":\"chat.completion\",\"created\":1795517079,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"route\\\":\\\"free-2\\\",\\\"reason\\\":\\\"The question asks about chronological order of historical inventions (printing press and telescope) and the societal impact of printing on education, which fits the History tutor's expertise.\\\"}\",\"reasoning\":\"We need history for printing press vs telescope and impact on schools: history. Use free-2.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.166930032,\"prompt_tokens\":332,\"prompt_time\":0.061209939,\"completion_tokens\":75,\"completion_time\":0.156404355,\"total_tokens\":407,\"total_time\":0.217614294,\"completion_tokens_details\":{\"reasoning_tokens\":21}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_4200b3f836\",\"x_groq\":{\"id\":\"req_01m86jgqg1eymtevwb5j1z0nd2\",\"seed\":367337889},\"service_tier\":\"on_demand\"}\n"
+      },
+      "error": null,
+      "ms": 493,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 500
+    },
+    {
+      "type": "api_call",
+      "agent": "free-2",
+      "provider": "groq",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.groq.com/openai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"openai/gpt-oss-20b\",\"max_completion_tokens\":4000,\"reasoning_effort\":\"low\",\"messages\":[{\"role\":\"system\",\"content\":\"Role: free\\nYou are History tutor. You are a history tutor. Answer questions about dates, events and their effects.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Which came first, the printing press or the telescope, and how did printing change schools?\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "alt-svc": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 10:44:40 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "vary": "(hidden)",
+          "x-groq-region": "(hidden)",
+          "x-ratelimit-limit-requests": "1000",
+          "x-ratelimit-limit-tokens": "8000",
+          "x-ratelimit-remaining-requests": "999",
+          "x-ratelimit-remaining-tokens": "7302",
+          "x-ratelimit-reset-requests": "1m26.4s",
+          "x-ratelimit-reset-tokens": "5.234s",
+          "x-request-id": "(hidden)"
+        },
+        "body": "{\"id\":\"chatcmpl-ec266641-9704-48a1-859a-bcc3d8352f1c\",\"object\":\"chat.completion\",\"created\":1795517079,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The printing press predates the telescope by more than a century.  \\n\\n**Printing press**  \\n- Johannes Gutenberg’s movable‑type press was perfected around 1440 in Mainz, Germany.  \\n- The first major printed book, the *Erasmus Biblia* (1455), shows the technology was already in use.\\n\\n**Telescope**  \\n- The first practical telescope appeared in 1608 in the Netherlands, credited to Hans Lippershey (though the Dutch optician Jacob Metius also applied for a patent the same year).  \\n- Galileo’s improvements in 1609–1610 made it a scientific instrument.\\n\\nSo, Gutenberg’s press came first by about 160 years.\\n\\n---\\n\\n### How printing changed schools\\n\\n| Area | Before printing | After printing |\\n|------|-----------------|----------------|\\n| **Curriculum** | Textbooks were rare, handwritten manuscripts; knowledge varied by region. | Standardized books (e.g., Latin manuals, catechisms) were widely available, allowing a more uniform curriculum. |\\n| **Teaching methods** | Oral transmission and individual copying; teachers were sole custodians of knowledge. | Teachers could rely on printed texts as authoritative references, freeing them to focus on explanation rather than copying. |\\n| **Student access** | Limited to a few copies per classroom; learning often required copying. | Larger classes could all read the same material simultaneously, encouraging active reading and discussion. |\\n| **Intellectual exchange** | Ideas circulated slowly via manuscripts. | Rapid dissemination of new theories (e.g., Copernican astronomy, humanist studies) fostered scholarly debate and quicker progress. |\\n| **Linguistic impact** | Latin dominated, with local scripts for religious texts. | Vernacular books appeared (e.g., Luther’s Bible in German), making education accessible beyond elites. |\\n\\nIn short, the printing press transformed schools by providing standardized, affordable, and widely accessible texts, shifting teaching from memorization and copying to interpretation and critical analysis. This laid the groundwork for the modern educational system and accelerated the spread of scientific ideas, including the eventual invention and use of the telescope.\",\"reasoning\":\"Need to answer in \\u003c300 words.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.030479821,\"prompt_tokens\":131,\"prompt_time\":0.00633727,\"completion_tokens\":446,\"completion_time\":0.467186513,\"total_tokens\":577,\"total_time\":0.473523783,\"completion_tokens_details\":{\"reasoning_tokens\":9}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_92d51d08e5\",\"x_groq\":{\"id\":\"req_01m86jgqy3ekyaepm3gagv86es\",\"seed\":2144946913},\"service_tier\":\"on_demand\"}\n"
+      },
+      "error": null,
+      "ms": 550,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 1053
+    }
+  ],
+  "design": {
+    "pattern": "router",
+    "nodes": [
+      {
+        "id": "router",
+        "agent": "router",
+        "model": "balanced",
+        "search": false,
+        "slot": "groq-free",
+        "custom": true
+      },
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Maths tutor",
+        "instructions": "You are a maths tutor. Answer questions about numbers and calculation.",
+        "slot": "groq-free"
+      },
+      {
+        "id": "free-2",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "History tutor",
+        "instructions": "You are a history tutor. Answer questions about dates, events and their effects.",
+        "slot": "groq-free"
+      },
+      {
+        "id": "free-3",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Language tutor",
+        "instructions": "You are a language tutor. Answer questions about words, grammar and writing.",
+        "slot": "groq-free"
+      },
+      {
+        "id": "free-4",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Science tutor",
+        "instructions": "You are a science tutor. Answer questions about nature, instruments and discoveries.",
+        "slot": "groq-free"
+      }
+    ],
+    "edges": [
+      {
+        "from": "router",
+        "to": "free"
+      },
+      {
+        "from": "router",
+        "to": "free-2"
+      },
+      {
+        "from": "router",
+        "to": "free-3"
+      },
+      {
+        "from": "router",
+        "to": "free-4"
+      }
+    ]
+  },
+  "task": "Which came first, the printing press or the telescope, and how did printing change schools?",
+  "about": {
+    "title": "Router: four specialists, an unclear question",
+    "author": "Agent Atlas Academy",
+    "description": "The question fits two specialists, so the router has to choose, and the choice changes the answer.\n\n**What it teaches**\n\nA router can choose wrongly when a question fits more than one specialist; one choice, no second opinion.\n\n**What to watch**\n\nThe reason the router gives, and what the unchosen specialist would have said.\n\nRead more: [Router](#/learn/router)"
+  },
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 463,
+    "output": 521,
+    "searches": 0,
+    "steps": 2
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T10:44:38.471Z",
+  "endedAt": "2026-11-24T10:44:40.149Z",
+  "durationMs": 1678
+}

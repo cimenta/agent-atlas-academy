@@ -36,6 +36,7 @@
         "id": "debater",
         "agent": "debater",
         "model": "fast",
+        "slot": "google-free",
         "search": false,
         "stance": "for"
       },
@@ -43,6 +44,7 @@
         "id": "debater-2",
         "agent": "debater",
         "model": "fast",
+        "slot": "google-free",
         "search": false,
         "stance": "against"
       },
@@ -50,6 +52,7 @@
         "id": "judge",
         "agent": "judge",
         "model": "fast",
+        "slot": "google-free",
         "search": false
       }
     ],

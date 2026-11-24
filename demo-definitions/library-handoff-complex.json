@@ -37,6 +37,7 @@
         "id": "helpdesk",
         "agent": "free",
         "model": "fast",
+        "slot": "anthropic",
         "search": false,
         "name": "Help desk",
         "instructions": "You answer first. Hand over to the best expert with a short note, or answer yourself when it is simple."
@@ -45,6 +46,7 @@
         "id": "accounts",
         "agent": "free",
         "model": "fast",
+        "slot": "anthropic",
         "search": false,
         "name": "Accounts expert",
         "instructions": "You fix login and password problems. If the problem is not about accounts, hand over."
@@ -53,6 +55,7 @@
         "id": "network",
         "agent": "free",
         "model": "fast",
+        "slot": "anthropic",
         "search": false,
         "name": "Network expert",
         "instructions": "You fix network and connection problems. If the problem is about the device itself, hand over."
@@ -61,6 +64,7 @@
         "id": "hardware",
         "agent": "free",
         "model": "fast",
+        "slot": "anthropic",
         "search": false,
         "name": "Hardware expert",
         "instructions": "You fix slow or broken devices. Give clear steps a student can try."

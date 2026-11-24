@@ -1,6 +1,6 @@
 {
-  "about": "A supervisor splits a small task between workers and puts their answers together.",
-  "how": "The supervisor decides who works next and when the answer is good enough.",
-  "learns": "What a supervisor adds over a plain chain, and what it costs.",
-  "watch": "The supervisor decisions between the worker steps."
+  "about": "A supervisor asks a researcher for facts and a writer for the text, then returns the finished welcome message for a school coding club. Runs on Anthropic.",
+  "how": "The supervisor answers with JSON only and each time chooses a worker or finishes; every result returns to the supervisor.",
+  "learns": "A supervisor decides who works next and sees every result.",
+  "watch": "The supervisor's instruction to each worker, and what it pasted from one worker to the other."
 }

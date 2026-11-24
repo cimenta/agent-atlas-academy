@@ -21,7 +21,8 @@
     },
     "tags": [
       "tool-choice",
-      "decision-making"
+      "decision-making",
+      "risk-analysis"
     ],
     "teaches": {
       "en": "A router can choose wrongly when a question fits more than one specialist; one choice, no second opinion.",
@@ -35,12 +36,14 @@
         "id": "router",
         "agent": "router",
         "model": "balanced",
+        "slot": "groq-free",
         "search": false
       },
       {
         "id": "maths",
         "agent": "free",
         "model": "fast",
+        "slot": "groq-free",
         "search": false,
         "name": "Maths tutor",
         "instructions": "You are a maths tutor. Answer questions about numbers and calculation."
@@ -49,6 +52,7 @@
         "id": "history",
         "agent": "free",
         "model": "fast",
+        "slot": "groq-free",
         "search": false,
         "name": "History tutor",
         "instructions": "You are a history tutor. Answer questions about dates, events and their effects."
@@ -57,6 +61,7 @@
         "id": "language",
         "agent": "free",
         "model": "fast",
+        "slot": "groq-free",
         "search": false,
         "name": "Language tutor",
         "instructions": "You are a language tutor. Answer questions about words, grammar and writing."
@@ -65,6 +70,7 @@
         "id": "science",
         "agent": "free",
         "model": "fast",
+        "slot": "groq-free",
         "search": false,
         "name": "Science tutor",
         "instructions": "You are a science tutor. Answer questions about nature, instruments and discoveries."

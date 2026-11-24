@@ -1,0 +1,6 @@
+{
+  "about": "One router and four specialists, on three free providers: the router on Groq, the history and maths tutors on Gemini, the language and science tutors on OpenRouter. The router chose the history tutor.",
+  "how": "Every agent has its own key slot. The router answers with JSON; only the chosen specialist is started, on its own provider.",
+  "learns": "One design can use several providers; each agent runs on the one that suits it, and the replay shows who answered.",
+  "watch": "The colour and provider of each agent, and the statistics split by provider."
+}

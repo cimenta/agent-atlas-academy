@@ -1,0 +1,9 @@
+{
+  "0": "Každý běh začíná zadáním. Tady může každý agent běžet na jiném provideru.",
+  "1": "Začíná směrovač. Jeho provider je Groq.",
+  "3": "Směrovač vybere jednoho specialistu a uvede důvod.",
+  "4": "Předání spustí jen vybraného specialistu, a to u providera jeho vlastního slotu (tady Gemini).",
+  "5": "Specialista začíná a vidí zadání. Všimněte si jeho barvy: je to jiný provider než u směrovače.",
+  "7": "Odpověď specialisty.",
+  "8": "Běh končí. Statistika ukazuje tokeny rozdělené podle providera."
+}

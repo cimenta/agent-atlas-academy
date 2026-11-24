@@ -21,7 +21,8 @@
     },
     "tags": [
       "parallel-work",
-      "combining-answers"
+      "combining-answers",
+      "speed"
     ],
     "teaches": {
       "en": "One worker design runs many times on different parts, so the work grows with the task, not with the number of agents.",
@@ -35,18 +36,21 @@
         "id": "splitter",
         "agent": "splitter",
         "model": "fast",
+        "slot": "cloudflare-free",
         "search": false
       },
       {
         "id": "worker",
         "agent": "worker",
         "model": "fast",
+        "slot": "cloudflare-free",
         "search": false
       },
       {
         "id": "reducer",
         "agent": "reducer",
         "model": "fast",
+        "slot": "cloudflare-free",
         "search": false
       }
     ],

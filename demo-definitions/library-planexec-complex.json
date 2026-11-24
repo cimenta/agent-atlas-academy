@@ -36,12 +36,14 @@
         "id": "planner",
         "agent": "planner",
         "model": "balanced",
+        "slot": "groq-free",
         "search": false
       },
       {
         "id": "executor",
         "agent": "executor",
         "model": "fast",
+        "slot": "groq-free",
         "search": false
       }
     ],

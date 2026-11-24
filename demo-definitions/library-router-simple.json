@@ -21,7 +21,8 @@
     },
     "tags": [
       "basics",
-      "tool-choice"
+      "tool-choice",
+      "cost"
     ],
     "teaches": {
       "en": "A router chooses one path and the others are never started, so it saves work.",
@@ -35,12 +36,14 @@
         "id": "router",
         "agent": "router",
         "model": "fast",
+        "slot": "groq-free",
         "search": false
       },
       {
         "id": "maths",
         "agent": "free",
         "model": "fast",
+        "slot": "groq-free",
         "search": false,
         "name": "Maths tutor",
         "instructions": "You are a patient maths tutor. Explain step by step with one worked example."
@@ -49,6 +52,7 @@
         "id": "language",
         "agent": "free",
         "model": "fast",
+        "slot": "groq-free",
         "search": false,
         "name": "Language tutor",
         "instructions": "You are a patient language tutor. Explain grammar and writing questions with one example."

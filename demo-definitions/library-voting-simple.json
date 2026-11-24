@@ -21,7 +21,8 @@
     },
     "tags": [
       "decision-making",
-      "disagreement"
+      "disagreement",
+      "risk-analysis"
     ],
     "teaches": {
       "en": "Independent answers can disagree; a vote shows how sure the group is, not who is right.",
@@ -35,6 +36,7 @@
         "id": "voter-1",
         "agent": "free",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false,
         "name": "Botanist",
         "instructions": "Answer as a botanist. Start with your single choice."
@@ -43,6 +45,7 @@
         "id": "voter-2",
         "agent": "free",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false,
         "name": "Cook",
         "instructions": "Answer as a cook. Start with your single choice."
@@ -51,6 +54,7 @@
         "id": "voter-3",
         "agent": "free",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false,
         "name": "Child",
         "instructions": "Answer as a curious ten-year-old. Start with your single choice."
@@ -59,6 +63,7 @@
         "id": "tally",
         "agent": "tally",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false
       }
     ],

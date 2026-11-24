@@ -36,6 +36,7 @@
         "id": "voter-1",
         "agent": "free",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false,
         "name": "Teacher",
         "instructions": "Answer as a school teacher. Start with your single choice."
@@ -44,6 +45,7 @@
         "id": "voter-2",
         "agent": "free",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false,
         "name": "Developer",
         "instructions": "Answer as a professional developer. Start with your single choice."
@@ -52,6 +54,7 @@
         "id": "voter-3",
         "agent": "free",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false,
         "name": "Parent",
         "instructions": "Answer as a parent of a 12-year-old. Start with your single choice."
@@ -60,6 +63,7 @@
         "id": "voter-4",
         "agent": "free",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false,
         "name": "Student",
         "instructions": "Answer as a 12-year-old who wants to build a game. Start with your single choice."
@@ -68,6 +72,7 @@
         "id": "voter-5",
         "agent": "free",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false,
         "name": "Skeptic",
         "instructions": "Answer as a skeptic who doubts the usual advice. Start with your single choice."
@@ -76,6 +81,7 @@
         "id": "tally",
         "agent": "tally",
         "model": "balanced",
+        "slot": "openrouter-free",
         "search": false
       }
     ],

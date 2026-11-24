@@ -21,7 +21,8 @@
     },
     "tags": [
       "handoff",
-      "tool-choice"
+      "tool-choice",
+      "prompt-chaining"
     ],
     "teaches": {
       "en": "In a handoff control moves forward and nothing stands above it; the note is all the next agent knows.",
@@ -36,6 +37,7 @@
         "id": "helpdesk",
         "agent": "free",
         "model": "fast",
+        "slot": "anthropic",
         "search": false,
         "name": "Help desk",
         "instructions": "You answer first. If the problem is about the network, hand over to the network expert with a short note. Otherwise answer yourself."
@@ -44,6 +46,7 @@
         "id": "network",
         "agent": "free",
         "model": "fast",
+        "slot": "anthropic",
         "search": false,
         "name": "Network expert",
         "instructions": "You fix network problems. Give clear steps a student can try."

@@ -1,5 +1,5 @@
 // Adds one exported run to the Library: checks it, writes public/runs/<id>.json and puts its entry into public/runs/index.json.
-//   node scripts/add-library-run.js <exported-run.json> --id <slug> --level <1-3> --path <goal>:<step> [--path <goal>:<step> ...]
+//   node scripts/add-library-run.js <exported-run.json> --id <slug> --level <1-3> [--path <goal>:<step> ...]  (no --path: the run is in the list only, not on the recommended path)
 //        [--kind pair|bad] [--twin <id>] [--tags a,b] [--home] [--time-scale <n>] [--teaches-en <text>] [--teaches-cs <text>]
 //        [--definition <definition.json>]  (its library section gives level, kind, twin, path, tags and teaches; the options above win)
 import { readFileSync, writeFileSync } from "node:fs";
@@ -62,7 +62,6 @@ export function addRun({ run, options, readIndex, writeFile }) {
   if (!Number.isInteger(level) || level < 1 || level > 3) throw new Error("The level must be 1, 2 or 3");
   if (kind !== undefined && kind !== "pair" && kind !== "bad") throw new Error('The kind must be "pair" or "bad"');
   const goals = Object.entries(paths ?? {});
-  if (goals.length === 0) throw new Error("A run needs at least one --path <goal>:<step>");
   for (const [goal, step] of goals) {
     if (!GOALS.includes(goal)) throw new Error(`Unknown goal "${goal}"; the goals are ${GOALS.join(", ")}`);
     if (!Number.isInteger(step) || step < 1) throw new Error(`The step of the goal ${goal} must be a whole number from 1`);

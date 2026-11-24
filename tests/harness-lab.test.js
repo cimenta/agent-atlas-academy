@@ -66,7 +66,7 @@ test("the slider ranges leave room above what the run used", () => {
 test("every recorded run of the library can be played in the lab", () => {
   const dir = new URL("../public/runs/", import.meta.url);
   const ids = readdirSync(dir).filter((f) => /^[a-z-]+\.json$/.test(f) && f !== "index.json");
-  assert.ok(ids.length >= 9);
+  assert.ok(ids.length >= 4);
   for (const f of ids) {
     const steps = labSteps(JSON.parse(readFileSync(new URL(f, dir), "utf8")));
     assert.ok(steps.length > 0, f);

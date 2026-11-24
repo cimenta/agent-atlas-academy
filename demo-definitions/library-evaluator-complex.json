@@ -21,7 +21,8 @@
     },
     "tags": [
       "explaining",
-      "decision-making"
+      "decision-making",
+      "disagreement"
     ],
     "teaches": {
       "en": "Good criteria decide the quality; every extra round costs tokens, and the loop stops when the work is accepted.",
@@ -35,12 +36,14 @@
         "id": "writer",
         "agent": "writer",
         "model": "fast",
+        "slot": "google-free",
         "search": false
       },
       {
         "id": "evaluator",
         "agent": "evaluator",
         "model": "balanced",
+        "slot": "google-free",
         "search": false
       }
     ],

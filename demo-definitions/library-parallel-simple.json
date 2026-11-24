@@ -36,6 +36,7 @@
         "id": "cook",
         "agent": "free",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false,
         "name": "Home cook",
         "instructions": "Answer as an experienced home cook. Give practical ways to waste less food in a normal kitchen."
@@ -44,6 +45,7 @@
         "id": "shopper",
         "agent": "free",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false,
         "name": "Shopper",
         "instructions": "Answer as a careful shopper. Give ways to buy only what gets eaten."
@@ -52,6 +54,7 @@
         "id": "combiner",
         "agent": "combiner",
         "model": "fast",
+        "slot": "openrouter-free",
         "search": false
       }
     ],

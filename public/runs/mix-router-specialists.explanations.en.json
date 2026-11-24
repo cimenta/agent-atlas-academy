@@ -1,0 +1,9 @@
+{
+  "0": "Every run starts with a task. Here every agent can run on a different provider.",
+  "1": "The Router starts. Its provider is Groq.",
+  "3": "The Router chooses one specialist and gives a reason.",
+  "4": "The handoff starts only the chosen specialist, on the provider of its own slot (here Gemini).",
+  "5": "The specialist starts and sees the task. Look at its colour: it is another provider than the Router.",
+  "7": "The specialist's answer.",
+  "8": "The run ends. The statistics show tokens split by provider."
+}

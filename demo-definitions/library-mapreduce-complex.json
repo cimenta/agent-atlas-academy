@@ -36,18 +36,21 @@
         "id": "splitter",
         "agent": "splitter",
         "model": "fast",
+        "slot": "cloudflare-free",
         "search": false
       },
       {
         "id": "worker",
         "agent": "worker",
         "model": "fast",
+        "slot": "cloudflare-free",
         "search": false
       },
       {
         "id": "reducer",
         "agent": "reducer",
         "model": "balanced",
+        "slot": "cloudflare-free",
         "search": false
       }
     ],

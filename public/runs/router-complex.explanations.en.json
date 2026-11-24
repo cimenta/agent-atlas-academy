@@ -1,0 +1,9 @@
+{
+  "0": "Every run starts with a task. The question fits both the history and the science tutor.",
+  "1": "The Router starts. It sees the task and the list of specialists.",
+  "3": "The Router chooses one specialist and gives a reason. Nobody checks the choice.",
+  "4": "The handoff starts only the chosen specialist; the others are never called.",
+  "5": "The chosen specialist starts and sees the task.",
+  "7": "The specialist's answer. Ask yourself what another tutor would have added.",
+  "8": "The run ends. The final answer is the specialist's text."
+}

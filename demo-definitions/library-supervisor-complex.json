@@ -36,30 +36,35 @@
         "id": "supervisor",
         "agent": "supervisor",
         "model": "balanced",
+        "slot": "anthropic",
         "search": false
       },
       {
         "id": "researcher",
         "agent": "researcher",
         "model": "fast",
+        "slot": "anthropic",
         "search": false
       },
       {
         "id": "writer",
         "agent": "writer",
         "model": "fast",
+        "slot": "anthropic",
         "search": false
       },
       {
         "id": "critic",
         "agent": "critic",
         "model": "fast",
+        "slot": "anthropic",
         "search": false
       },
       {
         "id": "treasurer",
         "agent": "free",
         "model": "fast",
+        "slot": "anthropic",
         "search": false,
         "name": "Treasurer",
         "instructions": "You keep the budget. Give a simple budget with amounts in euros."

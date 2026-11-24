@@ -36,24 +36,28 @@
         "id": "planner",
         "agent": "planner",
         "model": "fast",
+        "slot": "cloudflare-free",
         "search": false
       },
       {
         "id": "researcher",
         "agent": "researcher",
         "model": "fast",
+        "slot": "cloudflare-free",
         "search": false
       },
       {
         "id": "writer",
         "agent": "writer",
         "model": "fast",
+        "slot": "cloudflare-free",
         "search": false
       },
       {
         "id": "critic",
         "agent": "critic",
         "model": "balanced",
+        "slot": "cloudflare-free",
         "search": false
       }
     ],

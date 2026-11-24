@@ -1,0 +1,6 @@
+{
+  "about": "The question about the printing press and the telescope fits two tutors. The router, on Groq, picks one and only that tutor answers.",
+  "how": "The router answers with JSON: the chosen specialist and the reason. Only that specialist is started.",
+  "learns": "A router can choose wrongly when a question fits more than one specialist; one choice, no second opinion.",
+  "watch": "The reason the router gives, and what the unchosen specialist would have said."
+}

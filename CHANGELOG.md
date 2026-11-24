@@ -79,6 +79,9 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Library, first recorded runs: sequential-simple (Cloudflare), supervisor-simple (Anthropic), router-complex (Groq) and the new mix-router-specialists (Groq, Gemini and OpenRouter in one run) are in the library with details and explanations in English and Czech. The add-library-run script now accepts a run without a path (it is then only in the list). Every library definition has at least three tags. The seven older example runs are removed from the library; only the new ones stay.
+- Library, wave 1 definitions: the ten patterns are spread evenly over the five providers (two each: Cloudflare, OpenRouter, Anthropic, Gemini, Groq) with a key slot on every agent instead of Anthropic only; only the supervisor and handoff runs are paid.
+- Settings, Security: the provider chips wrap to a second row instead of shrinking, so the word Anthropic is no longer cut off at the edge of its chip.
 - Library: the tag cloud button next to the cog is gone; the tag cloud is the Tags tab of the right side. The first visit shows the recommended path instead of the tag cloud.
 - Settings, Cloudflare: the account ID and the API token have a box each. The app joins them into ACCOUNT_ID:TOKEN, the one field it keeps, so stored keys and backups are unchanged; a whole ACCOUNT_ID:TOKEN pasted into the token box is still accepted.
 - The message of the time limit (270 s per run) says that Settings cannot raise it and what can be done: continue the run, or make it shorter with fewer agents or rounds or a faster model.

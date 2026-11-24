@@ -1,0 +1,95 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "How did the printing press change the way children learned to read at school?",
+  "about": {
+    "en": {
+      "title": "Three providers in one run: a router and its specialists",
+      "author": "Agent Atlas Academy",
+      "description": "The router runs on Groq, the history and maths tutors on Gemini, the language and science tutors on OpenRouter. The router picks one specialist and the others stay idle. Every agent has its own key, so one run mixes providers at no cost.\n\n**What it teaches**\n\nOne design can use several providers; each agent can run on the one that suits it, and the replay shows which provider answered.\n\n**What to watch**\n\nThe colour of each agent, which specialist the router chooses, and the statistics split by provider.\n\nRead more: [Router](#/learn/router)"
+    },
+    "cs": {
+      "title": "Tři providery v jednom běhu: směrovač a jeho specialisté",
+      "author": "Agent Atlas Academy",
+      "description": "Směrovač běží na Groq, učitelé dějepisu a matematiky na Gemini, učitelé jazyka a přírodovědy na OpenRouter. Směrovač vybere jednoho specialistu a ostatní zůstanou nečinní. Každý agent má vlastní klíč, takže jeden běh míchá providery zdarma.\n\n**Čemu se naučíte**\n\nJeden návrh může používat víc providerů; každý agent poběží na tom, který se mu hodí, a replay ukáže, který provider odpověděl.\n\n**Na co se dívat**\n\nBarvu každého agenta, kterého specialistu směrovač zvolí a statistiku rozdělenou podle providera.\n\nVíce si přečtěte: [Směrovač](#/learn/router)"
+    }
+  },
+  "library": {
+    "level": 3,
+    "tags": [
+      "tool-choice",
+      "decision-making",
+      "cost"
+    ],
+    "teaches": {
+      "en": "One design can use several providers; each agent runs on the one that suits it, and the replay shows who answered.",
+      "cs": "Jeden návrh může používat víc providerů; každý agent běží na tom, který se mu hodí, a replay ukáže, kdo odpověděl."
+    }
+  },
+  "design": {
+    "pattern": "router",
+    "nodes": [
+      {
+        "id": "router",
+        "agent": "router",
+        "model": "balanced",
+        "slot": "groq-free",
+        "search": false
+      },
+      {
+        "id": "history",
+        "agent": "free",
+        "model": "fast",
+        "slot": "google-free",
+        "search": false,
+        "name": "History tutor",
+        "instructions": "You are a history tutor. Answer questions about dates, events and their effects."
+      },
+      {
+        "id": "language",
+        "agent": "free",
+        "model": "fast",
+        "slot": "openrouter-free",
+        "search": false,
+        "name": "Language tutor",
+        "instructions": "You are a language tutor. Answer questions about words, reading and writing."
+      },
+      {
+        "id": "maths",
+        "agent": "free",
+        "model": "fast",
+        "slot": "google-free",
+        "search": false,
+        "name": "Maths tutor",
+        "instructions": "You are a maths tutor. Answer questions about numbers and calculation."
+      },
+      {
+        "id": "science",
+        "agent": "free",
+        "model": "fast",
+        "slot": "openrouter-free",
+        "search": false,
+        "name": "Science tutor",
+        "instructions": "You are a science tutor. Answer questions about nature, instruments and discoveries."
+      }
+    ],
+    "edges": [
+      {
+        "from": "router",
+        "to": "history"
+      },
+      {
+        "from": "router",
+        "to": "language"
+      },
+      {
+        "from": "router",
+        "to": "maths"
+      },
+      {
+        "from": "router",
+        "to": "science"
+      }
+    ]
+  }
+}

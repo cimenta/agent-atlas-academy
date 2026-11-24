@@ -1,6 +1,6 @@
 {
-  "about": "Supervizor rozdělí malý úkol mezi pracovníky a jejich odpovědi složí dohromady.",
-  "how": "Supervizor rozhoduje, kdo pracuje dál a kdy je odpověď dost dobrá.",
-  "learns": "Co supervizor přidává oproti obyčejnému řetězci a kolik to stojí.",
-  "watch": "Rozhodnutí supervizora mezi kroky pracovníků."
+  "about": "Supervizor požádá výzkumníka o fakta a pisatele o text a pak vrátí hotovou uvítací zprávu pro školní kroužek programování. Běží na Anthropicu.",
+  "how": "Supervizor odpovídá jen JSON a pokaždé zvolí pracovníka nebo skončí; každý výsledek se vrací k němu.",
+  "learns": "Supervizor rozhoduje, kdo bude pracovat dál, a vidí každý výsledek.",
+  "watch": "Pokyn supervizora každému pracovníkovi a to, co vložil z jednoho pracovníka do druhého."
 }

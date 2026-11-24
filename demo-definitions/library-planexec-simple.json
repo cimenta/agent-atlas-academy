@@ -21,7 +21,8 @@
     },
     "tags": [
       "planning",
-      "prompt-chaining"
+      "prompt-chaining",
+      "handoff"
     ],
     "teaches": {
       "en": "A plan made first gives the run a shape, and the executor follows it even when a step turns out to be needless.",
@@ -35,12 +36,14 @@
         "id": "planner",
         "agent": "planner",
         "model": "fast",
+        "slot": "groq-free",
         "search": false
       },
       {
         "id": "executor",
         "agent": "executor",
         "model": "fast",
+        "slot": "groq-free",
         "search": false
       }
     ],

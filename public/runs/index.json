@@ -2,12 +2,12 @@
   "runs": [
     {
       "id": "sequential-simple",
-      "title": "Explain why the sky is blue.",
+      "title": "Explain in three sentences, for a ten-year-old, why the sky …",
       "pattern": "sequential",
       "language": "en",
-      "timeScale": 2,
+      "timeScale": 3,
       "home": true,
-      "provider": "anthropic",
+      "provider": "cloudflare",
       "outcome": "finished",
       "detail": [
         "en",
@@ -16,31 +16,23 @@
       "tags": [
         "basics",
         "prompt-chaining",
-        "handoff",
         "explaining"
-      ]
-    },
-    {
-      "id": "sequential-complex",
-      "title": "Should a small company run its own servers or move everything to the cloud?",
-      "pattern": "sequential",
-      "language": "en",
-      "timeScale": 3,
-      "provider": "anthropic",
-      "outcome": "finished",
-      "tags": [
-        "prompt-chaining",
-        "handoff",
-        "decision-making",
-        "cost"
-      ]
+      ],
+      "level": 1,
+      "paths": {
+        "patterns": 1
+      },
+      "teaches": {
+        "en": "How a chain passes work along: each agent gets the text of the one before it.",
+        "cs": "Jak řetěz předává práci dál: každý agent dostane text toho před sebou."
+      }
     },
     {
       "id": "supervisor-simple",
-      "title": "Explain how noise-cancelling headphones work, in two short paragraphs for a teenager.",
+      "title": "Write a short welcome message for new members of a school co…",
       "pattern": "supervisor",
       "language": "en",
-      "timeScale": 2,
+      "timeScale": 3,
       "provider": "anthropic",
       "outcome": "finished",
       "detail": [
@@ -48,101 +40,68 @@
         "cs"
       ],
       "tags": [
-        "supervisor",
-        "tool-choice",
-        "explaining"
-      ]
-    },
-    {
-      "id": "supervisor-complex",
-      "title": "A small cafe wants to start selling coffee beans online. Prepare a one-page action plan with the main risks.",
-      "pattern": "supervisor",
-      "language": "en",
-      "timeScale": 3,
-      "provider": "anthropic",
-      "outcome": "finished",
-      "tags": [
-        "supervisor",
-        "tool-choice",
-        "planning",
-        "risk-analysis"
-      ]
-    },
-    {
-      "id": "parallel-simple",
-      "title": "Name three ways to reduce food waste at home.",
-      "pattern": "parallel",
-      "language": "en",
-      "timeScale": 2,
-      "provider": "anthropic",
-      "outcome": "finished",
-      "tags": [
         "basics",
-        "parallel-work",
-        "combining-answers",
-        "speed"
-      ]
+        "supervisor",
+        "planning"
+      ],
+      "level": 1,
+      "paths": {
+        "patterns": 3
+      },
+      "teaches": {
+        "en": "With a supervisor every result returns to the boss, who decides what happens next.",
+        "cs": "U supervizora se každý výsledek vrací šéfovi, který rozhodne, co dál."
+      }
     },
     {
-      "id": "parallel-complex",
-      "title": "A town of 20000 people wants to reduce car traffic in its centre. Which measures would work best, and what are the risks?",
-      "pattern": "parallel",
+      "id": "router-complex",
+      "title": "Which came first, the printing press or the telescope, and h…",
+      "pattern": "router",
       "language": "en",
       "timeScale": 3,
-      "provider": "anthropic",
+      "provider": "groq",
       "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
       "tags": [
-        "parallel-work",
-        "combining-answers",
-        "speed",
+        "tool-choice",
         "decision-making",
         "risk-analysis"
-      ]
+      ],
+      "level": 2,
+      "paths": {
+        "patterns": 10
+      },
+      "teaches": {
+        "en": "A router can choose wrongly when a question fits more than one specialist; one choice, no second opinion.",
+        "cs": "Směrovač se může splést, když otázka sedí víc specialistům; jedna volba a žádný druhý názor."
+      }
     },
     {
-      "id": "debate-complex",
-      "title": "Should a town of 20000 people ban cars from its centre?",
-      "pattern": "debate",
+      "id": "mix-router-specialists",
+      "title": "How did the printing press change the way children learned t…",
+      "pattern": "router",
       "language": "en",
       "timeScale": 3,
-      "provider": "anthropic",
+      "provider": "groq+google+openrouter",
       "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
       "tags": [
-        "debate",
-        "disagreement",
+        "tool-choice",
         "decision-making",
         "cost"
-      ]
-    },
-    {
-      "id": "debate-simple",
-      "title": "Should schools start later in the morning?",
-      "pattern": "debate",
-      "language": "en",
-      "timeScale": 2,
-      "provider": "anthropic",
-      "outcome": "finished",
-      "tags": [
-        "basics",
-        "debate",
-        "disagreement",
-        "decision-making"
-      ]
-    },
-    {
-      "id": "supervisor-parallel",
-      "title": "A small cafe wants to start selling coffee beans online. Prepare a one-page action plan with the main risks. Two things can be researched independently, so research them at the same time.",
-      "pattern": "supervisor",
-      "language": "en",
-      "timeScale": 3,
-      "provider": "anthropic",
-      "outcome": "finished",
-      "tags": [
-        "supervisor",
-        "parallel-work",
-        "speed",
-        "planning"
-      ]
+      ],
+      "level": 3,
+      "paths": {},
+      "teaches": {
+        "en": "One design can use several providers; each agent runs on the one that suits it, and the replay shows who answered.",
+        "cs": "Jeden návrh může používat víc providerů; každý agent běží na tom, který se mu hodí, a replay ukáže, kdo odpověděl."
+      }
     }
   ]
 }

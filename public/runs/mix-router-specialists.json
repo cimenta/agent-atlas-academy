@@ -1,0 +1,422 @@
+{
+  "schemaVersion": 1,
+  "id": "mix-router-specialists",
+  "title": "How did the printing press change the way children learned t…",
+  "language": "en",
+  "pattern": "router",
+  "recordedWith": {
+    "provider": "groq+google+openrouter",
+    "model": "openai/gpt-oss-120b, gemini-3.5-flash-lite, google/gemma-4-26b-a4b-it:free",
+    "freeTier": true
+  },
+  "appVersion": "1.16.10-dev.0",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "How did the printing press change the way children learned to read at school?",
+      "pattern": "router",
+      "design": {
+        "pattern": "router",
+        "nodes": [
+          {
+            "id": "router",
+            "agent": "router",
+            "model": "balanced",
+            "search": false,
+            "slot": "groq-free",
+            "custom": true
+          },
+          {
+            "id": "free",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "History tutor",
+            "instructions": "You are a history tutor. Answer questions about dates, events and their effects.",
+            "slot": "google-free",
+            "custom": true
+          },
+          {
+            "id": "free-2",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Language tutor",
+            "instructions": "You are a language tutor. Answer questions about words, reading and writing.",
+            "slot": "openrouter-free",
+            "custom": true
+          },
+          {
+            "id": "free-3",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Maths tutor",
+            "instructions": "You are a maths tutor. Answer questions about numbers and calculation.",
+            "slot": "google-free",
+            "custom": true
+          },
+          {
+            "id": "free-4",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Science tutor",
+            "instructions": "You are a science tutor. Answer questions about nature, instruments and discoveries.",
+            "slot": "openrouter-free",
+            "custom": true
+          }
+        ],
+        "edges": [
+          {
+            "from": "router",
+            "to": "free"
+          },
+          {
+            "from": "router",
+            "to": "free-2"
+          },
+          {
+            "from": "router",
+            "to": "free-3"
+          },
+          {
+            "from": "router",
+            "to": "free-4"
+          }
+        ]
+      },
+      "t": 2
+    },
+    {
+      "type": "agent_start",
+      "agent": "router",
+      "role": "Router",
+      "model": "openai/gpt-oss-120b",
+      "tools": [],
+      "system": "Role: router\nYou are the Router. You read the task and choose exactly one specialist to answer it. The first message lists the specialist ids and what each one is for. You do not answer the task yourself, and you will not see the specialist's answer. Choose the specialist whose role fits the task best.\nReply with JSON only, in this form:\n{\"route\":\"<specialist id>\",\"reason\":\"<why this specialist fits the task>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 5
+    },
+    {
+      "type": "round",
+      "agent": "router",
+      "round": 1,
+      "ms": 416,
+      "stop": "end_turn",
+      "usage": {
+        "input": 329,
+        "output": 63
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: How did the printing press change the way children learned to read at school?\n\nYou may route to: free (History tutor: You are a history tutor. Answer questions about dates; events and their effects.), free-2 (Language tutor: You are a language tutor. Answer questions about words; reading and writing.), free-3 (Maths tutor: You are a maths tutor. Answer questions about numbers and calculation.), free-4 (Science tutor: You are a science tutor. Answer questions about nature; instruments and discover)"
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"route\": \"free\",\n  \"reason\": \"The question asks about the historical impact of the printing press on children's reading education, which fits the History tutor's expertise in events and their effects.\"\n}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "openai/gpt-oss-120b",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1,
+          "forced": true
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "openai/gpt-oss-120b",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 329,
+            "output_tokens": 63
+          }
+        }
+      },
+      "t": 421
+    },
+    {
+      "type": "agent_output",
+      "agent": "router",
+      "text": "{\n  \"route\": \"free\",\n  \"reason\": \"The question asks about the historical impact of the printing press on children's reading education, which fits the History tutor's expertise in events and their effects.\"\n}",
+      "tokens": {
+        "input": 329,
+        "output": 63
+      },
+      "t": 421
+    },
+    {
+      "type": "handoff",
+      "from": "router",
+      "to": "free",
+      "note": "The question asks about the historical impact of the printing press on children's reading education, which fits the History tutor's expertise in events and their effects.",
+      "t": 422
+    },
+    {
+      "type": "agent_start",
+      "agent": "free",
+      "role": "History tutor",
+      "model": "gemini-3.5-flash-lite",
+      "tools": [],
+      "system": "Role: free\nYou are History tutor. You are a history tutor. Answer questions about dates, events and their effects.\nKeep every reply under 300 words. Answer in English.",
+      "t": 422
+    },
+    {
+      "type": "round",
+      "agent": "free",
+      "round": 1,
+      "ms": 2367,
+      "stop": "end_turn",
+      "usage": {
+        "input": 58,
+        "output": 371
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: How did the printing press change the way children learned to read at school?"
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "Before the invention of Johannes Gutenberg’s movable-type printing press around 1440, books were painstakingly copied by hand. Because they were extremely rare and expensive, children rarely used books in school. Instead, lessons relied heavily on oral memorization, recitation, and teachers reading aloud from a single manuscript.\n\nThe printing press revolutionized early education by making books cheap, abundant, and accessible. Here is how it changed the way children learned to read:\n\n**1. The Rise of Textbooks**\nPrinted primers, grammars, and alphabet books suddenly became widely available. The most famous early tool was the \"hornbook\"—a wooden paddle featuring a printed sheet with the alphabet and the Lord’s Prayer, protected by a thin layer of transparent animal horn. Later, illustrated books like John Amos Comenius’s *Orbis Sensualium Pictus* (1658) used pictures paired with text, transforming how young minds connected words to meanings.\n\n**2. Shift from Oral to Visual Learning**\nWith their own copies of texts, children shifted from passive listeners to active readers. Instead of just memorizing what the teacher said, students could trace letters with their eyes, practice phonics, and read independently.\n\n**3. Standardization of Language**\nPrinted books used consistent spelling and grammar. As these books circulated in schools, they helped standardize regional dialects, ensuring children learned a unified national language.\n\n**4. Mass Literacy**\nBy the 16th and 17th centuries, schooling expanded beyond the elite. As reading materials became affordable for middle-class families, literacy rates soared across Europe, laying the foundation for modern mass education systems. \n\nIn short, the printing press turned reading from an exclusive, memory-based privilege into an individual, widespread skill taught with standardized tools."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "gemini-3.5-flash-lite",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "gemini-3.5-flash-lite",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 58,
+            "output_tokens": 371
+          }
+        }
+      },
+      "t": 2789
+    },
+    {
+      "type": "agent_output",
+      "agent": "free",
+      "text": "Before the invention of Johannes Gutenberg’s movable-type printing press around 1440, books were painstakingly copied by hand. Because they were extremely rare and expensive, children rarely used books in school. Instead, lessons relied heavily on oral memorization, recitation, and teachers reading aloud from a single manuscript.\n\nThe printing press revolutionized early education by making books cheap, abundant, and accessible. Here is how it changed the way children learned to read:\n\n**1. The Rise of Textbooks**\nPrinted primers, grammars, and alphabet books suddenly became widely available. The most famous early tool was the \"hornbook\"—a wooden paddle featuring a printed sheet with the alphabet and the Lord’s Prayer, protected by a thin layer of transparent animal horn. Later, illustrated books like John Amos Comenius’s *Orbis Sensualium Pictus* (1658) used pictures paired with text, transforming how young minds connected words to meanings.\n\n**2. Shift from Oral to Visual Learning**\nWith their own copies of texts, children shifted from passive listeners to active readers. Instead of just memorizing what the teacher said, students could trace letters with their eyes, practice phonics, and read independently.\n\n**3. Standardization of Language**\nPrinted books used consistent spelling and grammar. As these books circulated in schools, they helped standardize regional dialects, ensuring children learned a unified national language.\n\n**4. Mass Literacy**\nBy the 16th and 17th centuries, schooling expanded beyond the elite. As reading materials became affordable for middle-class families, literacy rates soared across Europe, laying the foundation for modern mass education systems. \n\nIn short, the printing press turned reading from an exclusive, memory-based privilege into an individual, widespread skill taught with standardized tools.",
+      "tokens": {
+        "input": 58,
+        "output": 371
+      },
+      "t": 2789
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 387,
+        "output": 434,
+        "searches": 0,
+        "steps": 2
+      },
+      "finalText": "Before the invention of Johannes Gutenberg’s movable-type printing press around 1440, books were painstakingly copied by hand. Because they were extremely rare and expensive, children rarely used books in school. Instead, lessons relied heavily on oral memorization, recitation, and teachers reading aloud from a single manuscript.\n\nThe printing press revolutionized early education by making books cheap, abundant, and accessible. Here is how it changed the way children learned to read:\n\n**1. The Rise of Textbooks**\nPrinted primers, grammars, and alphabet books suddenly became widely available. The most famous early tool was the \"hornbook\"—a wooden paddle featuring a printed sheet with the alphabet and the Lord’s Prayer, protected by a thin layer of transparent animal horn. Later, illustrated books like John Amos Comenius’s *Orbis Sensualium Pictus* (1658) used pictures paired with text, transforming how young minds connected words to meanings.\n\n**2. Shift from Oral to Visual Learning**\nWith their own copies of texts, children shifted from passive listeners to active readers. Instead of just memorizing what the teacher said, students could trace letters with their eyes, practice phonics, and read independently.\n\n**3. Standardization of Language**\nPrinted books used consistent spelling and grammar. As these books circulated in schools, they helped standardize regional dialects, ensuring children learned a unified national language.\n\n**4. Mass Literacy**\nBy the 16th and 17th centuries, schooling expanded beyond the elite. As reading materials became affordable for middle-class families, literacy rates soared across Europe, laying the foundation for modern mass education systems. \n\nIn short, the printing press turned reading from an exclusive, memory-based privilege into an individual, widespread skill taught with standardized tools.",
+      "t": 2791
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "router",
+      "provider": "groq",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.groq.com/openai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"openai/gpt-oss-120b\",\"max_completion_tokens\":4000,\"reasoning_effort\":\"low\",\"messages\":[{\"role\":\"system\",\"content\":\"Role: router\\nYou are the Router. You read the task and choose exactly one specialist to answer it. The first message lists the specialist ids and what each one is for. You do not answer the task yourself, and you will not see the specialist's answer. Choose the specialist whose role fits the task best.\\nReply with JSON only, in this form:\\n{\\\"route\\\":\\\"<specialist id>\\\",\\\"reason\\\":\\\"<why this specialist fits the task>\\\"}\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: How did the printing press change the way children learned to read at school?\\n\\nYou may route to: free (History tutor: You are a history tutor. Answer questions about dates; events and their effects.), free-2 (Language tutor: You are a language tutor. Answer questions about words; reading and writing.), free-3 (Maths tutor: You are a maths tutor. Answer questions about numbers and calculation.), free-4 (Science tutor: You are a science tutor. Answer questions about nature; instruments and discover)\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"reply\",\"strict\":false,\"schema\":{\"type\":\"object\",\"properties\":{\"route\":{\"type\":\"string\"},\"reason\":{\"type\":\"string\"}},\"required\":[\"route\",\"reason\"]}}}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "alt-svc": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 10:47:41 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "vary": "(hidden)",
+          "x-groq-region": "(hidden)",
+          "x-ratelimit-limit-requests": "1000",
+          "x-ratelimit-limit-tokens": "8000",
+          "x-ratelimit-remaining-requests": "999",
+          "x-ratelimit-remaining-tokens": "7526",
+          "x-ratelimit-reset-requests": "1m26.4s",
+          "x-ratelimit-reset-tokens": "3.554s",
+          "x-request-id": "(hidden)"
+        },
+        "body": "{\"id\":\"chatcmpl-fc0e33d8-b07b-4b59-995d-9d3cf26318b5\",\"object\":\"chat.completion\",\"created\":1795517261,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\n  \\\"route\\\": \\\"free\\\",\\n  \\\"reason\\\": \\\"The question asks about the historical impact of the printing press on children's reading education, which fits the History tutor's expertise in events and their effects.\\\"\\n}\",\"reasoning\":\"We need route to history tutor.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.151310365,\"prompt_tokens\":329,\"prompt_time\":0.014767858,\"completion_tokens\":63,\"completion_time\":0.132706792,\"total_tokens\":392,\"total_time\":0.14747465,\"completion_tokens_details\":{\"reasoning_tokens\":8}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_02b0d31eca\",\"x_groq\":{\"id\":\"req_01m86jp9vhejvvwy6jsfq7xaww\",\"seed\":263107700},\"service_tier\":\"on_demand\"}\n"
+      },
+      "error": null,
+      "ms": 412,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 421
+    },
+    {
+      "type": "api_call",
+      "agent": "free",
+      "provider": "google",
+      "n": 1,
+      "method": "POST",
+      "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-goog-api-key": "(hidden)"
+        },
+        "body": "{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"Task: How did the printing press change the way children learned to read at school?\"}]}],\"generationConfig\":{\"maxOutputTokens\":4000},\"systemInstruction\":{\"parts\":[{\"text\":\"Role: free\\nYou are History tutor. You are a history tutor. Answer questions about dates, events and their effects.\\nKeep every reply under 300 words. Answer in English.\"}]}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "alt-svc": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-length": "1508",
+          "content-type": "application/json; charset=UTF-8",
+          "date": "Tue, 24 Nov 2026 10:47:44 GMT",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "vary": "(hidden)",
+          "x-content-type-options": "(hidden)",
+          "x-frame-options": "(hidden)",
+          "x-gemini-service-tier": "(hidden)",
+          "x-xss-protection": "(hidden)"
+        },
+        "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"Before the invention of Johannes Gutenberg’s movable-type printing press around 1440, books were painstakingly copied by hand. Because they were extremely rare and expensive, children rarely used books in school. Instead, lessons relied heavily on oral memorization, recitation, and teachers reading aloud from a single manuscript.\\n\\nThe printing press revolutionized\"\n          },\n          {\n            \"text\": \" early education by making books cheap, abundant, and accessible. Here is how it changed the way children learned to read:\\n\\n**1. The Rise of Textbooks**\\nPrinted primers, grammars, and alphabet books suddenly became widely available. The most famous early tool was the \\\"hornbook\\\"—a wooden paddle featuring a printed sheet with the alphabet and the Lord’s Prayer, protected by a thin layer of transparent animal horn. Later, illustrated books like John Amos Comenius’s *Orbis Sensualium Pictus* (1658) used pictures paired with text, transforming how young minds connected words to meanings.\\n\\n**2. Shift from Oral to Visual Learning**\\nWith their own copies of texts, children shifted from passive listeners to active readers. Instead of just memorizing what the teacher said, students could trace letters with their eyes, practice phonics, and read independently.\\n\\n**3. Standardization of Language**\\nPrinted books used consistent spelling and grammar. As these books circulated in schools, they helped standardize regional dialects, ensuring children learned a unified national language.\\n\\n**4. Mass Literacy**\\nBy the 16th and 17th centuries, schooling expanded beyond the elite. As reading materials became affordable for middle-class families, literacy rates soared across Europe, laying the foundation for modern mass education systems. \\n\\nIn short, the printing press turned reading from an exclusive, memory-based privilege into an individual, widespread skill taught with standardized tools.\",\n            \"thoughtSignature\": \"EpYBCpMBAWkUfRM4c1o+RnP6SkJCn4r+4cwRnIAeTHHLgK9TeEHFE2R4/E8Vy1xU3Aq+Uthypxa6jZY3s4H6SdKmq8WX3hkEw7+OHN7YxXoSio9kbZZ1GQE6Z3cqQrV5pFRxtCHoglzgDd76uHGHYH1zyE+Q2SIhW1cwUvDOv9xF9ObTApi0tmsCB65v3JRgdzcmwxDmtlmx\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 58,\n    \"candidatesTokenCount\": 371,\n    \"totalTokenCount\": 429,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 58\n      }\n    ],\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-3.5-flash-lite\",\n  \"responseId\": \"TmsFa5n5BpWiytMPn7OC8Qo\"\n}\n"
+      },
+      "error": null,
+      "ms": 2364,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 2788
+    }
+  ],
+  "design": {
+    "pattern": "router",
+    "nodes": [
+      {
+        "id": "router",
+        "agent": "router",
+        "model": "balanced",
+        "search": false,
+        "slot": "groq-free",
+        "custom": true
+      },
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "History tutor",
+        "instructions": "You are a history tutor. Answer questions about dates, events and their effects.",
+        "slot": "google-free",
+        "custom": true
+      },
+      {
+        "id": "free-2",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Language tutor",
+        "instructions": "You are a language tutor. Answer questions about words, reading and writing.",
+        "slot": "openrouter-free",
+        "custom": true
+      },
+      {
+        "id": "free-3",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Maths tutor",
+        "instructions": "You are a maths tutor. Answer questions about numbers and calculation.",
+        "slot": "google-free",
+        "custom": true
+      },
+      {
+        "id": "free-4",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Science tutor",
+        "instructions": "You are a science tutor. Answer questions about nature, instruments and discoveries.",
+        "slot": "openrouter-free",
+        "custom": true
+      }
+    ],
+    "edges": [
+      {
+        "from": "router",
+        "to": "free"
+      },
+      {
+        "from": "router",
+        "to": "free-2"
+      },
+      {
+        "from": "router",
+        "to": "free-3"
+      },
+      {
+        "from": "router",
+        "to": "free-4"
+      }
+    ]
+  },
+  "task": "How did the printing press change the way children learned to read at school?",
+  "about": {
+    "title": "Three providers in one run: a router and its specialists",
+    "author": "Agent Atlas Academy",
+    "description": "The router runs on Groq, the history and maths tutors on Gemini, the language and science tutors on OpenRouter. The router picks one specialist and the others stay idle. Every agent has its own key, so one run mixes providers at no cost.\n\n**What it teaches**\n\nOne design can use several providers; each agent can run on the one that suits it, and the replay shows which provider answered.\n\n**What to watch**\n\nThe colour of each agent, which specialist the router chooses, and the statistics split by provider.\n\nRead more: [Router](#/learn/router)"
+  },
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 387,
+    "output": 434,
+    "searches": 0,
+    "steps": 2
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T10:47:41.135Z",
+  "endedAt": "2026-11-24T10:47:44.403Z",
+  "durationMs": 3268
+}

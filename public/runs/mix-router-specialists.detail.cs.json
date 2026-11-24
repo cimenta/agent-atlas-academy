@@ -1,0 +1,6 @@
+{
+  "about": "Jeden směrovač a čtyři specialisté na třech bezplatných providerech: směrovač na Groq, učitelé dějepisu a matematiky na Gemini, učitelé jazyka a přírodovědy na OpenRouter. Směrovač zvolil učitele dějepisu.",
+  "how": "Každý agent má vlastní slot s klíčem. Směrovač odpoví JSON; spustí se jen vybraný specialista, a to na svém provideru.",
+  "learns": "Jeden návrh může používat víc providerů; každý agent běží na tom, který se mu hodí, a replay ukáže, kdo odpověděl.",
+  "watch": "Barvu a providera každého agenta a statistiku rozdělenou podle providera."
+}
