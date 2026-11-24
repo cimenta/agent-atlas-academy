@@ -1,0 +1,6 @@
+{
+  "about": "Dělič rozdělí zadání na čtyři části, vždy jeden předmět, čtyři pracovníci je zodpoví současně a slučovač odpovědi spojí. Všichni běží na Cloudflare, bezplatný tarif.",
+  "how": "Dělič odpoví seznamem částí, každá část jde jednomu pracovníkovi a slučovač dostane všechny výsledky.",
+  "learns": "Map-reduce rozdělí jeden velký úkol na mnoho malých, které běží vedle sebe, a výsledky pak spojí.",
+  "watch": "Části, které dělič vytvořil, a jak slučovač spojil čtyři odpovědi."
+}

@@ -1,0 +1,6 @@
+{
+  "about": "Two debaters argue for and against later school starts and a judge picks the winner. All three agents run on Gemini, free tier.",
+  "how": "Each debater answers the task on its own; the judge reads both arguments and writes a verdict with reasons.",
+  "learns": "A debate gives two opposing arguments before one decision, so the judge decides from both sides.",
+  "watch": "How the two arguments differ, and which reasons the judge names for its verdict."
+}

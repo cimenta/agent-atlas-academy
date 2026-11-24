@@ -1,0 +1,6 @@
+{
+  "about": "Eight subjects are to get one sentence of study advice each. The splitter made only two parts of four subjects, two workers answered and a reducer merged them. All run on Cloudflare, free tier.",
+  "how": "The splitter decides how many parts there are, so the number of workers is a result, not a setting.",
+  "learns": "In map-reduce the splitter decides the shape of the work: two parts of four subjects run side by side, not eight parts.",
+  "watch": "How many parts the splitter chose, and what that meant for the speed."
+}

@@ -1,0 +1,6 @@
+{
+  "about": "Four agents plan a one-day school trip to a science museum for 30 students: a planner, a researcher, a writer and a critic, one after the other. All run on Cloudflare, free tier.",
+  "how": "Each agent gets the task and the text of the agent before it. The last agent, the critic, gives the final text.",
+  "learns": "A longer chain adds a step for every kind of work, but every step also costs time: the four agents took over a minute.",
+  "watch": "What each agent adds, and how long each step takes on this provider."
+}

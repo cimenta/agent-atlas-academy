@@ -1,0 +1,6 @@
+{
+  "about": "Dva debatéři argumentují pro a proti pozdějšímu začátku školy a soudce vybere vítěze. Všichni tři agenti běží na Gemini, bezplatný tarif.",
+  "how": "Každý debatér odpoví na zadání sám; soudce přečte oba argumenty a napíše verdikt s důvody.",
+  "learns": "Debata dá dva protichůdné argumenty před jedním rozhodnutím, takže soudce rozhoduje z obou stran.",
+  "watch": "V čem se oba argumenty liší a jaké důvody soudce uvede pro svůj verdikt."
+}

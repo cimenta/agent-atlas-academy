@@ -1,0 +1,568 @@
+{
+  "schemaVersion": 1,
+  "id": "mapreduce-complex",
+  "title": "Write one sentence of study advice for each of these eight s…",
+  "language": "en",
+  "pattern": "mapreduce",
+  "recordedWith": {
+    "provider": "cloudflare",
+    "model": "@cf/google/gemma-4-26b-a4b-it, @cf/openai/gpt-oss-120b",
+    "freeTier": true
+  },
+  "appVersion": "1.16.10-dev.0",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "Write one sentence of study advice for each of these eight subjects: maths, history, biology, chemistry, geography, art, music, English.",
+      "pattern": "mapreduce",
+      "design": {
+        "pattern": "mapreduce",
+        "nodes": [
+          {
+            "id": "splitter",
+            "agent": "splitter",
+            "model": "fast",
+            "search": false,
+            "slot": "cloudflare-free"
+          },
+          {
+            "id": "worker",
+            "agent": "worker",
+            "model": "fast",
+            "search": false,
+            "slot": "cloudflare-free"
+          },
+          {
+            "id": "reducer",
+            "agent": "reducer",
+            "model": "balanced",
+            "search": false,
+            "slot": "cloudflare-free",
+            "custom": true
+          }
+        ],
+        "edges": [
+          {
+            "from": "splitter",
+            "to": "worker"
+          },
+          {
+            "from": "worker",
+            "to": "reducer"
+          }
+        ]
+      },
+      "t": 1
+    },
+    {
+      "type": "agent_start",
+      "agent": "splitter",
+      "role": "Splitter",
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "tools": [],
+      "system": "Role: splitter\nYou are the Splitter. You cut the task into 2 to 6 independent parts that different workers can do at the same time, without seeing each other's work. Each part must be a complete instruction that makes sense alone. Do not do the work yourself.\nReply with JSON only, in this form:\n{\"parts\":[\"<part 1>\",\"<part 2>\"]}\nKeep every reply under 300 words. Answer in English.",
+      "t": 1
+    },
+    {
+      "type": "round",
+      "agent": "splitter",
+      "round": 1,
+      "ms": 6165,
+      "stop": "end_turn",
+      "usage": {
+        "input": 148,
+        "output": 394
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write one sentence of study advice for each of these eight subjects: maths, history, biology, chemistry, geography, art, music, English."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"parts\":[\"Write one sentence of study advice for each of these four subjects: maths, history, biology, and chemistry.\",\"Write one sentence of study advice for each of these four subjects: geography, art, music, and English.\"]}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1,
+          "forced": true
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 148,
+            "output_tokens": 394
+          }
+        }
+      },
+      "t": 6166
+    },
+    {
+      "type": "agent_output",
+      "agent": "splitter",
+      "text": "{\"parts\":[\"Write one sentence of study advice for each of these four subjects: maths, history, biology, and chemistry.\",\"Write one sentence of study advice for each of these four subjects: geography, art, music, and English.\"]}",
+      "tokens": {
+        "input": 148,
+        "output": 394
+      },
+      "t": 6166
+    },
+    {
+      "type": "handoff",
+      "from": "splitter",
+      "to": "worker#1",
+      "note": "Write one sentence of study advice for each of these four subjects: maths, history, biology, and chemistry.",
+      "t": 6166
+    },
+    {
+      "type": "handoff",
+      "from": "splitter",
+      "to": "worker#2",
+      "note": "Write one sentence of study advice for each of these four subjects: geography, art, music, and English.",
+      "t": 6166
+    },
+    {
+      "type": "agent_start",
+      "agent": "worker#1",
+      "role": "Worker 1",
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "tools": [],
+      "system": "Role: worker\nYou are a Worker. You get one part of a bigger task, and the task for context. Do only that part and reply with the result. You cannot see what the other workers do.\nKeep every reply under 300 words. Answer in English.",
+      "t": 6167
+    },
+    {
+      "type": "agent_start",
+      "agent": "worker#2",
+      "role": "Worker 2",
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "tools": [],
+      "system": "Role: worker\nYou are a Worker. You get one part of a bigger task, and the task for context. Do only that part and reply with the result. You cannot see what the other workers do.\nKeep every reply under 300 words. Answer in English.",
+      "t": 6167
+    },
+    {
+      "type": "round",
+      "agent": "worker#1",
+      "round": 1,
+      "ms": 7140,
+      "stop": "end_turn",
+      "usage": {
+        "input": 133,
+        "output": 470
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write one sentence of study advice for each of these eight subjects: maths, history, biology, chemistry, geography, art, music, English.\n\nYour part:\nWrite one sentence of study advice for each of these four subjects: maths, history, biology, and chemistry."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "Maths: Practice a wide variety of problems consistently to build intuition and problem-solving speed.\nHistory: Focus on understanding the underlying causes and consequences of events rather than just memorizing isolated dates.\nBiology: Use detailed diagrams and flowcharts to visualize complex biological processes and anatomical structures.\nChemistry: Master the fundamental concepts of the periodic table and chemical bonding to better predict reaction behaviors."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 133,
+            "output_tokens": 470
+          }
+        }
+      },
+      "t": 13307
+    },
+    {
+      "type": "agent_output",
+      "agent": "worker#1",
+      "text": "Maths: Practice a wide variety of problems consistently to build intuition and problem-solving speed.\nHistory: Focus on understanding the underlying causes and consequences of events rather than just memorizing isolated dates.\nBiology: Use detailed diagrams and flowcharts to visualize complex biological processes and anatomical structures.\nChemistry: Master the fundamental concepts of the periodic table and chemical bonding to better predict reaction behaviors.",
+      "tokens": {
+        "input": 133,
+        "output": 470
+      },
+      "t": 13307
+    },
+    {
+      "type": "round",
+      "agent": "worker#2",
+      "round": 1,
+      "ms": 17610,
+      "stop": "end_turn",
+      "usage": {
+        "input": 132,
+        "output": 467
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write one sentence of study advice for each of these eight subjects: maths, history, biology, chemistry, geography, art, music, English.\n\nYour part:\nWrite one sentence of study advice for each of these four subjects: geography, art, music, and English."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "Geography: Use maps and case studies to better understand spatial relationships and environmental processes.\nArt: Focus on practicing various techniques and studying the history of different movements to enhance your creativity.\nMusic: Practice your instrument consistently while actively listening to a wide range of genres to develop your musicality.\nEnglish: Read widely and practice analyzing how authors use language to convey deeper meanings."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 132,
+            "output_tokens": 467
+          }
+        }
+      },
+      "t": 23777
+    },
+    {
+      "type": "agent_output",
+      "agent": "worker#2",
+      "text": "Geography: Use maps and case studies to better understand spatial relationships and environmental processes.\nArt: Focus on practicing various techniques and studying the history of different movements to enhance your creativity.\nMusic: Practice your instrument consistently while actively listening to a wide range of genres to develop your musicality.\nEnglish: Read widely and practice analyzing how authors use language to convey deeper meanings.",
+      "tokens": {
+        "input": 132,
+        "output": 467
+      },
+      "t": 23778
+    },
+    {
+      "type": "handoff",
+      "from": "worker#1",
+      "to": "reducer",
+      "note": "Maths: Practice a wide variety of problems consistently to build intuition and problem-solving speed.\nHistory: Focus on understanding the underlying causes and consequences of events rather than just memorizing isolated dates.\nBiology: Use detailed diagrams and flowcharts to visualize complex biological processes and anatomical structures.\nChemistry: Master the fundamental concepts of the periodic table and chemical bonding to better predict reaction behaviors.",
+      "t": 23778
+    },
+    {
+      "type": "handoff",
+      "from": "worker#2",
+      "to": "reducer",
+      "note": "Geography: Use maps and case studies to better understand spatial relationships and environmental processes.\nArt: Focus on practicing various techniques and studying the history of different movements to enhance your creativity.\nMusic: Practice your instrument consistently while actively listening to a wide range of genres to develop your musicality.\nEnglish: Read widely and practice analyzing how authors use language to convey deeper meanings.",
+      "t": 23778
+    },
+    {
+      "type": "agent_start",
+      "agent": "reducer",
+      "role": "Reducer",
+      "model": "@cf/openai/gpt-oss-120b",
+      "tools": [],
+      "system": "Role: reducer\nYou are the Reducer. You receive the results of several workers, each of whom did one part of the same task. Merge them into one clear answer to the whole task, in the order of the parts, and say what is missing or does not fit together.\nKeep every reply under 300 words. Answer in English.",
+      "t": 23778
+    },
+    {
+      "type": "round",
+      "agent": "reducer",
+      "round": 1,
+      "ms": 5320,
+      "stop": "end_turn",
+      "usage": {
+        "input": 332,
+        "output": 223
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write one sentence of study advice for each of these eight subjects: maths, history, biology, chemistry, geography, art, music, English.\n\nResults of the workers:\n--- worker#1 ---\nMaths: Practice a wide variety of problems consistently to build intuition and problem-solving speed.\nHistory: Focus on understanding the underlying causes and consequences of events rather than just memorizing isolated dates.\nBiology: Use detailed diagrams and flowcharts to visualize complex biological processes and anatomical structures.\nChemistry: Master the fundamental concepts of the periodic table and chemical bonding to better predict reaction behaviors.\n\n--- worker#2 ---\nGeography: Use maps and case studies to better understand spatial relationships and environmental processes.\nArt: Focus on practicing various techniques and studying the history of different movements to enhance your creativity.\nMusic: Practice your instrument consistently while actively listening to a wide range of genres to develop your musicality.\nEnglish: Read widely and practice analyzing how authors use language to convey deeper meanings."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "**Maths:** Practice a wide variety of problems consistently to build intuition and boost problem‑solving speed.  \n**History:** Concentrate on the underlying causes and consequences of events rather than merely memorising dates.  \n**Biology:** Use detailed diagrams and flowcharts to visualise complex processes and anatomical structures.  \n**Chemistry:** Master the fundamentals of the periodic table and chemical bonding so you can predict reaction behaviour.  \n**Geography:** Work with maps and case studies to grasp spatial relationships and environmental processes.  \n**Art:** Experiment with diverse techniques and study art‑movement histories to expand your creative toolkit.  \n**Music:** Practice your instrument regularly while actively listening to a broad range of genres to develop musicality.  \n**English:** Read widely and analyse how authors employ language to convey deeper meanings."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "@cf/openai/gpt-oss-120b",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "@cf/openai/gpt-oss-120b",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 332,
+            "output_tokens": 223
+          }
+        }
+      },
+      "t": 29098
+    },
+    {
+      "type": "agent_output",
+      "agent": "reducer",
+      "text": "**Maths:** Practice a wide variety of problems consistently to build intuition and boost problem‑solving speed.  \n**History:** Concentrate on the underlying causes and consequences of events rather than merely memorising dates.  \n**Biology:** Use detailed diagrams and flowcharts to visualise complex processes and anatomical structures.  \n**Chemistry:** Master the fundamentals of the periodic table and chemical bonding so you can predict reaction behaviour.  \n**Geography:** Work with maps and case studies to grasp spatial relationships and environmental processes.  \n**Art:** Experiment with diverse techniques and study art‑movement histories to expand your creative toolkit.  \n**Music:** Practice your instrument regularly while actively listening to a broad range of genres to develop musicality.  \n**English:** Read widely and analyse how authors employ language to convey deeper meanings.",
+      "tokens": {
+        "input": 332,
+        "output": 223
+      },
+      "t": 29099
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 745,
+        "output": 1554,
+        "searches": 0,
+        "steps": 4
+      },
+      "finalText": "**Maths:** Practice a wide variety of problems consistently to build intuition and boost problem‑solving speed.  \n**History:** Concentrate on the underlying causes and consequences of events rather than merely memorising dates.  \n**Biology:** Use detailed diagrams and flowcharts to visualise complex processes and anatomical structures.  \n**Chemistry:** Master the fundamentals of the periodic table and chemical bonding so you can predict reaction behaviour.  \n**Geography:** Work with maps and case studies to grasp spatial relationships and environmental processes.  \n**Art:** Experiment with diverse techniques and study art‑movement histories to expand your creative toolkit.  \n**Music:** Practice your instrument regularly while actively listening to a broad range of genres to develop musicality.  \n**English:** Read widely and analyse how authors employ language to convey deeper meanings.",
+      "t": 29099
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "splitter",
+      "provider": "cloudflare",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.cloudflare.com/client/v4/accounts/{account}/ai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"max_completion_tokens\":4000,\"messages\":[{\"role\":\"system\",\"content\":\"Role: splitter\\nYou are the Splitter. You cut the task into 2 to 6 independent parts that different workers can do at the same time, without seeing each other's work. Each part must be a complete instruction that makes sense alone. Do not do the work yourself.\\nReply with JSON only, in this form:\\n{\\\"parts\\\":[\\\"<part 1>\\\",\\\"<part 2>\\\"]}\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Write one sentence of study advice for each of these eight subjects: maths, history, biology, chemistry, geography, art, music, English.\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"reply\",\"strict\":false,\"schema\":{\"type\":\"object\",\"properties\":{\"parts\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"parts\"]}}}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "api-version": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-ai-neurons": "(hidden)",
+          "cf-auditlog-id": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:24:53 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)"
+        },
+        "body": "{\"id\":\"id-1795519493319\",\"object\":\"chat.completion\",\"created\":1795519493,\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"parts\\\":[\\\"Write one sentence of study advice for each of these four subjects: maths, history, biology, and chemistry.\\\",\\\"Write one sentence of study advice for each of these four subjects: geography, art, music, and English.\\\"]}\",\"refusal\":null,\"annotations\":null,\"audio\":null,\"function_call\":null,\"reasoning\":\"*   Task: Write one sentence of study advice for eight subjects: maths, history, biology, chemistry, geography, art, music, English.\\n    *   Goal: Split the task into 2 to 6 independent parts for different workers.\\n\\n    *   Subject 1: maths\\n    *   Subject 2: history\\n    *   Subject 3: biology\\n    *   Subject 4: chemistry\\n    *   Subject 5: geography\\n    *   Subject 6: art\\n    *   Subject 7: music\\n    *   Subject 8: English\\n\\n    *   Option A (2 parts):\\n        *   Part 1: maths, history, biology, chemistry\\n        *   Part 2: geography, art, music, English\\n    *   Option B (4 parts):\\n        *   Part 1: maths, history\\n        *   Part 2: biology, chemistry\\n        *   Part 3: geography, art\\n        *   Part 4: music, English\\n\\n    *   Option A (2 parts) is efficient and keeps the workload even.\\n\\n    *   Part 1: Write one sentence of study advice for each of these four subjects: maths, history, biology, and chemistry.\\n    *   Part 2: Write one sentence of study advice for each of these four subjects: geography, art, music, and English.\\n\\n    *   Format: `{\\\"parts\\\":[\\\"<part 1>\\\",\\\"<part 2>\\\"]}`\\n    *   Constraint: Under 300 words.\\n    *   Constraint: JSON only.\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null,\"token_ids\":null,\"routed_experts\":null}],\"usage\":{\"prompt_tokens\":148,\"completion_tokens\":394,\"total_tokens\":542,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":12.090909004211426}}"
+      },
+      "error": null,
+      "ms": 6165,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 6166
+    },
+    {
+      "type": "api_call",
+      "agent": "worker#1",
+      "provider": "cloudflare",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.cloudflare.com/client/v4/accounts/{account}/ai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"max_completion_tokens\":4000,\"messages\":[{\"role\":\"system\",\"content\":\"Role: worker\\nYou are a Worker. You get one part of a bigger task, and the task for context. Do only that part and reply with the result. You cannot see what the other workers do.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Write one sentence of study advice for each of these eight subjects: maths, history, biology, chemistry, geography, art, music, English.\\n\\nYour part:\\nWrite one sentence of study advice for each of these four subjects: maths, history, biology, and chemistry.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "api-version": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-ai-neurons": "(hidden)",
+          "cf-auditlog-id": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:25:00 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)"
+        },
+        "body": "{\"id\":\"id-1795519500459\",\"object\":\"chat.completion\",\"created\":1795519500,\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Maths: Practice a wide variety of problems consistently to build intuition and problem-solving speed.\\nHistory: Focus on understanding the underlying causes and consequences of events rather than just memorizing isolated dates.\\nBiology: Use detailed diagrams and flowcharts to visualize complex biological processes and anatomical structures.\\nChemistry: Master the fundamental concepts of the periodic table and chemical bonding to better predict reaction behaviors.\",\"refusal\":null,\"annotations\":null,\"audio\":null,\"function_call\":null,\"reasoning\":\"*   Role: Worker.\\n    *   Task Context: Write one sentence of study advice for eight subjects: maths, history, biology, chemistry, geography, art, music, English.\\n    *   Specific Part: Write one sentence of study advice for: maths, history, biology, chemistry.\\n    *   Constraints: One sentence per subject, result only, under 300 words, English.\\n\\n    *   Maths: Focus on practice and problem-solving rather than memorization.\\n    *   History: Focus on understanding cause and effect rather than just dates.\\n    *   Biology: Use diagrams to visualize processes and memorize key terminology.\\n    *   Chemistry: Master the periodic table and understand how molecular structures influence reactions.\\n\\n    *   Maths: Practice a wide variety of problems consistently to build intuition and problem-solving speed.\\n    *   History: Focus on understanding the underlying causes and consequences of events rather than just memorizing isolated dates.\\n    *   Biology: Use detailed diagrams and flowcharts to visualize complex biological processes and anatomical structures.\\n    *   Chemistry: Master the fundamental concepts of the periodic table and chemical bonding to better predict reaction behaviors.\\n\\n    *   Maths: Practice a wide variety of problems consistently to build intuition and problem-solving speed.\\n    *   History: Focus on understanding the underlying causes and consequences of events rather than just memorizing isolated dates.\\n    *   Biology: Use detailed diagrams and flowcharts to visualize complex biological processes and anatomical structures.\\n    *   Chemistry: Master the fundamental concepts of the periodic table and chemical bonding to better predict reaction behaviors.\\n\\n    *   One sentence per subject? Yes.\\n    *   Four subjects (maths, history, biology, chemistry)? Yes.\\n    *   Under 300 words? Yes.\\n    *   English? Yes.\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":106,\"token_ids\":null,\"routed_experts\":null}],\"usage\":{\"prompt_tokens\":133,\"completion_tokens\":470,\"total_tokens\":603,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":14.027273178100586}}"
+      },
+      "error": null,
+      "ms": 7138,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 13307
+    },
+    {
+      "type": "api_call",
+      "agent": "worker#2",
+      "provider": "cloudflare",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.cloudflare.com/client/v4/accounts/{account}/ai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"max_completion_tokens\":4000,\"messages\":[{\"role\":\"system\",\"content\":\"Role: worker\\nYou are a Worker. You get one part of a bigger task, and the task for context. Do only that part and reply with the result. You cannot see what the other workers do.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Write one sentence of study advice for each of these eight subjects: maths, history, biology, chemistry, geography, art, music, English.\\n\\nYour part:\\nWrite one sentence of study advice for each of these four subjects: geography, art, music, and English.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "api-version": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-ai-neurons": "(hidden)",
+          "cf-auditlog-id": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:25:10 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)"
+        },
+        "body": "{\"id\":\"id-1795519510929\",\"object\":\"chat.completion\",\"created\":1795519510,\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Geography: Use maps and case studies to better understand spatial relationships and environmental processes.\\nArt: Focus on practicing various techniques and studying the history of different movements to enhance your creativity.\\nMusic: Practice your instrument consistently while actively listening to a wide range of genres to develop your musicality.\\nEnglish: Read widely and practice analyzing how authors use language to convey deeper meanings.\",\"reasoning_content\":\"*   Role: Worker.\\n    *   Task: Write one sentence of study advice for each of eight subjects: maths, history, biology, chemistry, geography, art, music, English.\\n    *   My Part: Write one sentence of study advice for four subjects: geography, art, music, and English.\\n    *   Constraints: Under 300 words, English only, only do my part.\\n\\n    *   Geography: Use maps and case studies to understand spatial patterns and real-world impacts.\\n    *   Art: Practice different techniques regularly and analyze various art movements to develop your own style.\\n    *   Music: Practice your instrument daily and listen critically to diverse genres to improve your ear.\\n    *   English: Read extensively and practice analyzing literary devices to strengthen your interpretation skills.\\n\\n    *   Geography: Use maps and case studies to better understand spatial relationships and environmental processes.\\n    *   Art: Focus on practicing various techniques and studying the context of different movements to enhance your creativity.\\n    *   Music: Practice your instrument consistently while actively listening to a wide range of genres to develop your musicality.\\n    *   English: Read widely and practice analyzing how authors use language to convey deeper meanings.\\n\\n    *   Geography: Use maps and case studies to better understand spatial relationships and environmental processes.\\n    *   Art: Focus on practicing various techniques and studying the history of different movements to enhance your creativity.\\n    *   Music: Practice your instrument consistently while actively listening to a wide range of genres to develop your musicality.\\n    *   English: Read widely and practice analyzing how authors use language to convey deeper meanings.\\n\\n    *   4 subjects? Yes.\\n    *   One sentence each? Yes.\\n    *   Under 300 words? Yes.\\n    *   Only my part? Yes.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":132,\"completion_tokens\":467,\"total_tokens\":599,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":13.936363220214844}}"
+      },
+      "error": null,
+      "ms": 10469,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 23777
+    },
+    {
+      "type": "api_call",
+      "agent": "reducer",
+      "provider": "cloudflare",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.cloudflare.com/client/v4/accounts/{account}/ai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"@cf/openai/gpt-oss-120b\",\"max_completion_tokens\":4000,\"messages\":[{\"role\":\"system\",\"content\":\"Role: reducer\\nYou are the Reducer. You receive the results of several workers, each of whom did one part of the same task. Merge them into one clear answer to the whole task, in the order of the parts, and say what is missing or does not fit together.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Write one sentence of study advice for each of these eight subjects: maths, history, biology, chemistry, geography, art, music, English.\\n\\nResults of the workers:\\n--- worker#1 ---\\nMaths: Practice a wide variety of problems consistently to build intuition and problem-solving speed.\\nHistory: Focus on understanding the underlying causes and consequences of events rather than just memorizing isolated dates.\\nBiology: Use detailed diagrams and flowcharts to visualize complex biological processes and anatomical structures.\\nChemistry: Master the fundamental concepts of the periodic table and chemical bonding to better predict reaction behaviors.\\n\\n--- worker#2 ---\\nGeography: Use maps and case studies to better understand spatial relationships and environmental processes.\\nArt: Focus on practicing various techniques and studying the history of different movements to enhance your creativity.\\nMusic: Practice your instrument consistently while actively listening to a wide range of genres to develop your musicality.\\nEnglish: Read widely and practice analyzing how authors use language to convey deeper meanings.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "api-version": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-ai-neurons": "(hidden)",
+          "cf-auditlog-id": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:25:16 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)"
+        },
+        "body": "{\"id\":\"id-1795519516251\",\"object\":\"chat.completion\",\"created\":1795519516,\"model\":\"@cf/openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"**Maths:** Practice a wide variety of problems consistently to build intuition and boost problem‑solving speed.  \\n**History:** Concentrate on the underlying causes and consequences of events rather than merely memorising dates.  \\n**Biology:** Use detailed diagrams and flowcharts to visualise complex processes and anatomical structures.  \\n**Chemistry:** Master the fundamentals of the periodic table and chemical bonding so you can predict reaction behaviour.  \\n**Geography:** Work with maps and case studies to grasp spatial relationships and environmental processes.  \\n**Art:** Experiment with diverse techniques and study art‑movement histories to expand your creative toolkit.  \\n**Music:** Practice your instrument regularly while actively listening to a broad range of genres to develop musicality.  \\n**English:** Read widely and analyse how authors employ language to convey deeper meanings.\",\"refusal\":null,\"annotations\":null,\"audio\":null,\"function_call\":null,\"reasoning\":\"We need to merge into one clear answer: one sentence per subject, eight subjects. Workers gave four each. Need to combine. Ensure each subject has one sentence. Provide missing subjects? All eight covered. Provide final list. Ensure sentences are concise.\",\"reasoning_content\":\"We need to merge into one clear answer: one sentence per subject, eight subjects. Workers gave four each. Need to combine. Ensure each subject has one sentence. Provide missing subjects? All eight covered. Provide final list. Ensure sentences are concise.\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":null,\"token_ids\":null,\"routed_experts\":null}],\"usage\":{\"prompt_tokens\":332,\"completion_tokens\":223,\"total_tokens\":555,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":25.768115997314453}}"
+      },
+      "error": null,
+      "ms": 5319,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 29098
+    }
+  ],
+  "design": {
+    "pattern": "mapreduce",
+    "nodes": [
+      {
+        "id": "splitter",
+        "agent": "splitter",
+        "model": "fast",
+        "search": false,
+        "slot": "cloudflare-free"
+      },
+      {
+        "id": "worker",
+        "agent": "worker",
+        "model": "fast",
+        "search": false,
+        "slot": "cloudflare-free"
+      },
+      {
+        "id": "reducer",
+        "agent": "reducer",
+        "model": "balanced",
+        "search": false,
+        "slot": "cloudflare-free",
+        "custom": true
+      }
+    ],
+    "edges": [
+      {
+        "from": "splitter",
+        "to": "worker"
+      },
+      {
+        "from": "worker",
+        "to": "reducer"
+      }
+    ]
+  },
+  "task": "Write one sentence of study advice for each of these eight subjects: maths, history, biology, chemistry, geography, art, music, English.",
+  "about": {
+    "title": "Map-reduce: eight parts",
+    "author": "Agent Atlas Academy",
+    "description": "The same design as the simple run with twice as many parts, so the work and the cost grow.\n\n**What it teaches**\n\nMap-reduce scales with the number of parts: the steps, the tokens and the cost, while the design stays the same.\n\n**What to watch**\n\nHow many steps the run needs, and whether the reducer keeps all eight parts.\n\nRead more: [Map-reduce](#/learn/map-reduce)"
+  },
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 745,
+    "output": 1554,
+    "searches": 0,
+    "steps": 4
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T11:24:46.977Z",
+  "endedAt": "2026-11-24T11:25:16.351Z",
+  "durationMs": 29374
+}

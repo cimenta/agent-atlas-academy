@@ -1,0 +1,7 @@
+{
+  "3": "The Help desk hands over to the Accounts expert with a note.",
+  "7": "The Accounts expert has no tools to check the account, so it hands over again.",
+  "11": "The Network expert also hands over.",
+  "15": "The Hardware expert finishes, but says it covers only the hardware part. The login problem stays unsolved.",
+  "16": "The run ends. It finished, but not every part of the ticket is solved."
+}

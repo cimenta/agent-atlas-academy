@@ -1,0 +1,6 @@
+{
+  "about": "Pracovník podpory dostane problém s Wi-Fi a předá ho síťovému expertovi, který ho dokončí. Oba běží na Anthropicu.",
+  "how": "Každý agent odpovídá JSON: dokončí s odpovědí, nebo předá jinému agentovi s poznámkou. Tady je jedno předání.",
+  "learns": "Předání předá řízení s poznámkou; agent, který ho dostane, rozhodne, co dál.",
+  "watch": "Poznámku podpory a co s ní síťový expert udělá."
+}

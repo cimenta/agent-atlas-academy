@@ -1,0 +1,6 @@
+{
+  "about": "Plánovač naplánuje desetiminutovou prezentaci o obnovitelné energii a vykonavatel ji napíše ve dvou krocích: osnova a pak text. Oba běží na Groq, bezplatný tarif.",
+  "how": "Plánovač odpověděl dvakrát; vykonavatel následoval druhý plán krok za krokem a text posledního kroku je odpověď.",
+  "learns": "Plán s velkými kroky nechá vykonavateli málo prostoru pro opravu: je tak dobrý, jak dobrý je plán.",
+  "watch": "Dva plány plánovače a jak druhý krok využívá osnovu z prvního."
+}

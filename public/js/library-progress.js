@@ -30,3 +30,19 @@ export function pruneProgress(set, items) {
   const ids = new Set((Array.isArray(items) ? items : []).map((r) => r.id));
   return new Set([...set].filter((key) => ids.has(key.slice(key.indexOf(":") + 1))));
 }
+
+// A run counts as done when it is marked in every goal it belongs to (the player marks all of them at once).
+export const isRunDone = (set, item) => {
+  const goals = Object.keys(item?.paths ?? {});
+  return goals.length > 0 && goals.every((g) => set.has(`${g}:${item.id}`));
+};
+
+// The "Not done only" switch of the Library: a run marked done in any of its goals is left out.
+export const withoutDone = (items, set) => items.filter((item) => !Object.keys(item.paths ?? {}).some((g) => set.has(`${g}:${item.id}`)));
+
+// What the player menu needs for "Mark as done": the state of one run and a way to change it, for all its goals.
+export function doneMarkFor(storage, item) {
+  const goals = Object.keys(item?.paths ?? {});
+  if (goals.length === 0) return null;
+  return { isDone: () => isRunDone(loadProgress(storage()), item), toggle: (on) => goals.forEach((g) => setDone(storage(), g, item.id, on)) };
+}

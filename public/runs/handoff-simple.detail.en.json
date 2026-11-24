@@ -1,0 +1,6 @@
+{
+  "about": "A help desk agent receives a Wi-Fi problem and hands it to a network expert, who finishes it. Both run on Anthropic.",
+  "how": "Each agent answers with JSON: finish with an answer, or hand over to another agent with a note. Here there is one handover.",
+  "learns": "A handoff passes control with a note; the agent who gets it decides what to do next.",
+  "watch": "The note of the help desk, and what the network expert does with it."
+}

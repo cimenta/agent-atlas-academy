@@ -1,0 +1,6 @@
+{
+  "3": "The Help desk hands the problem to the Network expert and writes a note.",
+  "4": "The handoff passes control. The Network expert sees the task and the note.",
+  "7": "The Network expert finishes: its reply is the answer.",
+  "8": "The run ends. The answer is the text of the agent that finished."
+}

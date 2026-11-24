@@ -1,0 +1,6 @@
+{
+  "about": "A planner plans a ten-minute class presentation on renewable energy and an executor writes it in two steps: an outline, then the script. Both run on Groq, free tier.",
+  "how": "The planner answered twice; the executor followed the second plan, step by step, and the script of the last step is the answer.",
+  "learns": "A plan with large steps gives the executor little to correct: it is only as good as the plan.",
+  "watch": "The two plans of the planner, and how the second step uses the outline of the first."
+}

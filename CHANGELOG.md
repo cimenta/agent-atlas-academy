@@ -6,6 +6,9 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Re-play, run menu: Mark as done (and Mark as not done) for a library run that is on the recommended path; it marks the run in every goal it belongs to.
+- Library, cog menu: Not done only (and Show all runs) leaves the runs marked as done out of the list.
+- Library: ten more recorded example runs (debate-simple, router-simple, evaluator-simple, sequential-complex, mapreduce-simple, mapreduce-complex, planexec-simple, planexec-complex, handoff-simple, handoff-complex) with details and explanations in English and Czech, on Gemini, Groq, Cloudflare and Anthropic.
 - Library, detail: the tags of the run are shown under the facts, each word in the colour of its group.
 - Library, recommended path: a new tab on the right side with four goals (Patterns of teamwork, Cost and speed, Reliability, What goes wrong), each with steps in three levels (beginner, advanced, expert). A step has a number, Open and Done; done steps are kept on this device, and a Continue box points to the next step. Tags filter the path and the list together, and a switch limits the list on the left to the chosen goal.
 - Library, right side: three tabs, Recommended path (shown on the first visit, with no run chosen), Tags and Detail. The arrow keys move between them, and the letter T opens Tags.
@@ -315,6 +318,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 - Measure that a 290-second stream survives on Vercel.
 
 ### Fixed
+
+- Anthropic: a model that refuses a forced reply tool (Sonnet 5.5 answers 400, tool_choice not supported) is now asked again once without the reply tool, so a supervisor, router or evaluator on Balanced no longer fails at its first call.
 
 - Cloudflare: a call waits twice as long as the request timeout (the Strong model writes about 33 tokens a second; Cloudflare itself ends a call after about two minutes), and the Info tab says so.
 - Cloudflare: when Cloudflare ends a call after about two minutes (status 408, code 3046), the error now says so and what to do (Retry, a faster model, fewer output tokens) instead of the raw AiError text.

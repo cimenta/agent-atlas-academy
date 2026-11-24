@@ -1,0 +1,6 @@
+{
+  "about": "A planner makes a four-step plan for a weekend camping packing list and an executor carries out the steps one after another. Both run on Groq, free tier.",
+  "how": "The planner writes the whole plan once. The executor does each step with the answers of the earlier steps in front of it; the last step is the answer.",
+  "learns": "Plan-and-execute separates thinking from doing: the plan is made once and then followed.",
+  "watch": "The steps of the plan, and how each step builds on the one before."
+}

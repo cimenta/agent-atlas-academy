@@ -2,7 +2,8 @@
 import { h } from "./dom.js";
 import { mountReplay } from "./replay/view.js";
 import { withRetryChoice } from "./replay/retry-choice.js";
-import { loadExplanations, renderNotFound, setTitle } from "./pages.js";
+import { loadExplanations, renderNotFound, setTitle, getJson } from "./pages.js";
+import { doneMarkFor } from "./library-progress.js";
 import { renderResult } from "./result-page.js";
 import { renderCreate } from "./create/create-page.js";
 import { approvalPanel } from "./approval-panel.js";
@@ -97,9 +98,27 @@ export async function renderReplayTab(ctx, requestedId) {
           doc.defaultView.location.hash = "#/play/create";
         }
       : null;
+  // A library run that is on the recommended path can be marked as done from its menu (in every goal it belongs to).
+  let doneMark = null;
+  if (found.source === "gallery") {
+    try {
+      const entry = ((await getJson(ctx, "/runs/index.json")).runs ?? []).find((r) => r.id === currentId);
+      const storage = () => {
+        try {
+          return doc.defaultView?.localStorage ?? null;
+        } catch {
+          return null;
+        }
+      };
+      doneMark = doneMarkFor(storage, entry);
+    } catch {
+      // without the index the menu simply has no such item
+    }
+    if (ctx.isStale()) return;
+  }
   const playerHost = h(doc, "div", { class: "player-mount" });
   host.append(playerHost);
-  handle = mountReplay(playerHost, { run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors, onRetry, suggestFallback: ctx.settings?.get().fallback !== "off", limitsInfo: () => ({ current: ctx.settings.get().limits, original: found.run.limits, record: found.run, repeatStop: ctx.settings.get().repeatStop }) });
+  handle = mountReplay(playerHost, { doneMark, run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors, onRetry, suggestFallback: ctx.settings?.get().fallback !== "off", limitsInfo: () => ({ current: ctx.settings.get().limits, original: found.run.limits, record: found.run, repeatStop: ctx.settings.get().repeatStop }) });
   // A run Create has just finished opens at its end, so its warnings and the message about how it ended are on the screen.
   if (justFinished.id === currentId) {
     justFinished.id = null;

@@ -1,0 +1,6 @@
+{
+  "about": "Osm předmětů má dostat každý jednu větu studijní rady. Dělič vytvořil jen dvě části po čtyřech předmětech, dva pracovníci odpověděli a slučovač je spojil. Všichni běží na Cloudflare, bezplatný tarif.",
+  "how": "Dělič rozhoduje, kolik bude částí, takže počet pracovníků je výsledek, ne nastavení.",
+  "learns": "V map-reduce určuje tvar práce dělič: běží vedle sebe dvě části po čtyřech předmětech, ne osm částí.",
+  "watch": "Kolik částí dělič zvolil a co to znamenalo pro rychlost."
+}

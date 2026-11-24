@@ -1,0 +1,10 @@
+{
+  "3": "The Planner's plan. It is the input of the Researcher.",
+  "4": "A handoff passes the plan on.",
+  "7": "The Researcher fills the plan with facts.",
+  "8": "A handoff passes the research to the Writer.",
+  "11": "The Writer turns the plan and the facts into a schedule with risks.",
+  "12": "A handoff passes the draft to the Critic.",
+  "15": "The Critic reviews and improves the draft. This is the final text.",
+  "16": "The run ends. The final answer is the last agent's text."
+}

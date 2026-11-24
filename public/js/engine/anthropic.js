@@ -23,9 +23,11 @@ export function redact(text, apiKey) {
 
 // A request that asks for a reply in a shape (body.replySchema) is sent as a forced tool call: the model must "call" the tool
 // reply, and the input it gives is the reply. The key replySchema never goes over the wire.
-function wireBody(body) {
+// forced: false leaves the reply tool out (a model that refuses a forced tool; the format repair of the engine covers that case).
+function wireBody(body, forced = true) {
   if (!body.replySchema) return body;
   const { replySchema, ...rest } = body;
+  if (!forced) return rest;
   const tools = [...(rest.tools ?? []), { name: "reply", description: "Give your reply in this shape.", input_schema: replySchema }];
   return { ...rest, tools, ...(tools.length === 1 ? { tool_choice: { type: "tool", name: "reply" } } : {}) };
 }
@@ -44,14 +46,26 @@ export async function callAnthropic(body, { apiKey, fetchImpl = fetch, signal, t
   const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
 
   let response;
+  let forced = true;
+  const send = () => fetchImpl(API_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+    body: JSON.stringify(wireBody(body, forced)),
+    signal: combined,
+  });
   const startedAt = Date.now();
   try {
-    response = await fetchImpl(API_URL, {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify(wireBody(body)),
-      signal: combined,
-    });
+    response = await send();
+    // Some models (Sonnet 5.5 among them) answer 400 to a forced tool; the same request is sent once more without the reply tool.
+    if (!response.ok && body.replySchema && response.status === 400) {
+      const refusal = await response.json().catch(() => null);
+      if (/tool_choice/i.test(String(refusal?.error?.message ?? ""))) {
+        forced = false;
+        response = await send();
+      } else {
+        response = { ok: false, status: 400, json: async () => refusal ?? {}, headers: response.headers };
+      }
+    }
   } catch (error) {
     if (signal?.aborted) throw new AnthropicError("The request was cancelled");
     if (timeout.aborted) throw new AnthropicError(`Timeout: Anthropic did not answer within ${Math.round(timeoutMs / 1000)} seconds.\n\nThe model may be busy. Press Retry, or pick another model with the arrow next to Retry.`);

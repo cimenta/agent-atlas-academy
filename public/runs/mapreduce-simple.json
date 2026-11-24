@@ -1,0 +1,798 @@
+{
+  "schemaVersion": 1,
+  "id": "mapreduce-simple",
+  "title": "Write one sentence of study advice for each of these subject…",
+  "language": "en",
+  "pattern": "mapreduce",
+  "recordedWith": {
+    "provider": "cloudflare",
+    "model": "@cf/google/gemma-4-26b-a4b-it",
+    "freeTier": true
+  },
+  "appVersion": "1.16.10-dev.0",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "Write one sentence of study advice for each of these subjects: maths, history, biology, art.",
+      "pattern": "mapreduce",
+      "design": {
+        "pattern": "mapreduce",
+        "nodes": [
+          {
+            "id": "splitter",
+            "agent": "splitter",
+            "model": "fast",
+            "search": false,
+            "slot": "cloudflare-free"
+          },
+          {
+            "id": "worker",
+            "agent": "worker",
+            "model": "fast",
+            "search": false,
+            "slot": "cloudflare-free"
+          },
+          {
+            "id": "reducer",
+            "agent": "reducer",
+            "model": "fast",
+            "search": false,
+            "slot": "cloudflare-free"
+          }
+        ],
+        "edges": [
+          {
+            "from": "splitter",
+            "to": "worker"
+          },
+          {
+            "from": "worker",
+            "to": "reducer"
+          }
+        ]
+      },
+      "t": 0
+    },
+    {
+      "type": "agent_start",
+      "agent": "splitter",
+      "role": "Splitter",
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "tools": [],
+      "system": "Role: splitter\nYou are the Splitter. You cut the task into 2 to 6 independent parts that different workers can do at the same time, without seeing each other's work. Each part must be a complete instruction that makes sense alone. Do not do the work yourself.\nReply with JSON only, in this form:\n{\"parts\":[\"<part 1>\",\"<part 2>\"]}\nKeep every reply under 300 words. Answer in English.",
+      "t": 1
+    },
+    {
+      "type": "round",
+      "agent": "splitter",
+      "round": 1,
+      "ms": 6765,
+      "stop": "end_turn",
+      "usage": {
+        "input": 138,
+        "output": 311
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"parts\":[\"Write one sentence of study advice for maths.\",\"Write one sentence of study advice for history.\",\"Write one sentence of study advice for biology.\",\"Write one sentence of study advice for art most.\"]}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1,
+          "forced": true
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 138,
+            "output_tokens": 311
+          }
+        }
+      },
+      "t": 6766
+    },
+    {
+      "type": "agent_output",
+      "agent": "splitter",
+      "text": "{\"parts\":[\"Write one sentence of study advice for maths.\",\"Write one sentence of study advice for history.\",\"Write one sentence of study advice for biology.\",\"Write one sentence of study advice for art most.\"]}",
+      "tokens": {
+        "input": 138,
+        "output": 311
+      },
+      "t": 6766
+    },
+    {
+      "type": "handoff",
+      "from": "splitter",
+      "to": "worker#1",
+      "note": "Write one sentence of study advice for maths.",
+      "t": 6766
+    },
+    {
+      "type": "handoff",
+      "from": "splitter",
+      "to": "worker#2",
+      "note": "Write one sentence of study advice for history.",
+      "t": 6766
+    },
+    {
+      "type": "handoff",
+      "from": "splitter",
+      "to": "worker#3",
+      "note": "Write one sentence of study advice for biology.",
+      "t": 6766
+    },
+    {
+      "type": "handoff",
+      "from": "splitter",
+      "to": "worker#4",
+      "note": "Write one sentence of study advice for art most.",
+      "t": 6766
+    },
+    {
+      "type": "agent_start",
+      "agent": "worker#1",
+      "role": "Worker 1",
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "tools": [],
+      "system": "Role: worker\nYou are a Worker. You get one part of a bigger task, and the task for context. Do only that part and reply with the result. You cannot see what the other workers do.\nKeep every reply under 300 words. Answer in English.",
+      "t": 6767
+    },
+    {
+      "type": "agent_start",
+      "agent": "worker#2",
+      "role": "Worker 2",
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "tools": [],
+      "system": "Role: worker\nYou are a Worker. You get one part of a bigger task, and the task for context. Do only that part and reply with the result. You cannot see what the other workers do.\nKeep every reply under 300 words. Answer in English.",
+      "t": 6767
+    },
+    {
+      "type": "agent_start",
+      "agent": "worker#3",
+      "role": "Worker 3",
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "tools": [],
+      "system": "Role: worker\nYou are a Worker. You get one part of a bigger task, and the task for context. Do only that part and reply with the result. You cannot see what the other workers do.\nKeep every reply under 300 words. Answer in English.",
+      "t": 6767
+    },
+    {
+      "type": "agent_start",
+      "agent": "worker#4",
+      "role": "Worker 4",
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "tools": [],
+      "system": "Role: worker\nYou are a Worker. You get one part of a bigger task, and the task for context. Do only that part and reply with the result. You cannot see what the other workers do.\nKeep every reply under 300 words. Answer in English.",
+      "t": 6767
+    },
+    {
+      "type": "round",
+      "agent": "worker#1",
+      "round": 1,
+      "ms": 5253,
+      "stop": "end_turn",
+      "usage": {
+        "input": 110,
+        "output": 268
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\n\nYour part:\nWrite one sentence of study advice for maths."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "Focus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 110,
+            "output_tokens": 268
+          }
+        }
+      },
+      "t": 12020
+    },
+    {
+      "type": "agent_output",
+      "agent": "worker#1",
+      "text": "Focus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition.",
+      "tokens": {
+        "input": 110,
+        "output": 268
+      },
+      "t": 12020
+    },
+    {
+      "type": "round",
+      "agent": "worker#2",
+      "round": 1,
+      "ms": 11052,
+      "stop": "end_turn",
+      "usage": {
+        "input": 110,
+        "output": 266
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\n\nYour part:\nWrite one sentence of study advice for history."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "Focus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 110,
+            "output_tokens": 266
+          }
+        }
+      },
+      "t": 17819
+    },
+    {
+      "type": "agent_output",
+      "agent": "worker#2",
+      "text": "Focus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names.",
+      "tokens": {
+        "input": 110,
+        "output": 266
+      },
+      "t": 17820
+    },
+    {
+      "type": "round",
+      "agent": "worker#3",
+      "round": 1,
+      "ms": 15291,
+      "stop": "end_turn",
+      "usage": {
+        "input": 110,
+        "output": 202
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\n\nYour part:\nWrite one sentence of study advice for biology."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "To master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 110,
+            "output_tokens": 202
+          }
+        }
+      },
+      "t": 22058
+    },
+    {
+      "type": "agent_output",
+      "agent": "worker#3",
+      "text": "To master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact.",
+      "tokens": {
+        "input": 110,
+        "output": 202
+      },
+      "t": 22058
+    },
+    {
+      "type": "round",
+      "agent": "worker#4",
+      "round": 1,
+      "ms": 20312,
+      "stop": "end_turn",
+      "usage": {
+        "input": 111,
+        "output": 262
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\n\nYour part:\nWrite one sentence of study advice for art most."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "To excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 111,
+            "output_tokens": 262
+          }
+        }
+      },
+      "t": 27079
+    },
+    {
+      "type": "agent_output",
+      "agent": "worker#4",
+      "text": "To excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control.",
+      "tokens": {
+        "input": 111,
+        "output": 262
+      },
+      "t": 27079
+    },
+    {
+      "type": "handoff",
+      "from": "worker#1",
+      "to": "reducer",
+      "note": "Focus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition.",
+      "t": 27079
+    },
+    {
+      "type": "handoff",
+      "from": "worker#2",
+      "to": "reducer",
+      "note": "Focus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names.",
+      "t": 27079
+    },
+    {
+      "type": "handoff",
+      "from": "worker#3",
+      "to": "reducer",
+      "note": "To master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact.",
+      "t": 27079
+    },
+    {
+      "type": "handoff",
+      "from": "worker#4",
+      "to": "reducer",
+      "note": "To excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control.",
+      "t": 27079
+    },
+    {
+      "type": "agent_start",
+      "agent": "reducer",
+      "role": "Reducer",
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "tools": [],
+      "system": "Role: reducer\nYou are the Reducer. You receive the results of several workers, each of whom did one part of the same task. Merge them into one clear answer to the whole task, in the order of the parts, and say what is missing or does not fit together.\nKeep every reply under 300 words. Answer in English.",
+      "t": 27080
+    },
+    {
+      "type": "round",
+      "agent": "reducer",
+      "round": 1,
+      "ms": 27495,
+      "stop": "end_turn",
+      "usage": {
+        "input": 246,
+        "output": 1391
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\n\nResults of the workers:\n--- worker#1 ---\nFocus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition.\n\n--- worker#2 ---\nFocus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names.\n\n--- worker#3 ---\nTo master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact.\n\n--- worker#4 ---\nTo excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "Here is the study advice for each subject:\n\n*   **Maths:** Focus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition.\n*   **History:** Focus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names.\n*   **Biology:** To master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact.\n*   **Art:** To excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control.\n\n**Missing/Non-fitting elements:**\nAll subjects were covered in the requested order, and no information is missing. The sentence structures vary slightly (some are direct imperatives while others are framed as \"To [verb]...\"), but they all function effectively as study advice."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "@cf/google/gemma-4-26b-a4b-it",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 246,
+            "output_tokens": 1391
+          }
+        }
+      },
+      "t": 54575
+    },
+    {
+      "type": "agent_output",
+      "agent": "reducer",
+      "text": "Here is the study advice for each subject:\n\n*   **Maths:** Focus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition.\n*   **History:** Focus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names.\n*   **Biology:** To master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact.\n*   **Art:** To excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control.\n\n**Missing/Non-fitting elements:**\nAll subjects were covered in the requested order, and no information is missing. The sentence structures vary slightly (some are direct imperatives while others are framed as \"To [verb]...\"), but they all function effectively as study advice.",
+      "tokens": {
+        "input": 246,
+        "output": 1391
+      },
+      "t": 54575
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 825,
+        "output": 2700,
+        "searches": 0,
+        "steps": 6
+      },
+      "finalText": "Here is the study advice for each subject:\n\n*   **Maths:** Focus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition.\n*   **History:** Focus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names.\n*   **Biology:** To master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact.\n*   **Art:** To excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control.\n\n**Missing/Non-fitting elements:**\nAll subjects were covered in the requested order, and no information is missing. The sentence structures vary slightly (some are direct imperatives while others are framed as \"To [verb]...\"), but they all function effectively as study advice.",
+      "t": 54576
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "splitter",
+      "provider": "cloudflare",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.cloudflare.com/client/v4/accounts/{account}/ai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"max_completion_tokens\":4000,\"messages\":[{\"role\":\"system\",\"content\":\"Role: splitter\\nYou are the Splitter. You cut the task into 2 to 6 independent parts that different workers can do at the same time, without seeing each other's work. Each part must be a complete instruction that makes sense alone. Do not do the work yourself.\\nReply with JSON only, in this form:\\n{\\\"parts\\\":[\\\"<part 1>\\\",\\\"<part 2>\\\"]}\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"reply\",\"strict\":false,\"schema\":{\"type\":\"object\",\"properties\":{\"parts\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"parts\"]}}}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "api-version": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-ai-neurons": "(hidden)",
+          "cf-auditlog-id": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:22:14 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)"
+        },
+        "body": "{\"id\":\"id-1795519334294\",\"object\":\"chat.completion\",\"created\":1795519334,\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"parts\\\":[\\\"Write one sentence of study advice for maths.\\\",\\\"Write one sentence of study advice for history.\\\",\\\"Write one sentence of study advice for biology.\\\",\\\"Write one sentence of study advice for art most.\\\"]}\",\"reasoning_content\":\"*   Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\\n    *   Constraint: Split the task into 2 to 6 independent parts for different workers.\\n    *   Constraint: Each part must be a complete instruction.\\n    *   Constraint: Output must be JSON only.\\n    *   Constraint: Output must be under 300 words.\\n\\n    *   Maths\\n    *   History\\n    *   Biology\\n    *   Art\\n\\n    *   Option A: 4 parts (one for each subject).\\n    *   Option B: 2 parts (Maths/History and Biology/Art).\\n\\n    Option A is more efficient for parallelism and ensures independence.\\n\\n    *   Part 1: Write one sentence of study advice for maths.\\n    *   Part 2: Write one sentence of study advice for history.\\n    *   Part 3: Write one sentence of study advice for biology.\\n    *   Part 4: Write one sentence of study advice for art.\\n\\n    *   JSON format: `{\\\"parts\\\":[\\\"...\\\",\\\"...\\\",\\\"...\\\",\\\"...\\\"]}`\\n    *   English.\\n    *   Under 300 words.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":138,\"completion_tokens\":311,\"total_tokens\":449,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":9.736363410949707}}"
+      },
+      "error": null,
+      "ms": 6764,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 6766
+    },
+    {
+      "type": "api_call",
+      "agent": "worker#1",
+      "provider": "cloudflare",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.cloudflare.com/client/v4/accounts/{account}/ai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"max_completion_tokens\":4000,\"messages\":[{\"role\":\"system\",\"content\":\"Role: worker\\nYou are a Worker. You get one part of a bigger task, and the task for context. Do only that part and reply with the result. You cannot see what the other workers do.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\\n\\nYour part:\\nWrite one sentence of study advice for maths.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "api-version": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-ai-neurons": "(hidden)",
+          "cf-auditlog-id": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:22:19 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)"
+        },
+        "body": "{\"id\":\"id-1795519339549\",\"object\":\"chat.completion\",\"created\":1795519339,\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Focus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition.\",\"reasoning_content\":\"*   Role: Worker.\\n    *   Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\\n    *   My part: Write one sentence of study advice for maths.\\n    *   Constraint 1: Do only the assigned part.\\n    *   Constraint 2: Reply with the result.\\n    *   Constraint 3: Under 300 words.\\n    *   Constraint 4: Answer in English.\\n\\n    *   Subject: Maths.\\n    *   Goal: One sentence of study advice.\\n\\n    *   *Option 1:* Practice as many problems as possible to build intuition.\\n    *   *Option 2:* Focus on understanding the underlying concepts rather than just memorizing formulas.\\n    *   *Option 3:* Work through diverse problem sets to master different applications of mathematical principles.\\n\\n    *   \\\"Focus on understanding the underlying concepts and practicing a wide variety of problems to build problem-solving intuition.\\\"\\n\\n    *   Only the part? Yes.\\n    *   Under 300 words? Yes.\\n    *   English? Yes.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":110,\"completion_tokens\":268,\"total_tokens\":378,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":8.309090614318848}}"
+      },
+      "error": null,
+      "ms": 5251,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 12020
+    },
+    {
+      "type": "api_call",
+      "agent": "worker#2",
+      "provider": "cloudflare",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.cloudflare.com/client/v4/accounts/{account}/ai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"max_completion_tokens\":4000,\"messages\":[{\"role\":\"system\",\"content\":\"Role: worker\\nYou are a Worker. You get one part of a bigger task, and the task for context. Do only that part and reply with the result. You cannot see what the other workers do.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\\n\\nYour part:\\nWrite one sentence of study advice for history.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "api-version": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-ai-neurons": "(hidden)",
+          "cf-auditlog-id": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:22:25 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)"
+        },
+        "body": "{\"id\":\"id-1795519345348\",\"object\":\"chat.completion\",\"created\":1795519345,\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Focus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names.\",\"reasoning_content\":\"*   Role: Worker.\\n    *   Task Context: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\\n    *   Specific Part: Write one sentence of study advice for history.\\n    *   Constraints: Only do the assigned part, reply with the result, keep reply under 300 words, answer in English.\\n\\n    *   Subject: History.\\n    *   Goal: One sentence of study advice.\\n\\n    *   Option 1: Focus on understanding cause and effect rather than just memorizing dates.\\n    *   Option 2: Try to visualize the timelines to better understand how events connect.\\n    *   Option 3: Connect historical events to modern contexts to make the material more memorable.\\n\\n    *   \\\"Focus on understanding the cause-and-effect relationships between events rather than simply memorizing dates and names.\\\"\\n\\n    *   One sentence? Yes.\\n    *   Subject: History? Yes.\\n    *   Under 300 words? Yes.\\n    *   English? Yes.\\n    *   Only the assigned part? Yes.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":110,\"completion_tokens\":266,\"total_tokens\":376,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":8.254545211791992}}"
+      },
+      "error": null,
+      "ms": 5798,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 17819
+    },
+    {
+      "type": "api_call",
+      "agent": "worker#3",
+      "provider": "cloudflare",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.cloudflare.com/client/v4/accounts/{account}/ai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"max_completion_tokens\":4000,\"messages\":[{\"role\":\"system\",\"content\":\"Role: worker\\nYou are a Worker. You get one part of a bigger task, and the task for context. Do only that part and reply with the result. You cannot see what the other workers do.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\\n\\nYour part:\\nWrite one sentence of study advice for biology.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "api-version": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-ai-neurons": "(hidden)",
+          "cf-auditlog-id": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:22:29 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)"
+        },
+        "body": "{\"id\":\"id-1795519349582\",\"object\":\"chat.completion\",\"created\":1795519349,\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"To master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact.\",\"reasoning_content\":\"*   Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\\n    *   My Part: Write one sentence of study advice for biology.\\n    *   Constraint 1: Do only the assigned part.\\n    *   Constraint 2: Under 300 words.\\n    *   Constraint 3: Answer in English.\\n\\n    *   Subject: Biology.\\n    *   Advice idea: Focus on understanding processes and diagrams rather than just memorizing terms.\\n\\n    *   \\\"To master biology, focus on understanding the interconnected processes and drawing out biological diagrams to visualize how systems function together.\\\"\\n\\n    *   Only biology advice? Yes.\\n    *   Under 300 words? Yes.\\n    *   English? Yes.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":110,\"completion_tokens\":202,\"total_tokens\":312,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":6.509090900421143}}"
+      },
+      "error": null,
+      "ms": 4236,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 22058
+    },
+    {
+      "type": "api_call",
+      "agent": "worker#4",
+      "provider": "cloudflare",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.cloudflare.com/client/v4/accounts/{account}/ai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"max_completion_tokens\":4000,\"messages\":[{\"role\":\"system\",\"content\":\"Role: worker\\nYou are a Worker. You get one part of a bigger task, and the task for context. Do only that part and reply with the result. You cannot see what the other workers do.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\\n\\nYour part:\\nWrite one sentence of study advice for art most.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "api-version": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-ai-neurons": "(hidden)",
+          "cf-auditlog-id": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:22:34 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)"
+        },
+        "body": "{\"id\":\"id-1795519354607\",\"object\":\"chat.completion\",\"created\":1795519354,\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"To excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control.\",\"reasoning_content\":\"*   Role: Worker.\\n    *   Task Context: Write one sentence of study advice for each subject (maths, history, biology, art).\\n    *   My Part: Write one sentence of study advice for art.\\n    *   Constraints: Under 300 words, English only, do *only* the assigned part.\\n\\n    *   Subject: Art.\\n    *   Goal: One sentence of study advice.\\n\\n    *   \\\"To improve your art, practice sketching daily to build muscle memory and refine your observational skills.\\\"\\n    *   \\\"Focus on understanding the fundamental principles of color theory and composition to elevate your creative expression.\\\"\\n    *   \\\"Practice consistent sketching and study the techniques of masters to develop your own unique visual language.\\\"\\n\\n    *   \\\"To excel in art, focus on consistent daily practice and study the techniques of masters to refine your observational skills and technical control.\\\"\\n\\n    *   One sentence? Yes.\\n    *   About art? Yes.\\n    *   Under 300 words? Yes.\\n    *   Only the assigned part? Yes.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":111,\"completion_tokens\":262,\"total_tokens\":373,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":8.154544830322266}}"
+      },
+      "error": null,
+      "ms": 5020,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 27079
+    },
+    {
+      "type": "api_call",
+      "agent": "reducer",
+      "provider": "cloudflare",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.cloudflare.com/client/v4/accounts/{account}/ai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"max_completion_tokens\":4000,\"messages\":[{\"role\":\"system\",\"content\":\"Role: reducer\\nYou are the Reducer. You receive the results of several workers, each of whom did one part of the same task. Merge them into one clear answer to the whole task, in the order of the parts, and say what is missing or does not fit together.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Write one sentence of study advice for each of these subjects: maths, history, biology, art.\\n\\nResults of the workers:\\n--- worker#1 ---\\nFocus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition.\\n\\n--- worker#2 ---\\nFocus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names.\\n\\n--- worker#3 ---\\nTo master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact.\\n\\n--- worker#4 ---\\nTo excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "api-version": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-ai-neurons": "(hidden)",
+          "cf-auditlog-id": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:23:02 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)"
+        },
+        "body": "{\"id\":\"id-1795519382103\",\"object\":\"chat.completion\",\"created\":1795519382,\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Here is the study advice for each subject:\\n\\n*   **Maths:** Focus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition.\\n*   **History:** Focus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names.\\n*   **Biology:** To master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact.\\n*   **Art:** To excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control.\\n\\n**Missing/Non-fitting elements:**\\nAll subjects were covered in the requested order, and no information is missing. The sentence structures vary slightly (some are direct imperatives while others are framed as \\\"To [verb]...\\\"), but they all function effectively as study advice.\",\"reasoning_content\":\"*   Task: Write one sentence of study advice for each subject: maths, history, biology, art.\\n    *   Worker #1: Maths (Focus on concepts and practice).\\n    *   Worker #2: History (Focus on cause-and-effect vs. dates).\\n    *   Worker #3: Biology (Focus on processes/systems and diagrams).\\n    *   Worker #4: Art (Focus on daily practice and studying masters).\\n\\n    *   Maths: Focus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition.\\n    *   History: Focus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names.\\n    *   Biology: To master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact.\\n    *   Art: To excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control.\\n\\n    *   Combine them into a clear list/set of sentences in order.\\n    *   Check for missing or non-fitting parts.\\n    *   Keep under 300 words.\\n\\n    *   Maths: Focus on understanding underlying concepts and consistently practicing a variety of problems to build problem-solving intuition.\\n    *   History: Focus on understanding cause-and-effect relationships between major events rather than memorizing isolated dates and names.\\n    *   Biology: Master biology by focusing on complex processes and systems instead of just memorizing terms, using diagrams to visualize structure interactions.\\n    *   Art: Excel in art through consistent daily practice and by studying the techniques of masters to refine observational skills and technical control.\\n\\n    *   Order: Maths, History, Biology, Art. Correct.\\n    *   Missing: None.\\n    *   Fit: The sentences vary slightly in structure (some start with \\\"Focus on...\\\", others with \\\"To master...\\\"), but they all follow the prompt requirements.\\n\\n    *   Maths: Focus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition.\\n    *   History: Focus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names.\\n    *   Biology: To master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact.\\n    *   Art: To excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control.\\n\\n    *   Everything is present. The style is slightly inconsistent (some are imperatives, some are instructional phrases), but they all address the prompt.\\n\\n    *   Maths: Focus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition.\\n    *   History: Focus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names.\\n    *   Biology: To master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact.\\n    *   Art: To excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control.\\n\\n    Nothing is missing or does not fit.\\n\\n    Wait, I should refine the biology and art sentences slightly to make them more cohesive if I'm \\\"merging them into one clear answer,\\\" but the instructions say \\\"Merge them into one clear answer... in the order of the parts.\\\" Usually, this means presenting the collected advice clearly.\\n\\n    Let's just list them as requested.\\n\\n    *Maths:* Focus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition.\\n    *History:* Focus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names.\\n    *Biology:* To master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact.\\n    *Art:* To excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control.\\n\\n    *Analysis:* All subjects are covered. No information is missing. The tone varies slightly between imperative and \\\"To [verb]...\\\" structures, but they work well together as a list of advice.\\n\\n    Word count check: ~120 words. Good.\\n\\n    Final check of prompt requirements:\\n    - \\\"Merge them into one clear answer to the whole task\\\"\\n    - \\\"in the order of the parts\\\"\\n    - \\\"say what is missing or does not fit together\\\"\\n    - \\\"under 300 words\\\"\\n    - \\\"Answer in English\\\"\\n\\n    Okay, I will present the sentences clearly.\\n\\n    (Self-correction: I will present them as a list for clarity).\\n\\n    Maths: Focus on understanding the underlying concepts and consistently practicing a wide variety of problems to build strong problem-solving intuition.\\n    History: Focus on understanding the cause-and-effect relationships between major events rather than simply memorizing isolated dates and names.\\n    Biology: To master biology, focus on understanding the complex processes and systems rather than just memorizing terms, and use diagrams to visualize how different biological structures interact.\\n    Art: To excel in art, focus on consistent daily practice and study the techniques of masters to refine both your observational skills and technical control.\\n\\n    Nothing is missing or does not fit.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":246,\"completion_tokens\":1391,\"total_tokens\":1637,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":40.172725677490234}}"
+      },
+      "error": null,
+      "ms": 27492,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 54575
+    }
+  ],
+  "design": {
+    "pattern": "mapreduce",
+    "nodes": [
+      {
+        "id": "splitter",
+        "agent": "splitter",
+        "model": "fast",
+        "search": false,
+        "slot": "cloudflare-free"
+      },
+      {
+        "id": "worker",
+        "agent": "worker",
+        "model": "fast",
+        "search": false,
+        "slot": "cloudflare-free"
+      },
+      {
+        "id": "reducer",
+        "agent": "reducer",
+        "model": "fast",
+        "search": false,
+        "slot": "cloudflare-free"
+      }
+    ],
+    "edges": [
+      {
+        "from": "splitter",
+        "to": "worker"
+      },
+      {
+        "from": "worker",
+        "to": "reducer"
+      }
+    ]
+  },
+  "task": "Write one sentence of study advice for each of these subjects: maths, history, biology, art.",
+  "about": {
+    "title": "Map-reduce: split, work on each part, join",
+    "author": "Agent Atlas Academy",
+    "description": "A splitter cuts the task into parts, one worker runs for every part, and a reducer joins the results.\n\n**What it teaches**\n\nOne worker design runs many times on different parts, so the work grows with the task, not with the number of agents.\n\n**What to watch**\n\nHow many parts the splitter makes, and how the reducer puts them in order.\n\nRead more: [Map-reduce](#/learn/map-reduce)"
+  },
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 825,
+    "output": 2700,
+    "searches": 0,
+    "steps": 6
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T11:22:07.333Z",
+  "endedAt": "2026-11-24T11:23:02.548Z",
+  "durationMs": 55215
+}

@@ -1,0 +1,8 @@
+{
+  "3": "The Splitter's parts: one sentence of advice per subject.",
+  "4": "Each part is handed to its own worker.",
+  "13": "Worker 1's answer. The workers run at the same time and do not see each other.",
+  "20": "Every worker's result goes to the Reducer.",
+  "26": "The Reducer merges the four answers into one text.",
+  "27": "The run ends. The final answer is the reducer's text."
+}

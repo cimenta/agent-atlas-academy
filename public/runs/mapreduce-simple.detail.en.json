@@ -1,0 +1,6 @@
+{
+  "about": "A splitter cuts the task into four parts, one subject each, four workers answer them at the same time and a reducer merges the answers. All run on Cloudflare, free tier.",
+  "how": "The splitter answers with a list of parts, every part goes to a worker, and the reducer gets all the results.",
+  "learns": "Map-reduce splits one big task into many small ones that run side by side, then merges the results.",
+  "watch": "The parts the splitter made, and how the reducer joined the four answers."
+}

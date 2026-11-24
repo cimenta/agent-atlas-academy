@@ -1,0 +1,7 @@
+{
+  "0": "Every run starts with a task. The question is clearly about maths.",
+  "3": "The Router chooses the Maths tutor and gives the reason.",
+  "4": "The handoff starts only the chosen specialist; the Language tutor is not called.",
+  "7": "The Maths tutor answers. Nobody checks that the choice was right.",
+  "8": "The run ends. The final answer is the specialist's text."
+}

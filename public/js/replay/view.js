@@ -98,10 +98,10 @@ export function headingOf(run) {
   return line.length > 120 ? `${line.slice(0, 117)}…` : line;
 }
 
-export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null }) {
+export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null, doneMark = null }) {
   const validation = validateRun(run);
   if (!validation.ok) return mountError(container, doc, t, validation.errors);
-  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, apiCalls: Array.isArray(run.apiCalls) ? run.apiCalls : [], apiCallsDropped: run.apiCallsDropped === true, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout, providerColors, onRetry, suggestFallback, limitsInfo });
+  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, apiCalls: Array.isArray(run.apiCalls) ? run.apiCalls : [], apiCallsDropped: run.apiCallsDropped === true, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout, providerColors, onRetry, suggestFallback, limitsInfo, doneMark });
 }
 
 // A player that shows a run while it is still arriving. Events are added with append(), end() closes it.
@@ -114,7 +114,7 @@ export function mountLiveReplay(container, { title, pattern, recordedWith, apiCa
   };
 }
 
-function mountView(container, { clockStartMs = 0, exportRun, pattern, events, apiCalls = [], apiCallsDropped = false, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null }) {
+function mountView(container, { clockStartMs = 0, exportRun, pattern, events, apiCalls = [], apiCallsDropped = false, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null, doneMark = null }) {
   const player = createPlayer({ events, clock, timeScale, live });
   const ui = { agent: null, tab: "steps", step: null, round: null, follow: true };
   const viewer = createViewer({ doc, t });
@@ -146,6 +146,7 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
         t,
         getItems: () => [
           { ui: "run-about", label: t("player.about"), hint: t("player.aboutHint"), onClick: () => aboutPanel.toggle() },
+          ...(doneMark ? [{ ui: "mark-done", label: t(doneMark.isDone() ? "player.markUndone" : "player.markDone"), hint: t("player.markDoneHint"), onClick: () => doneMark.toggle(!doneMark.isDone()) }] : []),
           { ui: "export-json", label: t("player.export"), hint: t("player.exportHint"), onClick: () => downloadFile(doc, `${safeFileName(exportRun.id)}.json`, JSON.stringify(runForExport(exportRun), null, 2), "application/json") },
           ...(definition ? [{ ui: "use-in-create", label: t("player.useInCreate"), hint: t("player.useInCreateHint"), onClick: () => openInCreate(doc, t, definition) }] : []),
           ...(definition ? [{ ui: "export-definition", label: t("player.exportDefinition"), hint: t("player.exportDefinitionHint"), onClick: () => downloadFile(doc, `${safeFileName(exportRun.id)}-definition.json`, JSON.stringify(definition, null, 2), "application/json") }] : []),

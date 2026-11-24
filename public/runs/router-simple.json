@@ -1,0 +1,367 @@
+{
+  "schemaVersion": 1,
+  "id": "router-simple",
+  "title": "How do I turn the fraction 3/4 into a percentage?",
+  "language": "en",
+  "pattern": "router",
+  "recordedWith": {
+    "provider": "groq",
+    "model": "openai/gpt-oss-20b",
+    "freeTier": true
+  },
+  "appVersion": "1.16.10-dev.0",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "How do I turn the fraction 3/4 into a percentage?",
+      "pattern": "router",
+      "design": {
+        "pattern": "router",
+        "nodes": [
+          {
+            "id": "router",
+            "agent": "router",
+            "model": "fast",
+            "search": false,
+            "slot": "groq-free"
+          },
+          {
+            "id": "free",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Maths tutor",
+            "instructions": "You are a patient maths tutor. Explain step by step with one worked example.",
+            "slot": "groq-free"
+          },
+          {
+            "id": "free-2",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Language tutor",
+            "instructions": "You are a patient language tutor. Explain grammar and writing questions with one example.",
+            "slot": "groq-free"
+          }
+        ],
+        "edges": [
+          {
+            "from": "router",
+            "to": "free"
+          },
+          {
+            "from": "router",
+            "to": "free-2"
+          }
+        ]
+      },
+      "t": 2
+    },
+    {
+      "type": "agent_start",
+      "agent": "router",
+      "role": "Router",
+      "model": "openai/gpt-oss-20b",
+      "tools": [],
+      "system": "Role: router\nYou are the Router. You read the task and choose exactly one specialist to answer it. The first message lists the specialist ids and what each one is for. You do not answer the task yourself, and you will not see the specialist's answer. Choose the specialist whose role fits the task best.\nReply with JSON only, in this form:\n{\"route\":\"<specialist id>\",\"reason\":\"<why this specialist fits the task>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 4
+    },
+    {
+      "type": "round",
+      "agent": "router",
+      "round": 1,
+      "ms": 293,
+      "stop": "end_turn",
+      "usage": {
+        "input": 286,
+        "output": 52
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: How do I turn the fraction 3/4 into a percentage?\n\nYou may route to: free (Maths tutor: You are a patient maths tutor. Explain step by step with one worked example.), free-2 (Language tutor: You are a patient language tutor. Explain grammar and writing questions with one)"
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"route\":\"free\",\"reason\":\"The task is a mathematical question asking how to convert a fraction into a percentage. The appropriate specialist is the Maths tutor.\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "openai/gpt-oss-20b",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1,
+          "forced": true
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "openai/gpt-oss-20b",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 286,
+            "output_tokens": 52
+          }
+        }
+      },
+      "t": 298
+    },
+    {
+      "type": "agent_output",
+      "agent": "router",
+      "text": "{\"route\":\"free\",\"reason\":\"The task is a mathematical question asking how to convert a fraction into a percentage. The appropriate specialist is the Maths tutor.\"}",
+      "tokens": {
+        "input": 286,
+        "output": 52
+      },
+      "t": 298
+    },
+    {
+      "type": "handoff",
+      "from": "router",
+      "to": "free",
+      "note": "The task is a mathematical question asking how to convert a fraction into a percentage. The appropriate specialist is the Maths tutor.",
+      "t": 298
+    },
+    {
+      "type": "agent_start",
+      "agent": "free",
+      "role": "Maths tutor",
+      "model": "openai/gpt-oss-20b",
+      "tools": [],
+      "system": "Role: free\nYou are Maths tutor. You are a patient maths tutor. Explain step by step with one worked example.\nKeep every reply under 300 words. Answer in English.",
+      "t": 298
+    },
+    {
+      "type": "round",
+      "agent": "free",
+      "round": 1,
+      "ms": 2677,
+      "stop": "end_turn",
+      "usage": {
+        "input": 127,
+        "output": 261
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: How do I turn the fraction 3/4 into a percentage?"
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "To convert a fraction to a percentage, you follow two simple steps:  \n\n1. **Divide the numerator by the denominator** to get a decimal.  \n2. **Multiply the decimal by 100** and add the percent sign.\n\n### Worked Example: \\(\\displaystyle \\frac{3}{4}\\)\n\n**Step 1 – Divide**\n\n\\[\n\\frac{3}{4} = 0.75\n\\]\n\n(You can do this on a calculator, or note that 4 goes into 3 a total of 0.75 times.)\n\n**Step 2 – Multiply by 100**\n\n\\[\n0.75 \\times 100 = 75\n\\]\n\nSo, \\(\\frac{3}{4}\\) expressed as a percentage is **75 %**.\n\n---\n\n### Quick Check\n\nIf you want to double‑check, remember that “percent” means “per 100.”  \nIf 4 parts equal 100 %, then 3 parts equal:\n\n\\[\n3 \\times \\frac{100}{4} = 3 \\times 25 = 75\n\\]\n\nSame result!  \n\nThat’s it—3/4 = 75 %."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "openai/gpt-oss-20b",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "openai/gpt-oss-20b",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 127,
+            "output_tokens": 261
+          }
+        }
+      },
+      "t": 2976
+    },
+    {
+      "type": "agent_output",
+      "agent": "free",
+      "text": "To convert a fraction to a percentage, you follow two simple steps:  \n\n1. **Divide the numerator by the denominator** to get a decimal.  \n2. **Multiply the decimal by 100** and add the percent sign.\n\n### Worked Example: \\(\\displaystyle \\frac{3}{4}\\)\n\n**Step 1 – Divide**\n\n\\[\n\\frac{3}{4} = 0.75\n\\]\n\n(You can do this on a calculator, or note that 4 goes into 3 a total of 0.75 times.)\n\n**Step 2 – Multiply by 100**\n\n\\[\n0.75 \\times 100 = 75\n\\]\n\nSo, \\(\\frac{3}{4}\\) expressed as a percentage is **75 %**.\n\n---\n\n### Quick Check\n\nIf you want to double‑check, remember that “percent” means “per 100.”  \nIf 4 parts equal 100 %, then 3 parts equal:\n\n\\[\n3 \\times \\frac{100}{4} = 3 \\times 25 = 75\n\\]\n\nSame result!  \n\nThat’s it—3/4 = 75 %.",
+      "tokens": {
+        "input": 127,
+        "output": 261
+      },
+      "t": 2976
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 413,
+        "output": 313,
+        "searches": 0,
+        "steps": 2
+      },
+      "finalText": "To convert a fraction to a percentage, you follow two simple steps:  \n\n1. **Divide the numerator by the denominator** to get a decimal.  \n2. **Multiply the decimal by 100** and add the percent sign.\n\n### Worked Example: \\(\\displaystyle \\frac{3}{4}\\)\n\n**Step 1 – Divide**\n\n\\[\n\\frac{3}{4} = 0.75\n\\]\n\n(You can do this on a calculator, or note that 4 goes into 3 a total of 0.75 times.)\n\n**Step 2 – Multiply by 100**\n\n\\[\n0.75 \\times 100 = 75\n\\]\n\nSo, \\(\\frac{3}{4}\\) expressed as a percentage is **75 %**.\n\n---\n\n### Quick Check\n\nIf you want to double‑check, remember that “percent” means “per 100.”  \nIf 4 parts equal 100 %, then 3 parts equal:\n\n\\[\n3 \\times \\frac{100}{4} = 3 \\times 25 = 75\n\\]\n\nSame result!  \n\nThat’s it—3/4 = 75 %.",
+      "t": 2978
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "router",
+      "provider": "groq",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.groq.com/openai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"openai/gpt-oss-20b\",\"max_completion_tokens\":4000,\"reasoning_effort\":\"low\",\"messages\":[{\"role\":\"system\",\"content\":\"Role: router\\nYou are the Router. You read the task and choose exactly one specialist to answer it. The first message lists the specialist ids and what each one is for. You do not answer the task yourself, and you will not see the specialist's answer. Choose the specialist whose role fits the task best.\\nReply with JSON only, in this form:\\n{\\\"route\\\":\\\"<specialist id>\\\",\\\"reason\\\":\\\"<why this specialist fits the task>\\\"}\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: How do I turn the fraction 3/4 into a percentage?\\n\\nYou may route to: free (Maths tutor: You are a patient maths tutor. Explain step by step with one worked example.), free-2 (Language tutor: You are a patient language tutor. Explain grammar and writing questions with one)\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"reply\",\"strict\":false,\"schema\":{\"type\":\"object\",\"properties\":{\"route\":{\"type\":\"string\"},\"reason\":{\"type\":\"string\"}},\"required\":[\"route\",\"reason\"]}}}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "alt-svc": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:18:56 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "vary": "(hidden)",
+          "x-groq-region": "(hidden)",
+          "x-ratelimit-limit-requests": "1000",
+          "x-ratelimit-limit-tokens": "8000",
+          "x-ratelimit-remaining-requests": "999",
+          "x-ratelimit-remaining-tokens": "7308",
+          "x-ratelimit-reset-requests": "1m26.4s",
+          "x-ratelimit-reset-tokens": "5.189s",
+          "x-request-id": "(hidden)"
+        },
+        "body": "{\"id\":\"chatcmpl-88957a92-80c3-4a51-bb9a-cec0b83ddecf\",\"object\":\"chat.completion\",\"created\":1795519136,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"route\\\":\\\"free\\\",\\\"reason\\\":\\\"The task is a mathematical question asking how to convert a fraction into a percentage. The appropriate specialist is the Maths tutor.\\\"}\",\"reasoning\":\"Need to route to maths tutor.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.083546341,\"prompt_tokens\":286,\"prompt_time\":0.019677282,\"completion_tokens\":52,\"completion_time\":0.07825881,\"total_tokens\":338,\"total_time\":0.097936092,\"completion_tokens_details\":{\"reasoning_tokens\":8}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_e11c8bbf69\",\"x_groq\":{\"id\":\"req_01m86mfg4fem89j6ecv98btf6h\",\"seed\":1757989246},\"service_tier\":\"on_demand\"}\n"
+      },
+      "error": null,
+      "ms": 290,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 297
+    },
+    {
+      "type": "api_call",
+      "agent": "free",
+      "provider": "groq",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.groq.com/openai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"openai/gpt-oss-20b\",\"max_completion_tokens\":4000,\"reasoning_effort\":\"low\",\"messages\":[{\"role\":\"system\",\"content\":\"Role: free\\nYou are Maths tutor. You are a patient maths tutor. Explain step by step with one worked example.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: How do I turn the fraction 3/4 into a percentage?\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "alt-svc": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:18:58 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "vary": "(hidden)",
+          "x-groq-region": "(hidden)",
+          "x-ratelimit-limit-requests": "1000",
+          "x-ratelimit-limit-tokens": "8000",
+          "x-ratelimit-remaining-requests": "998",
+          "x-ratelimit-remaining-tokens": "7408",
+          "x-ratelimit-reset-requests": "2m52.8s",
+          "x-ratelimit-reset-tokens": "4.439s",
+          "x-request-id": "(hidden)"
+        },
+        "body": "{\"id\":\"chatcmpl-ba41a7eb-6a5e-4b75-9000-a3b9bc5c0ddf\",\"object\":\"chat.completion\",\"created\":1795519138,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"To convert a fraction to a percentage, you follow two simple steps:  \\n\\n1. **Divide the numerator by the denominator** to get a decimal.  \\n2. **Multiply the decimal by 100** and add the percent sign.\\n\\n### Worked Example: \\\\(\\\\displaystyle \\\\frac{3}{4}\\\\)\\n\\n**Step 1 – Divide**\\n\\n\\\\[\\n\\\\frac{3}{4} = 0.75\\n\\\\]\\n\\n(You can do this on a calculator, or note that 4 goes into 3 a total of 0.75 times.)\\n\\n**Step 2 – Multiply by 100**\\n\\n\\\\[\\n0.75 \\\\times 100 = 75\\n\\\\]\\n\\nSo, \\\\(\\\\frac{3}{4}\\\\) expressed as a percentage is **75 %**.\\n\\n---\\n\\n### Quick Check\\n\\nIf you want to double‑check, remember that “percent” means “per 100.”  \\nIf 4 parts equal 100 %, then 3 parts equal:\\n\\n\\\\[\\n3 \\\\times \\\\frac{100}{4} = 3 \\\\times 25 = 75\\n\\\\]\\n\\nSame result!  \\n\\nThat’s it—3/4 = 75 %.\",\"reasoning\":\"Need step-by-step explanation under 300 words.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.203023551,\"prompt_tokens\":127,\"prompt_time\":0.007179213,\"completion_tokens\":261,\"completion_time\":0.28146111,\"total_tokens\":388,\"total_time\":0.288640323,\"completion_tokens_details\":{\"reasoning_tokens\":11}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_e99e93f2ac\",\"x_groq\":{\"id\":\"req_01m86mfjakeq2vq4nd7d5j3gdp\",\"seed\":988270739},\"service_tier\":\"on_demand\"}\n"
+      },
+      "error": null,
+      "ms": 675,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 2975
+    }
+  ],
+  "design": {
+    "pattern": "router",
+    "nodes": [
+      {
+        "id": "router",
+        "agent": "router",
+        "model": "fast",
+        "search": false,
+        "slot": "groq-free"
+      },
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Maths tutor",
+        "instructions": "You are a patient maths tutor. Explain step by step with one worked example.",
+        "slot": "groq-free"
+      },
+      {
+        "id": "free-2",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Language tutor",
+        "instructions": "You are a patient language tutor. Explain grammar and writing questions with one example.",
+        "slot": "groq-free"
+      }
+    ],
+    "edges": [
+      {
+        "from": "router",
+        "to": "free"
+      },
+      {
+        "from": "router",
+        "to": "free-2"
+      }
+    ]
+  },
+  "task": "How do I turn the fraction 3/4 into a percentage?",
+  "about": {
+    "title": "Router: choose the right specialist",
+    "author": "Agent Atlas Academy",
+    "description": "A router reads the question and sends it to one of two specialists.\n\n**What it teaches**\n\nA router chooses one path and the others are never started, so it saves work.\n\n**What to watch**\n\nWhich specialist is chosen and why, and which one stays idle.\n\nRead more: [Router](#/learn/router)"
+  },
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 413,
+    "output": 313,
+    "searches": 0,
+    "steps": 2
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T11:18:55.377Z",
+  "endedAt": "2026-11-24T11:18:59.013Z",
+  "durationMs": 3636
+}

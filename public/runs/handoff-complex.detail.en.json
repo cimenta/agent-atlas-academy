@@ -1,0 +1,6 @@
+{
+  "about": "A ticket about a portal login and a slow laptop travels from the help desk through accounts and network experts to a hardware expert. Every agent runs on Anthropic.",
+  "how": "Each agent either finishes or hands over with a note; here the ticket passed three handovers and the last agent finished.",
+  "learns": "A handoff chain can pass work along without anybody solving all of it: the last expert here covers only the hardware part.",
+  "watch": "The notes between the agents, and what the final answer leaves unsolved."
+}

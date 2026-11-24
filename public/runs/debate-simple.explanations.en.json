@@ -1,0 +1,8 @@
+{
+  "0": "Every run starts with a task. In a debate every debater gets the same question.",
+  "3": "Debater 1 argues one side. It does not see the other debater.",
+  "4": "A handoff sends the argument to the judge.",
+  "7": "Debater 2 argues independently of Debater 1.",
+  "11": "The judge's verdict: it names a winner and gives the reasons.",
+  "12": "The run ends. The final answer is the judge's verdict."
+}

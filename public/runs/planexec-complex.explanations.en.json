@@ -1,0 +1,8 @@
+{
+  "3": "The Planner's first plan.",
+  "6": "The Planner's second plan, with two steps. This is the plan the Executor follows.",
+  "7": "The first step goes to the Executor.",
+  "10": "Step 1: the outline of the presentation.",
+  "14": "Step 2: the script of every part, written from the outline. This is the answer.",
+  "15": "The run ends."
+}

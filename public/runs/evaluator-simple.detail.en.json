@@ -1,0 +1,6 @@
+{
+  "about": "A writer drafts a note on what a password manager is, an evaluator asks for a revision, and the second draft is accepted. Both agents run on Gemini, free tier.",
+  "how": "The evaluator answers with a verdict (accept or revise) and feedback. A revise sends the draft back to the writer, up to two rounds.",
+  "learns": "An evaluator loop improves a draft: the feedback of one round is the input of the next.",
+  "watch": "The feedback of the first round, and what the writer changed in the second draft."
+}

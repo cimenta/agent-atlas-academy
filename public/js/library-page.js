@@ -22,7 +22,7 @@ import { MAX_COMPARE } from "./compare-model.js";
 import { clearPageActions, setPageActions } from "./shortcuts.js";
 import { groupOfTag, tagCounts, filterByTags, cloudRows, tagWeight } from "./library-tags.js";
 import { stepOf } from "./library-path.js";
-import { loadProgress, setDone, isDone } from "./library-progress.js";
+import { loadProgress, setDone, isDone, withoutDone } from "./library-progress.js";
 import { drawPath, drawFilterBar } from "./library-path-view.js";
 
 export { importFiles };
@@ -238,6 +238,7 @@ export async function renderLibraryTab(ctx, requestedId) {
       label: t("library.bar.menu"),
       ui: "bar-menu",
       getItems: () => [
+        { ui: "only-undone", label: t(lib.onlyUndone ? "library.bar.showAll" : "library.bar.onlyUndone"), onClick: () => { lib.onlyUndone = !lib.onlyUndone; redraw(); } },
         { ui: "import-run", label: t("play.import"), onClick: () => fileInput.click() },
         { ui: "export-ticked", label: `${t("library.bar.exportTicked")} (${n})`, disabled: n === 0, onClick: () => exportRuns(lib.compare) },
         ...(mineIds.length > 0 ? [{ ui: "export-all-mine", label: `${t("library.bar.exportAll")} (${mineIds.length})`, onClick: () => exportRuns(mineIds) }] : []),
@@ -637,7 +638,9 @@ export async function renderLibraryTab(ctx, requestedId) {
     const built = buildReplayList(gallery, local);
     // With the switch on the right, the library list holds only the runs of the chosen goal.
     const ofGoal = lib.onlyGoal ? built.gallery.filter((item) => stepOf(item, lib.goal)) : built.gallery;
-    const shown = filterLibrary(filterByTags(ofGoal, lib.tags), lib.query, texts ?? {});
+    // With "Not done only" a run marked done on the path (in any goal) is left out.
+    const undone = lib.onlyUndone ? withoutDone(ofGoal, progressNow()) : ofGoal;
+    const shown = filterLibrary(filterByTags(undone, lib.tags), lib.query, texts ?? {});
     const mine = filterLibrary(built.mine, lib.query, texts ?? {});
     const none = (key) => h(doc, "p", { class: "notice" }, t(key));
     // The steps of the goal that is chosen on the path: a run of that goal shows its number, done or not.

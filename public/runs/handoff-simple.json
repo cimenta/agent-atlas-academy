@@ -1,0 +1,389 @@
+{
+  "schemaVersion": 1,
+  "id": "handoff-simple",
+  "title": "My laptop connects to the school Wi-Fi, but no web page open…",
+  "language": "en",
+  "pattern": "handoff",
+  "recordedWith": {
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "appVersion": "1.16.10-dev.0",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "My laptop connects to the school Wi-Fi, but no web page opens.",
+      "pattern": "handoff",
+      "design": {
+        "pattern": "handoff",
+        "nodes": [
+          {
+            "id": "free",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Help desk",
+            "instructions": "You answer first. If the problem is about the network, hand over to the network expert with a short note. Otherwise answer yourself.",
+            "slot": "anthropic"
+          },
+          {
+            "id": "free-2",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Network expert",
+            "instructions": "You fix network problems. Give clear steps a student can try.",
+            "slot": "anthropic"
+          }
+        ],
+        "edges": [
+          {
+            "from": "free",
+            "to": "free-2"
+          }
+        ],
+        "start": "free"
+      },
+      "t": 0
+    },
+    {
+      "type": "agent_start",
+      "agent": "free",
+      "role": "Help desk",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Help desk. You answer first. If the problem is about the network, hand over to the network expert with a short note. Otherwise answer yourself.\nThis is a handoff: there is no boss. Do your part of the task. Then either hand control to another agent, or finish the whole task. The first message lists the agents you may hand over to.\nThe next agent knows only the task and your note, nothing else you did or said. So the note must say what you did, what the result is, and what the next agent must do. The work itself goes into the note or the answer, because your reply is the decision.\nReply with JSON only, in one of these forms:\n{\"action\":\"handoff\",\"to\":\"<agent id>\",\"note\":\"<what you did, the result, and what the next agent must do>\"}\n{\"action\":\"finish\",\"answer\":\"<the final answer for the user>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 5
+    },
+    {
+      "type": "round",
+      "agent": "free",
+      "round": 1,
+      "ms": 1206,
+      "stop": "end_turn",
+      "usage": {
+        "input": 862,
+        "output": 192
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: My laptop connects to the school Wi-Fi, but no web page opens.\n\nYou may hand over to: free-2 (Network expert)"
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"action\":\"handoff\",\"to\":\"free-2\",\"note\":\"User's laptop connects to the school Wi-Fi, but no web pages open. This is a network problem, so I am handing it to you. I did not run any checks. Please diagnose why the connection is up but browsing fails (for example DNS, DHCP/IP config, captive portal login, proxy settings, or a blocked site), then give the user clear steps to fix it.\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1,
+          "forced": true
+        },
+        "response": {
+          "id": "msg_011ChMfrYpNBHQ46TP9iadPi",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 862,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 192,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 1211
+    },
+    {
+      "type": "agent_output",
+      "agent": "free",
+      "text": "{\"action\":\"handoff\",\"to\":\"free-2\",\"note\":\"User's laptop connects to the school Wi-Fi, but no web pages open. This is a network problem, so I am handing it to you. I did not run any checks. Please diagnose why the connection is up but browsing fails (for example DNS, DHCP/IP config, captive portal login, proxy settings, or a blocked site), then give the user clear steps to fix it.\"}",
+      "tokens": {
+        "input": 862,
+        "output": 192
+      },
+      "t": 1211
+    },
+    {
+      "type": "handoff",
+      "from": "free",
+      "to": "free-2",
+      "note": "User's laptop connects to the school Wi-Fi, but no web pages open. This is a network problem, so I am handing it to you. I did not run any checks. Please diagnose why the connection is up but browsing fails (for example DNS, DHCP/IP config, captive portal login, proxy settings, or a blocked site), then give the user clear steps to fix it.",
+      "t": 1212
+    },
+    {
+      "type": "agent_start",
+      "agent": "free-2",
+      "role": "Network expert",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Network expert. You fix network problems. Give clear steps a student can try.\nThis is a handoff: there is no boss. Do your part of the task. Then either hand control to another agent, or finish the whole task. The first message lists the agents you may hand over to.\nThe next agent knows only the task and your note, nothing else you did or said. So the note must say what you did, what the result is, and what the next agent must do. The work itself goes into the note or the answer, because your reply is the decision.\nReply with JSON only, in one of these forms:\n{\"action\":\"handoff\",\"to\":\"<agent id>\",\"note\":\"<what you did, the result, and what the next agent must do>\"}\n{\"action\":\"finish\",\"answer\":\"<the final answer for the user>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 1212
+    },
+    {
+      "type": "round",
+      "agent": "free-2",
+      "round": 1,
+      "ms": 4350,
+      "stop": "end_turn",
+      "usage": {
+        "input": 970,
+        "output": 864
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: My laptop connects to the school Wi-Fi, but no web page opens.\n\nHanded over by Help desk:\nUser's laptop connects to the school Wi-Fi, but no web pages open. This is a network problem, so I am handing it to you. I did not run any checks. Please diagnose why the connection is up but browsing fails (for example DNS, DHCP/IP config, captive portal login, proxy settings, or a blocked site), then give the user clear steps to fix it.\n\nYou cannot hand over to anyone. Finish the task."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"action\":\"finish\",\"answer\":\"Your laptop is connected to Wi-Fi, but web pages won't open. This usually means one of these: no DNS, a bad IP address, a captive portal login that hasn't been completed, a proxy setting, or a blocked site. Try these steps in order and check after each one.\\n\\n1. Check for a login page (captive portal). Open a browser and go to http://neverssl.com. If you're sent to a school login page, sign in with your school account. Then retry your original site.\\n\\n2. Check the IP address. Open Command Prompt and type: ipconfig\\n   - If your IPv4 address starts with 169.254, the laptop did not get an address from the network. Go to step 3.\\n   - If you have a normal address (for example 10.x.x.x or 192.168.x.x), go to step 4.\\n\\n3. Renew the IP address. In Command Prompt type these lines, one at a time:\\n   ipconfig /release\\n   ipconfig /renew\\n   Then reconnect to the school Wi-Fi.\\n\\n4. Test DNS. Type: nslookup google.com\\n   - If it returns an IP address, DNS works. Go to step 5.\\n   - If it times out or fails, flush DNS and try again: ipconfig /flushdns. If it still fails, set DNS to automatic (Settings > Network & Internet > Wi-Fi > Hardware properties > DNS server assignment > Automatic). Or restart the laptop.\\n\\n5. Test connectivity by IP. Type: ping 8.8.8.8\\n   - If it replies but websites still fail, the problem is DNS (go back to step 4).\\n   - If it does not reply, the network may be blocking traffic, so ask the help desk.\\n\\n6. Check proxy settings. Go to Settings > Network & Internet > Proxy. Turn off \\\"Use a proxy server\\\" unless your school told you to use one. Then retry.\\n\\n7. Check the time and date. Wrong time can break secure sites. Set \\\"Set time automatically\\\" to On.\\n\\n8. Test a different site or browser. If only one site fails, it may be blocked by school filtering. Ask the help desk to check it. Also try a private/incognito window to rule out browser problems.\\n\\n9. Last resort: forget the network and reconnect. Remove the school Wi-Fi from saved networks, reconnect, and sign in again.\\n\\nIf none of this works, contact the help desk with: the output of ipconfig, the result of nslookup google.com, and whether neverssl.com opens. Note: these checks were not run on your laptop by me, so these results are from your own tests.\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1,
+          "forced": true
+        },
+        "response": {
+          "id": "msg_011ChMfrdh41dcsNpvqX3EC6",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 970,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 864,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 5562
+    },
+    {
+      "type": "agent_output",
+      "agent": "free-2",
+      "text": "{\"action\":\"finish\",\"answer\":\"Your laptop is connected to Wi-Fi, but web pages won't open. This usually means one of these: no DNS, a bad IP address, a captive portal login that hasn't been completed, a proxy setting, or a blocked site. Try these steps in order and check after each one.\\n\\n1. Check for a login page (captive portal). Open a browser and go to http://neverssl.com. If you're sent to a school login page, sign in with your school account. Then retry your original site.\\n\\n2. Check the IP address. Open Command Prompt and type: ipconfig\\n   - If your IPv4 address starts with 169.254, the laptop did not get an address from the network. Go to step 3.\\n   - If you have a normal address (for example 10.x.x.x or 192.168.x.x), go to step 4.\\n\\n3. Renew the IP address. In Command Prompt type these lines, one at a time:\\n   ipconfig /release\\n   ipconfig /renew\\n   Then reconnect to the school Wi-Fi.\\n\\n4. Test DNS. Type: nslookup google.com\\n   - If it returns an IP address, DNS works. Go to step 5.\\n   - If it times out or fails, flush DNS and try again: ipconfig /flushdns. If it still fails, set DNS to automatic (Settings > Network & Internet > Wi-Fi > Hardware properties > DNS server assignment > Automatic). Or restart the laptop.\\n\\n5. Test connectivity by IP. Type: ping 8.8.8.8\\n   - If it replies but websites still fail, the problem is DNS (go back to step 4).\\n   - If it does not reply, the network may be blocking traffic, so ask the help desk.\\n\\n6. Check proxy settings. Go to Settings > Network & Internet > Proxy. Turn off \\\"Use a proxy server\\\" unless your school told you to use one. Then retry.\\n\\n7. Check the time and date. Wrong time can break secure sites. Set \\\"Set time automatically\\\" to On.\\n\\n8. Test a different site or browser. If only one site fails, it may be blocked by school filtering. Ask the help desk to check it. Also try a private/incognito window to rule out browser problems.\\n\\n9. Last resort: forget the network and reconnect. Remove the school Wi-Fi from saved networks, reconnect, and sign in again.\\n\\nIf none of this works, contact the help desk with: the output of ipconfig, the result of nslookup google.com, and whether neverssl.com opens. Note: these checks were not run on your laptop by me, so these results are from your own tests.\"}",
+      "tokens": {
+        "input": 970,
+        "output": 864
+      },
+      "t": 5562
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 1832,
+        "output": 1056,
+        "searches": 0,
+        "steps": 2
+      },
+      "finalText": "Your laptop is connected to Wi-Fi, but web pages won't open. This usually means one of these: no DNS, a bad IP address, a captive portal login that hasn't been completed, a proxy setting, or a blocked site. Try these steps in order and check after each one.\n\n1. Check for a login page (captive portal). Open a browser and go to http://neverssl.com. If you're sent to a school login page, sign in with your school account. Then retry your original site.\n\n2. Check the IP address. Open Command Prompt and type: ipconfig\n   - If your IPv4 address starts with 169.254, the laptop did not get an address from the network. Go to step 3.\n   - If you have a normal address (for example 10.x.x.x or 192.168.x.x), go to step 4.\n\n3. Renew the IP address. In Command Prompt type these lines, one at a time:\n   ipconfig /release\n   ipconfig /renew\n   Then reconnect to the school Wi-Fi.\n\n4. Test DNS. Type: nslookup google.com\n   - If it returns an IP address, DNS works. Go to step 5.\n   - If it times out or fails, flush DNS and try again: ipconfig /flushdns. If it still fails, set DNS to automatic (Settings > Network & Internet > Wi-Fi > Hardware properties > DNS server assignment > Automatic). Or restart the laptop.\n\n5. Test connectivity by IP. Type: ping 8.8.8.8\n   - If it replies but websites still fail, the problem is DNS (go back to step 4).\n   - If it does not reply, the network may be blocking traffic, so ask the help desk.\n\n6. Check proxy settings. Go to Settings > Network & Internet > Proxy. Turn off \"Use a proxy server\" unless your school told you to use one. Then retry.\n\n7. Check the time and date. Wrong time can break secure sites. Set \"Set time automatically\" to On.\n\n8. Test a different site or browser. If only one site fails, it may be blocked by school filtering. Ask the help desk to check it. Also try a private/incognito window to rule out browser problems.\n\n9. Last resort: forget the network and reconnect. Remove the school Wi-Fi from saved networks, reconnect, and sign in again.\n\nIf none of this works, contact the help desk with: the output of ipconfig, the result of nslookup google.com, and whether neverssl.com opens. Note: these checks were not run on your laptop by me, so these results are from your own tests.",
+      "t": 5563
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "free",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Help desk. You answer first. If the problem is about the network, hand over to the network expert with a short note. Otherwise answer yourself.\\nThis is a handoff: there is no boss. Do your part of the task. Then either hand control to another agent, or finish the whole task. The first message lists the agents you may hand over to.\\nThe next agent knows only the task and your note, nothing else you did or said. So the note must say what you did, what the result is, and what the next agent must do. The work itself goes into the note or the answer, because your reply is the decision.\\nReply with JSON only, in one of these forms:\\n{\\\"action\\\":\\\"handoff\\\",\\\"to\\\":\\\"<agent id>\\\",\\\"note\\\":\\\"<what you did, the result, and what the next agent must do>\\\"}\\n{\\\"action\\\":\\\"finish\\\",\\\"answer\\\":\\\"<the final answer for the user>\\\"}\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: My laptop connects to the school Wi-Fi, but no web page opens.\\n\\nYou may hand over to: free-2 (Network expert)\"}],\"tools\":[{\"name\":\"reply\",\"description\":\"Give your reply in this shape.\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[\"handoff\",\"finish\"]},\"to\":{\"type\":\"string\"},\"note\":{\"type\":\"string\"},\"answer\":{\"type\":\"string\"}},\"required\":[\"action\"]}}],\"tool_choice\":{\"type\":\"tool\",\"name\":\"reply\"}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T11:25:45Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T11:25:46Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T11:25:45Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "12000000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T11:25:45Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:25:46 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMfrYpNBHQ46TP9iadPi\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"toolu_01DY9MStfeFWuzpB6fvmKY1y\",\"name\":\"reply\",\"input\":{\"action\":\"handoff\",\"to\":\"free-2\",\"note\":\"User's laptop connects to the school Wi-Fi, but no web pages open. This is a network problem, so I am handing it to you. I did not run any checks. Please diagnose why the connection is up but browsing fails (for example DNS, DHCP/IP config, captive portal login, proxy settings, or a blocked site), then give the user clear steps to fix it.\"},\"caller\":{\"type\":\"direct\"}}],\"container\":null,\"stop_reason\":\"tool_use\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":862,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":192,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 1203,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 1211
+    },
+    {
+      "type": "api_call",
+      "agent": "free-2",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Network expert. You fix network problems. Give clear steps a student can try.\\nThis is a handoff: there is no boss. Do your part of the task. Then either hand control to another agent, or finish the whole task. The first message lists the agents you may hand over to.\\nThe next agent knows only the task and your note, nothing else you did or said. So the note must say what you did, what the result is, and what the next agent must do. The work itself goes into the note or the answer, because your reply is the decision.\\nReply with JSON only, in one of these forms:\\n{\\\"action\\\":\\\"handoff\\\",\\\"to\\\":\\\"<agent id>\\\",\\\"note\\\":\\\"<what you did, the result, and what the next agent must do>\\\"}\\n{\\\"action\\\":\\\"finish\\\",\\\"answer\\\":\\\"<the final answer for the user>\\\"}\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: My laptop connects to the school Wi-Fi, but no web page opens.\\n\\nHanded over by Help desk:\\nUser's laptop connects to the school Wi-Fi, but no web pages open. This is a network problem, so I am handing it to you. I did not run any checks. Please diagnose why the connection is up but browsing fails (for example DNS, DHCP/IP config, captive portal login, proxy settings, or a blocked site), then give the user clear steps to fix it.\\n\\nYou cannot hand over to anyone. Finish the task.\"}],\"tools\":[{\"name\":\"reply\",\"description\":\"Give your reply in this shape.\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[\"handoff\",\"finish\"]},\"to\":{\"type\":\"string\"},\"note\":{\"type\":\"string\"},\"answer\":{\"type\":\"string\"}},\"required\":[\"action\"]}}],\"tool_choice\":{\"type\":\"tool\",\"name\":\"reply\"}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "9999000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T11:25:46Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "1999000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T11:25:50Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T11:25:46Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11998000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T11:25:46Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:25:50 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMfrdh41dcsNpvqX3EC6\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"toolu_01SnNmXNRYUivjwtkajSYgWt\",\"name\":\"reply\",\"input\":{\"action\":\"finish\",\"answer\":\"Your laptop is connected to Wi-Fi, but web pages won't open. This usually means one of these: no DNS, a bad IP address, a captive portal login that hasn't been completed, a proxy setting, or a blocked site. Try these steps in order and check after each one.\\n\\n1. Check for a login page (captive portal). Open a browser and go to http://neverssl.com. If you're sent to a school login page, sign in with your school account. Then retry your original site.\\n\\n2. Check the IP address. Open Command Prompt and type: ipconfig\\n   - If your IPv4 address starts with 169.254, the laptop did not get an address from the network. Go to step 3.\\n   - If you have a normal address (for example 10.x.x.x or 192.168.x.x), go to step 4.\\n\\n3. Renew the IP address. In Command Prompt type these lines, one at a time:\\n   ipconfig /release\\n   ipconfig /renew\\n   Then reconnect to the school Wi-Fi.\\n\\n4. Test DNS. Type: nslookup google.com\\n   - If it returns an IP address, DNS works. Go to step 5.\\n   - If it times out or fails, flush DNS and try again: ipconfig /flushdns. If it still fails, set DNS to automatic (Settings > Network & Internet > Wi-Fi > Hardware properties > DNS server assignment > Automatic). Or restart the laptop.\\n\\n5. Test connectivity by IP. Type: ping 8.8.8.8\\n   - If it replies but websites still fail, the problem is DNS (go back to step 4).\\n   - If it does not reply, the network may be blocking traffic, so ask the help desk.\\n\\n6. Check proxy settings. Go to Settings > Network & Internet > Proxy. Turn off \\\"Use a proxy server\\\" unless your school told you to use one. Then retry.\\n\\n7. Check the time and date. Wrong time can break secure sites. Set \\\"Set time automatically\\\" to On.\\n\\n8. Test a different site or browser. If only one site fails, it may be blocked by school filtering. Ask the help desk to check it. Also try a private/incognito window to rule out browser problems.\\n\\n9. Last resort: forget the network and reconnect. Remove the school Wi-Fi from saved networks, reconnect, and sign in again.\\n\\nIf none of this works, contact the help desk with: the output of ipconfig, the result of nslookup google.com, and whether neverssl.com opens. Note: these checks were not run on your laptop by me, so these results are from your own tests.\"},\"caller\":{\"type\":\"direct\"}}],\"container\":null,\"stop_reason\":\"tool_use\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":970,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":864,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 4350,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 5562
+    }
+  ],
+  "design": {
+    "pattern": "handoff",
+    "nodes": [
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Help desk",
+        "instructions": "You answer first. If the problem is about the network, hand over to the network expert with a short note. Otherwise answer yourself.",
+        "slot": "anthropic"
+      },
+      {
+        "id": "free-2",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Network expert",
+        "instructions": "You fix network problems. Give clear steps a student can try.",
+        "slot": "anthropic"
+      }
+    ],
+    "edges": [
+      {
+        "from": "free",
+        "to": "free-2"
+      }
+    ],
+    "start": "free"
+  },
+  "task": "My laptop connects to the school Wi-Fi, but no web page opens.",
+  "about": {
+    "title": "Handoff: control moves to the expert",
+    "author": "Agent Atlas Academy",
+    "description": "The first agent decides it is not the right one and hands the problem to an expert with a note.\n\n**What it teaches**\n\nIn a handoff control moves forward and nothing stands above it; the note is all the next agent knows.\n\n**What to watch**\n\nWhat exactly is in the note, and what the expert received.\n\nRead more: [Handoff](#/learn/handoff)"
+  },
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 1832,
+    "output": 1056,
+    "searches": 0,
+    "steps": 2
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T11:25:44.678Z",
+  "endedAt": "2026-11-24T11:25:50.514Z",
+  "durationMs": 5836
+}

@@ -1,0 +1,6 @@
+{
+  "about": "Čtyři agenti naplánují jednodenní školní výlet do vědeckého muzea pro 30 žáků: plánovač, výzkumník, pisatel a kritik, jeden po druhém. Všichni běží na Cloudflare, bezplatný tarif.",
+  "how": "Každý agent dostane zadání a text agenta před sebou. Poslední agent, kritik, dá konečný text.",
+  "learns": "Delší řetěz přidá krok pro každý druh práce, ale každý krok stojí i čas: čtyři agenti potřebovali přes minutu.",
+  "watch": "Co každý agent přidává a jak dlouho trvá každý krok u tohoto providera."
+}

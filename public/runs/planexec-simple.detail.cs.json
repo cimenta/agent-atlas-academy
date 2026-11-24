@@ -1,0 +1,6 @@
+{
+  "about": "Plánovač udělá čtyřkrokový plán seznamu věcí na víkendové kempování a vykonavatel provede kroky jeden po druhém. Oba běží na Groq, bezplatný tarif.",
+  "how": "Plánovač napíše celý plán jednou. Vykonavatel dělá každý krok s odpověďmi dřívějších kroků před sebou; poslední krok je odpověď.",
+  "learns": "Plánuj a proveď odděluje přemýšlení od práce: plán se udělá jednou a pak se následuje.",
+  "watch": "Kroky plánu a jak každý krok navazuje na předchozí."
+}

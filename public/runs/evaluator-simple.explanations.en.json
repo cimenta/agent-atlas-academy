@@ -1,0 +1,10 @@
+{
+  "3": "The Writer's first draft.",
+  "4": "A handoff sends the draft to the Evaluator.",
+  "7": "The Evaluator says revise: the text is too complex for a ten-year-old and has no everyday example. This feedback goes back to the Writer.",
+  "8": "The loop sends the draft back with the feedback.",
+  "11": "The Writer's second draft, written with the feedback in view.",
+  "15": "The Evaluator accepts the second draft.",
+  "16": "The loop ends: accepted in round 2 of 2.",
+  "17": "The run ends. The final answer is the accepted draft."
+}

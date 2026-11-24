@@ -1,0 +1,737 @@
+{
+  "schemaVersion": 1,
+  "id": "handoff-complex",
+  "title": "I cannot log in to the school portal, and my laptop has also…",
+  "language": "en",
+  "pattern": "handoff",
+  "recordedWith": {
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "appVersion": "1.16.10-dev.0",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "I cannot log in to the school portal, and my laptop has also become very slow.",
+      "pattern": "handoff",
+      "design": {
+        "pattern": "handoff",
+        "nodes": [
+          {
+            "id": "free",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Help desk",
+            "instructions": "You answer first. Hand over to the best expert with a short note, or answer yourself when it is simple.",
+            "slot": "anthropic"
+          },
+          {
+            "id": "free-2",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Accounts expert",
+            "instructions": "You fix login and password problems. If the problem is not about accounts, hand over.",
+            "slot": "anthropic"
+          },
+          {
+            "id": "free-3",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Network expert",
+            "instructions": "You fix network and connection problems. If the problem is about the device itself, hand over.",
+            "slot": "anthropic"
+          },
+          {
+            "id": "free-4",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Hardware expert",
+            "instructions": "You fix slow or broken devices. Give clear steps a student can try.",
+            "slot": "anthropic"
+          }
+        ],
+        "edges": [
+          {
+            "from": "free",
+            "to": "free-2"
+          },
+          {
+            "from": "free",
+            "to": "free-3"
+          },
+          {
+            "from": "free",
+            "to": "free-4"
+          },
+          {
+            "from": "free-2",
+            "to": "free-3"
+          },
+          {
+            "from": "free-3",
+            "to": "free-4"
+          }
+        ],
+        "start": "free"
+      },
+      "t": 0
+    },
+    {
+      "type": "agent_start",
+      "agent": "free",
+      "role": "Help desk",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Help desk. You answer first. Hand over to the best expert with a short note, or answer yourself when it is simple.\nThis is a handoff: there is no boss. Do your part of the task. Then either hand control to another agent, or finish the whole task. The first message lists the agents you may hand over to.\nThe next agent knows only the task and your note, nothing else you did or said. So the note must say what you did, what the result is, and what the next agent must do. The work itself goes into the note or the answer, because your reply is the decision.\nReply with JSON only, in one of these forms:\n{\"action\":\"handoff\",\"to\":\"<agent id>\",\"note\":\"<what you did, the result, and what the next agent must do>\"}\n{\"action\":\"finish\",\"answer\":\"<the final answer for the user>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 0
+    },
+    {
+      "type": "round",
+      "agent": "free",
+      "round": 1,
+      "ms": 1381,
+      "stop": "end_turn",
+      "usage": {
+        "input": 879,
+        "output": 208
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: I cannot log in to the school portal, and my laptop has also become very slow.\n\nYou may hand over to: free-2 (Accounts expert), free-3 (Network expert), free-4 (Hardware expert)"
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"action\":\"handoff\",\"to\":\"free-2\",\"note\":\"User (help desk ticket) cannot log in to the school portal, and their laptop has also become very slow. I have not run any checks or changed anything yet. Please first handle the login problem: check the account status, whether the password is locked or expired, and reset access if needed. Then confirm with the user. If the slowness looks like a hardware or network issue after that, pass it on to free-4 (hardware) or free-3 (network).\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1,
+          "forced": true
+        },
+        "response": {
+          "id": "msg_011ChMfu3iDzbZJJUv8hk11i",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 879,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 208,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 1381
+    },
+    {
+      "type": "agent_output",
+      "agent": "free",
+      "text": "{\"action\":\"handoff\",\"to\":\"free-2\",\"note\":\"User (help desk ticket) cannot log in to the school portal, and their laptop has also become very slow. I have not run any checks or changed anything yet. Please first handle the login problem: check the account status, whether the password is locked or expired, and reset access if needed. Then confirm with the user. If the slowness looks like a hardware or network issue after that, pass it on to free-4 (hardware) or free-3 (network).\"}",
+      "tokens": {
+        "input": 879,
+        "output": 208
+      },
+      "t": 1382
+    },
+    {
+      "type": "handoff",
+      "from": "free",
+      "to": "free-2",
+      "note": "User (help desk ticket) cannot log in to the school portal, and their laptop has also become very slow. I have not run any checks or changed anything yet. Please first handle the login problem: check the account status, whether the password is locked or expired, and reset access if needed. Then confirm with the user. If the slowness looks like a hardware or network issue after that, pass it on to free-4 (hardware) or free-3 (network).",
+      "t": 1382
+    },
+    {
+      "type": "agent_start",
+      "agent": "free-2",
+      "role": "Accounts expert",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Accounts expert. You fix login and password problems. If the problem is not about accounts, hand over.\nThis is a handoff: there is no boss. Do your part of the task. Then either hand control to another agent, or finish the whole task. The first message lists the agents you may hand over to.\nThe next agent knows only the task and your note, nothing else you did or said. So the note must say what you did, what the result is, and what the next agent must do. The work itself goes into the note or the answer, because your reply is the decision.\nReply with JSON only, in one of these forms:\n{\"action\":\"handoff\",\"to\":\"<agent id>\",\"note\":\"<what you did, the result, and what the next agent must do>\"}\n{\"action\":\"finish\",\"answer\":\"<the final answer for the user>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 1382
+    },
+    {
+      "type": "round",
+      "agent": "free-2",
+      "round": 1,
+      "ms": 1838,
+      "stop": "end_turn",
+      "usage": {
+        "input": 993,
+        "output": 332
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: I cannot log in to the school portal, and my laptop has also become very slow.\n\nHanded over by Help desk:\nUser (help desk ticket) cannot log in to the school portal, and their laptop has also become very slow. I have not run any checks or changed anything yet. Please first handle the login problem: check the account status, whether the password is locked or expired, and reset access if needed. Then confirm with the user. If the slowness looks like a hardware or network issue after that, pass it on to free-4 (hardware) or free-3 (network).\n\nYou may hand over to: free-3 (Network expert)"
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"action\":\"handoff\",\"to\":\"free-3\",\"note\":\"I am the Accounts expert. I have not run any checks or changed anything. I cannot check account status, lock state, or reset passwords from here, because I have no tools or access to the school portal directory in this session. The login problem is still open and needs an account-side check: confirm the account is active, check whether the password is locked or expired, and reset access if needed, then confirm with the user. Free-3 is the only agent I can hand over to, and it is the network expert, so I am passing the whole ticket to it. Please handle the login check if you can, or hand it back to Help desk to route to an accounts-capable agent. The laptop slowness has not been assessed. If it turns out to be network-related, handle it there. If it looks like hardware, it should go to free-4, which is not in my allowed list, so it must go through Help desk.\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1,
+          "forced": true
+        },
+        "response": {
+          "id": "msg_011ChMfu9CssC3Kd9S7NmgyZ",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 993,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 332,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 3220
+    },
+    {
+      "type": "agent_output",
+      "agent": "free-2",
+      "text": "{\"action\":\"handoff\",\"to\":\"free-3\",\"note\":\"I am the Accounts expert. I have not run any checks or changed anything. I cannot check account status, lock state, or reset passwords from here, because I have no tools or access to the school portal directory in this session. The login problem is still open and needs an account-side check: confirm the account is active, check whether the password is locked or expired, and reset access if needed, then confirm with the user. Free-3 is the only agent I can hand over to, and it is the network expert, so I am passing the whole ticket to it. Please handle the login check if you can, or hand it back to Help desk to route to an accounts-capable agent. The laptop slowness has not been assessed. If it turns out to be network-related, handle it there. If it looks like hardware, it should go to free-4, which is not in my allowed list, so it must go through Help desk.\"}",
+      "tokens": {
+        "input": 993,
+        "output": 332
+      },
+      "t": 3221
+    },
+    {
+      "type": "handoff",
+      "from": "free-2",
+      "to": "free-3",
+      "note": "I am the Accounts expert. I have not run any checks or changed anything. I cannot check account status, lock state, or reset passwords from here, because I have no tools or access to the school portal directory in this session. The login problem is still open and needs an account-side check: confirm the account is active, check whether the password is locked or expired, and reset access if needed, then confirm with the user. Free-3 is the only agent I can hand over to, and it is the network expert, so I am passing the whole ticket to it. Please handle the login check if you can, or hand it back to Help desk to route to an accounts-capable agent. The laptop slowness has not been assessed. If it turns out to be network-related, handle it there. If it looks like hardware, it should go to free-4, which is not in my allowed list, so it must go through Help desk.",
+      "t": 3221
+    },
+    {
+      "type": "agent_start",
+      "agent": "free-3",
+      "role": "Network expert",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Network expert. You fix network and connection problems. If the problem is about the device itself, hand over.\nThis is a handoff: there is no boss. Do your part of the task. Then either hand control to another agent, or finish the whole task. The first message lists the agents you may hand over to.\nThe next agent knows only the task and your note, nothing else you did or said. So the note must say what you did, what the result is, and what the next agent must do. The work itself goes into the note or the answer, because your reply is the decision.\nReply with JSON only, in one of these forms:\n{\"action\":\"handoff\",\"to\":\"<agent id>\",\"note\":\"<what you did, the result, and what the next agent must do>\"}\n{\"action\":\"finish\",\"answer\":\"<the final answer for the user>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 3221
+    },
+    {
+      "type": "round",
+      "agent": "free-3",
+      "round": 1,
+      "ms": 1762,
+      "stop": "end_turn",
+      "usage": {
+        "input": 1120,
+        "output": 318
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: I cannot log in to the school portal, and my laptop has also become very slow.\n\nHanded over by Accounts expert:\nI am the Accounts expert. I have not run any checks or changed anything. I cannot check account status, lock state, or reset passwords from here, because I have no tools or access to the school portal directory in this session. The login problem is still open and needs an account-side check: confirm the account is active, check whether the password is locked or expired, and reset access if needed, then confirm with the user. Free-3 is the only agent I can hand over to, and it is the network expert, so I am passing the whole ticket to it. Please handle the login check if you can, or hand it back to Help desk to route to an accounts-capable agent. The laptop slowness has not been assessed. If it turns out to be network-related, handle it there. If it looks like hardware, it should go to free-4, which is not in my allowed list, so it must go through Help desk.\n\nYou may hand over to: free-4 (Hardware expert)"
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"action\":\"handoff\",\"to\":\"free-4\",\"note\":\"I am the Network expert (free-3). I received this ticket from the Accounts expert. I have not run any checks or changes yet, and I have no tools to check accounts or the school portal directory. Two issues: (1) Login to the school portal fails. This is an account-side problem: confirm the account is active, check for password lock or expiry, and reset access if needed. Nobody with account access has handled it yet. (2) The laptop is very slow. I did not assess this. Its cause is unknown, and it could be hardware. Please check the hardware side. Note: I was only allowed to hand over to free-4, so I am sending this to you directly. Please also confirm with Help desk that an accounts-capable agent has the login issue, and that the user is updated once it is resolved.\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1,
+          "forced": true
+        },
+        "response": {
+          "id": "msg_011ChMfuH88afpnu39NgWfL3",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 1120,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 318,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 4983
+    },
+    {
+      "type": "agent_output",
+      "agent": "free-3",
+      "text": "{\"action\":\"handoff\",\"to\":\"free-4\",\"note\":\"I am the Network expert (free-3). I received this ticket from the Accounts expert. I have not run any checks or changes yet, and I have no tools to check accounts or the school portal directory. Two issues: (1) Login to the school portal fails. This is an account-side problem: confirm the account is active, check for password lock or expiry, and reset access if needed. Nobody with account access has handled it yet. (2) The laptop is very slow. I did not assess this. Its cause is unknown, and it could be hardware. Please check the hardware side. Note: I was only allowed to hand over to free-4, so I am sending this to you directly. Please also confirm with Help desk that an accounts-capable agent has the login issue, and that the user is updated once it is resolved.\"}",
+      "tokens": {
+        "input": 1120,
+        "output": 318
+      },
+      "t": 4983
+    },
+    {
+      "type": "handoff",
+      "from": "free-3",
+      "to": "free-4",
+      "note": "I am the Network expert (free-3). I received this ticket from the Accounts expert. I have not run any checks or changes yet, and I have no tools to check accounts or the school portal directory. Two issues: (1) Login to the school portal fails. This is an account-side problem: confirm the account is active, check for password lock or expiry, and reset access if needed. Nobody with account access has handled it yet. (2) The laptop is very slow. I did not assess this. Its cause is unknown, and it could be hardware. Please check the hardware side. Note: I was only allowed to hand over to free-4, so I am sending this to you directly. Please also confirm with Help desk that an accounts-capable agent has the login issue, and that the user is updated once it is resolved.",
+      "t": 4983
+    },
+    {
+      "type": "agent_start",
+      "agent": "free-4",
+      "role": "Hardware expert",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Hardware expert. You fix slow or broken devices. Give clear steps a student can try.\nThis is a handoff: there is no boss. Do your part of the task. Then either hand control to another agent, or finish the whole task. The first message lists the agents you may hand over to.\nThe next agent knows only the task and your note, nothing else you did or said. So the note must say what you did, what the result is, and what the next agent must do. The work itself goes into the note or the answer, because your reply is the decision.\nReply with JSON only, in one of these forms:\n{\"action\":\"handoff\",\"to\":\"<agent id>\",\"note\":\"<what you did, the result, and what the next agent must do>\"}\n{\"action\":\"finish\",\"answer\":\"<the final answer for the user>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 4983
+    },
+    {
+      "type": "round",
+      "agent": "free-4",
+      "round": 1,
+      "ms": 3192,
+      "stop": "end_turn",
+      "usage": {
+        "input": 1102,
+        "output": 594
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: I cannot log in to the school portal, and my laptop has also become very slow.\n\nHanded over by Network expert:\nI am the Network expert (free-3). I received this ticket from the Accounts expert. I have not run any checks or changes yet, and I have no tools to check accounts or the school portal directory. Two issues: (1) Login to the school portal fails. This is an account-side problem: confirm the account is active, check for password lock or expiry, and reset access if needed. Nobody with account access has handled it yet. (2) The laptop is very slow. I did not assess this. Its cause is unknown, and it could be hardware. Please check the hardware side. Note: I was only allowed to hand over to free-4, so I am sending this to you directly. Please also confirm with Help desk that an accounts-capable agent has the login issue, and that the user is updated once it is resolved.\n\nYou cannot hand over to anyone. Finish the task."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"action\":\"finish\",\"answer\":\"I can only cover the hardware part of this ticket, and I cannot finish the whole task from here.\\n\\n1) School portal login (account issue): Not handled. I have no account or portal access, so I cannot check whether the account is active, locked, or expired, or reset it. This needs an agent with account access. I also cannot confirm with Help desk that someone has picked it up, or update the user. Please escalate this to Help desk or an accounts-capable agent.\\n\\n2) Slow laptop (hardware check). Steps the student can try now:\\n- Restart the laptop and wait 2 minutes before opening apps.\\n- Open Task Manager (Ctrl+Shift+Esc). Check CPU, Memory, and Disk. If Disk stays near 100%, or Memory is above 90% with little running, note which process is using it.\\n- Check free space on the system drive. Keep at least 15% free.\\n- Check for overheating: the fan should be audible, and the bottom should not be very hot. Dust in vents can cause throttling.\\n- Check Settings > System > Storage for large files, and remove startup apps you do not need (Task Manager > Startup).\\n- If the disk is an older hard drive (HDD) and Disk usage stays high, or the drive makes clicking noises, it is likely a hardware fault. Back up the data and report it to IT for repair or replacement.\\n- Run Windows Memory Diagnostic if you see random crashes.\\n\\nIf these steps do not fix it, send the results (CPU, memory, disk percentages, free space, and drive type) to IT support for hardware repair.\\n\\nNext step: Help desk must assign the login issue to an accounts-capable agent and tell the user when it is resolved.\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1,
+          "forced": true
+        },
+        "response": {
+          "id": "msg_011ChMfuQcq5ReAmHWjF8zio",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 1102,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 594,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 8175
+    },
+    {
+      "type": "agent_output",
+      "agent": "free-4",
+      "text": "{\"action\":\"finish\",\"answer\":\"I can only cover the hardware part of this ticket, and I cannot finish the whole task from here.\\n\\n1) School portal login (account issue): Not handled. I have no account or portal access, so I cannot check whether the account is active, locked, or expired, or reset it. This needs an agent with account access. I also cannot confirm with Help desk that someone has picked it up, or update the user. Please escalate this to Help desk or an accounts-capable agent.\\n\\n2) Slow laptop (hardware check). Steps the student can try now:\\n- Restart the laptop and wait 2 minutes before opening apps.\\n- Open Task Manager (Ctrl+Shift+Esc). Check CPU, Memory, and Disk. If Disk stays near 100%, or Memory is above 90% with little running, note which process is using it.\\n- Check free space on the system drive. Keep at least 15% free.\\n- Check for overheating: the fan should be audible, and the bottom should not be very hot. Dust in vents can cause throttling.\\n- Check Settings > System > Storage for large files, and remove startup apps you do not need (Task Manager > Startup).\\n- If the disk is an older hard drive (HDD) and Disk usage stays high, or the drive makes clicking noises, it is likely a hardware fault. Back up the data and report it to IT for repair or replacement.\\n- Run Windows Memory Diagnostic if you see random crashes.\\n\\nIf these steps do not fix it, send the results (CPU, memory, disk percentages, free space, and drive type) to IT support for hardware repair.\\n\\nNext step: Help desk must assign the login issue to an accounts-capable agent and tell the user when it is resolved.\"}",
+      "tokens": {
+        "input": 1102,
+        "output": 594
+      },
+      "t": 8175
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 4094,
+        "output": 1452,
+        "searches": 0,
+        "steps": 4
+      },
+      "finalText": "I can only cover the hardware part of this ticket, and I cannot finish the whole task from here.\n\n1) School portal login (account issue): Not handled. I have no account or portal access, so I cannot check whether the account is active, locked, or expired, or reset it. This needs an agent with account access. I also cannot confirm with Help desk that someone has picked it up, or update the user. Please escalate this to Help desk or an accounts-capable agent.\n\n2) Slow laptop (hardware check). Steps the student can try now:\n- Restart the laptop and wait 2 minutes before opening apps.\n- Open Task Manager (Ctrl+Shift+Esc). Check CPU, Memory, and Disk. If Disk stays near 100%, or Memory is above 90% with little running, note which process is using it.\n- Check free space on the system drive. Keep at least 15% free.\n- Check for overheating: the fan should be audible, and the bottom should not be very hot. Dust in vents can cause throttling.\n- Check Settings > System > Storage for large files, and remove startup apps you do not need (Task Manager > Startup).\n- If the disk is an older hard drive (HDD) and Disk usage stays high, or the drive makes clicking noises, it is likely a hardware fault. Back up the data and report it to IT for repair or replacement.\n- Run Windows Memory Diagnostic if you see random crashes.\n\nIf these steps do not fix it, send the results (CPU, memory, disk percentages, free space, and drive type) to IT support for hardware repair.\n\nNext step: Help desk must assign the login issue to an accounts-capable agent and tell the user when it is resolved.",
+      "t": 8175
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "free",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Help desk. You answer first. Hand over to the best expert with a short note, or answer yourself when it is simple.\\nThis is a handoff: there is no boss. Do your part of the task. Then either hand control to another agent, or finish the whole task. The first message lists the agents you may hand over to.\\nThe next agent knows only the task and your note, nothing else you did or said. So the note must say what you did, what the result is, and what the next agent must do. The work itself goes into the note or the answer, because your reply is the decision.\\nReply with JSON only, in one of these forms:\\n{\\\"action\\\":\\\"handoff\\\",\\\"to\\\":\\\"<agent id>\\\",\\\"note\\\":\\\"<what you did, the result, and what the next agent must do>\\\"}\\n{\\\"action\\\":\\\"finish\\\",\\\"answer\\\":\\\"<the final answer for the user>\\\"}\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: I cannot log in to the school portal, and my laptop has also become very slow.\\n\\nYou may hand over to: free-2 (Accounts expert), free-3 (Network expert), free-4 (Hardware expert)\"}],\"tools\":[{\"name\":\"reply\",\"description\":\"Give your reply in this shape.\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[\"handoff\",\"finish\"]},\"to\":{\"type\":\"string\"},\"note\":{\"type\":\"string\"},\"answer\":{\"type\":\"string\"}},\"required\":[\"action\"]}}],\"tool_choice\":{\"type\":\"tool\",\"name\":\"reply\"}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T11:26:19Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T11:26:20Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T11:26:18Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "12000000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T11:26:19Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:26:20 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMfu3iDzbZJJUv8hk11i\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"toolu_01TT4CvsCqejeXAxKyXH8uXX\",\"name\":\"reply\",\"input\":{\"action\":\"handoff\",\"to\":\"free-2\",\"note\":\"User (help desk ticket) cannot log in to the school portal, and their laptop has also become very slow. I have not run any checks or changed anything yet. Please first handle the login problem: check the account status, whether the password is locked or expired, and reset access if needed. Then confirm with the user. If the slowness looks like a hardware or network issue after that, pass it on to free-4 (hardware) or free-3 (network).\"},\"caller\":{\"type\":\"direct\"}}],\"container\":null,\"stop_reason\":\"tool_use\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":879,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":208,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 1380,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 1381
+    },
+    {
+      "type": "api_call",
+      "agent": "free-2",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Accounts expert. You fix login and password problems. If the problem is not about accounts, hand over.\\nThis is a handoff: there is no boss. Do your part of the task. Then either hand control to another agent, or finish the whole task. The first message lists the agents you may hand over to.\\nThe next agent knows only the task and your note, nothing else you did or said. So the note must say what you did, what the result is, and what the next agent must do. The work itself goes into the note or the answer, because your reply is the decision.\\nReply with JSON only, in one of these forms:\\n{\\\"action\\\":\\\"handoff\\\",\\\"to\\\":\\\"<agent id>\\\",\\\"note\\\":\\\"<what you did, the result, and what the next agent must do>\\\"}\\n{\\\"action\\\":\\\"finish\\\",\\\"answer\\\":\\\"<the final answer for the user>\\\"}\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: I cannot log in to the school portal, and my laptop has also become very slow.\\n\\nHanded over by Help desk:\\nUser (help desk ticket) cannot log in to the school portal, and their laptop has also become very slow. I have not run any checks or changed anything yet. Please first handle the login problem: check the account status, whether the password is locked or expired, and reset access if needed. Then confirm with the user. If the slowness looks like a hardware or network issue after that, pass it on to free-4 (hardware) or free-3 (network).\\n\\nYou may hand over to: free-3 (Network expert)\"}],\"tools\":[{\"name\":\"reply\",\"description\":\"Give your reply in this shape.\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[\"handoff\",\"finish\"]},\"to\":{\"type\":\"string\"},\"note\":{\"type\":\"string\"},\"answer\":{\"type\":\"string\"}},\"required\":[\"action\"]}}],\"tool_choice\":{\"type\":\"tool\",\"name\":\"reply\"}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "9999000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T11:26:20Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T11:26:21Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T11:26:20Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11999000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T11:26:20Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:26:22 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMfu9CssC3Kd9S7NmgyZ\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"toolu_01M9QYnz5S62rJ4ibZiPoFop\",\"name\":\"reply\",\"input\":{\"action\":\"handoff\",\"to\":\"free-3\",\"note\":\"I am the Accounts expert. I have not run any checks or changed anything. I cannot check account status, lock state, or reset passwords from here, because I have no tools or access to the school portal directory in this session. The login problem is still open and needs an account-side check: confirm the account is active, check whether the password is locked or expired, and reset access if needed, then confirm with the user. Free-3 is the only agent I can hand over to, and it is the network expert, so I am passing the whole ticket to it. Please handle the login check if you can, or hand it back to Help desk to route to an accounts-capable agent. The laptop slowness has not been assessed. If it turns out to be network-related, handle it there. If it looks like hardware, it should go to free-4, which is not in my allowed list, so it must go through Help desk.\"},\"caller\":{\"type\":\"direct\"}}],\"container\":null,\"stop_reason\":\"tool_use\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":993,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":332,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 1838,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 3220
+    },
+    {
+      "type": "api_call",
+      "agent": "free-3",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Network expert. You fix network and connection problems. If the problem is about the device itself, hand over.\\nThis is a handoff: there is no boss. Do your part of the task. Then either hand control to another agent, or finish the whole task. The first message lists the agents you may hand over to.\\nThe next agent knows only the task and your note, nothing else you did or said. So the note must say what you did, what the result is, and what the next agent must do. The work itself goes into the note or the answer, because your reply is the decision.\\nReply with JSON only, in one of these forms:\\n{\\\"action\\\":\\\"handoff\\\",\\\"to\\\":\\\"<agent id>\\\",\\\"note\\\":\\\"<what you did, the result, and what the next agent must do>\\\"}\\n{\\\"action\\\":\\\"finish\\\",\\\"answer\\\":\\\"<the final answer for the user>\\\"}\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: I cannot log in to the school portal, and my laptop has also become very slow.\\n\\nHanded over by Accounts expert:\\nI am the Accounts expert. I have not run any checks or changed anything. I cannot check account status, lock state, or reset passwords from here, because I have no tools or access to the school portal directory in this session. The login problem is still open and needs an account-side check: confirm the account is active, check whether the password is locked or expired, and reset access if needed, then confirm with the user. Free-3 is the only agent I can hand over to, and it is the network expert, so I am passing the whole ticket to it. Please handle the login check if you can, or hand it back to Help desk to route to an accounts-capable agent. The laptop slowness has not been assessed. If it turns out to be network-related, handle it there. If it looks like hardware, it should go to free-4, which is not in my allowed list, so it must go through Help desk.\\n\\nYou may hand over to: free-4 (Hardware expert)\"}],\"tools\":[{\"name\":\"reply\",\"description\":\"Give your reply in this shape.\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[\"handoff\",\"finish\"]},\"to\":{\"type\":\"string\"},\"note\":{\"type\":\"string\"},\"answer\":{\"type\":\"string\"}},\"required\":[\"action\"]}}],\"tool_choice\":{\"type\":\"tool\",\"name\":\"reply\"}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "9999000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T11:26:22Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T11:26:23Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T11:26:22Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11999000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T11:26:22Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:26:23 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMfuH88afpnu39NgWfL3\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"toolu_01R5y87igcrwRsAt9ziBYu8K\",\"name\":\"reply\",\"input\":{\"action\":\"handoff\",\"to\":\"free-4\",\"note\":\"I am the Network expert (free-3). I received this ticket from the Accounts expert. I have not run any checks or changes yet, and I have no tools to check accounts or the school portal directory. Two issues: (1) Login to the school portal fails. This is an account-side problem: confirm the account is active, check for password lock or expiry, and reset access if needed. Nobody with account access has handled it yet. (2) The laptop is very slow. I did not assess this. Its cause is unknown, and it could be hardware. Please check the hardware side. Note: I was only allowed to hand over to free-4, so I am sending this to you directly. Please also confirm with Help desk that an accounts-capable agent has the login issue, and that the user is updated once it is resolved.\"},\"caller\":{\"type\":\"direct\"}}],\"container\":null,\"stop_reason\":\"tool_use\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":1120,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":318,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 1761,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 4983
+    },
+    {
+      "type": "api_call",
+      "agent": "free-4",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Hardware expert. You fix slow or broken devices. Give clear steps a student can try.\\nThis is a handoff: there is no boss. Do your part of the task. Then either hand control to another agent, or finish the whole task. The first message lists the agents you may hand over to.\\nThe next agent knows only the task and your note, nothing else you did or said. So the note must say what you did, what the result is, and what the next agent must do. The work itself goes into the note or the answer, because your reply is the decision.\\nReply with JSON only, in one of these forms:\\n{\\\"action\\\":\\\"handoff\\\",\\\"to\\\":\\\"<agent id>\\\",\\\"note\\\":\\\"<what you did, the result, and what the next agent must do>\\\"}\\n{\\\"action\\\":\\\"finish\\\",\\\"answer\\\":\\\"<the final answer for the user>\\\"}\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: I cannot log in to the school portal, and my laptop has also become very slow.\\n\\nHanded over by Network expert:\\nI am the Network expert (free-3). I received this ticket from the Accounts expert. I have not run any checks or changes yet, and I have no tools to check accounts or the school portal directory. Two issues: (1) Login to the school portal fails. This is an account-side problem: confirm the account is active, check for password lock or expiry, and reset access if needed. Nobody with account access has handled it yet. (2) The laptop is very slow. I did not assess this. Its cause is unknown, and it could be hardware. Please check the hardware side. Note: I was only allowed to hand over to free-4, so I am sending this to you directly. Please also confirm with Help desk that an accounts-capable agent has the login issue, and that the user is updated once it is resolved.\\n\\nYou cannot hand over to anyone. Finish the task.\"}],\"tools\":[{\"name\":\"reply\",\"description\":\"Give your reply in this shape.\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[\"handoff\",\"finish\"]},\"to\":{\"type\":\"string\"},\"note\":{\"type\":\"string\"},\"answer\":{\"type\":\"string\"}},\"required\":[\"action\"]}}],\"tool_choice\":{\"type\":\"tool\",\"name\":\"reply\"}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "9999000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T11:26:24Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "1999000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T11:26:26Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T11:26:23Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11998000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T11:26:24Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 11:26:26 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMfuQcq5ReAmHWjF8zio\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"toolu_01VMDjr5cm8JmgDWx9Ceqm2o\",\"name\":\"reply\",\"input\":{\"action\":\"finish\",\"answer\":\"I can only cover the hardware part of this ticket, and I cannot finish the whole task from here.\\n\\n1) School portal login (account issue): Not handled. I have no account or portal access, so I cannot check whether the account is active, locked, or expired, or reset it. This needs an agent with account access. I also cannot confirm with Help desk that someone has picked it up, or update the user. Please escalate this to Help desk or an accounts-capable agent.\\n\\n2) Slow laptop (hardware check). Steps the student can try now:\\n- Restart the laptop and wait 2 minutes before opening apps.\\n- Open Task Manager (Ctrl+Shift+Esc). Check CPU, Memory, and Disk. If Disk stays near 100%, or Memory is above 90% with little running, note which process is using it.\\n- Check free space on the system drive. Keep at least 15% free.\\n- Check for overheating: the fan should be audible, and the bottom should not be very hot. Dust in vents can cause throttling.\\n- Check Settings > System > Storage for large files, and remove startup apps you do not need (Task Manager > Startup).\\n- If the disk is an older hard drive (HDD) and Disk usage stays high, or the drive makes clicking noises, it is likely a hardware fault. Back up the data and report it to IT for repair or replacement.\\n- Run Windows Memory Diagnostic if you see random crashes.\\n\\nIf these steps do not fix it, send the results (CPU, memory, disk percentages, free space, and drive type) to IT support for hardware repair.\\n\\nNext step: Help desk must assign the login issue to an accounts-capable agent and tell the user when it is resolved.\"},\"caller\":{\"type\":\"direct\"}}],\"container\":null,\"stop_reason\":\"tool_use\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":1102,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":594,\"output_tokens_details\":{\"thinking_tokens\":0},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 3191,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 8174
+    }
+  ],
+  "design": {
+    "pattern": "handoff",
+    "nodes": [
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Help desk",
+        "instructions": "You answer first. Hand over to the best expert with a short note, or answer yourself when it is simple.",
+        "slot": "anthropic"
+      },
+      {
+        "id": "free-2",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Accounts expert",
+        "instructions": "You fix login and password problems. If the problem is not about accounts, hand over.",
+        "slot": "anthropic"
+      },
+      {
+        "id": "free-3",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Network expert",
+        "instructions": "You fix network and connection problems. If the problem is about the device itself, hand over.",
+        "slot": "anthropic"
+      },
+      {
+        "id": "free-4",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Hardware expert",
+        "instructions": "You fix slow or broken devices. Give clear steps a student can try.",
+        "slot": "anthropic"
+      }
+    ],
+    "edges": [
+      {
+        "from": "free",
+        "to": "free-2"
+      },
+      {
+        "from": "free",
+        "to": "free-3"
+      },
+      {
+        "from": "free",
+        "to": "free-4"
+      },
+      {
+        "from": "free-2",
+        "to": "free-3"
+      },
+      {
+        "from": "free-3",
+        "to": "free-4"
+      }
+    ],
+    "start": "free"
+  },
+  "task": "I cannot log in to the school portal, and my laptop has also become very slow.",
+  "about": {
+    "title": "Handoff: a path through four agents",
+    "author": "Agent Atlas Academy",
+    "description": "Two problems in one question: control may pass through several agents, and each sees only the note and the task.\n\n**What it teaches**\n\nA poor note starves the next agent, and a path with many handoffs can lose the second problem.\n\n**What to watch**\n\nWhich problem each agent solves, and whether the second problem is ever answered.\n\nRead more: [Handoff](#/learn/handoff)"
+  },
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 4094,
+    "output": 1452,
+    "searches": 0,
+    "steps": 4
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T11:26:18.615Z",
+  "endedAt": "2026-11-24T11:26:27.000Z",
+  "durationMs": 8385
+}

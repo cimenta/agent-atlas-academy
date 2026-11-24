@@ -1,0 +1,6 @@
+{
+  "about": "Tiket o přihlášení do portálu a pomalém notebooku putuje od podpory přes experta na účty a síť k hardwarovému expertovi. Každý agent běží na Anthropicu.",
+  "how": "Každý agent buď dokončí, nebo předá s poznámkou; tady prošel tiket třemi předáními a poslední agent skončil.",
+  "learns": "Řetěz předání může předávat práci dál, aniž ji kdokoli vyřeší celou: poslední expert tady pokryje jen hardwarovou část.",
+  "watch": "Poznámky mezi agenty a co konečná odpověď nechává nevyřešené."
+}

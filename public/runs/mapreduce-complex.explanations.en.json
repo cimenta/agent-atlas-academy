@@ -1,0 +1,8 @@
+{
+  "3": "The Splitter made two parts of four subjects each, not eight parts.",
+  "4": "Each part goes to its own worker.",
+  "9": "Worker 1 answers four subjects in one call.",
+  "12": "The results go to the Reducer.",
+  "16": "The Reducer merges the two answers into one list of eight sentences.",
+  "17": "The run ends."
+}

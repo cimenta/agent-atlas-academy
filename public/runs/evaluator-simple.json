@@ -1,0 +1,575 @@
+{
+  "schemaVersion": 1,
+  "id": "evaluator-simple",
+  "title": "Write a short note that explains what a password manager is.",
+  "language": "en",
+  "pattern": "evaluator",
+  "recordedWith": {
+    "provider": "google",
+    "model": "gemini-3.5-flash-lite",
+    "freeTier": true
+  },
+  "appVersion": "1.16.10-dev.0",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "Write a short note that explains what a password manager is.",
+      "pattern": "evaluator",
+      "design": {
+        "pattern": "evaluator",
+        "nodes": [
+          {
+            "id": "writer",
+            "agent": "writer",
+            "model": "fast",
+            "search": false,
+            "slot": "google-free"
+          },
+          {
+            "id": "evaluator",
+            "agent": "evaluator",
+            "model": "fast",
+            "search": false,
+            "slot": "google-free"
+          }
+        ],
+        "edges": [
+          {
+            "from": "writer",
+            "to": "evaluator"
+          }
+        ],
+        "rounds": 2,
+        "criteria": "Clear for a ten-year-old. At most 80 words. Contains one everyday example."
+      },
+      "t": 1
+    },
+    {
+      "type": "agent_start",
+      "agent": "writer",
+      "role": "Writer",
+      "model": "gemini-3.5-flash-lite",
+      "tools": [],
+      "system": "Role: writer\nYou are the Writer. Write the final answer for the user from the material you were given. Be clear and short, with no filler.\nKeep every reply under 300 words. Answer in English.",
+      "t": 1
+    },
+    {
+      "type": "round",
+      "agent": "writer",
+      "round": 1,
+      "ms": 908,
+      "stop": "end_turn",
+      "usage": {
+        "input": 62,
+        "output": 87
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write a short note that explains what a password manager is."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "A password manager is a secure digital tool that stores, manages, and generates all your passwords in one place. Instead of memorizing dozens of complex combinations or reusing the same weak password across multiple sites, you only need to remember one strong \"master password\" to access the vault. \n\nPassword managers improve your online security by creating unique, hard-to-crack passwords for every account and automatically filling them in when you log in."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "gemini-3.5-flash-lite",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "gemini-3.5-flash-lite",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 62,
+            "output_tokens": 87
+          }
+        }
+      },
+      "t": 910
+    },
+    {
+      "type": "agent_output",
+      "agent": "writer",
+      "text": "A password manager is a secure digital tool that stores, manages, and generates all your passwords in one place. Instead of memorizing dozens of complex combinations or reusing the same weak password across multiple sites, you only need to remember one strong \"master password\" to access the vault. \n\nPassword managers improve your online security by creating unique, hard-to-crack passwords for every account and automatically filling them in when you log in.",
+      "tokens": {
+        "input": 62,
+        "output": 87
+      },
+      "t": 910
+    },
+    {
+      "type": "handoff",
+      "from": "writer",
+      "to": "evaluator",
+      "note": "A password manager is a secure digital tool that stores, manages, and generates all your passwords in one place. Instead of memorizing dozens of complex combinations or reusing the same weak password across multiple sites, you only need to remember one strong \"master password\" to access the vault. \n\nPassword managers improve your online security by creating unique, hard-to-crack passwords for every account and automatically filling them in when you log in.",
+      "t": 910
+    },
+    {
+      "type": "agent_start",
+      "agent": "evaluator",
+      "role": "Evaluator",
+      "model": "gemini-3.5-flash-lite",
+      "tools": [],
+      "system": "Role: evaluator\nYou are the Evaluator. You judge a draft only against the criteria given in the message. If no criteria are given, judge whether the draft answers the task clearly and correctly. If the draft is good enough, accept it. If not, ask for a revision and give specific feedback (what is wrong and what to change), not only a score.\nReply with JSON only, in one of these forms:\n{\"verdict\":\"accept\"}\n{\"verdict\":\"revise\",\"feedback\":\"<what to change>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 910
+    },
+    {
+      "type": "round",
+      "agent": "evaluator",
+      "round": 1,
+      "ms": 668,
+      "stop": "end_turn",
+      "usage": {
+        "input": 261,
+        "output": 44
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write a short note that explains what a password manager is.\n\nCriteria:\nClear for a ten-year-old. At most 80 words. Contains one everyday example.\n\nDraft:\nA password manager is a secure digital tool that stores, manages, and generates all your passwords in one place. Instead of memorizing dozens of complex combinations or reusing the same weak password across multiple sites, you only need to remember one strong \"master password\" to access the vault. \n\nPassword managers improve your online security by creating unique, hard-to-crack passwords for every account and automatically filling them in when you log in.\n\nGive your verdict now."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"verdict\": \"revise\", \"feedback\": \"The draft is too complex for a ten-year-old (uses words like 'combination', 'vault', 'unique') and is missing an everyday example.\"}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "gemini-3.5-flash-lite",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1,
+          "forced": true
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "gemini-3.5-flash-lite",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 261,
+            "output_tokens": 44
+          }
+        }
+      },
+      "t": 1578
+    },
+    {
+      "type": "agent_output",
+      "agent": "evaluator",
+      "text": "{\"verdict\": \"revise\", \"feedback\": \"The draft is too complex for a ten-year-old (uses words like 'combination', 'vault', 'unique') and is missing an everyday example.\"}",
+      "tokens": {
+        "input": 261,
+        "output": 44
+      },
+      "t": 1578
+    },
+    {
+      "type": "handoff",
+      "from": "evaluator",
+      "to": "writer",
+      "note": "The draft is too complex for a ten-year-old (uses words like 'combination', 'vault', 'unique') and is missing an everyday example.",
+      "t": 1578
+    },
+    {
+      "type": "agent_start",
+      "agent": "writer",
+      "role": "Writer",
+      "model": "gemini-3.5-flash-lite",
+      "tools": [],
+      "system": "Role: writer\nYou are the Writer. Write the final answer for the user from the material you were given. Be clear and short, with no filler.\nKeep every reply under 300 words. Answer in English.",
+      "t": 1578
+    },
+    {
+      "type": "round",
+      "agent": "writer",
+      "round": 2,
+      "ms": 1098,
+      "stop": "end_turn",
+      "usage": {
+        "input": 305,
+        "output": 69
+      },
+      "newMessages": [
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "A password manager is a secure digital tool that stores, manages, and generates all your passwords in one place. Instead of memorizing dozens of complex combinations or reusing the same weak password across multiple sites, you only need to remember one strong \"master password\" to access the vault. \n\nPassword managers improve your online security by creating unique, hard-to-crack passwords for every account and automatically filling them in when you log in."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": "Task: Write a short note that explains what a password manager is.\n\nYour last draft:\nA password manager is a secure digital tool that stores, manages, and generates all your passwords in one place. Instead of memorizing dozens of complex combinations or reusing the same weak password across multiple sites, you only need to remember one strong \"master password\" to access the vault. \n\nPassword managers improve your online security by creating unique, hard-to-crack passwords for every account and automatically filling them in when you log in.\n\nThe evaluator's feedback:\nThe draft is too complex for a ten-year-old (uses words like 'combination', 'vault', 'unique') and is missing an everyday example.\n\nWrite the improved draft now."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "A password manager is a safe app that remembers all your secret login words for you. \n\nInstead of trying to memorize a bunch of different words for games, school accounts, and websites, you only have to remember one super-strong master password. It works like a digital treasure chest that locks your information and types it in for you automatically."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "gemini-3.5-flash-lite",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 3
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "gemini-3.5-flash-lite",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 305,
+            "output_tokens": 69
+          }
+        }
+      },
+      "t": 2676
+    },
+    {
+      "type": "agent_output",
+      "agent": "writer",
+      "text": "A password manager is a safe app that remembers all your secret login words for you. \n\nInstead of trying to memorize a bunch of different words for games, school accounts, and websites, you only have to remember one super-strong master password. It works like a digital treasure chest that locks your information and types it in for you automatically.",
+      "tokens": {
+        "input": 305,
+        "output": 69
+      },
+      "t": 2676
+    },
+    {
+      "type": "handoff",
+      "from": "writer",
+      "to": "evaluator",
+      "note": "A password manager is a safe app that remembers all your secret login words for you. \n\nInstead of trying to memorize a bunch of different words for games, school accounts, and websites, you only have to remember one super-strong master password. It works like a digital treasure chest that locks your information and types it in for you automatically.",
+      "t": 2677
+    },
+    {
+      "type": "agent_start",
+      "agent": "evaluator",
+      "role": "Evaluator",
+      "model": "gemini-3.5-flash-lite",
+      "tools": [],
+      "system": "Role: evaluator\nYou are the Evaluator. You judge a draft only against the criteria given in the message. If no criteria are given, judge whether the draft answers the task clearly and correctly. If the draft is good enough, accept it. If not, ask for a revision and give specific feedback (what is wrong and what to change), not only a score.\nReply with JSON only, in one of these forms:\n{\"verdict\":\"accept\"}\n{\"verdict\":\"revise\",\"feedback\":\"<what to change>\"}\nKeep every reply under 300 words. Answer in English.",
+      "t": 2677
+    },
+    {
+      "type": "round",
+      "agent": "evaluator",
+      "round": 2,
+      "ms": 893,
+      "stop": "end_turn",
+      "usage": {
+        "input": 425,
+        "output": 12
+      },
+      "newMessages": [
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"verdict\": \"revise\", \"feedback\": \"The draft is too complex for a ten-year-old (uses words like 'combination', 'vault', 'unique') and is missing an everyday example.\"}"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": "Task: Write a short note that explains what a password manager is.\n\nCriteria:\nClear for a ten-year-old. At most 80 words. Contains one everyday example.\n\nDraft:\nA password manager is a safe app that remembers all your secret login words for you. \n\nInstead of trying to memorize a bunch of different words for games, school accounts, and websites, you only have to remember one super-strong master password. It works like a digital treasure chest that locks your information and types it in for you automatically.\n\nGive your verdict now."
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"verdict\": \"accept\"\n}"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "gemini-3.5-flash-lite",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 3,
+          "forced": true
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "gemini-3.5-flash-lite",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 425,
+            "output_tokens": 12
+          }
+        }
+      },
+      "t": 3570
+    },
+    {
+      "type": "agent_output",
+      "agent": "evaluator",
+      "text": "{\n  \"verdict\": \"accept\"\n}",
+      "tokens": {
+        "input": 425,
+        "output": 12
+      },
+      "t": 3571
+    },
+    {
+      "type": "loop_end",
+      "result": "accepted",
+      "round": 2,
+      "judged": true,
+      "t": 3571
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 1053,
+        "output": 212,
+        "searches": 0,
+        "steps": 4
+      },
+      "finalText": "A password manager is a safe app that remembers all your secret login words for you. \n\nInstead of trying to memorize a bunch of different words for games, school accounts, and websites, you only have to remember one super-strong master password. It works like a digital treasure chest that locks your information and types it in for you automatically.",
+      "t": 3571
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "writer",
+      "provider": "google",
+      "n": 1,
+      "method": "POST",
+      "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-goog-api-key": "(hidden)"
+        },
+        "body": "{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"Task: Write a short note that explains what a password manager is.\"}]}],\"generationConfig\":{\"maxOutputTokens\":4000},\"systemInstruction\":{\"parts\":[{\"text\":\"Role: writer\\nYou are the Writer. Write the final answer for the user from the material you were given. Be clear and short, with no filler.\\nKeep every reply under 300 words. Answer in English.\"}]}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "alt-svc": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-length": "763",
+          "content-type": "application/json; charset=UTF-8",
+          "date": "Tue, 24 Nov 2026 11:19:28 GMT",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "vary": "(hidden)",
+          "x-content-type-options": "(hidden)",
+          "x-frame-options": "(hidden)",
+          "x-gemini-service-tier": "(hidden)",
+          "x-xss-protection": "(hidden)"
+        },
+        "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"A password manager is a secure digital tool that stores, manages, and generates all your passwords in one place. Instead of memorizing dozens of complex combinations or reusing the same weak password across multiple sites, you only need to remember one strong \\\"master password\\\" to access the vault. \\n\\nPassword managers improve your online security by creating unique, hard-to-crack passwords for every account and automatically filling them in when you log in.\",\n            \"thoughtSignature\": \"EpYBCpMBAWkUfRM3GHoSvcyJuJzWQfYxvaD+VUepbYVFAGxZ2E+XUwrtwnwDIFt+8n3UWn/wjgjYtQ740LXKl/wgnxFLW/UBkuwDXUQm5G4USgyMN72aQexAN63uuKSzZxuHNXCQXKfPVov3TsfF1OUSaGIy0E1AjR7mqYZHVvYl0KTkvj3YrUUS/FK6mRlMojVv75HgGj17\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 62,\n    \"candidatesTokenCount\": 87,\n    \"totalTokenCount\": 149,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 62\n      }\n    ],\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-3.5-flash-lite\",\n  \"responseId\": \"v3IFa6GgO6LCxdIPwPDzgQI\"\n}\n"
+      },
+      "error": null,
+      "ms": 907,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 909
+    },
+    {
+      "type": "api_call",
+      "agent": "evaluator",
+      "provider": "google",
+      "n": 1,
+      "method": "POST",
+      "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-goog-api-key": "(hidden)"
+        },
+        "body": "{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"Task: Write a short note that explains what a password manager is.\\n\\nCriteria:\\nClear for a ten-year-old. At most 80 words. Contains one everyday example.\\n\\nDraft:\\nA password manager is a secure digital tool that stores, manages, and generates all your passwords in one place. Instead of memorizing dozens of complex combinations or reusing the same weak password across multiple sites, you only need to remember one strong \\\"master password\\\" to access the vault. \\n\\nPassword managers improve your online security by creating unique, hard-to-crack passwords for every account and automatically filling them in when you log in.\\n\\nGive your verdict now.\"}]}],\"generationConfig\":{\"maxOutputTokens\":4000,\"responseMimeType\":\"application/json\",\"responseSchema\":{\"type\":\"OBJECT\",\"properties\":{\"verdict\":{\"type\":\"STRING\",\"enum\":[\"accept\",\"revise\"]},\"feedback\":{\"type\":\"STRING\"}},\"required\":[\"verdict\"]}},\"systemInstruction\":{\"parts\":[{\"text\":\"Role: evaluator\\nYou are the Evaluator. You judge a draft only against the criteria given in the message. If no criteria are given, judge whether the draft answers the task clearly and correctly. If the draft is good enough, accept it. If not, ask for a revision and give specific feedback (what is wrong and what to change), not only a score.\\nReply with JSON only, in one of these forms:\\n{\\\"verdict\\\":\\\"accept\\\"}\\n{\\\"verdict\\\":\\\"revise\\\",\\\"feedback\\\":\\\"<what to change>\\\"}\\nKeep every reply under 300 words. Answer in English.\"}]}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "alt-svc": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-length": "620",
+          "content-type": "application/json; charset=UTF-8",
+          "date": "Tue, 24 Nov 2026 11:19:29 GMT",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "vary": "(hidden)",
+          "x-content-type-options": "(hidden)",
+          "x-frame-options": "(hidden)",
+          "x-gemini-service-tier": "(hidden)",
+          "x-xss-protection": "(hidden)"
+        },
+        "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"{\\\"verdict\\\": \\\"revise\\\", \\\"feedback\\\": \\\"The draft is too complex for a ten-year-old (uses words like 'combination', 'vault', 'unique') and is missing an everyday example.\\\"}\",\n            \"thoughtSignature\": \"EpYBCpMBAWkUfRMHovTRTGYE2H8/xH8YJ769CBVDi87kJAvwXlvejZbMJEEAs8kWlKnX+zjwZbVfk+EdgvxpkCE5zcqUTFg9bR+1wHD3w0GYGmXd9qgjBEY7qarTjYu11Lu2zv8sbTM7jCc6wfnd4OO0kn7d8xkR96MJ2Z5+aO2qb442ZF+c2QtGzcEZr7qkuXugmBfWmsX9\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 261,\n    \"candidatesTokenCount\": 44,\n    \"totalTokenCount\": 305,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 261\n      }\n    ],\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-3.5-flash-lite\",\n  \"responseId\": \"wHIFa__9NIevwbUPzb7b6Qw\"\n}\n"
+      },
+      "error": null,
+      "ms": 667,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 1577
+    },
+    {
+      "type": "api_call",
+      "agent": "writer",
+      "provider": "google",
+      "n": 2,
+      "method": "POST",
+      "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-goog-api-key": "(hidden)"
+        },
+        "body": "{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"Task: Write a short note that explains what a password manager is.\"}]},{\"role\":\"model\",\"parts\":[{\"text\":\"A password manager is a secure digital tool that stores, manages, and generates all your passwords in one place. Instead of memorizing dozens of complex combinations or reusing the same weak password across multiple sites, you only need to remember one strong \\\"master password\\\" to access the vault. \\n\\nPassword managers improve your online security by creating unique, hard-to-crack passwords for every account and automatically filling them in when you log in.\"}]},{\"role\":\"user\",\"parts\":[{\"text\":\"Task: Write a short note that explains what a password manager is.\\n\\nYour last draft:\\nA password manager is a secure digital tool that stores, manages, and generates all your passwords in one place. Instead of memorizing dozens of complex combinations or reusing the same weak password across multiple sites, you only need to remember one strong \\\"master password\\\" to access the vault. \\n\\nPassword managers improve your online security by creating unique, hard-to-crack passwords for every account and automatically filling them in when you log in.\\n\\nThe evaluator's feedback:\\nThe draft is too complex for a ten-year-old (uses words like 'combination', 'vault', 'unique') and is missing an everyday example.\\n\\nWrite the improved draft now.\"}]}],\"generationConfig\":{\"maxOutputTokens\":4000},\"systemInstruction\":{\"parts\":[{\"text\":\"Role: writer\\nYou are the Writer. Write the final answer for the user from the material you were given. Be clear and short, with no filler.\\nKeep every reply under 300 words. Answer in English.\"}]}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "alt-svc": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-length": "702",
+          "content-type": "application/json; charset=UTF-8",
+          "date": "Tue, 24 Nov 2026 11:19:30 GMT",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "vary": "(hidden)",
+          "x-content-type-options": "(hidden)",
+          "x-frame-options": "(hidden)",
+          "x-gemini-service-tier": "(hidden)",
+          "x-xss-protection": "(hidden)"
+        },
+        "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"A password manager is a safe app that remembers all your secret login words for you. \\n\\nInstead of trying to memorize a bunch of different words for games, school accounts, and websites, you only have to remember one super-strong master password. It works like a digital treasure chest that locks your information and types it in for you automatically.\",\n            \"thoughtSignature\": \"EpYBCpMBAWkUfRNOHeLTSmGPWkEEw3RlB/SpcOzT5ylch790kHv4RAOLHx2v9YdlYajZrMnejqk+3LtKZpp2OJUuuds+x0Ej7E6YWsa93nkRu1J+mnhsMPPPibEKjztTPd7Phm8vnKoUQtnmIBylP9PRn1QKJpJYR31e4nCtinebGyeK25IlCXqs0Uu29c/dncViSk5bFKr2\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 305,\n    \"candidatesTokenCount\": 69,\n    \"totalTokenCount\": 374,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 305\n      }\n    ],\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-3.5-flash-lite\",\n  \"responseId\": \"wXIFa469IMCoxdIPy6_nqAo\"\n}\n"
+      },
+      "error": null,
+      "ms": 1098,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 2676
+    },
+    {
+      "type": "api_call",
+      "agent": "evaluator",
+      "provider": "google",
+      "n": 2,
+      "method": "POST",
+      "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-goog-api-key": "(hidden)"
+        },
+        "body": "{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"Task: Write a short note that explains what a password manager is.\\n\\nCriteria:\\nClear for a ten-year-old. At most 80 words. Contains one everyday example.\\n\\nDraft:\\nA password manager is a secure digital tool that stores, manages, and generates all your passwords in one place. Instead of memorizing dozens of complex combinations or reusing the same weak password across multiple sites, you only need to remember one strong \\\"master password\\\" to access the vault. \\n\\nPassword managers improve your online security by creating unique, hard-to-crack passwords for every account and automatically filling them in when you log in.\\n\\nGive your verdict now.\"}]},{\"role\":\"model\",\"parts\":[{\"text\":\"{\\\"verdict\\\": \\\"revise\\\", \\\"feedback\\\": \\\"The draft is too complex for a ten-year-old (uses words like 'combination', 'vault', 'unique') and is missing an everyday example.\\\"}\"}]},{\"role\":\"user\",\"parts\":[{\"text\":\"Task: Write a short note that explains what a password manager is.\\n\\nCriteria:\\nClear for a ten-year-old. At most 80 words. Contains one everyday example.\\n\\nDraft:\\nA password manager is a safe app that remembers all your secret login words for you. \\n\\nInstead of trying to memorize a bunch of different words for games, school accounts, and websites, you only have to remember one super-strong master password. It works like a digital treasure chest that locks your information and types it in for you automatically.\\n\\nGive your verdict now.\"}]}],\"generationConfig\":{\"maxOutputTokens\":4000,\"responseMimeType\":\"application/json\",\"responseSchema\":{\"type\":\"OBJECT\",\"properties\":{\"verdict\":{\"type\":\"STRING\",\"enum\":[\"accept\",\"revise\"]},\"feedback\":{\"type\":\"STRING\"}},\"required\":[\"verdict\"]}},\"systemInstruction\":{\"parts\":[{\"text\":\"Role: evaluator\\nYou are the Evaluator. You judge a draft only against the criteria given in the message. If no criteria are given, judge whether the draft answers the task clearly and correctly. If the draft is good enough, accept it. If not, ask for a revision and give specific feedback (what is wrong and what to change), not only a score.\\nReply with JSON only, in one of these forms:\\n{\\\"verdict\\\":\\\"accept\\\"}\\n{\\\"verdict\\\":\\\"revise\\\",\\\"feedback\\\":\\\"<what to change>\\\"}\\nKeep every reply under 300 words. Answer in English.\"}]}}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "alt-svc": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-length": "519",
+          "content-type": "application/json; charset=UTF-8",
+          "date": "Tue, 24 Nov 2026 11:19:31 GMT",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "vary": "(hidden)",
+          "x-content-type-options": "(hidden)",
+          "x-frame-options": "(hidden)",
+          "x-gemini-service-tier": "(hidden)",
+          "x-xss-protection": "(hidden)"
+        },
+        "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"{\\n  \\\"verdict\\\": \\\"accept\\\"\\n}\",\n            \"thoughtSignature\": \"EpYBCpMBAWkUfROIZoUHsvhodnkPzcLTdJIWSW45JV87YAzj+FmswrTvhFZdbmf05r200QNguxGnaMZEZRssNv8Yy1uOpM1r9f3ZCPP/61LBX+EHPuNaHf1yMCZOlKzY2u9t5/opxC86owazKBap/8KDIvXjDgYZM3ZowMxeJhyzm6DlZbNraGGSlWq7rO58/U2X85mVLMij\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 425,\n    \"candidatesTokenCount\": 12,\n    \"totalTokenCount\": 437,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 425\n      }\n    ],\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-3.5-flash-lite\",\n  \"responseId\": \"wnIFa8eVJ_bExdIP8pTayAY\"\n}\n"
+      },
+      "error": null,
+      "ms": 893,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 3570
+    }
+  ],
+  "design": {
+    "pattern": "evaluator",
+    "nodes": [
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false,
+        "slot": "google-free"
+      },
+      {
+        "id": "evaluator",
+        "agent": "evaluator",
+        "model": "fast",
+        "search": false,
+        "slot": "google-free"
+      }
+    ],
+    "edges": [
+      {
+        "from": "writer",
+        "to": "evaluator"
+      }
+    ],
+    "rounds": 2,
+    "criteria": "Clear for a ten-year-old. At most 80 words. Contains one everyday example."
+  },
+  "task": "Write a short note that explains what a password manager is.",
+  "about": {
+    "title": "Evaluator loop: write, check, improve",
+    "author": "Agent Atlas Academy",
+    "description": "A writer drafts, an evaluator checks the draft against the criteria, and the writer improves it.\n\n**What it teaches**\n\nA loop with a clear check makes the answer better, but only as far as the criteria say.\n\n**What to watch**\n\nWhat the evaluator asks to change, and whether round two fixes it.\n\nRead more: [Evaluator loop](#/learn/evaluator-loop)"
+  },
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 1053,
+    "output": 212,
+    "searches": 0,
+    "steps": 4
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T11:19:27.655Z",
+  "endedAt": "2026-11-24T11:19:31.491Z",
+  "durationMs": 3836
+}

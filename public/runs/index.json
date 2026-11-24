@@ -102,6 +102,266 @@
         "en": "One design can use several providers; each agent runs on the one that suits it, and the replay shows who answered.",
         "cs": "Jeden návrh může používat víc providerů; každý agent běží na tom, který se mu hodí, a replay ukáže, kdo odpověděl."
       }
+    },
+    {
+      "id": "debate-simple",
+      "title": "Should schools start later in the morning?",
+      "pattern": "debate",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "google",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "basics",
+        "debate",
+        "disagreement"
+      ],
+      "level": 1,
+      "paths": {
+        "patterns": 4
+      },
+      "teaches": {
+        "en": "Agents that disagree on purpose bring out arguments a single answer would miss.",
+        "cs": "Agenti, kteří se záměrně neshodnou, odhalí argumenty, které by jedna odpověď přehlédla."
+      }
+    },
+    {
+      "id": "router-simple",
+      "title": "How do I turn the fraction 3/4 into a percentage?",
+      "pattern": "router",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "groq",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "basics",
+        "tool-choice",
+        "cost"
+      ],
+      "level": 1,
+      "paths": {
+        "patterns": 5
+      },
+      "teaches": {
+        "en": "A router chooses one path and the others are never started, so it saves work.",
+        "cs": "Směrovač zvolí jednu cestu a ostatní se vůbec nespustí, takže šetří práci."
+      }
+    },
+    {
+      "id": "evaluator-simple",
+      "title": "Write a short note that explains what a password manager is.",
+      "pattern": "evaluator",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "google",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "basics",
+        "explaining",
+        "prompt-chaining"
+      ],
+      "level": 1,
+      "paths": {
+        "patterns": 6
+      },
+      "teaches": {
+        "en": "A loop with a clear check makes the answer better, but only as far as the criteria say.",
+        "cs": "Smyčka s jasnou kontrolou zlepší odpověď, ale jen tak, jak říkají kritéria."
+      }
+    },
+    {
+      "id": "sequential-complex",
+      "title": "Plan a one-day school trip to a science museum for 30 studen…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "cloudflare",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "prompt-chaining",
+        "planning",
+        "risk-analysis"
+      ],
+      "level": 2,
+      "paths": {
+        "patterns": 7
+      },
+      "teaches": {
+        "en": "A longer chain adds quality at each step, but also time and cost, and an early mistake travels down the line.",
+        "cs": "Delší řetěz přidává v každém kroku kvalitu, ale i čas a cenu, a chyba z počátku se táhne dál."
+      }
+    },
+    {
+      "id": "mapreduce-simple",
+      "title": "Write one sentence of study advice for each of these subject…",
+      "pattern": "mapreduce",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "cloudflare",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "parallel-work",
+        "combining-answers",
+        "speed"
+      ],
+      "level": 2,
+      "paths": {
+        "patterns": 13
+      },
+      "teaches": {
+        "en": "One worker design runs many times on different parts, so the work grows with the task, not with the number of agents.",
+        "cs": "Jeden návrh pracovníka běží opakovaně na různých částech, takže práce roste s úkolem, ne s počtem agentů."
+      }
+    },
+    {
+      "id": "planexec-simple",
+      "title": "Make a packing list for a weekend camping trip: first plan t…",
+      "pattern": "planexec",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "groq",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "planning",
+        "prompt-chaining",
+        "handoff"
+      ],
+      "level": 2,
+      "paths": {
+        "patterns": 14
+      },
+      "teaches": {
+        "en": "A plan made first gives the run a shape, and the executor follows it even when a step turns out to be needless.",
+        "cs": "Plán vytvořený předem dává běhu tvar a vykonavatel ho následuje, i když se krok ukáže jako zbytečný."
+      }
+    },
+    {
+      "id": "planexec-complex",
+      "title": "Plan a ten-minute class presentation about renewable energy …",
+      "pattern": "planexec",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "groq",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "planning",
+        "decision-making",
+        "cost"
+      ],
+      "level": 3,
+      "paths": {
+        "patterns": 20
+      },
+      "teaches": {
+        "en": "The quality of the whole run depends on the plan, and a step that was not needed is still done.",
+        "cs": "Kvalita celého běhu závisí na plánu a krok, který nebyl potřeba, se přesto provede."
+      }
+    },
+    {
+      "id": "mapreduce-complex",
+      "title": "Write one sentence of study advice for each of these eight s…",
+      "pattern": "mapreduce",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "cloudflare",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "parallel-work",
+        "combining-answers",
+        "cost"
+      ],
+      "level": 3,
+      "paths": {
+        "patterns": 19
+      },
+      "teaches": {
+        "en": "Map-reduce scales with the number of parts: the steps, the tokens and the cost, while the design stays the same.",
+        "cs": "Map-reduce roste s počtem částí: kroky, tokeny i cena, zatímco návrh zůstává stejný."
+      }
+    },
+    {
+      "id": "handoff-simple",
+      "title": "My laptop connects to the school Wi-Fi, but no web page open…",
+      "pattern": "handoff",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "handoff",
+        "tool-choice",
+        "prompt-chaining"
+      ],
+      "level": 2,
+      "paths": {
+        "patterns": 11
+      },
+      "teaches": {
+        "en": "In a handoff control moves forward and nothing stands above it; the note is all the next agent knows.",
+        "cs": "U předání řízení postupuje dopředu a nic nad ním nestojí; poznámka je vše, co další agent ví."
+      }
+    },
+    {
+      "id": "handoff-complex",
+      "title": "I cannot log in to the school portal, and my laptop has also…",
+      "pattern": "handoff",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "handoff",
+        "tool-choice",
+        "decision-making"
+      ],
+      "level": 3,
+      "paths": {
+        "patterns": 17
+      },
+      "teaches": {
+        "en": "A poor note starves the next agent, and a path with many handoffs can lose the second problem.",
+        "cs": "Špatná poznámka připraví dalšího agenta o informace a cesta s mnoha předáními může druhý problém ztratit."
+      }
     }
   ]
 }
