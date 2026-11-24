@@ -1,0 +1,6 @@
+{
+  "about": "Jeden agent napíše dvě věty o podzimním listí a pak posoudí vlastní koncept podle kritérií: správně, dvě věty, bez odborných slov.",
+  "how": "Je tu jen jeden agent: týž model píše, pak hraje hodnotitele a pak text přepíše.",
+  "learns": "Sebekritika ušetří druhého agenta, ale i tak najde skutečné chyby: tady zachytí odborná slova v prvním konceptu.",
+  "watch": "Verdikt v 1. kole (upravit kvůli chlorofylu a fotosyntéze) a jednodušší druhý koncept."
+}

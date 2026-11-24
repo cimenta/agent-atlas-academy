@@ -1,0 +1,6 @@
+{
+  "about": "Pisatel musí poslat uvítací zprávu nejvýš na 300 znaků. Guardrail délky ji zkontroluje a když je dlouhá, vrátí ji ke zkrácení.",
+  "how": "Guardrail má akci opravit: agent dostane problém a ještě jeden pokus.",
+  "learns": "Guardrail může požádat agenta, aby svou odpověď opravil, místo aby zastavil běh.",
+  "watch": "První odpověď je moc dlouhá a kontrolou neprojde; druhá je dost krátká a projde."
+}

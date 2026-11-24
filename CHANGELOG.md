@@ -4,9 +4,13 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ## [Unreleased]
 
+### Changed
+
+- Home: more compact. The heading is See and learn how AI agents work together, the Task line above the player is gone, and the Start here card is one blue line; the whole card is clickable (and opens with Enter or Space), More goals stays a link.
+
 ### Added
 
-- Library, wave 2 started: 17 run definitions for the goals Cost and speed and Reliability (demo-definitions/wave2-*.json), and ten recorded runs on Anthropic with details and explanations in English and Czech: save-models-strong and save-models-mixed, save-serial and save-parallel, save-search-off and save-search-on, rel-format-free and rel-format-fields, rel-eval-vague and rel-eval-good. The path-coverage check skips the goals save, reliable and wrong until they are complete.
+- Library, wave 2 started: 17 run definitions for the goals Cost and speed and Reliability (demo-definitions/wave2-*.json), and sixteen recorded runs on Anthropic with details and explanations in English and Czech: save-models-strong and save-models-mixed, save-serial and save-parallel, save-search-off and save-search-on, rel-format-free and rel-format-fields, rel-eval-vague and rel-eval-good, rel-guard-leak and rel-guard-stop (the guardrail stops the run on purpose), rel-approve-yes and rel-approve-no, rel-guard-repair and more-self-critique. The path-coverage check skips the goals save, reliable and wrong until they are complete.
 - Library: supervisor-complex (Anthropic) is recorded, with details and explanations in English and Czech.
 - Library, cog menu: Delete ticked and Delete all mine remove your own runs after one confirmation that says how many; the library's own runs are never deleted.
 - Re-play, run menu: Mark as done (and Mark as not done) for a library run that is on the recommended path; it marks the run in every goal it belongs to.

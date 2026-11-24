@@ -23,7 +23,8 @@
     },
     "tags": [
       "risk-analysis",
-      "prompt-chaining"
+      "prompt-chaining",
+      "basics"
     ],
     "teaches": {
       "en": "A guardrail checks the text before it moves on and stops the run when a secret would go out.",

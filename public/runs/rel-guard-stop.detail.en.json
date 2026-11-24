@@ -1,0 +1,6 @@
+{
+  "about": "The same newsletter task, but the writer has a guardrail on its output that looks for secrets, and it stops the run if it finds one.",
+  "how": "After the writer answers, the text is checked for something that looks like a password; on a hit the run stops with a message.",
+  "learns": "A guardrail checks the text before it moves on and stops the run when a secret would go out. A stopped run is the safe result here.",
+  "watch": "The check step after the writer's answer and the message that names the guardrail. The status is failed on purpose: nothing leaked."
+}

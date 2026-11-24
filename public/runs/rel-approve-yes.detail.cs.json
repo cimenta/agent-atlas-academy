@@ -1,0 +1,6 @@
+{
+  "about": "Supervizor pošle výzkumníka a pak pisatele připravit oznámení pro rodiče. Pisatel je označen, že čeká na člověka, a ten schválí.",
+  "how": "Než pisatel poprvé běží, běh se zastaví a zeptá se: Schválit a pokračovat, nebo Zastavit.",
+  "learns": "Krok, který posílá text dalším lidem, může čekat na člověka; schválení nechá běh pokračovat.",
+  "watch": "Krok schválení před pisatelem a krok schváleno po něm."
+}

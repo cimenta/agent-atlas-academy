@@ -1,0 +1,9 @@
+{
+  "3": "The supervisor starts by calling the researcher.",
+  "11": "The supervisor calls the writer.",
+  "13": "The run stops here and waits: the writer needs a person's approval.",
+  "14": "A person approved the step, so the writer runs.",
+  "17": "The writer's notice to parents.",
+  "21": "The supervisor finishes with the notice.",
+  "22": "The run ends, finished."
+}

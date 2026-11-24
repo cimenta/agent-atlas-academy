@@ -1,0 +1,7 @@
+{
+  "3": "The writer's first welcome message is warm and long, well over 300 characters.",
+  "4": "The length check fails. The guardrail repairs instead of stopping: the writer gets another try.",
+  "7": "The second answer is short.",
+  "8": "The check passes, so the run goes on.",
+  "9": "The run ends with a finished status; the guardrail cost one extra call."
+}

@@ -1,0 +1,6 @@
+{
+  "about": "Stejný běh, ale tentokrát člověk před pisatelem zastaví.",
+  "how": "Při schvalování zvolí člověk Zastavit; pisatel nikdy neběží.",
+  "learns": "Odmítnutí ukončí krok dřív, než něco udělá; běh si ponechá, co se stalo, a ukáže, co bylo zastaveno.",
+  "watch": "Krok schválení jako poslední krok a stav: zastaveno uživatelem."
+}

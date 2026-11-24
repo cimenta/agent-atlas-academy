@@ -668,6 +668,170 @@
         "en": "Measurable criteria let the evaluator find a real fault and say exactly what to change.",
         "cs": "Měřitelná kritéria umožní hodnotiteli najít skutečnou chybu a říct, co změnit."
       }
+    },
+    {
+      "id": "rel-guard-stop",
+      "title": "Write a short newsletter item from this note for the club me…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "failed",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "risk-analysis",
+        "prompt-chaining",
+        "basics"
+      ],
+      "level": 2,
+      "kind": "pair",
+      "twin": "rel-guard-leak",
+      "paths": {
+        "reliable": 6
+      },
+      "teaches": {
+        "en": "A guardrail checks the text before it moves on and stops the run when a secret would go out.",
+        "cs": "Guardrail zkontroluje text dřív, než půjde dál, a zastaví běh, když by tajný údaj odešel."
+      }
+    },
+    {
+      "id": "rel-guard-leak",
+      "title": "Write a short newsletter item from this note for the club me…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "risk-analysis",
+        "prompt-chaining",
+        "basics"
+      ],
+      "level": 2,
+      "kind": "pair",
+      "twin": "rel-guard-stop",
+      "paths": {
+        "reliable": 5
+      },
+      "teaches": {
+        "en": "Without a guardrail an agent may copy a secret from its input into a text everyone reads.",
+        "cs": "Bez guardrailu může agent zkopírovat tajný údaj ze vstupu do textu, který čtou všichni."
+      }
+    },
+    {
+      "id": "rel-guard-repair",
+      "title": "Write a welcome message for new students. Write at length an…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "risk-analysis",
+        "basics",
+        "prompt-chaining"
+      ],
+      "level": 2,
+      "paths": {
+        "reliable": 7
+      },
+      "teaches": {
+        "en": "A guardrail can ask the agent to repair its own answer instead of stopping the run.",
+        "cs": "Guardrail může požádat agenta, aby svou odpověď opravil, místo aby zastavil běh."
+      }
+    },
+    {
+      "id": "rel-approve-yes",
+      "title": "Write a short notice to parents about a school trip next wee…",
+      "pattern": "supervisor",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "risk-analysis",
+        "decision-making",
+        "supervisor"
+      ],
+      "level": 2,
+      "kind": "pair",
+      "twin": "rel-approve-no",
+      "paths": {
+        "reliable": 8
+      },
+      "teaches": {
+        "en": "A step that sends text to others can wait for a person; approving lets the run go on.",
+        "cs": "Krok, který posílá text dalším lidem, může čekat na člověka; schválení nechá běh pokračovat."
+      }
+    },
+    {
+      "id": "rel-approve-no",
+      "title": "Write a short notice to parents about a school trip next wee…",
+      "pattern": "supervisor",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "stopped_user",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "risk-analysis",
+        "decision-making",
+        "supervisor"
+      ],
+      "level": 2,
+      "kind": "pair",
+      "twin": "rel-approve-yes",
+      "paths": {
+        "reliable": 9
+      },
+      "teaches": {
+        "en": "A refusal ends the step before it does anything; the run shows what was stopped and why.",
+        "cs": "Odmítnutí ukončí krok dřív, než něco udělá; běh ukáže, co bylo zastaveno a proč."
+      }
+    },
+    {
+      "id": "more-self-critique",
+      "title": "Write two sentences that explain why leaves change colour in…",
+      "pattern": "evaluator",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "decision-making",
+        "disagreement",
+        "basics"
+      ],
+      "level": 2,
+      "paths": {
+        "reliable": 10
+      },
+      "teaches": {
+        "en": "Self-critique costs one agent less, but it shares the writer's blind spots.",
+        "cs": "Sebekritika stojí o agenta méně, ale sdílí slepá místa pisatele."
+      }
     }
   ]
 }

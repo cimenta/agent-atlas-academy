@@ -1,0 +1,6 @@
+{
+  "about": "The same run, but this time the person stops before the writer.",
+  "how": "At the approval step the person chooses Stop here; the writer never runs.",
+  "learns": "A refusal ends the step before it does anything; the run keeps what was done and shows what was stopped.",
+  "watch": "The approval step as the last step, and the status: stopped by the user."
+}

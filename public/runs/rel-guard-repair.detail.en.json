@@ -1,0 +1,6 @@
+{
+  "about": "A writer must send a welcome message of at most 300 characters. A length guardrail checks it and, if it is too long, sends it back to be shortened.",
+  "how": "The guardrail has the action repair: the agent gets the problem and one more try.",
+  "learns": "A guardrail can ask the agent to repair its own answer instead of stopping the run.",
+  "watch": "The first answer is too long and fails the check; the second is short enough and passes."
+}

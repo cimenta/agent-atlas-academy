@@ -1,0 +1,6 @@
+{
+  "7": "The writer's text again contains the password.",
+  "8": "The guardrail checks this text: it looks like a secret (a value after the word password).",
+  "9": "The run is stopped by guardrail 1 before the text goes out. Compare with the twin without a guardrail.",
+  "10": "The run ends as failed, and the answer is empty: nothing leaked."
+}

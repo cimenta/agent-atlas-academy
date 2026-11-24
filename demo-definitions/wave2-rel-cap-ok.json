@@ -1,0 +1,113 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "A town wants to plan a new public library. Give a full report.",
+  "about": {
+    "en": {
+      "title": "Reliability: a cost cap that is high enough",
+      "author": "Agent Atlas Academy",
+      "description": "The same run with the cost cap off.\n\n**What it teaches**\n\nWith a cap above what the run needs, it finishes; the cap costs nothing until it is reached."
+    },
+    "cs": {
+      "title": "Spolehlivost: strop ceny dost vysoký",
+      "author": "Agent Atlas Academy",
+      "description": "Stejný běh se vypnutým stropem ceny.\n\n**Čemu se naučíte**\n\nSe stropem nad potřebou běhu doběhne; strop nic nestojí, dokud se nedosáhne."
+    }
+  },
+  "library": {
+    "level": 3,
+    "kind": "pair",
+    "twin": "rel-cap-low",
+    "paths": {
+      "reliable": 12
+    },
+    "tags": [
+      "cost",
+      "risk-analysis",
+      "parallel-work"
+    ],
+    "teaches": {
+      "en": "With a cap above what the run needs, it finishes; the cap costs nothing until it is reached.",
+      "cs": "Se stropem nad potřebou běhu doběhne; strop nic nestojí, dokud se nedosáhne."
+    }
+  },
+  "design": {
+    "pattern": "parallel",
+    "nodes": [
+      {
+        "id": "w1",
+        "agent": "free",
+        "model": "strong",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Architect",
+        "instructions": "Answer as an architect. Write about 400 words."
+      },
+      {
+        "id": "w2",
+        "agent": "free",
+        "model": "strong",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Librarian",
+        "instructions": "Answer as a librarian. Write about 400 words."
+      },
+      {
+        "id": "w3",
+        "agent": "free",
+        "model": "strong",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Teacher",
+        "instructions": "Answer as a teacher. Write about 400 words."
+      },
+      {
+        "id": "w4",
+        "agent": "free",
+        "model": "strong",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Accountant",
+        "instructions": "Answer as an accountant. Write about 400 words."
+      },
+      {
+        "id": "w5",
+        "agent": "free",
+        "model": "strong",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Neighbour",
+        "instructions": "Answer as a neighbour. Write about 400 words."
+      },
+      {
+        "id": "combiner",
+        "agent": "combiner",
+        "model": "strong",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "w1",
+        "to": "combiner"
+      },
+      {
+        "from": "w2",
+        "to": "combiner"
+      },
+      {
+        "from": "w3",
+        "to": "combiner"
+      },
+      {
+        "from": "w4",
+        "to": "combiner"
+      },
+      {
+        "from": "w5",
+        "to": "combiner"
+      }
+    ]
+  }
+}

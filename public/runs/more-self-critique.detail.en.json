@@ -1,0 +1,6 @@
+{
+  "about": "One agent writes two sentences about autumn leaves and then judges its own draft against the criteria: correct, two sentences, no jargon.",
+  "how": "There is only one agent: the same model writes, then plays the evaluator, then rewrites.",
+  "learns": "Self-critique saves a second agent, but it can still find real faults: here it catches the jargon words in the first draft.",
+  "watch": "The verdict in round 1 (revise, because of chlorophyll and photosynthesis) and the plainer second draft."
+}

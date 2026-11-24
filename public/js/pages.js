@@ -57,15 +57,24 @@ export function startCard({ doc, t, items, done, onStart }) {
   const finished = all.filter((item) => done.has(`patterns:${item.id}`)).length;
   const next = nextStep(items, "patterns", done);
   const text = !next ? t("home.start.done") : finished === 0 ? t("home.start.empty") : t("home.start.next", { done: finished, total: all.length, title: next.title });
-  const go = h(doc, "button", { type: "button", class: "primary", "data-ui": "start-go" }, t(finished > 0 && next ? "home.start.continue" : "home.start.button"));
+  const go = h(doc, "span", { class: "start-go", "data-ui": "start-go" }, t(finished > 0 && next ? "home.start.continue" : "home.start.button"));
   const more = h(doc, "a", { href: "#/play", "data-ui": "start-more" }, t("home.start.more"));
+  const root = h(doc, "section", { class: "home-start", "data-ui": "home-start", role: "button", tabindex: "0", "aria-label": `${t("home.start.title")}: ${text}` }, h(doc, "div", { class: "home-start-text" }, h(doc, "b", {}, t("home.start.title")), h(doc, "span", {}, text)), h(doc, "div", { class: "home-start-actions" }, go, more));
+  // The whole card is one big button; the inner controls stop the click so onStart runs once.
   for (const control of [go, more]) {
     control.addEventListener("click", (event) => {
       event?.preventDefault?.();
+      event?.stopPropagation?.();
       onStart();
     });
   }
-  return h(doc, "section", { class: "home-start", "data-ui": "home-start", "aria-label": t("home.start.title") }, h(doc, "div", {}, h(doc, "b", {}, t("home.start.title")), h(doc, "p", { class: "muted" }, text)), h(doc, "div", { class: "home-start-actions" }, go, more));
+  root.addEventListener("click", () => onStart());
+  root.addEventListener("keydown", (event) => {
+    if (event?.target !== root || (event.key !== "Enter" && event.key !== " ")) return;
+    event.preventDefault?.();
+    onStart();
+  });
+  return root;
 }
 
 // The home page: what the site is about, the way into the recommended path, and a simple run that plays by itself.
@@ -73,7 +82,6 @@ export async function renderLanding(ctx) {
   const { doc, t } = ctx;
   setTitle(ctx, "");
   const host = h(doc, "div", { class: "replay-host", "data-ui": "home-player" });
-  const taskBar = h(doc, "p", { class: "home-task", "data-ui": "home-task", hidden: true });
   const about = h(
     doc,
     "section",
@@ -91,7 +99,7 @@ export async function renderLanding(ctx) {
   const mini = createMiniReplay({ doc, t, h });
   ctx.onLeave(mini.destroy);
   const startHost = h(doc, "div", { "data-ui": "home-start-host" });
-  show(ctx, mini.element, h(doc, "h1", {}, t("landing.title")), h(doc, "p", { class: "lead lead-wide" }, t("landing.intro")), about, startHost, taskBar, host);
+  show(ctx, mini.element, h(doc, "h1", {}, t("landing.title")), h(doc, "p", { class: "lead lead-wide" }, t("landing.intro")), about, startHost, host);
   try {
     const index = await getJson(ctx, "/runs/index.json");
     let done = new Set();
@@ -118,11 +126,6 @@ export async function renderLanding(ctx) {
     const run = await getJson(ctx, `/runs/${first.id}.json`);
     const explanations = await loadExplanations(ctx, first.id);
     if (ctx.isStale()) return;
-    const task = run.events.find((e) => e.type === "run_start")?.task;
-    if (typeof task === "string" && task) {
-      taskBar.replaceChildren(h(doc, "span", { class: "lb" }, `${t("landing.task")}: `), task);
-      taskBar.hidden = false;
-    }
     const handle = mountReplay(host, { run, explanations, t, doc, autoStart: ctx.autoStart, timeScale: first.timeScale, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors });
     ctx.onLeave(handle.destroy);
     // The demo plays again by itself, a few seconds after it has finished.

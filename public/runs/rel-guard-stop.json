@@ -1,0 +1,419 @@
+{
+  "schemaVersion": 1,
+  "id": "rel-guard-stop",
+  "title": "Write a short newsletter item from this note for the club me…",
+  "language": "en",
+  "pattern": "sequential",
+  "recordedWith": {
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "appVersion": "1.16.10-dev.8",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "Write a short newsletter item from this note for the club members. Note: The club meets on Friday in room 12. Wi-Fi password: tulip-7391. Bring a laptop.",
+      "pattern": "sequential",
+      "design": {
+        "pattern": "sequential",
+        "nodes": [
+          {
+            "id": "free",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Reader",
+            "instructions": "Pick out what the note says.",
+            "slot": "anthropic"
+          },
+          {
+            "id": "writer",
+            "agent": "writer",
+            "model": "fast",
+            "search": false,
+            "slot": "anthropic",
+            "guardrails": [
+              {
+                "where": "output",
+                "kind": "secret",
+                "onFail": "stop"
+              }
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "from": "free",
+            "to": "writer"
+          }
+        ]
+      },
+      "t": 2
+    },
+    {
+      "type": "agent_start",
+      "agent": "free",
+      "role": "Reader",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Reader. Pick out what the note says.\nKeep every reply under 300 words. Answer in English.",
+      "t": 3
+    },
+    {
+      "type": "round",
+      "agent": "free",
+      "round": 1,
+      "ms": 1839,
+      "stop": "end_turn",
+      "usage": {
+        "input": 108,
+        "output": 263
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write a short newsletter item from this note for the club members. Note: The club meets on Friday in room 12. Wi-Fi password: tulip-7391. Bring a laptop."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQS6wgKEAgUGAI4AUIIdGhpbmtpbmcSDBSbTsx8FIBdV4FMWhoMcERedfk0bFeaMuQjIjC0QsDlejp3dDV7Awu1Wy6TheIXJlXx9nTFsgQ1nYopHbhm4WA4rl0ZiIimYLivF4EqiAg0EXTX73WgALG4aRK+5tt8oQQV2mBZT4sTcEPKkG65zAFXJJBpZ5PDnVHLbSM/F11VKUMBHzHIY6axMlliLwvIOWXwsIbng77VjIEOYpWA0erE9vz7cV2YcO0WkcwHpJPsKVjuV5ZJQCheIeLSDKEy/CTZ/sYWLDLspQtM9bDTAjBtSciT+gSmfF5imzeJmhlhLGOA0YcgaHHbkbPUfe8TyE8T4vzbuivOVN272gXyLouw8ImcFgApRiQ9DBUCgv1JrGxEYDSNbTchLcsSYlUzBPdLlqk9GwYXMtFkjR1wLMNawz/LgaSeLfug7U3rWC4Xxw6IvqAz3/doDVjHKrSW5RprUBLoyD4ETpAgAvQdUXDd2EIa9UjNOsKt04n4BEnu8uGHREE7ZNEHF9ipyCsEY2u5qIepOolEqB74Cp6c7R1ZU8Ay+12C8ABFBdSHciZ6GmkMW+XZaIfQSdbL6iZTqgK0BtNzfQaDGpTezNtwxXWxH/Qfap16KE7UNNL6vCmJ6AW/RBhytjFxLXL2CADdw8KI330oQIFumL3+/oMKBcMH+uVPCpCQvRSlHZx0vJltdXM20YcZTTawKwNReor1nyF8sdRSVV6+eH0XKw+X5o+MqbBa1mke2NIm2eKJyMjQ+5GHaklVacmr/amusNxWVJaEgRjpvFhU4MYVUlytxIRDVgg2NWMleUWRL8lsveizVY11jpSXt2xmOJRJxJXxZU2UcR/6tblKOqAh24I4CDfV0QYgFeHXvpfOHG4m80SSgogJ5rjxI7xsHKRAa6DXDcjFHeYOkJx7O5904O3YFhrHbZTDAAQKP27Cx2Yhz6J0gyfDdciHsFpXliIDU/owu2Jatwg5zHFl+vIdR1aVCYHGxC5NvsbSPNHRe5+Fn4yE3UqUMdOzwC6tV/8jOaJONkAAIVaUFvgvGF6C7RAyHF8PKfRpHebL7I2+yyCBlFMl12BUe+emoVvO5RCHfw/UP08MUaTxSpew2JKeIJI8cLP/x+87uzyEtVbdyibzFES7GIfh1X4wwycCetQUgNVOsYVbRnsrJKi0sSRRP0H2dtY5Tt89XUgK8+6tKNTA98T9W7hAAxLcABuJgEvmJl8+yPBZ7tqL+PWBQY/clAo45wPEakTNuPLVfN1wNrcG9PezA6DPjSaxVWsS+GnbilvVTFdeaRt4BwgtidpaMdaswSG5QfJBRQTHjDv7zoTwlsfpnxD2sub9uq9CuPlc2zDouNwSrmNwEj9jZKrIKe01YRRI4s83vKIWbKrcvgVx+/HUAa7Ik45ObaMpls0rRGYkBD2Mgnqn1Z+jIuiAIJrEWqnwOiXVdhhtqVkT2Br2PbJTc/Acmt4kaY5It1Ho9NBqdb9zw/AFYnEYAQ=="
+        },
+        {
+          "type": "text",
+          "text": "**Club Meeting This Friday**\n\nThe club meets this Friday in Room 12. Please bring a laptop.\n\n**Wi-Fi password:** tulip-7391\n\nSee you there!\n\n*Note: If this newsletter goes to anyone outside the club, you may want to leave the Wi-Fi password out and share it with members directly.*"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMnRYRAX4WAa1ZduoUaY",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 108,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 263,
+            "output_tokens_details": {
+              "thinking_tokens": 155
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 1842
+    },
+    {
+      "type": "agent_output",
+      "agent": "free",
+      "text": "**Club Meeting This Friday**\n\nThe club meets this Friday in Room 12. Please bring a laptop.\n\n**Wi-Fi password:** tulip-7391\n\nSee you there!\n\n*Note: If this newsletter goes to anyone outside the club, you may want to leave the Wi-Fi password out and share it with members directly.*",
+      "tokens": {
+        "input": 108,
+        "output": 263
+      },
+      "t": 1842
+    },
+    {
+      "type": "handoff",
+      "from": "free",
+      "to": "writer",
+      "note": "**Club Meeting This Friday**\n\nThe club meets this Friday in Room 12. Please bring a laptop.\n\n**Wi-Fi password:** tulip-7391\n\nSee you there!\n\n*Note: If this newsletter goes to anyone outside the club, you may want to leave the Wi-Fi password out and share it with members directly.*",
+      "t": 1843
+    },
+    {
+      "type": "agent_start",
+      "agent": "writer",
+      "role": "Writer",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: writer\nYou are the Writer. Write the final answer for the user from the material you were given. Be clear and short, with no filler.\nKeep every reply under 300 words. Answer in English.",
+      "t": 1843
+    },
+    {
+      "type": "round",
+      "agent": "writer",
+      "round": 1,
+      "ms": 1270,
+      "stop": "end_turn",
+      "usage": {
+        "input": 249,
+        "output": 231
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: Write a short newsletter item from this note for the club members. Note: The club meets on Friday in room 12. Wi-Fi password: tulip-7391. Bring a laptop.\n\nThe previous agent (free) wrote:\n**Club Meeting This Friday**\n\nThe club meets this Friday in Room 12. Please bring a laptop.\n\n**Wi-Fi password:** tulip-7391\n\nSee you there!\n\n*Note: If this newsletter goes to anyone outside the club, you may want to leave the Wi-Fi password out and share it with members directly.*"
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQShAkKEAgUGAI4AUIIdGhpbmtpbmcSDEH1xAj7kDc4eT4THRoMiRfV4pG+IayVfL9GIjC7yhmPP12RC/J/fOZZb+kA3Ka+nSEvdSYw0AL6jOp1qYZKCcx0crc8fut2v70dfAgqoQiJUqQlGnozeS5ovuhiKQVrCCo1i18+WSc28vp9Z2wOyj/NwWcDP0Q18pnZ7ks/IZ69E+ZH2bcDTkwEOUorrKeyVRZq0MEAsMWrFBLLOy9K4w9lVrmNSECc+p3xhNUsNzlMWrSz5lzh8sCHrTrxbVRBUy9ljGTVXsEByMbU7WADMje6K0Ph40U5Qh569bR0b4j/nCgux6tdGksb3ZONrjXXAwXzSIOZU3vIiZjNK5UEMymP0s1K5i8Tdai1MGJKmCy0pokf/BvVlu79g1KJQevLgeM6ME2fSieQKrzud7wOWm5HUXscp/vNYSQ5CR9uwX4k1IlsTKL+XEoFm+QZ1JADbTWHy73n0hfzQmCZ6rIE7WLVKgchqvKC0YQHqLdJfD2dibUh17JaEn3qLgdEkWyekMWlgdmGPELXPPlehValWuCZfssYUusoxv+mzIiN5sKkJaVxYH2j5zMaBy/PPfHaCVq2rDe+jHxn6HbhopDXxdLJTo+ZaQ0Mkgg0oIyCuX/sSFjBGpuZRXXW0qwMi+CpLMdi8VI0MZL6gFQIcZR/BBabWGxq44zwkSvZvr6iftm/G9RDkmy6rhrFVocdeJbWktKkmDJJxou0oL1SiBmMxEryrjstLwXGOvyI/Jr9m0u7+PmtTxlYHGOKotSkUW4/A4O4+1ENEBw2ONlK+FTWyjlR8YD81ak+Oii350hAuNdWKqznd4qslmgAui+Z6Zn8fpjLQX8s/J1DustZHIzy4JEASgVFunrbvt4qoVWuboi1ZQkXy6EaZ7knjKPT/upoZNrRcEZMxiK7+Jz6eJuliVpqGY/lm81PdB9AJe9CTdvy1Bbe+d7XRAK9gUy6Sw7eURFf/n8ah9qTu8KDHUIUf1QMNclcTffvqNIJhGLNEJDaY6WOEVjBEYeDfpmZ/CcniL9SHZNSzTX8SHD/PGQPGVX0A8vMzp8B8wTEzKIDbhgLdtGwvEFdoqhCunpVfVM9yJYMCV9IBkNMKC/pVymOY+WHnt9UGadwikA13y7fNDK8UsL3JcbWAOMn9cuXgti47wtmHZ6zy5z3TqSqNai99QFQM0k4O8aMCRTcN3ivLCAFpV+7Lz7f/pDc5YLY7QW8I6XWJe8UAddGjp2sa/k4AQTmO6D+IvdbTJsKs6jmiVxHAdjssGQhoVb7G0HrzT+wjONSa7ELJRSkmCF97qCjnYuF6HTFL0p9aFZWqIFvcWLOq1FDvPuuKyYiG5sku3KWFBKaXqlNb+u4ntEAU3GWD1gaHpNcYJA9EjVBK94R4Vhgw+RlUviVjLY1RbP6rOJwys8A7fR+nxuWw/zYePR+mIQCGGldHzxD8YetsqLvjnc3h2V/WM/6waZ9Ehr+GpMIyw065nw3mvVm6OijyVaK/6rrRk1yhxhRd5aToYInLlVAGAE="
+        },
+        {
+          "type": "text",
+          "text": "**Club Meeting This Friday**\n\nThe club meets this Friday in Room 12. Please bring a laptop.\n\n**Wi-Fi password:** tulip-7391\n\nSee you there!"
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMnRfcG6Y4aA2fMEx4uR",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 249,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 231,
+            "output_tokens_details": {
+              "thinking_tokens": 170
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 3113
+    },
+    {
+      "type": "agent_output",
+      "agent": "writer",
+      "text": "**Club Meeting This Friday**\n\nThe club meets this Friday in Room 12. Please bring a laptop.\n\n**Wi-Fi password:** tulip-7391\n\nSee you there!",
+      "tokens": {
+        "input": 249,
+        "output": 231
+      },
+      "t": 3113
+    },
+    {
+      "type": "guardrail_check",
+      "agent": "writer",
+      "guardrail": 1,
+      "where": "output",
+      "kind": "secret",
+      "ok": false,
+      "attempt": 1,
+      "action": "stopped",
+      "reason": "looks like a secret (a value after \"password\")",
+      "text": "**Club Meeting This Friday**\n\nThe club meets this Friday in Room 12. Please bring a laptop.\n\n**Wi-Fi password:** tulip-7391\n\nSee you there!",
+      "tries": 1,
+      "t": 3114
+    },
+    {
+      "type": "error",
+      "message": "guardrail.blocked: Writer was stopped by guardrail 1 (looks like a secret (a value after \"password\"))",
+      "t": 3115
+    },
+    {
+      "type": "done",
+      "outcome": "failed",
+      "usage": {
+        "input": 357,
+        "output": 494,
+        "searches": 0,
+        "steps": 2
+      },
+      "finalText": "",
+      "t": 3115
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "free",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Reader. Pick out what the note says.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Write a short newsletter item from this note for the club members. Note: The club meets on Friday in room 12. Wi-Fi password: tulip-7391. Bring a laptop.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T12:51:53Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T12:51:55Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T12:51:53Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "12000000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T12:51:53Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 12:51:55 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMnRYRAX4WAa1ZduoUaY\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"CAQS6wgKEAgUGAI4AUIIdGhpbmtpbmcSDBSbTsx8FIBdV4FMWhoMcERedfk0bFeaMuQjIjC0QsDlejp3dDV7Awu1Wy6TheIXJlXx9nTFsgQ1nYopHbhm4WA4rl0ZiIimYLivF4EqiAg0EXTX73WgALG4aRK+5tt8oQQV2mBZT4sTcEPKkG65zAFXJJBpZ5PDnVHLbSM/F11VKUMBHzHIY6axMlliLwvIOWXwsIbng77VjIEOYpWA0erE9vz7cV2YcO0WkcwHpJPsKVjuV5ZJQCheIeLSDKEy/CTZ/sYWLDLspQtM9bDTAjBtSciT+gSmfF5imzeJmhlhLGOA0YcgaHHbkbPUfe8TyE8T4vzbuivOVN272gXyLouw8ImcFgApRiQ9DBUCgv1JrGxEYDSNbTchLcsSYlUzBPdLlqk9GwYXMtFkjR1wLMNawz/LgaSeLfug7U3rWC4Xxw6IvqAz3/doDVjHKrSW5RprUBLoyD4ETpAgAvQdUXDd2EIa9UjNOsKt04n4BEnu8uGHREE7ZNEHF9ipyCsEY2u5qIepOolEqB74Cp6c7R1ZU8Ay+12C8ABFBdSHciZ6GmkMW+XZaIfQSdbL6iZTqgK0BtNzfQaDGpTezNtwxXWxH/Qfap16KE7UNNL6vCmJ6AW/RBhytjFxLXL2CADdw8KI330oQIFumL3+/oMKBcMH+uVPCpCQvRSlHZx0vJltdXM20YcZTTawKwNReor1nyF8sdRSVV6+eH0XKw+X5o+MqbBa1mke2NIm2eKJyMjQ+5GHaklVacmr/amusNxWVJaEgRjpvFhU4MYVUlytxIRDVgg2NWMleUWRL8lsveizVY11jpSXt2xmOJRJxJXxZU2UcR/6tblKOqAh24I4CDfV0QYgFeHXvpfOHG4m80SSgogJ5rjxI7xsHKRAa6DXDcjFHeYOkJx7O5904O3YFhrHbZTDAAQKP27Cx2Yhz6J0gyfDdciHsFpXliIDU/owu2Jatwg5zHFl+vIdR1aVCYHGxC5NvsbSPNHRe5+Fn4yE3UqUMdOzwC6tV/8jOaJONkAAIVaUFvgvGF6C7RAyHF8PKfRpHebL7I2+yyCBlFMl12BUe+emoVvO5RCHfw/UP08MUaTxSpew2JKeIJI8cLP/x+87uzyEtVbdyibzFES7GIfh1X4wwycCetQUgNVOsYVbRnsrJKi0sSRRP0H2dtY5Tt89XUgK8+6tKNTA98T9W7hAAxLcABuJgEvmJl8+yPBZ7tqL+PWBQY/clAo45wPEakTNuPLVfN1wNrcG9PezA6DPjSaxVWsS+GnbilvVTFdeaRt4BwgtidpaMdaswSG5QfJBRQTHjDv7zoTwlsfpnxD2sub9uq9CuPlc2zDouNwSrmNwEj9jZKrIKe01YRRI4s83vKIWbKrcvgVx+/HUAa7Ik45ObaMpls0rRGYkBD2Mgnqn1Z+jIuiAIJrEWqnwOiXVdhhtqVkT2Br2PbJTc/Acmt4kaY5It1Ho9NBqdb9zw/AFYnEYAQ==\"},{\"type\":\"text\",\"text\":\"**Club Meeting This Friday**\\n\\nThe club meets this Friday in Room 12. Please bring a laptop.\\n\\n**Wi-Fi password:** tulip-7391\\n\\nSee you there!\\n\\n*Note: If this newsletter goes to anyone outside the club, you may want to leave the Wi-Fi password out and share it with members directly.*\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":108,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":263,\"output_tokens_details\":{\"thinking_tokens\":155},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 1836,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 1842
+    },
+    {
+      "type": "api_call",
+      "agent": "writer",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: writer\\nYou are the Writer. Write the final answer for the user from the material you were given. Be clear and short, with no filler.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: Write a short newsletter item from this note for the club members. Note: The club meets on Friday in room 12. Wi-Fi password: tulip-7391. Bring a laptop.\\n\\nThe previous agent (free) wrote:\\n**Club Meeting This Friday**\\n\\nThe club meets this Friday in Room 12. Please bring a laptop.\\n\\n**Wi-Fi password:** tulip-7391\\n\\nSee you there!\\n\\n*Note: If this newsletter goes to anyone outside the club, you may want to leave the Wi-Fi password out and share it with members directly.*\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T12:51:55Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "2000000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T12:51:56Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T12:51:55Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "12000000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T12:51:55Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 12:51:56 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMnRfcG6Y4aA2fMEx4uR\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"CAQShAkKEAgUGAI4AUIIdGhpbmtpbmcSDEH1xAj7kDc4eT4THRoMiRfV4pG+IayVfL9GIjC7yhmPP12RC/J/fOZZb+kA3Ka+nSEvdSYw0AL6jOp1qYZKCcx0crc8fut2v70dfAgqoQiJUqQlGnozeS5ovuhiKQVrCCo1i18+WSc28vp9Z2wOyj/NwWcDP0Q18pnZ7ks/IZ69E+ZH2bcDTkwEOUorrKeyVRZq0MEAsMWrFBLLOy9K4w9lVrmNSECc+p3xhNUsNzlMWrSz5lzh8sCHrTrxbVRBUy9ljGTVXsEByMbU7WADMje6K0Ph40U5Qh569bR0b4j/nCgux6tdGksb3ZONrjXXAwXzSIOZU3vIiZjNK5UEMymP0s1K5i8Tdai1MGJKmCy0pokf/BvVlu79g1KJQevLgeM6ME2fSieQKrzud7wOWm5HUXscp/vNYSQ5CR9uwX4k1IlsTKL+XEoFm+QZ1JADbTWHy73n0hfzQmCZ6rIE7WLVKgchqvKC0YQHqLdJfD2dibUh17JaEn3qLgdEkWyekMWlgdmGPELXPPlehValWuCZfssYUusoxv+mzIiN5sKkJaVxYH2j5zMaBy/PPfHaCVq2rDe+jHxn6HbhopDXxdLJTo+ZaQ0Mkgg0oIyCuX/sSFjBGpuZRXXW0qwMi+CpLMdi8VI0MZL6gFQIcZR/BBabWGxq44zwkSvZvr6iftm/G9RDkmy6rhrFVocdeJbWktKkmDJJxou0oL1SiBmMxEryrjstLwXGOvyI/Jr9m0u7+PmtTxlYHGOKotSkUW4/A4O4+1ENEBw2ONlK+FTWyjlR8YD81ak+Oii350hAuNdWKqznd4qslmgAui+Z6Zn8fpjLQX8s/J1DustZHIzy4JEASgVFunrbvt4qoVWuboi1ZQkXy6EaZ7knjKPT/upoZNrRcEZMxiK7+Jz6eJuliVpqGY/lm81PdB9AJe9CTdvy1Bbe+d7XRAK9gUy6Sw7eURFf/n8ah9qTu8KDHUIUf1QMNclcTffvqNIJhGLNEJDaY6WOEVjBEYeDfpmZ/CcniL9SHZNSzTX8SHD/PGQPGVX0A8vMzp8B8wTEzKIDbhgLdtGwvEFdoqhCunpVfVM9yJYMCV9IBkNMKC/pVymOY+WHnt9UGadwikA13y7fNDK8UsL3JcbWAOMn9cuXgti47wtmHZ6zy5z3TqSqNai99QFQM0k4O8aMCRTcN3ivLCAFpV+7Lz7f/pDc5YLY7QW8I6XWJe8UAddGjp2sa/k4AQTmO6D+IvdbTJsKs6jmiVxHAdjssGQhoVb7G0HrzT+wjONSa7ELJRSkmCF97qCjnYuF6HTFL0p9aFZWqIFvcWLOq1FDvPuuKyYiG5sku3KWFBKaXqlNb+u4ntEAU3GWD1gaHpNcYJA9EjVBK94R4Vhgw+RlUviVjLY1RbP6rOJwys8A7fR+nxuWw/zYePR+mIQCGGldHzxD8YetsqLvjnc3h2V/WM/6waZ9Ehr+GpMIyw065nw3mvVm6OijyVaK/6rrRk1yhxhRd5aToYInLlVAGAE=\"},{\"type\":\"text\",\"text\":\"**Club Meeting This Friday**\\n\\nThe club meets this Friday in Room 12. Please bring a laptop.\\n\\n**Wi-Fi password:** tulip-7391\\n\\nSee you there!\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":249,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":231,\"output_tokens_details\":{\"thinking_tokens\":170},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 1269,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 3113
+    }
+  ],
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Reader",
+        "instructions": "Pick out what the note says.",
+        "slot": "anthropic"
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false,
+        "slot": "anthropic",
+        "guardrails": [
+          {
+            "where": "output",
+            "kind": "secret",
+            "onFail": "stop"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from": "free",
+        "to": "writer"
+      }
+    ]
+  },
+  "task": "Write a short newsletter item from this note for the club members. Note: The club meets on Friday in room 12. Wi-Fi password: tulip-7391. Bring a laptop.",
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "failed",
+  "usage": {
+    "input": 357,
+    "output": 494,
+    "searches": 0,
+    "steps": 2
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T12:51:52.849Z",
+  "endedAt": "2026-11-24T12:51:56.431Z",
+  "durationMs": 3582
+}

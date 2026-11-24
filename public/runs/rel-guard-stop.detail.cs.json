@@ -1,0 +1,6 @@
+{
+  "about": "Stejné zadání pro newsletter, ale pisatel má na výstupu guardrail, který hledá tajné údaje a při nálezu zastaví běh.",
+  "how": "Po odpovědi pisatele se text zkontroluje, zda nevypadá jako heslo; při nálezu se běh zastaví se zprávou.",
+  "learns": "Guardrail zkontroluje text dřív, než půjde dál, a zastaví běh, když by tajný údaj odešel. Zastavený běh je tady bezpečný výsledek.",
+  "watch": "Krok kontroly po odpovědi pisatele a zprávu, která jmenuje guardrail. Stav je selhání záměrně: nic neuniklo."
+}

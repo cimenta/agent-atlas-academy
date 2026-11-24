@@ -23,7 +23,8 @@
     },
     "tags": [
       "risk-analysis",
-      "prompt-chaining"
+      "prompt-chaining",
+      "basics"
     ],
     "teaches": {
       "en": "Without a guardrail an agent may copy a secret from its input into a text everyone reads.",

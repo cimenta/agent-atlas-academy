@@ -49,6 +49,17 @@ test("all done shows the done text, and the button still opens the path", () => 
   assert.equal(ui(root, "start-go").length, 1);
 });
 
+test("the whole card is a button: a click or Enter on it calls onStart, other keys do not", () => {
+  let calls = 0;
+  const root = card({ onStart: () => { calls += 1; } });
+  assert.equal(root.attrs.role, "button");
+  root.listeners.click[0]({});
+  root.listeners.keydown[0]({ target: root, key: "Enter", preventDefault() {} });
+  root.listeners.keydown[0]({ target: root, key: "a", preventDefault() {} });
+  root.listeners.keydown[0]({ target: {}, key: "Enter", preventDefault() {} });
+  assert.equal(calls, 2);
+});
+
 test("the button and the link call onStart", () => {
   let calls = 0;
   const root = card({ onStart: () => { calls += 1; } });

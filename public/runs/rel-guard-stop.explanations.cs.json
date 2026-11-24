@@ -1,0 +1,6 @@
+{
+  "7": "Text pisatele opět obsahuje heslo.",
+  "8": "Guardrail tento text zkontroluje: vypadá jako tajný údaj (hodnota za slovem password).",
+  "9": "Běh je zastaven guardrailem 1 dřív, než text odejde. Porovnejte s dvojčetem bez guardrailu.",
+  "10": "Běh končí jako selhání a odpověď je prázdná: nic neuniklo."
+}

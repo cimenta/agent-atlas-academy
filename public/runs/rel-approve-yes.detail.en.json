@@ -1,0 +1,6 @@
+{
+  "about": "A supervisor sends a researcher and then a writer to prepare a notice to parents. The writer is marked to wait for a person, and the person approves.",
+  "how": "Before the writer runs for the first time, the run stops and asks: Approve and continue, or Stop here.",
+  "learns": "A step that sends text to others can wait for a person; approving lets the run go on.",
+  "watch": "The approval step before the writer and the approved step after it."
+}

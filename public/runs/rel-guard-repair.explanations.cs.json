@@ -1,0 +1,7 @@
+{
+  "3": "První uvítací zpráva pisatele je vřelá a dlouhá, výrazně přes 300 znaků.",
+  "4": "Kontrola délky selže. Guardrail opravuje místo zastavení: pisatel dostane další pokus.",
+  "7": "Druhá odpověď je krátká.",
+  "8": "Kontrola projde, takže běh pokračuje.",
+  "9": "Běh končí stavem hotovo; guardrail stál jedno volání navíc."
+}
