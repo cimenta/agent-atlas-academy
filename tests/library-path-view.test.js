@@ -108,5 +108,9 @@ test("the filter bar shows the chosen tags, removes one, clears all, and switche
   const empty = drawFilterBar({ doc, t, tags: [], goal: "patterns", onlyGoal: false, tagLabel: (x) => x, onRemove() {}, onClear() {}, onOnlyGoal() {} });
   assert.equal(ui(empty, "tag-chip").length, 0);
   assert.equal(ui(empty, "tags-clear").length, 0);
-  assert.match(empty.text, /path\.filterNone/);
+  assert.equal(ui(empty, "filter-chips").length, 0, "the blue frame is only there while a tag is chosen");
+  assert.equal(ui(empty, "only-goal").length, 1, "the checkbox is always there");
+  assert.doesNotMatch(empty.text, /path\.filterNone/);
+  const names = bar.children.map((c) => c.attrs?.["data-ui"] ?? c.tag);
+  assert.deepEqual([names[0], names[1]], ["only-goal-row", "filter-chips"], "the checkbox row is above the blue frame");
 });

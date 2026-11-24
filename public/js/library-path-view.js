@@ -12,7 +12,7 @@ export function stepIcon(doc, t, n, done, goal) {
   return h(doc, "span", { class: `step-icon${done ? " done" : ""}`, "data-ui": "run-step", role: "img", "aria-label": t(done ? "path.stepDone" : "path.step", { n }), title: t("path.stepTip", { n, goal: goal ? t(`path.goal.${goal}`) : "" }) }, done ? `✓ ${n}` : String(n));
 }
 
-// The bar with the chosen tags, shared by the tabs Recommended path and Tags.
+// The checkbox that limits the lists to one topic of the path, and below it the bar with the chosen tags (only while a tag is chosen), shared by the tabs Recommended path and Tags.
 export function drawFilterBar({ doc, t, tags, goal, onlyGoal, tagLabel, onRemove, onClear, onOnlyGoal }) {
   const chips = tags.map((tag) => {
     const chip = h(doc, "button", { type: "button", class: "tag-chip", "data-ui": "tag-chip", "aria-label": t("path.removeTag", { tag: tagLabel(tag) }), title: t("path.removeTag", { tag: tagLabel(tag) }) }, `${tagLabel(tag)} ×`);
@@ -23,7 +23,10 @@ export function drawFilterBar({ doc, t, tags, goal, onlyGoal, tagLabel, onRemove
   if (clear) clear.addEventListener("click", () => onClear());
   const only = h(doc, "input", { type: "checkbox", "data-ui": "only-goal", checked: onlyGoal });
   only.addEventListener("change", (event) => onOnlyGoal(Boolean(event?.target?.checked ?? only.checked)));
-  return h(doc, "div", { class: "fbar", "data-ui": "filter-bar" }, h(doc, "span", {}, tags.length > 0 ? t("path.filterTags") : t("path.filterNone")), ...chips, clear, h(doc, "label", {}, only, t("path.onlyGoal", { goal: t(`path.goal.${goal}`) })));
+  // The checkbox row is always there; the blue frame with the chosen tags only while a tag is chosen.
+  const row = h(doc, "label", { class: "only-goal", "data-ui": "only-goal-row" }, only, t("path.onlyGoal", { goal: t(`path.goal.${goal}`) }));
+  const frame = tags.length > 0 ? h(doc, "div", { class: "fbar", "data-ui": "filter-chips" }, h(doc, "span", {}, t("path.filterTags")), ...chips, clear) : "";
+  return h(doc, "div", { class: "fbox", "data-ui": "filter-bar" }, row, ...(frame ? [frame] : []));
 }
 
 // items: the runs of the library (index entries). done: Set of "<goal>:<runId>". teachesOf(item): the one line of what the run teaches.

@@ -9,7 +9,7 @@ const css = readFileSync(new URL("../public/styles.css", import.meta.url), "utf8
 
 const keys = [
   "tab", "tags", "detail", "tabs", "title", "hint", "legend", "step", "stepDone", "stepTip", "open", "done", "undo", "continue", "continueTitle", "allDone",
-  "emptyFilter", "empty", "progress", "summary", "summaryFiltered", "filterNone", "filterTags", "clearTags", "removeTag", "onlyGoal", "onlyGoalNote",
+  "emptyFilter", "empty", "progress", "summary", "summaryFiltered", "filterTags", "clearTags", "removeTag", "onlyGoal", "onlyGoalNote",
   "kind.pair", "kind.bad", "kindTip.pair", "kindTip.bad", "outcome.ok", "outcome.warn", "outcome.fail", "level.label", "detailHint", "cloudHint", "cloudResult",
   ...["patterns", "save", "reliable", "wrong"].flatMap((g) => [`goal.${g}`, `goalSub.${g}`]),
   "level.1", "level.2", "level.3",
