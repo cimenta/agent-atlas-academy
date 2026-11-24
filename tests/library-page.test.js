@@ -64,3 +64,17 @@ test("every icon and tag of a card says what it is when the mouse rests on it", 
   assert.equal(tip((e) => e.attrs["data-ui"] === "run-when"), "library.tip.when");
   assert.equal(tip((e) => String(e.attrs.class) === "provider-chip"), "library.tip.provider");
 });
+
+test("Delete ticked and Delete all ask once, name the count, and remove nothing when the answer is no", async () => {
+  const { removeLocalRuns } = await import("../public/js/library-page.js");
+  const removed = [];
+  const asked = [];
+  const make = (answer) => ({ doc: { defaultView: { confirm: (m) => { asked.push(m); return answer; } } }, t: (k, v) => `${k}:${v?.n ?? ""}`, runStore: { remove: async (id) => removed.push(id), list: async () => [] }, settings: null });
+  assert.equal(await removeLocalRuns(make(false), ["a", "b"]), false);
+  assert.deepEqual(removed, []);
+  assert.equal(await removeLocalRuns(make(true), []), false);
+  assert.equal(asked.length, 1);
+  assert.match(asked[0], /library\.bar\.deleteConfirm:2/);
+  assert.equal(await removeLocalRuns(make(true), ["a", "b"]), true);
+  assert.deepEqual(removed, ["a", "b"]);
+});

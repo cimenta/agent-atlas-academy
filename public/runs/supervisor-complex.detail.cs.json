@@ -1,0 +1,6 @@
+{
+  "about": "Supervizor plánuje školní charitativní koláčový bazar s výzkumníkem, pisatelem a kritikem; pokladník je k dispozici, ale nikdy se nezavolá. Všichni běží na Anthropicu.",
+  "how": "Supervizor odpovídá jen JSON a volá vždy jednoho pracovníka; každý výsledek se k němu vrací, takže jeho kontext s každým tahem roste.",
+  "learns": "Supervizor vidí všechno, což je užitečné a drahé: každý tah se k němu vrací a jeho kontext roste.",
+  "watch": "Jak supervizor vkládá každý výsledek do dalšího pokynu a že je zavolán pětkrát na čtyři kroky práce."
+}

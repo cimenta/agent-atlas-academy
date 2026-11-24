@@ -1,0 +1,12 @@
+{
+  "0": "Každý běh začíná zadáním. Supervizor navíc dostane seznam svých pěti pracovníků.",
+  "3": "Supervizor nejdřív zavolá výzkumníka a řekne mu, co má najít.",
+  "7": "Poznámky výzkumníka se vracejí k supervizorovi.",
+  "11": "Supervizor zavolá pisatele a vloží výzkum do pokynu.",
+  "15": "Plán pisatele se vrací k supervizorovi, ne k dalšímu pracovníkovi.",
+  "19": "Supervizor zavolá kritika a vloží plán znovu. Jeho kontext je teď mnohem delší než na začátku.",
+  "23": "Kontrola kritika se vrací k supervizorovi.",
+  "25": "Supervizor začíná po páté. Pokladník nebyl vůbec potřeba.",
+  "27": "Supervizor skončí s konečným plánem. Spočítejte, kolikrát byl zavolán.",
+  "28": "Běh končí."
+}

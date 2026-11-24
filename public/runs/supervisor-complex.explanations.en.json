@@ -1,0 +1,12 @@
+{
+  "0": "Every run starts with a task. The Supervisor also gets the list of its five workers.",
+  "3": "The Supervisor calls the Researcher first and says what to find.",
+  "7": "The Researcher's notes go back to the Supervisor.",
+  "11": "The Supervisor calls the Writer and pastes the research into the instruction.",
+  "15": "The Writer's plan goes back to the Supervisor, not to the next worker.",
+  "19": "The Supervisor calls the Critic and pastes the plan in again. Its context is now much longer than at the start.",
+  "23": "The Critic's review goes back to the Supervisor.",
+  "25": "The Supervisor starts for the fifth time. The Treasurer was never needed.",
+  "27": "The Supervisor finishes with the final plan. Count how many times it was called.",
+  "28": "The run ends."
+}

@@ -362,6 +362,32 @@
         "en": "A poor note starves the next agent, and a path with many handoffs can lose the second problem.",
         "cs": "Špatná poznámka připraví dalšího agenta o informace a cesta s mnoha předáními může druhý problém ztratit."
       }
+    },
+    {
+      "id": "supervisor-complex",
+      "title": "Prepare a one-page plan for a school charity bake sale: a bu…",
+      "pattern": "supervisor",
+      "language": "en",
+      "timeScale": 2,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "supervisor",
+        "planning",
+        "risk-analysis"
+      ],
+      "level": 3,
+      "paths": {
+        "patterns": 15
+      },
+      "teaches": {
+        "en": "A supervisor sees everything, which is useful and expensive: every turn returns to it, and its context grows.",
+        "cs": "Supervizor vidí všechno, což je užitečné a drahé: každý tah se k němu vrací a jeho kontext roste."
+      }
     }
   ]
 }

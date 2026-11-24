@@ -6,6 +6,8 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
+- Library: supervisor-complex (Anthropic) is recorded, with details and explanations in English and Czech.
+- Library, cog menu: Delete ticked and Delete all mine remove your own runs after one confirmation that says how many; the library's own runs are never deleted.
 - Re-play, run menu: Mark as done (and Mark as not done) for a library run that is on the recommended path; it marks the run in every goal it belongs to.
 - Library, cog menu: Not done only (and Show all runs) leaves the runs marked as done out of the list.
 - Library: ten more recorded example runs (debate-simple, router-simple, evaluator-simple, sequential-complex, mapreduce-simple, mapreduce-complex, planexec-simple, planexec-complex, handoff-simple, handoff-complex) with details and explanations in English and Czech, on Gemini, Groq, Cloudflare and Anthropic.

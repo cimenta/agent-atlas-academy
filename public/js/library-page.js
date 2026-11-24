@@ -79,6 +79,19 @@ export async function removeLocalRun(ctx, item) {
   return true;
 }
 
+// Deletes several of the visitor's own runs after one confirmation that says how many (the library's own runs are never in the list).
+export async function removeLocalRuns(ctx, ids) {
+  if (ids.length === 0) return false;
+  if (!ctx.doc.defaultView.confirm(ctx.t("library.bar.deleteConfirm", { n: ids.length }))) return false;
+  for (const id of ids) {
+    await ctx.runStore.remove(id);
+    lib.compare = lib.compare.filter((x) => x !== id);
+    if (rememberedRun() === id) rememberRun("");
+  }
+  await refreshResultTab(ctx);
+  return true;
+}
+
 export async function renderLibraryTab(ctx, requestedId) {
   const { doc, t } = ctx;
   setTitle(ctx, "");
@@ -231,6 +244,13 @@ export async function renderLibraryTab(ctx, requestedId) {
         }),
       );
     }
+    const ownTicked = lib.compare.filter((id) => mineIds.includes(id));
+    const deleteRuns = async (ids) => {
+      if (await removeLocalRuns(ctx, ids)) {
+        if (ids.includes(selected)) await select(null);
+        await redraw();
+      }
+    };
     const hint = compareNote || (n > 0 ? t(n === 1 ? "compare.pickOne" : "compare.base") : "");
     const menu = createRunMenu({
       doc,
@@ -242,6 +262,12 @@ export async function renderLibraryTab(ctx, requestedId) {
         { ui: "import-run", label: t("play.import"), onClick: () => fileInput.click() },
         { ui: "export-ticked", label: `${t("library.bar.exportTicked")} (${n})`, disabled: n === 0, onClick: () => exportRuns(lib.compare) },
         ...(mineIds.length > 0 ? [{ ui: "export-all-mine", label: `${t("library.bar.exportAll")} (${mineIds.length})`, onClick: () => exportRuns(mineIds) }] : []),
+        ...(mineIds.length > 0
+          ? [
+              { ui: "delete-ticked", label: `${t("library.bar.deleteTicked")} (${ownTicked.length})`, disabled: ownTicked.length === 0, danger: true, onClick: () => deleteRuns(ownTicked) },
+              { ui: "delete-all-mine", label: `${t("library.bar.deleteAll")} (${mineIds.length})`, danger: true, onClick: () => deleteRuns(mineIds) },
+            ]
+          : []),
       ],
     });
     menu.element.classList.add("bar-menu");

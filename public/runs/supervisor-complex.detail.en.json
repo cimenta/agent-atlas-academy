@@ -1,0 +1,6 @@
+{
+  "about": "A supervisor plans a school charity bake sale with a researcher, a writer and a critic; a treasurer is available but never called. All run on Anthropic.",
+  "how": "The supervisor answers with JSON only and calls one worker at a time; every result returns to it, so its context grows with each turn.",
+  "learns": "A supervisor sees everything, which is useful and expensive: every turn returns to it, and its context grows.",
+  "watch": "How the supervisor passes each result into the next instruction, and that it is called five times for four steps of work."
+}
