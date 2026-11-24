@@ -10,7 +10,7 @@ class El {
   find(pred, out = []) { for (const c of this.children) if (c instanceof El) { if (pred(c)) out.push(c); c.find(pred, out); } return out; }
   get text() { return this.children.map((c) => c.text).join(" "); }
 }
-const doc = { createElement: (tag) => new El(tag), createTextNode: (text) => ({ text }) };
+const doc = { createElement: (tag) => new El(tag), createElementNS: (ns, tag) => new El(tag), createTextNode: (text) => ({ text }) };
 const t = (k, p) => (p ? `${k}|${Object.values(p).join(",")}` : k);
 const ui = (root, name) => root.find((e) => e.attrs["data-ui"] === name);
 
@@ -113,4 +113,41 @@ test("the filter bar shows the chosen tags, removes one, clears all, and switche
   assert.doesNotMatch(empty.text, /path\.filterNone/);
   const names = bar.children.map((c) => c.attrs?.["data-ui"] ?? c.tag);
   assert.deepEqual([names[0], names[1]], ["only-goal-row", "filter-chips"], "the checkbox row is above the blue frame");
+});
+
+test("with no goal chosen only the goals and the hint show: no steps, no legend, no empty notice, no limit checkbox", () => {
+  const root = drawPath(base({ goal: "" }));
+  assert.equal(ui(root, "path-goal").length, 4);
+  assert.ok(ui(root, "path-goal").every((b) => b.attrs["aria-pressed"] === "false"));
+  assert.equal(ui(root, "path-step").length, 0);
+  assert.equal(ui(root, "path-level").length, 0);
+  assert.equal(ui(root, "path-legend").length, 0);
+  assert.equal(ui(root, "path-empty").length, 0);
+  assert.match(root.text, /path\.hint/);
+  const bar = drawFilterBar({ doc, t, tags: [], goal: "", onlyGoal: false, tagLabel: (x) => x, onRemove() {}, onClear() {}, onOnlyGoal() {} });
+  assert.equal(ui(bar, "only-goal").length, 0);
+});
+
+test("a goal card has a count chip and a chip with the study time that is left, and both explain themselves on hover", () => {
+  const withTime = items.map((i, n) => ({ ...i, studyMinutes: 10 * (n + 1) }));
+  const card = (done) => ui(drawPath(base({ items: withTime, done })), "path-goal")[0];
+  const none = card(new Set());
+  assert.equal(ui(none, "path-count")[0].text.trim(), "4", "only the number when nothing is done");
+  assert.equal(ui(none, "path-time")[0].text.trim(), "1 h 40 min");
+  assert.equal(ui(none, "path-time")[0].attrs["data-hover-badge"], "1 h 40 min");
+  assert.equal(ui(none, "path-count")[0].attrs.tabindex, "0");
+  const some = card(new Set(["patterns:a", "patterns:d"]));
+  assert.match(ui(some, "path-count")[0].text, /path\.card\.someDone\|2,4/);
+  assert.equal(ui(some, "path-time")[0].text.trim(), "50 min", "the time of Beta and Gamma is left");
+  const all = card(new Set(["patterns:a", "patterns:b", "patterns:c", "patterns:d"]));
+  assert.match(ui(all, "path-count")[0].text, /path\.card\.allDone/);
+  assert.equal(ui(all, "path-time").length, 0);
+});
+
+test("the heading above the goals and the sentence with the count are gone; the hint shows only while no goal is chosen", () => {
+  const root = drawPath(base());
+  assert.equal(root.find((e) => e.tag === "h2").length, 0);
+  assert.equal(ui(root, "path-hint").length, 0);
+  assert.doesNotMatch(root.text, /path\.summary/);
+  assert.equal(ui(drawPath(base({ goal: "" })), "path-hint").length, 1);
 });

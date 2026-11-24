@@ -176,6 +176,15 @@ export async function renderLibraryTab(ctx, requestedId) {
     return true;
   };
 
+  // The detail may be above the part of the page the student is looking at (a step far down the path, a run at the end of the list):
+  // bring it into view so it can be read without scrolling by hand. A detail that is already on screen stays where it is.
+  const revealDetail = () => {
+    const rect = detailHost.getBoundingClientRect?.();
+    const win = doc.defaultView;
+    if (!rect || !win) return;
+    if (rect.top < 0 || rect.top > (win.innerHeight ?? 800) * 0.6) detailHost.scrollIntoView?.({ block: "start" });
+  };
+
   // keepList: the arrow keys move the selection without leaving the list (on a phone the detail would hide it and the focus with it).
   const select = (id, { keepList = false } = {}) => {
     selected = id;
@@ -195,7 +204,9 @@ export async function renderLibraryTab(ctx, requestedId) {
       if (row.getAttribute("data-run") === id) row.setAttribute("aria-current", "true");
       else row.removeAttribute("aria-current");
     }
-    return drawRight();
+    const drawn = drawRight();
+    if (id && !keepList) Promise.resolve(drawn).then(revealDetail);
+    return drawn;
   };
 
   let compareNote = "";
@@ -381,8 +392,8 @@ export async function renderLibraryTab(ctx, requestedId) {
     toggleTags: withNoteCleared(() => showTags()),
     importFile: () => fileInput.click(),
     loadLast: () => {
-      const last = doc.querySelector('[data-ui="load-last"]');
-      if (last && !last.disabled) last.click();
+      const id = rememberedRun();
+      if (id) doc.defaultView.location.hash = `#/play/run/${id}`;
     },
   };
   setPageActions(pageActions);
@@ -467,7 +478,7 @@ export async function renderLibraryTab(ctx, requestedId) {
   const drawCloud = (body) => {
     const items = buildReplayList(gallery, []).gallery;
     // With the switch on, the cloud counts only the runs of the chosen goal.
-    const pool = lib.onlyGoal ? items.filter((item) => stepOf(item, lib.goal)) : items;
+    const pool = lib.onlyGoal && lib.goal ? items.filter((item) => stepOf(item, lib.goal)) : items;
     const all = tagCounts(pool);
     const left = filterByTags(pool, lib.tags);
     const shown = tagCounts(left);
@@ -519,7 +530,8 @@ export async function renderLibraryTab(ctx, requestedId) {
         teachesOf,
         filterBar: filterBar(),
         onGoal: (goal) => {
-          lib.goal = goal;
+          // A second click on the chosen goal takes the choice back: no goal, no steps.
+          lib.goal = lib.goal === goal ? "" : goal;
           redraw();
           drawRight();
         },
@@ -675,7 +687,7 @@ export async function renderLibraryTab(ctx, requestedId) {
     if (ctx.isStale()) return;
     const built = buildReplayList(gallery, local);
     // With the switch on the right, the library list holds only the runs of the chosen goal.
-    const ofGoal = lib.onlyGoal ? built.gallery.filter((item) => stepOf(item, lib.goal)) : built.gallery;
+    const ofGoal = lib.onlyGoal && lib.goal ? built.gallery.filter((item) => stepOf(item, lib.goal)) : built.gallery;
     // With "Not done only" a run marked done on the path (in any goal) is left out.
     const undone = lib.onlyUndone ? withoutDone(ofGoal, progressNow()) : ofGoal;
     const shown = filterLibrary(filterByTags(undone, lib.tags), lib.query, texts ?? {});

@@ -18,7 +18,7 @@ export const TAB_OF_VIEW = { library: "library", replay: "replay", run: "replay"
 // compare: the runs ticked in the library, in the order they were ticked (the first is the base of a comparison).
 // The run Create has just finished: Re-play opens it at its end, where the warnings and the message about the end are, not at the start.
 export const justFinished = { id: null };
-export const lib = { query: "", tab: null, compare: [], right: null, tags: [], goal: "patterns", onlyGoal: false, onlyUndone: false };
+export const lib = { query: "", tab: null, compare: [], right: null, tags: [], goal: "", onlyGoal: false, onlyUndone: false };
 
 // The tab bar lives in the site header, with the library search next to it.
 export function tabBar(ctx, view, { onQuery, onFocusList, intro, resultOpen = false } = {}) {
@@ -35,15 +35,7 @@ export function tabBar(ctx, view, { onQuery, onFocusList, intro, resultOpen = fa
   // On Create there is nothing to search, so the box is greyed out.
   const none = view === "create";
   const input = h(doc, "input", { type: "search", value: none ? "" : lib.query, placeholder: t(none ? "play.searchNone" : "play.search"), "aria-label": t(none ? "play.searchNone" : "play.searchLabel"), "data-ui": "library-search", autocomplete: "off", ...(none ? { disabled: true } : {}) });
-  const last = h(doc, "button", { type: "button", "data-ui": "load-last", title: t("play.loadLast"), "aria-label": t("play.loadLast") }, "↻");
-  const lastId = rememberedRun();
-  last.disabled = !lastId;
-  if (!lastId) last.title = t("play.loadLastNone");
-  last.addEventListener("click", () => {
-    const id = rememberedRun();
-    if (id) location.hash = `#/play/run/${id}`;
-  });
-  const form = h(doc, "form", { class: "lib-search", role: "search", "data-ui": "library-search-form" }, input, last);
+  const form = h(doc, "form", { class: "lib-search", role: "search", "data-ui": "library-search-form" }, input);
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     lib.query = input.value;
@@ -190,8 +182,8 @@ export function registerPlayKeys(ctx, runId) {
       return true;
     },
     loadLast: () => {
-      const last = doc.querySelector('[data-ui="load-last"]');
-      if (last && !last.disabled) last.click();
+      const id = rememberedRun();
+      if (id) doc.defaultView.location.hash = `#/play/run/${id}`;
     },
     say: (name) => {
       let note = doc.querySelector('[data-ui="key-note"]');

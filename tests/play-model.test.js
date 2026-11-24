@@ -156,3 +156,9 @@ test("the search finds a run by its provider and by how it ended", () => {
   assert.deepEqual(filterLib2(items, "groq").map((i) => i.id), ["a"]);
   assert.deepEqual(filterLib2(items, "finished").map((i) => i.id), ["b"]);
 });
+
+test("a library run keeps its study time in the list, so the goal cards can add up what is left", () => {
+  const { gallery } = buildReplayList([{ id: "x", title: "X", pattern: "sequential", studyMinutes: 12 }, { id: "y", title: "Y", pattern: "sequential" }], []);
+  assert.equal(gallery[0].studyMinutes, 12);
+  assert.equal("studyMinutes" in gallery[1], false);
+});

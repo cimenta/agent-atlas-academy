@@ -63,7 +63,7 @@ export function searchBar({ doc, t, value = "", apply, placeholder, ui = "text-s
     input.setAttribute("aria-label", label);
     form.querySelector(".sc")?.remove();
     const tools = h(doc, "span", { class: "sc", "data-ui": ui }, count, prev, next);
-    form.insertBefore(tools, form.querySelector('[data-ui="load-last"]'));
+    form.append(tools);
   } else {
     input = h(doc, "input", { class: "vq", type: "search", placeholder: label, "aria-label": label, autocomplete: "off" });
   }

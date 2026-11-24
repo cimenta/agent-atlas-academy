@@ -2,6 +2,24 @@
 // Pure drawing: the rules are in library-path.js, the marks of done steps come in as a Set of "<goal>:<runId>".
 import { h } from "./dom.js";
 import { GOALS, LEVELS, goalLevels, nextStep, stepOf, levelOf, kindOf } from "./library-path.js";
+import { formatMinutes } from "./library-stats.js";
+
+// The two small icons of the goal card: a list (how many examples) and a cap (the study time that is left), and a tick for a finished goal.
+const CARD_ICONS = {
+  list: ["M5.5 4h8M5.5 8h8M5.5 12h8M2.5 4h.01M2.5 8h.01M2.5 12h.01"],
+  cap: ["M1.5 4.5 8 2l6.5 2.5L8 7zM4 6.2v3.3c0 1 1.8 2 4 2s4-1 4-2V6.2"],
+  tick: ["M3 8.5 6.5 12 13 4.5"],
+};
+function cardIcon(doc, kind) {
+  const svg = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
+  for (const [k, v] of Object.entries({ viewBox: "0 0 16 16", width: "14", height: "14", "aria-hidden": "true", fill: "none", stroke: "currentColor", "stroke-width": "1.7", "stroke-linecap": "round", "stroke-linejoin": "round" })) svg.setAttribute(k, v);
+  for (const d of CARD_ICONS[kind]) {
+    const p = doc.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", d);
+    svg.append(p);
+  }
+  return svg;
+}
 
 // The level as dots (the same icon as on the card in the list).
 export function levelDots(doc, t, level) {
@@ -24,9 +42,10 @@ export function drawFilterBar({ doc, t, tags, goal, onlyGoal, tagLabel, onRemove
   const only = h(doc, "input", { type: "checkbox", "data-ui": "only-goal", checked: onlyGoal });
   only.addEventListener("change", (event) => onOnlyGoal(Boolean(event?.target?.checked ?? only.checked)));
   // The checkbox row is always there; the blue frame with the chosen tags only while a tag is chosen.
-  const row = h(doc, "label", { class: "only-goal", "data-ui": "only-goal-row" }, only, t("path.onlyGoal", { goal: t(`path.goal.${goal}`) }));
+  // With no goal chosen there is nothing to limit to, so the checkbox is left out.
+  const row = goal ? h(doc, "label", { class: "only-goal", "data-ui": "only-goal-row" }, only, t("path.onlyGoal", { goal: t(`path.goal.${goal}`) })) : "";
   const frame = tags.length > 0 ? h(doc, "div", { class: "fbar", "data-ui": "filter-chips" }, h(doc, "span", {}, t("path.filterTags")), ...chips, clear) : "";
-  return h(doc, "div", { class: "fbox", "data-ui": "filter-bar" }, row, ...(frame ? [frame] : []));
+  return h(doc, "div", { class: "fbox", "data-ui": "filter-bar" }, ...(row ? [row] : []), ...(frame ? [frame] : []));
 }
 
 // items: the runs of the library (index entries). done: Set of "<goal>:<runId>". teachesOf(item): the one line of what the run teaches.
@@ -44,12 +63,22 @@ export function drawPath({ doc, t, items, goal, tags, done, tagLabel, teachesOf,
     { class: "path-goals", role: "group", "aria-label": t("path.title") },
     ...GOALS.map((g) => {
       const count = totalIn(g);
+      const doneCount = doneIn(g);
+      const finished = count > 0 && doneCount >= count;
+      // Minutes of study that are left: the study time of the examples of the goal that are not done yet.
+      const left = LEVELS.reduce((sum, l) => sum + goalLevels(items, g)[l].filter((r) => !done.has(`${g}:${r.id}`)).reduce((m, r) => m + (Number.isFinite(r.studyMinutes) && r.studyMinutes > 0 ? r.studyMinutes : 0), 0), 0);
+      const chip = (kind, label, hover, cls = "") => h(doc, "span", { class: `pchip${cls}`, tabindex: "0", "data-ui": `path-${kind}`, ...hover }, cardIcon(doc, kind === "count" ? (finished ? "tick" : "list") : "cap"), label);
+      const meta = count > 0 ? h(doc, "div", { class: "pmeta" },
+        chip("count", finished ? t("path.card.allDone") : doneCount > 0 ? t("path.card.someDone", { done: doneCount, total: count }) : String(count), { "data-hover-title": t("path.card.countTitle"), "data-hover-text": doneCount > 0 ? t("path.card.countSome", { done: doneCount, total: count }) : t("path.card.countNone", { total: count }), "data-hover-hint": t("path.card.countHint") }, finished ? " done" : ""),
+        ...(!finished && left > 0 ? [chip("time", formatMinutes(left), { "data-hover-title": t("path.card.timeTitle"), "data-hover-badge": formatMinutes(left), "data-hover-text": t("path.card.timeText"), "data-hover-hint": t("path.card.timeHint") })] : []),
+      ) : "";
       const button = h(
         doc,
         "button",
         { type: "button", class: "path-goal", "data-ui": "path-goal", "data-goal": g, "aria-pressed": String(g === goal) },
         h(doc, "b", {}, t(`path.goal.${g}`)),
         h(doc, "span", {}, t(`path.goalSub.${g}`)),
+        meta,
         h(doc, "div", { class: "pbar" }, h(doc, "i", { style: `width:${count > 0 ? Math.round((doneIn(g) / count) * 100) : 0}%` })),
       );
       button.addEventListener("click", () => onGoal(g));
@@ -61,15 +90,18 @@ export function drawPath({ doc, t, items, goal, tags, done, tagLabel, teachesOf,
 
   const anyDone = done.size > 0;
   const next = nextStep(items, goal, done, tags);
-  const parts = [goals, filterBar, legend];
-  if (anyDone && next) {
+  // No goal chosen: only the goals and the hint; the steps, the legend and the Continue box wait for a choice.
+  const parts = goal ? [goals, filterBar, legend] : [goals, filterBar];
+  if (goal && anyDone && next) {
     const go = h(doc, "button", { type: "button", "data-ui": "path-continue" }, t("path.continue"));
     go.addEventListener("click", () => onOpen(next.id));
     parts.push(h(doc, "div", { class: "path-next", "data-ui": "path-next" }, h(doc, "div", {}, h(doc, "b", {}, t("path.continueTitle", { title: next.title })), h(doc, "small", {}, teachesOf(next) || "")), go));
-  } else if (!next && shown > 0) {
+  } else if (goal && !next && shown > 0) {
     parts.push(h(doc, "p", { class: "notice", "data-ui": "path-all-done" }, t("path.allDone")));
   }
-  if (total === 0) parts.push(h(doc, "p", { class: "notice", "data-ui": "path-empty" }, t("path.empty")));
+  if (!goal) {
+    // nothing to list
+  } else if (total === 0) parts.push(h(doc, "p", { class: "notice", "data-ui": "path-empty" }, t("path.empty")));
   else if (shown === 0) parts.push(h(doc, "p", { class: "notice", "data-ui": "path-empty" }, t("path.emptyFilter")));
 
   for (const level of LEVELS) {
@@ -100,6 +132,5 @@ export function drawPath({ doc, t, items, goal, tags, done, tagLabel, teachesOf,
     );
   }
 
-  const summary = tags.length > 0 ? t("path.summaryFiltered", { goal: t(`path.goal.${goal}`), done: doneIn(goal), total, shown }) : t("path.summary", { goal: t(`path.goal.${goal}`), done: doneIn(goal), total });
-  return h(doc, "div", { class: "path", "data-ui": "path" }, h(doc, "h2", { class: "tag-title" }, t("path.title")), h(doc, "p", { class: "muted" }, total === 0 ? t("path.hint") : summary), ...parts);
+  return h(doc, "div", { class: "path", "data-ui": "path" }, ...(goal ? [] : [h(doc, "p", { class: "muted", "data-ui": "path-hint" }, t("path.hint"))]), ...parts);
 }

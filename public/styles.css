@@ -1850,3 +1850,8 @@ table.libstats .num { font-variant-numeric: tabular-nums; }
 table.libstats th[data-hover-title] { cursor: help; }
 table.libstats th[data-hover-title]::after { content: " ⓘ"; font-size: 0.8em; }
 @media (max-width: 640px) { table.libstats { font-size: 0.85rem; } table.libstats th, table.libstats td { padding: 5px 5px; } }
+.library-detail-host { scroll-margin-top: 12px; }
+/* The two chips of a goal card: how many examples, and the study time that is left. */
+.path-goal .pmeta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+.path-goal .pchip { display: inline-flex; align-items: center; gap: 5px; height: 22px; box-sizing: border-box; padding: 0 9px 0 7px; border: 1px solid var(--accent-line); border-radius: 999px; background: var(--accent-bg); color: var(--accent); font-size: 0.8rem; font-weight: 600; font-variant-numeric: tabular-nums; cursor: help; white-space: nowrap; }
+.path-goal .pchip.done { border-color: var(--done); background: transparent; color: var(--done); }
