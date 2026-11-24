@@ -17,13 +17,13 @@ export function cleanAbout(values) {
 
 export const isHttpUrl = (text) => /^https?:\/\/\S+$/i.test(text) && isSafeHref(text);
 
-export function createAboutPanel({ doc, t, getAbout, editable, onSave, headingKey = "about.heading", closable = true }) {
+export function createAboutPanel({ doc, t, getAbout, editable, onSave, headingKey = "about.heading", closable = true, showHeading = true }) {
   const element = h(doc, "section", { class: "about-panel", "data-ui": "run-about", "aria-label": t(headingKey), hidden: true });
   let editing = false;
 
   function viewMode() {
     const about = getAbout();
-    const parts = [h(doc, "h3", {}, t(headingKey))];
+    const parts = showHeading ? [h(doc, "h3", {}, t(headingKey))] : [];
     if (!about) {
       parts.push(h(doc, "p", { class: "hint" }, t(editable ? "about.empty" : "about.emptyReadonly")));
     } else {
@@ -78,7 +78,7 @@ export function createAboutPanel({ doc, t, getAbout, editable, onSave, headingKe
       draw();
     });
     return [
-      h(doc, "h3", {}, t(headingKey)),
+      ...(showHeading ? [h(doc, "h3", {}, t(headingKey))] : []),
       field("about-title", t("about.titleLabel"), title),
       field("about-author", t("about.authorLabel"), author),
       field("about-url", t("about.urlLabel"), url),

@@ -7,10 +7,13 @@ import { groupOfTag } from "./library-tags.js";
 const nameOf = (node) => node.name || AGENT_TYPES[node.agent]?.label || node.id;
 
 // The design as small boxes: one path when the agents form a chain, otherwise one line per arrow, or the agents alone.
-function diagram(doc, design) {
+function diagram(doc, design, describe = () => ({})) {
   const nodes = Array.isArray(design?.nodes) ? design.nodes : [];
   const edges = Array.isArray(design?.edges) ? design.edges : [];
-  const box = (id) => h(doc, "b", {}, nameOf(nodes.find((n) => n.id === id) ?? { id }));
+  const box = (id) => {
+    const node = nodes.find((n) => n.id === id) ?? { id };
+    return h(doc, "b", { ...describe(node, nodes.indexOf(node), nodes.length) }, nameOf(node));
+  };
   const arrow = () => h(doc, "i", {}, "→");
   const line = (ids) => h(doc, "div", { class: "lib-diagram" }, ...ids.flatMap((id, i) => (i === 0 ? [box(id)] : [arrow(), box(id)])));
   if (nodes.length === 0) return [];
@@ -34,6 +37,8 @@ function diagram(doc, design) {
 }
 
 const section = (doc, t, key, ...content) => h(doc, "section", { "data-ui": `detail-${key}` }, h(doc, "h3", {}, t(`library.detail.${key}`)), ...content);
+// A section inside a tab. The section that carries the name of its tab (About, Settings) has no heading of its own: the tab already says it.
+const part = (doc, t, key, named, ...content) => (named ? h(doc, "section", { "data-ui": `detail-${key}` }, ...content) : section(doc, t, key, ...content));
 const paragraph = (doc, text) => h(doc, "p", {}, text);
 
 const ACTION_ICONS = {
@@ -93,7 +98,7 @@ export function formatRunTime(seconds) {
 }
 
 // actions: [{ ui, label, primary?, danger?, onClick }]. tagLabel(tag): the word of a tag in the language of the page. aboutPanel: the description panel of your own run, shown as a section.
-export function libraryDetail({ doc, t, item, run, source, detail, facts, actions = [], aboutPanel = null, num = (n) => String(n), tagLabel = (tag) => tag }) {
+export function libraryDetail({ doc, t, item, run, source, detail, facts, actions = [], aboutPanel = null, num = (n) => String(n), tagLabel = (tag) => tag, tagInfo = () => null }) {
   const text = (key) => (typeof detail?.[key] === "string" && detail[key].trim() !== "" ? detail[key] : "");
   const articles = Array.isArray(detail?.articles) ? detail.articles.filter((a) => a && typeof a.slug === "string" && /^[a-z0-9-]+$/.test(a.slug)) : [];
   const tags = Array.isArray(item?.tags) ? item.tags.filter((x) => typeof x === "string" && x !== "") : [];
@@ -124,17 +129,26 @@ export function libraryDetail({ doc, t, item, run, source, detail, facts, action
     ...(runSeconds > 0 ? [chip("run", t("library.detail.runTime"), formatRunTime(runSeconds))] : []),
     ...(studyMinutes > 0 ? [chip("study", t("library.detail.studyTime"), t("library.detail.studyAbout", { minutes: num(Math.round(studyMinutes)) }))] : []),
   ];
-  const tagWords = tags.map((tag) => h(doc, "span", { class: `tag-word tag-${groupOfTag(tag)}`, "data-ui": "detail-tag" }, tagLabel(tag)));
+  const tagWords = tags.map((tag) => {
+    const info = tagInfo(tag);
+    return h(doc, "span", { class: `tag-word tag-${groupOfTag(tag)}`, "data-ui": "detail-tag", ...(info ? { tabindex: "0", "data-hover-title": tagLabel(tag), "data-hover-text": info.text, ...(info.badge ? { "data-hover-badge": info.badge } : {}) } : {}) }, tagLabel(tag));
+  });
+  const describeAgent = (node, index, total) => {
+    const name = nameOf(node);
+    const help = t(`agent.${node.agent}.help`);
+    const model = facts.models[index];
+    return { tabindex: "0", "data-hover-title": name, "data-hover-badge": t("library.tip.agentNo", { n: index + 1, total }), ...(help.startsWith("agent.") ? {} : { "data-hover-text": help }), ...(model ? { "data-hover-rows": JSON.stringify([[t("library.tip.agentModel"), `${providerCatalog(model.provider).label} · ${model.model}`]]) } : {}) };
+  };
 
   // Three tabs: what it is about, the settings, and the note about the pattern (or your own note on your run).
   const aboutPane = [
-    ...(text("about") ? [section(doc, t, "about", paragraph(doc, text("about")))] : []),
-    ...(text("how") || run?.design ? [section(doc, t, "how", ...diagram(doc, run?.design), ...(text("how") ? [paragraph(doc, text("how"))] : []))] : []),
-    ...(text("watch") ? [section(doc, t, "watch", paragraph(doc, text("watch")))] : []),
+    ...(text("about") ? [part(doc, t, "about", true, paragraph(doc, text("about")))] : []),
+    ...(text("how") || run?.design ? [part(doc, t, "how", false, ...diagram(doc, run?.design, describeAgent), ...(text("how") ? [paragraph(doc, text("how"))] : []))] : []),
+    ...(text("watch") ? [part(doc, t, "watch", false, paragraph(doc, text("watch")))] : []),
     ...(articles.length > 0 ? [section(doc, t, "articles", h(doc, "p", {}, ...articles.flatMap((a, i) => [...(i > 0 ? [" · "] : []), h(doc, "a", { href: `#/learn/${a.slug}` }, typeof a.title === "string" && a.title ? a.title : a.slug)])))] : []),
     ...(hasText || aboutPanel ? [] : [h(doc, "p", { class: "hint", "data-ui": "detail-no-text" }, t("library.detail.noText"))]),
   ];
-  const settingsPane = [section(doc, t, "settings", h(doc, "table", { class: "detail-table" }, h(doc, "tr", {}, h(doc, "th", {}, t("library.settings.agent")), h(doc, "th", {}, t("library.settings.model"))), ...rows), h(doc, "p", { class: "facts" }, [limits, apiLog].filter(Boolean).join(" ")))];
+  const settingsPane = [part(doc, t, "settings", true, h(doc, "table", { class: "detail-table" }, h(doc, "tr", {}, h(doc, "th", {}, t("library.settings.agent")), h(doc, "th", {}, t("library.settings.model"))), ...rows), h(doc, "p", { class: "facts" }, [limits, apiLog].filter(Boolean).join(" ")))];
   const tabList = [
     { name: "about", label: t("library.tab.about"), content: aboutPane },
     { name: "settings", label: t("library.tab.settings"), content: settingsPane },

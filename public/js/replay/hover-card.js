@@ -11,7 +11,7 @@ export function createHoverCard({ doc, clock = realClock, delayMs = 250 }) {
   let current = null; // { get, line }
   const children = (info) => {
     const rows = (info.rows ?? []).filter(Boolean);
-    return [h(doc, "h4", {}, info.title, info.badge ? h(doc, "span", { class: "hover-badge" }, info.badge) : ""), ...(info.text ? [h(doc, "p", {}, info.text)] : []), ...(info.extra ? [h(doc, "p", { class: "hover-extra" }, info.extra)] : []), ...(rows.length ? [h(doc, "dl", {}, ...rows.flatMap(([k, v]) => [h(doc, "dt", {}, k), h(doc, "dd", {}, v)]))] : [])];
+    return [...(info.title ? [h(doc, "h4", {}, info.title, info.badge ? h(doc, "span", { class: "hover-badge" }, info.badge) : "")] : []), ...(info.text ? [h(doc, "p", {}, info.text)] : []), ...(info.extra ? [h(doc, "p", { class: "hover-extra" }, info.extra)] : []), ...(rows.length ? [h(doc, "dl", {}, ...rows.flatMap(([k, v]) => [h(doc, "dt", {}, k), h(doc, "dd", {}, v)]))] : []), ...(info.hint ? [h(doc, "p", { class: "hover-hint" }, info.hint)] : [])];
   };
   function hide() {
     if (timer !== null) clock.clearTimeout(timer);
@@ -26,7 +26,7 @@ export function createHoverCard({ doc, clock = realClock, delayMs = 250 }) {
     const info = current.get();
     if (info) card.replaceChildren(...children(info));
   }
-  // get() gives { title, badge?, text?, extra?, rows? }; line (optional) is an arrow that is lit while the card is open.
+  // get() gives { title?, badge?, text?, extra?, rows?, hint? }; line (optional) is an arrow that is lit while the card is open.
   function show(get, anchor, line = null) {
     if (timer !== null) clock.clearTimeout(timer);
     timer = clock.setTimeout(() => {

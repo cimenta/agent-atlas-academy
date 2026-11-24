@@ -561,7 +561,7 @@ export async function renderLibraryTab(ctx, requestedId) {
         t,
         getAbout: () => run.about ?? null,
         editable: own,
-        closable: false,
+        closable: false, showHeading: false,
         headingKey: own ? "about.heading" : "about.headingPattern",
         onSave: async (about) => {
           const next = { ...run };
@@ -600,10 +600,17 @@ export async function renderLibraryTab(ctx, requestedId) {
         panel?.element.querySelector('[data-ui="about-edit"]')?.click();
       },
     };
+    const libraryCounts = tagCounts(buildReplayList(gallery, []).gallery);
+    const tagInfo = (tag) => {
+      const desc = t(`tag.desc.${tag}`);
+      if (desc === `tag.desc.${tag}`) return null;
+      const n = libraryCounts.get(tag) ?? 0;
+      return { text: desc, badge: n > 0 ? t(n === 1 ? "library.tip.tagRun1" : "library.tip.tagRuns", { n }) : "" };
+    };
     detailState = { id: selected, definition, panel };
     const labels = { load: "library.action.load", "use-in-create": "library.action.useInCreate", export: "library.action.export", compare: "library.action.compare", send: "library.action.send", delete: "library.action.delete", "edit-description": "library.action.editDescription" };
     const actions = actionList({ source, hasDefinition: Boolean(definition), canSubmit: own && canSubmit(run) }).map((ui) => ({ ui, label: t(labels[ui]), primary: ui === "load", danger: ui === "delete", onClick: handlers[ui] }));
-    const view = libraryDetail({ doc, t, item, run, source, detail, facts: runFacts(run), actions, aboutPanel: panel?.element ?? null, tagLabel, num: (n) => new Intl.NumberFormat(ctx.lang === "cs" ? "cs-CZ" : "en-US").format(n) });
+    const view = libraryDetail({ doc, t, item, run, source, detail, facts: runFacts(run), actions, aboutPanel: panel?.element ?? null, tagLabel, tagInfo, num: (n) => new Intl.NumberFormat(ctx.lang === "cs" ? "cs-CZ" : "en-US").format(n) });
     body.replaceChildren(view);
   }
 

@@ -28,8 +28,10 @@ import {
   setTitle,
 } from "./pages.js";
 import { renderHelp } from "./help-page.js";
+import { installHover } from "./hover.js";
 
 const doc = document;
+installHover({ doc });
 const fetchFn = (url) => fetch(url);
 
 function safeStorage() {

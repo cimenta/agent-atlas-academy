@@ -23,15 +23,39 @@ const detail = { about: "About text", how: "How text", learns: "Learns text", wa
 const make = (over = {}, dict = en) => libraryDetail({ doc, t: tOf(dict), item, run: { design: { pattern: "sequential", nodes: [{ id: "planner" }, { id: "writer" }], edges: [{ from: "planner", to: "writer" }] } }, source: "gallery", detail, facts, actions: [{ ui: "load", label: "Load", primary: true, onClick() {} }], ...over });
 
 test("the detail shows the title, the facts and the sections in the order of the tabs: about, settings", () => {
-  const text = make().text.replace(/\s+/g, " ");
+  const box = make();
+  const text = box.text.replace(/\s+/g, " ");
   const at = (s) => text.lastIndexOf(s);
-  const names = ["What the student learns", "What it is about", "How it works", "What to watch for in the replay", "Related articles", "Settings"];
+  const names = ["What the student learns", "What it is about", "Settings", "How it works", "What to watch for in the replay", "Related articles"];
   assert.ok(at("One task, two models") >= 0);
   for (const s of names) assert.ok(at(s) >= 0, s);
-  const order = names.map(at);
-  assert.deepEqual(order, [...order].sort((a, b) => a - b));
+  assert.ok(at("What the student learns") < at("What it is about"), "the tabs come after what the student learns");
+  assert.ok(at("How it works") < at("What to watch for in the replay") && at("What to watch for in the replay") < at("Related articles"));
   assert.match(text, /About text/);
   assert.doesNotMatch(text, /MISSING|undefined|\{\w+\}/);
+});
+
+test("a tab does not repeat its own name inside: only the tab buttons say What it is about and Settings", () => {
+  const box = make();
+  const headings = box.find((e) => e.tag === "h3").map((e) => e.text);
+  assert.ok(!headings.includes("What it is about"));
+  assert.ok(!headings.includes("Settings"));
+  assert.ok(headings.includes("How it works") && headings.includes("What to watch for in the replay"));
+  const tabs = box.find((e) => e.attrs.role === "tab").map((e) => e.text);
+  assert.ok(tabs.includes("What it is about") && tabs.includes("Settings"));
+});
+
+test("a tag and an agent of the diagram explain themselves on hover and with the keyboard", () => {
+  const box = make({ tagInfo: (tag) => ({ text: `about ${tag}`, badge: "3 runs" }), item: { ...item, tags: ["handoff", "speed", "cost"] } });
+  const tag = box.find((e) => e.attrs["data-ui"] === "detail-tag")[0];
+  assert.equal(tag.attrs["data-hover-title"], "handoff");
+  assert.equal(tag.attrs["data-hover-text"], "about handoff");
+  assert.equal(tag.attrs["data-hover-badge"], "3 runs");
+  assert.equal(tag.attrs.tabindex, "0");
+  const agents = box.find((e) => e.tag === "b" && e.attrs["data-hover-title"]);
+  assert.deepEqual(agents.map((e) => e.attrs["data-hover-title"]), ["planner", "writer"]);
+  assert.equal(agents[0].attrs["data-hover-badge"], "Agent 1 of 2");
+  assert.deepEqual(JSON.parse(agents[0].attrs["data-hover-rows"]), [["Provider and model", "Groq · openai/gpt-oss-20b"]]);
 });
 
 test("a section with no text is left out, and a run with no detail file still shows its facts", () => {
