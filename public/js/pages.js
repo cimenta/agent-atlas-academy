@@ -9,6 +9,7 @@ import { markText } from "./text-search.js";
 import { createMiniReplay } from "./mini-replay.js";
 import { LEVELS, goalLevels, nextStep } from "./library-path.js";
 import { loadProgress } from "./library-progress.js";
+import { statsTable } from "./library-stats.js";
 
 const RUN_ID = /^[a-z0-9-]+$/;
 const LOOP_WAIT_MS = 5000;
@@ -306,6 +307,20 @@ export function renderTextPage(ctx, titleKey, bodyKey) {
   setTitle(ctx, t(titleKey));
   const nodes = [h(doc, "h1", {}, t(titleKey)), markdown(ctx, t(bodyKey))];
   show(ctx, ...nodes);
+}
+
+// The About page: the text, then the table of the Library in numbers (left out when the index cannot be read).
+export async function renderAbout(ctx) {
+  const { doc, t } = ctx;
+  renderTextPage(ctx, "about.title", "about.body");
+  let items = [];
+  try {
+    items = (await getJson(ctx, "/runs/index.json")).runs ?? [];
+  } catch {
+    return;
+  }
+  if (ctx.isStale() || items.length === 0) return;
+  ctx.main.append(h(doc, "section", { class: "about-stats", "data-ui": "about-stats" }, h(doc, "h2", {}, t("about.stats.title")), statsTable({ doc, t, items }), h(doc, "p", { class: "hint" }, t("about.stats.foot"), " ", h(doc, "a", { href: "#/learn/study-time-of-a-run" }, t("about.stats.article")))));
 }
 
 export async function renderLegalPage(ctx, name) {

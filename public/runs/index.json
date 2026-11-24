@@ -25,7 +25,9 @@
       "teaches": {
         "en": "How a chain passes work along: each agent gets the text of the one before it.",
         "cs": "Jak řetěz předává práci dál: každý agent dostane text toho před sebou."
-      }
+      },
+      "studyMinutes": 9,
+      "runSeconds": 32
     },
     {
       "id": "supervisor-simple",
@@ -51,7 +53,9 @@
       "teaches": {
         "en": "With a supervisor every result returns to the boss, who decides what happens next.",
         "cs": "U supervizora se každý výsledek vrací šéfovi, který rozhodne, co dál."
-      }
+      },
+      "studyMinutes": 15,
+      "runSeconds": 11
     },
     {
       "id": "router-complex",
@@ -77,7 +81,9 @@
       "teaches": {
         "en": "A router can choose wrongly when a question fits more than one specialist; one choice, no second opinion.",
         "cs": "Směrovač se může splést, když otázka sedí víc specialistům; jedna volba a žádný druhý názor."
-      }
+      },
+      "studyMinutes": 12,
+      "runSeconds": 1
     },
     {
       "id": "mix-router-specialists",
@@ -101,7 +107,9 @@
       "teaches": {
         "en": "One design can use several providers; each agent runs on the one that suits it, and the replay shows who answered.",
         "cs": "Jeden návrh může používat víc providerů; každý agent běží na tom, který se mu hodí, a replay ukáže, kdo odpověděl."
-      }
+      },
+      "studyMinutes": 12,
+      "runSeconds": 3
     },
     {
       "id": "debate-simple",
@@ -127,7 +135,9 @@
       "teaches": {
         "en": "Agents that disagree on purpose bring out arguments a single answer would miss.",
         "cs": "Agenti, kteří se záměrně neshodnou, odhalí argumenty, které by jedna odpověď přehlédla."
-      }
+      },
+      "studyMinutes": 11,
+      "runSeconds": 4
     },
     {
       "id": "router-simple",
@@ -153,7 +163,9 @@
       "teaches": {
         "en": "A router chooses one path and the others are never started, so it saves work.",
         "cs": "Směrovač zvolí jednu cestu a ostatní se vůbec nespustí, takže šetří práci."
-      }
+      },
+      "studyMinutes": 9,
+      "runSeconds": 3
     },
     {
       "id": "evaluator-simple",
@@ -179,7 +191,9 @@
       "teaches": {
         "en": "A loop with a clear check makes the answer better, but only as far as the criteria say.",
         "cs": "Smyčka s jasnou kontrolou zlepší odpověď, ale jen tak, jak říkají kritéria."
-      }
+      },
+      "studyMinutes": 10,
+      "runSeconds": 4
     },
     {
       "id": "sequential-complex",
@@ -205,7 +219,9 @@
       "teaches": {
         "en": "A longer chain adds quality at each step, but also time and cost, and an early mistake travels down the line.",
         "cs": "Delší řetěz přidává v každém kroku kvalitu, ale i čas a cenu, a chyba z počátku se táhne dál."
-      }
+      },
+      "studyMinutes": 14,
+      "runSeconds": 67
     },
     {
       "id": "mapreduce-simple",
@@ -231,7 +247,9 @@
       "teaches": {
         "en": "One worker design runs many times on different parts, so the work grows with the task, not with the number of agents.",
         "cs": "Jeden návrh pracovníka běží opakovaně na různých částech, takže práce roste s úkolem, ne s počtem agentů."
-      }
+      },
+      "studyMinutes": 10,
+      "runSeconds": 55
     },
     {
       "id": "planexec-simple",
@@ -257,7 +275,9 @@
       "teaches": {
         "en": "A plan made first gives the run a shape, and the executor follows it even when a step turns out to be needless.",
         "cs": "Plán vytvořený předem dává běhu tvar a vykonavatel ho následuje, i když se krok ukáže jako zbytečný."
-      }
+      },
+      "studyMinutes": 13,
+      "runSeconds": 12
     },
     {
       "id": "planexec-complex",
@@ -283,7 +303,9 @@
       "teaches": {
         "en": "The quality of the whole run depends on the plan, and a step that was not needed is still done.",
         "cs": "Kvalita celého běhu závisí na plánu a krok, který nebyl potřeba, se přesto provede."
-      }
+      },
+      "studyMinutes": 12,
+      "runSeconds": 7
     },
     {
       "id": "mapreduce-complex",
@@ -309,7 +331,9 @@
       "teaches": {
         "en": "Map-reduce scales with the number of parts: the steps, the tokens and the cost, while the design stays the same.",
         "cs": "Map-reduce roste s počtem částí: kroky, tokeny i cena, zatímco návrh zůstává stejný."
-      }
+      },
+      "studyMinutes": 10,
+      "runSeconds": 29
     },
     {
       "id": "handoff-simple",
@@ -335,7 +359,9 @@
       "teaches": {
         "en": "In a handoff control moves forward and nothing stands above it; the note is all the next agent knows.",
         "cs": "U předání řízení postupuje dopředu a nic nad ním nestojí; poznámka je vše, co další agent ví."
-      }
+      },
+      "studyMinutes": 10,
+      "runSeconds": 6
     },
     {
       "id": "handoff-complex",
@@ -361,7 +387,9 @@
       "teaches": {
         "en": "A poor note starves the next agent, and a path with many handoffs can lose the second problem.",
         "cs": "Špatná poznámka připraví dalšího agenta o informace a cesta s mnoha předáními může druhý problém ztratit."
-      }
+      },
+      "studyMinutes": 11,
+      "runSeconds": 8
     },
     {
       "id": "supervisor-complex",
@@ -387,7 +415,9 @@
       "teaches": {
         "en": "A supervisor sees everything, which is useful and expensive: every turn returns to it, and its context grows.",
         "cs": "Supervizor vidí všechno, což je užitečné a drahé: každý tah se k němu vrací a jeho kontext roste."
-      }
+      },
+      "studyMinutes": 18,
+      "runSeconds": 44
     },
     {
       "id": "save-models-strong",
@@ -415,7 +445,9 @@
       "teaches": {
         "en": "The strongest model on every step is the most expensive; most of these steps would do well on a lighter model.",
         "cs": "Nejsilnější model v každém kroku je nejdražší; většinu kroků by zvládl lehčí model."
-      }
+      },
+      "studyMinutes": 12,
+      "runSeconds": 35
     },
     {
       "id": "save-models-mixed",
@@ -443,7 +475,9 @@
       "teaches": {
         "en": "The same task, a fraction of the cost: use the stronger model only where the step needs it.",
         "cs": "Stejné zadání za zlomek ceny: silnější model jen tam, kde ho krok potřebuje."
-      }
+      },
+      "studyMinutes": 12,
+      "runSeconds": 23
     },
     {
       "id": "save-serial",
@@ -471,7 +505,9 @@
       "teaches": {
         "en": "A chain waits for every step; the same analyses take about three times as long as side by side.",
         "cs": "Řetěz čeká na každý krok; stejné rozbory trvají asi třikrát déle než vedle sebe."
-      }
+      },
+      "studyMinutes": 13,
+      "runSeconds": 14
     },
     {
       "id": "save-parallel",
@@ -499,7 +535,9 @@
       "teaches": {
         "en": "Working side by side shortens the time; the cost stays almost the same.",
         "cs": "Souběžná práce zkrátí čas; cena zůstane skoro stejná."
-      }
+      },
+      "studyMinutes": 15,
+      "runSeconds": 11
     },
     {
       "id": "save-search-off",
@@ -527,7 +565,9 @@
       "teaches": {
         "en": "Without search a run is cheap, but the answer has no sources.",
         "cs": "Bez hledání je běh levný, ale odpověď nemá zdroje."
-      }
+      },
+      "studyMinutes": 8,
+      "runSeconds": 7
     },
     {
       "id": "save-search-on",
@@ -555,7 +595,9 @@
       "teaches": {
         "en": "A search has its own price for every query; the answer gets sources.",
         "cs": "Hledání má vlastní cenu za každý dotaz; odpověď dostane zdroje."
-      }
+      },
+      "studyMinutes": 10,
+      "runSeconds": 11
     },
     {
       "id": "rel-format-free",
@@ -583,7 +625,9 @@
       "teaches": {
         "en": "Free text is easy to read for a person, but the next agent must guess where each fact is.",
         "cs": "Volný text se člověku dobře čte, ale další agent musí hádat, kde je který údaj."
-      }
+      },
+      "studyMinutes": 7,
+      "runSeconds": 1
     },
     {
       "id": "rel-format-fields",
@@ -611,7 +655,9 @@
       "teaches": {
         "en": "A fixed answer format makes the facts easy to find and checked; a wrong answer is asked for again.",
         "cs": "Pevný formát odpovědi usnadní nalezení údajů a kontroluje se; špatná odpověď se vyžádá znovu."
-      }
+      },
+      "studyMinutes": 7,
+      "runSeconds": 1
     },
     {
       "id": "rel-eval-vague",
@@ -639,7 +685,9 @@
       "teaches": {
         "en": "Vague criteria give the evaluator nothing to measure; it accepts at once or asks for changes without a reason.",
         "cs": "Vágní kritéria nedají hodnotiteli nic k měření; přijme hned, nebo žádá změny bez důvodu."
-      }
+      },
+      "studyMinutes": 8,
+      "runSeconds": 3
     },
     {
       "id": "rel-eval-good",
@@ -667,7 +715,9 @@
       "teaches": {
         "en": "Measurable criteria let the evaluator find a real fault and say exactly what to change.",
         "cs": "Měřitelná kritéria umožní hodnotiteli najít skutečnou chybu a říct, co změnit."
-      }
+      },
+      "studyMinutes": 9,
+      "runSeconds": 4
     },
     {
       "id": "rel-guard-stop",
@@ -695,7 +745,9 @@
       "teaches": {
         "en": "A guardrail checks the text before it moves on and stops the run when a secret would go out.",
         "cs": "Guardrail zkontroluje text dřív, než půjde dál, a zastaví běh, když by tajný údaj odešel."
-      }
+      },
+      "studyMinutes": 8,
+      "runSeconds": 3
     },
     {
       "id": "rel-guard-leak",
@@ -723,7 +775,9 @@
       "teaches": {
         "en": "Without a guardrail an agent may copy a secret from its input into a text everyone reads.",
         "cs": "Bez guardrailu může agent zkopírovat tajný údaj ze vstupu do textu, který čtou všichni."
-      }
+      },
+      "studyMinutes": 7,
+      "runSeconds": 3
     },
     {
       "id": "rel-guard-repair",
@@ -749,7 +803,9 @@
       "teaches": {
         "en": "A guardrail can ask the agent to repair its own answer instead of stopping the run.",
         "cs": "Guardrail může požádat agenta, aby svou odpověď opravil, místo aby zastavil běh."
-      }
+      },
+      "studyMinutes": 9,
+      "runSeconds": 6
     },
     {
       "id": "rel-approve-yes",
@@ -777,7 +833,9 @@
       "teaches": {
         "en": "A step that sends text to others can wait for a person; approving lets the run go on.",
         "cs": "Krok, který posílá text dalším lidem, může čekat na člověka; schválení nechá běh pokračovat."
-      }
+      },
+      "studyMinutes": 11,
+      "runSeconds": 11
     },
     {
       "id": "rel-approve-no",
@@ -805,7 +863,9 @@
       "teaches": {
         "en": "A refusal ends the step before it does anything; the run shows what was stopped and why.",
         "cs": "Odmítnutí ukončí krok dřív, než něco udělá; běh ukáže, co bylo zastaveno a proč."
-      }
+      },
+      "studyMinutes": 9,
+      "runSeconds": 6
     },
     {
       "id": "more-self-critique",
@@ -831,7 +891,9 @@
       "teaches": {
         "en": "Self-critique costs one agent less, but it shares the writer's blind spots.",
         "cs": "Sebekritika stojí o agenta méně, ale sdílí slepá místa pisatele."
-      }
+      },
+      "studyMinutes": 8,
+      "runSeconds": 3
     },
     {
       "id": "rel-cap-low",
@@ -859,7 +921,9 @@
       "teaches": {
         "en": "A cost cap stops an expensive run before it can finish; you keep what was done and no more is spent.",
         "cs": "Strop ceny zastaví drahý běh dřív, než doběhne; zachová se, co se udělalo, a víc se neutratí."
-      }
+      },
+      "studyMinutes": 16,
+      "runSeconds": 10
     },
     {
       "id": "rel-cap-ok",
@@ -887,7 +951,9 @@
       "teaches": {
         "en": "With a cap above what the run needs, it finishes; the cap costs nothing until it is reached.",
         "cs": "Se stropem nad potřebou běhu doběhne; strop nic nestojí, dokud se nedosáhne."
-      }
+      },
+      "studyMinutes": 18,
+      "runSeconds": 24
     },
     {
       "id": "save-tokens-4000",
@@ -915,7 +981,9 @@
       "teaches": {
         "en": "Agents write at length when they may; a longer reply costs more tokens and more time.",
         "cs": "Agenti píší dlouho, když smějí; delší odpověď stojí víc tokenů i času."
-      }
+      },
+      "studyMinutes": 10,
+      "runSeconds": 11
     },
     {
       "id": "save-tokens-1000",
@@ -943,7 +1011,9 @@
       "teaches": {
         "en": "A low limit shortens the answer and the cost, but may cut a sentence; choose it by the task.",
         "cs": "Nízký strop zkrátí odpověď i cenu, ale může useknout větu; volí se podle úkolu."
-      }
+      },
+      "studyMinutes": 8,
+      "runSeconds": 11
     },
     {
       "id": "save-condense-off",
@@ -971,7 +1041,9 @@
       "teaches": {
         "en": "In a long debate every round carries all the earlier text, so the input grows and the cost with it.",
         "cs": "V dlouhé debatě nese každé kolo všechen dřívější text, takže vstup roste a s ním cena."
-      }
+      },
+      "studyMinutes": 16,
+      "runSeconds": 43
     },
     {
       "id": "save-condense-on",
@@ -999,7 +1071,9 @@
       "teaches": {
         "en": "Condensing keeps the input short and cheaper, at the price of an extra call and some lost detail.",
         "cs": "Zhutnění drží vstup krátký a levnější, za cenu extra volání a ztráty části detailů."
-      }
+      },
+      "studyMinutes": 16,
+      "runSeconds": 55
     },
     {
       "id": "wrong-single",
@@ -1027,7 +1101,9 @@
       "teaches": {
         "en": "For a simple question one agent is enough: it is quick and cheap.",
         "cs": "Na jednoduchou otázku stačí jeden agent: je rychlý a levný."
-      }
+      },
+      "studyMinutes": 6,
+      "runSeconds": 1
     },
     {
       "id": "wrong-debate-fact",
@@ -1055,7 +1131,9 @@
       "teaches": {
         "en": "The wrong pattern for the task: a debate is for questions with two sides, and here it only repeats a known fact at many times the cost.",
         "cs": "Špatný vzor pro úkol: debata je pro otázky se dvěma stranami, a tady jen mnohonásobně dráž opakuje známý fakt."
-      }
+      },
+      "studyMinutes": 11,
+      "runSeconds": 14
     },
     {
       "id": "wrong-parallel-dependent",
@@ -1083,7 +1161,9 @@
       "teaches": {
         "en": "The wrong pattern: agents side by side do not see each other's results, so the combiner joins parts that do not fit.",
         "cs": "Špatný vzor: agenti vedle sebe nevidí výsledky ostatních, takže slučovač spojí části, které k sobě nesedí."
-      }
+      },
+      "studyMinutes": 13,
+      "runSeconds": 15
     },
     {
       "id": "wrong-sequential-fixed",
@@ -1111,7 +1191,9 @@
       "teaches": {
         "en": "The right pattern for steps that depend on each other: a chain passes the result on, so the plan fits together.",
         "cs": "Správný vzor pro kroky, které na sobě závisejí: řetěz předává výsledek dál, takže plán drží pohromadě."
-      }
+      },
+      "studyMinutes": 11,
+      "runSeconds": 17
     },
     {
       "id": "wrong-steps-low",
@@ -1137,7 +1219,9 @@
       "teaches": {
         "en": "A limit that is too low stops the work half way: the result is incomplete and the replay says which limit was reached.",
         "cs": "Příliš nízký limit zastaví práci v půlce: výsledek je neúplný a replay říká, který limit byl dosažen."
-      }
+      },
+      "studyMinutes": 13,
+      "runSeconds": 17
     },
     {
       "id": "wrong-voting-same",
@@ -1163,7 +1247,9 @@
       "teaches": {
         "en": "Voting needs different views: five copies of the same agent only repeat the same answer five times, and you pay for all five.",
         "cs": "Hlasování potřebuje různé pohledy: pět kopií téhož agenta jen pětkrát zopakuje tutéž odpověď a platíte za všech pět."
-      }
+      },
+      "studyMinutes": 10,
+      "runSeconds": 2
     },
     {
       "id": "wrong-critic-yes",
@@ -1189,7 +1275,9 @@
       "teaches": {
         "en": "A reviewer that praises everything adds a step and a cost, but no quality: the instruction decides what it can find.",
         "cs": "Recenzent, který všechno chválí, přidá krok a cenu, ale ne kvalitu: instrukce rozhoduje, co může najít."
-      }
+      },
+      "studyMinutes": 7,
+      "runSeconds": 3
     },
     {
       "id": "wrong-run-tokens-low",
@@ -1215,7 +1303,9 @@
       "teaches": {
         "en": "A limit on all tokens of a run stops it when the agents have used them up, even if the last one never ran: the report is missing.",
         "cs": "Limit tokenů celého běhu ho zastaví, když je agenti spotřebují, i když poslední vůbec neběžel: zpráva chybí."
-      }
+      },
+      "studyMinutes": 15,
+      "runSeconds": 5
     },
     {
       "id": "wrong-groq-429",
@@ -1241,7 +1331,9 @@
       "teaches": {
         "en": "A free plan has a limit per minute: a long chain can hit it, and the app waits and tries again instead of failing at once.",
         "cs": "Bezplatný plán má limit za minutu: dlouhý řetěz na něj může narazit a aplikace počká a zkusí to znovu, místo aby hned selhala."
-      }
+      },
+      "studyMinutes": 25,
+      "runSeconds": 43
     },
     {
       "id": "wrong-cloudflare-timeout",
@@ -1267,7 +1359,9 @@
       "teaches": {
         "en": "A provider ends a call that lasts too long: a slow model with a long reply fails with a timeout, and the replay keeps what was written before.",
         "cs": "Poskytovatel ukončí volání, které trvá příliš dlouho: pomalý model s dlouhou odpovědí skončí chybou timeout a replay zachová, co se napsalo předtím."
-      }
+      },
+      "studyMinutes": 16,
+      "runSeconds": 240
     },
     {
       "id": "save-mix-map",
@@ -1293,7 +1387,9 @@
       "teaches": {
         "en": "Each agent can use its own provider: free workers do the many small calls and a paid model does only the two steps that need care.",
         "cs": "Každý agent může mít vlastního poskytovatele: zdarma pracovníci dělají mnoho malých volání a placený model jen dva kroky, které vyžadují péči."
-      }
+      },
+      "studyMinutes": 11,
+      "runSeconds": 15
     },
     {
       "id": "save-provider-anthropic",
@@ -1321,7 +1417,9 @@
       "teaches": {
         "en": "The same task on a paid provider is fast and every call has a price.",
         "cs": "Stejné zadání u placeného poskytovatele je rychlé a každé volání má cenu."
-      }
+      },
+      "studyMinutes": 11,
+      "runSeconds": 18
     },
     {
       "id": "save-provider-groq",
@@ -1349,7 +1447,9 @@
       "teaches": {
         "en": "The same task on a free provider costs nothing, but its calls are spaced and the answers differ.",
         "cs": "Stejné zadání u bezplatného poskytovatele nestojí nic, ale jeho volání jsou rozložená v čase a odpovědi se liší."
-      }
+      },
+      "studyMinutes": 11,
+      "runSeconds": 6
     },
     {
       "id": "save-provider-cloudflare",
@@ -1375,7 +1475,9 @@
       "teaches": {
         "en": "The same task takes seconds on one provider and much longer on another: speed is a property of the provider, not only of the model.",
         "cs": "Stejný úkol trvá na jednom poskytovateli sekundy a na jiném mnohem déle: rychlost je vlastnost poskytovatele, ne jen modelu."
-      }
+      },
+      "studyMinutes": 11,
+      "runSeconds": 63
     }
   ]
 }

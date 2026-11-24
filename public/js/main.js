@@ -24,7 +24,7 @@ import {
   renderLearn,
   renderLegalPage,
   renderNotFound,
-  renderTextPage,
+  renderAbout,
   setTitle,
 } from "./pages.js";
 import { renderHelp } from "./help-page.js";
@@ -206,7 +206,7 @@ async function renderRoute(isNavigation) {
         renderHelp(ctx, route.params.topic);
         break;
       case "about":
-        renderTextPage(ctx, "about.title", "about.body");
+        await renderAbout(ctx);
         break;
       case "page":
         await renderLegalPage(ctx, route.params.name);
