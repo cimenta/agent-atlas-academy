@@ -80,6 +80,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Changed
 
+- Library, tag bar: the Clear all button sits at the far right and is red.
 - Library, path: the switch that limits the list on the left now reads Show only runs of this goal in the list on the left (goal name).
 - Library, first recorded runs: sequential-simple (Cloudflare), supervisor-simple (Anthropic), router-complex (Groq) and the new mix-router-specialists (Groq, Gemini and OpenRouter in one run) are in the library with details and explanations in English and Czech. The add-library-run script now accepts a run without a path (it is then only in the list). Every library definition has at least three tags. The seven older example runs are removed from the library; only the new ones stay.
 - Library, wave 1 definitions: the ten patterns are spread evenly over the five providers (two each: Cloudflare, OpenRouter, Anthropic, Gemini, Groq) with a key slot on every agent instead of Anthropic only; only the supervisor and handoff runs are paid.

@@ -1800,6 +1800,8 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .pbar i { display: block; height: 100%; background: var(--done); }
 .fbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; background: var(--accent-bg); border: 1px solid var(--accent-line); border-radius: var(--radius); padding: 6px 10px; margin: 0 0 10px; font-size: 0.85rem; }
 .fbar .tag-chip { min-height: 0; }
+.fbar [data-ui="tags-clear"] { margin-left: auto; background: #c62828; border-color: #c62828; color: #fff; }
+.fbar [data-ui="tags-clear"]:hover { background: #a61e1e; border-color: #a61e1e; }
 .fbar label { display: inline-flex; gap: 5px; align-items: center; margin-left: auto; }
 .legend { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-size: 0.8rem; color: var(--muted); margin: 0 0 8px; }
 .legend span { display: inline-flex; gap: 5px; align-items: center; }
