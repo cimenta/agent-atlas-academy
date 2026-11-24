@@ -1,0 +1,76 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "A school wants to organise a class trip to a zoo. Weigh the idea.",
+  "about": {
+    "en": {
+      "title": "Speed: three analyses, one after another",
+      "author": "Agent Atlas Academy",
+      "description": "Three analysts, each waiting for the one before.\n\n**What it teaches**\n\nA chain waits for every step; the same analyses take about three times as long as side by side."
+    },
+    "cs": {
+      "title": "Rychlost: tři rozbory za sebou",
+      "author": "Agent Atlas Academy",
+      "description": "Tři analytici, každý čeká na toho před sebou.\n\n**Čemu se naučíte**\n\nŘetěz čeká na každý krok; stejné rozbory trvají asi třikrát déle než vedle sebe."
+    }
+  },
+  "library": {
+    "level": 2,
+    "kind": "pair",
+    "twin": "save-parallel",
+    "paths": {
+      "save": 5
+    },
+    "tags": [
+      "speed",
+      "parallel-work",
+      "cost"
+    ],
+    "teaches": {
+      "en": "A chain waits for every step; the same analyses take about three times as long as side by side.",
+      "cs": "Řetěz čeká na každý krok; stejné rozbory trvají asi třikrát déle než vedle sebe."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "cost",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Cost analyst",
+        "instructions": "Look at the question only from the side of cost."
+      },
+      {
+        "id": "safety",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Safety analyst",
+        "instructions": "Look at the question only from the side of safety."
+      },
+      {
+        "id": "fun",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Fun analyst",
+        "instructions": "Look at the question only from the side of what students enjoy."
+      }
+    ],
+    "edges": [
+      {
+        "from": "cost",
+        "to": "safety"
+      },
+      {
+        "from": "safety",
+        "to": "fun"
+      }
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "1": "All three analysts start at the same moment.",
+  "5": "The first analyst to finish. The order of the answers is not fixed.",
+  "10": "Three handoffs bring the answers to the combiner.",
+  "15": "The combiner joins the three views into one text, and also the answer of the run.",
+  "16": "The run ends after about 11 seconds, faster than the serial twin."
+}

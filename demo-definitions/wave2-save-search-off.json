@@ -1,0 +1,59 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Explain how a bill becomes a law in a parliament, for a student who writes a school report. Name what a student should check in a source.",
+  "about": {
+    "en": {
+      "title": "Cost: no web search",
+      "author": "Agent Atlas Academy",
+      "description": "The researcher answers from what the model knows.\n\n**What it teaches**\n\nWithout search a run is cheap, but the answer has no sources."
+    },
+    "cs": {
+      "title": "Cena: bez webového hledání",
+      "author": "Agent Atlas Academy",
+      "description": "Výzkumník odpovídá z toho, co model ví.\n\n**Čemu se naučíte**\n\nBez hledání je běh levný, ale odpověď nemá zdroje."
+    }
+  },
+  "library": {
+    "level": 2,
+    "kind": "pair",
+    "twin": "save-search-on",
+    "paths": {
+      "save": 7
+    },
+    "tags": [
+      "cost",
+      "explaining",
+      "prompt-chaining"
+    ],
+    "teaches": {
+      "en": "Without search a run is cheap, but the answer has no sources.",
+      "cs": "Bez hledání je běh levný, ale odpověď nemá zdroje."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "researcher",
+        "to": "writer"
+      }
+    ]
+  }
+}

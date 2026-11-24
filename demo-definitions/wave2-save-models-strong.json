@@ -1,0 +1,70 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Explain to a ten-year-old why the moon has phases, then check the text for mistakes.",
+  "about": {
+    "en": {
+      "title": "Cost: the strongest model on every step",
+      "author": "Agent Atlas Academy",
+      "description": "Three steps, all on Strong.\n\n**What it teaches**\n\nThe strongest model on every step is the most expensive; most of these steps would do well on a lighter model."
+    },
+    "cs": {
+      "title": "Cena: nejsilnější model v každém kroku",
+      "author": "Agent Atlas Academy",
+      "description": "Tři kroky, všechny na Strong.\n\n**Čemu se naučíte**\n\nNejsilnější model v každém kroku je nejdražší; většinu kroků by zvládl lehčí model."
+    }
+  },
+  "library": {
+    "level": 1,
+    "kind": "pair",
+    "twin": "save-models-mixed",
+    "paths": {
+      "save": 1
+    },
+    "tags": [
+      "cost",
+      "basics",
+      "prompt-chaining"
+    ],
+    "teaches": {
+      "en": "The strongest model on every step is the most expensive; most of these steps would do well on a lighter model.",
+      "cs": "Nejsilnější model v každém kroku je nejdražší; většinu kroků by zvládl lehčí model."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "strong",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "strong",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "strong",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "researcher",
+        "to": "writer"
+      },
+      {
+        "from": "writer",
+        "to": "critic"
+      }
+    ]
+  }
+}

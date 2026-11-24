@@ -1,0 +1,6 @@
+{
+  "about": "Stejné tři kroky, ale výzkumník a pisatel používají Fast a jen kritik Balanced.",
+  "how": "Řetěz tří agentů; model se vybírá pro každého agenta zvlášť.",
+  "learns": "Stejné zadání za zlomek ceny: silnější model jen tam, kde ho krok potřebuje.",
+  "watch": "Texty obou běhů vedle sebe v Compare a dobu běhu: asi 23 sekund proti 35."
+}

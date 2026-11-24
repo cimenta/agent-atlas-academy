@@ -1,0 +1,71 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write a short notice to parents about a school trip next week.",
+  "about": {
+    "en": {
+      "title": "Reliability: a human approves the step",
+      "author": "Agent Atlas Academy",
+      "description": "The run waits before the writer; you approve it.\n\n**What it teaches**\n\nA step that sends text to others can wait for a person; approving lets the run go on."
+    },
+    "cs": {
+      "title": "Spolehlivost: člověk schválí krok",
+      "author": "Agent Atlas Academy",
+      "description": "Běh čeká před pisatelem; vy ho schválíte.\n\n**Čemu se naučíte**\n\nKrok, který posílá text dalším lidem, může čekat na člověka; schválení nechá běh pokračovat."
+    }
+  },
+  "library": {
+    "level": 2,
+    "kind": "pair",
+    "twin": "rel-approve-no",
+    "paths": {
+      "reliable": 8
+    },
+    "tags": [
+      "risk-analysis",
+      "decision-making",
+      "supervisor"
+    ],
+    "teaches": {
+      "en": "A step that sends text to others can wait for a person; approving lets the run go on.",
+      "cs": "Krok, který posílá text dalším lidem, může čekat na člověka; schválení nechá běh pokračovat."
+    }
+  },
+  "design": {
+    "pattern": "supervisor",
+    "nodes": [
+      {
+        "id": "supervisor",
+        "agent": "supervisor",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "approve": true
+      }
+    ],
+    "edges": [
+      {
+        "from": "supervisor",
+        "to": "researcher"
+      },
+      {
+        "from": "supervisor",
+        "to": "writer"
+      }
+    ]
+  }
+}

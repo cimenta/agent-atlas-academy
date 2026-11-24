@@ -1,0 +1,87 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "A school wants to organise a class trip to a zoo. Weigh the idea.",
+  "about": {
+    "en": {
+      "title": "Provider: three analyses on paid Anthropic",
+      "author": "Agent Atlas Academy",
+      "description": "The parallel design of the speed pair, run on a paid provider.\n\n**What it teaches**\n\nA paid provider costs money but has no daily limit of a free account; compare it with the free run of the same design."
+    },
+    "cs": {
+      "title": "Provider: tři rozbory na placeném Anthropicu",
+      "author": "Agent Atlas Academy",
+      "description": "Souběžný návrh z dvojice o rychlosti na placeném providerovi.\n\n**Čemu se naučíte**\n\nPlacený provider stojí peníze, ale nemá denní limit bezplatného účtu; porovnejte ho s bezplatným během téhož návrhu."
+    }
+  },
+  "library": {
+    "level": 2,
+    "kind": "pair",
+    "twin": "save-provider-groq",
+    "paths": {
+      "save": 9
+    },
+    "tags": [
+      "cost",
+      "speed",
+      "parallel-work"
+    ],
+    "teaches": {
+      "en": "A paid provider costs money but has no daily limit of a free account; compare it with the free run of the same design.",
+      "cs": "Placený provider stojí peníze, ale nemá denní limit bezplatného účtu; porovnejte ho s bezplatným během téhož návrhu."
+    }
+  },
+  "design": {
+    "pattern": "parallel",
+    "nodes": [
+      {
+        "id": "cost",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Cost analyst",
+        "instructions": "Look at the question only from the side of cost."
+      },
+      {
+        "id": "safety",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Safety analyst",
+        "instructions": "Look at the question only from the side of safety."
+      },
+      {
+        "id": "fun",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Fun analyst",
+        "instructions": "Look at the question only from the side of what students enjoy."
+      },
+      {
+        "id": "combiner",
+        "agent": "combiner",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "cost",
+        "to": "combiner"
+      },
+      {
+        "from": "safety",
+        "to": "combiner"
+      },
+      {
+        "from": "fun",
+        "to": "combiner"
+      }
+    ]
+  }
+}

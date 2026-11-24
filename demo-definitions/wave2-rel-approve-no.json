@@ -1,0 +1,71 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write a short notice to parents about a school trip next week.",
+  "about": {
+    "en": {
+      "title": "Reliability: a human refuses the step",
+      "author": "Agent Atlas Academy",
+      "description": "The same run; this time the writer is refused.\n\n**What it teaches**\n\nA refusal ends the step before it does anything; the run shows what was stopped and why."
+    },
+    "cs": {
+      "title": "Spolehlivost: člověk krok odmítne",
+      "author": "Agent Atlas Academy",
+      "description": "Stejný běh; tentokrát je pisatel odmítnut.\n\n**Čemu se naučíte**\n\nOdmítnutí ukončí krok dřív, než něco udělá; běh ukáže, co bylo zastaveno a proč."
+    }
+  },
+  "library": {
+    "level": 2,
+    "kind": "pair",
+    "twin": "rel-approve-yes",
+    "paths": {
+      "reliable": 9
+    },
+    "tags": [
+      "risk-analysis",
+      "decision-making",
+      "supervisor"
+    ],
+    "teaches": {
+      "en": "A refusal ends the step before it does anything; the run shows what was stopped and why.",
+      "cs": "Odmítnutí ukončí krok dřív, než něco udělá; běh ukáže, co bylo zastaveno a proč."
+    }
+  },
+  "design": {
+    "pattern": "supervisor",
+    "nodes": [
+      {
+        "id": "supervisor",
+        "agent": "supervisor",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "approve": true
+      }
+    ],
+    "edges": [
+      {
+        "from": "supervisor",
+        "to": "researcher"
+      },
+      {
+        "from": "supervisor",
+        "to": "writer"
+      }
+    ]
+  }
+}

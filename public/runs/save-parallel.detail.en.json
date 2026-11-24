@@ -1,0 +1,6 @@
+{
+  "about": "The same three analysts work at the same time and a combiner joins their answers.",
+  "how": "The three analysts start together; the combiner gets all three answers and writes one text.",
+  "learns": "Working side by side shortens the time; the cost stays almost the same, plus one extra call to combine.",
+  "watch": "The three agents that start together, and the run time: about 11 seconds against 15 in the serial twin."
+}

@@ -1,0 +1,87 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "A school wants to organise a class trip to a zoo. Weigh the idea.",
+  "about": {
+    "en": {
+      "title": "Speed: the same three analyses side by side",
+      "author": "Agent Atlas Academy",
+      "description": "The same analysts work at the same time and a combiner joins them.\n\n**What it teaches**\n\nWorking side by side shortens the time; the cost stays almost the same."
+    },
+    "cs": {
+      "title": "Rychlost: stejné tři rozbory vedle sebe",
+      "author": "Agent Atlas Academy",
+      "description": "Stejní analytici pracují současně a slučovač je spojí.\n\n**Čemu se naučíte**\n\nSouběžná práce zkrátí čas; cena zůstane skoro stejná."
+    }
+  },
+  "library": {
+    "level": 2,
+    "kind": "pair",
+    "twin": "save-serial",
+    "paths": {
+      "save": 6
+    },
+    "tags": [
+      "speed",
+      "parallel-work",
+      "combining-answers"
+    ],
+    "teaches": {
+      "en": "Working side by side shortens the time; the cost stays almost the same.",
+      "cs": "Souběžná práce zkrátí čas; cena zůstane skoro stejná."
+    }
+  },
+  "design": {
+    "pattern": "parallel",
+    "nodes": [
+      {
+        "id": "cost",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Cost analyst",
+        "instructions": "Look at the question only from the side of cost."
+      },
+      {
+        "id": "safety",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Safety analyst",
+        "instructions": "Look at the question only from the side of safety."
+      },
+      {
+        "id": "fun",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Fun analyst",
+        "instructions": "Look at the question only from the side of what students enjoy."
+      },
+      {
+        "id": "combiner",
+        "agent": "combiner",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "cost",
+        "to": "combiner"
+      },
+      {
+        "from": "safety",
+        "to": "combiner"
+      },
+      {
+        "from": "fun",
+        "to": "combiner"
+      }
+    ]
+  }
+}

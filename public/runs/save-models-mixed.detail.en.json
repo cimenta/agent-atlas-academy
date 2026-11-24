@@ -1,0 +1,6 @@
+{
+  "about": "The same three steps, but the researcher and the writer use Fast and only the critic uses Balanced.",
+  "how": "A chain of three agents; the model is chosen for each agent separately.",
+  "learns": "The same task, a fraction of the cost: use the stronger model only where the step needs it.",
+  "watch": "The texts of the two runs side by side in Compare, and the run time: about 23 seconds against 35."
+}

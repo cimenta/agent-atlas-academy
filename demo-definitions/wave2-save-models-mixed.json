@@ -1,0 +1,70 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Explain to a ten-year-old why the moon has phases, then check the text for mistakes.",
+  "about": {
+    "en": {
+      "title": "Cost: a light model where the step is light",
+      "author": "Agent Atlas Academy",
+      "description": "The same three steps: Fast for the research and the writing, Balanced for the final check.\n\n**What it teaches**\n\nThe same task, a fraction of the cost: use the stronger model only where the step needs it."
+    },
+    "cs": {
+      "title": "Cena: lehký model tam, kde je krok lehký",
+      "author": "Agent Atlas Academy",
+      "description": "Stejné tři kroky: Fast na výzkum a psaní, Balanced na závěrečnou kontrolu.\n\n**Čemu se naučíte**\n\nStejné zadání za zlomek ceny: silnější model jen tam, kde ho krok potřebuje."
+    }
+  },
+  "library": {
+    "level": 1,
+    "kind": "pair",
+    "twin": "save-models-strong",
+    "paths": {
+      "save": 2
+    },
+    "tags": [
+      "cost",
+      "basics",
+      "prompt-chaining"
+    ],
+    "teaches": {
+      "en": "The same task, a fraction of the cost: use the stronger model only where the step needs it.",
+      "cs": "Stejné zadání za zlomek ceny: silnější model jen tam, kde ho krok potřebuje."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "critic",
+        "agent": "critic",
+        "model": "balanced",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "researcher",
+        "to": "writer"
+      },
+      {
+        "from": "writer",
+        "to": "critic"
+      }
+    ]
+  }
+}

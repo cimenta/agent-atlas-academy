@@ -1,0 +1,61 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "From this note take the name of the dish, the number of servings and whether it contains nuts, and write a label: Grandma's apple cake serves eight and has walnuts on top.",
+  "about": {
+    "en": {
+      "title": "Reliability: the first agent answers in free text",
+      "author": "Agent Atlas Academy",
+      "description": "A reader finds the facts and a writer makes the label.\n\n**What it teaches**\n\nFree text is easy to read for a person, but the next agent must guess where each fact is."
+    },
+    "cs": {
+      "title": "Spolehlivost: první agent odpovídá volným textem",
+      "author": "Agent Atlas Academy",
+      "description": "Čtenář najde fakta a pisatel udělá štítek.\n\n**Čemu se naučíte**\n\nVolný text se člověku dobře čte, ale další agent musí hádat, kde je který údaj."
+    }
+  },
+  "library": {
+    "level": 1,
+    "kind": "pair",
+    "twin": "rel-format-fields",
+    "paths": {
+      "reliable": 1
+    },
+    "tags": [
+      "basics",
+      "risk-analysis",
+      "prompt-chaining"
+    ],
+    "teaches": {
+      "en": "Free text is easy to read for a person, but the next agent must guess where each fact is.",
+      "cs": "Volný text se člověku dobře čte, ale další agent musí hádat, kde je který údaj."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "reader",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Reader",
+        "instructions": "Find the facts that are asked for in the note."
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "reader",
+        "to": "writer"
+      }
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write a welcome message for new students. Write at length and be warm.",
+  "about": {
+    "en": {
+      "title": "Reliability: a length guardrail that repairs",
+      "author": "Agent Atlas Academy",
+      "description": "The writer must stay under 300 characters; a longer text is sent back to be shortened.\n\n**What it teaches**\n\nA guardrail can ask the agent to repair its own answer instead of stopping the run."
+    },
+    "cs": {
+      "title": "Spolehlivost: guardrail délky, který opravuje",
+      "author": "Agent Atlas Academy",
+      "description": "Pisatel musí zůstat pod 300 znaky; delší text se vrátí ke zkrácení.\n\n**Čemu se naučíte**\n\nGuardrail může požádat agenta, aby svou odpověď opravil, místo aby zastavil běh."
+    }
+  },
+  "library": {
+    "level": 2,
+    "paths": {
+      "reliable": 7
+    },
+    "tags": [
+      "risk-analysis",
+      "basics",
+      "prompt-chaining"
+    ],
+    "teaches": {
+      "en": "A guardrail can ask the agent to repair its own answer instead of stopping the run.",
+      "cs": "Guardrail může požádat agenta, aby svou odpověď opravil, místo aby zastavil běh."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "guardrails": [
+          {
+            "where": "output",
+            "kind": "length",
+            "max": 300,
+            "onFail": "repair"
+          }
+        ]
+      }
+    ],
+    "edges": []
+  }
+}

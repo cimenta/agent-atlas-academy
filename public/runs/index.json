@@ -388,6 +388,118 @@
         "en": "A supervisor sees everything, which is useful and expensive: every turn returns to it, and its context grows.",
         "cs": "Supervizor vidí všechno, což je užitečné a drahé: každý tah se k němu vrací a jeho kontext roste."
       }
+    },
+    {
+      "id": "save-models-strong",
+      "title": "Explain to a ten-year-old why the moon has phases, then chec…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "cost",
+        "basics",
+        "prompt-chaining"
+      ],
+      "level": 1,
+      "kind": "pair",
+      "twin": "save-models-mixed",
+      "paths": {
+        "save": 1
+      },
+      "teaches": {
+        "en": "The strongest model on every step is the most expensive; most of these steps would do well on a lighter model.",
+        "cs": "Nejsilnější model v každém kroku je nejdražší; většinu kroků by zvládl lehčí model."
+      }
+    },
+    {
+      "id": "save-models-mixed",
+      "title": "Explain to a ten-year-old why the moon has phases, then chec…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "cost",
+        "basics",
+        "prompt-chaining"
+      ],
+      "level": 1,
+      "kind": "pair",
+      "twin": "save-models-strong",
+      "paths": {
+        "save": 2
+      },
+      "teaches": {
+        "en": "The same task, a fraction of the cost: use the stronger model only where the step needs it.",
+        "cs": "Stejné zadání za zlomek ceny: silnější model jen tam, kde ho krok potřebuje."
+      }
+    },
+    {
+      "id": "save-serial",
+      "title": "A school wants to organise a class trip to a zoo. Weigh the …",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "speed",
+        "parallel-work",
+        "cost"
+      ],
+      "level": 2,
+      "kind": "pair",
+      "twin": "save-parallel",
+      "paths": {
+        "save": 5
+      },
+      "teaches": {
+        "en": "A chain waits for every step; the same analyses take about three times as long as side by side.",
+        "cs": "Řetěz čeká na každý krok; stejné rozbory trvají asi třikrát déle než vedle sebe."
+      }
+    },
+    {
+      "id": "save-parallel",
+      "title": "A school wants to organise a class trip to a zoo. Weigh the …",
+      "pattern": "parallel",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "detail": [
+        "en",
+        "cs"
+      ],
+      "tags": [
+        "speed",
+        "parallel-work",
+        "combining-answers"
+      ],
+      "level": 2,
+      "kind": "pair",
+      "twin": "save-serial",
+      "paths": {
+        "save": 6
+      },
+      "teaches": {
+        "en": "Working side by side shortens the time; the cost stays almost the same.",
+        "cs": "Souběžná práce zkrátí čas; cena zůstane skoro stejná."
+      }
     }
   ]
 }

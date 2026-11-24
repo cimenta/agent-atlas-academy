@@ -1,0 +1,726 @@
+{
+  "schemaVersion": 1,
+  "id": "save-parallel",
+  "title": "A school wants to organise a class trip to a zoo. Weigh the …",
+  "language": "en",
+  "pattern": "parallel",
+  "recordedWith": {
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "appVersion": "1.16.10-dev.6",
+  "events": [
+    {
+      "type": "run_start",
+      "task": "A school wants to organise a class trip to a zoo. Weigh the idea.",
+      "pattern": "parallel",
+      "design": {
+        "pattern": "parallel",
+        "nodes": [
+          {
+            "id": "free",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Cost analyst",
+            "instructions": "Look at the question only from the side of cost.",
+            "slot": "anthropic"
+          },
+          {
+            "id": "free-2",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Safety analyst",
+            "instructions": "Look at the question only from the side of safety.",
+            "slot": "anthropic"
+          },
+          {
+            "id": "free-3",
+            "agent": "free",
+            "model": "fast",
+            "search": false,
+            "name": "Fun analyst",
+            "instructions": "Look at the question only from the side of what students enjoy.",
+            "slot": "anthropic"
+          },
+          {
+            "id": "combiner",
+            "agent": "combiner",
+            "model": "fast",
+            "search": false,
+            "slot": "anthropic"
+          }
+        ],
+        "edges": [
+          {
+            "from": "free",
+            "to": "combiner"
+          },
+          {
+            "from": "free-2",
+            "to": "combiner"
+          },
+          {
+            "from": "free-3",
+            "to": "combiner"
+          }
+        ]
+      },
+      "t": 0
+    },
+    {
+      "type": "agent_start",
+      "agent": "free",
+      "role": "Cost analyst",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Cost analyst. Look at the question only from the side of cost.\nKeep every reply under 300 words. Answer in English.",
+      "t": 0
+    },
+    {
+      "type": "agent_start",
+      "agent": "free-2",
+      "role": "Safety analyst",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Safety analyst. Look at the question only from the side of safety.\nKeep every reply under 300 words. Answer in English.",
+      "t": 1
+    },
+    {
+      "type": "agent_start",
+      "agent": "free-3",
+      "role": "Fun analyst",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: free\nYou are Fun analyst. Look at the question only from the side of what students enjoy.\nKeep every reply under 300 words. Answer in English.",
+      "t": 2
+    },
+    {
+      "type": "round",
+      "agent": "free-3",
+      "round": 1,
+      "ms": 4515,
+      "stop": "end_turn",
+      "usage": {
+        "input": 87,
+        "output": 713
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: A school wants to organise a class trip to a zoo. Weigh the idea."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQSqQcKEAgUGAI4AUIIdGhpbmtpbmcSDA+lliz43q+jLNClZRoMtVuHIdY5xR3spzSLIjDEU9CPeyrqQhXrsF4YMp4ep+bGNFSi4IOT4ski/H+U6OoPFLhaS6jh0SuGnN5DgJMqxga3tRZ4Ow+kDbQMvfEXjCWt/r5jdc4iGTloyHGtlzzpyLqwibDZkEnSioCbDv+jeQCnwqBS/mNc5K7z9cCYoww9jJS60D9nMV4i69di17penLttSa87zSdPwkXFr3n3hzCy1yEAb0owIG8C13L79D+DHRt21ahpCe4KU/uxIAv2xKQVDmUiyJHjmnmxs3lR1cGah4kxe8TKCPSiQWyF9913KV4vdX9tnSY0RN6HspwxdnnWFMr2/YhSM4qmFU0ADvukxxlq4zbjrl/6ul2mOpentRpZMDWLID68LwszA8DBGkxIkDKvvLauMprxst+RVf0MWTFJ+G/VV7bsMKS3QF+1F81QDSTZoFHwLZd3qoA3PXb5VUgutkzPq7xuWXdrSLnAIPybNlxKL6v0H2zAZHQYpkp4jpJFfDQanhIMfrgcff0Gwu1UfRMnsi3oFi5mKixuBxThHStJNTw4uH1/Y5tEXGk63KVfMh2GFuFHSUeN2RRFXWADj0IUKgOuG6XGa9kuoOqeyhhbowwAL7q3rOpdTileWFzMemEbH4cR7dawyHDDKjHTLcPjVITrmGAUCuOqoSt/UGi6YUCgV0iRV2hZ+QOmyhjuZOgelqZxWwfNUZOP33DkokATYfyRHoq2saKS3W1pCWhFwaHNkVCTAYxSf2trEHtyVlulQWjeC5Ft63fHVpWw6d+axvBhU0z7zceFKlYQMitZI2+pe/kRCS5+u5fcKstz0jEDJFUAKSrBIVAclgVNbxQ1fgD1vFJrtQQY37PXi1KoYzX4mz8DiTBAQfd6mWAVEcItwDIw9VqDvgkwPcWhsbHMIZhX16x0IEEf+8IUX3JdJENslOe0MiYZSSu9g47UQ9M9m/DTUuUzZ4M91uKcfw/Q/JjjxiKOHIr22I5dJ+roU72liKbYzc+go8zIjC+GizHyqT6vw+OlFR8QdMUi5crqraP9q1CtVys5FAQP+2++uwNVb2TyBOdMi7eJnyLThc4RwLqyaUt34cbzkV6aKsgINrEgK07aqMYVMsLawkv+Ibr4bvRD3SxYnwpx3Bl+Qvlk/dBK6hFXMko774oY3897HDtm570V5probkXRYY50hjAwolDqLDDp2Pgi3dHLGAE="
+        },
+        {
+          "type": "text",
+          "text": "**Verdict: A zoo trip is a strong hit with students.** Here's how it looks from their side.\n\n**What students will love:**\n- **Animals up close.** Most kids get excited seeing lions, giraffes, or penguins in person, and that excitement is easy to share.\n- **Freedom from the classroom.** Walking around outdoors with friends feels like a reward in itself.\n- **Photo moments.** Students will want selfies with animals, group shots, and funny pictures to post.\n- **Feeding and interactive areas.** Petting zoos, feeding stations, and keeper talks are often the highlights.\n- **Social time.** Lunch outside, sharing snacks, and chatting with friends away from desks build good energy.\n\n**What could dampen the fun:**\n- **Too much walking.** Tired, cranky students stop enjoying anything. Shorter routes with rest stops help.\n- **Long lectures or rigid worksheets.** If the trip feels like a lesson, the magic fades. Keep any tasks light, like a scavenger hunt or \"animal of the day\" pick.\n- **Boredom with inactive animals.** Some animals sleep through the afternoon. Pick a zoo with shows, feeding times, or a play area.\n- **Waiting in long queues** for popular exhibits or for food.\n\n**Ways to boost enjoyment:**\n- Let students vote on their favourite animals to visit.\n- Run a friendly competition, such as a photo contest or quiz with small prizes.\n- Schedule a free-time block where they choose what to explore.\n- Check feeding times and keeper talks in advance so students don't miss them.\n\n**Bottom line:** Students will likely enjoy this trip a lot, especially if it includes animal interaction, free time, and a little friendly competition. Keep the schedule relaxed and the learning tasks playful."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMjaBHL5RPkZ6ViUxd5v",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 87,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 713,
+            "output_tokens_details": {
+              "thinking_tokens": 110
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 4517
+    },
+    {
+      "type": "agent_output",
+      "agent": "free-3",
+      "text": "**Verdict: A zoo trip is a strong hit with students.** Here's how it looks from their side.\n\n**What students will love:**\n- **Animals up close.** Most kids get excited seeing lions, giraffes, or penguins in person, and that excitement is easy to share.\n- **Freedom from the classroom.** Walking around outdoors with friends feels like a reward in itself.\n- **Photo moments.** Students will want selfies with animals, group shots, and funny pictures to post.\n- **Feeding and interactive areas.** Petting zoos, feeding stations, and keeper talks are often the highlights.\n- **Social time.** Lunch outside, sharing snacks, and chatting with friends away from desks build good energy.\n\n**What could dampen the fun:**\n- **Too much walking.** Tired, cranky students stop enjoying anything. Shorter routes with rest stops help.\n- **Long lectures or rigid worksheets.** If the trip feels like a lesson, the magic fades. Keep any tasks light, like a scavenger hunt or \"animal of the day\" pick.\n- **Boredom with inactive animals.** Some animals sleep through the afternoon. Pick a zoo with shows, feeding times, or a play area.\n- **Waiting in long queues** for popular exhibits or for food.\n\n**Ways to boost enjoyment:**\n- Let students vote on their favourite animals to visit.\n- Run a friendly competition, such as a photo contest or quiz with small prizes.\n- Schedule a free-time block where they choose what to explore.\n- Check feeding times and keeper talks in advance so students don't miss them.\n\n**Bottom line:** Students will likely enjoy this trip a lot, especially if it includes animal interaction, free time, and a little friendly competition. Keep the schedule relaxed and the learning tasks playful.",
+      "tokens": {
+        "input": 87,
+        "output": 713
+      },
+      "t": 4517
+    },
+    {
+      "type": "round",
+      "agent": "free",
+      "round": 1,
+      "ms": 5349,
+      "stop": "end_turn",
+      "usage": {
+        "input": 83,
+        "output": 892
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: A school wants to organise a class trip to a zoo. Weigh the idea."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQSyQgKEAgUGAI4AUIIdGhpbmtpbmcSDI7UPJmaEjqvBx/3khoMwlOKtj+wZJKGBv4tIjD4m+PhF29tSzQuwwb2QD1n1+u06ZGTz5YuQ/qc7fxWhWyhutCIFU9HI0YTrvAp6u8q5gfrxvaiPoq6P1LL5lic60sWv2vKZIFutZgHX4ztzJP3SRRTr3HIRW/7a5iZ99LctkXVeBtkXGz6z4vyX/CaDNIF9Txv07CRXp9eNAtCghGccWA7/Gx9jhhYP6fcsBq8LIva90EitNH1Q1x5Jgi9h8oke/e5NmNNNJn/Alisf5MthdVOxV0VvvDjDUBorHGGP3bCDUpQn8IZ/Q1y1drotNMJ22gQUepAzSOIPkPbNLw1tV+7y4f9ynE3j21oIYXya+ioxp/nQnRoBEdzYBL5QZNy33yvjrcg0hAMvI7TxO2fAdHOlpFD0ouq5aH0nX5AhZjF2NlgKbyAq1koTCcgW+z1AsTD85Qna1Vme0rB2+EvuAbEYWauyeujKc7GYoe8P+h5Lc/eBOZcaAUY7T1yUkytWX4w7t9Btn22N9TUuZqMXktXoHgCvQpwI4AD6U5G4S7vrBINjGi7IlNBDB9nQ+DXd3JC8dmFRoU5NC/KovgcjbG+MFOB0cmYxt+DUy54Sdvx4r22h7K4PZYVu7Aa252g/oGb7v44fFszJvAHw1Mu7Ab5RTPIs+cfzV0TO/xaLTQMBW1XWEE7Sk8mguc9W86VkH5WJ+HETCOve3nWCg8VqiWkGn1YViNd7X5Q4FMLsRd1YJ+RS0LhtqzB22jx2Fg+2ZF/71C07A1WOkLLr0XPU/p1iAgi/nf+yLzkLGLvvnxVuQleDUt0rINJ3KaN5o1GtoJmIsYxMc7oEbgFtHICei4bwIr0m8P5soxo2CChdNWciW92m1yeaGcw+Q3ebWujiA9SJDTLsWNl51CaxQZEfNbqfsEVYInqHU6eNuWITo8FGBnauFQeNE9/CUomTiC+keqGKBwNG8yEsDzhpJNTUmi1pYis83hcl2CTmK9C1N5NmEykbp+gyXzZqeXm3sY0sHK6pkY6ElFe9tX0fiUwcIVCodr4Y4pOZki1wSCkaNefGNf1kjXeYZaCuIxlB7aQI5RIrHR3s1YOlBwPcFdHxtysntYxboAvq91h2B2BdW5lkjhDjxQmShoc1eSHy4ITYP3+ewNVr1eAFtknirxS3IdAPF+UHlnmhGZmpvfFm036GubOaeFTsAMgfcRrLWUDhcZFk3qNH0CdqPVppQ6HVSDAZBJYDUdJI2mvpzYcCu7gBqynO6F+4BWkm0eqS4p5Ool4cNkO31bEaaMIp6HMpVeFZBOcS/ZhM3dsH6xJLFEq7KM+5cFRT0vr07VLR4qhIHpp44zlqII4XS1MYvOiw6H7AFVE6m0gxjk/6RA6ZeoSR4tCp4UgtBfpBV3BxourMmtvhCQ1T8fTQBJ3a60WP6A8zqDJ+xgB"
+        },
+        {
+          "type": "text",
+          "text": "**Cost Analysis: School Class Trip to a Zoo**\n\n**1. Direct costs (per trip)**\n- **Transport:** Coach hire is typically the largest single item. Estimate by distance and class size.\n- **Entry tickets:** Often discounted for school groups, but still a per-pupil cost. Check whether accompanying adults get free entry.\n- **Insurance and permissions:** Trip cover and admin time for consent forms.\n- **Meals and snacks:** Only if not covered by pupils' own packed lunches.\n\n**2. Indirect costs**\n- **Staff time:** Teachers' planning, supervision, and recovery time. Count supervision ratios too; more adults may be needed, which means more staff cost.\n- **Substitute cover:** If teachers are out of class, supply teacher fees apply.\n- **Lost learning time:** A full day away from the timetable has an opportunity cost.\n\n**3. Hidden or variable costs**\n- Cancellation or weather-related rescheduling\n- Extra payments for guided tours or workshops\n- Costs for pupils who cannot afford the trip (subsidies, which the school may need to fund)\n\n**4. Cost per pupil (illustrative only)**\nTotal cost ÷ number of pupils. Example assumptions: coach £400, tickets 30 pupils × £12 = £360, staff/cover £250, insurance and admin £50. Total ≈ £1,060, or about £35 per pupil. Actual figures will vary by location and provider.\n\n**5. Funding options**\n- Parent contributions (voluntary or capped)\n- PTA or school fund\n- Educational grants or zoo education programmes with reduced rates\n\n**6. Cost comparison**\nCompare against cheaper alternatives: an on-site visit, a video-based lesson, or a local nature trail. The zoo option is justified only if its learning value per pound is clearly higher.\n\n**Verdict:** The trip is affordable if the cost per pupil fits the budget and subsidies are available for low-income families. Confirm real quotes from coach firms and the zoo's group rates before deciding. If costs exceed the budget or the cheaper alternatives deliver similar learning outcomes, the idea is not cost-effective."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMjaBCcVWosSiXysXRmb",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 83,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 892,
+            "output_tokens_details": {
+              "thinking_tokens": 159
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 5349
+    },
+    {
+      "type": "agent_output",
+      "agent": "free",
+      "text": "**Cost Analysis: School Class Trip to a Zoo**\n\n**1. Direct costs (per trip)**\n- **Transport:** Coach hire is typically the largest single item. Estimate by distance and class size.\n- **Entry tickets:** Often discounted for school groups, but still a per-pupil cost. Check whether accompanying adults get free entry.\n- **Insurance and permissions:** Trip cover and admin time for consent forms.\n- **Meals and snacks:** Only if not covered by pupils' own packed lunches.\n\n**2. Indirect costs**\n- **Staff time:** Teachers' planning, supervision, and recovery time. Count supervision ratios too; more adults may be needed, which means more staff cost.\n- **Substitute cover:** If teachers are out of class, supply teacher fees apply.\n- **Lost learning time:** A full day away from the timetable has an opportunity cost.\n\n**3. Hidden or variable costs**\n- Cancellation or weather-related rescheduling\n- Extra payments for guided tours or workshops\n- Costs for pupils who cannot afford the trip (subsidies, which the school may need to fund)\n\n**4. Cost per pupil (illustrative only)**\nTotal cost ÷ number of pupils. Example assumptions: coach £400, tickets 30 pupils × £12 = £360, staff/cover £250, insurance and admin £50. Total ≈ £1,060, or about £35 per pupil. Actual figures will vary by location and provider.\n\n**5. Funding options**\n- Parent contributions (voluntary or capped)\n- PTA or school fund\n- Educational grants or zoo education programmes with reduced rates\n\n**6. Cost comparison**\nCompare against cheaper alternatives: an on-site visit, a video-based lesson, or a local nature trail. The zoo option is justified only if its learning value per pound is clearly higher.\n\n**Verdict:** The trip is affordable if the cost per pupil fits the budget and subsidies are available for low-income families. Confirm real quotes from coach firms and the zoo's group rates before deciding. If costs exceed the budget or the cheaper alternatives deliver similar learning outcomes, the idea is not cost-effective.",
+      "tokens": {
+        "input": 83,
+        "output": 892
+      },
+      "t": 5349
+    },
+    {
+      "type": "round",
+      "agent": "free-2",
+      "round": 1,
+      "ms": 6278,
+      "stop": "end_turn",
+      "usage": {
+        "input": 83,
+        "output": 1059
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: A school wants to organise a class trip to a zoo. Weigh the idea."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "CAQS3woKEAgUGAI4AUIIdGhpbmtpbmcSDHSYVVsNhfhSrvmhMxoMD+yzLIVsRduFda2iIjCRPpb5Vxzlx7vULbI03lE65EQwDKkJ6Xlaj4avd79Ag8E6Tt+fmefbq8neVMqUNTgq/Ak5+dnyxwO3H4LntkWpH6nnIweKiaCy/NR+VRYgrc+R2vw8RXStOIcEwV7X/J5wCm9fegIaDlOHehUC488LSbS0ajOtGbnZoHOGEYQh50SU5fWt8SaERcpdXK34LfcCtC0dj//xstKSDzHWSJ19jjczTwGE5akNHSwWSyFkud4AtFfukRT2n/fTvgyBwM6CKQLrVHnqXbVpHYfZMgQjUEHBxCz3QbpiDY18acpVvQ/nZDs8mwsKd5cGxjxH0rnZzj7i25AZgYZbxFbVVMAKNM3L+VMu5RCi395uxy70/ZwtQX0NmjlqrfzkWpiElFUgEC628UR3IEvJjUudCNDmTNXaHl43h2j3D5sEEj4tcTcdK8FQ2GlZBJDvomDJiTY+7CAeIfGhGpjmoUY7bkDHs6JrOE5XBjrU99Y3DXDa4ZvFC+Udn6ul+cFkoF2teS1mMEJtJzfoAxZrkS/4TpTfAAGCPgNgd05u9O0QfCaBQYfns7rfJTUuhQ0BWCNgXxF51EITB/qbFlAQD5gkyqsPOhfR6S02g0tcrG49rfz8wWVu8LFx/HZUyrkTcHqpcXtPIsQt51ixiXNJq36OCLbbAOmJMFLFo+DwIcstV3itmv4aFYMHwN6Z6I+GU7XkrnILdJcCgwRo1HdrGCEujwX6Ut9Vzf+75aFSw1hv2pLxajDLHay1w58kStQ/1/0JuOUvlmkPcFsud+OVbABt2rY+60MEWmZXNGTgpRQShTaZ+UNLv32NAVd0BMybIU46nIvI01ehHTeV119LTHJF9279ACXH4I9uvWUjD4kin67wgySDI2S9t3HVi9FzWEUKAQEI7VQ+4TTL81cjt8R2rE9f7jqKBkEhbKHo4FARdfTvawgswdS7YP0pi4SkamEbLLcgIBoiTA7CoLeXeLP2PtIb6tNWg2nq8gt753mulTzsK6E56SjEKIpFqJro0eKmFUhXb0T4Oe+uS0cJDFQDGGICWgkkPWzhaGrJzrRZsT797R+nlJyuc8bVDbrBGUjnus83XnX+6bqANfEs+I2OiN0ndjWtAV6gMNezRZEYL0q0tRFGzRSj7KBgywkmanWhUK92v+BbogdL6ZtRPX0tq4jskaFTa/s7DiBqPd+fCCtYuWFjDtXpiUxIkc1VXQiLWpWB+nePhDlbatgUuT+oYN1R9xEAThKUT8jC58VoLK2cBXfFILq6D1HrkOJ8h1wkqVq3uK/ANXaSsO0QsiNLhZvTfru2gSK1JMYy1LJazGDsInWvsDKhrGEC86FdFUM5175cFGVGSmD8WPYSLGZoqNv/TnLhUFCuhP0lBU/WTOH2N50sDstFDxbRKyzYHT2vSfHdmwDL54WqwGYgh23z4DU3DgLMLspnCV9zurEpJKVfd6mvy8RVd9qlXtV4769kN+aAoRp/WsCEZdjzSn1/RwsOwCIAPxwzQlJ1+7laE574KtMLRMgLeHKrIt0OttEIIK7BK8Xi44jyqSsrXP5N87KvSWAW6fmED/bNEzvmJB3Wbe68neOOON7PYjv1sYf6tr5Qc6+BMhl5ziaLUVhwfOr+5rJ1lA81FQzcxfUeZbfCzrFCuU0JC6u8KUHBpR1pJcTOObfHphUBfR5yeeZMRlzgs2CE0xSARhZzhsw+g+/zjandRcMaDaTpxT3hu2Z31+vhlYCrIeWhi46f/bZiBOlvPxOczsLM5aDTPg0fj1LNGAE="
+        },
+        {
+          "type": "text",
+          "text": "**Safety verdict: Acceptable with conditions.** A zoo trip is generally low-risk when the school plans for the hazards below.\n\n**Main risks and controls**\n\n1. **Animal contact and bites or scratches.** Keep children out of contact areas, especially petting zones and feeding sessions, unless staff supervise closely. Require hand-washing stations and a clear no-touching rule.\n2. **Infection (zoonoses such as Salmonella, E. coli, ringworm).** Make hand hygiene mandatory before eating and after leaving animal areas. Bring hand sanitiser, and ensure children with open cuts are briefed.\n3. **Getting lost or separated.** Use a buddy system, headcounts at set points, a meeting point, and name tags or wristbands with the school contact number, especially for younger pupils.\n4. **Supervision ratio.** Maintain at least the school's minimum adult-to-pupil ratio, with extra adults for young children and pupils with additional needs. Each adult should know their assigned group.\n5. **Transport.** Use a licensed coach or bus with seatbelts where fitted. Verify the operator's insurance and driver checks.\n6. **Heat, sun and dehydration.** Check the forecast. Require water, sun protection and shaded rest breaks. Cancel or adapt if extreme heat is forecast.\n7. **Medical needs and allergies.** Collect medical forms in advance. Carry medication, epinephrine auto-injectors where prescribed, and a first-aid kit. Ensure at least one trained first aider attends.\n8. **Crowds and walking fatigue.** Plan routes, limit distances for young pupils, and set clear boundaries for the group.\n9. **Emergency response.** Confirm the zoo's emergency procedures, know the nearest medical facility, and keep a list of emergency contacts and consent forms with a staff member.\n\n**Pre-trip checks**\n- Confirm the zoo is accredited or licensed and has a current safety record.\n- Complete and file a written risk assessment.\n- Obtain signed parental consent covering medical treatment and activities.\n- Brief pupils on rules before departure.\n\n**Conclusion:** The trip is safe to proceed if the school enforces hand hygiene, no-contact rules, supervision ratios, a buddy system, and a medical plan, and if it cancels or adjusts for extreme weather."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMjaBDrXbKMUuxVWaNna",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 83,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 1059,
+            "output_tokens_details": {
+              "thinking_tokens": 266
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 6279
+    },
+    {
+      "type": "agent_output",
+      "agent": "free-2",
+      "text": "**Safety verdict: Acceptable with conditions.** A zoo trip is generally low-risk when the school plans for the hazards below.\n\n**Main risks and controls**\n\n1. **Animal contact and bites or scratches.** Keep children out of contact areas, especially petting zones and feeding sessions, unless staff supervise closely. Require hand-washing stations and a clear no-touching rule.\n2. **Infection (zoonoses such as Salmonella, E. coli, ringworm).** Make hand hygiene mandatory before eating and after leaving animal areas. Bring hand sanitiser, and ensure children with open cuts are briefed.\n3. **Getting lost or separated.** Use a buddy system, headcounts at set points, a meeting point, and name tags or wristbands with the school contact number, especially for younger pupils.\n4. **Supervision ratio.** Maintain at least the school's minimum adult-to-pupil ratio, with extra adults for young children and pupils with additional needs. Each adult should know their assigned group.\n5. **Transport.** Use a licensed coach or bus with seatbelts where fitted. Verify the operator's insurance and driver checks.\n6. **Heat, sun and dehydration.** Check the forecast. Require water, sun protection and shaded rest breaks. Cancel or adapt if extreme heat is forecast.\n7. **Medical needs and allergies.** Collect medical forms in advance. Carry medication, epinephrine auto-injectors where prescribed, and a first-aid kit. Ensure at least one trained first aider attends.\n8. **Crowds and walking fatigue.** Plan routes, limit distances for young pupils, and set clear boundaries for the group.\n9. **Emergency response.** Confirm the zoo's emergency procedures, know the nearest medical facility, and keep a list of emergency contacts and consent forms with a staff member.\n\n**Pre-trip checks**\n- Confirm the zoo is accredited or licensed and has a current safety record.\n- Complete and file a written risk assessment.\n- Obtain signed parental consent covering medical treatment and activities.\n- Brief pupils on rules before departure.\n\n**Conclusion:** The trip is safe to proceed if the school enforces hand hygiene, no-contact rules, supervision ratios, a buddy system, and a medical plan, and if it cancels or adjusts for extreme weather.",
+      "tokens": {
+        "input": 83,
+        "output": 1059
+      },
+      "t": 6279
+    },
+    {
+      "type": "handoff",
+      "from": "free",
+      "to": "combiner",
+      "note": "**Cost Analysis: School Class Trip to a Zoo**\n\n**1. Direct costs (per trip)**\n- **Transport:** Coach hire is typically the largest single item. Estimate by distance and class size.\n- **Entry tickets:** Often discounted for school groups, but still a per-pupil cost. Check whether accompanying adults get free entry.\n- **Insurance and permissions:** Trip cover and admin time for consent forms.\n- **Meals and snacks:** Only if not covered by pupils' own packed lunches.\n\n**2. Indirect costs**\n- **Staff time:** Teachers' planning, supervision, and recovery time. Count supervision ratios too; more adults may be needed, which means more staff cost.\n- **Substitute cover:** If teachers are out of class, supply teacher fees apply.\n- **Lost learning time:** A full day away from the timetable has an opportunity cost.\n\n**3. Hidden or variable costs**\n- Cancellation or weather-related rescheduling\n- Extra payments for guided tours or workshops\n- Costs for pupils who cannot afford the trip (subsidies, which the school may need to fund)\n\n**4. Cost per pupil (illustrative only)**\nTotal cost ÷ number of pupils. Example assumptions: coach £400, tickets 30 pupils × £12 = £360, staff/cover £250, insurance and admin £50. Total ≈ £1,060, or about £35 per pupil. Actual figures will vary by location and provider.\n\n**5. Funding options**\n- Parent contributions (voluntary or capped)\n- PTA or school fund\n- Educational grants or zoo education programmes with reduced rates\n\n**6. Cost comparison**\nCompare against cheaper alternatives: an on-site visit, a video-based lesson, or a local nature trail. The zoo option is justified only if its learning value per pound is clearly higher.\n\n**Verdict:** The trip is affordable if the cost per pupil fits the budget and subsidies are available for low-income families. Confirm real quotes from coach firms and the zoo's group rates before deciding. If costs exceed the budget or the cheaper alternatives deliver similar learning outcomes, the idea is not cost-effe",
+      "t": 6279
+    },
+    {
+      "type": "handoff",
+      "from": "free-2",
+      "to": "combiner",
+      "note": "**Safety verdict: Acceptable with conditions.** A zoo trip is generally low-risk when the school plans for the hazards below.\n\n**Main risks and controls**\n\n1. **Animal contact and bites or scratches.** Keep children out of contact areas, especially petting zones and feeding sessions, unless staff supervise closely. Require hand-washing stations and a clear no-touching rule.\n2. **Infection (zoonoses such as Salmonella, E. coli, ringworm).** Make hand hygiene mandatory before eating and after leaving animal areas. Bring hand sanitiser, and ensure children with open cuts are briefed.\n3. **Getting lost or separated.** Use a buddy system, headcounts at set points, a meeting point, and name tags or wristbands with the school contact number, especially for younger pupils.\n4. **Supervision ratio.** Maintain at least the school's minimum adult-to-pupil ratio, with extra adults for young children and pupils with additional needs. Each adult should know their assigned group.\n5. **Transport.** Use a licensed coach or bus with seatbelts where fitted. Verify the operator's insurance and driver checks.\n6. **Heat, sun and dehydration.** Check the forecast. Require water, sun protection and shaded rest breaks. Cancel or adapt if extreme heat is forecast.\n7. **Medical needs and allergies.** Collect medical forms in advance. Carry medication, epinephrine auto-injectors where prescribed, and a first-aid kit. Ensure at least one trained first aider attends.\n8. **Crowds and walking fatigue.** Plan routes, limit distances for young pupils, and set clear boundaries for the group.\n9. **Emergency response.** Confirm the zoo's emergency procedures, know the nearest medical facility, and keep a list of emergency contacts and consent forms with a staff member.\n\n**Pre-trip checks**\n- Confirm the zoo is accredited or licensed and has a current safety record.\n- Complete and file a written risk assessment.\n- Obtain signed parental consent covering medical treatment and activities.\n- Brief pupils on",
+      "t": 6279
+    },
+    {
+      "type": "handoff",
+      "from": "free-3",
+      "to": "combiner",
+      "note": "**Verdict: A zoo trip is a strong hit with students.** Here's how it looks from their side.\n\n**What students will love:**\n- **Animals up close.** Most kids get excited seeing lions, giraffes, or penguins in person, and that excitement is easy to share.\n- **Freedom from the classroom.** Walking around outdoors with friends feels like a reward in itself.\n- **Photo moments.** Students will want selfies with animals, group shots, and funny pictures to post.\n- **Feeding and interactive areas.** Petting zoos, feeding stations, and keeper talks are often the highlights.\n- **Social time.** Lunch outside, sharing snacks, and chatting with friends away from desks build good energy.\n\n**What could dampen the fun:**\n- **Too much walking.** Tired, cranky students stop enjoying anything. Shorter routes with rest stops help.\n- **Long lectures or rigid worksheets.** If the trip feels like a lesson, the magic fades. Keep any tasks light, like a scavenger hunt or \"animal of the day\" pick.\n- **Boredom with inactive animals.** Some animals sleep through the afternoon. Pick a zoo with shows, feeding times, or a play area.\n- **Waiting in long queues** for popular exhibits or for food.\n\n**Ways to boost enjoyment:**\n- Let students vote on their favourite animals to visit.\n- Run a friendly competition, such as a photo contest or quiz with small prizes.\n- Schedule a free-time block where they choose what to explore.\n- Check feeding times and keeper talks in advance so students don't miss them.\n\n**Bottom line:** Students will likely enjoy this trip a lot, especially if it includes animal interaction, free time, and a little friendly competition. Keep the schedule relaxed and the learning tasks playful.",
+      "t": 6279
+    },
+    {
+      "type": "agent_start",
+      "agent": "combiner",
+      "role": "Combiner",
+      "model": "claude-haiku-5-5",
+      "tools": [],
+      "system": "Role: combiner\nYou are the Combiner. You receive the results of several agents who worked on the same task at the same time. Combine them into one clear answer and say where they disagree.\nKeep every reply under 300 words. Answer in English.",
+      "t": 6279
+    },
+    {
+      "type": "round",
+      "agent": "combiner",
+      "round": 1,
+      "ms": 4915,
+      "stop": "end_turn",
+      "usage": {
+        "input": 2268,
+        "output": 1005
+      },
+      "newMessages": [
+        {
+          "role": "user",
+          "content": "Task: A school wants to organise a class trip to a zoo. Weigh the idea.\n\nResults from the agents:\n--- free ---\n**Cost Analysis: School Class Trip to a Zoo**\n\n**1. Direct costs (per trip)**\n- **Transport:** Coach hire is typically the largest single item. Estimate by distance and class size.\n- **Entry tickets:** Often discounted for school groups, but still a per-pupil cost. Check whether accompanying adults get free entry.\n- **Insurance and permissions:** Trip cover and admin time for consent forms.\n- **Meals and snacks:** Only if not covered by pupils' own packed lunches.\n\n**2. Indirect costs**\n- **Staff time:** Teachers' planning, supervision, and recovery time. Count supervision ratios too; more adults may be needed, which means more staff cost.\n- **Substitute cover:** If teachers are out of class, supply teacher fees apply.\n- **Lost learning time:** A full day away from the timetable has an opportunity cost.\n\n**3. Hidden or variable costs**\n- Cancellation or weather-related rescheduling\n- Extra payments for guided tours or workshops\n- Costs for pupils who cannot afford the trip (subsidies, which the school may need to fund)\n\n**4. Cost per pupil (illustrative only)**\nTotal cost ÷ number of pupils. Example assumptions: coach £400, tickets 30 pupils × £12 = £360, staff/cover £250, insurance and admin £50. Total ≈ £1,060, or about £35 per pupil. Actual figures will vary by location and provider.\n\n**5. Funding options**\n- Parent contributions (voluntary or capped)\n- PTA or school fund\n- Educational grants or zoo education programmes with reduced rates\n\n**6. Cost comparison**\nCompare against cheaper alternatives: an on-site visit, a video-based lesson, or a local nature trail. The zoo option is justified only if its learning value per pound is clearly higher.\n\n**Verdict:** The trip is affordable if the cost per pupil fits the budget and subsidies are available for low-income families. Confirm real quotes from coach firms and the zoo's group rates before deciding. If costs exceed the budget or the cheaper alternatives deliver similar learning outcomes, the idea is not cost-effective.\n\n--- free-2 ---\n**Safety verdict: Acceptable with conditions.** A zoo trip is generally low-risk when the school plans for the hazards below.\n\n**Main risks and controls**\n\n1. **Animal contact and bites or scratches.** Keep children out of contact areas, especially petting zones and feeding sessions, unless staff supervise closely. Require hand-washing stations and a clear no-touching rule.\n2. **Infection (zoonoses such as Salmonella, E. coli, ringworm).** Make hand hygiene mandatory before eating and after leaving animal areas. Bring hand sanitiser, and ensure children with open cuts are briefed.\n3. **Getting lost or separated.** Use a buddy system, headcounts at set points, a meeting point, and name tags or wristbands with the school contact number, especially for younger pupils.\n4. **Supervision ratio.** Maintain at least the school's minimum adult-to-pupil ratio, with extra adults for young children and pupils with additional needs. Each adult should know their assigned group.\n5. **Transport.** Use a licensed coach or bus with seatbelts where fitted. Verify the operator's insurance and driver checks.\n6. **Heat, sun and dehydration.** Check the forecast. Require water, sun protection and shaded rest breaks. Cancel or adapt if extreme heat is forecast.\n7. **Medical needs and allergies.** Collect medical forms in advance. Carry medication, epinephrine auto-injectors where prescribed, and a first-aid kit. Ensure at least one trained first aider attends.\n8. **Crowds and walking fatigue.** Plan routes, limit distances for young pupils, and set clear boundaries for the group.\n9. **Emergency response.** Confirm the zoo's emergency procedures, know the nearest medical facility, and keep a list of emergency contacts and consent forms with a staff member.\n\n**Pre-trip checks**\n- Confirm the zoo is accredited or licensed and has a current safety record.\n- Complete and file a written risk assessment.\n- Obtain signed parental consent covering medical treatment and activities.\n- Brief pupils on rules before departure.\n\n**Conclusion:** The trip is safe to proceed if the school enforces hand hygiene, no-contact rules, supervision ratios, a buddy system, and a medical plan, and if it cancels or adjusts for extreme weather.\n\n--- free-3 ---\n**Verdict: A zoo trip is a strong hit with students.** Here's how it looks from their side.\n\n**What students will love:**\n- **Animals up close.** Most kids get excited seeing lions, giraffes, or penguins in person, and that excitement is easy to share.\n- **Freedom from the classroom.** Walking around outdoors with friends feels like a reward in itself.\n- **Photo moments.** Students will want selfies with animals, group shots, and funny pictures to post.\n- **Feeding and interactive areas.** Petting zoos, feeding stations, and keeper talks are often the highlights.\n- **Social time.** Lunch outside, sharing snacks, and chatting with friends away from desks build good energy.\n\n**What could dampen the fun:**\n- **Too much walking.** Tired, cranky students stop enjoying anything. Shorter routes with rest stops help.\n- **Long lectures or rigid worksheets.** If the trip feels like a lesson, the magic fades. Keep any tasks light, like a scavenger hunt or \"animal of the day\" pick.\n- **Boredom with inactive animals.** Some animals sleep through the afternoon. Pick a zoo with shows, feeding times, or a play area.\n- **Waiting in long queues** for popular exhibits or for food.\n\n**Ways to boost enjoyment:**\n- Let students vote on their favourite animals to visit.\n- Run a friendly competition, such as a photo contest or quiz with small prizes.\n- Schedule a free-time block where they choose what to explore.\n- Check feeding times and keeper talks in advance so students don't miss them.\n\n**Bottom line:** Students will likely enjoy this trip a lot, especially if it includes animal interaction, free time, and a little friendly competition. Keep the schedule relaxed and the learning tasks playful."
+        }
+      ],
+      "content": [
+        {
+          "type": "thinking",
+          "thinking": "",
+          "signature": "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"
+        },
+        {
+          "type": "text",
+          "text": "**Combined verdict: Worth doing, with conditions.** The trip is safe, popular with pupils, and affordable if the budget and learning case hold up.\n\n**Points of agreement**\n- **Safety:** Acceptable if the school enforces hand hygiene, supervision ratios, a buddy system, a medical plan, and a written risk assessment.\n- **Cost:** Affordable if the per-pupil cost fits the budget (illustrative estimate: about £35) and subsidies cover pupils who cannot pay.\n- **Enjoyment:** Students are likely to enjoy animal sightings, free time, and outdoor social time.\n\n**Where the agents disagree or pull in different directions**\n1. **Animal contact:** The safety agent says to keep children out of petting and feeding areas unless staff supervise closely. The enjoyment agent names petting zones and feeding stations as highlights. The school must choose which, and should only include contact activities that staff can supervise.\n2. **Learning versus fun:** The cost agent says the trip is justified only if its learning value beats cheaper alternatives, such as an on-site visit or a nature trail. The enjoyment agent recommends playful tasks and free time, which may reduce structured learning. Enjoyment does not prove educational value, so the school should set clear learning objectives.\n3. **Who can attend:** The cost agent highlights that some families cannot afford the trip, which affects inclusion. The enjoyment and safety agents assume all pupils attend. Subsidies should be settled before the trip is confirmed.\n\n**Recommended next steps**\n- Get real quotes from coach firms and the zoo's group rates.\n- Compare the zoo's learning value against one cheaper alternative.\n- Set a no-contact or supervised-contact policy.\n- Confirm subsidies for low-income families.\n- Complete the risk assessment and parental consent forms.\n\nIf the costs fit, subsidies are secured, and the learning goals are clear, the trip is a good idea. If not, a cheaper alternative may deliver similar outcomes."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "claude-haiku-5-5",
+          "max_tokens": 4000,
+          "tools": [],
+          "messageCount": 1
+        },
+        "response": {
+          "id": "msg_011ChMjaduxsiBEiZc6P2aW5",
+          "type": "message",
+          "role": "assistant",
+          "model": "claude-haiku-5-5",
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 2268,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 1005,
+            "output_tokens_details": {
+              "thinking_tokens": 331
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          }
+        }
+      },
+      "t": 11194
+    },
+    {
+      "type": "agent_output",
+      "agent": "combiner",
+      "text": "**Combined verdict: Worth doing, with conditions.** The trip is safe, popular with pupils, and affordable if the budget and learning case hold up.\n\n**Points of agreement**\n- **Safety:** Acceptable if the school enforces hand hygiene, supervision ratios, a buddy system, a medical plan, and a written risk assessment.\n- **Cost:** Affordable if the per-pupil cost fits the budget (illustrative estimate: about £35) and subsidies cover pupils who cannot pay.\n- **Enjoyment:** Students are likely to enjoy animal sightings, free time, and outdoor social time.\n\n**Where the agents disagree or pull in different directions**\n1. **Animal contact:** The safety agent says to keep children out of petting and feeding areas unless staff supervise closely. The enjoyment agent names petting zones and feeding stations as highlights. The school must choose which, and should only include contact activities that staff can supervise.\n2. **Learning versus fun:** The cost agent says the trip is justified only if its learning value beats cheaper alternatives, such as an on-site visit or a nature trail. The enjoyment agent recommends playful tasks and free time, which may reduce structured learning. Enjoyment does not prove educational value, so the school should set clear learning objectives.\n3. **Who can attend:** The cost agent highlights that some families cannot afford the trip, which affects inclusion. The enjoyment and safety agents assume all pupils attend. Subsidies should be settled before the trip is confirmed.\n\n**Recommended next steps**\n- Get real quotes from coach firms and the zoo's group rates.\n- Compare the zoo's learning value against one cheaper alternative.\n- Set a no-contact or supervised-contact policy.\n- Confirm subsidies for low-income families.\n- Complete the risk assessment and parental consent forms.\n\nIf the costs fit, subsidies are secured, and the learning goals are clear, the trip is a good idea. If not, a cheaper alternative may deliver similar outcomes.",
+      "tokens": {
+        "input": 2268,
+        "output": 1005
+      },
+      "t": 11195
+    },
+    {
+      "type": "done",
+      "outcome": "finished",
+      "usage": {
+        "input": 2521,
+        "output": 3669,
+        "searches": 0,
+        "steps": 4
+      },
+      "finalText": "**Combined verdict: Worth doing, with conditions.** The trip is safe, popular with pupils, and affordable if the budget and learning case hold up.\n\n**Points of agreement**\n- **Safety:** Acceptable if the school enforces hand hygiene, supervision ratios, a buddy system, a medical plan, and a written risk assessment.\n- **Cost:** Affordable if the per-pupil cost fits the budget (illustrative estimate: about £35) and subsidies cover pupils who cannot pay.\n- **Enjoyment:** Students are likely to enjoy animal sightings, free time, and outdoor social time.\n\n**Where the agents disagree or pull in different directions**\n1. **Animal contact:** The safety agent says to keep children out of petting and feeding areas unless staff supervise closely. The enjoyment agent names petting zones and feeding stations as highlights. The school must choose which, and should only include contact activities that staff can supervise.\n2. **Learning versus fun:** The cost agent says the trip is justified only if its learning value beats cheaper alternatives, such as an on-site visit or a nature trail. The enjoyment agent recommends playful tasks and free time, which may reduce structured learning. Enjoyment does not prove educational value, so the school should set clear learning objectives.\n3. **Who can attend:** The cost agent highlights that some families cannot afford the trip, which affects inclusion. The enjoyment and safety agents assume all pupils attend. Subsidies should be settled before the trip is confirmed.\n\n**Recommended next steps**\n- Get real quotes from coach firms and the zoo's group rates.\n- Compare the zoo's learning value against one cheaper alternative.\n- Set a no-contact or supervised-contact policy.\n- Confirm subsidies for low-income families.\n- Complete the risk assessment and parental consent forms.\n\nIf the costs fit, subsidies are secured, and the learning goals are clear, the trip is a good idea. If not, a cheaper alternative may deliver similar outcomes.",
+      "t": 11195
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "api_call",
+      "agent": "free-3",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Fun analyst. Look at the question only from the side of what students enjoy.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: A school wants to organise a class trip to a zoo. Weigh the idea.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T12:14:30Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "1999000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T12:14:34Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T12:14:30Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11999000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T12:14:30Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 12:14:34 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMjaBHL5RPkZ6ViUxd5v\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"CAQSqQcKEAgUGAI4AUIIdGhpbmtpbmcSDA+lliz43q+jLNClZRoMtVuHIdY5xR3spzSLIjDEU9CPeyrqQhXrsF4YMp4ep+bGNFSi4IOT4ski/H+U6OoPFLhaS6jh0SuGnN5DgJMqxga3tRZ4Ow+kDbQMvfEXjCWt/r5jdc4iGTloyHGtlzzpyLqwibDZkEnSioCbDv+jeQCnwqBS/mNc5K7z9cCYoww9jJS60D9nMV4i69di17penLttSa87zSdPwkXFr3n3hzCy1yEAb0owIG8C13L79D+DHRt21ahpCe4KU/uxIAv2xKQVDmUiyJHjmnmxs3lR1cGah4kxe8TKCPSiQWyF9913KV4vdX9tnSY0RN6HspwxdnnWFMr2/YhSM4qmFU0ADvukxxlq4zbjrl/6ul2mOpentRpZMDWLID68LwszA8DBGkxIkDKvvLauMprxst+RVf0MWTFJ+G/VV7bsMKS3QF+1F81QDSTZoFHwLZd3qoA3PXb5VUgutkzPq7xuWXdrSLnAIPybNlxKL6v0H2zAZHQYpkp4jpJFfDQanhIMfrgcff0Gwu1UfRMnsi3oFi5mKixuBxThHStJNTw4uH1/Y5tEXGk63KVfMh2GFuFHSUeN2RRFXWADj0IUKgOuG6XGa9kuoOqeyhhbowwAL7q3rOpdTileWFzMemEbH4cR7dawyHDDKjHTLcPjVITrmGAUCuOqoSt/UGi6YUCgV0iRV2hZ+QOmyhjuZOgelqZxWwfNUZOP33DkokATYfyRHoq2saKS3W1pCWhFwaHNkVCTAYxSf2trEHtyVlulQWjeC5Ft63fHVpWw6d+axvBhU0z7zceFKlYQMitZI2+pe/kRCS5+u5fcKstz0jEDJFUAKSrBIVAclgVNbxQ1fgD1vFJrtQQY37PXi1KoYzX4mz8DiTBAQfd6mWAVEcItwDIw9VqDvgkwPcWhsbHMIZhX16x0IEEf+8IUX3JdJENslOe0MiYZSSu9g47UQ9M9m/DTUuUzZ4M91uKcfw/Q/JjjxiKOHIr22I5dJ+roU72liKbYzc+go8zIjC+GizHyqT6vw+OlFR8QdMUi5crqraP9q1CtVys5FAQP+2++uwNVb2TyBOdMi7eJnyLThc4RwLqyaUt34cbzkV6aKsgINrEgK07aqMYVMsLawkv+Ibr4bvRD3SxYnwpx3Bl+Qvlk/dBK6hFXMko774oY3897HDtm570V5probkXRYY50hjAwolDqLDDp2Pgi3dHLGAE=\"},{\"type\":\"text\",\"text\":\"**Verdict: A zoo trip is a strong hit with students.** Here's how it looks from their side.\\n\\n**What students will love:**\\n- **Animals up close.** Most kids get excited seeing lions, giraffes, or penguins in person, and that excitement is easy to share.\\n- **Freedom from the classroom.** Walking around outdoors with friends feels like a reward in itself.\\n- **Photo moments.** Students will want selfies with animals, group shots, and funny pictures to post.\\n- **Feeding and interactive areas.** Petting zoos, feeding stations, and keeper talks are often the highlights.\\n- **Social time.** Lunch outside, sharing snacks, and chatting with friends away from desks build good energy.\\n\\n**What could dampen the fun:**\\n- **Too much walking.** Tired, cranky students stop enjoying anything. Shorter routes with rest stops help.\\n- **Long lectures or rigid worksheets.** If the trip feels like a lesson, the magic fades. Keep any tasks light, like a scavenger hunt or \\\"animal of the day\\\" pick.\\n- **Boredom with inactive animals.** Some animals sleep through the afternoon. Pick a zoo with shows, feeding times, or a play area.\\n- **Waiting in long queues** for popular exhibits or for food.\\n\\n**Ways to boost enjoyment:**\\n- Let students vote on their favourite animals to visit.\\n- Run a friendly competition, such as a photo contest or quiz with small prizes.\\n- Schedule a free-time block where they choose what to explore.\\n- Check feeding times and keeper talks in advance so students don't miss them.\\n\\n**Bottom line:** Students will likely enjoy this trip a lot, especially if it includes animal interaction, free time, and a little friendly competition. Keep the schedule relaxed and the learning tasks playful.\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":87,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":713,\"output_tokens_details\":{\"thinking_tokens\":110},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 4515,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 4517
+    },
+    {
+      "type": "api_call",
+      "agent": "free",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Cost analyst. Look at the question only from the side of cost.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: A school wants to organise a class trip to a zoo. Weigh the idea.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T12:14:30Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "1999000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T12:14:35Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T12:14:30Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11999000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T12:14:30Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 12:14:35 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMjaBCcVWosSiXysXRmb\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"CAQSyQgKEAgUGAI4AUIIdGhpbmtpbmcSDI7UPJmaEjqvBx/3khoMwlOKtj+wZJKGBv4tIjD4m+PhF29tSzQuwwb2QD1n1+u06ZGTz5YuQ/qc7fxWhWyhutCIFU9HI0YTrvAp6u8q5gfrxvaiPoq6P1LL5lic60sWv2vKZIFutZgHX4ztzJP3SRRTr3HIRW/7a5iZ99LctkXVeBtkXGz6z4vyX/CaDNIF9Txv07CRXp9eNAtCghGccWA7/Gx9jhhYP6fcsBq8LIva90EitNH1Q1x5Jgi9h8oke/e5NmNNNJn/Alisf5MthdVOxV0VvvDjDUBorHGGP3bCDUpQn8IZ/Q1y1drotNMJ22gQUepAzSOIPkPbNLw1tV+7y4f9ynE3j21oIYXya+ioxp/nQnRoBEdzYBL5QZNy33yvjrcg0hAMvI7TxO2fAdHOlpFD0ouq5aH0nX5AhZjF2NlgKbyAq1koTCcgW+z1AsTD85Qna1Vme0rB2+EvuAbEYWauyeujKc7GYoe8P+h5Lc/eBOZcaAUY7T1yUkytWX4w7t9Btn22N9TUuZqMXktXoHgCvQpwI4AD6U5G4S7vrBINjGi7IlNBDB9nQ+DXd3JC8dmFRoU5NC/KovgcjbG+MFOB0cmYxt+DUy54Sdvx4r22h7K4PZYVu7Aa252g/oGb7v44fFszJvAHw1Mu7Ab5RTPIs+cfzV0TO/xaLTQMBW1XWEE7Sk8mguc9W86VkH5WJ+HETCOve3nWCg8VqiWkGn1YViNd7X5Q4FMLsRd1YJ+RS0LhtqzB22jx2Fg+2ZF/71C07A1WOkLLr0XPU/p1iAgi/nf+yLzkLGLvvnxVuQleDUt0rINJ3KaN5o1GtoJmIsYxMc7oEbgFtHICei4bwIr0m8P5soxo2CChdNWciW92m1yeaGcw+Q3ebWujiA9SJDTLsWNl51CaxQZEfNbqfsEVYInqHU6eNuWITo8FGBnauFQeNE9/CUomTiC+keqGKBwNG8yEsDzhpJNTUmi1pYis83hcl2CTmK9C1N5NmEykbp+gyXzZqeXm3sY0sHK6pkY6ElFe9tX0fiUwcIVCodr4Y4pOZki1wSCkaNefGNf1kjXeYZaCuIxlB7aQI5RIrHR3s1YOlBwPcFdHxtysntYxboAvq91h2B2BdW5lkjhDjxQmShoc1eSHy4ITYP3+ewNVr1eAFtknirxS3IdAPF+UHlnmhGZmpvfFm036GubOaeFTsAMgfcRrLWUDhcZFk3qNH0CdqPVppQ6HVSDAZBJYDUdJI2mvpzYcCu7gBqynO6F+4BWkm0eqS4p5Ool4cNkO31bEaaMIp6HMpVeFZBOcS/ZhM3dsH6xJLFEq7KM+5cFRT0vr07VLR4qhIHpp44zlqII4XS1MYvOiw6H7AFVE6m0gxjk/6RA6ZeoSR4tCp4UgtBfpBV3BxourMmtvhCQ1T8fTQBJ3a60WP6A8zqDJ+xgB\"},{\"type\":\"text\",\"text\":\"**Cost Analysis: School Class Trip to a Zoo**\\n\\n**1. Direct costs (per trip)**\\n- **Transport:** Coach hire is typically the largest single item. Estimate by distance and class size.\\n- **Entry tickets:** Often discounted for school groups, but still a per-pupil cost. Check whether accompanying adults get free entry.\\n- **Insurance and permissions:** Trip cover and admin time for consent forms.\\n- **Meals and snacks:** Only if not covered by pupils' own packed lunches.\\n\\n**2. Indirect costs**\\n- **Staff time:** Teachers' planning, supervision, and recovery time. Count supervision ratios too; more adults may be needed, which means more staff cost.\\n- **Substitute cover:** If teachers are out of class, supply teacher fees apply.\\n- **Lost learning time:** A full day away from the timetable has an opportunity cost.\\n\\n**3. Hidden or variable costs**\\n- Cancellation or weather-related rescheduling\\n- Extra payments for guided tours or workshops\\n- Costs for pupils who cannot afford the trip (subsidies, which the school may need to fund)\\n\\n**4. Cost per pupil (illustrative only)**\\nTotal cost ÷ number of pupils. Example assumptions: coach £400, tickets 30 pupils × £12 = £360, staff/cover £250, insurance and admin £50. Total ≈ £1,060, or about £35 per pupil. Actual figures will vary by location and provider.\\n\\n**5. Funding options**\\n- Parent contributions (voluntary or capped)\\n- PTA or school fund\\n- Educational grants or zoo education programmes with reduced rates\\n\\n**6. Cost comparison**\\nCompare against cheaper alternatives: an on-site visit, a video-based lesson, or a local nature trail. The zoo option is justified only if its learning value per pound is clearly higher.\\n\\n**Verdict:** The trip is affordable if the cost per pupil fits the budget and subsidies are available for low-income families. Confirm real quotes from coach firms and the zoo's group rates before deciding. If costs exceed the budget or the cheaper alternatives deliver similar learning outcomes, the idea is not cost-effective.\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":83,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":892,\"output_tokens_details\":{\"thinking_tokens\":159},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 5348,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 5348
+    },
+    {
+      "type": "api_call",
+      "agent": "free-2",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: free\\nYou are Safety analyst. Look at the question only from the side of safety.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: A school wants to organise a class trip to a zoo. Weigh the idea.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "10000000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T12:14:30Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "1999000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T12:14:36Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T12:14:30Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11999000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T12:14:30Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 12:14:36 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMjaBDrXbKMUuxVWaNna\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"CAQS3woKEAgUGAI4AUIIdGhpbmtpbmcSDHSYVVsNhfhSrvmhMxoMD+yzLIVsRduFda2iIjCRPpb5Vxzlx7vULbI03lE65EQwDKkJ6Xlaj4avd79Ag8E6Tt+fmefbq8neVMqUNTgq/Ak5+dnyxwO3H4LntkWpH6nnIweKiaCy/NR+VRYgrc+R2vw8RXStOIcEwV7X/J5wCm9fegIaDlOHehUC488LSbS0ajOtGbnZoHOGEYQh50SU5fWt8SaERcpdXK34LfcCtC0dj//xstKSDzHWSJ19jjczTwGE5akNHSwWSyFkud4AtFfukRT2n/fTvgyBwM6CKQLrVHnqXbVpHYfZMgQjUEHBxCz3QbpiDY18acpVvQ/nZDs8mwsKd5cGxjxH0rnZzj7i25AZgYZbxFbVVMAKNM3L+VMu5RCi395uxy70/ZwtQX0NmjlqrfzkWpiElFUgEC628UR3IEvJjUudCNDmTNXaHl43h2j3D5sEEj4tcTcdK8FQ2GlZBJDvomDJiTY+7CAeIfGhGpjmoUY7bkDHs6JrOE5XBjrU99Y3DXDa4ZvFC+Udn6ul+cFkoF2teS1mMEJtJzfoAxZrkS/4TpTfAAGCPgNgd05u9O0QfCaBQYfns7rfJTUuhQ0BWCNgXxF51EITB/qbFlAQD5gkyqsPOhfR6S02g0tcrG49rfz8wWVu8LFx/HZUyrkTcHqpcXtPIsQt51ixiXNJq36OCLbbAOmJMFLFo+DwIcstV3itmv4aFYMHwN6Z6I+GU7XkrnILdJcCgwRo1HdrGCEujwX6Ut9Vzf+75aFSw1hv2pLxajDLHay1w58kStQ/1/0JuOUvlmkPcFsud+OVbABt2rY+60MEWmZXNGTgpRQShTaZ+UNLv32NAVd0BMybIU46nIvI01ehHTeV119LTHJF9279ACXH4I9uvWUjD4kin67wgySDI2S9t3HVi9FzWEUKAQEI7VQ+4TTL81cjt8R2rE9f7jqKBkEhbKHo4FARdfTvawgswdS7YP0pi4SkamEbLLcgIBoiTA7CoLeXeLP2PtIb6tNWg2nq8gt753mulTzsK6E56SjEKIpFqJro0eKmFUhXb0T4Oe+uS0cJDFQDGGICWgkkPWzhaGrJzrRZsT797R+nlJyuc8bVDbrBGUjnus83XnX+6bqANfEs+I2OiN0ndjWtAV6gMNezRZEYL0q0tRFGzRSj7KBgywkmanWhUK92v+BbogdL6ZtRPX0tq4jskaFTa/s7DiBqPd+fCCtYuWFjDtXpiUxIkc1VXQiLWpWB+nePhDlbatgUuT+oYN1R9xEAThKUT8jC58VoLK2cBXfFILq6D1HrkOJ8h1wkqVq3uK/ANXaSsO0QsiNLhZvTfru2gSK1JMYy1LJazGDsInWvsDKhrGEC86FdFUM5175cFGVGSmD8WPYSLGZoqNv/TnLhUFCuhP0lBU/WTOH2N50sDstFDxbRKyzYHT2vSfHdmwDL54WqwGYgh23z4DU3DgLMLspnCV9zurEpJKVfd6mvy8RVd9qlXtV4769kN+aAoRp/WsCEZdjzSn1/RwsOwCIAPxwzQlJ1+7laE574KtMLRMgLeHKrIt0OttEIIK7BK8Xi44jyqSsrXP5N87KvSWAW6fmED/bNEzvmJB3Wbe68neOOON7PYjv1sYf6tr5Qc6+BMhl5ziaLUVhwfOr+5rJ1lA81FQzcxfUeZbfCzrFCuU0JC6u8KUHBpR1pJcTOObfHphUBfR5yeeZMRlzgs2CE0xSARhZzhsw+g+/zjandRcMaDaTpxT3hu2Z31+vhlYCrIeWhi46f/bZiBOlvPxOczsLM5aDTPg0fj1LNGAE=\"},{\"type\":\"text\",\"text\":\"**Safety verdict: Acceptable with conditions.** A zoo trip is generally low-risk when the school plans for the hazards below.\\n\\n**Main risks and controls**\\n\\n1. **Animal contact and bites or scratches.** Keep children out of contact areas, especially petting zones and feeding sessions, unless staff supervise closely. Require hand-washing stations and a clear no-touching rule.\\n2. **Infection (zoonoses such as Salmonella, E. coli, ringworm).** Make hand hygiene mandatory before eating and after leaving animal areas. Bring hand sanitiser, and ensure children with open cuts are briefed.\\n3. **Getting lost or separated.** Use a buddy system, headcounts at set points, a meeting point, and name tags or wristbands with the school contact number, especially for younger pupils.\\n4. **Supervision ratio.** Maintain at least the school's minimum adult-to-pupil ratio, with extra adults for young children and pupils with additional needs. Each adult should know their assigned group.\\n5. **Transport.** Use a licensed coach or bus with seatbelts where fitted. Verify the operator's insurance and driver checks.\\n6. **Heat, sun and dehydration.** Check the forecast. Require water, sun protection and shaded rest breaks. Cancel or adapt if extreme heat is forecast.\\n7. **Medical needs and allergies.** Collect medical forms in advance. Carry medication, epinephrine auto-injectors where prescribed, and a first-aid kit. Ensure at least one trained first aider attends.\\n8. **Crowds and walking fatigue.** Plan routes, limit distances for young pupils, and set clear boundaries for the group.\\n9. **Emergency response.** Confirm the zoo's emergency procedures, know the nearest medical facility, and keep a list of emergency contacts and consent forms with a staff member.\\n\\n**Pre-trip checks**\\n- Confirm the zoo is accredited or licensed and has a current safety record.\\n- Complete and file a written risk assessment.\\n- Obtain signed parental consent covering medical treatment and activities.\\n- Brief pupils on rules before departure.\\n\\n**Conclusion:** The trip is safe to proceed if the school enforces hand hygiene, no-contact rules, supervision ratios, a buddy system, and a medical plan, and if it cancels or adjusts for extreme weather.\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":83,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":1059,\"output_tokens_details\":{\"thinking_tokens\":266},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 6277,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 6279
+    },
+    {
+      "type": "api_call",
+      "agent": "combiner",
+      "provider": "anthropic",
+      "n": 1,
+      "method": "POST",
+      "url": "https://api.anthropic.com/v1/messages",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "x-api-key": "(hidden)",
+          "anthropic-version": "2023-06-01"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"max_tokens\":4000,\"system\":\"Role: combiner\\nYou are the Combiner. You receive the results of several agents who worked on the same task at the same time. Combine them into one clear answer and say where they disagree.\\nKeep every reply under 300 words. Answer in English.\",\"messages\":[{\"role\":\"user\",\"content\":\"Task: A school wants to organise a class trip to a zoo. Weigh the idea.\\n\\nResults from the agents:\\n--- free ---\\n**Cost Analysis: School Class Trip to a Zoo**\\n\\n**1. Direct costs (per trip)**\\n- **Transport:** Coach hire is typically the largest single item. Estimate by distance and class size.\\n- **Entry tickets:** Often discounted for school groups, but still a per-pupil cost. Check whether accompanying adults get free entry.\\n- **Insurance and permissions:** Trip cover and admin time for consent forms.\\n- **Meals and snacks:** Only if not covered by pupils' own packed lunches.\\n\\n**2. Indirect costs**\\n- **Staff time:** Teachers' planning, supervision, and recovery time. Count supervision ratios too; more adults may be needed, which means more staff cost.\\n- **Substitute cover:** If teachers are out of class, supply teacher fees apply.\\n- **Lost learning time:** A full day away from the timetable has an opportunity cost.\\n\\n**3. Hidden or variable costs**\\n- Cancellation or weather-related rescheduling\\n- Extra payments for guided tours or workshops\\n- Costs for pupils who cannot afford the trip (subsidies, which the school may need to fund)\\n\\n**4. Cost per pupil (illustrative only)**\\nTotal cost ÷ number of pupils. Example assumptions: coach £400, tickets 30 pupils × £12 = £360, staff/cover £250, insurance and admin £50. Total ≈ £1,060, or about £35 per pupil. Actual figures will vary by location and provider.\\n\\n**5. Funding options**\\n- Parent contributions (voluntary or capped)\\n- PTA or school fund\\n- Educational grants or zoo education programmes with reduced rates\\n\\n**6. Cost comparison**\\nCompare against cheaper alternatives: an on-site visit, a video-based lesson, or a local nature trail. The zoo option is justified only if its learning value per pound is clearly higher.\\n\\n**Verdict:** The trip is affordable if the cost per pupil fits the budget and subsidies are available for low-income families. Confirm real quotes from coach firms and the zoo's group rates before deciding. If costs exceed the budget or the cheaper alternatives deliver similar learning outcomes, the idea is not cost-effective.\\n\\n--- free-2 ---\\n**Safety verdict: Acceptable with conditions.** A zoo trip is generally low-risk when the school plans for the hazards below.\\n\\n**Main risks and controls**\\n\\n1. **Animal contact and bites or scratches.** Keep children out of contact areas, especially petting zones and feeding sessions, unless staff supervise closely. Require hand-washing stations and a clear no-touching rule.\\n2. **Infection (zoonoses such as Salmonella, E. coli, ringworm).** Make hand hygiene mandatory before eating and after leaving animal areas. Bring hand sanitiser, and ensure children with open cuts are briefed.\\n3. **Getting lost or separated.** Use a buddy system, headcounts at set points, a meeting point, and name tags or wristbands with the school contact number, especially for younger pupils.\\n4. **Supervision ratio.** Maintain at least the school's minimum adult-to-pupil ratio, with extra adults for young children and pupils with additional needs. Each adult should know their assigned group.\\n5. **Transport.** Use a licensed coach or bus with seatbelts where fitted. Verify the operator's insurance and driver checks.\\n6. **Heat, sun and dehydration.** Check the forecast. Require water, sun protection and shaded rest breaks. Cancel or adapt if extreme heat is forecast.\\n7. **Medical needs and allergies.** Collect medical forms in advance. Carry medication, epinephrine auto-injectors where prescribed, and a first-aid kit. Ensure at least one trained first aider attends.\\n8. **Crowds and walking fatigue.** Plan routes, limit distances for young pupils, and set clear boundaries for the group.\\n9. **Emergency response.** Confirm the zoo's emergency procedures, know the nearest medical facility, and keep a list of emergency contacts and consent forms with a staff member.\\n\\n**Pre-trip checks**\\n- Confirm the zoo is accredited or licensed and has a current safety record.\\n- Complete and file a written risk assessment.\\n- Obtain signed parental consent covering medical treatment and activities.\\n- Brief pupils on rules before departure.\\n\\n**Conclusion:** The trip is safe to proceed if the school enforces hand hygiene, no-contact rules, supervision ratios, a buddy system, and a medical plan, and if it cancels or adjusts for extreme weather.\\n\\n--- free-3 ---\\n**Verdict: A zoo trip is a strong hit with students.** Here's how it looks from their side.\\n\\n**What students will love:**\\n- **Animals up close.** Most kids get excited seeing lions, giraffes, or penguins in person, and that excitement is easy to share.\\n- **Freedom from the classroom.** Walking around outdoors with friends feels like a reward in itself.\\n- **Photo moments.** Students will want selfies with animals, group shots, and funny pictures to post.\\n- **Feeding and interactive areas.** Petting zoos, feeding stations, and keeper talks are often the highlights.\\n- **Social time.** Lunch outside, sharing snacks, and chatting with friends away from desks build good energy.\\n\\n**What could dampen the fun:**\\n- **Too much walking.** Tired, cranky students stop enjoying anything. Shorter routes with rest stops help.\\n- **Long lectures or rigid worksheets.** If the trip feels like a lesson, the magic fades. Keep any tasks light, like a scavenger hunt or \\\"animal of the day\\\" pick.\\n- **Boredom with inactive animals.** Some animals sleep through the afternoon. Pick a zoo with shows, feeding times, or a play area.\\n- **Waiting in long queues** for popular exhibits or for food.\\n\\n**Ways to boost enjoyment:**\\n- Let students vote on their favourite animals to visit.\\n- Run a friendly competition, such as a photo contest or quiz with small prizes.\\n- Schedule a free-time block where they choose what to explore.\\n- Check feeding times and keeper talks in advance so students don't miss them.\\n\\n**Bottom line:** Students will likely enjoy this trip a lot, especially if it includes animal interaction, free time, and a little friendly competition. Keep the schedule relaxed and the learning tasks playful.\"}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "anthropic-organization-id": "(hidden)",
+          "anthropic-ratelimit-input-tokens-limit": "10000000",
+          "anthropic-ratelimit-input-tokens-remaining": "9999000",
+          "anthropic-ratelimit-input-tokens-reset": "2026-11-24T12:14:36Z",
+          "anthropic-ratelimit-output-tokens-limit": "2000000",
+          "anthropic-ratelimit-output-tokens-remaining": "1999000",
+          "anthropic-ratelimit-output-tokens-reset": "2026-11-24T12:14:41Z",
+          "anthropic-ratelimit-requests-limit": "13000",
+          "anthropic-ratelimit-requests-remaining": "12999",
+          "anthropic-ratelimit-requests-reset": "2026-11-24T12:14:36Z",
+          "anthropic-ratelimit-tokens-limit": "12000000",
+          "anthropic-ratelimit-tokens-remaining": "11998000",
+          "anthropic-ratelimit-tokens-reset": "2026-11-24T12:14:36Z",
+          "anthropic-workspace-id": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-security-policy": "(hidden)",
+          "content-type": "application/json",
+          "date": "Tue, 24 Nov 2026 12:14:41 GMT",
+          "request-id": "(hidden)",
+          "server": "(hidden)",
+          "server-timing": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "traceresponse": "(hidden)",
+          "vary": "(hidden)",
+          "x-robots-tag": "(hidden)"
+        },
+        "body": "{\"model\":\"claude-haiku-5-5\",\"id\":\"msg_011ChMjaduxsiBEiZc6P2aW5\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"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\"},{\"type\":\"text\",\"text\":\"**Combined verdict: Worth doing, with conditions.** The trip is safe, popular with pupils, and affordable if the budget and learning case hold up.\\n\\n**Points of agreement**\\n- **Safety:** Acceptable if the school enforces hand hygiene, supervision ratios, a buddy system, a medical plan, and a written risk assessment.\\n- **Cost:** Affordable if the per-pupil cost fits the budget (illustrative estimate: about £35) and subsidies cover pupils who cannot pay.\\n- **Enjoyment:** Students are likely to enjoy animal sightings, free time, and outdoor social time.\\n\\n**Where the agents disagree or pull in different directions**\\n1. **Animal contact:** The safety agent says to keep children out of petting and feeding areas unless staff supervise closely. The enjoyment agent names petting zones and feeding stations as highlights. The school must choose which, and should only include contact activities that staff can supervise.\\n2. **Learning versus fun:** The cost agent says the trip is justified only if its learning value beats cheaper alternatives, such as an on-site visit or a nature trail. The enjoyment agent recommends playful tasks and free time, which may reduce structured learning. Enjoyment does not prove educational value, so the school should set clear learning objectives.\\n3. **Who can attend:** The cost agent highlights that some families cannot afford the trip, which affects inclusion. The enjoyment and safety agents assume all pupils attend. Subsidies should be settled before the trip is confirmed.\\n\\n**Recommended next steps**\\n- Get real quotes from coach firms and the zoo's group rates.\\n- Compare the zoo's learning value against one cheaper alternative.\\n- Set a no-contact or supervised-contact policy.\\n- Confirm subsidies for low-income families.\\n- Complete the risk assessment and parental consent forms.\\n\\nIf the costs fit, subsidies are secured, and the learning goals are clear, the trip is a good idea. If not, a cheaper alternative may deliver similar outcomes.\"}],\"container\":null,\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":2268,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":1005,\"output_tokens_details\":{\"thinking_tokens\":331},\"service_tier\":\"standard\",\"inference_geo\":\"global\",\"speed\":\"standard\"},\"diagnostics\":null}"
+      },
+      "error": null,
+      "ms": 4914,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 11194
+    }
+  ],
+  "design": {
+    "pattern": "parallel",
+    "nodes": [
+      {
+        "id": "free",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Cost analyst",
+        "instructions": "Look at the question only from the side of cost.",
+        "slot": "anthropic"
+      },
+      {
+        "id": "free-2",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Safety analyst",
+        "instructions": "Look at the question only from the side of safety.",
+        "slot": "anthropic"
+      },
+      {
+        "id": "free-3",
+        "agent": "free",
+        "model": "fast",
+        "search": false,
+        "name": "Fun analyst",
+        "instructions": "Look at the question only from the side of what students enjoy.",
+        "slot": "anthropic"
+      },
+      {
+        "id": "combiner",
+        "agent": "combiner",
+        "model": "fast",
+        "search": false,
+        "slot": "anthropic"
+      }
+    ],
+    "edges": [
+      {
+        "from": "free",
+        "to": "combiner"
+      },
+      {
+        "from": "free-2",
+        "to": "combiner"
+      },
+      {
+        "from": "free-3",
+        "to": "combiner"
+      }
+    ]
+  },
+  "task": "A school wants to organise a class trip to a zoo. Weigh the idea.",
+  "limits": {
+    "maxSteps": 20,
+    "maxTokens": 40000,
+    "maxSearches": 3
+  },
+  "outcome": "finished",
+  "usage": {
+    "input": 2521,
+    "output": 3669,
+    "searches": 0,
+    "steps": 4
+  },
+  "source": "local",
+  "startedAt": "2026-11-24T12:14:29.872Z",
+  "endedAt": "2026-11-24T12:14:41.313Z",
+  "durationMs": 11441
+}

@@ -1,0 +1,6 @@
+{
+  "about": "Výzkumník, pisatel a kritik vysvětlují desetiletému fáze Měsíce. Každý agent běží na modelu Strong od Anthropicu.",
+  "how": "Tři agenti pracují v řetězu; každý dostane zadání a text agenta před sebou. Všichni tři používají Strong.",
+  "learns": "Nejsilnější model v každém kroku je nejdražší; většinu kroků by zvládl lehčí model.",
+  "watch": "Jak dlouhý je každý krok a jak dlouho běh trvá, a pak to porovnejte s dvojčetem, které používá lehčí modely."
+}

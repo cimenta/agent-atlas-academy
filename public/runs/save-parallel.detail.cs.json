@@ -1,0 +1,6 @@
+{
+  "about": "Stejní tři analytici pracují současně a slučovač jejich odpovědi spojí.",
+  "how": "Tři analytici začnou společně; slučovač dostane všechny tři odpovědi a napíše jeden text.",
+  "learns": "Souběžná práce zkrátí čas; cena zůstane skoro stejná, plus jedno volání navíc na spojení.",
+  "watch": "Tři agenty, kteří začnou společně, a dobu běhu: asi 11 sekund proti 15 u řetězového dvojčete."
+}

@@ -1,0 +1,6 @@
+{
+  "about": "A researcher, a writer and a critic explain the phases of the moon to a ten-year-old. Every agent runs on the Strong model of Anthropic.",
+  "how": "The three agents work in a chain; each gets the task and the text of the one before. All three use Strong.",
+  "learns": "The strongest model on every step is the most expensive; most of these steps would do well on a lighter model.",
+  "watch": "How long each step is and how long the run takes, then compare with the twin run that uses lighter models."
+}

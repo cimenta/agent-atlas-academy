@@ -1,0 +1,61 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write an invitation to a school concert.",
+  "about": {
+    "en": {
+      "title": "Reliability: three measurable criteria",
+      "author": "Agent Atlas Academy",
+      "description": "At most 50 words, names the day and the place, ends with a call to come.\n\n**What it teaches**\n\nMeasurable criteria let the evaluator find a real fault and say exactly what to change."
+    },
+    "cs": {
+      "title": "Spolehlivost: tři měřitelná kritéria",
+      "author": "Agent Atlas Academy",
+      "description": "Nejvýš 50 slov, uvede den a místo, končí výzvou přijít.\n\n**Čemu se naučíte**\n\nMěřitelná kritéria umožní hodnotiteli najít skutečnou chybu a říct, co změnit."
+    }
+  },
+  "library": {
+    "level": 1,
+    "kind": "pair",
+    "twin": "rel-eval-vague",
+    "paths": {
+      "reliable": 4
+    },
+    "tags": [
+      "basics",
+      "decision-making",
+      "risk-analysis"
+    ],
+    "teaches": {
+      "en": "Measurable criteria let the evaluator find a real fault and say exactly what to change.",
+      "cs": "Měřitelná kritéria umožní hodnotiteli najít skutečnou chybu a říct, co změnit."
+    }
+  },
+  "design": {
+    "pattern": "evaluator",
+    "nodes": [
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "evaluator",
+        "agent": "evaluator",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "writer",
+        "to": "evaluator"
+      }
+    ],
+    "rounds": 2,
+    "criteria": "At most 50 words. Names the day and the place. Ends with a call to come."
+  }
+}

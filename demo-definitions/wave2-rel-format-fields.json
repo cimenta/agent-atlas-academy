@@ -1,0 +1,77 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "From this note take the name of the dish, the number of servings and whether it contains nuts, and write a label: Grandma's apple cake serves eight and has walnuts on top.",
+  "about": {
+    "en": {
+      "title": "Reliability: the first agent answers in fields",
+      "author": "Agent Atlas Academy",
+      "description": "The reader must fill three fields: dish, servings, nuts.\n\n**What it teaches**\n\nA fixed answer format makes the facts easy to find and checked; a wrong answer is asked for again."
+    },
+    "cs": {
+      "title": "Spolehlivost: první agent odpovídá v polích",
+      "author": "Agent Atlas Academy",
+      "description": "Čtenář musí vyplnit tři pole: jídlo, porce, ořechy.\n\n**Čemu se naučíte**\n\nPevný formát odpovědi usnadní nalezení údajů a kontroluje se; špatná odpověď se vyžádá znovu."
+    }
+  },
+  "library": {
+    "level": 1,
+    "kind": "pair",
+    "twin": "rel-format-free",
+    "paths": {
+      "reliable": 2
+    },
+    "tags": [
+      "basics",
+      "risk-analysis",
+      "prompt-chaining"
+    ],
+    "teaches": {
+      "en": "A fixed answer format makes the facts easy to find and checked; a wrong answer is asked for again.",
+      "cs": "Pevný formát odpovědi usnadní nalezení údajů a kontroluje se; špatná odpověď se vyžádá znovu."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "reader",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Reader",
+        "instructions": "Find the facts that are asked for in the note.",
+        "format": {
+          "fields": [
+            {
+              "name": "dish",
+              "type": "text"
+            },
+            {
+              "name": "servings",
+              "type": "number"
+            },
+            {
+              "name": "nuts",
+              "type": "yesno"
+            }
+          ]
+        }
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "reader",
+        "to": "writer"
+      }
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write an invitation to a school concert.",
+  "about": {
+    "en": {
+      "title": "Reliability: vague criteria for the evaluator",
+      "author": "Agent Atlas Academy",
+      "description": "The criteria are: Write it nicely.\n\n**What it teaches**\n\nVague criteria give the evaluator nothing to measure; it accepts at once or asks for changes without a reason."
+    },
+    "cs": {
+      "title": "Spolehlivost: vágní kritéria hodnotitele",
+      "author": "Agent Atlas Academy",
+      "description": "Kritéria zní: Napiš to hezky.\n\n**Čemu se naučíte**\n\nVágní kritéria nedají hodnotiteli nic k měření; přijme hned, nebo žádá změny bez důvodu."
+    }
+  },
+  "library": {
+    "level": 1,
+    "kind": "pair",
+    "twin": "rel-eval-good",
+    "paths": {
+      "reliable": 3
+    },
+    "tags": [
+      "basics",
+      "decision-making",
+      "risk-analysis"
+    ],
+    "teaches": {
+      "en": "Vague criteria give the evaluator nothing to measure; it accepts at once or asks for changes without a reason.",
+      "cs": "Vágní kritéria nedají hodnotiteli nic k měření; přijme hned, nebo žádá změny bez důvodu."
+    }
+  },
+  "design": {
+    "pattern": "evaluator",
+    "nodes": [
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      },
+      {
+        "id": "evaluator",
+        "agent": "evaluator",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "writer",
+        "to": "evaluator"
+      }
+    ],
+    "rounds": 2,
+    "criteria": "Write it nicely."
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write two sentences that explain why leaves change colour in autumn.",
+  "about": {
+    "en": {
+      "title": "Reliability: one agent judges itself",
+      "author": "Agent Atlas Academy",
+      "description": "A writer and an evaluator that is the same model with a critic's role.\n\n**What it teaches**\n\nSelf-critique costs one agent less, but it shares the writer's blind spots."
+    },
+    "cs": {
+      "title": "Spolehlivost: jeden agent posuzuje sám sebe",
+      "author": "Agent Atlas Academy",
+      "description": "Pisatel a hodnotitel, který je týž model v roli kritika.\n\n**Čemu se naučíte**\n\nSebekritika stojí o agenta méně, ale sdílí slepá místa pisatele."
+    }
+  },
+  "library": {
+    "level": 2,
+    "paths": {
+      "reliable": 10
+    },
+    "tags": [
+      "decision-making",
+      "disagreement",
+      "basics"
+    ],
+    "teaches": {
+      "en": "Self-critique costs one agent less, but it shares the writer's blind spots.",
+      "cs": "Sebekritika stojí o agenta méně, ale sdílí slepá místa pisatele."
+    }
+  },
+  "design": {
+    "pattern": "evaluator",
+    "nodes": [
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [],
+    "rounds": 2,
+    "criteria": "Correct. At most two sentences. No jargon.",
+    "selfCritique": true
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "about": "Three analysts judge a class trip to a zoo, one from the side of cost, one of safety, one of fun. They work one after another.",
+  "how": "A chain: each analyst gets the task and the text of the one before, although the analyses do not need each other.",
+  "learns": "A chain waits for every step; analyses that do not depend on each other lose time when they run one after another.",
+  "watch": "The run took about 15 seconds. Compare with the parallel twin, which does the same work side by side."
+}

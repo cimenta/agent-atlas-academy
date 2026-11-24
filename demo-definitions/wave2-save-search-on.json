@@ -1,0 +1,62 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Explain how a bill becomes a law in a parliament, for a student who writes a school report. Name what a student should check in a source.",
+  "about": {
+    "en": {
+      "title": "Cost: the researcher may search the web",
+      "author": "Agent Atlas Academy",
+      "description": "The researcher may make up to two searches.\n\n**What it teaches**\n\nA search has its own price for every query; the answer gets sources."
+    },
+    "cs": {
+      "title": "Cena: výzkumník smí hledat na webu",
+      "author": "Agent Atlas Academy",
+      "description": "Výzkumník smí udělat nejvýš dvě hledání.\n\n**Čemu se naučíte**\n\nHledání má vlastní cenu za každý dotaz; odpověď dostane zdroje."
+    }
+  },
+  "library": {
+    "level": 2,
+    "kind": "pair",
+    "twin": "save-search-off",
+    "paths": {
+      "save": 8
+    },
+    "tags": [
+      "cost",
+      "explaining",
+      "prompt-chaining"
+    ],
+    "teaches": {
+      "en": "A search has its own price for every query; the answer gets sources.",
+      "cs": "Hledání má vlastní cenu za každý dotaz; odpověď dostane zdroje."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": true,
+        "limits": {
+          "maxSearches": 2
+        }
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "researcher",
+        "to": "writer"
+      }
+    ]
+  }
+}

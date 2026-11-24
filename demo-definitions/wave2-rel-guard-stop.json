@@ -1,0 +1,67 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write a short newsletter item from this note for the club members. Note: The club meets on Friday in room 12. Wi-Fi password: tulip-7391. Bring a laptop.",
+  "about": {
+    "en": {
+      "title": "Reliability: a secret guardrail on the output",
+      "author": "Agent Atlas Academy",
+      "description": "The writer's output is checked for something that looks like a secret; the run stops if it does.\n\n**What it teaches**\n\nA guardrail checks the text before it moves on and stops the run when a secret would go out."
+    },
+    "cs": {
+      "title": "Spolehlivost: guardrail na tajné údaje na výstupu",
+      "author": "Agent Atlas Academy",
+      "description": "Výstup pisatele se zkontroluje, zda nevypadá jako tajný údaj; pokud ano, běh se zastaví.\n\n**Čemu se naučíte**\n\nGuardrail zkontroluje text dřív, než půjde dál, a zastaví běh, když by tajný údaj odešel."
+    }
+  },
+  "library": {
+    "level": 2,
+    "kind": "pair",
+    "twin": "rel-guard-leak",
+    "paths": {
+      "reliable": 6
+    },
+    "tags": [
+      "risk-analysis",
+      "prompt-chaining"
+    ],
+    "teaches": {
+      "en": "A guardrail checks the text before it moves on and stops the run when a secret would go out.",
+      "cs": "Guardrail zkontroluje text dřív, než půjde dál, a zastaví běh, když by tajný údaj odešel."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "reader",
+        "agent": "free",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "name": "Reader",
+        "instructions": "Pick out what the note says."
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "slot": "anthropic",
+        "search": false,
+        "guardrails": [
+          {
+            "where": "output",
+            "kind": "secret",
+            "onFail": "stop"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from": "reader",
+        "to": "writer"
+      }
+    ]
+  }
+}
