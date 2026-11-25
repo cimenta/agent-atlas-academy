@@ -22,7 +22,7 @@ export function createSettingsStore(storage) {
     // Tooltips are on unless the user turned them off.
     // The player controls sit on one slim bar ("bar") unless the user chose the side column ("side").
     const free = stored?.freeTier;
-    return { freeTier: Object.fromEntries(FREE_PROVIDERS.map((p) => [p, free?.[p] === true])), limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, helpButtons: stored?.helpButtons !== false, webSearch: stored?.webSearch !== false, ownTools: stored?.ownTools !== false, fallback: clampFallback(stored?.fallback), formatEnforcement: stored?.formatEnforcement !== false, playerLayout: stored?.playerLayout === "side" ? "side" : "bar", createLayout: stored?.createLayout === "workspace" ? "workspace" : "steps", shortcuts: stored?.shortcuts !== false, goKeys: mergeGoKeys(stored?.goKeys), providerColors: mergeProviderColors(stored?.providerColors), requestTimeoutSec: clampTimeoutSec(stored?.requestTimeoutSec), maxOutputTokens: clampOutputTokens(stored?.maxOutputTokens), retries: clampRetries(stored?.retries ?? undefined), retryDelaySec: clampRetryDelaySec(stored?.retryDelaySec), repeatStop: clampRepeatStop(stored?.repeatStop), handoffChars: clampHandoffChars(stored?.handoffChars), modelOverrides: cleanOverrides(stored?.modelOverrides) };
+    return { freeTier: Object.fromEntries(FREE_PROVIDERS.map((p) => [p, free?.[p] === true])), limits: clampLimits(stored?.limits), tooltips: stored?.tooltips !== false, helpButtons: stored?.helpButtons !== false, libraryHelp: stored?.libraryHelp !== false, webSearch: stored?.webSearch !== false, ownTools: stored?.ownTools !== false, fallback: clampFallback(stored?.fallback), formatEnforcement: stored?.formatEnforcement !== false, playerLayout: stored?.playerLayout === "side" ? "side" : "bar", createLayout: stored?.createLayout === "workspace" ? "workspace" : "steps", shortcuts: stored?.shortcuts !== false, goKeys: mergeGoKeys(stored?.goKeys), providerColors: mergeProviderColors(stored?.providerColors), requestTimeoutSec: clampTimeoutSec(stored?.requestTimeoutSec), maxOutputTokens: clampOutputTokens(stored?.maxOutputTokens), retries: clampRetries(stored?.retries ?? undefined), retryDelaySec: clampRetryDelaySec(stored?.retryDelaySec), repeatStop: clampRepeatStop(stored?.repeatStop), handoffChars: clampHandoffChars(stored?.handoffChars), modelOverrides: cleanOverrides(stored?.modelOverrides) };
   }
   function save(next) {
     try {
@@ -91,6 +91,10 @@ export function createSettingsStore(storage) {
     // The round ? buttons that open a section of Help: shown unless turned off.
     setHelpButtons(on) {
       save({ ...get(), helpButtons: on !== false });
+    },
+    // The Library help window opens by itself when the Library opens, unless the student turned it off (Do not show again, or Settings).
+    setLibraryHelp(on) {
+      save({ ...get(), libraryHelp: on !== false });
     },
     // Returns false (and keeps the old letters) when the new ones are not valid.
     setGoKeys(map) {

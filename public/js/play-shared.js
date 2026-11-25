@@ -143,14 +143,14 @@ export function runRow(ctx, item, pick) {
 
 // The two runs of a before and after pair in one frame. The header holds a question mark: on hover, focus or a click it says what the pair compares
 // and what each run teaches. rowOf(item) draws one card.
-export function pairFrame(ctx, members, rowOf) {
+export function pairFrame(ctx, members, rowOf, { idPrefix = "pair-tip" } = {}) {
   const { doc, t, lang } = ctx;
   const trio = members.length === 3;
   const key = groupKey(members);
   const said = t(`pair.cmp.${key}`);
   const compares = said === `pair.cmp.${key}` ? t("pair.cmpDefault") : said;
   const teaches = (item) => item?.teaches?.[lang] ?? item?.teaches?.en ?? "";
-  const tipId = `pair-tip-${key}`;
+  const tipId = `${idPrefix}-${key}`;
   const tip = h(doc, "div", { class: "pair-tip", id: tipId, role: "tooltip", hidden: true, "data-ui": "pair-tip" },
     h(doc, "b", {}, t("pair.compared")),
     h(doc, "p", {}, compares),

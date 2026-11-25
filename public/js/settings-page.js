@@ -674,6 +674,14 @@ export function renderSettings(ctx) {
     say(t(helpBox.checked ? "settings.helpButtonsOff" : "settings.helpButtonsOn"));
   });
 
+  // The Library help window that opens by itself.
+  const libraryHelpBox = h(doc, "input", { id: "set-library-help", type: "checkbox", "data-ui": "set-library-help" });
+  libraryHelpBox.checked = settings.get().libraryHelp;
+  libraryHelpBox.addEventListener("change", () => {
+    settings.setLibraryHelp(libraryHelpBox.checked);
+    say(t(libraryHelpBox.checked ? "settings.libraryHelpOn" : "settings.libraryHelpOff"));
+  });
+
   // Where the player buttons sit.
   const layoutSelect = h(doc, "select", { id: "set-player-layout", "data-ui": "player-layout-select" }, h(doc, "option", { value: "side" }, t("settings.playerSide")), h(doc, "option", { value: "bar" }, t("settings.playerBar")));
   layoutSelect.value = settings.get().playerLayout;
@@ -864,6 +872,9 @@ export function renderSettings(ctx) {
       h(doc, "h3", {}, t("settings.helpButtonsHeading"), help("settings-help-buttons", t("settings.helpButtonsHeading"))),
       h(doc, "p", {}, t("settings.helpButtonsIntro")),
       h(doc, "div", { class: "field checkbox" }, helpBox, h(doc, "label", { for: "set-help-buttons" }, t("settings.helpButtonsLabel"))),
+      h(doc, "h3", {}, t("settings.libraryHelpHeading")),
+      h(doc, "p", {}, t("settings.libraryHelpIntro")),
+      h(doc, "div", { class: "field checkbox" }, libraryHelpBox, h(doc, "label", { for: "set-library-help" }, t("settings.libraryHelpLabel"))),
       h(doc, "h3", {}, t("settings.createHeading"), help("settings-create", t("settings.createHeading"))),
       h(doc, "p", {}, t("settings.createIntro")),
       field("set-create-layout", t("settings.createLabel"), createLayoutSelect),

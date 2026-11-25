@@ -24,6 +24,7 @@ import { groupOfTag, tagCounts, filterByTags, cloudRows, tagWeight } from "./lib
 import { stepOf, groupPairs } from "./library-path.js";
 import { loadProgress, setDone, isDone, withoutDone } from "./library-progress.js";
 import { drawPath, drawFilterBar } from "./library-path-view.js";
+import { createLibraryHelp, helpWanted, markHelpSeen } from "./library-help.js";
 
 export { importFiles };
 
@@ -626,6 +627,8 @@ export async function renderLibraryTab(ctx, requestedId) {
     body.replaceChildren(view);
   }
 
+  const help = createLibraryHelp(ctx, () => gallery);
+  ctx.onLeave(() => help.close());
   let focusRightTab = false;
   const RIGHT_TABS = ["path", "tags", "detail"];
   const rightTabs = () => {
@@ -644,6 +647,7 @@ export async function renderLibraryTab(ctx, requestedId) {
         return button;
       }),
     );
+    list.append(h(doc, "span", { class: "tab-tools" }, help.button()));
     list.addEventListener("keydown", (event) => {
       if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
       event.preventDefault();
@@ -752,4 +756,9 @@ export async function renderLibraryTab(ctx, requestedId) {
   redraw = draw;
   await draw();
   await drawRight();
+  // The first time the Library opens in a browser session the help window opens by itself (a link to one run does not get it).
+  if (!requestedId && helpWanted(ctx)) {
+    markHelpSeen(ctx);
+    help.open();
+  }
 }
