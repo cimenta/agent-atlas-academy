@@ -65,9 +65,10 @@ test("the reminder shows after enough changes, in the mode remind only", () => {
 });
 
 test("the file name sorts by time", () => {
-  assert.equal(backupFileName(new Date(2026, 10, 25, 14, 5)), "agent-atlas-backup-2026-11-25-1405.json.gz");
-  assert.equal(backupFileName(new Date(2026, 10, 25, 14, 5), ".json"), "agent-atlas-backup-2026-11-25-1405.json");
-  assert.ok(backupFileName(new Date(2026, 10, 25, 14, 5)) < backupFileName(new Date(2026, 10, 25, 14, 30)));
+  assert.equal(backupFileName(new Date(2026, 10, 25, 14, 5, 9)), "agent-atlas-backup-2026-11-25-140509.json.gz");
+  assert.equal(backupFileName(new Date(2026, 10, 25, 14, 5, 9), ".json"), "agent-atlas-backup-2026-11-25-140509.json");
+  assert.ok(backupFileName(new Date(2026, 10, 25, 14, 5, 9)) < backupFileName(new Date(2026, 10, 25, 14, 5, 40)));
+  assert.ok(backupFileName(new Date(2026, 10, 25, 14, 5, 40), ".json") < backupFileName(new Date(2026, 10, 25, 14, 5, 41)), "two files of one minute are told apart by the seconds, whatever their extension");
 });
 
 function fakeFolder(existing = []) {
@@ -252,8 +253,38 @@ test("a failed backup is remembered with its time, and a good one clears it", as
 test("the time in a file name is read back, and only our names count", () => {
   assert.equal(dateOfName("agent-atlas-backup-2026-11-25-1432.json.gz"), new Date(2026, 10, 25, 14, 32).getTime());
   assert.equal(dateOfName("agent-atlas-backup-2026-11-25-1432.json"), new Date(2026, 10, 25, 14, 32).getTime());
+  assert.equal(dateOfName("agent-atlas-backup-2026-11-25-143207.json.gz"), new Date(2026, 10, 25, 14, 32, 7).getTime(), "a name with seconds");
   assert.equal(dateOfName("holiday.json"), 0);
   assert.equal(isBackupFile("agent-atlas-backup-x.json"), true);
   assert.equal(isBackupFile("agent-atlas-backup-x.txt"), false);
   assert.equal(isBackupFile("other.json"), false);
+});
+
+test("two backups of the same minute are listed with the last one first, whatever their extension and the old names without seconds", async () => {
+  const w = service();
+  const stamps = new Map([["agent-atlas-backup-2026-11-25-1400.json.gz", 30], ["agent-atlas-backup-2026-11-25-1400.json", 10], ["agent-atlas-backup-2026-11-25-1359.json.gz", 99]]);
+  const folder = fakeFolder([...stamps.keys()]);
+  const entries = folder.entries;
+  folder.entries = async function* () {
+    for await (const [name, entry] of entries.call(folder)) yield [name, { kind: "file", getFile: async () => ({ size: 3, lastModified: stamps.get(name) }) }];
+  };
+  w.setHandle(folder);
+  const names = (await w.svc.listFiles()).files.map((f) => f.name);
+  assert.deepEqual(names, ["agent-atlas-backup-2026-11-25-1400.json.gz", "agent-atlas-backup-2026-11-25-1400.json", "agent-atlas-backup-2026-11-25-1359.json.gz"], "the time of the file breaks a tie of one minute");
+  stamps.set("agent-atlas-backup-2026-11-25-1400.json", 50);
+  const again = (await w.svc.listFiles()).files.map((f) => f.name);
+  assert.equal(again[0], "agent-atlas-backup-2026-11-25-1400.json", "the later of two files of one minute is first, not the one with the later extension");
+});
+
+test("the files beyond the newest five are removed by their time, not by the order of their extensions", async () => {
+  const stamps = new Map([["agent-atlas-backup-2026-01-01-0000.json.gz", 100], ["agent-atlas-backup-2026-01-01-0000.json", 1]]);
+  for (let d = 2; d <= 4; d++) stamps.set("agent-atlas-backup-2026-01-0" + d + "-0000.json", 10 + d);
+  const folder = fakeFolder([...stamps.keys()]);
+  const entries = folder.entries;
+  folder.entries = async function* () {
+    for await (const [name] of entries.call(folder)) yield [name, { kind: "file", getFile: async () => ({ size: 3, lastModified: stamps.get(name) ?? 1000 }) }];
+  };
+  await writeToFolder(folder, "agent-atlas-backup-2026-01-06-0000.json", "NEW");
+  assert.equal(folder.files.has("agent-atlas-backup-2026-01-01-0000.json"), false, "the older of the two files of one minute goes");
+  assert.equal(folder.files.has("agent-atlas-backup-2026-01-01-0000.json.gz"), true, "the later one stays");
 });

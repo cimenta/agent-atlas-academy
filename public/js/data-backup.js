@@ -83,20 +83,23 @@ export function backupDue(state, now) {
 // The reminder of the mode remind: shown when enough changes were made since the last backup or export.
 export const reminderDue = (state) => state.mode === "remind" && state.changes >= state.remindAfter;
 
-// The file name of a backup, sortable: agent-atlas-backup-2026-11-25-1432.json.gz
+// The file name of a backup, sortable: agent-atlas-backup-2026-11-25-143207.json.gz (the seconds tell apart two backups of one minute)
 export function backupFileName(date, extension = PLAIN_EXTENSION) {
   const p = (n) => String(n).padStart(2, "0");
-  return `${FILE_PREFIX}${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}-${p(date.getHours())}${p(date.getMinutes())}${extension}`;
+  return `${FILE_PREFIX}${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}-${p(date.getHours())}${p(date.getMinutes())}${p(date.getSeconds())}${extension}`;
 }
 
 // Is this a file of ours? (agent-atlas-backup-...json or .json.gz) A file of another name in the folder is never listed, changed or removed.
 export const isBackupFile = (name) => name.startsWith(FILE_PREFIX) && (name.endsWith(".json") || name.endsWith(".json.gz"));
 
-// The time in the name of a backup file (agent-atlas-backup-2026-11-25-1432.json.gz) as milliseconds, or 0 when the name has none.
+// The time in the name of a backup file (agent-atlas-backup-2026-11-25-143207.json.gz, or an older one without seconds: ...-1432.json.gz) as milliseconds, or 0 when the name has none.
 export function dateOfName(name) {
-  const m = /^agent-atlas-backup-(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})\.json(?:\.gz)?$/.exec(name);
-  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]), Number(m[5])).getTime() : 0;
+  const m = /^agent-atlas-backup-(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})(\d{2})?\.json(?:\.gz)?$/.exec(name);
+  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]), Number(m[5]), Number(m[6] ?? 0)).getTime() : 0;
 }
+
+// The order of two backup files, the newest first: by the time in the name, then by the time the file was written (two files of one minute, or an old name without seconds), then by the name.
+export const newestFirst = (a, b) => dateOfName(b.name) - dateOfName(a.name) || (b.modified || 0) - (a.modified || 0) || (a.name < b.name ? 1 : a.name > b.name ? -1 : 0);
 
 // Writes the file into a folder handle (File System Access API) and removes the oldest of our own files beyond the newest KEEP_FILES.
 export async function writeToFolder(handle, name, data, keep = KEEP_FILES) {
@@ -105,11 +108,20 @@ export async function writeToFolder(handle, name, data, keep = KEEP_FILES) {
   await out.write(data);
   await out.close();
   const ours = [];
-  for await (const [entryName, entry] of handle.entries()) if (entry.kind === "file" && isBackupFile(entryName)) ours.push(entryName);
-  ours.sort();
-  for (const old of ours.slice(0, Math.max(0, ours.length - keep))) {
+  for await (const [entryName, entry] of handle.entries()) {
+    if (entry.kind !== "file" || !isBackupFile(entryName)) continue;
+    let modified = 0;
     try {
-      await handle.removeEntry(old);
+      modified = (await entry.getFile()).lastModified || 0;
+    } catch {
+      // without a time the name alone decides
+    }
+    ours.push({ name: entryName, modified });
+  }
+  ours.sort(newestFirst);
+  for (const old of ours.slice(keep)) {
+    try {
+      await handle.removeEntry(old.name);
     } catch {
       // an old file that cannot be removed is left
     }
@@ -241,9 +253,9 @@ export function createBackupService({ storage, runStore, settings, skills, vault
       for await (const [name, entry] of handle.entries()) {
         if (entry.kind !== "file" || !isBackupFile(name)) continue;
         const file = await entry.getFile();
-        files.push({ name, size: file.size, date: dateOfName(name) || file.lastModified || 0, encrypted: !name.endsWith(".gz") });
+        files.push({ name, size: file.size, date: dateOfName(name) || file.lastModified || 0, modified: file.lastModified || 0, encrypted: !name.endsWith(".gz") });
       }
-      files.sort((a, b) => (a.name < b.name ? 1 : a.name > b.name ? -1 : 0));
+      files.sort(newestFirst);
       return { ok: true, files };
     } catch {
       return { ok: false, reason: "read", files: [] };
