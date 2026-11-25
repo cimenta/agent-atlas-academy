@@ -1926,7 +1926,7 @@
   "skills.appVersion": "app, version {v}",
   "skills.appReadonly": "A skill of the app can not be changed. You can make your own skill that extends it, and it keeps the version it was made from until you accept a newer one.",
   "skills.cultureList": "Cultures: {list}.",
-  "skills.cultureNote": "The cultures are simplifications. Check the result with someone who knows the culture before you rely on it. A model may write a culture worse in some languages, and Thai or Hindi text costs more tokens.",
+  "skills.cultureNote": "The cultures are simplifications. Check the result with someone who knows the culture before you rely on it. The culture changes how the text is written, not the language: the letter stays in the language of the task. A model may know some cultures worse than others.",
   "skills.composedHeading": "The text the model gets",
   "skills.mineHeading": "My skill",
   "skills.name": "Name",

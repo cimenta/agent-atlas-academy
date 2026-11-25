@@ -1926,7 +1926,7 @@
   "skills.appVersion": "aplikace, verze {v}",
   "skills.appReadonly": "Skill aplikace se nedá měnit. Můžete z něj udělat vlastní skill, který ho rozšiřuje. Ten si pamatuje verzi, ze které vznikl, dokud nepřijmete novější.",
   "skills.cultureList": "Kultury: {list}.",
-  "skills.cultureNote": "Kultury jsou zjednodušení. Výsledek si před použitím ověřte u někoho, kdo kulturu zná. Model může některé jazyky psát hůř a thajský nebo hindský text stojí víc tokenů.",
+  "skills.cultureNote": "Kultury jsou zjednodušení. Výsledek si před použitím ověřte u někoho, kdo kulturu zná. Kultura mění, jak se text píše, ne jazyk: dopis zůstane v jazyce zadání. Model může některé kultury znát hůř než jiné.",
   "skills.composedHeading": "Text, který dostane model",
   "skills.mineHeading": "Můj skill",
   "skills.name": "Název",

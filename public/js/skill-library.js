@@ -12,10 +12,10 @@ const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v)
 export const CULTURE_IDS = ["cs", "en", "th", "in"];
 export const DEFAULT_CULTURE = "cs";
 const CULTURE_TEXT = {
-  cs: "Culture: Czech. Address the reader formally with title and surname, stay factual and polite, avoid superlatives. Close with a formal greeting.",
-  en: "Culture: international English. Write directly but politely, in short paragraphs, with a clear next action at the end.",
-  th: "Culture: Thai. Write very politely, say bad news indirectly and with an apology, help the other side keep face, and use polite particles. Write the text in Thai.",
-  in: "Culture: Indian business English. Write formally, respect hierarchy, open with polite phrases, and avoid outdated stock phrases.",
+  cs: "Culture: Czech. Address the reader formally with title and surname, stay factual and polite, avoid superlatives. Close with a formal greeting. Keep the language of the task.",
+  en: "Culture: international English. Write directly but politely, in short paragraphs, with a clear next action at the end. Keep the language of the task.",
+  th: "Culture: Thai. Write very politely, say bad news indirectly and with an apology, help the other side keep face. Keep the language of the task.",
+  in: "Culture: Indian business English. Write formally, respect hierarchy, open with polite phrases, and avoid outdated stock phrases. Keep the language of the task.",
 };
 
 // The skills of the app. cur is the current version; versions keeps every version, so a skill of a student stays on the one it was made from.
