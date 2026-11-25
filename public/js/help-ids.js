@@ -3,7 +3,7 @@ const LIMIT_HELP = { steps: "harness-steps", tokens: "harness-tokens", searches:
 
 export function warningHelp(event) {
   if (event?.fallback) return "harness-fallback";
-  if (event?.webSearchOff) return "harness-web-search";
+  if (event?.webSearchOff || event?.toolsOff) return "harness-web-search";
   if (event?.handoff) return "harness-handoff";
   if (event?.rateWait !== undefined) return ["openrouter", "cloudflare"].includes(event.provider) ? event.provider : "groq";
   if (event?.retry) return "harness-retries";

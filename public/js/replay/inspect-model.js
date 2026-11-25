@@ -128,8 +128,9 @@ export function deriveInspector(events, cursor = events.length) {
           at: event.t,
           title: `${event.tool}: ${typeof event.input === "string" ? event.input : JSON.stringify(event.input ?? "")}`,
           ms: null,
-          server: true,
-          input: typeof event.input === "string" ? event.input : JSON.stringify(event.input ?? {}, null, 2),
+          server: event.own !== true,
+          own: event.own === true,
+          input: event.own === true && event.args ? JSON.stringify(event.args, null, 2) : typeof event.input === "string" ? event.input : JSON.stringify(event.input ?? {}, null, 2),
           output: null,
           eventIndex: index,
         });
@@ -141,6 +142,8 @@ export function deriveInspector(events, cursor = events.length) {
         if (open) {
           open.output = output;
           open.at = event.t;
+          if (typeof event.ms === "number") open.ms = event.ms;
+          if (event.error === true) open.error = true;
         } else agent.steps.push({ kind: "tool", at: event.t, tool: event.tool, title: String(event.tool), ms: null, server: true, input: "", output, eventIndex: index });
         break;
       }

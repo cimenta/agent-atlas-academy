@@ -6,7 +6,7 @@ import { agentLabel } from "../engine/labels.js";
 import { AGENT_TYPES, CRITERIA_MAX, MODELS, LIMIT_DEFAULTS, OUTPUT_TOKENS, CREATOR_TYPES, NODE_MAX, INSTRUCTIONS_MAX } from "../engine/catalog.js";
 import { createCapFor } from "../engine/created.js";
 import { AGENT_LIMIT_KEYS, agentLimitRange } from "../engine/agent-limits.js";
-import { TOOLS } from "../engine/tools.js";
+import { toolsPane as drawToolsPane } from "./tools-pane.js";
 import { roleText } from "../engine/prompts.js";
 import { mayCondense } from "../engine/condense.js";
 import { mayGuard, cleanGuardrails, GUARDRAIL_MAX, WORDS_MAX, LENGTH_MIN, LENGTH_MAX, POLICY_MAX, GUARDRAIL_KINDS } from "../engine/guardrails.js";
@@ -20,7 +20,7 @@ import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, ext
 const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, skillsUi = null, getModels = (node) => MODELS, modelUi = null, webSearchAllowed = () => true, searchAvailable = () => true, runLimits = () => ({ ...LIMIT_DEFAULTS, maxOutputTokens: OUTPUT_TOKENS.default }) }) {
+export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, skillsUi = null, getModels = (node) => MODELS, modelUi = null, webSearchAllowed = () => true, ownToolsAllowed = () => true, toolsAvailable = () => true, searchAvailable = () => true, runLimits = () => ({ ...LIMIT_DEFAULTS, maxOutputTokens: OUTPUT_TOKENS.default }) }) {
   let selectedId = null;
   let settingsTab = "tools"; // the tab of the agent settings that is open, kept while the visitor works on agents
   let connectFrom = null;
@@ -620,6 +620,8 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       }
       // A search limit stays with the agent even while search is switched off.
       if (node.search !== true && node.limits?.maxSearches !== undefined) limits.maxSearches = node.limits.maxSearches;
+      // The tool calls are set in the tab Tools.
+      if (node.limits?.maxToolCalls !== undefined) limits.maxToolCalls = node.limits.maxToolCalls;
       return limits;
     };
     const apply = () => {
@@ -666,11 +668,6 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       changed();
     });
     const searchUnavailable = searchAvailable(node) === false;
-    const search = h(doc, "input", { id: "ed-search", type: "checkbox", checked: node.search && !searchUnavailable, disabled: searchUnavailable });
-    search.addEventListener("change", () => {
-      editor.setNode(node.id, { search: search.checked });
-      changed();
-    });
     const remove = h(doc, "button", { type: "button", class: "danger small", "data-focus-key": "remove-node" }, t("editor.remove"));
     remove.addEventListener("click", () => removeSelected());
     const parts = [h(doc, "div", { class: "editor-settings-head" }, h(doc, "h4", {}, t("editor.settings", { name: nodeLabel(node) })), remove), field("ed-model", t("editor.model"), model)];
@@ -701,15 +698,8 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       });
       parts.push(h(doc, "div", { class: "field checkbox" }, startBox, h(doc, "label", { for: "ed-start" }, isStart ? t("editor.startsRun") : t("editor.makeStart"))), h(doc, "p", { class: "hint" }, t("editor.startHelp")));
     }
-    const toolsPane = [];
-    const searchRow = h(doc, "div", { class: "field checkbox" }, search, h(doc, "label", { for: "ed-search" }, t("editor.search")));
-    // Tools: an agent gets only the tools it needs.
-    toolsPane.push(h(doc, "h4", { class: "editor-tools-heading" }, t("editor.toolsHeading"), helpIcon({ doc, t, id: "create-tools", name: t("editor.toolsHeading") })));
-    toolsPane.push(searchRow);
-    if (TOOLS.web_search?.extraFee) toolsPane.push(h(doc, "p", { class: "notice" }, t("editor.searchFee")));
-    toolsPane.push(h(doc, "p", { class: "hint" }, t("editor.toolsNote")));
-    if (searchUnavailable) toolsPane.push(h(doc, "p", { class: "limit-warning", "data-ui": "search-provider-off" }, t("editor.searchOffProvider")));
-    if (node.search === true && !webSearchAllowed()) toolsPane.push(h(doc, "p", { class: "limit-warning", "data-ui": "search-off-warning" }, t("editor.searchOffInSettings")));
+    // Tools: an agent gets only the tools it needs (see create/tools-pane.js).
+    const toolsPane = drawToolsPane({ doc, t, node, editor, changed, searchUnavailable, webSearchAllowed: webSearchAllowed(), ownToolsAllowed: ownToolsAllowed(), toolsAvailable: toolsAvailable(node) });
     const approvalPane = [];
     // Approval: the run stops before this agent and waits for a click.
     const approve = h(doc, "input", { id: "ed-approve", type: "checkbox", checked: node.approve === true, "data-ui": "agent-approve" });

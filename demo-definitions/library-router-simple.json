@@ -1,17 +1,17 @@
 {
   "format": "agent-atlas-run-definition",
   "version": 1,
-  "task": "How do I turn the fraction 3/4 into a percentage?",
+  "task": "How do I turn the fraction 3/4 into a percentage, and what is 17.5 percent of 240?",
   "about": {
     "en": {
-      "title": "Router: choose the right specialist",
+      "title": "Router: choose the right specialist, who can use a calculator",
       "author": "Agent Atlas Academy",
-      "description": "A router reads the question and sends it to one of two specialists.\n\n**What it teaches**\n\nA router chooses one path and the others are never started, so it saves work.\n\n**What to watch**\n\nWhich specialist is chosen and why, and which one stays idle.\n\nRead more: [Router](#/learn/router)"
+      "description": "A router reads the question and sends it to one of two specialists.\n\n**What it teaches**\n\nA router chooses one path and the others never start. The chosen specialist can call a tool: here a calculator, so it does not work the sum out itself.\n\n**What to watch**\n\nWhich specialist is chosen and why, which one stays idle, and what the maths specialist asks the calculator.\n\nRead more: [Router](#/learn/router)"
     },
     "cs": {
-      "title": "Směrovač: vyber správného specialistu",
+      "title": "Směrovač: vyber správného specialistu, který umí použít kalkulačku",
       "author": "Agent Atlas Academy",
-      "description": "Směrovač přečte otázku a pošle ji jednomu ze dvou specialistů.\n\n**Čemu se naučíte**\n\nSměrovač zvolí jednu cestu a ostatní se vůbec nespustí, takže šetří práci.\n\n**Na co se dívat**\n\nKdo je vybrán a proč, a který specialista zůstane nečinný.\n\nVíce si přečtěte: [Směrovač](#/learn/router)"
+      "description": "Směrovač přečte otázku a pošle ji jednomu ze dvou specialistů.\n\n**Čemu se naučíte**\n\nSměrovač zvolí jednu cestu a ostatní se nespustí. Zvolený specialista může zavolat nástroj: tady kalkulačku, takže příklad nepočítá sám.\n\n**Na co se dívat**\n\nKdo je vybrán a proč, který specialista zůstane nečinný a na co se matematik ptá kalkulačky.\n\nVíce si přečtěte: [Směrovač](#/learn/router)"
     }
   },
   "library": {
@@ -22,11 +22,12 @@
     "tags": [
       "basics",
       "tool-choice",
-      "cost"
+      "cost",
+      "tool-use"
     ],
     "teaches": {
-      "en": "A router chooses one path and the others are never started, so it saves work.",
-      "cs": "Směrovač zvolí jednu cestu a ostatní se vůbec nespustí, takže šetří práci."
+      "en": "A router chooses one path and the others never start. The chosen specialist can call a tool: here a calculator, so it does not work the sum out itself.",
+      "cs": "Směrovač zvolí jednu cestu a ostatní se nespustí. Zvolený specialista může zavolat nástroj: tady kalkulačku, takže příklad nepočítá sám."
     }
   },
   "design": {
@@ -46,7 +47,10 @@
         "slot": "groq-free",
         "search": false,
         "name": "Maths tutor",
-        "instructions": "You are a patient maths tutor. Explain step by step with one worked example."
+        "instructions": "You are a patient maths tutor. Explain step by step with one worked example.",
+        "tools": [
+          "calculator"
+        ]
       },
       {
         "id": "language",

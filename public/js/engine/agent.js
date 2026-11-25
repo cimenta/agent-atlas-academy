@@ -1,15 +1,15 @@
 // One agent in a run: keeps its own conversation, calls the model, reports events.
 import { slotFreeLimits } from "../key-slots.js";
-import { RATE_WAIT_MAX_SEC, RATE_WAITS_MAX, nodeProvider, nodeModel, withTier, AGENT_TYPES, OUTPUT_TOKENS, RETRIES, RETRY_DELAY_SEC, REPEAT_STOP, MAX_PAUSES, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop, fallbackModelFor } from "./catalog.js";
+import { RATE_WAIT_MAX_SEC, RATE_WAITS_MAX, nodeProvider, nodeModel, withTier, AGENT_TYPES, OUTPUT_TOKENS, RETRIES, RETRY_DELAY_SEC, REPEAT_STOP, MAX_PAUSES, TOOL_LIMITS, clampOutputTokens, clampRetries, clampRetryDelaySec, clampRepeatStop, fallbackModelFor } from "./catalog.js";
 import { systemPromptFor } from "./prompts.js";
-import { toolsFor } from "./tools.js";
+import { toolsFor, runTool, ownToolKeys } from "./tools.js";
 import { AnthropicError, redact } from "./anthropic.js";
 import { agentLabel } from "./labels.js";
 import { AgentLimitError, LimitError } from "./budget.js";
 import { agentPassMessage } from "./harness.js";
 import { usageCostUsd } from "./cost.js";
 import { ApprovalPause, APPROVAL_INPUT_MAX } from "./approval.js";
-import { notebookRole, extractNotes } from "./notebook.js";
+import { notebookRole, extractNotes, NOTEBOOK_MARK } from "./notebook.js";
 import { splitInput, mayCondense, condenseInstruction, condensedInput } from "./condense.js";
 import { validFormat, mayFormat, checkFormat, formatRepairText } from "./format.js";
 import { replySchemaFor } from "./schema.js";
@@ -46,7 +46,11 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
   const carriedInput = cached.filter((c) => c.inputChecks === true).flatMap((c) => c.guardrails ?? []);
   const model = nodeModel(node, provider).id;
   // The shared notebook: what this agent may do with it (nothing unless the run has it switched on).
-  const book = notebook ? notebookRole(node, design) : { on: false, read: false, write: false };
+  // An agent that has the tool notes writes with the tool, so it is not told to write notes with tags (one way in each).
+  const roleBook = notebook ? notebookRole(node, design) : { on: false, read: false, write: false };
+  const book = ownToolKeys(node).includes("notes") ? { ...roleBook, write: false } : roleBook;
+  // What the tool notes may do: write to the notebook and read it. null when the run has no notebook.
+  const notesAccess = notebook ? { write: (text) => notebook.add(node.id, text), read: () => notebook.forReader({ mode: "peek" }).slice(NOTEBOOK_MARK.length) } : null;
   const memory = book.on ? book : undefined;
   const ownSystem = systemPromptFor(node, { language, pattern: design?.pattern, memory });
   // Self-critique: the same agent is asked to judge its own draft (run(input, { as: "evaluator" })), with the evaluator role.
@@ -84,12 +88,37 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
   let sent = 0; // how many messages earlier requests already carried
   let round = 0;
   let judgingNow = false; // the call in progress is the self-critique judging of this agent
+  // The tools of our own: the rounds of tool use of the answer in progress, the names offered in the last request, and the calls made so far.
+  let toolRounds = 0;
+  let offered = new Set();
+  let toolCallsMade = 0;
+  const toolCallCap = Number.isInteger(node.limits?.maxToolCalls) && node.limits.maxToolCalls >= 1 ? Math.min(node.limits.maxToolCalls, TOOL_LIMITS.callsMax) : TOOL_LIMITS.callsPerAgent;
+
+  // The model asked for tools: each is run (or refused with a reason), recorded, and the results go back in one message, in the order of the calls.
+  async function runToolUses(uses) {
+    const results = [];
+    for (const use of uses) {
+      const args = use.input !== null && typeof use.input === "object" && !Array.isArray(use.input) ? use.input : {};
+      emit({ type: "tool_call", agent: node.id, tool: use.name, own: true, id: use.id, args: copy(args), input: JSON.stringify(args) });
+      let outcome;
+      if (!offered.has(use.name)) outcome = { output: `The tool ${use.name} is not available to this agent.`, error: true, ms: 0 };
+      else if (toolCallsMade >= toolCallCap) outcome = { output: `Tool call limit reached: this agent may make ${toolCallCap} tool calls. Answer with what you have.`, error: true, ms: 0 };
+      else {
+        toolCallsMade += 1;
+        outcome = await runTool(use.name, args, { now: Date.now(), documents: design?.documents, notes: notesAccess });
+      }
+      emit({ type: "tool_result", agent: node.id, tool: use.name, own: true, id: use.id, output: outcome.output, error: outcome.error, ms: outcome.ms });
+      results.push({ type: "tool_result", tool_use_id: use.id, content: outcome.output, ...(outcome.error ? { is_error: true } : {}) });
+    }
+    return results;
+  }
 
   // chargeTo: the budget that pays the step (the agent's own, or the run's for a call that is not the agent's work).
   async function request(custom = null, chargeTo = budget) {
     chargeTo.chargeStep();
     if (custom) return call(custom, { signal });
-    const tools = toolsFor(node, budget, provider);
+    const tools = toolsFor(node, budget, provider, { own: toolRounds < TOOL_LIMITS.rounds });
+    offered = new Set(tools.map((tool) => tool.name));
     // With the setting on, a reply that has a fixed shape is asked for as that shape (the provider forces it). An agent that
     // searches the web is not forced: a forced reply and a search tool do not combine on every model. Nor is an agent that writes
     // notes: they go after its answer, and a forced reply can hold nothing else.
@@ -252,6 +281,7 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
       const total = { input: 0, output: 0, searches: 0 };
       const texts = [];
       let pauses = 0;
+      toolRounds = 0;
       // The agent reached a limit of its own. Stop: the run ends. Pass: what it wrote goes on, and the run carries on.
       const endAtLimit = (reason) => {
         // In a handoff, router or voting run (the tally) the reply is the decision, so a cut-off reply cannot be passed on: a limit of the agent always stops the run.
@@ -314,12 +344,19 @@ export function createAgent({ node, design = null, call, emit, budget: runBudget
         total.output += charge.output || 0;
         total.searches += charge.searches || 0;
         messages.push({ role: "assistant", content: response.content ?? [] });
-        texts.push(textOf(response.content ?? []));
+        const toolUses = response.stop_reason === "tool_use" ? (response.content ?? []).filter((b) => b.type === "tool_use") : [];
+        // The words before a call for a tool ("Let me check") are not part of the answer.
+        if (toolUses.length === 0) texts.push(textOf(response.content ?? []));
         try {
           budget.chargeUsage({ ...charge, cost: costOf(charge) });
         } catch (error) {
           if (!(error instanceof AgentLimitError)) throw error;
           return endAtLimit(error.reason);
+        }
+        if (toolUses.length > 0) {
+          toolRounds += 1;
+          messages.push({ role: "user", content: await runToolUses(toolUses) });
+          continue;
         }
         if (response.stop_reason === "pause_turn") {
           pauses += 1;

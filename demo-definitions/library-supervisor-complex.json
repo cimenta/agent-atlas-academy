@@ -4,14 +4,14 @@
   "task": "Prepare a one-page plan for a school charity bake sale: a budget, who does what, and the main risks.",
   "about": {
     "en": {
-      "title": "Supervisor: four workers and many turns",
+      "title": "Supervisor: four workers, many turns, and a shared notebook",
       "author": "Agent Atlas Academy",
-      "description": "The supervisor chooses among four workers in turn and decides when the plan is done.\n\n**What it teaches**\n\nA supervisor sees everything, which is useful and expensive: every turn returns to it, and its context grows.\n\n**What to watch**\n\nThe order in which the workers are called, and how the supervisor decides to stop.\n\nRead more: [Supervisor and workers](#/learn/supervisor-and-workers)"
+      "description": "The supervisor chooses among four workers in turn and decides when the plan is done.\n\n**What it teaches**\n\nA supervisor sees everything, which is useful and expensive. The workers can leave notes in a shared notebook with a tool, so later workers know what earlier ones found.\n\n**What to watch**\n\nThe order in which the workers are called, how the supervisor decides to stop, and which notes the workers write and read.\n\nRead more: [Supervisor and workers](#/learn/supervisor-and-workers)"
     },
     "cs": {
-      "title": "Supervizor: čtyři pracovníci a mnoho tahů",
+      "title": "Supervizor: čtyři pracovníci, mnoho tahů a sdílený zápisník",
       "author": "Agent Atlas Academy",
-      "description": "Supervizor postupně vybírá ze čtyř pracovníků a rozhoduje, kdy je plán hotový.\n\n**Čemu se naučíte**\n\nSupervizor vidí všechno, což je užitečné a drahé: každý tah se k němu vrací a jeho kontext roste.\n\n**Na co se dívat**\n\nV jakém pořadí jsou pracovníci volání a jak supervizor rozhodne skončit.\n\nVíce si přečtěte: [Supervizor a pracovníci](#/learn/supervisor-and-workers)"
+      "description": "Supervizor postupně vybírá ze čtyř pracovníků a rozhoduje, kdy je plán hotový.\n\n**Čemu se naučíte**\n\nSupervizor vidí všechno, což je užitečné a drahé. Pracovníci mohou nástrojem nechat poznámky ve sdíleném zápisníku, takže další vědí, co zjistili předchozí.\n\n**Na co se dívat**\n\nV jakém pořadí jsou pracovníci volání, jak supervizor rozhodne skončit a které poznámky pracovníci píšou a čtou.\n\nVíce si přečtěte: [Supervizor a pracovníci](#/learn/supervisor-and-workers)"
     }
   },
   "library": {
@@ -22,11 +22,12 @@
     "tags": [
       "supervisor",
       "planning",
-      "risk-analysis"
+      "risk-analysis",
+      "tool-use"
     ],
     "teaches": {
-      "en": "A supervisor sees everything, which is useful and expensive: every turn returns to it, and its context grows.",
-      "cs": "Supervizor vidí všechno, což je užitečné a drahé: každý tah se k němu vrací a jeho kontext roste."
+      "en": "A supervisor sees everything, which is useful and expensive. The workers can leave notes in a shared notebook with a tool, so later workers know what earlier ones found.",
+      "cs": "Supervizor vidí všechno, což je užitečné a drahé. Pracovníci mohou nástrojem nechat poznámky ve sdíleném zápisníku, takže další vědí, co zjistili předchozí."
     }
   },
   "design": {
@@ -44,7 +45,10 @@
         "agent": "researcher",
         "model": "fast",
         "slot": "anthropic",
-        "search": false
+        "search": false,
+        "tools": [
+          "notes"
+        ]
       },
       {
         "id": "writer",
@@ -58,7 +62,10 @@
         "agent": "critic",
         "model": "fast",
         "slot": "anthropic",
-        "search": false
+        "search": false,
+        "tools": [
+          "notes"
+        ]
       },
       {
         "id": "treasurer",
@@ -67,7 +74,10 @@
         "slot": "anthropic",
         "search": false,
         "name": "Treasurer",
-        "instructions": "You keep the budget. Give a simple budget with amounts in euros."
+        "instructions": "You keep the budget. Give a simple budget with amounts in euros.",
+        "tools": [
+          "notes"
+        ]
       }
     ],
     "edges": [
@@ -87,6 +97,9 @@
         "from": "supervisor",
         "to": "treasurer"
       }
-    ]
+    ],
+    "memory": {
+      "notebook": true
+    }
   }
 }

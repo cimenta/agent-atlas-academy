@@ -52,7 +52,7 @@ export function buildResultModel(run) {
   const summed = {
     input: perAgent.reduce((n, a) => n + a.input, 0),
     output: perAgent.reduce((n, a) => n + a.output, 0),
-    searches: events.filter((e) => e.type === "tool_call").length,
+    searches: events.filter((e) => e.type === "tool_call" && e.own !== true).length,
   };
   const usage = done?.usage
     ? { input: done.usage.input ?? 0, output: done.usage.output ?? 0, searches: done.usage.searches ?? 0 }

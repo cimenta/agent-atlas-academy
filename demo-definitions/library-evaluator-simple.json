@@ -4,14 +4,14 @@
   "task": "Write a short note that explains what a password manager is.",
   "about": {
     "en": {
-      "title": "Evaluator loop: write, check, improve",
+      "title": "Evaluator loop: write, check with a word counter, improve",
       "author": "Agent Atlas Academy",
-      "description": "A writer drafts, an evaluator checks the draft against the criteria, and the writer improves it.\n\n**What it teaches**\n\nA loop with a clear check makes the answer better, but only as far as the criteria say.\n\n**What to watch**\n\nWhat the evaluator asks to change, and whether round two fixes it.\n\nRead more: [Evaluator loop](#/learn/evaluator-loop)"
+      "description": "A writer drafts, an evaluator checks the draft against the criteria, and the writer improves it.\n\n**What it teaches**\n\nA loop with a clear check makes the answer better, as far as the criteria say. The evaluator counts words with a tool, because a model counts badly.\n\n**What to watch**\n\nWhat the evaluator asks to change, the number the counting tool returns, and whether round two fixes it.\n\nRead more: [Evaluator loop](#/learn/evaluator-loop)"
     },
     "cs": {
-      "title": "Smyčka s hodnotitelem: napiš, zkontroluj, vylepši",
+      "title": "Smyčka s hodnotitelem: napiš, zkontroluj počítadlem slov, vylepši",
       "author": "Agent Atlas Academy",
-      "description": "Pisatel napíše návrh, hodnotitel ho zkontroluje podle kritérií a pisatel ho vylepší.\n\n**Čemu se naučíte**\n\nSmyčka s jasnou kontrolou zlepší odpověď, ale jen tak, jak říkají kritéria.\n\n**Na co se dívat**\n\nCo hodnotitel žádá změnit a zda to druhé kolo opraví.\n\nVíce si přečtěte: [Smyčka s hodnotitelem](#/learn/evaluator-loop)"
+      "description": "Pisatel napíše návrh, hodnotitel ho zkontroluje podle kritérií a pisatel ho vylepší.\n\n**Čemu se naučíte**\n\nSmyčka s jasnou kontrolou zlepší odpověď, jak říkají kritéria. Hodnotitel počítá slova nástrojem, protože model počítá špatně.\n\n**Na co se dívat**\n\nCo hodnotitel žádá změnit, jaké číslo vrátí počítadlo a zda to druhé kolo opraví.\n\nVíce si přečtěte: [Smyčka s hodnotitelem](#/learn/evaluator-loop)"
     }
   },
   "library": {
@@ -22,11 +22,12 @@
     "tags": [
       "basics",
       "explaining",
-      "prompt-chaining"
+      "prompt-chaining",
+      "tool-use"
     ],
     "teaches": {
-      "en": "A loop with a clear check makes the answer better, but only as far as the criteria say.",
-      "cs": "Smyčka s jasnou kontrolou zlepší odpověď, ale jen tak, jak říkají kritéria."
+      "en": "A loop with a clear check makes the answer better, as far as the criteria say. The evaluator counts words with a tool, because a model counts badly.",
+      "cs": "Smyčka s jasnou kontrolou zlepší odpověď, jak říkají kritéria. Hodnotitel počítá slova nástrojem, protože model počítá špatně."
     }
   },
   "design": {
@@ -44,7 +45,10 @@
         "agent": "evaluator",
         "model": "fast",
         "slot": "google-free",
-        "search": false
+        "search": false,
+        "tools": [
+          "text_stats"
+        ]
       }
     ],
     "edges": [
@@ -54,6 +58,6 @@
       }
     ],
     "rounds": 2,
-    "criteria": "Clear for a ten-year-old. At most 80 words. Contains one everyday example."
+    "criteria": "Clear for a ten-year-old. At most 80 words. Contains one everyday example. Count the words with the counting tool before you judge the length."
   }
 }

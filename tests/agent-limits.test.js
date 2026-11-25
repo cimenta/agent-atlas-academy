@@ -22,11 +22,12 @@ const design = (extra = {}) => ({
 const codes = (d) => validateDesign(d).errors.map((e) => e.code);
 
 test("the agent limit keys and their ranges", () => {
-  assert.deepEqual(AGENT_LIMIT_KEYS, ["maxSteps", "maxTokens", "maxOutputTokens", "maxSearches"]);
+  assert.deepEqual(AGENT_LIMIT_KEYS, ["maxSteps", "maxTokens", "maxOutputTokens", "maxSearches", "maxToolCalls"]);
   assert.deepEqual(agentLimitRange("maxSteps"), { min: 1, max: 60 });
   assert.deepEqual(agentLimitRange("maxTokens"), { min: 1000, max: 150000 });
   assert.deepEqual(agentLimitRange("maxOutputTokens"), { min: 1000, max: 4000 });
   assert.deepEqual(agentLimitRange("maxSearches"), { min: 0, max: 10 });
+  assert.deepEqual(agentLimitRange("maxToolCalls"), { min: 1, max: 50 });
 });
 
 test("validNodeLimits accepts whole numbers in range and nothing else", () => {

@@ -9,9 +9,11 @@ import { mayCondense } from "../engine/condense.js";
 import { cleanFormat, mayFormat } from "../engine/format.js";
 import { cleanGuardrails, mayGuard } from "../engine/guardrails.js";
 import { cleanSkills } from "../engine/skills.js";
+import { cleanToolKeys } from "../engine/own-tools.js";
+import { cleanDocuments } from "../engine/documents.js";
 
 const ONCE_ONLY = new Set(["supervisor", "combiner", "judge", "evaluator", "router", "tally", "splitter", "worker", "reducer", "executor"]);
-const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve", "notebook", "condense", "creates", "format", "guardrails", "skills"];
+const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve", "notebook", "condense", "creates", "format", "guardrails", "skills", "tools"];
 const DEFAULT_ROUNDS = 2;
 const EVALUATOR_ROUNDS = 3;
 const roundsFor = (pattern) => (pattern === "evaluator" ? EVALUATOR_ROUNDS : DEFAULT_ROUNDS);
@@ -63,6 +65,14 @@ export function setDefaultSkills(fn) {
 }
 
 // The skills of an agent: kept cleaned (see engine/skills.js). Nothing left removes them.
+// The tools of our own: the known keys, once each, in the fixed order; none left means no field.
+function tidyTools(node) {
+  if (node.tools === undefined) return;
+  const keys = cleanToolKeys(node.tools);
+  if (keys.length > 0) node.tools = keys;
+  else delete node.tools;
+}
+
 function tidySkills(node) {
   if (node.skills === undefined) {
     delete node.skills;
@@ -81,6 +91,7 @@ export function createEditor(initialPattern) {
   let criteria = "";
   let notebook = false; // the shared notebook of the run is switched on
   let selfCritique = false; // evaluator loop: the writer judges its own draft (there is no evaluator)
+  let documents = []; // the documents of the student for the tool document_search: [{ name, text }]
   let start; // handoff: the id of the agent that begins
   let positions = {};
   // The default model: { slot, model }. A new agent starts with it, and so does every agent that has not been
@@ -116,6 +127,7 @@ export function createEditor(initialPattern) {
   return {
     design() {
       const copy = { pattern, nodes: structuredClone(nodes), edges: structuredClone(edges) };
+      if (documents.length > 0) copy.documents = structuredClone(documents);
       if (notebook) copy.memory = { notebook: true };
       else for (const node of copy.nodes) delete node.notebook;
       if (pattern === "debate") copy.rounds = rounds;
@@ -126,6 +138,14 @@ export function createEditor(initialPattern) {
         if (selfCritique) copy.selfCritique = true;
       }
       return copy;
+    },
+
+    // The documents of the student: the list is kept cleaned (at most 3 files, 200000 characters in all).
+    documents() {
+      return structuredClone(documents);
+    },
+    setDocuments(list) {
+      documents = cleanDocuments(list);
     },
 
     // Evaluator loop: the writer judges its own draft. On, the evaluator and its arrow go away; off, they come back.
@@ -203,6 +223,7 @@ export function createEditor(initialPattern) {
       tidyFormat(node, pattern);
       tidyGuardrails(node, pattern);
       tidySkills(node);
+      tidyTools(node);
       tidyCreates(node, nodes.length);
     },
 
@@ -370,6 +391,7 @@ export function createEditor(initialPattern) {
       positions = {};
       start = undefined;
       selfCritique = false;
+      documents = [];
       // The one agent these patterns cannot run without is placed for you; the agents around it are added by the student.
       if (nextPattern === "parallel") this.addNode("combiner");
       if (nextPattern === "supervisor") this.addNode("supervisor");

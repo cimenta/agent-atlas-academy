@@ -104,14 +104,16 @@ export const RATE_WAITS_MAX = 3;
 
 // The fixed rules of the harness: the visitor cannot change them (see the Harness tab in Settings).
 export const MAX_PAUSES = 4; // pauses of the model in one agent turn
-export const REQUEST_MAX_BYTES = 65536; // a request to start a run
-export const RESUME_MAX_BYTES = 262144; // a run that is carried on also sends the answers of the agents that finished
+export const REQUEST_MAX_BYTES = 655360; // a request to start a run (640 KB: room for the documents of the student, 200000 characters at most)
+export const RESUME_MAX_BYTES = 1048576; // a run that is carried on also sends the answers of the agents that finished
 export const MODEL_CHECKS_PER_HOUR = 30; // checks of the list of models one address may make in an hour (Settings, Check models)
 export const DEFAULT_RUNS_PER_HOUR = 10; // runs one address may start in an hour (the site operator can change it)
 export const RUN_STORE_MAX_BYTES = 2 * 1024 * 1024; // one saved run
 
 export const LIMIT_DEFAULTS = { maxSteps: 20, maxTokens: 40000, maxSearches: 3 };
 export const LIMIT_MAX = { maxSteps: 60, maxTokens: 150000, maxSearches: 10 };
+// The tools of our own: the calls one agent may make (node.limits.maxToolCalls can change it), and how many rounds of tool use one answer may take.
+export const TOOL_LIMITS = { callsPerAgent: 10, callsMax: 50, rounds: 5 };
 
 export const TASK_MAX_CHARS = 1000;
 export const NODE_MAX = 8;

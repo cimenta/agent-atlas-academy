@@ -1,0 +1,75 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Plan a one-day school trip to Prague for 24 students and 2 teachers, on the next Friday. Give the date, a short note about Charles Bridge, the weather forecast for Prague, and the total cost from the price list for the entry, the guided walk and the tram tickets. Keep the final text under 120 words.",
+  "about": {
+    "en": {
+      "title": "Many tools in one run: a clock, Wikipedia, the weather, a price list, a calculator and a word counter",
+      "author": "Agent Atlas Academy",
+      "description": "A researcher collects the facts with four tools and a writer turns them into a short plan with two more. The run uses every tool of the app.\n\n**What it teaches**\n\nA model asks for the right tool at the right moment: the clock for the date, a lookup for facts, a search in the price list, a calculator for the sum and a counter for the length.\n\n**What to watch**\n\nThe order of the tool calls, which tool each agent chooses for which part of the task, and what the notes carry from the researcher to the writer. The forecast is the one of the day of the recording.\n\nRead more: [Tools](#/learn/tools)"
+    },
+    "cs": {
+      "title": "Mnoho nástrojů v jednom běhu: hodiny, Wikipedie, počasí, ceník, kalkulačka a počítadlo slov",
+      "author": "Agent Atlas Academy",
+      "description": "Výzkumník sesbírá fakta čtyřmi nástroji a pisatel z nich napíše krátký plán dalšími dvěma. Běh použije všechny nástroje aplikace.\n\n**Čemu se naučíte**\n\nModel si řekne o správný nástroj ve správnou chvíli: hodiny pro datum, vyhledání pro fakta, hledání v ceníku, kalkulačku pro součet a počítadlo pro délku.\n\n**Na co se dívat**\n\nV jakém pořadí se nástroje volají, který nástroj si který agent vybere pro kterou část úkolu a co poznámky předávají od výzkumníka pisateli. Předpověď je ta z dne natáčení.\n\nVíce si přečtěte: [Nástroje](#/learn/tools)"
+    }
+  },
+  "library": {
+    "level": 3,
+    "tags": [
+      "tool-use",
+      "tool-choice",
+      "planning",
+      "decision-making"
+    ],
+    "teaches": {
+      "en": "A model chooses the right tool for each part of a task: a clock, a lookup, a search in documents, a calculator and a counter, in one run.",
+      "cs": "Model vybírá správný nástroj pro každou část úkolu: hodiny, vyhledání, hledání v dokumentech, kalkulačku a počítadlo, v jednom běhu."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "memory": {
+      "notebook": true
+    },
+    "documents": [
+      {
+        "name": "price-list.txt",
+        "text": "Price list for school groups, Prague day trip\n\nEntry to the Old Town Bridge Tower: students 90 CZK each, teachers free.\nGuided walk through the Old Town: 600 CZK per group, one guide for up to 25 people.\nTram day ticket for a group: 120 CZK per person.\nLunch in the school canteen of the partner school: 85 CZK per person.\n\nGroups of more than 20 people must book the guided walk one week before."
+      }
+    ],
+    "nodes": [
+      {
+        "id": "researcher",
+        "agent": "researcher",
+        "model": "balanced",
+        "slot": "anthropic",
+        "search": false,
+        "tools": [
+          "datetime",
+          "wikipedia",
+          "weather",
+          "document_search",
+          "notes"
+        ]
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "balanced",
+        "slot": "anthropic",
+        "search": false,
+        "tools": [
+          "calculator",
+          "text_stats"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from": "researcher",
+        "to": "writer"
+      }
+    ]
+  }
+}

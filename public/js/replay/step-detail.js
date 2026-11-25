@@ -41,12 +41,13 @@ export function stepDetail({ doc, t, step, why, viewer, viewerId, fmt, onShowMes
   if (typeof step.ms === "number") facts.push(t("insp.tookTime", { time: fmt(step.ms) }));
   else if (step.server) facts.push(t("insp.inModelHint"));
   if (typeof step.at === "number") facts.push(t("insp.at", { time: fmt(step.at) }));
+  if (step.error === true) facts.push(t("insp.toolError"));
   if (step.reviewer) facts.push(t("insp.guardrailReviewer", { model: step.reviewer.model, input: step.reviewer.tokens?.input ?? 0, output: step.reviewer.tokens?.output ?? 0, cost: Number(step.reviewer.cost ?? 0).toFixed(4) }));
   if (facts.length) root.append(h(doc, "p", { class: "facts" }, facts.join(" · ")));
 
   // ----- input
   if (step.kind === "tool") {
-    root.append(section("in", t("insp.input"), h(doc, "p", { class: "query" }, h(doc, "span", { class: "lb" }, `${t("insp.searchQuery")}: `), h(doc, "q", {}, step.input))));
+    root.append(section("in", t("insp.input"), h(doc, "p", { class: "query" }, h(doc, "span", { class: "lb" }, `${t(step.own ? "insp.arguments" : "insp.searchQuery")}: `), h(doc, "q", {}, step.input))));
   } else if (step.kind === "model") {
     const box = section("in", t("insp.input"), h(doc, "p", {}, t("insp.messagesSent", { n: step.messageCount ?? 0 })));
     if (onShowMessages) {

@@ -974,6 +974,17 @@ a.art-pill:hover { text-decoration: underline; }
 /* Warning before a run: the design will probably reach a limit. */
 .limit-warning { margin: 10px 0; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--warn-line, #d9b36a); background: var(--warn-bg, #fbf1dc); color: var(--warn-text, #6b4a0a); font-size: 0.9rem; }
 .limit-warning b { display: block; margin-bottom: 2px; }
+.tool-row { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 12px; align-items: start; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.tool-row:last-of-type { border-bottom: 0; }
+.tool-row input[type=checkbox] { margin-top: 4px; }
+.tool-row .tool-name { font-weight: 600; }
+.tool-row .tool-what { grid-column: 2; font-size: 0.86rem; color: var(--muted); }
+.tool-row .tool-why { grid-column: 2; font-size: 0.8rem; color: #c0392b; }
+.tool-row.off { opacity: 0.55; }
+.tool-chip { display: inline-flex; align-items: center; height: 19px; padding: 0 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 600; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+.tool-chip.fee { border-color: var(--accent-line); color: var(--accent); }
+.tool-calls-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 10px 0 0; }
+.tool-calls-row input { width: 90px; }
 .limit-warning a { color: inherit; text-decoration: underline; }
 
 /* Harness: the ? button of a setting, its popup and the shared Save bar. */
@@ -1930,3 +1941,11 @@ table.libstats th[data-hover-title]::after { content: " ⓘ"; font-size: 0.8em; 
 .data-cat { margin: 2px 0; }
 .data-delete-cell { text-align: right; white-space: nowrap; vertical-align: middle; }
 button.danger.sure { background: var(--err); border-color: var(--err); color: #fff; }
+.docs-block { margin: 12px 0; padding: 12px; border: 1px solid var(--border); border-radius: 8px; }
+.docs-block h5 { margin: 0 0 6px; }
+.doc-list { list-style: none; margin: 8px 0; padding: 0; }
+.doc-item { display: flex; gap: 10px; align-items: baseline; padding: 4px 0; border-bottom: 1px solid var(--border); }
+.doc-item .doc-name { font-weight: 600; word-break: break-all; }
+.doc-item .doc-size { color: var(--muted); font-size: 0.8rem; margin-left: auto; white-space: nowrap; }
+.docs-block textarea { width: 100%; box-sizing: border-box; }
+.doc-status { color: #c0392b; }

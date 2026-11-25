@@ -852,7 +852,7 @@ export function renderCreate(ctx) {
         draft.editor.setNodeModel(id, choice);
       },
     };
-    editorHandle = mountEditor(editorHost, { editor: draft.editor, t, doc, onChange: drawReview, webSearchAllowed: () => ctx.settings.get().webSearch, searchAvailable: (node) => (isSlot(node.slot) ? providerSpec(slotProvider(node.slot)).capabilities.search : true), modelUi, skillsUi: ctx.skills ? { library: () => ctx.skills.library(), startEntries: (agent) => defaultEntries(ctx.skills.library(), ctx.skills.defaults(), agent) } : null, runLimits: () => ({ ...clampLimits(draft.limits), maxOutputTokens: ctx.settings.get().maxOutputTokens }) });
+    editorHandle = mountEditor(editorHost, { editor: draft.editor, t, doc, onChange: drawReview, webSearchAllowed: () => ctx.settings.get().webSearch, ownToolsAllowed: () => ctx.settings.get().ownTools, searchAvailable: (node) => (isSlot(node.slot) ? providerSpec(slotProvider(node.slot)).capabilities.search : true), modelUi, skillsUi: ctx.skills ? { library: () => ctx.skills.library(), startEntries: (agent) => defaultEntries(ctx.skills.library(), ctx.skills.defaults(), agent) } : null, runLimits: () => ({ ...clampLimits(draft.limits), maxOutputTokens: ctx.settings.get().maxOutputTokens }) });
     ctx.onLeave(() => editorHandle.destroy());
     drawPatterns();
     drawReview();
@@ -1058,6 +1058,7 @@ export function renderCreate(ctx) {
       repeatStop: ctx.settings.get().repeatStop,
       handoffChars: resume ? ctx.settings.get().handoffChars : runSettings().handoffChars,
       webSearch: ctx.settings.get().webSearch,
+      ownTools: ctx.settings.get().ownTools,
       fallback: ctx.settings.get().fallback,
       formatEnforcement: ctx.settings.get().formatEnforcement,
       language: ctx.lang,

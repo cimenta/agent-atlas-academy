@@ -1,9 +1,9 @@
 // Limits of one agent (node.limits) and what the agent does when it reaches one (node.onLimit).
 // A limit that is not set means the agent has none of its own and the limits of the whole run apply.
 // An agent limit never lifts a limit of the run: the lower of the two always wins.
-import { LIMIT_MAX, OUTPUT_TOKENS } from "./catalog.js";
+import { LIMIT_MAX, OUTPUT_TOKENS, TOOL_LIMITS } from "./catalog.js";
 
-export const AGENT_LIMIT_KEYS = ["maxSteps", "maxTokens", "maxOutputTokens", "maxSearches"];
+export const AGENT_LIMIT_KEYS = ["maxSteps", "maxTokens", "maxOutputTokens", "maxSearches", "maxToolCalls"];
 export const ON_LIMIT = ["stop", "pass"];
 
 const RANGES = {
@@ -11,6 +11,7 @@ const RANGES = {
   maxTokens: { min: 1000, max: LIMIT_MAX.maxTokens },
   maxOutputTokens: { min: OUTPUT_TOKENS.min, max: OUTPUT_TOKENS.max },
   maxSearches: { min: 0, max: LIMIT_MAX.maxSearches },
+  maxToolCalls: { min: 1, max: TOOL_LIMITS.callsMax },
 };
 
 const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);

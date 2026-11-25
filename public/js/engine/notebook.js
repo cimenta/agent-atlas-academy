@@ -1,6 +1,7 @@
 // The shared notebook of a run: short notes that agents leave for each other while the run lasts.
 // It lives only in the run. The program reads and writes it; no model decides what is kept.
 import { validFormat } from "./format.js";
+import { ToolError } from "./own-tools.js";
 export const NOTE_MAX = 600;
 export const NOTEBOOK_READ_MAX = 6000;
 export const NOTEBOOK_MARK = "\n\nNotebook:\n";
@@ -39,6 +40,23 @@ export function extractNotes(text) {
   if (open !== -1) rest = rest.slice(0, open);
   rest = rest.replace(/<\/?note\s*>/gi, "");
   return { text: rest.replace(/\n{3,}/g, "\n\n").trim(), notes };
+}
+
+// The tool notes: the model writes a note into the notebook of the run, or reads the notes so far. `book` is { write(text), read() }
+// of the notebook, or null when the run has no notebook (the tool then says so). It is the same notebook the tags <note> write to.
+export function notesToolText({ action, text } = {}, book) {
+  if (!book) throw new ToolError("The notebook is switched off in this run, so there are no notes. It is switched on in step 1 of Create, under Memory.");
+  if (action === "read") {
+    const notes = book.read();
+    return notes === "" ? "The notebook is empty." : notes;
+  }
+  if (action === "write") {
+    const body = oneLine(typeof text === "string" ? text : "");
+    if (body === "") throw new ToolError("A note needs some text.");
+    const note = book.write(body);
+    return `Note ${note.n} saved${body.length > NOTE_MAX ? ` (cut to ${NOTE_MAX} characters)` : ""}.`;
+  }
+  throw new ToolError('The action must be "write" or "read".');
 }
 
 export function createNotebook({ emit = () => {} } = {}) {

@@ -7,6 +7,8 @@ import { NOTEBOOK_CHOICES } from "./notebook.js";
 import { validFormat, mayFormat } from "./format.js";
 import { validGuardrails, mayGuard } from "./guardrails.js";
 import { validSkills } from "./skills.js";
+import { validToolKeys } from "./own-tools.js";
+import { validDocuments } from "./documents.js";
 import { AGENT_TYPES, MODELS, LIMIT_DEFAULTS, LIMIT_MAX, clampCostCap, CRITERIA_MAX, NODE_MAX, NAME_MAX, INSTRUCTIONS_MAX, CREATE_MAX, CREATOR_TYPES } from "./catalog.js";
 
 export const PATTERNS = ["sequential", "parallel", "supervisor", "debate", "evaluator", "handoff", "router", "voting", "mapreduce", "planexec"];
@@ -38,6 +40,9 @@ export function validateDesign(design) {
 
   // Self-critique is a switch of the evaluator loop alone: true or absent, nothing else.
   if (design.selfCritique !== undefined && (design.selfCritique !== true || pattern !== "evaluator")) add("eval.self");
+
+  // The documents of the student (text for the tool document_search): a short list of { name, text }.
+  if (design.documents !== undefined && !validDocuments(design.documents)) add("design.documents");
 
   // Memory management: the shared notebook switch of the run.
   if (design.memory !== undefined && !(isObject(design.memory) && typeof design.memory.notebook === "boolean")) add("memory.notebook");
@@ -72,6 +77,7 @@ export function validateDesign(design) {
     if (node.format !== undefined && !(validFormat(node.format) && mayFormat(node.agent, pattern))) add("node.format", { id: node.id });
     if (node.guardrails !== undefined && !(validGuardrails(node.guardrails) && mayGuard(node.agent, pattern))) add("node.guardrails", { id: node.id });
     if (node.skills !== undefined && !validSkills(node.skills)) add("node.skills", { id: node.id });
+    if (node.tools !== undefined && !validToolKeys(node.tools)) add("node.tools", { id: node.id });
     if (node.creates !== undefined) {
       const c = node.creates;
       const ok = isObject(c) && CREATOR_TYPES.includes(node.agent) && Number.isInteger(c.max) && c.max >= 1 && c.max <= CREATE_MAX && typeof c.guidance === "string" && c.guidance.length <= INSTRUCTIONS_MAX && typeof c.search === "boolean";

@@ -1,17 +1,17 @@
 {
   "format": "agent-atlas-run-definition",
   "version": 1,
-  "task": "My laptop connects to the school Wi-Fi, but no web page opens.",
+  "task": "My laptop connects to the school Wi-Fi, but no web page opens. Look in the school IT help sheet.",
   "about": {
     "en": {
-      "title": "Handoff: control moves to the expert",
+      "title": "Handoff: control moves to the expert, who searches a help sheet",
       "author": "Agent Atlas Academy",
-      "description": "The first agent decides it is not the right one and hands the problem to an expert with a note.\n\n**What it teaches**\n\nIn a handoff control moves forward and nothing stands above it; the note is all the next agent knows.\n\n**What to watch**\n\nWhat exactly is in the note, and what the expert received.\n\nRead more: [Handoff](#/learn/handoff)"
+      "description": "The first agent decides it is not the right one and hands the problem to an expert with a note.\n\n**What it teaches**\n\nIn a handoff control moves forward and the note is all the next agent knows. The expert reads the help sheet only through a search tool, never whole.\n\n**What to watch**\n\nWhat is in the note, what the expert searches for, and which passages of the help sheet come back.\n\nRead more: [Handoff](#/learn/handoff)"
     },
     "cs": {
-      "title": "Předání: řízení přejde na experta",
+      "title": "Předání: řízení přejde na experta, který hledá v příručce",
       "author": "Agent Atlas Academy",
-      "description": "První agent usoudí, že není ten pravý, a předá problém expertovi s poznámkou.\n\n**Čemu se naučíte**\n\nU předání řízení postupuje dopředu a nic nad ním nestojí; poznámka je vše, co další agent ví.\n\n**Na co se dívat**\n\nCo přesně je v poznámce a co expert dostal.\n\nVíce si přečtěte: [Předání](#/learn/handoff)"
+      "description": "První agent usoudí, že není ten pravý, a předá problém expertovi s poznámkou.\n\n**Čemu se naučíte**\n\nU předání řízení postupuje dopředu a poznámka je vše, co další agent ví. Expert čte příručku jen přes nástroj hledání, nikdy celou.\n\n**Na co se dívat**\n\nCo je v poznámce, co expert hledá a které úseky příručky se vrátí.\n\nVíce si přečtěte: [Předání](#/learn/handoff)"
     }
   },
   "library": {
@@ -22,11 +22,12 @@
     "tags": [
       "handoff",
       "tool-choice",
-      "prompt-chaining"
+      "prompt-chaining",
+      "tool-use"
     ],
     "teaches": {
-      "en": "In a handoff control moves forward and nothing stands above it; the note is all the next agent knows.",
-      "cs": "U předání řízení postupuje dopředu a nic nad ním nestojí; poznámka je vše, co další agent ví."
+      "en": "In a handoff control moves forward and the note is all the next agent knows. The expert reads the help sheet only through a search tool, never whole.",
+      "cs": "U předání řízení postupuje dopředu a poznámka je vše, co další agent ví. Expert čte příručku jen přes nástroj hledání, nikdy celou."
     }
   },
   "design": {
@@ -49,13 +50,22 @@
         "slot": "anthropic",
         "search": false,
         "name": "Network expert",
-        "instructions": "You fix network problems. Give clear steps a student can try."
+        "instructions": "You fix network problems. Give clear steps a student can try.",
+        "tools": [
+          "document_search"
+        ]
       }
     ],
     "edges": [
       {
         "from": "helpdesk",
         "to": "network"
+      }
+    ],
+    "documents": [
+      {
+        "name": "school-it-help.txt",
+        "text": "School IT help sheet\n\nWi-Fi login. The school Wi-Fi called SCHOOL-STUDENTS asks you to sign in on a web page. If you are connected but no page opens, the sign-in page has not appeared. Open any address that starts with http, not https, for example http://neverssl.com, and the sign-in page should come up. Sign in with the school user name and password.\n\nWrong date or time. If the clock of the laptop is wrong by more than a few minutes, secure pages fail to open. Set the date and time to update automatically.\n\nName server problems. If the sign-in works but pages still do not open, the laptop may use a name server of its own from home. In the network settings choose to get the name server automatically.\n\nProxy. Switch off any proxy that was set for another network. The school network needs none.\n\nStill not working. Write down the name of the network, the time, and what you see, and send them to the IT room."
       }
     ]
   }

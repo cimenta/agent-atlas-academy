@@ -150,6 +150,17 @@ export function createMockCall({ delayMs = 0, evaluatorAcceptsAt = 2, breakForma
           : JSON.stringify({ action: "finish", answer: "Final answer: the workers' results were put together into one answer." });
       return reply([{ type: "text", text }]);
     }
+    // An agent with tools of our own: the mock asks for the first one, and after its result it answers and says what the tool gave.
+    const ownTools = (Array.isArray(body.tools) ? body.tools : []).filter((tool) => tool?.input_schema && tool.name !== "reply");
+    if (ownTools.length > 0) {
+      const results = Array.isArray(messages.at(-1)?.content) ? messages.at(-1).content.filter((b) => b?.type === "tool_result") : [];
+      if (results.length === 0) {
+        const name = ownTools[0].name;
+        const input = name === "calculator" ? { expression: "6 * 7" } : name === "wikipedia" ? { query: "Alan Turing" } : name === "weather" ? { place: "Brno" } : name === "text_stats" ? { text: "one two three" } : name === "document_search" ? { query: "main facts" } : name === "notes" ? { action: "write", text: "A note written with the tool." } : {};
+        return { content: [{ type: "text", text: "I will use a tool." }, { type: "tool_use", id: "toolu_mock_1", name, input }], stop_reason: "tool_use", usage };
+      }
+      return reply([{ type: "text", text: `${withMemory(TEXT[role] ?? TEXT.free)} (The tool said: ${results.map((r) => r.content).join("; ")})` }]);
+    }
     if (role === "researcher" && Array.isArray(body.tools) && body.tools.length > 0) {
       return reply(
         [

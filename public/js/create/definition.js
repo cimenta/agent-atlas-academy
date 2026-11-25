@@ -2,6 +2,7 @@
 // It can be exported from a run, shared as a JSON file and loaded into the Create tab, which
 // then looks exactly as if the user had built it. Pure: no DOM.
 import { MODELS, DEFAULT_MODEL, TASK_MAX_CHARS } from "../engine/catalog.js";
+import { cleanToolKeys } from "../engine/own-tools.js";
 import { PATTERNS } from "../engine/patterns.js";
 import { isSlot } from "../key-slots.js";
 import { createEditor } from "./editor-model.js";
@@ -10,7 +11,7 @@ import { GOALS } from "../library-path.js";
 
 export const DEFINITION_FORMAT = "agent-atlas-run-definition";
 export const DEFINITION_VERSION = 1;
-export const DEFINITION_MAX_CHARS = 200000;
+export const DEFINITION_MAX_CHARS = 400000; // room for the documents of the student (200000 characters) besides the design
 
 const MODEL_KEYS = new Set(MODELS.map((m) => m.key));
 const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
@@ -120,6 +121,7 @@ export function loadDefinition(text) {
 
   const editor = createEditor(design.pattern);
   if (design.memory?.notebook === true) editor.setNotebook(true);
+  if (Array.isArray(design.documents)) editor.setDocuments(design.documents);
   const ids = new Map();
   for (const node of design.nodes) {
     if (!isObject(node)) return fail("invalid");
@@ -136,6 +138,7 @@ export function loadDefinition(text) {
       if (node.custom === true) overrides.custom = true;
     }
     if (typeof node.search === "boolean") overrides.search = node.search;
+    if (cleanToolKeys(node.tools).length > 0) overrides.tools = cleanToolKeys(node.tools);
     if (node.addToPrevious === true) overrides.addToPrevious = true;
     if (isObject(node.limits)) overrides.limits = node.limits;
     if (node.onLimit === "pass") overrides.onLimit = "pass";

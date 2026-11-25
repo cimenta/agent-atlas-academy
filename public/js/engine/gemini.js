@@ -33,9 +33,24 @@ function toGeminiSchema(schema) {
 // Anthropic-shaped body -> Gemini generateContent body.
 export function toGeminiRequest(body) {
   const contents = [];
+  const toolNames = new Map(); // the id of a call for a tool to its name: a result must say which function it answers
   for (const message of body.messages ?? []) {
+    const blocks = Array.isArray(message.content) ? message.content : [];
     const text = textOfContent(message.content);
-    contents.push({ role: message.role === "assistant" ? "model" : "user", parts: [{ text: text === "" ? "(no text)" : text }] });
+    if (message.role === "assistant") {
+      const parts = text === "" ? [] : [{ text }];
+      for (const b of blocks) {
+        if (b?.type !== "tool_use") continue;
+        toolNames.set(b.id, b.name);
+        // The signature of a thought belongs to the call and must be sent back with it.
+        parts.push({ functionCall: { name: b.name, args: b.input ?? {} }, ...(typeof b.thoughtSignature === "string" ? { thoughtSignature: b.thoughtSignature } : {}) });
+      }
+      contents.push({ role: "model", parts: parts.length === 0 ? [{ text: "(no text)" }] : parts });
+      continue;
+    }
+    const results = blocks.filter((b) => b?.type === "tool_result").map((b) => ({ functionResponse: { name: toolNames.get(b.tool_use_id) ?? "tool", response: b.is_error === true ? { error: textOfContent(b.content) } : { result: textOfContent(b.content) } } }));
+    const parts = [...results, ...(text === "" ? [] : [{ text }])];
+    contents.push({ role: "user", parts: parts.length === 0 ? [{ text: "(no text)" }] : parts });
   }
   const request = {
     contents,
@@ -46,7 +61,11 @@ export function toGeminiRequest(body) {
     request.generationConfig.responseSchema = toGeminiSchema(body.replySchema);
   }
   if (typeof body.system === "string" && body.system !== "") request.systemInstruction = { parts: [{ text: body.system }] };
-  if (Array.isArray(body.tools) && body.tools.length > 0) request.tools = [{ google_search: {} }];
+  const tools = Array.isArray(body.tools) ? body.tools : [];
+  const own = tools.filter((tool) => tool?.input_schema);
+  // The search of Gemini and functions do not go in one request: when there are functions, they are sent.
+  if (own.length > 0) request.tools = [{ functionDeclarations: own.map((tool) => ({ name: tool.name, description: tool.description, parameters: toGeminiSchema(tool.input_schema) })) }];
+  else if (tools.length > 0) request.tools = [{ google_search: {} }];
   return request;
 }
 
@@ -57,7 +76,9 @@ export function fromGeminiResponse(data) {
     const reason = data?.promptFeedback?.blockReason;
     throw new AnthropicError(reason ? `Google did not answer: the request was blocked (${reason})` : "Google returned no answer");
   }
-  const text = (candidate.content?.parts ?? []).map((p) => (typeof p?.text === "string" ? p.text : "")).join("");
+  const parts = candidate.content?.parts ?? [];
+  const text = parts.map((p) => (typeof p?.text === "string" ? p.text : "")).join("");
+  const calls = parts.filter((p) => p?.functionCall && typeof p.functionCall.name === "string");
   const grounding = candidate.groundingMetadata;
   const queries = Array.isArray(grounding?.webSearchQueries) ? grounding.webSearchQueries : [];
   const content = [];
@@ -67,6 +88,7 @@ export function fromGeminiResponse(data) {
     content.push({ type: "web_search_tool_result", content: results });
   }
   content.push({ type: "text", text });
+  calls.forEach((p, i) => content.push({ type: "tool_use", id: `call_${i + 1}`, name: p.functionCall.name, input: p.functionCall.args ?? {}, ...(typeof p.thoughtSignature === "string" ? { thoughtSignature: p.thoughtSignature } : {}) }));
   const usageMetadata = data.usageMetadata ?? {};
   const usage = {
     input_tokens: Number(usageMetadata.promptTokenCount) || 0,
@@ -74,7 +96,7 @@ export function fromGeminiResponse(data) {
     output_tokens: (Number(usageMetadata.candidatesTokenCount) || 0) + (Number(usageMetadata.thoughtsTokenCount) || 0),
   };
   if (queries.length > 0) usage.server_tool_use = { web_search_requests: queries.length };
-  return { type: "message", role: "assistant", content, stop_reason: candidate.finishReason === "MAX_TOKENS" ? "max_tokens" : "end_turn", usage };
+  return { type: "message", role: "assistant", content, stop_reason: candidate.finishReason === "MAX_TOKENS" ? "max_tokens" : calls.length > 0 ? "tool_use" : "end_turn", usage };
 }
 
 export async function callGemini(body, { apiKey, fetchImpl = fetch, signal, timeoutMs = 60000 } = {}) {

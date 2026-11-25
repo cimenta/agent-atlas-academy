@@ -50,7 +50,7 @@ test("text that is not JSON, or not a definition, is refused", () => {
   assert.equal(loadDefinition("{oops").code, "notJson");
   assert.equal(loadDefinition("[]").code, "notDefinition");
   assert.equal(loadDefinition(JSON.stringify(runs[0])).code, "notDefinition");
-  assert.equal(loadDefinition("x".repeat(300000)).code, "tooBig");
+  assert.equal(loadDefinition("x".repeat(450000)).code, "tooBig");
 });
 
 test("a definition from a newer version of the app says so", () => {

@@ -492,6 +492,7 @@ export function renderSettings(ctx) {
     settings.setRepeatStop(value("repeat"));
     settings.setHandoffChars(value("handoff"));
     settings.setWebSearch(webBox.checked);
+    settings.setOwnTools(toolsBox.checked);
     settings.setFallback(chosenFallback());
     settings.setFormatEnforcement(formatRadios.on.checked);
     const saved = settings.get();
@@ -511,6 +512,7 @@ export function renderSettings(ctx) {
   harnessReset.addEventListener("click", () => {
     harnessRows.forEach((row) => row.set(row.spec.def));
     webBox.checked = true;
+    toolsBox.checked = true;
     fallbackRadios.suggest.checked = true;
     formatRadios.on.checked = true;
     say(t("harness.resetDone"));
@@ -608,6 +610,8 @@ export function renderSettings(ctx) {
   // Tools: the master switch for web search, and the rule about web content that cannot be changed.
   const webBox = h(doc, "input", { id: "set-web-search", type: "checkbox", "data-ui": "set-web-search" });
   webBox.checked = harnessNow.webSearch;
+  const toolsBox = h(doc, "input", { id: "set-own-tools", type: "checkbox", "data-ui": "set-own-tools" });
+  toolsBox.checked = harnessNow.ownTools;
   const webFixed = h(doc, "input", { id: "set-web-data", type: "checkbox", disabled: true, "data-ui": "set-web-data" });
   webFixed.checked = true;
   const harnessTools = page(
@@ -615,6 +619,8 @@ export function renderSettings(ctx) {
     h(doc, "h4", {}, t("harness.toolsHeading"), help("harness-web-search", t("harness.toolsHeading"))),
     h(doc, "p", { class: "hint" }, t("harness.toolsIntro")),
     h(doc, "div", { class: "field checkbox" }, webBox, h(doc, "label", { for: "set-web-search" }, t("harness.webSearchLabel"))),
+    h(doc, "div", { class: "field checkbox" }, toolsBox, h(doc, "label", { for: "set-own-tools" }, t("harness.ownToolsLabel"))),
+    h(doc, "p", { class: "hint" }, t("harness.ownToolsNote")),
     h(doc, "h4", {}, t("harness.webContentHeading"), help("harness-web-content", t("harness.webContentHeading"))),
     h(doc, "div", { class: "field checkbox" }, webFixed, h(doc, "label", { for: "set-web-data" }, t("harness.webContentLabel")), h(doc, "span", { class: "tag-always" }, t("harness.alwaysOn"))),
     h(doc, "p", { class: "hint" }, t("harness.webContentNote")),

@@ -44,7 +44,7 @@ export const RUNNERS = {
 // resume: the answers of agents that already finished in an earlier try of this run, in order ({ agent, text, tokens }).
 // An agent's first activations are answered from them without calling the provider, so the run goes through the
 // same steps and carries on live where it failed. No run_start event is sent then: the caller already has it.
-export async function runDesign({ design, task, limits, language = "en", call, callFor, emit, signal, now = Date.now, provider = "anthropic", resume = [], maxOutputTokens, retries, retryDelaySec, freeTier = false, repeatStop, handoffChars = 0, allowSearch = true, fallback = "off", approved = [], formatEnforcement = true }) {
+export async function runDesign({ design, task, limits, language = "en", call, callFor, emit, signal, now = Date.now, provider = "anthropic", resume = [], maxOutputTokens, retries, retryDelaySec, freeTier = false, repeatStop, handoffChars = 0, allowSearch = true, allowTools = true, fallback = "off", approved = [], formatEnforcement = true }) {
   const startedAt = now();
   const send = (event) => emit({ ...event, t: now() - startedAt });
 
@@ -61,6 +61,11 @@ export async function runDesign({ design, task, limits, language = "en", call, c
   const budget = createBudget(searchOff ? { ...limits, maxSearches: 0 } : limits, { now });
   if (searchOff && design.nodes.some((node) => node.search === true)) {
     send({ type: "warning", webSearchOff: true, message: "Web search is turned off in Settings, Harness, Tools. No agent searched." });
+  }
+  // The visitor can forbid the tools of our own for the whole run: no agent is given one.
+  if (allowTools === false && design.nodes.some((node) => Array.isArray(node.tools) && node.tools.length > 0)) {
+    design = { ...design, nodes: design.nodes.map(({ tools, ...rest }) => rest) };
+    send({ type: "warning", toolsOff: true, message: "The tools of the app are turned off in Settings, Harness, Tools. No agent used one." });
   }
   const control = new AbortController();
   const onAbort = () => control.abort();

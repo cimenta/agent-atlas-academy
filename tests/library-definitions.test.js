@@ -30,7 +30,33 @@ const articles = new Set(JSON.parse(readFileSync(new URL("../public/content/arti
 
 test("there is one definition for every run of the level table, and no other library definition", () => {
   const files = readdirSync(dir).filter((f) => f.startsWith("library-")).map((f) => f.replace(/^library-/, "").replace(/\.json$/, "")).sort();
-  assert.deepEqual(files, Object.keys(WAVE1).sort());
+  assert.deepEqual(files, [...Object.keys(WAVE1), "tools-together"].sort(), "the 20 runs of wave 1 and the run that uses many tools");
+});
+
+test("the run with many tools gives every tool of the app to its two agents, has no step on a path, and carries the price list", async () => {
+  const { OWN_TOOL_KEYS } = await import("../public/js/engine/own-tools.js");
+  const loaded = loadDefinition(read("tools-together"));
+  assert.equal(loaded.ok, true, JSON.stringify(loaded));
+  const design = loaded.editor.design();
+  assert.deepEqual(design.nodes.flatMap((n) => n.tools ?? []).sort(), [...OWN_TOOL_KEYS].sort());
+  assert.equal(validateDesign(design).ok, true);
+  assert.equal(loaded.editor.notebookOn(), true, "the notes tool needs the notebook");
+  assert.equal(loaded.editor.documents().length, 1);
+  assert.equal(loaded.library.level, 3);
+  assert.equal(loaded.library.paths, undefined, "in the list and in the tags, not on a guided path");
+  assert.ok(loaded.library.tags.includes("tool-use"));
+  const tags = new Set(Object.values(TAG_GROUPS).flat());
+  assert.ok(loaded.library.tags.every((t) => tags.has(t)));
+  const data = JSON.parse(read("tools-together"));
+  assert.ok(data.design.nodes.every((n) => n.search === false && slotProvider(n.slot) === "anthropic"));
+  for (const lang of ["en", "cs"]) {
+    const links = [...data.about[lang].description.matchAll(/\(#\/learn\/([a-z0-9-]+)\)/g)].map((m) => m[1]);
+    assert.deepEqual(links, ["tools"], lang);
+    assert.ok(articles.has("tools"));
+  }
+  assert.notEqual(data.about.en.title, data.about.cs.title);
+  assert.equal(/\d{4}|today|news|latest/i.test(data.task), false, "no live data written into the task");
+  assert.ok(data.task.length <= 1000);
 });
 
 test("the levels are 6, 8 and 6 runs, and the steps are 1 to 20 once each", () => {
@@ -91,6 +117,36 @@ test("every definition carries its place in the library: the level and the step 
 test("a simple run has fewer agents than the complex run of the same pattern, except where the pattern fixes the shape", () => {
   const count = (id) => JSON.parse(read(id)).design.nodes.length;
   for (const p of ["sequential", "parallel", "supervisor", "debate", "router", "handoff", "voting"]) assert.ok(count(`${p}-simple`) < count(`${p}-complex`), p);
+});
+
+// Step 6 of the tools design: seven runs of the library are recorded again with a tool each, so that every tool of the app is shown in a run.
+// The tool of the app that each run uses (web search is shown by save-search-on, which already exists).
+export const TOOL_RUNS = { "router-simple": "calculator", "planexec-complex": "datetime", "router-complex": "wikipedia", "planexec-simple": "weather", "evaluator-simple": "text_stats", "handoff-simple": "document_search", "supervisor-complex": "notes" };
+
+test("every tool of the app is shown by a run of the library, and the run gives that tool to an agent and carries the tag", async () => {
+  const { OWN_TOOL_KEYS } = await import("../public/js/engine/own-tools.js");
+  assert.deepEqual(Object.values(TOOL_RUNS).sort(), [...OWN_TOOL_KEYS].sort());
+  for (const [id, tool] of Object.entries(TOOL_RUNS)) {
+    const loaded = loadDefinition(read(id));
+    assert.equal(loaded.ok, true, id);
+    const design = loaded.editor.design();
+    assert.ok(design.nodes.some((n) => (n.tools ?? []).includes(tool)), `${id} gives ${tool} to an agent`);
+    assert.ok(loaded.library.tags.includes("tool-use"), id);
+    assert.equal(validateDesign(design).ok, true, id);
+  }
+});
+
+test("a run with the notes tool has the notebook on, and a run with the documents tool carries its documents", () => {
+  const notes = loadDefinition(read("supervisor-complex"));
+  assert.equal(notes.editor.notebookOn(), true);
+  const docs = loadDefinition(read("handoff-simple"));
+  assert.equal(docs.editor.documents().length, 1);
+  assert.ok(docs.editor.documents()[0].text.length > 300 && docs.editor.documents()[0].text.length < 5000);
+});
+
+test("a tool run is on a provider that takes tools, and a run with the counting tool asks for the count in its criteria", () => {
+  for (const id of Object.keys(TOOL_RUNS)) assert.ok(["groq", "anthropic", "google"].includes(slotProvider(JSON.parse(read(id)).design.nodes[0].slot)), `${id}: Cloudflare and OpenRouter free models are not trusted with tools`);
+  assert.match(JSON.parse(read("evaluator-simple")).design.criteria, /Count the words/);
 });
 
 test("the five providers are used evenly by wave 1: two patterns each, with Anthropic one of them", () => {

@@ -16,7 +16,7 @@ function synthesizeDone(outcome, events) {
       usage.output += Number(e.tokens?.output) || 0;
       usage.steps += 1;
     }
-    if (e.type === "tool_call") usage.searches += 1;
+    if (e.type === "tool_call" && e.own !== true) usage.searches += 1;
   }
   return { type: "done", outcome, usage, finalText: "", t: events.at(-1)?.t ?? 0 };
 }
@@ -34,7 +34,7 @@ function parseBlock(block) {
   return null;
 }
 
-export function startRun({ design, task, limits, language, apiKey, keys, resume, provider = "anthropic", timeoutSec, outputTokens, retries, retryDelaySec, freeTier, repeatStop, handoffChars, webSearch, fallback, formatEnforcement, approved, fetchFn = fetch, onEvent }) {
+export function startRun({ design, task, limits, language, apiKey, keys, resume, provider = "anthropic", timeoutSec, outputTokens, retries, retryDelaySec, freeTier, repeatStop, handoffChars, webSearch, ownTools, fallback, formatEnforcement, approved, fetchFn = fetch, onEvent }) {
   const controller = new AbortController();
   const events = [];
   let stopped = false;
@@ -52,7 +52,7 @@ export function startRun({ design, task, limits, language, apiKey, keys, resume,
       response = await fetchFn("/api/run", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...(webSearch === false ? { webSearch: false } : {}), ...(fallback ? { fallback } : {}), ...(formatEnforcement === false ? { formatEnforcement: false } : {}), ...(approved?.length ? { approved } : {}), design, task, limits, language, apiKey, ...(keys ? { keys } : {}), ...(resume?.length ? { resume } : {}), ...(timeoutSec ? { timeoutSec } : {}), ...(outputTokens ? { outputTokens } : {}), ...(retries !== undefined ? { retries } : {}), ...(freeTier === true ? { freeTier } : {}), ...(repeatStop !== undefined ? { repeatStop } : {}), ...(handoffChars ? { handoffChars } : {}), ...(retryDelaySec ? { retryDelaySec } : {}), provider }),
+        body: JSON.stringify({ ...(webSearch === false ? { webSearch: false } : {}), ...(ownTools === false ? { ownTools: false } : {}), ...(fallback ? { fallback } : {}), ...(formatEnforcement === false ? { formatEnforcement: false } : {}), ...(approved?.length ? { approved } : {}), design, task, limits, language, apiKey, ...(keys ? { keys } : {}), ...(resume?.length ? { resume } : {}), ...(timeoutSec ? { timeoutSec } : {}), ...(outputTokens ? { outputTokens } : {}), ...(retries !== undefined ? { retries } : {}), ...(freeTier === true ? { freeTier } : {}), ...(repeatStop !== undefined ? { repeatStop } : {}), ...(handoffChars ? { handoffChars } : {}), ...(retryDelaySec ? { retryDelaySec } : {}), provider }),
         signal: controller.signal,
       });
     } catch (error) {

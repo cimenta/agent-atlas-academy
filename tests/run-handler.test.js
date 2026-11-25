@@ -85,10 +85,28 @@ test("a body that is not JSON gets 400 bad_json", async () => {
   assert.equal(res.json.error, "bad_json");
 });
 
-test("a body over 65536 bytes gets 413 too_large", async () => {
-  const res = await send(handler(), JSON.stringify(goodBody({ pad: "x".repeat(70000) })));
+test("a body over 655360 bytes gets 413 too_large", async () => {
+  const res = await send(handler(), JSON.stringify(goodBody({ pad: "x".repeat(660000) })));
   assert.equal(res.statusCode, 413);
   assert.equal(res.json.error, "too_large");
+});
+
+test("a run with documents of the student, 200000 characters of them, is accepted and the search finds a passage", async () => {
+  const text = `${"Filler sentence about nothing. ".repeat(6000)}The refund deadline is 14 days after delivery.`;
+  const design = { pattern: "sequential", nodes: [{ id: "a", agent: "researcher", model: "fast", search: false, tools: ["document_search"] }, { id: "b", agent: "writer", model: "fast", search: false }], edges: [{ from: "a", to: "b" }], documents: [{ name: "terms.txt", text }] };
+  assert.ok(Buffer.byteLength(JSON.stringify(goodBody({ design }))) > 65536);
+  const res = await send(handler(), JSON.stringify(goodBody({ design })));
+  assert.equal(res.statusCode, 200);
+});
+
+test("documents that are too many or too long are refused as a bad design", async () => {
+  const base = { pattern: "sequential", nodes: [{ id: "a", agent: "researcher", model: "fast", search: false }, { id: "b", agent: "writer", model: "fast", search: false }], edges: [{ from: "a", to: "b" }] };
+  const doc = (n) => ({ name: `d${n}.txt`, text: "hello" });
+  for (const documents of [[doc(1), doc(2), doc(3), doc(4)], [{ name: "big.txt", text: "x".repeat(200001) }], "text", [{ name: "", text: "a" }]]) {
+    const res = await send(handler(), JSON.stringify(goodBody({ design: { ...base, documents } })));
+    assert.equal(res.statusCode, 400);
+    assert.ok(res.json.errors.some((e) => e.code === "design.documents"));
+  }
 });
 
 test("a missing or short key gets 400 bad_key", async () => {

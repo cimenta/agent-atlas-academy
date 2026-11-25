@@ -35,7 +35,7 @@ function sumUsage(events) {
       usage.output += Number(event.tokens?.output) || 0;
       usage.steps += 1;
     }
-    if (event.type === "tool_call") usage.searches += 1;
+    if (event.type === "tool_call" && event.own !== true) usage.searches += 1;
   }
   return usage;
 }
