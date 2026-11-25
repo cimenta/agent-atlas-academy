@@ -3,7 +3,7 @@ import { h } from "./dom.js";
 import { providerChips } from "./provider-colors.js";
 import { getJson } from "./pages.js";
 import { formatRunWhen } from "./play-model.js";
-import { levelOf, kindOf } from "./library-path.js";
+import { levelOf, kindOf, pairKey } from "./library-path.js";
 import { refreshResultTab } from "./tab-state.js";
 import { clearPageActions, setPageActions } from "./shortcuts.js";
 
@@ -139,6 +139,41 @@ export function runRow(ctx, item, pick) {
     pick.onSelect(item.id);
   });
   return li;
+}
+
+// The two runs of a before and after pair in one frame. The header holds a question mark: on hover, focus or a click it says what the pair compares
+// and what each run teaches. rowOf(item) draws one card.
+export function pairFrame(ctx, [first, second], rowOf) {
+  const { doc, t, lang } = ctx;
+  const key = pairKey(first, second);
+  const said = t(`pair.cmp.${key}`);
+  const compares = said === `pair.cmp.${key}` ? t("pair.cmpDefault") : said;
+  const teaches = (item) => item?.teaches?.[lang] ?? item?.teaches?.en ?? "";
+  const tipId = `pair-tip-${key}`;
+  const tip = h(doc, "div", { class: "pair-tip", id: tipId, role: "tooltip", hidden: true, "data-ui": "pair-tip" },
+    h(doc, "b", {}, t("pair.compared")),
+    h(doc, "p", {}, compares),
+    h(doc, "dl", {}, h(doc, "dt", {}, t("pair.top")), h(doc, "dd", {}, teaches(first)), h(doc, "dt", {}, t("pair.bottom")), h(doc, "dd", {}, teaches(second))),
+    h(doc, "p", { class: "muted" }, t("pair.tick")));
+  const help = h(doc, "button", { type: "button", class: "pair-help", "data-ui": "pair-help", "aria-label": t("pair.help"), "aria-describedby": tipId, "aria-expanded": "false" }, "?");
+  let pinned = false;
+  const show = (on) => {
+    tip.hidden = !on;
+    help.setAttribute("aria-expanded", on ? "true" : "false");
+  };
+  help.addEventListener("mouseenter", () => show(true));
+  help.addEventListener("mouseleave", () => { if (!pinned) show(false); });
+  help.addEventListener("focus", () => show(true));
+  help.addEventListener("blur", () => { if (!pinned) show(false); });
+  help.addEventListener("click", (event) => {
+    event.stopPropagation?.();
+    pinned = !pinned;
+    show(pinned);
+  });
+  return h(doc, "li", { class: "pair-group", "data-ui": "pair-group", "data-pair": key },
+    h(doc, "div", { class: "pair-head" }, h(doc, "span", {}, `⇄ ${t("path.kind.pair")}`), help),
+    tip,
+    h(doc, "ul", { class: "pair-cards" }, rowOf(first), rowOf(second)));
 }
 
 const LAST_RUN_KEY = "aa.lastRun";

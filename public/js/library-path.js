@@ -55,3 +55,25 @@ export function twinOf(items, item) {
   if (typeof item?.twin !== "string" || item.twin === "") return null;
   return (Array.isArray(items) ? items : []).find((r) => r.id === item.twin) ?? null;
 }
+
+// The runs of a list with the two runs of a before and after pair put together: each item is a run, or { pair: [first, second] } when both twins are
+// in the list and name each other (the second one moves up next to the first). A twin that is filtered out leaves the other run alone.
+export function groupPairs(items) {
+  const list = Array.isArray(items) ? items : [];
+  const used = new Set();
+  const out = [];
+  for (const item of list) {
+    if (used.has(item.id)) continue;
+    const twin = item.kind === "pair" && item.twin ? list.find((r) => r.id === item.twin && r.kind === "pair" && r.twin === item.id && !used.has(r.id)) : null;
+    used.add(item.id);
+    if (twin) {
+      used.add(twin.id);
+      out.push({ pair: [item, twin] });
+    } else {
+      out.push(item);
+    }
+  }
+  return out;
+}
+// The key of the text that says what a pair compares: the smaller of the two ids, so both runs of a pair give the same key.
+export const pairKey = (a, b) => [a.id, b.id].sort()[0];

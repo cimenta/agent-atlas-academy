@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { runRow } from "../public/js/play-shared.js";
+import { runRow, pairFrame } from "../public/js/play-shared.js";
+import { readFileSync } from "node:fs";
 
 class El {
   constructor(tag) { this.tag = tag; this.attrs = {}; this.children = []; this.listeners = {}; }
@@ -71,4 +72,42 @@ test("a before and after run and a bad on purpose run say so with an icon whose 
   assert.equal(bad.text, "⚠");
   assert.match(bad.attrs["aria-label"], /path\.kind\.bad/);
   assert.equal(ui(build(), "run-kind").length, 0);
+});
+
+test("a pair is one frame with a header, a question mark that opens what is compared and what each run teaches, and the two cards", () => {
+  const first = { ...base, id: "save-tokens-4000", kind: "pair", twin: "save-tokens-1000", teaches: { en: "Long replies." } };
+  const second = { ...base, id: "save-tokens-1000", kind: "pair", twin: "save-tokens-4000", teaches: { en: "Short replies." } };
+  const frame = pairFrame(ctx, [first, second], (item) => runRow(ctx, item, { checked: false, base: false, selected: false, onToggle() {}, onSelect() {} }));
+  assert.equal(frame.attrs["data-pair"], "save-tokens-1000", "the key is the smaller id");
+  assert.equal(frame.find((e) => e.attrs["data-ui"] === "run-row").length, 2);
+  const tip = ui(frame, "pair-tip")[0];
+  assert.notEqual(tip.attrs.hidden, undefined, "it starts hidden");
+  assert.match(tip.text, /pair.cmpDefault/, "the test t returns the key, so the missing text falls back");
+  assert.match(tip.text, /Long replies./);
+  assert.match(tip.text, /Short replies./);
+  const help = ui(frame, "pair-help")[0];
+  assert.equal(help.attrs["aria-describedby"], tip.attrs.id);
+  assert.equal(help.attrs["aria-expanded"], "false");
+  help.listeners.mouseenter[0]();
+  assert.equal(tip.hidden, false, "hover opens it");
+  help.listeners.mouseleave[0]();
+  assert.equal(tip.hidden, true);
+  help.listeners.click[0]({});
+  help.listeners.mouseleave[0]();
+  assert.equal(tip.hidden, false, "a click keeps it open");
+  help.listeners.click[0]({});
+  assert.equal(tip.hidden, true);
+});
+
+test("every pair of the library says what it compares, in English and in Czech", () => {
+  const index = JSON.parse(readFileSync(new URL("../public/runs/index.json", import.meta.url), "utf8"));
+  const list = Array.isArray(index) ? index : index.runs;
+  const en = JSON.parse(readFileSync(new URL("../public/locales/en.json", import.meta.url), "utf8"));
+  const cs = JSON.parse(readFileSync(new URL("../public/locales/cs.json", import.meta.url), "utf8"));
+  const keys = new Set(list.filter((r) => r.kind === "pair" && r.twin).map((r) => [r.id, r.twin].sort()[0]));
+  assert.ok(keys.size >= 13);
+  for (const key of keys) {
+    assert.ok(en["pair.cmp." + key] && cs["pair.cmp." + key], key);
+    assert.notEqual(en["pair.cmp." + key], cs["pair.cmp." + key], key);
+  }
 });

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { GOALS, LEVELS, levelOf, stepOf, kindOf, goalLevels, nextStep, coverageErrors, twinOf } from "../public/js/library-path.js";
+import { GOALS, LEVELS, levelOf, stepOf, kindOf, goalLevels, nextStep, coverageErrors, twinOf, groupPairs, pairKey } from "../public/js/library-path.js";
 import { buildReplayList } from "../public/js/play-model.js";
 
 test("the goals and levels of the path", () => {
@@ -82,4 +82,17 @@ test("the list of the library keeps level, kind, twin and paths", () => {
   assert.equal(item.kind, "pair");
   assert.equal(item.twin, "b");
   assert.deepEqual(item.paths, { patterns: 1 });
+});
+
+test("two runs that name each other as a before and after pair are put together, a twin that is not in the list leaves the other alone", () => {
+  const a = { id: "a", kind: "pair", twin: "b" };
+  const b = { id: "b", kind: "pair", twin: "a" };
+  const c = { id: "c" };
+  const d = { id: "d", kind: "pair", twin: "gone" };
+  const out = groupPairs([a, c, d, b]);
+  assert.deepEqual(out, [{ pair: [a, b] }, c, d], "the second run moves up next to the first, in the place of the first");
+  assert.deepEqual(groupPairs([b]), [b]);
+  assert.deepEqual(groupPairs([{ id: "x", kind: "pair", twin: "y" }, { id: "y", kind: "pair", twin: "z" }]).map((e) => e.pair), [undefined, undefined], "twins that do not name each other are not paired");
+  assert.deepEqual(groupPairs([{ id: "p", kind: "bad", twin: "q" }, { id: "q", kind: "bad", twin: "p" }]).map((e) => e.pair), [undefined, undefined], "only the kind pair is framed");
+  assert.equal(pairKey(b, a), "a");
 });
