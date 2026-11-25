@@ -53,12 +53,12 @@ test("the window opens in the body with five sections and closes with the Escape
   assert.equal(body.children.length, 0);
 });
 
-test("the card section points at every part with its own words: two for the providers, one for the background colour, and the step shows the tick icon", () => {
+test("the card section points at every part with its own words: one for the providers, one for the background colour, and the step shows the tick icon", () => {
   const { body, help } = setup();
   help.open();
   const panel = ui(body, "help-panel")[0];
   for (const part of CARD_PARTS) assert.equal(ui(panel, `help-label-${part}`).length, 1, part);
-  assert.ok(CARD_PARTS.includes("prov1") && CARD_PARTS.includes("prov2") && CARD_PARTS.includes("bg"));
+  assert.ok(CARD_PARTS.includes("prov") && CARD_PARTS.includes("bg") && !CARD_PARTS.includes("prov2"), "one label for the providers, one for the background");
   assert.match(ui(panel, "help-label-bg")[0].text, /libhelp\.p\.bg\.t/);
   const step = ui(panel, "help-label-step")[0];
   assert.equal(ui(step, "help-step-done").length, 1, "the words of the step hold the icon with the tick");
@@ -147,4 +147,12 @@ test("every word of the help is in English and in Czech, and the setting is in t
   for (const part of CARD_PARTS) assert.ok(en[`libhelp.p.${part}.t`] && en[`libhelp.p.${part}.d`], part);
   const source = readFileSync(new URL("../public/js/storage/settings.js", import.meta.url), "utf8");
   assert.match(source, /libraryHelp: stored\?\.libraryHelp !== false/);
+});
+
+test("the level section shows the icon with the tick once, in the line about a done step", () => {
+  const { body, help } = setup();
+  help.open();
+  ui(body, "help-tab-level")[0].listeners.click[0]();
+  assert.equal(ui(body, "help-step-done").length, 1);
+  assert.equal(ui(body, "help-step").length, 1);
 });

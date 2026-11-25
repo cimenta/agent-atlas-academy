@@ -9,7 +9,7 @@ export const HELP_TABS = ["card", "color", "level", "pairs", "compare"];
 const SVG = "http://www.w3.org/2000/svg";
 const SEEN_KEY = "aa.libraryHelpSeen";
 // The parts of a card the help points at, in the order of the legend.
-export const CARD_PARTS = ["title", "type", "prov1", "prov2", "bg", "tick", "kind", "step", "level"];
+export const CARD_PARTS = ["title", "bg", "type", "prov", "tick", "kind", "step", "level"];
 
 const sessionStore = (ctx) => {
   try {
@@ -123,50 +123,70 @@ export function createLibraryHelp(ctx, getItems = () => []) {
       svg.append(circle);
     };
     let need = card.bottom;
+    const titleR = rect(part.title);
+    const typeR = rect(part.type);
+    const chipRects = chips.map(rect);
+    // the background: a point in the empty part of the card between the title and the chips, so its line never crosses the pattern
+    const chipTop = chipRects.length ? Math.min(typeR.top, ...chipRects.map((c) => c.top)) : typeR.top;
+    const bgAnchor = { x: card.left + 12, y: (titleR.bottom + chipTop) / 2 };
     const place = (side, keys) => {
       const items = keys.filter((k) => labOf(k)).map((key) => {
         let anchor;
-        if (key === "bg") anchor = { x: card.left + 14, y: card.top + card.height * 0.5 };
-        else if (key === "title") anchor = { x: rect(part.title).left, y: rect(part.title).top + 10 };
-        else if (key === "type") anchor = { x: rect(part.type).left, y: rect(part.type).top + rect(part.type).height / 2 };
+        if (key === "bg") anchor = bgAnchor;
+        else if (key === "title") anchor = { x: titleR.left, y: titleR.top + 10 };
+        else if (key === "type") anchor = { x: typeR.left, y: typeR.top + typeR.height / 2 };
         else {
           const r = rect(part[key]);
           anchor = { x: r.right, y: r.top + r.height / 2 };
         }
         return { key, anchor };
-      }).sort((a, b) => a.anchor.y - b.anchor.y);
+      }).sort((x, y) => x.anchor.y - y.anchor.y);
       let y = 0;
       for (const it of items) {
         const lab = labOf(it.key);
-        lab.style.width = "130px";
+        lab.style.width = "120px";
         lab.style.textAlign = side === "left" ? "right" : "left";
-        lab.style.left = `${side === "left" ? 0 : dr.width - 130}px`;
+        lab.style.left = `${side === "left" ? 0 : dr.width - 120}px`;
         const top = Math.max(y, it.anchor.y - 10);
         lab.style.top = `${top}px`;
-        y = top + lab.offsetHeight + 10;
+        y = top + lab.offsetHeight + 26;
         need = Math.max(need, y);
-        const ex = side === "left" ? 130 + 6 : dr.width - 130 - 6;
+        const ex = side === "left" ? 126 : dr.width - 126;
         const ey = top + 10;
         const dx = side === "left" ? 30 : -30;
         line(`M${it.anchor.x} ${it.anchor.y} C ${it.anchor.x + dx} ${it.anchor.y}, ${ex - dx} ${ey}, ${ex} ${ey}`, it.key, [it.anchor.x, it.anchor.y]);
       }
     };
     place("left", ["title", "bg", "type"]);
-    place("right", ["tick", "kind", "step", "level"]);
-    // the providers: a straight line down from each chip to its words under the card
-    chips.slice(0, 2).forEach((chip, i) => {
-      const lab = labOf(`prov${i + 1}`);
-      if (!lab) return;
-      const r = rect(chip);
-      const cx = r.left + r.width / 2;
-      const top = card.bottom + 22;
-      lab.style.width = "130px";
-      lab.style.textAlign = i === 0 ? "right" : "left";
-      lab.style.left = `${i === 0 ? Math.max(150, cx - 130) : cx}px`;
-      lab.style.top = `${top}px`;
-      line(`M${cx} ${r.bottom} L ${cx} ${top - 2}`, `prov${i + 1}`, [cx, r.bottom]);
-      need = Math.max(need, top + lab.offsetHeight);
-    });
+    place("right", ["tick", "kind", "step"]);
+    const below = card.bottom + 22;
+    // the providers: one bracket under all the chips and one text, centred under the line that leaves the bracket
+    const provLab = labOf("prov");
+    if (provLab && chipRects.length) {
+      const first = chipRects[0];
+      const last = chipRects[chipRects.length - 1];
+      const by = Math.max(...chipRects.map((c) => c.bottom)) + 6;
+      const mid = (first.left + last.right) / 2;
+      provLab.style.width = "100px";
+      provLab.style.textAlign = "center";
+      provLab.style.left = `${mid - 50}px`;
+      provLab.style.top = `${below}px`;
+      const cx = (c) => c.left + c.width / 2;
+      line(`M${cx(first)} ${first.bottom} L ${cx(first)} ${by} L ${cx(last)} ${by} L ${cx(last)} ${last.bottom} M${mid} ${by} L ${mid} ${below - 2}`, "prov", [mid, by]);
+      need = Math.max(need, below + provLab.offsetHeight);
+    }
+    // the level: under the card at the right, a straight line down from the dots
+    const levelLab = labOf("level");
+    if (levelLab && part.level) {
+      const d = rect(part.level);
+      const cx = d.left + d.width / 2;
+      levelLab.style.width = "90px";
+      levelLab.style.textAlign = "left";
+      levelLab.style.left = `${card.right - 90}px`;
+      levelLab.style.top = `${below}px`;
+      line(`M${cx} ${d.bottom} L ${cx} ${below - 2}`, "level", [cx, d.bottom]);
+      need = Math.max(need, below + levelLab.offsetHeight);
+    }
     demo.style.minHeight = `${need + 8}px`;
   }
 
@@ -186,7 +206,7 @@ export function createLibraryHelp(ctx, getItems = () => []) {
       h(doc, "div", { class: "lh-levels" },
         ...[1, 2, 3].map((n) => h(doc, "div", { class: "lh-lv", "data-ui": `help-level-${n}` }, dots(n), h(doc, "span", {}, h(doc, "b", {}, t(`path.level.${n}`)), ": ", t(`libhelp.level.${n}.d`)))),
         h(doc, "div", { class: "lh-lv", "data-ui": "help-level-step" }, stepIcon(3, false), h(doc, "span", {}, t("libhelp.level.step"))),
-        h(doc, "div", { class: "lh-lv", "data-ui": "help-level-done" }, stepIcon(3, true), h(doc, "span", {}, ...rich(doc, t("libhelp.level.done"), { done: () => stepIcon(3, true) })))),
+        h(doc, "div", { class: "lh-lv", "data-ui": "help-level-done" }, h(doc, "span", {}, ...rich(doc, t("libhelp.level.done"), { done: () => stepIcon(3, true) })))),
     ];
   }
 
