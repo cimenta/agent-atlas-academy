@@ -984,7 +984,7 @@ export function renderSettings(ctx) {
     ),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.securityHeading"), help("settings-security", t("settings.securityHeading"))), h(doc, "div", { class: "sec-switch", "data-ui": "sec-switch", role: "group", "aria-label": t("settings.secProvider") }, ...secSwitch), securityNone, secLead, secSteps, unlockForm, secActions),
   ];
-  const skillsSection = ctx.skills ? h(doc, "section", { class: "settings-section", "data-ui": "skills-section" }, h(doc, "h2", {}, t("skills.heading")), renderSkillsSettings({ doc, t, store: ctx.skills })) : null;
+  const skillsSection = ctx.skills ? h(doc, "section", { class: "settings-section", "data-ui": "skills-section" }, h(doc, "h2", {}, t("skills.heading"), help("settings-skills", t("skills.heading"))), renderSkillsSettings({ doc, t, store: ctx.skills })) : null;
   const [keySection, harnessSection, tooltipsSection, playerSection, shortcutsSection, dataSection, securitySection] = written;
   // Tabs down the left (a row on a phone); one section is shown at a time.
   const keyTag = h(doc, "span", { class: "key-dot key-dot-inline", "data-ui": "key-saved-tag", role: "img", hidden: true });

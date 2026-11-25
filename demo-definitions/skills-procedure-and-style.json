@@ -1,0 +1,57 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "Write a letter to a supplier whose delivery of 200 chairs is two weeks late. We need a new delivery date and a discount for the delay.",
+  "about": {
+    "en": {
+      "title": "Two skills: a procedure and a style",
+      "author": "Agent Atlas Academy",
+      "description": "Two agents in a chain, and each one carries one skill. The **Planner** has the procedure **Step planner**: it splits the job into numbered steps and says what shows each step is done. The **Writer** has the style **Business writing** with the Czech culture: a clear subject, a factual core, a formal greeting, and a next step with a date.\n\n**What it shows**\n\n- What a skill is: a piece of text that the application adds to the prompt of an agent. The two agents are of the usual types (Planner, Writer); the skills change how they work and how they write, not who they are.\n- Two kinds of skill side by side: a **procedure** (how the Planner works) and a **style** (how the Writer writes).\n- The culture of a style: with Business writing set to another culture, the same letter is written in a different way.\n\n**What to watch**\n\n- In the replay open the Planner and the Writer, tab **Settings**: it lists the skills of the agent and the text the model really got.\n- Compare with a second run of the same task with the skills taken off (Create, the agent, tab Skills, **Back to defaults** or choose None). The letter loses its structure and its formal tone.\n\n**To try**\n\nLoad this definition in Create and press Run. Then change the culture of Business writing to English or Thai and run again."
+    },
+    "cs": {
+      "title": "Dva skilly: postup a styl",
+      "author": "Agent Atlas Academy",
+      "description": "Dva agenti v řetězu a každý nese jeden skill. **Plánovač** má postup **Plánovač kroků**: rozdělí práci na číslované kroky a řekne, podle čeho poznáme, že je krok hotový. **Pisatel** má styl **Business psaní** s českou kulturou: jasný předmět, věcné jádro, formální pozdrav a další krok s datem.\n\n**Co ukazuje**\n\n- Co je skill: kus textu, který aplikace přidá do promptu agenta. Oba agenti jsou obvyklých typů (Plánovač, Pisatel); skilly mění, jak pracují a jak píší, ne kým jsou.\n- Dva druhy skillů vedle sebe: **postup** (jak pracuje Plánovač) a **styl** (jak píše Pisatel).\n- Kultura stylu: když u Business psaní nastavíte jinou kulturu, stejný dopis se napíše jinak.\n\n**Na co se dívat**\n\n- V záznamu otevřete Plánovače a Pisatele, záložka **Settings**: vypíše skilly agenta a text, který model opravdu dostal.\n- Porovnejte s druhým během stejného zadání bez skillů (Create, agent, záložka Skilly, **Zpět na výchozí** nebo volba Žádná). Dopis ztratí strukturu i formální tón.\n\n**Co zkusit**\n\nNačtěte definici v Create a spusťte. Pak změňte kulturu Business psaní na angličtinu nebo thajštinu a spusťte znovu."
+    }
+  },
+  "design": {
+    "pattern": "sequential",
+    "nodes": [
+      {
+        "id": "planner",
+        "agent": "planner",
+        "model": "fast",
+        "search": false,
+        "skills": [
+          {
+            "id": "planner-steps",
+            "kind": "postup",
+            "name": "Step planner",
+            "text": "Procedure: first split the task into numbered steps and write for each step the result that shows it is done. Only then start on the first step."
+          }
+        ]
+      },
+      {
+        "id": "writer",
+        "agent": "writer",
+        "model": "fast",
+        "search": false,
+        "skills": [
+          {
+            "id": "business",
+            "kind": "styl",
+            "name": "Business writing",
+            "param": "cs",
+            "text": "Style: business correspondence. A clear subject, a short opening with the reason for writing, a factual core, and a concrete next step with a date. No slang.\nCulture: Czech. Address the reader formally with title and surname, stay factual and polite, avoid superlatives. Close with a formal greeting."
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from": "planner",
+        "to": "writer"
+      }
+    ]
+  }
+}

@@ -6,7 +6,7 @@ All notable changes are listed here. The format follows Keep a Changelog and the
 
 ### Added
 
-- Skills: pieces of text that give an agent a role (who it is), a procedure (how it works) or a style (how it writes). Settings has a new tab Skills with a library (app skills are read only and versioned, your own skills extend one parent, up to three levels, the culture of Business writing can be Czech, English, Thai or Indian) and the defaults of each agent type. In the settings of an agent the new tab Skills chooses them, shows the composed text with a token estimate and goes back to the defaults. An agent carries a copy of the text, so runs, replays and shared definitions do not depend on your library. In Re-play, the Settings tab of an agent shows its skills and their text.
+- Skills: pieces of text that give an agent a role (who it is), a procedure (how it works) or a style (how it writes). Settings has a new tab Skills with a library (app skills are read only and versioned, your own skills extend one parent, up to three levels, the culture of Business writing can be Czech, English, Thai or Indian) and the defaults of each agent type. In the settings of an agent the new tab Skills chooses them, shows the composed text with a token estimate and goes back to the defaults. An agent carries a copy of the text, so runs, replays and shared definitions do not depend on your library. In Re-play, the Settings tab of an agent shows its skills and their text. Learn has a new article, What are skills? (English and Czech), Help has sections for the skills of Settings and of an agent with ? buttons, and the folder demo-definitions has a definition that uses two skills (a procedure and a style).
 
 ### Fixed
 
