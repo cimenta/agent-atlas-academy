@@ -3,7 +3,7 @@ import { h } from "./dom.js";
 import { providerChips } from "./provider-colors.js";
 import { getJson } from "./pages.js";
 import { formatRunWhen } from "./play-model.js";
-import { levelOf, kindOf, pairKey } from "./library-path.js";
+import { levelOf, kindOf, groupKey } from "./library-path.js";
 import { refreshResultTab } from "./tab-state.js";
 import { clearPageActions, setPageActions } from "./shortcuts.js";
 
@@ -112,7 +112,7 @@ export function runRow(ctx, item, pick) {
     ? h(doc, "span", { class: `lv-dots l${level}`, "data-ui": "run-level", role: "img", "aria-label": t("path.level.label", { level: t(`path.level.${level}`) }), title: t(`path.level.${level}`) }, ...[1, 2, 3].map((n) => h(doc, "i", { class: n <= level ? "on" : undefined })))
     : "";
   // The kind of the run (before and after, bad on purpose) is an icon in the side column; its words are the label and the tip.
-  const kindIcon = kind ? h(doc, "span", { class: `chip-kind ${kind}`, "data-ui": "run-kind", role: "img", "aria-label": t(`path.kind.${kind}`), title: `${t(`path.kind.${kind}`)}: ${t(`path.kindTip.${kind}`)}` }, kind === "pair" ? "⇄" : "⚠") : "";
+  const kindIcon = kind ? h(doc, "span", { class: `chip-kind ${kind}`, "data-ui": "run-kind", role: "img", "aria-label": t(`path.kind.${kind}`), title: `${t(`path.kind.${kind}`)}: ${t(`path.kindTip.${kind}`)}` }, kind === "pair" ? "⇄" : kind === "trio" ? "⇶" : "⚠") : "";
   const li = h(
     doc,
     "li",
@@ -143,9 +143,10 @@ export function runRow(ctx, item, pick) {
 
 // The two runs of a before and after pair in one frame. The header holds a question mark: on hover, focus or a click it says what the pair compares
 // and what each run teaches. rowOf(item) draws one card.
-export function pairFrame(ctx, [first, second], rowOf) {
+export function pairFrame(ctx, members, rowOf) {
   const { doc, t, lang } = ctx;
-  const key = pairKey(first, second);
+  const trio = members.length === 3;
+  const key = groupKey(members);
   const said = t(`pair.cmp.${key}`);
   const compares = said === `pair.cmp.${key}` ? t("pair.cmpDefault") : said;
   const teaches = (item) => item?.teaches?.[lang] ?? item?.teaches?.en ?? "";
@@ -153,8 +154,8 @@ export function pairFrame(ctx, [first, second], rowOf) {
   const tip = h(doc, "div", { class: "pair-tip", id: tipId, role: "tooltip", hidden: true, "data-ui": "pair-tip" },
     h(doc, "b", {}, t("pair.compared")),
     h(doc, "p", {}, compares),
-    h(doc, "dl", {}, h(doc, "dt", {}, t("pair.top")), h(doc, "dd", {}, teaches(first)), h(doc, "dt", {}, t("pair.bottom")), h(doc, "dd", {}, teaches(second))),
-    h(doc, "p", { class: "muted" }, t("pair.tick")));
+    h(doc, "dl", {}, ...members.flatMap((item, i) => [h(doc, "dt", {}, t(trio ? ["pair.top", "pair.middle", "pair.bottom"][i] : ["pair.top", "pair.bottom"][i])), h(doc, "dd", {}, teaches(item))])),
+    h(doc, "p", { class: "muted" }, t(trio ? "pair.tickTrio" : "pair.tick")));
   const help = h(doc, "button", { type: "button", class: "pair-help", "data-ui": "pair-help", "aria-label": t("pair.help"), "aria-describedby": tipId, "aria-expanded": "false" }, "?");
   let pinned = false;
   const show = (on) => {
@@ -171,9 +172,9 @@ export function pairFrame(ctx, [first, second], rowOf) {
     show(pinned);
   });
   return h(doc, "li", { class: "pair-group", "data-ui": "pair-group", "data-pair": key },
-    h(doc, "div", { class: "pair-head" }, h(doc, "span", {}, `⇄ ${t("path.kind.pair")}`), help),
+    h(doc, "div", { class: "pair-head" }, h(doc, "span", {}, `${trio ? "⇶" : "⇄"} ${t(trio ? "path.kind.trio" : "path.kind.pair")}`), help),
     tip,
-    h(doc, "ul", { class: "pair-cards" }, rowOf(first), rowOf(second)));
+    h(doc, "ul", { class: "pair-cards" }, ...members.map(rowOf)));
 }
 
 const LAST_RUN_KEY = "aa.lastRun";

@@ -1409,8 +1409,7 @@
         "basics"
       ],
       "level": 2,
-      "kind": "pair",
-      "twin": "save-provider-groq",
+      "kind": "trio",
       "paths": {
         "save": 12
       },
@@ -1419,7 +1418,11 @@
         "cs": "Stejné zadání u placeného poskytovatele je rychlé a každé volání má cenu."
       },
       "studyMinutes": 11,
-      "runSeconds": 18
+      "runSeconds": 18,
+      "with": [
+        "save-provider-groq",
+        "save-provider-cloudflare"
+      ]
     },
     {
       "id": "save-provider-groq",
@@ -1439,8 +1442,7 @@
         "basics"
       ],
       "level": 2,
-      "kind": "pair",
-      "twin": "save-provider-anthropic",
+      "kind": "trio",
       "paths": {
         "save": 13
       },
@@ -1449,7 +1451,11 @@
         "cs": "Stejné zadání u bezplatného poskytovatele nestojí nic, ale jeho volání jsou rozložená v čase a odpovědi se liší."
       },
       "studyMinutes": 11,
-      "runSeconds": 6
+      "runSeconds": 6,
+      "with": [
+        "save-provider-anthropic",
+        "save-provider-cloudflare"
+      ]
     },
     {
       "id": "save-provider-cloudflare",
@@ -1477,7 +1483,12 @@
         "cs": "Stejný úkol trvá na jednom poskytovateli sekundy a na jiném mnohem déle: rychlost je vlastnost poskytovatele, ne jen modelu."
       },
       "studyMinutes": 11,
-      "runSeconds": 63
+      "runSeconds": 63,
+      "kind": "trio",
+      "with": [
+        "save-provider-anthropic",
+        "save-provider-groq"
+      ]
     },
     {
       "id": "tools-together",

@@ -2169,6 +2169,10 @@
   "pair.cmpDefault": "Stejná úloha dvakrát, s jedním změněným nastavením.",
   "pair.top": "Horní karta",
   "pair.bottom": "Dolní karta",
+  "pair.middle": "Prostřední karta",
+  "pair.tickTrio": "Zaškrtněte všechny tři karty a uvidíte je vedle sebe.",
+  "path.kind.trio": "Srovnání tří",
+  "path.kindTip.trio": "Jeden ze tří běhů stejné úlohy, každý s jiným nastavením.",
   "pair.tick": "Zaškrtněte obě karty a uvidíte je vedle sebe.",
   "pair.cmp.save-models-mixed": "Velikost modelu: nejsilnější model na každém kroku, proti kombinaci modelů.",
   "pair.cmp.save-parallel": "Pořadí práce: agenti jeden po druhém, proti vedle sebe.",
@@ -2182,5 +2186,5 @@
   "pair.cmp.save-condense-off": "Zhušťování předchozích kol: vypnuté, proti zapnutému.",
   "pair.cmp.wrong-debate-fact": "Vzor: jeden agent, proti debatě.",
   "pair.cmp.wrong-parallel-dependent": "Vzor: agenti vedle sebe, proti řetězu.",
-  "pair.cmp.save-provider-anthropic": "Provider: placený, proti bezplatnému."
+  "pair.cmp.save-provider-anthropic": "Provider: placený Anthropic, bezplatný Groq a bezplatný Cloudflare."
 }

@@ -54,8 +54,9 @@ export function cleanLibraryMeta(meta) {
   if (!isObject(meta)) return null;
   const out = {};
   if (Number.isInteger(meta.level) && meta.level >= 1 && meta.level <= 3) out.level = meta.level;
-  if (meta.kind === "pair" || meta.kind === "bad") out.kind = meta.kind;
+  if (meta.kind === "pair" || meta.kind === "trio" || meta.kind === "bad") out.kind = meta.kind;
   if (typeof meta.twin === "string" && SLUG.test(meta.twin)) out.twin = meta.twin;
+  if (Array.isArray(meta.with) && meta.with.length === 2 && meta.with.every((id) => typeof id === "string" && SLUG.test(id)) && meta.with[0] !== meta.with[1]) out.with = [...meta.with];
   if (isObject(meta.paths)) {
     const paths = Object.fromEntries(Object.entries(meta.paths).filter(([goal, step]) => GOALS.includes(goal) && Number.isInteger(step) && step > 0));
     if (Object.keys(paths).length > 0) out.paths = paths;

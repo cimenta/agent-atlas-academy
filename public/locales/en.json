@@ -2169,6 +2169,10 @@
   "pair.cmpDefault": "The same task twice, with one setting changed.",
   "pair.top": "Top card",
   "pair.bottom": "Bottom card",
+  "pair.middle": "Middle card",
+  "pair.tickTrio": "Tick all three cards to compare them side by side.",
+  "path.kind.trio": "Three-way comparison",
+  "path.kindTip.trio": "One of three runs of the same task, each with a different setting.",
   "pair.tick": "Tick both cards to compare them side by side.",
   "pair.cmp.save-models-mixed": "Model size: the strongest model on every step, against a mix of models.",
   "pair.cmp.save-parallel": "Order of work: agents one after another, against side by side.",
@@ -2182,5 +2186,5 @@
   "pair.cmp.save-condense-off": "Condensing the earlier rounds: switched off, against switched on.",
   "pair.cmp.wrong-debate-fact": "Pattern: one agent, against a debate.",
   "pair.cmp.wrong-parallel-dependent": "Pattern: agents side by side, against a chain.",
-  "pair.cmp.save-provider-anthropic": "Provider: paid, against free."
+  "pair.cmp.save-provider-anthropic": "Provider: paid Anthropic, free Groq and free Cloudflare."
 }

@@ -16,8 +16,7 @@
   },
   "library": {
     "level": 2,
-    "kind": "pair",
-    "twin": "save-provider-anthropic",
+    "kind": "trio",
     "paths": {
       "save": 13
     },
@@ -29,7 +28,11 @@
     "teaches": {
       "en": "The same task on a free provider costs nothing, but its calls are spaced and the answers differ.",
       "cs": "Stejné zadání u bezplatného poskytovatele nestojí nic, ale jeho volání jsou rozložená v čase a odpovědi se liší."
-    }
+    },
+    "with": [
+      "save-provider-anthropic",
+      "save-provider-cloudflare"
+    ]
   },
   "design": {
     "pattern": "sequential",

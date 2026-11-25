@@ -64,6 +64,14 @@ test("the path of the library: every goal has two runs on every level, steps are
   for (const entry of index) {
     if (entry.level !== undefined) assert.ok(levelOf(entry) > 0, `${entry.id} level`);
     for (const goal of Object.keys(entry.paths ?? {})) assert.ok(GOALS.includes(goal), `${entry.id} goal ${goal}`);
+    if (entry.kind === "trio") {
+      assert.equal(entry.with?.length, 2, `${entry.id} names the other two runs`);
+      for (const otherId of entry.with) {
+        const other = index.find((r) => r.id === otherId);
+        assert.ok(other && other.kind === "trio", `${entry.id} with ${otherId} exists`);
+        assert.ok([entry.id, ...entry.with].filter((x) => x !== otherId).every((x) => other.with.includes(x)), `${otherId} names the same trio`);
+      }
+    }
     if (entry.twin !== undefined) {
       const twin = twinOf(index, entry);
       assert.ok(twin, `${entry.id} twin exists`);

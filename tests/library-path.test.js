@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { groupTrios } from "../public/js/library-path.js";
 import { GOALS, LEVELS, levelOf, stepOf, kindOf, goalLevels, nextStep, coverageErrors, twinOf, groupPairs, pairKey } from "../public/js/library-path.js";
 import { buildReplayList } from "../public/js/play-model.js";
 
@@ -95,4 +96,14 @@ test("two runs that name each other as a before and after pair are put together,
   assert.deepEqual(groupPairs([{ id: "x", kind: "pair", twin: "y" }, { id: "y", kind: "pair", twin: "z" }]).map((e) => e.pair), [undefined, undefined], "twins that do not name each other are not paired");
   assert.deepEqual(groupPairs([{ id: "p", kind: "bad", twin: "q" }, { id: "q", kind: "bad", twin: "p" }]).map((e) => e.pair), [undefined, undefined], "only the kind pair is framed");
   assert.equal(pairKey(b, a), "a");
+});
+
+test("three runs that name each other in with are one trio, a run that is filtered out leaves the other two alone", () => {
+  const a = { id: "a", kind: "trio", with: ["b", "c"] };
+  const b = { id: "b", kind: "trio", with: ["a", "c"] };
+  const c = { id: "c", kind: "trio", with: ["a", "b"] };
+  assert.deepEqual(groupTrios([a, { id: "x" }, c, b]).map((e) => (e.trio ? e.trio.map((r) => r.id) : e.id)), [["a", "b", "c"], "x"]);
+  assert.deepEqual(groupTrios([a, b]).map((e) => e.trio), [undefined, undefined]);
+  assert.deepEqual(groupPairs([a, b, c]).map((e) => e.trio?.length), [3]);
+  assert.deepEqual(groupTrios([a, b, { id: "c", kind: "trio", with: ["a", "z"] }]).map((e) => e.trio), [undefined, undefined, undefined], "a run that does not name the others back breaks the trio");
 });

@@ -14,7 +14,7 @@ export function stepOf(item, goalId) {
   return Number.isInteger(step) && step > 0 ? step : 0;
 }
 
-export const kindOf = (item) => (item?.kind === "pair" || item?.kind === "bad" ? item.kind : "");
+export const kindOf = (item) => (item?.kind === "pair" || item?.kind === "trio" || item?.kind === "bad" ? item.kind : "");
 
 const tagsOf = (item) => (Array.isArray(item?.tags) ? item.tags.filter((x) => typeof x === "string") : []);
 
@@ -62,7 +62,12 @@ export function groupPairs(items) {
   const list = Array.isArray(items) ? items : [];
   const used = new Set();
   const out = [];
-  for (const item of list) {
+  for (const entry of groupTrios(list)) {
+    if (entry.trio) {
+      out.push(entry);
+      continue;
+    }
+    const item = entry;
     if (used.has(item.id)) continue;
     const twin = item.kind === "pair" && item.twin ? list.find((r) => r.id === item.twin && r.kind === "pair" && r.twin === item.id && !used.has(r.id)) : null;
     used.add(item.id);
@@ -77,3 +82,26 @@ export function groupPairs(items) {
 }
 // The key of the text that says what a pair compares: the smaller of the two ids, so both runs of a pair give the same key.
 export const pairKey = (a, b) => [a.id, b.id].sort()[0];
+// The same for any group (two or three runs): the smallest id.
+export const groupKey = (members) => members.map((r) => r.id).sort()[0];
+
+// The runs of a list with the three runs of a trio put together (each names the other two in "with" and the other two name it back):
+// each item is a run, or { trio: [first, second, third] } when all three are in the list. A trio with a run filtered out leaves the rest alone.
+export function groupTrios(items) {
+  const list = Array.isArray(items) ? items : [];
+  const used = new Set();
+  const out = [];
+  for (const item of list) {
+    if (used.has(item.id)) continue;
+    const others = item.kind === "trio" && Array.isArray(item.with) && item.with.length === 2 ? item.with.map((id) => list.find((r) => r.id === id && r.kind === "trio" && !used.has(r.id))) : [];
+    const whole = others.length === 2 && others.every((r) => r && Array.isArray(r.with) && [item.id, ...item.with].filter((id) => id !== r.id).every((id) => r.with.includes(id)));
+    used.add(item.id);
+    if (whole) {
+      for (const r of others) used.add(r.id);
+      out.push({ trio: [item, ...others] });
+    } else {
+      out.push(item);
+    }
+  }
+  return out;
+}

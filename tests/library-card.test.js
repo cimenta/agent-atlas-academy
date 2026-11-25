@@ -99,13 +99,26 @@ test("a pair is one frame with a header, a question mark that opens what is comp
   assert.equal(tip.hidden, true);
 });
 
+test("a trio is one frame with three cards, a three-way header and a middle card in the tip", () => {
+  const mk = (id, text) => ({ ...base, id, kind: "trio", teaches: { en: text } });
+  const members = [mk("a-1", "First."), mk("a-2", "Second."), mk("a-3", "Third.")];
+  const frame = pairFrame(ctx, members, (item) => runRow(ctx, item, { checked: false, base: false, selected: false, onToggle() {}, onSelect() {} }));
+  assert.equal(frame.attrs["data-pair"], "a-1");
+  assert.equal(frame.find((e) => e.attrs["data-ui"] === "run-row").length, 3);
+  assert.match(frame.find((e) => e.attrs.class === "pair-head")[0].text, /path.kind.trio/);
+  const tip = ui(frame, "pair-tip")[0];
+  for (const word of ["pair.top", "pair.middle", "pair.bottom", "First.", "Second.", "Third."]) assert.match(tip.text, new RegExp(word.replace(".", "\.")));
+  assert.equal(ui(frame, "run-kind")[0].text, "⇶");
+});
+
 test("every pair of the library says what it compares, in English and in Czech", () => {
   const index = JSON.parse(readFileSync(new URL("../public/runs/index.json", import.meta.url), "utf8"));
   const list = Array.isArray(index) ? index : index.runs;
   const en = JSON.parse(readFileSync(new URL("../public/locales/en.json", import.meta.url), "utf8"));
   const cs = JSON.parse(readFileSync(new URL("../public/locales/cs.json", import.meta.url), "utf8"));
   const keys = new Set(list.filter((r) => r.kind === "pair" && r.twin).map((r) => [r.id, r.twin].sort()[0]));
-  assert.ok(keys.size >= 13);
+  assert.ok(keys.size >= 12);
+  for (const r of list.filter((x) => x.kind === "trio")) keys.add([r.id, ...r.with].sort()[0]);
   for (const key of keys) {
     assert.ok(en["pair.cmp." + key] && cs["pair.cmp." + key], key);
     assert.notEqual(en["pair.cmp." + key], cs["pair.cmp." + key], key);

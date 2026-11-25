@@ -17,7 +17,7 @@ export function pickHomeRun(runs) {
 
 export function buildReplayList(gallery, local) {
   return {
-    gallery: gallery.map((r) => ({ id: r.id, title: r.title, pattern: r.pattern, ...(Array.isArray(r.tags) ? { tags: r.tags } : {}), ...(r.provider ? { provider: r.provider } : {}), ...(r.outcome ? { outcome: r.outcome } : {}), ...(r.level !== undefined ? { level: r.level } : {}), ...(r.kind !== undefined ? { kind: r.kind } : {}), ...(r.twin !== undefined ? { twin: r.twin } : {}), ...(r.paths !== undefined ? { paths: r.paths } : {}), ...(r.teaches !== undefined ? { teaches: r.teaches } : {}), ...(Number.isFinite(r.studyMinutes) ? { studyMinutes: r.studyMinutes } : {}), ...(typeof r.recordedAt === "number" ? { createdAt: r.recordedAt } : {}), source: "gallery" })),
+    gallery: gallery.map((r) => ({ id: r.id, title: r.title, pattern: r.pattern, ...(Array.isArray(r.tags) ? { tags: r.tags } : {}), ...(r.provider ? { provider: r.provider } : {}), ...(r.outcome ? { outcome: r.outcome } : {}), ...(r.level !== undefined ? { level: r.level } : {}), ...(r.kind !== undefined ? { kind: r.kind } : {}), ...(r.twin !== undefined ? { twin: r.twin } : {}), ...(r.with !== undefined ? { with: r.with } : {}), ...(r.paths !== undefined ? { paths: r.paths } : {}), ...(r.teaches !== undefined ? { teaches: r.teaches } : {}), ...(Number.isFinite(r.studyMinutes) ? { studyMinutes: r.studyMinutes } : {}), ...(typeof r.recordedAt === "number" ? { createdAt: r.recordedAt } : {}), source: "gallery" })),
     mine: [...local]
       .sort((a, b) => b.createdAt - a.createdAt)
       .map((r) => ({ id: r.id, title: r.title, pattern: r.pattern, outcome: r.outcome, provider: r.provider, createdAt: r.createdAt, source: "local" })),

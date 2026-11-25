@@ -739,7 +739,7 @@ export async function renderLibraryTab(ctx, requestedId) {
       ...(bar.bar ? [bar.bar] : []),
       ...(active === "mine"
         ? [mine.length === 0 ? none(lib.query && built.mine.length > 0 ? "play.noMatches" : "play.empty") : h(doc, "ul", { class: "run-list", "data-ui": "run-list-mine" }, ...mine.map((item) => row(item)))]
-        : [shown.length === 0 ? none("play.noMatches") : h(doc, "ul", { class: "run-list", "data-ui": "run-list-library" }, ...groupPairs(shown).map((entry) => (entry.pair ? pairFrame(ctx, entry.pair, row) : row(entry))))]),
+        : [shown.length === 0 ? none("play.noMatches") : h(doc, "ul", { class: "run-list", "data-ui": "run-list-library" }, ...groupPairs(shown).map((entry) => (entry.pair || entry.trio ? pairFrame(ctx, entry.pair ?? entry.trio, row) : row(entry))))]),
     );
     // The list was drawn again (a tick, the other list): the focus stays on the same card, or goes to the first card after Left or Right.
     const links = [...pane.querySelectorAll(".run-list .run-title")];

@@ -27,7 +27,12 @@
     "teaches": {
       "en": "The same task takes seconds on one provider and much longer on another: speed is a property of the provider, not only of the model.",
       "cs": "Stejný úkol trvá na jednom poskytovateli sekundy a na jiném mnohem déle: rychlost je vlastnost poskytovatele, ne jen modelu."
-    }
+    },
+    "kind": "trio",
+    "with": [
+      "save-provider-anthropic",
+      "save-provider-groq"
+    ]
   },
   "design": {
     "pattern": "sequential",

@@ -34,6 +34,7 @@ export function parseArgs(argv) {
     else if (name === "level") options.level = Number(value);
     else if (name === "kind") options.kind = value;
     else if (name === "twin") options.twin = value;
+    else if (name === "with") options.with = value.split(",").map((x) => x.trim()).filter(Boolean);
     else if (name === "tags") options.tags = value.split(",").map((x) => x.trim()).filter(Boolean);
     else if (name === "time-scale") options.timeScale = Number(value);
     else if (name === "teaches-en") options.teaches = { ...options.teaches, en: value };
@@ -58,9 +59,11 @@ export function withDefinition(options, definition) {
 // readIndex() gives the parsed index.json; writeFile(name, text) writes a file under public/runs. Returns { entry, warnings }; throws a plain Error to refuse.
 export function addRun({ run, options, readIndex, writeFile }) {
   const { id, level, kind, twin, paths, tags, home, timeScale, teaches } = options;
+  const together = options.with;
   if (typeof id !== "string" || !SLUG.test(id)) throw new Error("The id must be a slug: lower case letters, digits and single dashes");
   if (!Number.isInteger(level) || level < 1 || level > 3) throw new Error("The level must be 1, 2 or 3");
-  if (kind !== undefined && kind !== "pair" && kind !== "bad") throw new Error('The kind must be "pair" or "bad"');
+  if (kind !== undefined && kind !== "pair" && kind !== "trio" && kind !== "bad") throw new Error('The kind must be "pair", "trio" or "bad"');
+  if (kind === "trio" && !(Array.isArray(together) && together.length === 2 && together.every((x) => SLUG.test(x)) && !together.includes(id))) throw new Error("A trio needs --with <id>,<id>: the other two runs");
   const goals = Object.entries(paths ?? {});
   for (const [goal, step] of goals) {
     if (!GOALS.includes(goal)) throw new Error(`Unknown goal "${goal}"; the goals are ${GOALS.join(", ")}`);
@@ -81,6 +84,13 @@ export function addRun({ run, options, readIndex, writeFile }) {
     if (other && other.twin !== id) throw new Error(`The twin ${twin} does not name ${id} back; fix its twin first`);
     if (!other) warnings.push(`The twin ${twin} is not in the library yet; add it with --twin ${id}`);
   }
+  if (kind === "trio") {
+    for (const otherId of together) {
+      const other = runs.find((r) => r.id === otherId);
+      if (other && !(Array.isArray(other.with) && [id, ...together].filter((x) => x !== otherId).every((x) => other.with.includes(x)))) throw new Error(`The run ${otherId} does not name the same trio; fix its with first`);
+      if (!other) warnings.push(`The run ${otherId} is not in the library yet; add it with the same trio`);
+    }
+  }
   const at = runs.findIndex((r) => r.id === id);
   const old = at >= 0 ? runs[at] : null;
   const entry = {
@@ -97,6 +107,7 @@ export function addRun({ run, options, readIndex, writeFile }) {
     level,
     ...(kind ? { kind } : {}),
     ...(twin ? { twin } : {}),
+    ...(kind === "trio" ? { with: together } : {}),
     paths: { ...paths },
     ...(teaches ?? old?.teaches ? { teaches: teaches ?? old.teaches } : {}),
   };

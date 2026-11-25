@@ -16,8 +16,7 @@
   },
   "library": {
     "level": 2,
-    "kind": "pair",
-    "twin": "save-provider-groq",
+    "kind": "trio",
     "paths": {
       "save": 12
     },
@@ -29,7 +28,11 @@
     "teaches": {
       "en": "The same task on a paid provider is fast and every call has a price.",
       "cs": "Stejné zadání u placeného poskytovatele je rychlé a každé volání má cenu."
-    }
+    },
+    "with": [
+      "save-provider-groq",
+      "save-provider-cloudflare"
+    ]
   },
   "design": {
     "pattern": "sequential",
