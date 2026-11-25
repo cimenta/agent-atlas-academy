@@ -3,7 +3,7 @@
 
 // Related tags share a colour. A tag that is in no group (a new one in an imported index) is drawn like the basics.
 export const TAG_GROUPS = {
-  pattern: ["prompt-chaining", "handoff", "parallel-work", "combining-answers", "supervisor", "tool-choice", "tool-use", "debate", "disagreement"],
+  pattern: ["prompt-chaining", "handoff", "parallel-work", "combining-answers", "supervisor", "tool-choice", "tool-use", "tool-calculator", "tool-datetime", "tool-wikipedia", "tool-weather", "tool-text-counting", "tool-documents", "tool-notes", "debate", "disagreement"],
   task: ["explaining", "planning", "decision-making", "risk-analysis"],
   efficiency: ["speed", "cost"],
   basics: ["basics"],

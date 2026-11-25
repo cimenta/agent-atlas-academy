@@ -23,7 +23,8 @@
       "planning",
       "prompt-chaining",
       "handoff",
-      "tool-use"
+      "tool-use",
+      "tool-weather"
     ],
     "teaches": {
       "en": "A plan made first gives the run a shape. The executor can call a tool: here the weather forecast, a fact no model can know.",

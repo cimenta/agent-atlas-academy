@@ -136,6 +136,25 @@ test("every tool of the app is shown by a run of the library, and the run gives 
   }
 });
 
+const TOOL_TAG = { calculator: "tool-calculator", datetime: "tool-datetime", wikipedia: "tool-wikipedia", weather: "tool-weather", text_stats: "tool-text-counting", document_search: "tool-documents", notes: "tool-notes" };
+
+test("every tool has its own tag, and a run carries the tag of each tool it gives to an agent, and no other tool tag", async () => {
+  const { OWN_TOOL_KEYS } = await import("../public/js/engine/own-tools.js");
+  assert.deepEqual(Object.keys(TOOL_TAG).sort(), [...OWN_TOOL_KEYS].sort());
+  const en = JSON.parse(readFileSync(new URL("../public/locales/en.json", import.meta.url), "utf8"));
+  const cs = JSON.parse(readFileSync(new URL("../public/locales/cs.json", import.meta.url), "utf8"));
+  for (const tag of Object.values(TOOL_TAG)) {
+    assert.ok(en[`tag.${tag}`] && cs[`tag.${tag}`] && en[`tag.desc.${tag}`] && cs[`tag.desc.${tag}`], tag);
+    assert.notEqual(en[`tag.${tag}`], cs[`tag.${tag}`], `${tag} is translated`);
+  }
+  for (const id of [...Object.keys(TOOL_RUNS), "tools-together"]) {
+    const { library, editor } = loadDefinition(read(id));
+    const used = new Set(editor.design().nodes.flatMap((n) => n.tools ?? []));
+    const carried = Object.entries(TOOL_TAG).filter(([, tag]) => library.tags.includes(tag)).map(([tool]) => tool);
+    assert.deepEqual(carried.sort(), [...used].sort(), id);
+  }
+});
+
 test("a run with the notes tool has the notebook on, and a run with the documents tool carries its documents", () => {
   const notes = loadDefinition(read("supervisor-complex"));
   assert.equal(notes.editor.notebookOn(), true);

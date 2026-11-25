@@ -23,7 +23,8 @@
       "tool-choice",
       "decision-making",
       "risk-analysis",
-      "tool-use"
+      "tool-use",
+      "tool-wikipedia"
     ],
     "teaches": {
       "en": "A router can choose wrongly when a question fits two specialists. The history specialist can call a tool: here a Wikipedia lookup, so its facts do not come from memory alone.",

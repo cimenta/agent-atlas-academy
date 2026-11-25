@@ -2148,5 +2148,19 @@
   "tools.notesWarning": "This agent has the notes tool, but the notebook is off in this run, so the tool will only say so. Switch Memory on in step 1.",
   "insp.doc.notes": "Notes of the run is a tool of the app. The model asked to write a note or to read the notes, and the app did it in the shared notebook of the run. The note shows in the notebook for the agents that come later.",
   "tag.tool-use": "using tools",
-  "tag.desc.tool-use": "The agent calls a tool that the app runs: a calculator, a lookup, a clock, a search in documents or a notebook."
+  "tag.desc.tool-use": "The agent calls a tool that the app runs: a calculator, a lookup, a clock, a search in documents or a notebook.",
+  "tag.tool-calculator": "calculator",
+  "tag.desc.tool-calculator": "An agent calls the calculator, because a model calculates badly.",
+  "tag.tool-datetime": "date and time",
+  "tag.desc.tool-datetime": "An agent asks the clock for the date, the time or the weekday, which a model does not know.",
+  "tag.tool-wikipedia": "Wikipedia",
+  "tag.desc.tool-wikipedia": "An agent looks a subject up on Wikipedia instead of answering from memory.",
+  "tag.tool-weather": "weather",
+  "tag.desc.tool-weather": "An agent asks for a weather forecast, a fact no model can know.",
+  "tag.tool-text-counting": "text counting",
+  "tag.desc.tool-text-counting": "An agent counts the words, sentences or letters of a text with a tool.",
+  "tag.tool-documents": "documents",
+  "tag.desc.tool-documents": "An agent searches documents that were added to the run, and sees only the passages the search returns.",
+  "tag.tool-notes": "notes",
+  "tag.desc.tool-notes": "Agents write and read notes in a notebook shared by the run, with a tool."
 }

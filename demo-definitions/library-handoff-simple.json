@@ -23,7 +23,8 @@
       "handoff",
       "tool-choice",
       "prompt-chaining",
-      "tool-use"
+      "tool-use",
+      "tool-documents"
     ],
     "teaches": {
       "en": "In a handoff control moves forward and the note is all the next agent knows. The expert reads the help sheet only through a search tool, never whole.",

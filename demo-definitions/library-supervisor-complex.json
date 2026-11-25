@@ -23,7 +23,8 @@
       "supervisor",
       "planning",
       "risk-analysis",
-      "tool-use"
+      "tool-use",
+      "tool-notes"
     ],
     "teaches": {
       "en": "A supervisor sees everything, which is useful and expensive. The workers can leave notes in a shared notebook with a tool, so later workers know what earlier ones found.",

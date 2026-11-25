@@ -23,7 +23,8 @@
       "planning",
       "decision-making",
       "cost",
-      "tool-use"
+      "tool-use",
+      "tool-datetime"
     ],
     "teaches": {
       "en": "The quality of the whole run depends on the plan. The planner can call a tool: here the clock, because a model does not know what day it is.",

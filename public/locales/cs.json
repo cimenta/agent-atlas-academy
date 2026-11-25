@@ -2148,5 +2148,19 @@
   "tools.notesWarning": "Tento agent má nástroj poznámek, ale zápisník je v tomto běhu vypnutý, takže nástroj jen oznámí, že nejde. Zapněte Paměť v kroku 1.",
   "insp.doc.notes": "Poznámky běhu jsou nástroj aplikace. Model chtěl zapsat poznámku nebo přečíst poznámky a aplikace to provedla ve sdíleném zápisníku běhu. Poznámka se objeví v zápisníku pro agenty, kteří přijdou později.",
   "tag.tool-use": "používání nástrojů",
-  "tag.desc.tool-use": "Agent zavolá nástroj, který provede aplikace: kalkulačku, vyhledání, hodiny, hledání v dokumentech nebo zápisník."
+  "tag.desc.tool-use": "Agent zavolá nástroj, který provede aplikace: kalkulačku, vyhledání, hodiny, hledání v dokumentech nebo zápisník.",
+  "tag.tool-calculator": "kalkulačka",
+  "tag.desc.tool-calculator": "Agent zavolá kalkulačku, protože model počítá špatně.",
+  "tag.tool-datetime": "datum a čas",
+  "tag.desc.tool-datetime": "Agent se zeptá hodin na datum, čas nebo den v týdnu, které model nezná.",
+  "tag.tool-wikipedia": "Wikipedie",
+  "tag.desc.tool-wikipedia": "Agent vyhledá téma na Wikipedii místo odpovědi z paměti.",
+  "tag.tool-weather": "počasí",
+  "tag.desc.tool-weather": "Agent požádá o předpověď počasí, fakt, který žádný model nezná.",
+  "tag.tool-text-counting": "počítání textu",
+  "tag.desc.tool-text-counting": "Agent spočítá nástrojem slova, věty nebo písmena v textu.",
+  "tag.tool-documents": "dokumenty",
+  "tag.desc.tool-documents": "Agent hledá v dokumentech přidaných k běhu a vidí jen úseky, které hledání vrátí.",
+  "tag.tool-notes": "poznámky",
+  "tag.desc.tool-notes": "Agenti nástrojem zapisují a čtou poznámky v zápisníku sdíleném během."
 }

@@ -23,7 +23,8 @@
       "basics",
       "tool-choice",
       "cost",
-      "tool-use"
+      "tool-use",
+      "tool-calculator"
     ],
     "teaches": {
       "en": "A router chooses one path and the others never start. The chosen specialist can call a tool: here a calculator, so it does not work the sum out itself.",

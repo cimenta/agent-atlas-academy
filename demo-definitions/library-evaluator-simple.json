@@ -23,7 +23,8 @@
       "basics",
       "explaining",
       "prompt-chaining",
-      "tool-use"
+      "tool-use",
+      "tool-text-counting"
     ],
     "teaches": {
       "en": "A loop with a clear check makes the answer better, as far as the criteria say. The evaluator counts words with a tool, because a model counts badly.",

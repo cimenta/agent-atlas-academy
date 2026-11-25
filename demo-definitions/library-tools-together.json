@@ -20,7 +20,14 @@
       "tool-use",
       "tool-choice",
       "planning",
-      "decision-making"
+      "decision-making",
+      "tool-calculator",
+      "tool-datetime",
+      "tool-wikipedia",
+      "tool-weather",
+      "tool-text-counting",
+      "tool-documents",
+      "tool-notes"
     ],
     "teaches": {
       "en": "A model chooses the right tool for each part of a task: a clock, a lookup, a search in documents, a calculator and a counter, in one run.",
