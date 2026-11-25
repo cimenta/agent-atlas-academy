@@ -42,7 +42,7 @@ export function createBackupView({ doc, t, service, redraw, refreshOverview }) {
   function listContent(listing) {
     if (!listing.ok) return [h(doc, "p", { class: "notice", "data-ui": "data-files-problem" }, t(`data.filesProblem.${listing.reason}`))];
     if (listing.files.length === 0) return [h(doc, "p", { class: "hint", "data-ui": "data-files-empty" }, t("data.filesEmpty"))];
-    const rows = listing.files.map((f, i) => {
+    const rows = listing.files.map((f) => {
       const sure = armed === f.name;
       const del = h(doc, "button", { type: "button", class: `danger${sure ? " sure" : ""}`, "data-ui": `data-file-delete-${f.name}` }, t(sure ? "data.deleteSure" : "data.delete"));
       del.addEventListener("click", async () => {
@@ -55,7 +55,7 @@ export function createBackupView({ doc, t, service, redraw, refreshOverview }) {
         await service.deleteFile(f.name);
         redraw();
       });
-      return h(doc, "tr", { "data-ui": `data-file-${f.name}` }, h(doc, "td", {}, fmt(f.date), i === 0 ? h(doc, "span", { class: "data-tag" }, t("data.newest")) : ""), h(doc, "td", { class: "data-filename" }, f.name), h(doc, "td", {}, size(f.size), f.encrypted ? h(doc, "span", { class: "data-tag enc" }, t("data.withPassword")) : ""), h(doc, "td", { class: "data-delete-cell" }, del));
+      return h(doc, "tr", { "data-ui": `data-file-${f.name}` }, h(doc, "td", {}, fmt(f.date)), h(doc, "td", { class: "data-filename" }, f.name), h(doc, "td", {}, size(f.size), f.encrypted ? h(doc, "span", { class: "data-lock", title: t("data.withPassword"), "aria-label": t("data.withPassword"), "data-ui": `data-file-lock-${f.name}` }, "🔒") : ""), h(doc, "td", { class: "data-delete-cell" }, del));
     });
     return [
       h(doc, "table", { class: "detail-table", "data-ui": "data-files-table" }, h(doc, "tr", {}, h(doc, "th", {}, t("data.fileWhen")), h(doc, "th", { class: "data-filename" }, t("data.fileName")), h(doc, "th", {}, t("data.fileSize")), h(doc, "th", {})), ...rows),

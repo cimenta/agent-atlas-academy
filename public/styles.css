@@ -1919,8 +1919,7 @@ table.libstats th[data-hover-title]::after { content: " ⓘ"; font-size: 0.8em; 
 .data-btabsrow .ptabs { border-bottom: 0; margin: 0; }
 .data-btabsrow > button { margin-bottom: 6px; }
 .ptabs.sub { font-size: 0.9rem; border-bottom: 1px dashed var(--border); }
-.data-tag { margin-left: 6px; font-size: 0.7rem; border: 1px solid var(--border); border-radius: 999px; padding: 1px 7px; color: var(--muted); }
-.data-tag.enc { border-color: var(--accent); color: var(--accent); }
+.data-lock { margin-left: 6px; cursor: help; }
 .data-filename { word-break: break-all; }
 @media (max-width: 520px) { .data-filename { display: none; } }
 .data-cells { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 6px; }

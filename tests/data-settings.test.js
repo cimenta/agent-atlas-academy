@@ -390,7 +390,8 @@ test("the Backups tab lists the files of the folder, and a file is deleted after
   await ui(s.root, "data-tab-backup").click();
   await later();
   assert.ok(ui(s.root, "data-files-table"));
-  assert.ok(ui(s.root, "data-file-agent-atlas-backup-2026-11-25-1400.json").text.includes("password"), "an encrypted file is marked");
+  assert.ok(ui(s.root, "data-file-lock-agent-atlas-backup-2026-11-25-1400.json"), "an encrypted file has the lock icon");
+  assert.equal(ui(s.root, "data-file-lock-agent-atlas-backup-2026-11-25-1300.json.gz"), undefined, "a file without a password has none");
   assert.equal(ui(s.root, "data-file-holiday.json"), undefined, "a file of another name is not listed");
   const del = () => ui(s.root, "data-file-delete-agent-atlas-backup-2026-11-25-1300.json.gz");
   await del().click();
