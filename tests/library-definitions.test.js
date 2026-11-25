@@ -30,7 +30,40 @@ const articles = new Set(JSON.parse(readFileSync(new URL("../public/content/arti
 
 test("there is one definition for every run of the level table, and no other library definition", () => {
   const files = readdirSync(dir).filter((f) => f.startsWith("library-")).map((f) => f.replace(/^library-/, "").replace(/\.json$/, "")).sort();
-  assert.deepEqual(files, [...Object.keys(WAVE1), "tools-together"].sort(), "the 20 runs of wave 1 and the run that uses many tools");
+  assert.deepEqual(files, [...Object.keys(WAVE1), "tools-together", "parallel-tools-split"].sort(), "the 20 runs of wave 1, the run that uses many tools and the run of parallel workers with different tools");
+});
+
+test("the run of parallel workers with different tools names the part of each worker, tells the combiner to join, and uses only free Groq", () => {
+  const loaded = loadDefinition(read("parallel-tools-split"));
+  assert.equal(loaded.ok, true, JSON.stringify(loaded));
+  const data = JSON.parse(read("parallel-tools-split"));
+  assert.equal(loaded.pattern, "parallel");
+  assert.equal(validateDesign(data.design).ok, true);
+  const worker = (id) => data.design.nodes.find((n) => n.id === id);
+  assert.deepEqual(worker("facts").tools, ["wikipedia"]);
+  assert.deepEqual(worker("weather").tools, ["weather"]);
+  assert.equal(worker("combiner").tools, undefined);
+  for (const n of data.design.nodes) {
+    assert.equal(slotProvider(n.slot), "groq");
+    assert.equal(n.search, false);
+  }
+  for (const id of ["facts", "weather"]) assert.ok(worker(id).instructions.length > 20, `${id} has a line that names its part`);
+  assert.equal(worker("combiner").instructions, undefined, "only a free agent carries instructions, so the task tells the combiner");
+  assert.match(worker("facts").instructions, /weather/i, "the facts worker is told to leave the weather to the other");
+  assert.match(worker("weather").instructions, /facts/i, "the weather worker is told to leave the facts to the other");
+  assert.match(data.task, /joins the two answers city by city, does not compare/i, "the task tells the combiner to join, not to compare");
+  assert.equal(loaded.library.level, 2);
+  assert.equal(loaded.library.paths, undefined, "in the list and in the tags, not on a guided path");
+  const tags = new Set(Object.values(TAG_GROUPS).flat());
+  assert.ok(loaded.library.tags.every((t) => tags.has(t)));
+  assert.ok(loaded.library.teaches.en !== loaded.library.teaches.cs);
+  for (const lang of ["en", "cs"]) {
+    const links = [...data.about[lang].description.matchAll(/\(#\/learn\/([a-z0-9-]+)\)/g)].map((m) => m[1]);
+    assert.deepEqual(links, ["parallel-fan-out-fan-in", "tools"], lang);
+    for (const slug of links) assert.ok(articles.has(slug), slug);
+  }
+  assert.notEqual(data.about.en.title, data.about.cs.title);
+  assert.equal(/\d{4}|today|news|latest/i.test(data.task), false);
 });
 
 test("the run with many tools gives every tool of the app to its two agents, has no step on a path, and carries the price list", async () => {
@@ -147,7 +180,7 @@ test("every tool has its own tag, and a run carries the tag of each tool it give
     assert.ok(en[`tag.${tag}`] && cs[`tag.${tag}`] && en[`tag.desc.${tag}`] && cs[`tag.desc.${tag}`], tag);
     assert.notEqual(en[`tag.${tag}`], cs[`tag.${tag}`], `${tag} is translated`);
   }
-  for (const id of [...Object.keys(TOOL_RUNS), "tools-together"]) {
+  for (const id of [...Object.keys(TOOL_RUNS), "tools-together", "parallel-tools-split"]) {
     const { library, editor } = loadDefinition(read(id));
     const used = new Set(editor.design().nodes.flatMap((n) => n.tools ?? []));
     const carried = Object.entries(TOOL_TAG).filter(([, tag]) => library.tags.includes(tag)).map(([tool]) => tool);

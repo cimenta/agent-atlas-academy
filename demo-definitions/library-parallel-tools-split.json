@@ -1,0 +1,77 @@
+{
+  "format": "agent-atlas-run-definition",
+  "version": 1,
+  "task": "A family cannot decide where to spend a weekend: Brno or Ostrava. One researcher gives two or three facts about each city, the other gives the weather for the coming days in each. The combiner joins the two answers city by city, does not compare them with each other, and ends with one sentence of advice.",
+  "about": {
+    "en": {
+      "title": "Parallel workers with different tools: tell each one its part",
+      "author": "Agent Atlas Academy",
+      "description": "Two researchers work at the same time. One has Wikipedia, the other has the weather, and a combiner writes the answer.\n\n**What it teaches**\n\nIn the parallel pattern every worker gets the same task. A different tool does not divide the work by itself: without a line that says what each worker does, both would try to answer everything. Here each worker is told its part, and the task tells the combiner that the two answers are different kinds of facts to join, not two opinions to compare.\n\n**What to watch**\n\nWhich tool each researcher calls, that both start together, and how the combiner joins facts and forecast without saying that the researchers agree. Then open the run in Create, delete the instructions of the two researchers and the second sentence of the task and run it again to see what changes. The forecast is the one of the day of the recording.\n\nRead more: [Parallel fan-out and fan-in](#/learn/parallel-fan-out-fan-in), [Tools](#/learn/tools)"
+    },
+    "cs": {
+      "title": "Paralelní pracovníci s různými nástroji: řekněte každému jeho úkol",
+      "author": "Agent Atlas Academy",
+      "description": "Dva výzkumníci pracují současně. Jeden má Wikipedii, druhý počasí a slučovač napíše odpověď.\n\n**Čemu se naučíte**\n\nV paralelním vzoru dostane každý pracovník stejné zadání. Jiný nástroj práci sám nerozdělí: bez řádku, který říká, co kdo dělá, by se oba pokusili odpovědět na všechno. Tady má každý pracovník řečeno, co je jeho část, a zadání slučovači říká, že obě odpovědi jsou různé druhy faktů ke spojení, ne dva názory k porovnání.\n\n**Na co se dívat**\n\nKterý nástroj který výzkumník volá, že oba začnou společně a jak slučovač spojí fakta a předpověď, aniž by napsal, že se výzkumníci shodují. Pak běh otevřete v Create, smažte pokyny obou výzkumníků i druhou větu zadání a spusťte znovu, ať vidíte, co se změní. Předpověď je ta z dne natáčení.\n\nVíce si přečtěte: [Paralelní rozvětvení a sloučení](#/learn/parallel-fan-out-fan-in), [Nástroje](#/learn/tools)"
+    }
+  },
+  "library": {
+    "level": 2,
+    "tags": [
+      "parallel-work",
+      "combining-answers",
+      "tool-use",
+      "tool-wikipedia",
+      "tool-weather"
+    ],
+    "teaches": {
+      "en": "Parallel workers all get the same task, so different tools do not divide the work: each worker needs its part named, and the combiner needs to know whether to join or to compare.",
+      "cs": "Paralelní pracovníci dostanou všichni stejné zadání, takže jiné nástroje práci nerozdělí: každý pracovník potřebuje pojmenovanou svou část a slučovač musí vědět, zda má spojovat, nebo porovnávat."
+    }
+  },
+  "design": {
+    "pattern": "parallel",
+    "nodes": [
+      {
+        "id": "facts",
+        "agent": "free",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false,
+        "name": "Facts researcher",
+        "instructions": "Your part is the facts about the two cities, nothing else. Use the Wikipedia tool once for each city (language en) and give two or three facts about each. Do not give any weather: another researcher does that.",
+        "tools": [
+          "wikipedia"
+        ]
+      },
+      {
+        "id": "weather",
+        "agent": "free",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false,
+        "name": "Weather researcher",
+        "instructions": "Your part is the weather, nothing else. Use the weather tool once for each city and give the temperature and rain for the coming days. Do not give any facts about the cities: another researcher does that.",
+        "tools": [
+          "weather"
+        ]
+      },
+      {
+        "id": "combiner",
+        "agent": "combiner",
+        "model": "fast",
+        "slot": "groq-free",
+        "search": false
+      }
+    ],
+    "edges": [
+      {
+        "from": "facts",
+        "to": "combiner"
+      },
+      {
+        "from": "weather",
+        "to": "combiner"
+      }
+    ]
+  }
+}
