@@ -3,7 +3,7 @@
 // Nothing here talks to a server; the file goes to a folder of the student's own computer (which a cloud app may sync).
 import { SLOT_IDS } from "./key-slots.js";
 import { exportBackup, backupVaultRecords, BACKUP_CATEGORIES } from "./storage/backup.js";
-import { encryptText } from "./storage/file-crypto.js";
+import { encryptText, gzip } from "./storage/file-crypto.js";
 import { exportProgress } from "./library-progress.js";
 
 export const BACKUP_KEY = "aa.data.backup";
@@ -12,6 +12,9 @@ export const MODES = ["off", "remind", "auto"];
 export const TRIGGERS = ["time", "change"];
 export const KEEP_FILES = 5;
 export const FILE_PREFIX = "agent-atlas-backup-";
+// A backup is gzip compressed: a file .json.gz without a password, and a .json wrapper with the compressed text inside when there is one.
+export const PLAIN_EXTENSION = ".json.gz";
+export const ENCRYPTED_EXTENSION = ".json";
 const MINUTE = 60000;
 
 export const DEFAULTS = { mode: "off", remindAfter: 5, trigger: "time", interval: 60, quiet: 2, gap: 10, autoKeys: false, lastBackup: 0, lastChange: 0, changes: 0, sig: "" };
@@ -79,20 +82,20 @@ export function backupDue(state, now) {
 // The reminder of the mode remind: shown when enough changes were made since the last backup or export.
 export const reminderDue = (state) => state.mode === "remind" && state.changes >= state.remindAfter;
 
-// The file name of a backup, sortable: agent-atlas-backup-2026-11-25-1432.json
-export function backupFileName(date) {
+// The file name of a backup, sortable: agent-atlas-backup-2026-11-25-1432.json.gz
+export function backupFileName(date, extension = PLAIN_EXTENSION) {
   const p = (n) => String(n).padStart(2, "0");
-  return `${FILE_PREFIX}${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}-${p(date.getHours())}${p(date.getMinutes())}.json`;
+  return `${FILE_PREFIX}${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}-${p(date.getHours())}${p(date.getMinutes())}${extension}`;
 }
 
 // Writes the file into a folder handle (File System Access API) and removes the oldest of our own files beyond the newest KEEP_FILES.
-export async function writeToFolder(handle, name, text, keep = KEEP_FILES) {
+export async function writeToFolder(handle, name, data, keep = KEEP_FILES) {
   const file = await handle.getFileHandle(name, { create: true });
   const out = await file.createWritable();
-  await out.write(text);
+  await out.write(data);
   await out.close();
   const ours = [];
-  for await (const [entryName, entry] of handle.entries()) if (entry.kind === "file" && entryName.startsWith(FILE_PREFIX) && entryName.endsWith(".json")) ours.push(entryName);
+  for await (const [entryName, entry] of handle.entries()) if (entry.kind === "file" && entryName.startsWith(FILE_PREFIX) && (entryName.endsWith(".json") || entryName.endsWith(".json.gz"))) ours.push(entryName);
   ours.sort();
   for (const old of ours.slice(0, Math.max(0, ours.length - keep))) {
     try {
@@ -143,8 +146,8 @@ export function createBackupService({ storage, runStore, settings, skills, vault
     onChange();
   };
 
-  // The text of a backup file of the chosen parts, encrypted when there is a password. Also used by the manual export.
-  async function buildText(chosen, pass) {
+  // A backup file of the chosen parts: { data, extension, mime }. Always gzip compressed, and encrypted when there is a password. Also used by the manual export.
+  async function buildFile(chosen, pass) {
     const items = chosen.includes("runs") ? await runStore.list() : [];
     const runs = [];
     for (const item of items) runs.push(await runStore.get(item.id));
@@ -161,7 +164,8 @@ export function createBackupService({ storage, runStore, settings, skills, vault
       appVersion: getVersion(),
     });
     const plain = JSON.stringify(backup, null, 2);
-    return pass === "" ? plain : await encryptText(plain, pass);
+    if (pass === "") return { data: await gzip(plain), extension: PLAIN_EXTENSION, mime: "application/gzip" };
+    return { data: await encryptText(plain, pass, { compress: true }), extension: ENCRYPTED_EXTENSION, mime: "application/json" };
   }
 
   // The fingerprint of everything a backup would hold (the runs by their ids: a run is saved once and not edited).
@@ -192,8 +196,8 @@ export function createBackupService({ storage, runStore, settings, skills, vault
         onChange();
         return { ok: false, reason: "permission" };
       }
-      const text = await buildText(categories(), password);
-      await writeToFolder(handle, backupFileName(new Date(now())), text);
+      const file = await buildFile(categories(), password);
+      await writeToFolder(handle, backupFileName(new Date(now()), file.extension), file.data);
       error = "";
       save({ ...state, lastBackup: now(), changes: 0, sig: await snapshot() });
       return { ok: true };
@@ -226,7 +230,7 @@ export function createBackupService({ storage, runStore, settings, skills, vault
       password = String(value ?? "");
     },
     hasPassword: () => password !== "",
-    buildText,
+    buildFile,
     backupNow,
     tick,
     error: () => error,

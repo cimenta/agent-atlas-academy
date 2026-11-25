@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolveObjectURL } from "node:buffer";
-import { encryptText, decryptText, isEncryptedText, FileCryptoError } from "../public/js/storage/file-crypto.js";
+import { encryptText, decryptText, isEncryptedText, gzip, gunzip, isGzip, fileToText, FileCryptoError } from "../public/js/storage/file-crypto.js";
 import { exportBackup, parseBackup, applyBackup, backupCategories, BACKUP_VERSION } from "../public/js/storage/backup.js";
 import { createMemoryBackend, createRunStore } from "../public/js/storage/runs-store.js";
 import { createSettingsStore } from "../public/js/storage/settings.js";
@@ -231,12 +231,14 @@ test("a part that is unticked in the restore table is left alone", async () => {
   const s = screen(w);
   await later();
   await ui(s.root, "data-export").click();
-  const text = await resolveObjectURL(s.downloads[0].attrs.href).text();
+  const blob = resolveObjectURL(s.downloads[0].attrs.href);
+  assert.ok(s.downloads[0].attrs.download.endsWith(".json.gz"), "a file without a password is gzip compressed");
+  assert.equal(isGzip(new Uint8Array(await blob.arrayBuffer())), true);
   const other = world();
   const s2 = screen(other);
   await later();
   const file = ui(s2.root, "data-import-file");
-  file.files = [{ text: async () => text }];
+  file.files = [blob];
   await file.fire("change");
   const runsBox = ui(s2.root, "data-restore-runs");
   runsBox.checked = false;
@@ -333,4 +335,21 @@ test("the reminder shows above the tabs after enough changes and goes to Export"
   assert.ok(ui(again.root, "data-remind"));
   await ui(again.root, "data-remind-go").click();
   assert.ok(ui(again.root, "data-export"), "the button opens Export and import");
+});
+
+test("a text is compressed with gzip and read back, in a file and inside an encrypted one", async () => {
+  const text = JSON.stringify({ runs: Array.from({ length: 200 }, (_, i) => ({ id: "run-" + i, text: "the same words again and again" })) });
+  const packed = await gzip(text);
+  assert.equal(isGzip(packed), true);
+  assert.ok(packed.length < text.length / 5, "repeated text shrinks a lot");
+  assert.equal(await gunzip(packed), text);
+  assert.equal(await fileToText({ arrayBuffer: async () => packed.buffer.slice(packed.byteOffset, packed.byteOffset + packed.byteLength) }), text);
+  assert.equal(await fileToText({ arrayBuffer: async () => new TextEncoder().encode(text).buffer }), text, "a plain text file is read as it is");
+  assert.equal(await fileToText({ text: async () => "plain" }), "plain");
+  const sealed = await encryptText(text, "pass phrase", { iterations: 1000, compress: true });
+  assert.equal(JSON.parse(sealed).compression, "gzip");
+  assert.ok(sealed.length < text.length, "the encrypted file is smaller than the text");
+  assert.equal(await decryptText(sealed, "pass phrase"), text);
+  assert.equal(JSON.parse(await encryptText(text, "pass phrase", { iterations: 1000 })).compression, undefined, "an old style file has no compression field");
+  await assert.rejects(() => decryptText(JSON.stringify({ ...JSON.parse(sealed), compression: "zip" }), "pass phrase"), (e) => e.code === "shape");
 });

@@ -3,13 +3,13 @@
 import { h } from "./dom.js";
 import { SLOT_IDS } from "./key-slots.js";
 import { parseBackup, applyBackup, backupCategories, BACKUP_CATEGORIES } from "./storage/backup.js";
-import { decryptText, isEncryptedText, FileCryptoError } from "./storage/file-crypto.js";
+import { decryptText, isEncryptedText, fileToText, FileCryptoError } from "./storage/file-crypto.js";
 import { createBackupService, createFolderStore, reminderDue, OPTIONS } from "./data-backup.js";
 import { exportProgress, clearProgress } from "./library-progress.js";
 
 const META_KEY = "aa.data.meta";
 const SETTINGS_KEY = "aa.settings";
-const FILE_NAME = "agent-atlas-export.json";
+const FILE_NAME = "agent-atlas-export";
 
 const formatSize = (bytes) => (bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} kB`);
 const textOf = (value) => (value === undefined ? "" : JSON.stringify(value));
@@ -214,10 +214,10 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
       if (chosen.length === 0) return message.replaceChildren(h(doc, "p", { class: "notice error" }, t("data.noneChosen")));
       if (chosen.includes("keys") && password.value === "") return message.replaceChildren(h(doc, "p", { class: "notice error", "data-ui": "data-keys-need-pass" }, t("data.keysNeedPass")));
       try {
-        const text = await service.buildText(chosen, password.value);
-        const blob = new Blob([text], { type: "application/json" });
+        const file = await service.buildFile(chosen, password.value);
+        const blob = new Blob([file.data], { type: file.mime });
         const url = URL.createObjectURL(blob);
-        const link = h(doc, "a", { href: url, download: FILE_NAME });
+        const link = h(doc, "a", { href: url, download: FILE_NAME + file.extension });
         doc.body.append(link);
         link.click();
         link.remove();
@@ -236,7 +236,7 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
   }
 
   function importCard() {
-    const file = h(doc, "input", { id: "data-import", type: "file", accept: "application/json,.json", hidden: true, "data-ui": "data-import-file" });
+    const file = h(doc, "input", { id: "data-import", type: "file", accept: "application/json,application/gzip,.json,.gz", hidden: true, "data-ui": "data-import-file" });
     const choose = h(doc, "button", { type: "button", "data-ui": "data-import-choose" }, t("settings.chooseFile"));
     choose.addEventListener("click", () => file.click());
     const pass = h(doc, "input", { id: "data-import-pass", type: "password", autocomplete: "off", "data-ui": "data-import-pass" });
@@ -260,7 +260,7 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
       return preview(parsed.backup);
     };
     file.addEventListener("change", async () => {
-      text = file.files?.[0] ? await file.files[0].text() : "";
+      text = file.files?.[0] ? await fileToText(file.files[0]) : "";
       await load();
     });
     pass.addEventListener("change", load);

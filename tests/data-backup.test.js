@@ -5,7 +5,7 @@ import { createSettingsStore } from "../public/js/storage/settings.js";
 import { createVault } from "../public/js/storage/key-vault.js";
 import { createSkillsStore } from "../public/js/storage/skills-store.js";
 import { createVerdictStore } from "../public/js/compare-verdict.js";
-import { decryptText, isEncryptedText } from "../public/js/storage/file-crypto.js";
+import { decryptText, isEncryptedText, gunzip, isGzip } from "../public/js/storage/file-crypto.js";
 import { DEFAULTS, normalize, observe, backupDue, reminderDue, backupFileName, writeToFolder, createBackupService, readState, writeState, fingerprint } from "../public/js/data-backup.js";
 
 const MIN = 60000;
@@ -65,7 +65,8 @@ test("the reminder shows after enough changes, in the mode remind only", () => {
 });
 
 test("the file name sorts by time", () => {
-  assert.equal(backupFileName(new Date(2026, 10, 25, 14, 5)), "agent-atlas-backup-2026-11-25-1405.json");
+  assert.equal(backupFileName(new Date(2026, 10, 25, 14, 5)), "agent-atlas-backup-2026-11-25-1405.json.gz");
+  assert.equal(backupFileName(new Date(2026, 10, 25, 14, 5), ".json"), "agent-atlas-backup-2026-11-25-1405.json");
   assert.ok(backupFileName(new Date(2026, 10, 25, 14, 5)) < backupFileName(new Date(2026, 10, 25, 14, 30)));
 });
 
@@ -117,8 +118,9 @@ test("the service counts a change, waits for the rule, then writes one backup an
   w.skills.add({ id: "u-a", kind: "styl", name: "A", text: "a" });
   await w.svc.tick();
   assert.equal(w.folder.files.size, 1, "a first backup is due at once, there was none before");
-  const text = [...w.folder.files.values()][0];
-  assert.equal(JSON.parse(text).appVersion, "9.9.9");
+  const bytes = [...w.folder.files.values()][0];
+  assert.equal(isGzip(bytes), true, "a backup without a password is a gzip file");
+  assert.equal(JSON.parse(await gunzip(bytes)).appVersion, "9.9.9");
   assert.equal(w.svc.state().changes, 0);
   w.skills.add({ id: "u-b", kind: "styl", name: "B", text: "b" });
   w.advance(5);
@@ -178,11 +180,14 @@ test("keys go into a backup only when chosen, and then only with a password, and
   assert.deepEqual(await w.svc.backupNow(), { ok: true });
   const text = [...w.folder.files.values()][0];
   assert.equal(isEncryptedText(text), true);
+  assert.equal(JSON.parse(text).compression, "gzip", "the text is compressed before it is encrypted");
   const plain = JSON.parse(await decryptText(text, "a long password"));
   assert.ok(plain.categories.includes("keys"));
   const other = service();
   assert.deepEqual(await other.svc.backupNow(), { ok: true });
-  assert.equal(JSON.parse([...other.folder.files.values()][0]).categories.includes("keys"), false, "keys are off by default");
+  assert.equal(JSON.parse(await gunzip([...other.folder.files.values()][0])).categories.includes("keys"), false, "keys are off by default");
+  assert.ok([...other.folder.files.keys()][0].endsWith(".json.gz"));
+  assert.ok([...w.folder.files.keys()][0].endsWith(".json"), "an encrypted backup is a .json wrapper");
 });
 
 test("an export by hand starts the reminder again", async () => {
