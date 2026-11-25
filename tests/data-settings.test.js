@@ -274,3 +274,47 @@ test("cleanup asks twice, then deletes only that part, and Delete all clears eve
   assert.equal((await w.runStore.list()).length, 0);
   assert.equal(exportProgress(w.storage).length, 0);
 });
+
+test("the Backup tab is off by default, and choosing the automatic mode shows its options and asks for a folder", async () => {
+  const w = world();
+  const s = screen(w);
+  await later();
+  await ui(s.root, "data-tab-backup").click();
+  assert.equal(ui(s.root, "data-mode-off").checked, true);
+  assert.equal(ui(s.root, "data-trigger"), undefined, "no options while it is off");
+  const auto = ui(s.root, "data-mode-auto");
+  auto.checked = true;
+  await auto.fire("change");
+  assert.ok(ui(s.root, "data-trigger"));
+  assert.ok(ui(s.root, "data-interval"), "by time shows the interval");
+  assert.ok(ui(s.root, "data-need-target"), "no folder chosen yet");
+  assert.notEqual(ui(s.root, "data-backup-now").attrs.disabled, undefined, "nothing to back up to yet");
+  const trigger = ui(s.root, "data-trigger");
+  trigger.value = "change";
+  await trigger.fire("change");
+  assert.ok(ui(s.root, "data-quiet") && ui(s.root, "data-gap"));
+  assert.equal(ui(s.root, "data-interval"), undefined);
+  const keys = ui(s.root, "data-auto-keys");
+  keys.checked = true;
+  await keys.fire("change");
+  assert.ok(ui(s.root, "data-auto-keys-warning"));
+});
+
+test("the reminder shows above the tabs after enough changes and goes to Export", async () => {
+  const w = world();
+  const s = screen(w);
+  await later();
+  await ui(s.root, "data-tab-backup").click();
+  const remind = ui(s.root, "data-mode-remind");
+  remind.checked = true;
+  await remind.fire("change");
+  assert.ok(ui(s.root, "data-remind-after") === undefined && ui(s.root, "data-remindAfter"));
+  assert.equal(ui(s.root, "data-remind"), undefined);
+  const raw = JSON.parse(w.storage.getItem("aa.data.backup"));
+  w.storage.setItem("aa.data.backup", JSON.stringify({ ...raw, changes: 9 }));
+  const again = screen(w);
+  await later();
+  assert.ok(ui(again.root, "data-remind"));
+  await ui(again.root, "data-remind-go").click();
+  assert.ok(ui(again.root, "data-export"), "the button opens Export and import");
+});

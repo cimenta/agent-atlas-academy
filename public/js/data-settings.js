@@ -2,8 +2,9 @@
 // password), and cleanup. Builds DOM and keeps no state of its own besides the open sub-tab; every change goes through the stores.
 import { h } from "./dom.js";
 import { SLOT_IDS } from "./key-slots.js";
-import { exportBackup, parseBackup, applyBackup, backupVaultRecords, backupCategories, BACKUP_CATEGORIES } from "./storage/backup.js";
-import { encryptText, decryptText, isEncryptedText, FileCryptoError } from "./storage/file-crypto.js";
+import { parseBackup, applyBackup, backupCategories, BACKUP_CATEGORIES } from "./storage/backup.js";
+import { decryptText, isEncryptedText, FileCryptoError } from "./storage/file-crypto.js";
+import { createBackupService, createFolderStore, reminderDue, OPTIONS } from "./data-backup.js";
 import { exportProgress, clearProgress } from "./library-progress.js";
 
 const META_KEY = "aa.data.meta";
@@ -43,7 +44,8 @@ export async function dataStats({ runStore, settings, skills, storage, vaultOf, 
   return { counts, bytes, total: Object.values(bytes).reduce((a, b) => a + b, 0) };
 }
 
-export function renderDataSettings({ doc, t, say, runStore, settings, vault, vaultOf, skills, storage, verdictStore, version, title = null, onChanged = () => {} }) {
+export function renderDataSettings({ doc, t, say, runStore, settings, vault, vaultOf, skills, storage, verdictStore, version, title = null, backup = null, onChanged = () => {} }) {
+  const service = backup ?? createBackupService({ storage, runStore, settings, skills, vault, vaultOf, verdictStore, getVersion: () => version, folderStore: createFolderStore() });
   let tab = "export";
   const selected = Object.fromEntries(BACKUP_CATEGORIES.map((c) => [c, c !== "keys"]));
   let armed = null; // the delete button that has been clicked once
@@ -75,12 +77,111 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
     return [
       h(doc, "div", { class: "data-cells", "data-ui": "data-cells" }, ...BACKUP_CATEGORIES.filter((c) => c !== "settings").map((c) => h(doc, "div", { class: "data-cell", title: t(`data.tip.${c}`), tabindex: "0", "data-ui": `data-count-${c}` }, h(doc, "b", {}, stats ? String(stats.counts[c]) : "?"), h(doc, "span", {}, t(`data.cat.${c}`))))),
       h(doc, "p", { class: "hint", "data-ui": "data-last" }, t("data.lastExport", { when })),
+      h(doc, "p", { class: "hint", "data-ui": "data-last-backup" }, t("data.lastBackup", { when: service.state().lastBackup ? new Date(service.state().lastBackup).toLocaleString(doc.documentElement?.lang || undefined) : t("data.never") }), " ", t("data.changesSince", { n: service.state().changes })),
     ];
   }
 
-  const draw = () => body.replaceChildren(subTabs(), ...(tab === "clean" ? cleanView() : tab === "stats" ? statsView() : exportView()));
+  // ---- backup: an export that runs by itself (off by default)
+  const duration = (minutes) => (minutes < 60 ? t("data.dur.min", { n: minutes }) : minutes === 1440 ? t("data.dur.day") : t("data.dur.hour", { n: minutes / 60 }));
+  function backupView() {
+    const state = service.state();
+    const field = (label, control) => h(doc, "div", { class: "field" }, h(doc, "label", { for: control.attrs?.id ?? control.id }, label), control);
+    const choice = (id, key, values, current, text) => {
+      const sel = h(doc, "select", { id, "data-ui": key }, ...values.map((v) => h(doc, "option", { value: String(v), selected: v === current }, text(v))));
+      sel.addEventListener("change", () => {
+        const raw = sel.value;
+        service.update({ [key.replace("data-", "")]: Number.isNaN(Number(raw)) ? raw : Number(raw) });
+        draw();
+      });
+      return sel;
+    };
+    const modes = ["off", "remind", "auto"].map((m) => {
+      const radio = h(doc, "input", { type: "radio", name: "data-mode", id: `data-mode-${m}`, value: m, checked: state.mode === m, "data-ui": `data-mode-${m}` });
+      radio.addEventListener("change", () => {
+        service.update({ mode: m });
+        draw();
+      });
+      return h(doc, "div", { class: "field checkbox" }, radio, h(doc, "label", { for: `data-mode-${m}` }, t(`data.mode.${m}`)));
+    });
+
+    let more = [];
+    if (state.mode === "remind") {
+      const sel = choice("data-remindAfter", "data-remindAfter", OPTIONS.remindAfter, state.remindAfter, (n) => t("data.remindOpt", { n }));
+      more = [h(doc, "div", { class: "field" }, h(doc, "label", { for: "data-remindAfter" }, t("data.remindAfter")), sel), h(doc, "p", { class: "hint" }, t("data.remindHint"))];
+    }
+    if (state.mode === "auto") {
+      const trigger = choice("data-trigger", "data-trigger", ["time", "change"], state.trigger, (v) => t(`data.trigger.${v}`));
+      const when = state.trigger === "time"
+        ? [field(t("data.every"), choice("data-interval", "data-interval", OPTIONS.interval, state.interval, duration))]
+        : [field(t("data.quiet"), choice("data-quiet", "data-quiet", OPTIONS.quiet, state.quiet, duration)), field(t("data.gap"), choice("data-gap", "data-gap", OPTIONS.gap, state.gap, duration))];
+      const pass = h(doc, "input", { id: "data-pass-auto", type: "password", autocomplete: "new-password", placeholder: service.hasPassword() ? t("data.autoPassSet") : t("data.passPlaceholder"), "data-ui": "data-pass-auto" });
+      pass.addEventListener("input", () => service.setPassword(pass.value));
+      const keys = h(doc, "input", { type: "checkbox", id: "data-auto-keys", checked: state.autoKeys, "data-ui": "data-auto-keys" });
+      keys.addEventListener("change", () => {
+        service.update({ autoKeys: keys.checked });
+        draw();
+      });
+      more = [
+        h(doc, "div", { class: "field" }, h(doc, "label", { for: "data-trigger" }, t("data.when")), trigger),
+        ...when,
+        field(t("data.autoPass"), pass),
+        h(doc, "p", { class: "hint" }, t(state.trigger === "change" ? "data.autoHintChange" : "data.autoHintTime"), " ", t("data.autoHintOpen")),
+        h(doc, "div", { class: "field checkbox" }, keys, h(doc, "label", { for: "data-auto-keys" }, t("data.autoKeys"))),
+        ...(state.autoKeys ? [h(doc, "p", { class: "notice", "data-ui": "data-auto-keys-warning" }, t("data.keysWarning"))] : []),
+      ];
+    }
+
+    const folderName = service.folderName();
+    const supported = typeof globalThis.showDirectoryPicker === "function";
+    const choose = h(doc, "button", { type: "button", "data-ui": "data-folder-choose", disabled: !supported }, t(folderName ? "data.folderChange" : "data.folderChoose"));
+    const message = h(doc, "div", { "data-ui": "data-backup-message", "aria-live": "polite" });
+    choose.addEventListener("click", async () => {
+      try {
+        await service.chooseFolder();
+        draw();
+      } catch {
+        // the student closed the folder window
+      }
+    });
+    const now = h(doc, "button", { type: "button", class: "primary", "data-ui": "data-backup-now", disabled: folderName === "" }, t("data.backupNow"));
+    now.addEventListener("click", async () => {
+      const outcome = await service.backupNow({ interactive: true });
+      message.replaceChildren(h(doc, "p", { class: outcome.ok ? "hint" : "notice error", "data-ui": "data-backup-result" }, t(outcome.ok ? "data.backupDone" : `data.backupFail.${outcome.reason}`)));
+      if (outcome.ok) drawOverview();
+    });
+    const problem = service.error() ? [h(doc, "p", { class: "notice error", "data-ui": "data-backup-error" }, t(`data.backupFail.${service.error()}`))] : [];
+    return [
+      h(doc, "div", { class: "data-card wide", "data-ui": "data-backup-card" },
+        h(doc, "h3", {}, t("data.backupHeading")),
+        h(doc, "p", {}, t("data.backupIntro")),
+        h(doc, "div", { class: "field" }, h(doc, "b", {}, t("data.whenHeading")), ...modes),
+        ...more,
+        h(doc, "div", { class: "field" }, h(doc, "b", {}, t("data.whereHeading")), h(doc, "p", { class: "hint" }, t("data.whereHint")),
+          h(doc, "div", { class: "data-actions" }, choose, h(doc, "span", { class: "hint", "data-ui": "data-folder-name" }, folderName || t("data.noFolder")))),
+        ...(supported ? [] : [h(doc, "p", { class: "notice", "data-ui": "data-folder-unsupported" }, t("data.folderUnsupported"))]),
+        ...(state.mode === "auto" && folderName === "" ? [h(doc, "p", { class: "notice", "data-ui": "data-need-target" }, t("data.needTarget"))] : []),
+        ...problem,
+        h(doc, "div", { class: "data-actions" }, now),
+        message,
+        h(doc, "p", { class: "hint" }, t("data.cloudLater"))),
+    ];
+  }
+
+  // The reminder of the mode remind, above the tabs.
+  const reminder = () => {
+    const state = service.state();
+    if (!reminderDue(state)) return [];
+    const go = h(doc, "button", { type: "button", "data-ui": "data-remind-go" }, t("data.remindGo"));
+    go.addEventListener("click", () => {
+      tab = "export";
+      draw();
+    });
+    return [h(doc, "div", { class: "notice", "data-ui": "data-remind" }, t("data.remind", { n: state.changes }), " ", go)];
+  };
+
+  const draw = () => body.replaceChildren(...reminder(), subTabs(), ...(tab === "clean" ? cleanView() : tab === "stats" ? statsView() : tab === "backup" ? backupView() : exportView()));
   const subTabs = () =>
-    h(doc, "div", { class: "ptabs", role: "tablist", "data-ui": "data-tabs" }, ...["export", "clean", "stats"].map((id) => {
+    h(doc, "div", { class: "ptabs", role: "tablist", "data-ui": "data-tabs" }, ...["export", "backup", "clean", "stats"].map((id) => {
       const b = h(doc, "button", { type: "button", class: "ptab", role: "tab", "aria-selected": String(tab === id), "data-ui": `data-tab-${id}` }, t(`data.tab.${id}`));
       b.addEventListener("click", () => {
         tab = id;
@@ -108,23 +209,7 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
       if (chosen.length === 0) return message.replaceChildren(h(doc, "p", { class: "notice error" }, t("data.noneChosen")));
       if (chosen.includes("keys") && password.value === "") return message.replaceChildren(h(doc, "p", { class: "notice error", "data-ui": "data-keys-need-pass" }, t("data.keysNeedPass")));
       try {
-        const items = chosen.includes("runs") ? await runStore.list() : [];
-        const runs = [];
-        for (const item of items) runs.push(await runStore.get(item.id));
-        const backup = exportBackup({
-          runs: runs.filter(Boolean),
-          settings: settings.get(),
-          skills: skills ? skills.exportData() : null,
-          progress: exportProgress(storage),
-          verdicts: verdictStore.exportAll(),
-          categories: chosen,
-          vaultRecord: vault.exportRecord(),
-          ...backupVaultRecords(vaultOf),
-          includeKey: chosen.includes("keys"),
-          appVersion: version,
-        });
-        const plain = JSON.stringify(backup, null, 2);
-        const text = password.value === "" ? plain : await encryptText(plain, password.value);
+        const text = await service.buildText(chosen, password.value);
         const blob = new Blob([text], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const link = h(doc, "a", { href: url, download: FILE_NAME });
@@ -133,6 +218,7 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
         link.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
         stamp();
+        if (service.state().mode === "remind") service.markExported();
         say(t(password.value === "" ? "data.exported" : "data.exportedEncrypted", { n: chosen.length }));
         drawOverview();
       } catch {
@@ -265,6 +351,7 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
   }
 
   drawOverview().then(draw);
+  service.loadFolder().then(() => (tab === "backup" ? draw() : undefined)).catch(() => {});
   draw();
   return root;
 }

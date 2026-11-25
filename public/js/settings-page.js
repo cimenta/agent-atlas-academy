@@ -724,7 +724,7 @@ export function renderSettings(ctx) {
 
   // Local data: overview, export and import, and cleanup (see data-settings.js).
   const storage = doc.defaultView?.localStorage ?? null;
-  const dataBody = renderDataSettings({ doc, t, say, runStore, settings, vault, vaultOf, skills: ctx.skills ?? null, storage, verdictStore: createVerdictStore(storage), version: ctx.version, title: h(doc, "h2", {}, t("settings.dataHeading"), help("settings-data", t("settings.dataHeading"))), onChanged: () => refreshStatus() });
+  const dataBody = renderDataSettings({ doc, t, say, runStore, settings, vault, vaultOf, skills: ctx.skills ?? null, storage, verdictStore: createVerdictStore(storage), version: ctx.version, backup: ctx.backup ?? null, title: h(doc, "h2", {}, t("settings.dataHeading"), help("settings-data", t("settings.dataHeading"))), onChanged: () => refreshStatus() });
 
   // Check all models: every key that is loaded, one after the other, one line for each. Shown only, never stored.
   let checkingAll = false;

@@ -12,6 +12,8 @@ import { setDefaultSkills } from "./create/editor-model.js";
 import { migrateGeminiKey } from "./storage/gemini-slots.js";
 import { createIndexedDbBackend, createMemoryBackend, createRunStore } from "./storage/runs-store.js";
 import { renderSettings } from "./settings-page.js";
+import { createBackupService, createFolderStore } from "./data-backup.js";
+import { createVerdictStore } from "./compare-verdict.js";
 import { renderPlay } from "./play-pages.js";
 import { renderLab } from "./harness-lab.js";
 import {
@@ -65,6 +67,9 @@ setDefaultSkills((agent) => defaultEntries(skills.library(), skills.defaults(), 
 // The ? help buttons are hidden by a rule in the style sheet when this says off.
 document.documentElement.setAttribute("data-help", settings.get().helpButtons ? "on" : "off");
 const runStore = createRunStore(typeof indexedDB === "undefined" ? createMemoryBackend() : createIndexedDbBackend());
+// The backup of the Data screen watches the data while the app is open (it does nothing in the default mode off, except counting changes).
+const backup = createBackupService({ storage, runStore, settings, skills, vault, vaultOf: (id) => (vault.forProvider ? vault.forProvider(id) : vault), verdictStore: createVerdictStore(storage), getVersion: () => version, folderStore: createFolderStore() });
+backup.start();
 const menu = doc.getElementById("menu");
 const menuToggle = doc.getElementById("menu-toggle");
 const switcher = doc.getElementById("language-switcher");
@@ -182,6 +187,7 @@ async function renderRoute(isNavigation) {
     settings,
     skills,
     runStore,
+    backup,
     tab: route.params?.tab,
     slot: route.params?.slot,
     autoStart: !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches),
