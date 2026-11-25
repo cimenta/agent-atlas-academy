@@ -724,7 +724,7 @@ export function renderSettings(ctx) {
 
   // Local data: overview, export and import, and cleanup (see data-settings.js).
   const storage = doc.defaultView?.localStorage ?? null;
-  const dataBody = renderDataSettings({ doc, t, say, runStore, settings, vault, vaultOf, skills: ctx.skills ?? null, storage, verdictStore: createVerdictStore(storage), version: ctx.version, onChanged: () => refreshStatus() });
+  const dataBody = renderDataSettings({ doc, t, say, runStore, settings, vault, vaultOf, skills: ctx.skills ?? null, storage, verdictStore: createVerdictStore(storage), version: ctx.version, title: h(doc, "h2", {}, t("settings.dataHeading"), help("settings-data", t("settings.dataHeading"))), onChanged: () => refreshStatus() });
 
   // Check all models: every key that is loaded, one after the other, one line for each. Shown only, never stored.
   let checkingAll = false;
@@ -868,8 +868,6 @@ export function renderSettings(ctx) {
       doc,
       "section",
       { class: "settings-section" },
-      h(doc, "h2", {}, t("settings.dataHeading"), help("settings-data", t("settings.dataHeading"))),
-      h(doc, "p", {}, t("settings.dataIntro")),
       dataBody,
     ),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.securityHeading"), help("settings-security", t("settings.securityHeading"))), h(doc, "div", { class: "sec-switch", "data-ui": "sec-switch", role: "group", "aria-label": t("settings.secProvider") }, ...secSwitch), securityNone, secLead, secSteps, unlockForm, secActions),

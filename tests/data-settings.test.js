@@ -171,12 +171,15 @@ test("the screen shows the overview and two sub-tabs, and Export needs a passwor
   const s = screen(w);
   await later();
   assert.ok(ui(s.root, "data-size"), "the total size is always shown");
-  assert.equal(ui(s.root, "data-count-runs"), undefined, "the tiles are hidden until More");
-  await ui(s.root, "data-more").click();
+  assert.equal(ui(s.root, "data-count-runs"), undefined, "the tiles are on the Statistics tab only");
+  assert.ok(ui(s.root, "data-tab-export") && ui(s.root, "data-tab-clean") && ui(s.root, "data-tab-stats"));
+  await ui(s.root, "data-tab-stats").click();
   await later();
   assert.equal(ui(s.root, "data-count-runs").text.trim().startsWith("0"), true);
   assert.ok(ui(s.root, "data-count-runs").attrs.title.length > 0, "a tile explains itself on hover");
-  assert.ok(ui(s.root, "data-tab-export") && ui(s.root, "data-tab-clean"));
+  assert.equal(ui(s.root, "data-count-settings"), undefined, "settings are one record and are not counted");
+  assert.ok(ui(s.root, "data-last"));
+  await ui(s.root, "data-tab-export").click();
   await later();
   const keys = ui(s.root, "data-cat-keys");
   assert.equal(keys.checked, false, "keys are off by default");

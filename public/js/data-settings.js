@@ -43,12 +43,11 @@ export async function dataStats({ runStore, settings, skills, storage, vaultOf, 
   return { counts, bytes, total: Object.values(bytes).reduce((a, b) => a + b, 0) };
 }
 
-export function renderDataSettings({ doc, t, say, runStore, settings, vault, vaultOf, skills, storage, verdictStore, version, onChanged = () => {} }) {
+export function renderDataSettings({ doc, t, say, runStore, settings, vault, vaultOf, skills, storage, verdictStore, version, title = null, onChanged = () => {} }) {
   let tab = "export";
   const selected = Object.fromEntries(BACKUP_CATEGORIES.map((c) => [c, c !== "keys"]));
   let armed = null; // the delete button that has been clicked once
   let stats = null;
-  let showMore = false;
   const overview = h(doc, "div", { class: "data-overview", "data-ui": "data-overview" });
   const body = h(doc, "div", { class: "data-body", "data-ui": "data-body" });
   const root = h(doc, "div", { class: "data-settings", "data-ui": "data-settings" }, overview, body);
@@ -61,27 +60,27 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
     } catch {
       stats = null;
     }
-    const last = readMeta(storage).lastExport;
-    const when = last ? new Date(last).toLocaleString(doc.documentElement?.lang || undefined) : t("data.never");
-    const more = h(doc, "button", { type: "button", class: "linklike", "aria-expanded": String(showMore), "data-ui": "data-more" }, t(showMore ? "data.less" : "data.more"));
-    more.addEventListener("click", () => {
-      showMore = !showMore;
-      drawOverview();
-    });
-    const cells = showMore
-      ? [h(doc, "div", { class: "data-cells", "data-ui": "data-cells" }, ...BACKUP_CATEGORIES.map((c) => h(doc, "div", { class: "data-cell", title: t(`data.tip.${c}`), "data-ui": `data-count-${c}` }, h(doc, "b", {}, stats ? String(stats.counts[c]) : "?"), h(doc, "span", {}, t(`data.cat.${c}`)))))]
-      : [];
+    // the heading with the size in the top right corner, and the intro right under it
     overview.replaceChildren(
-      h(doc, "div", { class: "data-top" },
-        h(doc, "p", { class: "hint", "data-ui": "data-last" }, t("data.lastExport", { when })),
-        h(doc, "div", { class: "data-sizebox" }, h(doc, "div", { class: "data-size", title: t("data.tip.size"), "data-ui": "data-size" }, h(doc, "b", {}, stats ? formatSize(stats.total) : "?"), " ", h(doc, "span", {}, t("data.size"))), more)),
-      ...cells,
+      h(doc, "div", { class: "data-head" }, title ?? h(doc, "h2", {}, t("settings.dataHeading")), h(doc, "div", { class: "data-size", title: t("data.tip.size"), tabindex: "0", "data-ui": "data-size" }, stats ? formatSize(stats.total) : "?")),
+      h(doc, "p", { class: "data-intro" }, t("settings.dataIntro")),
     );
+    if (tab === "stats") draw();
   }
 
-  const draw = () => body.replaceChildren(subTabs(), ...(tab === "clean" ? cleanView() : exportView()));
+  // ---- statistics: the counts of every part (settings are one record, so they are not counted) and the last export
+  function statsView() {
+    const last = readMeta(storage).lastExport;
+    const when = last ? new Date(last).toLocaleString(doc.documentElement?.lang || undefined) : t("data.never");
+    return [
+      h(doc, "div", { class: "data-cells", "data-ui": "data-cells" }, ...BACKUP_CATEGORIES.filter((c) => c !== "settings").map((c) => h(doc, "div", { class: "data-cell", title: t(`data.tip.${c}`), tabindex: "0", "data-ui": `data-count-${c}` }, h(doc, "b", {}, stats ? String(stats.counts[c]) : "?"), h(doc, "span", {}, t(`data.cat.${c}`))))),
+      h(doc, "p", { class: "hint", "data-ui": "data-last" }, t("data.lastExport", { when })),
+    ];
+  }
+
+  const draw = () => body.replaceChildren(subTabs(), ...(tab === "clean" ? cleanView() : tab === "stats" ? statsView() : exportView()));
   const subTabs = () =>
-    h(doc, "div", { class: "ptabs", role: "tablist", "data-ui": "data-tabs" }, ...["export", "clean"].map((id) => {
+    h(doc, "div", { class: "ptabs", role: "tablist", "data-ui": "data-tabs" }, ...["export", "clean", "stats"].map((id) => {
       const b = h(doc, "button", { type: "button", class: "ptab", role: "tab", "aria-selected": String(tab === id), "data-ui": `data-tab-${id}` }, t(`data.tab.${id}`));
       b.addEventListener("click", () => {
         tab = id;
