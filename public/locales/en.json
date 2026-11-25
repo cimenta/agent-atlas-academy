@@ -2020,5 +2020,14 @@
   "data.deleteSure": "Really delete",
   "data.deleted": "Deleted.",
   "data.deleteAll": "Delete all data",
-  "data.deleteAllText": "Removes every part above from this browser."
+  "data.deleteAllText": "Removes every part above from this browser.",
+  "data.more": "More",
+  "data.less": "Less",
+  "data.tip.size": "The space all of this takes in this browser, as the app counts it. Most of it is usually the runs and their recordings.",
+  "data.tip.runs": "The number of your own runs saved here, with the recording of each.",
+  "data.tip.settings": "Always 1: your settings are one record (language, limits, default models, look).",
+  "data.tip.skills": "The number of skills you wrote. The default skills of the agents are kept apart and are not counted.",
+  "data.tip.progress": "The number of steps of the recommended path that you marked as done.",
+  "data.tip.verdicts": "The number of comparisons where you chose which result is better.",
+  "data.tip.keys": "The number of API keys saved here, each protected by your passphrase."
 }

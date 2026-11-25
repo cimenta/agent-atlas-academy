@@ -1906,6 +1906,12 @@ table.libstats th[data-hover-title]::after { content: " ⓘ"; font-size: 0.8em; 
 :root[data-theme="dark"] .skill-seg.seg-app { background: #1c2f3b; }
 :root[data-theme="dark"] .skill-seg.seg-culture { background: #3a3220; }
 :root[data-theme="dark"] .skill-seg.seg-user { background: #2a2340; }
+.data-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin: 0 0 8px; }
+.data-top .hint { margin: 0; }
+.data-sizebox { text-align: right; flex: none; }
+.data-size b { font-size: 1.25rem; }
+.data-size span { font-size: 0.8rem; color: var(--muted); }
+.data-cell { cursor: help; }
 .data-cells { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 6px; }
 .data-cell { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); padding: 8px 12px; min-width: 100px; }
 .data-cell b { display: block; font-size: 1.25rem; }

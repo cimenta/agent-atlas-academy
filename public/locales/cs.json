@@ -2020,5 +2020,14 @@
   "data.deleteSure": "Opravdu smazat",
   "data.deleted": "Smazáno.",
   "data.deleteAll": "Smazat všechna data",
-  "data.deleteAllText": "Odstraní z tohoto prohlížeče všechny výše uvedené části."
+  "data.deleteAllText": "Odstraní z tohoto prohlížeče všechny výše uvedené části.",
+  "data.more": "Více",
+  "data.less": "Méně",
+  "data.tip.size": "Místo, které to všechno zabírá v tomto prohlížeči, tak jak ho aplikace počítá. Většinu obvykle tvoří běhy a jejich záznamy.",
+  "data.tip.runs": "Počet vašich vlastních běhů uložených tady, každý i se záznamem.",
+  "data.tip.settings": "Vždy 1: nastavení je jeden záznam (jazyk, limity, výchozí modely, vzhled).",
+  "data.tip.skills": "Počet skillů, které jste napsali. Výchozí skilly agentů se vedou zvlášť a nepočítají se.",
+  "data.tip.progress": "Počet kroků doporučené cesty, které jste označili jako hotové.",
+  "data.tip.verdicts": "Počet porovnání, kde jste zvolili, který výsledek je lepší.",
+  "data.tip.keys": "Počet klíčů API uložených tady, každý chráněný vaším heslem."
 }

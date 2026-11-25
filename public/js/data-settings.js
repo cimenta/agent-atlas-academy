@@ -48,6 +48,7 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
   const selected = Object.fromEntries(BACKUP_CATEGORIES.map((c) => [c, c !== "keys"]));
   let armed = null; // the delete button that has been clicked once
   let stats = null;
+  let showMore = false;
   const overview = h(doc, "div", { class: "data-overview", "data-ui": "data-overview" });
   const body = h(doc, "div", { class: "data-body", "data-ui": "data-body" });
   const root = h(doc, "div", { class: "data-settings", "data-ui": "data-settings" }, overview, body);
@@ -62,9 +63,19 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
     }
     const last = readMeta(storage).lastExport;
     const when = last ? new Date(last).toLocaleString(doc.documentElement?.lang || undefined) : t("data.never");
+    const more = h(doc, "button", { type: "button", class: "linklike", "aria-expanded": String(showMore), "data-ui": "data-more" }, t(showMore ? "data.less" : "data.more"));
+    more.addEventListener("click", () => {
+      showMore = !showMore;
+      drawOverview();
+    });
+    const cells = showMore
+      ? [h(doc, "div", { class: "data-cells", "data-ui": "data-cells" }, ...BACKUP_CATEGORIES.map((c) => h(doc, "div", { class: "data-cell", title: t(`data.tip.${c}`), "data-ui": `data-count-${c}` }, h(doc, "b", {}, stats ? String(stats.counts[c]) : "?"), h(doc, "span", {}, t(`data.cat.${c}`)))))]
+      : [];
     overview.replaceChildren(
-      h(doc, "div", { class: "data-cells" }, ...BACKUP_CATEGORIES.map((c) => h(doc, "div", { class: "data-cell", "data-ui": `data-count-${c}` }, h(doc, "b", {}, stats ? String(stats.counts[c]) : "?"), h(doc, "span", {}, t(`data.cat.${c}`)))), h(doc, "div", { class: "data-cell", "data-ui": "data-size" }, h(doc, "b", {}, stats ? formatSize(stats.total) : "?"), h(doc, "span", {}, t("data.size")))),
-      h(doc, "p", { class: "hint", "data-ui": "data-last" }, t("data.lastExport", { when })),
+      h(doc, "div", { class: "data-top" },
+        h(doc, "p", { class: "hint", "data-ui": "data-last" }, t("data.lastExport", { when })),
+        h(doc, "div", { class: "data-sizebox" }, h(doc, "div", { class: "data-size", title: t("data.tip.size"), "data-ui": "data-size" }, h(doc, "b", {}, stats ? formatSize(stats.total) : "?"), " ", h(doc, "span", {}, t("data.size"))), more)),
+      ...cells,
     );
   }
 
