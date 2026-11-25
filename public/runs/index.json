@@ -1506,6 +1506,28 @@
         "en": "A model chooses the right tool for each part of a task: a clock, a lookup, a search in documents, a calculator and a counter, in one run.",
         "cs": "Model vybírá správný nástroj pro každou část úkolu: hodiny, vyhledání, hledání v dokumentech, kalkulačku a počítadlo, v jednom běhu."
       }
+    },
+    {
+      "id": "parallel-tools-split",
+      "title": "A family cannot decide where to spend a weekend: Brno or Ost…",
+      "pattern": "parallel",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "groq",
+      "outcome": "finished",
+      "tags": [
+        "parallel-work",
+        "combining-answers",
+        "tool-use",
+        "tool-wikipedia",
+        "tool-weather"
+      ],
+      "level": 2,
+      "paths": {},
+      "teaches": {
+        "en": "Parallel workers all get the same task, so different tools do not divide the work: each worker needs its part named, and the combiner needs to know whether to join or to compare.",
+        "cs": "Paralelní pracovníci dostanou všichni stejné zadání, takže jiné nástroje práci nerozdělí: každý pracovník potřebuje pojmenovanou svou část a slučovač musí vědět, zda má spojovat, nebo porovnávat."
+      }
     }
   ]
 }

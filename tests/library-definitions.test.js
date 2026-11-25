@@ -51,7 +51,7 @@ test("the run of parallel workers with different tools names the part of each wo
   assert.equal(worker("combiner").instructions, undefined, "only a free agent carries instructions, so the task tells the combiner");
   assert.match(worker("facts").instructions, /weather/i, "the facts worker is told to leave the weather to the other");
   assert.match(worker("weather").instructions, /facts/i, "the weather worker is told to leave the facts to the other");
-  assert.match(data.task, /joins the two answers city by city, does not compare/i, "the task tells the combiner to join, not to compare");
+  assert.match(data.task, /joins the two answers city by city, with no section about disagreements/i, "the task tells the combiner to join, not to compare");
   assert.equal(loaded.library.level, 2);
   assert.equal(loaded.library.paths, undefined, "in the list and in the tags, not on a guided path");
   const tags = new Set(Object.values(TAG_GROUPS).flat());

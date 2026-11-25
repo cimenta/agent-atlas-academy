@@ -1,7 +1,7 @@
 {
   "format": "agent-atlas-run-definition",
   "version": 1,
-  "task": "A family cannot decide where to spend a weekend: Brno or Ostrava. One researcher gives two or three facts about each city, the other gives the weather for the coming days in each. The combiner joins the two answers city by city, does not compare them with each other, and ends with one sentence of advice.",
+  "task": "A family cannot decide where to spend a weekend: Brno or Ostrava. One researcher gives two or three facts about each city, the other gives the weather for the coming days in each. The combiner joins the two answers city by city, with no section about disagreements because the researchers did different jobs, and ends with one sentence of advice.",
   "about": {
     "en": {
       "title": "Parallel workers with different tools: tell each one its part",

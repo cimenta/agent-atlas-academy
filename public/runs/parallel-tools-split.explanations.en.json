@@ -1,0 +1,11 @@
+{
+  "0": "Both researchers get this same task. Nothing in it says who does what, so each one's instructions do.",
+  "4": "The facts researcher asks Wikipedia about Brno.",
+  "7": "The weather researcher asks for the weather in Brno at the same time: both work in parallel.",
+  "10": "The facts researcher asks about Ostrava, the second city.",
+  "13": "The weather researcher asks for the weather in Ostrava.",
+  "16": "The facts researcher answers with facts only. The weather is left to the other one, as its instructions say.",
+  "18": "The weather researcher answers with the forecast only.",
+  "23": "The combiner joins the facts and the forecast city by city and gives one sentence of advice. It does not claim that the researchers agree, because they did different jobs.",
+  "24": "The run ends."
+}

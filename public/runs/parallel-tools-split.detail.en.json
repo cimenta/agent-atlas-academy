@@ -1,0 +1,6 @@
+{
+  "about": "Two researchers work at the same time on one task: which of two cities to visit for a weekend. One has Wikipedia, the other the weather, and a combiner writes the answer. Groq (free).",
+  "how": "Both researchers get the same task, so each is told its part: the first gives facts and leaves the weather alone, the second gives the weather and leaves the facts alone. Each calls its tool once for each city. The combiner joins the two answers city by city.",
+  "learns": "Parallel workers all get the same task, so different tools do not divide the work: each worker needs its part named, and the combiner needs to know whether to join or to compare.",
+  "watch": "Which tool each researcher calls, that both start together, and that the combiner joins facts and forecast without a section about disagreements. In a first recording without that line it invented one."
+}

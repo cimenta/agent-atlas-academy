@@ -1,0 +1,6 @@
+{
+  "about": "Dva výzkumníci pracují současně na jednom zadání: které ze dvou měst navštívit na víkend. Jeden má Wikipedii, druhý počasí a slučovač napíše odpověď. Groq (zdarma).",
+  "how": "Oba výzkumníci dostanou stejné zadání, proto má každý řečeno, co je jeho část: první dává fakta a počasí nechá být, druhý dává počasí a fakta nechá být. Každý zavolá svůj nástroj jednou pro každé město. Slučovač spojí obě odpovědi město po městě.",
+  "learns": "Paralelní pracovníci dostanou všichni stejné zadání, takže jiné nástroje práci nerozdělí: každý pracovník potřebuje pojmenovanou svou část a slučovač musí vědět, zda má spojovat, nebo porovnávat.",
+  "watch": "Který nástroj který výzkumník volá, že oba začnou společně a že slučovač spojí fakta a předpověď bez sekce o neshodách. V prvním nahrávání bez té věty si ji vymyslel."
+}
