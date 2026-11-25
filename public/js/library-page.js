@@ -24,7 +24,7 @@ import { groupOfTag, tagCounts, filterByTags, cloudRows, tagWeight } from "./lib
 import { stepOf, groupPairs } from "./library-path.js";
 import { loadProgress, setDone, isDone, withoutDone } from "./library-progress.js";
 import { drawPath, drawFilterBar } from "./library-path-view.js";
-import { createLibraryHelp, helpWanted, markHelpSeen } from "./library-help.js";
+import { createLibraryHelp, helpWanted } from "./library-help.js";
 
 export { importFiles };
 
@@ -756,9 +756,6 @@ export async function renderLibraryTab(ctx, requestedId) {
   redraw = draw;
   await draw();
   await drawRight();
-  // The first time the Library opens in a browser session the help window opens by itself (a link to one run does not get it).
-  if (!requestedId && helpWanted(ctx)) {
-    markHelpSeen(ctx);
-    help.open();
-  }
+  // Every time the Library is opened the help window opens by itself, unless the student turned it off (a link to one run does not get it).
+  if (!requestedId && helpWanted(ctx)) help.open();
 }

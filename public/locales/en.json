@@ -2242,7 +2242,7 @@
   "libhelp.sample.2": "Write a welcome message for new members of a school club …",
   "libhelp.sample.3": "Which came first, the printing press or the telescope? …",
   "settings.libraryHelpHeading": "Library help",
-  "settings.libraryHelpIntro": "A window that explains the cards of the Library opens by itself the first time you come to the Library in a browser session.",
+  "settings.libraryHelpIntro": "A window that explains the cards of the Library opens by itself every time you open the Library.",
   "settings.libraryHelpLabel": "Open the Library help by itself",
   "settings.libraryHelpOn": "The Library help opens by itself.",
   "settings.libraryHelpOff": "The Library help does not open by itself. The button in the Library still opens it."

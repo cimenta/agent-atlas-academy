@@ -1743,7 +1743,7 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 /* The card that explains a box or an arrow of the replay diagram when the pointer rests on it. */
 .flow-hit { stroke: transparent; stroke-width: 16px; pointer-events: stroke; cursor: help; }
 .flow.hot { stroke: var(--accent); stroke-width: 3; opacity: 1; }
-.hover-card { position: fixed; z-index: 60; width: 270px; max-width: calc(100vw - 16px); pointer-events: none; padding: 10px 13px; border-radius: 10px; background: var(--card); color: var(--text); border: 1px solid var(--border); font-size: 0.85rem; line-height: 1.4; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16); }
+.hover-card { position: fixed; z-index: 80; width: 270px; max-width: calc(100vw - 16px); pointer-events: none; padding: 10px 13px; border-radius: 10px; background: var(--card); color: var(--text); border: 1px solid var(--border); font-size: 0.85rem; line-height: 1.4; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16); }
 .hover-card h4 { margin: 0 0 4px; font-size: 0.92rem; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .hover-card p { margin: 0 0 4px; }
 .hover-card .hover-extra { opacity: 0.85; }

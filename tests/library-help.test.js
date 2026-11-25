@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 const EN = JSON.parse(readFileSync(new URL("../public/locales/en.json", import.meta.url), "utf8"));
-import { createLibraryHelp, helpWanted, markHelpSeen, HELP_TABS, CARD_PARTS } from "../public/js/library-help.js";
+import { createLibraryHelp, helpWanted, HELP_TABS, CARD_PARTS } from "../public/js/library-help.js";
 
 class El {
   constructor(tag) { this.tag = tag; this.attrs = {}; this.children = []; this.listeners = {}; this.parent = null; }
@@ -130,11 +130,10 @@ test("Do not show again is the setting: ticking it turns the automatic opening o
   assert.deepEqual(saved, [false, true]);
 });
 
-test("the window opens by itself once in a browser session and never when the setting is off", () => {
+test("the window opens by itself every time the Library opens, and never when the setting is off", () => {
   const on = setup();
   assert.equal(helpWanted(on.ctx), true);
-  markHelpSeen(on.ctx);
-  assert.equal(helpWanted(on.ctx), false, "seen in this session");
+  assert.equal(helpWanted(on.ctx), true, "not only the first time");
   assert.equal(helpWanted(setup({ libraryHelp: false }).ctx), false, "turned off");
 });
 

@@ -1,5 +1,5 @@
 // The Library help window: five sections (the card, the colour, the level, pairs, compare) with the real cards and frames of the Library.
-// It opens from a button next to the tabs of the right side, and by itself when the Library is opened (once in a browser session) until the
+// It opens from a button next to the tabs of the right side, and by itself whenever the Library is opened until the
 // student ticks "Do not show again" (the same switch is in Settings).
 import { h } from "./dom.js";
 import { runRow, pairFrame } from "./play-shared.js";
@@ -7,33 +7,12 @@ import { groupPairs } from "./library-path.js";
 
 export const HELP_TABS = ["card", "color", "level", "pairs", "compare"];
 const SVG = "http://www.w3.org/2000/svg";
-const SEEN_KEY = "aa.libraryHelpSeen";
 // The parts of a card the help points at, in the order of the legend.
 export const CARD_PARTS = ["title", "bg", "type", "prov", "tick", "kind", "step", "level"];
 
-const sessionStore = (ctx) => {
-  try {
-    return ctx.doc.defaultView?.sessionStorage ?? null;
-  } catch {
-    return null;
-  }
-};
-
-// The window opens by itself when the setting is on and it has not opened yet in this browser session.
+// The window opens by itself every time the Library is opened, unless the student turned it off (Do not show again, or Settings).
 export function helpWanted(ctx) {
-  if (ctx.settings?.get?.().libraryHelp === false) return false;
-  try {
-    return sessionStore(ctx)?.getItem(SEEN_KEY) !== "1";
-  } catch {
-    return true;
-  }
-}
-export function markHelpSeen(ctx) {
-  try {
-    sessionStore(ctx)?.setItem(SEEN_KEY, "1");
-  } catch {
-    // opening again next time is harmless
-  }
+  return ctx.settings?.get?.().libraryHelp !== false;
 }
 
 // A text with {done} in it, the marker replaced by the node.

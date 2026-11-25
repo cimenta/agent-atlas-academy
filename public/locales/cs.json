@@ -2242,7 +2242,7 @@
   "libhelp.sample.2": "Napište uvítací zprávu pro nové členy školního klubu …",
   "libhelp.sample.3": "Co bylo dřív, knihtisk, nebo dalekohled? …",
   "settings.libraryHelpHeading": "Nápověda knihovny",
-  "settings.libraryHelpIntro": "Okno, které vysvětluje karty knihovny, se otevře samo při prvním vstupu do knihovny v relaci prohlížeče.",
+  "settings.libraryHelpIntro": "Okno, které vysvětluje karty knihovny, se otevře samo při každém vstupu do knihovny.",
   "settings.libraryHelpLabel": "Otevírat nápovědu knihovny samo",
   "settings.libraryHelpOn": "Nápověda knihovny se otevře sama.",
   "settings.libraryHelpOff": "Nápověda knihovny se sama neotevře. Tlačítko v knihovně ji pořád otevře."
