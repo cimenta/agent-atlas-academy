@@ -54,6 +54,7 @@ export function notesToolText({ action, text } = {}, book) {
     const body = oneLine(typeof text === "string" ? text : "");
     if (body === "") throw new ToolError("A note needs some text.");
     const note = book.write(body);
+    if (note.duplicate) return `Note ${note.n} already says this, so nothing was added.`;
     return `Note ${note.n} saved${body.length > NOTE_MAX ? ` (cut to ${NOTE_MAX} characters)` : ""}.`;
   }
   throw new ToolError('The action must be "write" or "read".');
@@ -67,6 +68,9 @@ export function createNotebook({ emit = () => {} } = {}) {
     add(agent, text, { silent = false } = {}) {
       const note = { n: list.length + 1, agent, text: oneLine(text).slice(0, NOTE_MAX) };
       if (note.text === "") return null;
+      // The same note twice (an agent that read the notebook and copied a note back) adds nothing: the first one stays, and nothing is emitted.
+      const same = list.find((n) => n.text.toLowerCase() === note.text.toLowerCase());
+      if (same) return { ...same, duplicate: true };
       list.push(note);
       if (!silent) emit({ type: "note", agent, text: note.text, n: note.n });
       return note;

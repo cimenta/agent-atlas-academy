@@ -24,3 +24,5 @@ related: [memory-summaries, context-window, information-leaking-between-agents, 
 - Co se zapíše, tam zůstane. Pokud agent zapíše text z nedůvěryhodného zdroje, například z webové stránky, tento text může ovlivnit každého agenta, který zápisník později přečte.
 
 Zacházejte se zápisníkem jako se sdíleným, ne soukromým.
+
+V Agent Atlasu může agent dostat i **nástroj poznámek**. Místo aby poznámky psal do odpovědi, model zavolá nástroj, když sám usoudí, že je čas zapsat poznámku do sdíleného zápisníku nebo přečíst dosavadní poznámky. Je to stejný zápisník, takže ostatní agenti poznámku vidí tak i tak.

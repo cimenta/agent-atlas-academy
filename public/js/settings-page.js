@@ -619,7 +619,7 @@ export function renderSettings(ctx) {
     h(doc, "h4", {}, t("harness.toolsHeading"), help("harness-web-search", t("harness.toolsHeading"))),
     h(doc, "p", { class: "hint" }, t("harness.toolsIntro")),
     h(doc, "div", { class: "field checkbox" }, webBox, h(doc, "label", { for: "set-web-search" }, t("harness.webSearchLabel"))),
-    h(doc, "div", { class: "field checkbox" }, toolsBox, h(doc, "label", { for: "set-own-tools" }, t("harness.ownToolsLabel"))),
+    h(doc, "div", { class: "field checkbox" }, toolsBox, h(doc, "label", { for: "set-own-tools" }, t("harness.ownToolsLabel")), help("harness-own-tools", t("harness.ownToolsName"))),
     h(doc, "p", { class: "hint" }, t("harness.ownToolsNote")),
     h(doc, "h4", {}, t("harness.webContentHeading"), help("harness-web-content", t("harness.webContentHeading"))),
     h(doc, "div", { class: "field checkbox" }, webFixed, h(doc, "label", { for: "set-web-data" }, t("harness.webContentLabel")), h(doc, "span", { class: "tag-always" }, t("harness.alwaysOn"))),

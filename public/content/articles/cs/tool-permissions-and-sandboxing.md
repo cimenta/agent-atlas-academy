@@ -16,4 +16,4 @@ Typická pravidla:
 - **Jen pro čtení**: nástroje, které nemohou nic změnit.
 - **Izolované prostředí**: spuštění riskantního kódu v odděleném prostoru bez přístupu ke zbytku systému.
 
-Vyhledávání na webu v Agent Atlasu jen čte a spouští ho aplikace, ne model. Nástroj pro stahování stránek se připravuje a bude fungovat takto: odmítá interní adresy, má časový limit a jen čte. Zásada zní dát pravidlo do kódu, který nástroj spouští, ne do pokynů, jimiž se má agent řídit.
+Nástroje v Agent Atlasu to dodržují. Spouští je aplikace, ne model. Dva, které volají jinou službu, Wikipedie a počasí, mají adresy pevně v kódu, takže model nemůže poslat volání jinam; volání se po 8 sekundách zastaví, odpověď delší než 300000 znaků se odmítne a místo nebo dotaz se nejdřív zkontrolují. Kalkulačka má vlastní malý parser a text nikdy nespouští jako kód. Hledání v dokumentech se dívá jen na text, který jste k běhu přidali, a nástroj poznámek zapisuje jen do zápisníku běhu. Zásada zní dát pravidlo do kódu, který nástroj spouští, ne do pokynů, jimiž se má agent řídit.

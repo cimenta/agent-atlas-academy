@@ -16,4 +16,4 @@ Examples:
 
 Why it matters: if an agent is fooled, by a prompt injection or by its own mistake, the damage is limited to what it was allowed to do. An agent with nothing dangerous in its hands can do nothing dangerous.
 
-This is why Agent Atlas offers only a read-only web search. When you choose tools per agent, ask for each one: does this agent really need this? If not, remove it. In Create, web search is a switch on each agent, and Settings, Harness, Tools has a master switch that turns it off for every run.
+This is why every tool in Agent Atlas is a switch on each agent, off until you turn it on, and why none of them can change anything outside the app: web search and the tools that look something up only read, and the notes tool writes only into the notebook of the run. When you choose tools per agent, ask for each one: does this agent really need this? If not, remove it. Settings, Harness, Tools has a master switch for web search and one for the tools of the app, which turn them off for every run.

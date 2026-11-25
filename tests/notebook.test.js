@@ -31,6 +31,18 @@ test("the notebook numbers notes, emits an event for each and gives a block to r
   assert.equal(book.add("x", "   "), null);
 });
 
+test("a note that is already in the notebook is not added again, and the agent is told not to copy", () => {
+  const events = [];
+  const book = createNotebook({ emit: (e) => events.push(e) });
+  book.add("researcher", "Weather in Brno: 1.3 C.");
+  const again = book.add("writer", "  weather in brno: 1.3 C. ");
+  assert.equal(again.duplicate, true);
+  assert.equal(again.n, 1);
+  assert.equal(events.length, 1);
+  assert.equal(book.notes().length, 1);
+  assert.match(systemPromptFor({ agent: "writer" }, { memory: { on: true, read: true, write: true } }), /never copy a note that is already in the notebook/);
+});
+
 test("a silent note (from a cached reply) adds no event", () => {
   const events = [];
   const book = createNotebook({ emit: (e) => events.push(e) });
@@ -122,13 +134,13 @@ test("review: the notebook warning is emitted once, and not at all in a silent r
   const events = [];
   const book = createNotebook({ emit: (e) => events.push(e) });
   for (let i = 0; i < 14; i++) {
-    book.add("a", "x".repeat(590));
+    book.add("a", `${i}:` + "x".repeat(580));
     book.forReader();
   }
   assert.equal(events.filter((e) => e.type === "warning").length, 1);
   const quiet = [];
   const other = createNotebook({ emit: (e) => quiet.push(e) });
-  for (let i = 0; i < 14; i++) other.add("a", "x".repeat(590), { silent: true });
+  for (let i = 0; i < 14; i++) other.add("a", `${i}:` + "x".repeat(580), { silent: true });
   other.forReader({ mode: "peek" });
   assert.equal(quiet.length, 0);
 });

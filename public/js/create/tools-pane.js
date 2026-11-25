@@ -72,7 +72,7 @@ function documentsBlock({ doc, t, editor, changed, readFile }) {
   });
 
   return h(doc, "div", { class: "docs-block", "data-ui": "docs-block" },
-    h(doc, "h5", {}, t("tools.docs.heading")),
+    h(doc, "h5", {}, t("tools.docs.heading"), helpIcon({ doc, t, id: "create-documents", name: t("tools.docs.heading") })),
     h(doc, "p", { class: "hint" }, t("tools.docs.intro", { files: DOC_LIMITS.files, chars: DOC_LIMITS.totalChars })),
     docs.length > 0 ? h(doc, "ul", { class: "doc-list" }, ...list) : h(doc, "p", { class: "hint", "data-ui": "docs-empty" }, t("tools.docs.none")),
     h(doc, "p", { class: "hint" }, t("tools.docs.count", { files: docs.length, max: DOC_LIMITS.files, chars: docChars(docs), maxChars: DOC_LIMITS.totalChars })),

@@ -24,3 +24,5 @@ A **scratchpad** is a shared place for notes. Agents write the facts, decisions 
 - Whatever is written stays there. If an agent writes text from an untrusted source, such as a web page, that text can influence every agent that reads the pad later.
 
 Treat the scratchpad as shared, not private.
+
+In Agent Atlas an agent can also be given the **notes tool**. Instead of putting notes into its answer, the model calls the tool to write a note into the shared notebook or to read the notes so far, when it chooses to. It is the same notebook, so the other agents see the note either way.

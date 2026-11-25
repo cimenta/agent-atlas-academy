@@ -125,10 +125,12 @@ test("review: notes are taken before the repeat check, so a stopped run still sh
 });
 
 test("review: a resumed run does not repeat the notebook warning", async () => {
-  const big = "<note>" + "x".repeat(590) + "</note><note>" + "y".repeat(590) + "</note>";
+  // Every reply holds different notes: a note that is already in the notebook is not added again.
+  let counter = 0;
+  const big = () => { counter += 1; return `<note>${counter}x` + "x".repeat(580) + `</note><note>${counter}y` + "y".repeat(580) + "</note>"; };
   const nodes = Array.from({ length: 8 }, (_, i) => node("n" + i, "writer", { notebook: "both" }));
   const first = [];
-  const call = async () => text("Done " + big);
+  const call = async () => text("Done " + big());
   await runDesign({ design: design(nodes, { memory: { notebook: true } }), task: "t", limits: LIMIT_DEFAULTS, call, emit: (e) => first.push(e) });
   const warnings = first.filter((e) => e.type === "warning" && e.notebook).length;
   assert.equal(warnings, 1);
