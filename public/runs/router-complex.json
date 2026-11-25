@@ -9,7 +9,7 @@
     "model": "openai/gpt-oss-120b, openai/gpt-oss-20b",
     "freeTier": true
   },
-  "appVersion": "1.16.10-dev.0",
+  "appVersion": "1.21.5-dev.1",
   "events": [
     {
       "type": "run_start",
@@ -42,7 +42,10 @@
             "search": false,
             "name": "History tutor",
             "instructions": "You are a history tutor. Answer questions about dates, events and their effects.",
-            "slot": "groq-free"
+            "slot": "groq-free",
+            "tools": [
+              "wikipedia"
+            ]
           },
           {
             "id": "free-3",
@@ -91,17 +94,17 @@
       "model": "openai/gpt-oss-120b",
       "tools": [],
       "system": "Role: router\nYou are the Router. You read the task and choose exactly one specialist to answer it. The first message lists the specialist ids and what each one is for. You do not answer the task yourself, and you will not see the specialist's answer. Choose the specialist whose role fits the task best.\nReply with JSON only, in this form:\n{\"route\":\"<specialist id>\",\"reason\":\"<why this specialist fits the task>\"}\nKeep every reply under 300 words. Answer in English.",
-      "t": 3
+      "t": 4
     },
     {
       "type": "round",
       "agent": "router",
       "round": 1,
-      "ms": 496,
+      "ms": 412,
       "stop": "end_turn",
       "usage": {
         "input": 332,
-        "output": 75
+        "output": 94
       },
       "newMessages": [
         {
@@ -112,7 +115,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{\"route\":\"free-2\",\"reason\":\"The question asks about chronological order of historical inventions (printing press and telescope) and the societal impact of printing on education, which fits the History tutor's expertise.\"}"
+          "text": "{\n  \"route\": \"free-2\",\n  \"reason\": \"The question involves historical chronology (printing press vs telescope) and the impact of printing on schools, which fits the History tutor's expertise in dates, events, and their effects.\"\n}"
         }
       ],
       "raw": {
@@ -132,47 +135,49 @@
           "stop_sequence": null,
           "usage": {
             "input_tokens": 332,
-            "output_tokens": 75
+            "output_tokens": 94
           }
         }
       },
-      "t": 500
+      "t": 416
     },
     {
       "type": "agent_output",
       "agent": "router",
-      "text": "{\"route\":\"free-2\",\"reason\":\"The question asks about chronological order of historical inventions (printing press and telescope) and the societal impact of printing on education, which fits the History tutor's expertise.\"}",
+      "text": "{\n  \"route\": \"free-2\",\n  \"reason\": \"The question involves historical chronology (printing press vs telescope) and the impact of printing on schools, which fits the History tutor's expertise in dates, events, and their effects.\"\n}",
       "tokens": {
         "input": 332,
-        "output": 75
+        "output": 94
       },
-      "t": 500
+      "t": 416
     },
     {
       "type": "handoff",
       "from": "router",
       "to": "free-2",
-      "note": "The question asks about chronological order of historical inventions (printing press and telescope) and the societal impact of printing on education, which fits the History tutor's expertise.",
-      "t": 501
+      "note": "The question involves historical chronology (printing press vs telescope) and the impact of printing on schools, which fits the History tutor's expertise in dates, events, and their effects.",
+      "t": 416
     },
     {
       "type": "agent_start",
       "agent": "free-2",
       "role": "History tutor",
       "model": "openai/gpt-oss-20b",
-      "tools": [],
+      "tools": [
+        "wikipedia"
+      ],
       "system": "Role: free\nYou are History tutor. You are a history tutor. Answer questions about dates, events and their effects.\nKeep every reply under 300 words. Answer in English.",
-      "t": 501
+      "t": 417
     },
     {
       "type": "round",
       "agent": "free-2",
       "round": 1,
-      "ms": 552,
-      "stop": "end_turn",
+      "ms": 328,
+      "stop": "tool_use",
       "usage": {
-        "input": 131,
-        "output": 446
+        "input": 247,
+        "output": 35
       },
       "newMessages": [
         {
@@ -182,16 +187,277 @@
       ],
       "content": [
         {
-          "type": "text",
-          "text": "The printing press predates the telescope by more than a century.  \n\n**Printing press**  \n- Johannes Gutenberg’s movable‑type press was perfected around 1440 in Mainz, Germany.  \n- The first major printed book, the *Erasmus Biblia* (1455), shows the technology was already in use.\n\n**Telescope**  \n- The first practical telescope appeared in 1608 in the Netherlands, credited to Hans Lippershey (though the Dutch optician Jacob Metius also applied for a patent the same year).  \n- Galileo’s improvements in 1609–1610 made it a scientific instrument.\n\nSo, Gutenberg’s press came first by about 160 years.\n\n---\n\n### How printing changed schools\n\n| Area | Before printing | After printing |\n|------|-----------------|----------------|\n| **Curriculum** | Textbooks were rare, handwritten manuscripts; knowledge varied by region. | Standardized books (e.g., Latin manuals, catechisms) were widely available, allowing a more uniform curriculum. |\n| **Teaching methods** | Oral transmission and individual copying; teachers were sole custodians of knowledge. | Teachers could rely on printed texts as authoritative references, freeing them to focus on explanation rather than copying. |\n| **Student access** | Limited to a few copies per classroom; learning often required copying. | Larger classes could all read the same material simultaneously, encouraging active reading and discussion. |\n| **Intellectual exchange** | Ideas circulated slowly via manuscripts. | Rapid dissemination of new theories (e.g., Copernican astronomy, humanist studies) fostered scholarly debate and quicker progress. |\n| **Linguistic impact** | Latin dominated, with local scripts for religious texts. | Vernacular books appeared (e.g., Luther’s Bible in German), making education accessible beyond elites. |\n\nIn short, the printing press transformed schools by providing standardized, affordable, and widely accessible texts, shifting teaching from memorization and copying to interpretation and critical analysis. This laid the groundwork for the modern educational system and accelerated the spread of scientific ideas, including the eventual invention and use of the telescope."
+          "type": "tool_use",
+          "id": "fc_a23581e5-d715-470a-bf31-3304e96946e2",
+          "name": "wikipedia",
+          "input": {
+            "language": "en",
+            "query": "printing press"
+          }
         }
       ],
       "raw": {
         "request": {
           "model": "openai/gpt-oss-20b",
           "max_tokens": 4000,
-          "tools": [],
+          "tools": [
+            {
+              "name": "wikipedia",
+              "description": "Looks a subject up on Wikipedia and returns the title, a summary of about 1200 characters and the address of the page. Use it for facts about people, places, events and things instead of answering from memory.",
+              "input_schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "What to look up, for example Alan Turing."
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "cs"
+                    ],
+                    "description": "The Wikipedia language: en (default) or cs."
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          ],
           "messageCount": 1
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "openai/gpt-oss-20b",
+          "stop_reason": "tool_use",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 247,
+            "output_tokens": 35
+          }
+        }
+      },
+      "t": 745
+    },
+    {
+      "type": "tool_call",
+      "agent": "free-2",
+      "tool": "wikipedia",
+      "own": true,
+      "id": "fc_a23581e5-d715-470a-bf31-3304e96946e2",
+      "args": {
+        "language": "en",
+        "query": "printing press"
+      },
+      "input": "{\"language\":\"en\",\"query\":\"printing press\"}",
+      "t": 745
+    },
+    {
+      "type": "tool_result",
+      "agent": "free-2",
+      "tool": "wikipedia",
+      "own": true,
+      "id": "fc_a23581e5-d715-470a-bf31-3304e96946e2",
+      "output": "Printing press (Wikipedia, en)\nA printing press is a machine that applies pressure to transfer ink onto a surface made of paper, cloth, or a similar material. Its workers are known as printing press operators. It marked a significant improvement on earlier methods, in which the paper was rubbed by hand to transfer applied ink to the printing surface. \nThe printing press was invented by the German goldsmith Johannes Gutenberg around 1440, and its subsequent global spread revolutionized literary production and communication during the early modern period. The spread of printing brought about an era of mass communication in European society, allowing information to quickly spread across Europe and contributing to the Reformation and the Scientific Revolution. The cost of printed texts declined and their availability increased, facilitating higher adult literacy rates across Europe. Books increasingly appeared in vernacular languages rather than Latin, and national languages were standardized.\nThe basic design of the wooden handpress was largely consistent for over three centuries, until the Industrial Revolution. By 1800 Lord Stanhope had built a new iron printing press printing a sheet at one pull. In 1814, The Times...\nhttps://en.wikipedia.org/wiki/Printing_press",
+      "error": false,
+      "ms": 497,
+      "t": 1243
+    },
+    {
+      "type": "round",
+      "agent": "free-2",
+      "round": 2,
+      "ms": 2308,
+      "stop": "tool_use",
+      "usage": {
+        "input": 506,
+        "output": 31
+      },
+      "newMessages": [
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "tool_use",
+              "id": "fc_a23581e5-d715-470a-bf31-3304e96946e2",
+              "name": "wikipedia",
+              "input": {
+                "language": "en",
+                "query": "printing press"
+              }
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "tool_use_id": "fc_a23581e5-d715-470a-bf31-3304e96946e2",
+              "content": "Printing press (Wikipedia, en)\nA printing press is a machine that applies pressure to transfer ink onto a surface made of paper, cloth, or a similar material. Its workers are known as printing press operators. It marked a significant improvement on earlier methods, in which the paper was rubbed by hand to transfer applied ink to the printing surface. \nThe printing press was invented by the German goldsmith Johannes Gutenberg around 1440, and its subsequent global spread revolutionized literary production and communication during the early modern period. The spread of printing brought about an era of mass communication in European society, allowing information to quickly spread across Europe and contributing to the Reformation and the Scientific Revolution. The cost of printed texts declined and their availability increased, facilitating higher adult literacy rates across Europe. Books increasingly appeared in vernacular languages rather than Latin, and national languages were standardized.\nThe basic design of the wooden handpress was largely consistent for over three centuries, until the Industrial Revolution. By 1800 Lord Stanhope had built a new iron printing press printing a sheet at one pull. In 1814, The Times...\nhttps://en.wikipedia.org/wiki/Printing_press"
+            }
+          ]
+        }
+      ],
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "fc_6d7df1eb-2d0b-4800-9406-932ffa3c29fb",
+          "name": "wikipedia",
+          "input": {
+            "language": "en",
+            "query": "telescope"
+          }
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "openai/gpt-oss-20b",
+          "max_tokens": 4000,
+          "tools": [
+            {
+              "name": "wikipedia",
+              "description": "Looks a subject up on Wikipedia and returns the title, a summary of about 1200 characters and the address of the page. Use it for facts about people, places, events and things instead of answering from memory.",
+              "input_schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "What to look up, for example Alan Turing."
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "cs"
+                    ],
+                    "description": "The Wikipedia language: en (default) or cs."
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          ],
+          "messageCount": 3
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "openai/gpt-oss-20b",
+          "stop_reason": "tool_use",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 506,
+            "output_tokens": 31
+          }
+        }
+      },
+      "t": 3551
+    },
+    {
+      "type": "tool_call",
+      "agent": "free-2",
+      "tool": "wikipedia",
+      "own": true,
+      "id": "fc_6d7df1eb-2d0b-4800-9406-932ffa3c29fb",
+      "args": {
+        "language": "en",
+        "query": "telescope"
+      },
+      "input": "{\"language\":\"en\",\"query\":\"telescope\"}",
+      "t": 3551
+    },
+    {
+      "type": "tool_result",
+      "agent": "free-2",
+      "tool": "wikipedia",
+      "own": true,
+      "id": "fc_6d7df1eb-2d0b-4800-9406-932ffa3c29fb",
+      "output": "Telescope (Wikipedia, en)\nA telescope is a device used to observe distant objects by their emission, absorption, or reflection of electromagnetic radiation. Originally, it was an optical instrument using lenses, curved mirrors, or a combination of both to observe distant objects – an optical telescope. Nowadays, the word \"telescope\" is defined as a wide range of instruments capable of detecting different regions of the electromagnetic spectrum, and in some cases other types of detectors.\nThe first known practical telescopes were refracting telescopes with glass lenses and were invented in the Netherlands at the beginning of the 17th century. They were used for both terrestrial applications and astronomy.\nThe reflecting telescope, which uses mirrors to collect and focus light, was invented within a few decades of the first refracting telescope.\nIn the 20th century, many new types of telescopes were invented, including radio telescopes in the 1930s and infrared telescopes in the 1960s.\nhttps://en.wikipedia.org/wiki/Telescope",
+      "error": false,
+      "ms": 338,
+      "t": 3889
+    },
+    {
+      "type": "round",
+      "agent": "free-2",
+      "round": 3,
+      "ms": 2549,
+      "stop": "end_turn",
+      "usage": {
+        "input": 736,
+        "output": 331
+      },
+      "newMessages": [
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "tool_use",
+              "id": "fc_6d7df1eb-2d0b-4800-9406-932ffa3c29fb",
+              "name": "wikipedia",
+              "input": {
+                "language": "en",
+                "query": "telescope"
+              }
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "tool_use_id": "fc_6d7df1eb-2d0b-4800-9406-932ffa3c29fb",
+              "content": "Telescope (Wikipedia, en)\nA telescope is a device used to observe distant objects by their emission, absorption, or reflection of electromagnetic radiation. Originally, it was an optical instrument using lenses, curved mirrors, or a combination of both to observe distant objects – an optical telescope. Nowadays, the word \"telescope\" is defined as a wide range of instruments capable of detecting different regions of the electromagnetic spectrum, and in some cases other types of detectors.\nThe first known practical telescopes were refracting telescopes with glass lenses and were invented in the Netherlands at the beginning of the 17th century. They were used for both terrestrial applications and astronomy.\nThe reflecting telescope, which uses mirrors to collect and focus light, was invented within a few decades of the first refracting telescope.\nIn the 20th century, many new types of telescopes were invented, including radio telescopes in the 1930s and infrared telescopes in the 1960s.\nhttps://en.wikipedia.org/wiki/Telescope"
+            }
+          ]
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "The printing press predates the telescope. Johannes Gutenberg’s movable‑type press was developed around 1440 in Mainz, Germany, whereas the first practical refracting telescope appeared in the Netherlands at the beginning of the 17th century (≈1608‑1610).\n\n**How printing reshaped schools**\n\n| Aspect | Before the press | After the press |\n|--------|------------------|-----------------|\n| **Textual resources** | Manuscripts copied by hand, rare, expensive, often in Latin | Mass‑produced books, primers, textbooks in vernacular languages; cost fell dramatically |\n| **Curriculum** | Limited to elite, clergy, or university scholars; focus on Latin, rhetoric, theology | Broader subject matter (history, science, geography) became accessible; standardized textbooks allowed uniform instruction |\n| **Teacher’s role** | Relied on oral tradition and handwritten notes | Teachers could reference printed manuals and treatises, improving consistency and professional training |\n| **Student literacy** | Lower overall literacy; reading was a skill of the educated few | Rising literacy rates as printed reading materials became available to a wider audience |\n| **Institutional change** | Schools were small, localized, heavily reliant on patronage | Emergence of more formal school systems, state‑supported education, and the spread of public libraries |\n\nIn short, the printing press made knowledge more portable and affordable, enabling schools to move from rare, hand‑copied texts to standardized, widely distributed materials, which in turn broadened educational access and laid groundwork for modern schooling."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "openai/gpt-oss-20b",
+          "max_tokens": 4000,
+          "tools": [
+            {
+              "name": "wikipedia",
+              "description": "Looks a subject up on Wikipedia and returns the title, a summary of about 1200 characters and the address of the page. Use it for facts about people, places, events and things instead of answering from memory.",
+              "input_schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "What to look up, for example Alan Turing."
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "cs"
+                    ],
+                    "description": "The Wikipedia language: en (default) or cs."
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          ],
+          "messageCount": 5
         },
         "response": {
           "id": null,
@@ -201,34 +467,34 @@
           "stop_reason": "end_turn",
           "stop_sequence": null,
           "usage": {
-            "input_tokens": 131,
-            "output_tokens": 446
+            "input_tokens": 736,
+            "output_tokens": 331
           }
         }
       },
-      "t": 1053
+      "t": 6438
     },
     {
       "type": "agent_output",
       "agent": "free-2",
-      "text": "The printing press predates the telescope by more than a century.  \n\n**Printing press**  \n- Johannes Gutenberg’s movable‑type press was perfected around 1440 in Mainz, Germany.  \n- The first major printed book, the *Erasmus Biblia* (1455), shows the technology was already in use.\n\n**Telescope**  \n- The first practical telescope appeared in 1608 in the Netherlands, credited to Hans Lippershey (though the Dutch optician Jacob Metius also applied for a patent the same year).  \n- Galileo’s improvements in 1609–1610 made it a scientific instrument.\n\nSo, Gutenberg’s press came first by about 160 years.\n\n---\n\n### How printing changed schools\n\n| Area | Before printing | After printing |\n|------|-----------------|----------------|\n| **Curriculum** | Textbooks were rare, handwritten manuscripts; knowledge varied by region. | Standardized books (e.g., Latin manuals, catechisms) were widely available, allowing a more uniform curriculum. |\n| **Teaching methods** | Oral transmission and individual copying; teachers were sole custodians of knowledge. | Teachers could rely on printed texts as authoritative references, freeing them to focus on explanation rather than copying. |\n| **Student access** | Limited to a few copies per classroom; learning often required copying. | Larger classes could all read the same material simultaneously, encouraging active reading and discussion. |\n| **Intellectual exchange** | Ideas circulated slowly via manuscripts. | Rapid dissemination of new theories (e.g., Copernican astronomy, humanist studies) fostered scholarly debate and quicker progress. |\n| **Linguistic impact** | Latin dominated, with local scripts for religious texts. | Vernacular books appeared (e.g., Luther’s Bible in German), making education accessible beyond elites. |\n\nIn short, the printing press transformed schools by providing standardized, affordable, and widely accessible texts, shifting teaching from memorization and copying to interpretation and critical analysis. This laid the groundwork for the modern educational system and accelerated the spread of scientific ideas, including the eventual invention and use of the telescope.",
+      "text": "The printing press predates the telescope. Johannes Gutenberg’s movable‑type press was developed around 1440 in Mainz, Germany, whereas the first practical refracting telescope appeared in the Netherlands at the beginning of the 17th century (≈1608‑1610).\n\n**How printing reshaped schools**\n\n| Aspect | Before the press | After the press |\n|--------|------------------|-----------------|\n| **Textual resources** | Manuscripts copied by hand, rare, expensive, often in Latin | Mass‑produced books, primers, textbooks in vernacular languages; cost fell dramatically |\n| **Curriculum** | Limited to elite, clergy, or university scholars; focus on Latin, rhetoric, theology | Broader subject matter (history, science, geography) became accessible; standardized textbooks allowed uniform instruction |\n| **Teacher’s role** | Relied on oral tradition and handwritten notes | Teachers could reference printed manuals and treatises, improving consistency and professional training |\n| **Student literacy** | Lower overall literacy; reading was a skill of the educated few | Rising literacy rates as printed reading materials became available to a wider audience |\n| **Institutional change** | Schools were small, localized, heavily reliant on patronage | Emergence of more formal school systems, state‑supported education, and the spread of public libraries |\n\nIn short, the printing press made knowledge more portable and affordable, enabling schools to move from rare, hand‑copied texts to standardized, widely distributed materials, which in turn broadened educational access and laid groundwork for modern schooling.",
       "tokens": {
-        "input": 131,
-        "output": 446
+        "input": 1489,
+        "output": 397
       },
-      "t": 1054
+      "t": 6438
     },
     {
       "type": "done",
       "outcome": "finished",
       "usage": {
-        "input": 463,
-        "output": 521,
+        "input": 1821,
+        "output": 491,
         "searches": 0,
-        "steps": 2
+        "steps": 4
       },
-      "finalText": "The printing press predates the telescope by more than a century.  \n\n**Printing press**  \n- Johannes Gutenberg’s movable‑type press was perfected around 1440 in Mainz, Germany.  \n- The first major printed book, the *Erasmus Biblia* (1455), shows the technology was already in use.\n\n**Telescope**  \n- The first practical telescope appeared in 1608 in the Netherlands, credited to Hans Lippershey (though the Dutch optician Jacob Metius also applied for a patent the same year).  \n- Galileo’s improvements in 1609–1610 made it a scientific instrument.\n\nSo, Gutenberg’s press came first by about 160 years.\n\n---\n\n### How printing changed schools\n\n| Area | Before printing | After printing |\n|------|-----------------|----------------|\n| **Curriculum** | Textbooks were rare, handwritten manuscripts; knowledge varied by region. | Standardized books (e.g., Latin manuals, catechisms) were widely available, allowing a more uniform curriculum. |\n| **Teaching methods** | Oral transmission and individual copying; teachers were sole custodians of knowledge. | Teachers could rely on printed texts as authoritative references, freeing them to focus on explanation rather than copying. |\n| **Student access** | Limited to a few copies per classroom; learning often required copying. | Larger classes could all read the same material simultaneously, encouraging active reading and discussion. |\n| **Intellectual exchange** | Ideas circulated slowly via manuscripts. | Rapid dissemination of new theories (e.g., Copernican astronomy, humanist studies) fostered scholarly debate and quicker progress. |\n| **Linguistic impact** | Latin dominated, with local scripts for religious texts. | Vernacular books appeared (e.g., Luther’s Bible in German), making education accessible beyond elites. |\n\nIn short, the printing press transformed schools by providing standardized, affordable, and widely accessible texts, shifting teaching from memorization and copying to interpretation and critical analysis. This laid the groundwork for the modern educational system and accelerated the spread of scientific ideas, including the eventual invention and use of the telescope.",
-      "t": 1055
+      "finalText": "The printing press predates the telescope. Johannes Gutenberg’s movable‑type press was developed around 1440 in Mainz, Germany, whereas the first practical refracting telescope appeared in the Netherlands at the beginning of the 17th century (≈1608‑1610).\n\n**How printing reshaped schools**\n\n| Aspect | Before the press | After the press |\n|--------|------------------|-----------------|\n| **Textual resources** | Manuscripts copied by hand, rare, expensive, often in Latin | Mass‑produced books, primers, textbooks in vernacular languages; cost fell dramatically |\n| **Curriculum** | Limited to elite, clergy, or university scholars; focus on Latin, rhetoric, theology | Broader subject matter (history, science, geography) became accessible; standardized textbooks allowed uniform instruction |\n| **Teacher’s role** | Relied on oral tradition and handwritten notes | Teachers could reference printed manuals and treatises, improving consistency and professional training |\n| **Student literacy** | Lower overall literacy; reading was a skill of the educated few | Rising literacy rates as printed reading materials became available to a wider audience |\n| **Institutional change** | Schools were small, localized, heavily reliant on patronage | Emergence of more formal school systems, state‑supported education, and the spread of public libraries |\n\nIn short, the printing press made knowledge more portable and affordable, enabling schools to move from rare, hand‑copied texts to standardized, widely distributed materials, which in turn broadened educational access and laid groundwork for modern schooling.",
+      "t": 6439
     }
   ],
   "apiCalls": [
@@ -256,7 +522,7 @@
           "cf-ray": "(hidden)",
           "content-encoding": "(hidden)",
           "content-type": "application/json",
-          "date": "Tue, 24 Nov 2026 10:44:39 GMT",
+          "date": "Wed, 25 Nov 2026 14:19:40 GMT",
           "server": "(hidden)",
           "set-cookie": "(hidden)",
           "strict-transport-security": "(hidden)",
@@ -265,20 +531,20 @@
           "x-ratelimit-limit-requests": "1000",
           "x-ratelimit-limit-tokens": "8000",
           "x-ratelimit-remaining-requests": "999",
-          "x-ratelimit-remaining-tokens": "7529",
+          "x-ratelimit-remaining-tokens": "7463",
           "x-ratelimit-reset-requests": "1m26.4s",
-          "x-ratelimit-reset-tokens": "3.532s",
+          "x-ratelimit-reset-tokens": "4.027s",
           "x-request-id": "(hidden)"
         },
-        "body": "{\"id\":\"chatcmpl-e886dd07-fce6-4633-bb1d-b26a1615646c\",\"object\":\"chat.completion\",\"created\":1795517079,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"route\\\":\\\"free-2\\\",\\\"reason\\\":\\\"The question asks about chronological order of historical inventions (printing press and telescope) and the societal impact of printing on education, which fits the History tutor's expertise.\\\"}\",\"reasoning\":\"We need history for printing press vs telescope and impact on schools: history. Use free-2.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.166930032,\"prompt_tokens\":332,\"prompt_time\":0.061209939,\"completion_tokens\":75,\"completion_time\":0.156404355,\"total_tokens\":407,\"total_time\":0.217614294,\"completion_tokens_details\":{\"reasoning_tokens\":21}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_4200b3f836\",\"x_groq\":{\"id\":\"req_01m86jgqg1eymtevwb5j1z0nd2\",\"seed\":367337889},\"service_tier\":\"on_demand\"}\n"
+        "body": "{\"id\":\"chatcmpl-11ba3478-7db0-483e-99b7-affb60f7127f\",\"object\":\"chat.completion\",\"created\":1795616380,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\n  \\\"route\\\": \\\"free-2\\\",\\n  \\\"reason\\\": \\\"The question involves historical chronology (printing press vs telescope) and the impact of printing on schools, which fits the History tutor's expertise in dates, events, and their effects.\\\"\\n}\",\"reasoning\":\"Need history and science. Asking which came first printing press or telescope (history) and how printing changed schools (history/education). Choose History tutor.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.089780438,\"prompt_tokens\":332,\"prompt_time\":0.019393746,\"completion_tokens\":94,\"completion_time\":0.202213602,\"total_tokens\":426,\"total_time\":0.221607348,\"completion_tokens_details\":{\"reasoning_tokens\":31}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_c868cf1eaa\",\"x_groq\":{\"id\":\"req_01m89h74wnett85tp5rc5ymhea\",\"seed\":1390485843},\"service_tier\":\"on_demand\"}\n"
       },
       "error": null,
-      "ms": 493,
+      "ms": 409,
       "truncated": {
         "request": null,
         "response": null
       },
-      "t": 500
+      "t": 416
     },
     {
       "type": "api_call",
@@ -292,7 +558,7 @@
           "content-type": "application/json",
           "authorization": "(hidden)"
         },
-        "body": "{\"model\":\"openai/gpt-oss-20b\",\"max_completion_tokens\":4000,\"reasoning_effort\":\"low\",\"messages\":[{\"role\":\"system\",\"content\":\"Role: free\\nYou are History tutor. You are a history tutor. Answer questions about dates, events and their effects.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Which came first, the printing press or the telescope, and how did printing change schools?\"}]}"
+        "body": "{\"model\":\"openai/gpt-oss-20b\",\"max_completion_tokens\":4000,\"reasoning_effort\":\"low\",\"messages\":[{\"role\":\"system\",\"content\":\"Role: free\\nYou are History tutor. You are a history tutor. Answer questions about dates, events and their effects.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Which came first, the printing press or the telescope, and how did printing change schools?\"}],\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"wikipedia\",\"description\":\"Looks a subject up on Wikipedia and returns the title, a summary of about 1200 characters and the address of the page. Use it for facts about people, places, events and things instead of answering from memory.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\",\"description\":\"What to look up, for example Alan Turing.\"},\"language\":{\"type\":\"string\",\"enum\":[\"en\",\"cs\"],\"description\":\"The Wikipedia language: en (default) or cs.\"}},\"required\":[\"query\"]}}}]}"
       },
       "response": {
         "status": 200,
@@ -304,7 +570,7 @@
           "cf-ray": "(hidden)",
           "content-encoding": "(hidden)",
           "content-type": "application/json",
-          "date": "Tue, 24 Nov 2026 10:44:40 GMT",
+          "date": "Wed, 25 Nov 2026 14:19:40 GMT",
           "server": "(hidden)",
           "set-cookie": "(hidden)",
           "strict-transport-security": "(hidden)",
@@ -312,21 +578,117 @@
           "x-groq-region": "(hidden)",
           "x-ratelimit-limit-requests": "1000",
           "x-ratelimit-limit-tokens": "8000",
-          "x-ratelimit-remaining-requests": "999",
-          "x-ratelimit-remaining-tokens": "7302",
-          "x-ratelimit-reset-requests": "1m26.4s",
-          "x-ratelimit-reset-tokens": "5.234s",
+          "x-ratelimit-remaining-requests": "997",
+          "x-ratelimit-remaining-tokens": "7428",
+          "x-ratelimit-reset-requests": "4m19.2s",
+          "x-ratelimit-reset-tokens": "4.29s",
           "x-request-id": "(hidden)"
         },
-        "body": "{\"id\":\"chatcmpl-ec266641-9704-48a1-859a-bcc3d8352f1c\",\"object\":\"chat.completion\",\"created\":1795517079,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The printing press predates the telescope by more than a century.  \\n\\n**Printing press**  \\n- Johannes Gutenberg’s movable‑type press was perfected around 1440 in Mainz, Germany.  \\n- The first major printed book, the *Erasmus Biblia* (1455), shows the technology was already in use.\\n\\n**Telescope**  \\n- The first practical telescope appeared in 1608 in the Netherlands, credited to Hans Lippershey (though the Dutch optician Jacob Metius also applied for a patent the same year).  \\n- Galileo’s improvements in 1609–1610 made it a scientific instrument.\\n\\nSo, Gutenberg’s press came first by about 160 years.\\n\\n---\\n\\n### How printing changed schools\\n\\n| Area | Before printing | After printing |\\n|------|-----------------|----------------|\\n| **Curriculum** | Textbooks were rare, handwritten manuscripts; knowledge varied by region. | Standardized books (e.g., Latin manuals, catechisms) were widely available, allowing a more uniform curriculum. |\\n| **Teaching methods** | Oral transmission and individual copying; teachers were sole custodians of knowledge. | Teachers could rely on printed texts as authoritative references, freeing them to focus on explanation rather than copying. |\\n| **Student access** | Limited to a few copies per classroom; learning often required copying. | Larger classes could all read the same material simultaneously, encouraging active reading and discussion. |\\n| **Intellectual exchange** | Ideas circulated slowly via manuscripts. | Rapid dissemination of new theories (e.g., Copernican astronomy, humanist studies) fostered scholarly debate and quicker progress. |\\n| **Linguistic impact** | Latin dominated, with local scripts for religious texts. | Vernacular books appeared (e.g., Luther’s Bible in German), making education accessible beyond elites. |\\n\\nIn short, the printing press transformed schools by providing standardized, affordable, and widely accessible texts, shifting teaching from memorization and copying to interpretation and critical analysis. This laid the groundwork for the modern educational system and accelerated the spread of scientific ideas, including the eventual invention and use of the telescope.\",\"reasoning\":\"Need to answer in \\u003c300 words.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.030479821,\"prompt_tokens\":131,\"prompt_time\":0.00633727,\"completion_tokens\":446,\"completion_time\":0.467186513,\"total_tokens\":577,\"total_time\":0.473523783,\"completion_tokens_details\":{\"reasoning_tokens\":9}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_92d51d08e5\",\"x_groq\":{\"id\":\"req_01m86jgqy3ekyaepm3gagv86es\",\"seed\":2144946913},\"service_tier\":\"on_demand\"}\n"
+        "body": "{\"id\":\"chatcmpl-4ae4c1ed-f8fe-44ca-b3ba-09f3ea41bed2\",\"object\":\"chat.completion\",\"created\":1795616380,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"reasoning\":\"Need to use Wikipedia for facts.\",\"tool_calls\":[{\"id\":\"fc_a23581e5-d715-470a-bf31-3304e96946e2\",\"type\":\"function\",\"function\":{\"name\":\"wikipedia\",\"arguments\":\"{\\\"language\\\":\\\"en\\\",\\\"query\\\":\\\"printing press\\\"}\"}}]},\"logprobs\":null,\"finish_reason\":\"tool_calls\"}],\"usage\":{\"queue_time\":0.220909374,\"prompt_tokens\":247,\"prompt_time\":0.017786421,\"completion_tokens\":35,\"completion_time\":0.039893466,\"total_tokens\":282,\"total_time\":0.057679887,\"completion_tokens_details\":{\"reasoning_tokens\":8}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_a12402de73\",\"x_groq\":{\"id\":\"req_01m89h7589e6e98kv3k5j4svjc\",\"seed\":2009592809},\"service_tier\":\"on_demand\"}\n"
       },
       "error": null,
-      "ms": 550,
+      "ms": 328,
       "truncated": {
         "request": null,
         "response": null
       },
-      "t": 1053
+      "t": 745
+    },
+    {
+      "type": "api_call",
+      "agent": "free-2",
+      "provider": "groq",
+      "n": 2,
+      "method": "POST",
+      "url": "https://api.groq.com/openai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"openai/gpt-oss-20b\",\"max_completion_tokens\":4000,\"reasoning_effort\":\"low\",\"messages\":[{\"role\":\"system\",\"content\":\"Role: free\\nYou are History tutor. You are a history tutor. Answer questions about dates, events and their effects.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Which came first, the printing press or the telescope, and how did printing change schools?\"},{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"fc_a23581e5-d715-470a-bf31-3304e96946e2\",\"type\":\"function\",\"function\":{\"name\":\"wikipedia\",\"arguments\":\"{\\\"language\\\":\\\"en\\\",\\\"query\\\":\\\"printing press\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_a23581e5-d715-470a-bf31-3304e96946e2\",\"content\":\"Printing press (Wikipedia, en)\\nA printing press is a machine that applies pressure to transfer ink onto a surface made of paper, cloth, or a similar material. Its workers are known as printing press operators. It marked a significant improvement on earlier methods, in which the paper was rubbed by hand to transfer applied ink to the printing surface. \\nThe printing press was invented by the German goldsmith Johannes Gutenberg around 1440, and its subsequent global spread revolutionized literary production and communication during the early modern period. The spread of printing brought about an era of mass communication in European society, allowing information to quickly spread across Europe and contributing to the Reformation and the Scientific Revolution. The cost of printed texts declined and their availability increased, facilitating higher adult literacy rates across Europe. Books increasingly appeared in vernacular languages rather than Latin, and national languages were standardized.\\nThe basic design of the wooden handpress was largely consistent for over three centuries, until the Industrial Revolution. By 1800 Lord Stanhope had built a new iron printing press printing a sheet at one pull. In 1814, The Times...\\nhttps://en.wikipedia.org/wiki/Printing_press\"}],\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"wikipedia\",\"description\":\"Looks a subject up on Wikipedia and returns the title, a summary of about 1200 characters and the address of the page. Use it for facts about people, places, events and things instead of answering from memory.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\",\"description\":\"What to look up, for example Alan Turing.\"},\"language\":{\"type\":\"string\",\"enum\":[\"en\",\"cs\"],\"description\":\"The Wikipedia language: en (default) or cs.\"}},\"required\":[\"query\"]}}}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "alt-svc": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Wed, 25 Nov 2026 14:19:43 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "vary": "(hidden)",
+          "x-groq-region": "(hidden)",
+          "x-ratelimit-limit-requests": "1000",
+          "x-ratelimit-limit-tokens": "8000",
+          "x-ratelimit-remaining-requests": "996",
+          "x-ratelimit-remaining-tokens": "7076",
+          "x-ratelimit-reset-requests": "5m45.6s",
+          "x-ratelimit-reset-tokens": "6.93s",
+          "x-request-id": "(hidden)"
+        },
+        "body": "{\"id\":\"chatcmpl-955f2156-51f2-42e1-b0d6-aaf4e0f95436\",\"object\":\"chat.completion\",\"created\":1795616383,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"reasoning\":\"Need telescope.\",\"tool_calls\":[{\"id\":\"fc_6d7df1eb-2d0b-4800-9406-932ffa3c29fb\",\"type\":\"function\",\"function\":{\"name\":\"wikipedia\",\"arguments\":\"{\\\"language\\\":\\\"en\\\",\\\"query\\\":\\\"telescope\\\"}\"}}]},\"logprobs\":null,\"finish_reason\":\"tool_calls\"}],\"usage\":{\"queue_time\":0.179562386,\"prompt_tokens\":506,\"prompt_time\":0.030001637,\"completion_tokens\":31,\"completion_time\":0.03277933,\"total_tokens\":537,\"total_time\":0.062780967,\"completion_tokens_details\":{\"reasoning_tokens\":4}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_8d13edce1d\",\"x_groq\":{\"id\":\"req_01m89h780hekjrdr7wk4sj57rh\",\"seed\":406771588},\"service_tier\":\"on_demand\"}\n"
+      },
+      "error": null,
+      "ms": 306,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 3551
+    },
+    {
+      "type": "api_call",
+      "agent": "free-2",
+      "provider": "groq",
+      "n": 3,
+      "method": "POST",
+      "url": "https://api.groq.com/openai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"openai/gpt-oss-20b\",\"max_completion_tokens\":4000,\"reasoning_effort\":\"low\",\"messages\":[{\"role\":\"system\",\"content\":\"Role: free\\nYou are History tutor. You are a history tutor. Answer questions about dates, events and their effects.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: Which came first, the printing press or the telescope, and how did printing change schools?\"},{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"fc_a23581e5-d715-470a-bf31-3304e96946e2\",\"type\":\"function\",\"function\":{\"name\":\"wikipedia\",\"arguments\":\"{\\\"language\\\":\\\"en\\\",\\\"query\\\":\\\"printing press\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_a23581e5-d715-470a-bf31-3304e96946e2\",\"content\":\"Printing press (Wikipedia, en)\\nA printing press is a machine that applies pressure to transfer ink onto a surface made of paper, cloth, or a similar material. Its workers are known as printing press operators. It marked a significant improvement on earlier methods, in which the paper was rubbed by hand to transfer applied ink to the printing surface. \\nThe printing press was invented by the German goldsmith Johannes Gutenberg around 1440, and its subsequent global spread revolutionized literary production and communication during the early modern period. The spread of printing brought about an era of mass communication in European society, allowing information to quickly spread across Europe and contributing to the Reformation and the Scientific Revolution. The cost of printed texts declined and their availability increased, facilitating higher adult literacy rates across Europe. Books increasingly appeared in vernacular languages rather than Latin, and national languages were standardized.\\nThe basic design of the wooden handpress was largely consistent for over three centuries, until the Industrial Revolution. By 1800 Lord Stanhope had built a new iron printing press printing a sheet at one pull. In 1814, The Times...\\nhttps://en.wikipedia.org/wiki/Printing_press\"},{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"fc_6d7df1eb-2d0b-4800-9406-932ffa3c29fb\",\"type\":\"function\",\"function\":{\"name\":\"wikipedia\",\"arguments\":\"{\\\"language\\\":\\\"en\\\",\\\"query\\\":\\\"telescope\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_6d7df1eb-2d0b-4800-9406-932ffa3c29fb\",\"content\":\"Telescope (Wikipedia, en)\\nA telescope is a device used to observe distant objects by their emission, absorption, or reflection of electromagnetic radiation. Originally, it was an optical instrument using lenses, curved mirrors, or a combination of both to observe distant objects – an optical telescope. Nowadays, the word \\\"telescope\\\" is defined as a wide range of instruments capable of detecting different regions of the electromagnetic spectrum, and in some cases other types of detectors.\\nThe first known practical telescopes were refracting telescopes with glass lenses and were invented in the Netherlands at the beginning of the 17th century. They were used for both terrestrial applications and astronomy.\\nThe reflecting telescope, which uses mirrors to collect and focus light, was invented within a few decades of the first refracting telescope.\\nIn the 20th century, many new types of telescopes were invented, including radio telescopes in the 1930s and infrared telescopes in the 1960s.\\nhttps://en.wikipedia.org/wiki/Telescope\"}],\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"wikipedia\",\"description\":\"Looks a subject up on Wikipedia and returns the title, a summary of about 1200 characters and the address of the page. Use it for facts about people, places, events and things instead of answering from memory.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\",\"description\":\"What to look up, for example Alan Turing.\"},\"language\":{\"type\":\"string\",\"enum\":[\"en\",\"cs\"],\"description\":\"The Wikipedia language: en (default) or cs.\"}},\"required\":[\"query\"]}}}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "alt-svc": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Wed, 25 Nov 2026 14:19:46 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "vary": "(hidden)",
+          "x-groq-region": "(hidden)",
+          "x-ratelimit-limit-requests": "1000",
+          "x-ratelimit-limit-tokens": "8000",
+          "x-ratelimit-remaining-requests": "995",
+          "x-ratelimit-remaining-tokens": "7048",
+          "x-ratelimit-reset-requests": "7m12s",
+          "x-ratelimit-reset-tokens": "7.14s",
+          "x-request-id": "(hidden)"
+        },
+        "body": "{\"id\":\"chatcmpl-490c7e93-c1d8-49a7-936d-ccdad6e665e6\",\"object\":\"chat.completion\",\"created\":1795616386,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The printing press predates the telescope. Johannes Gutenberg’s movable‑type press was developed around 1440 in Mainz, Germany, whereas the first practical refracting telescope appeared in the Netherlands at the beginning of the 17th century (≈1608‑1610).\\n\\n**How printing reshaped schools**\\n\\n| Aspect | Before the press | After the press |\\n|--------|------------------|-----------------|\\n| **Textual resources** | Manuscripts copied by hand, rare, expensive, often in Latin | Mass‑produced books, primers, textbooks in vernacular languages; cost fell dramatically |\\n| **Curriculum** | Limited to elite, clergy, or university scholars; focus on Latin, rhetoric, theology | Broader subject matter (history, science, geography) became accessible; standardized textbooks allowed uniform instruction |\\n| **Teacher’s role** | Relied on oral tradition and handwritten notes | Teachers could reference printed manuals and treatises, improving consistency and professional training |\\n| **Student literacy** | Lower overall literacy; reading was a skill of the educated few | Rising literacy rates as printed reading materials became available to a wider audience |\\n| **Institutional change** | Schools were small, localized, heavily reliant on patronage | Emergence of more formal school systems, state‑supported education, and the spread of public libraries |\\n\\nIn short, the printing press made knowledge more portable and affordable, enabling schools to move from rare, hand‑copied texts to standardized, widely distributed materials, which in turn broadened educational access and laid groundwork for modern schooling.\",\"reasoning\":\"Now answer.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.084789916,\"prompt_tokens\":736,\"prompt_time\":0.05836766,\"completion_tokens\":331,\"completion_time\":0.357808804,\"total_tokens\":1067,\"total_time\":0.416176464,\"completion_tokens_details\":{\"reasoning_tokens\":4}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_bb6a356524\",\"x_groq\":{\"id\":\"req_01m89h7ak6er1bznf73949d6f4\",\"seed\":299022791},\"service_tier\":\"on_demand\"}\n"
+      },
+      "error": null,
+      "ms": 548,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 6438
     }
   ],
   "design": {
@@ -356,7 +718,10 @@
         "search": false,
         "name": "History tutor",
         "instructions": "You are a history tutor. Answer questions about dates, events and their effects.",
-        "slot": "groq-free"
+        "slot": "groq-free",
+        "tools": [
+          "wikipedia"
+        ]
       },
       {
         "id": "free-3",
@@ -398,9 +763,9 @@
   },
   "task": "Which came first, the printing press or the telescope, and how did printing change schools?",
   "about": {
-    "title": "Router: four specialists, an unclear question",
+    "title": "Router: four specialists, an unclear question, and a Wikipedia lookup",
     "author": "Agent Atlas Academy",
-    "description": "The question fits two specialists, so the router has to choose, and the choice changes the answer.\n\n**What it teaches**\n\nA router can choose wrongly when a question fits more than one specialist; one choice, no second opinion.\n\n**What to watch**\n\nThe reason the router gives, and what the unchosen specialist would have said.\n\nRead more: [Router](#/learn/router)"
+    "description": "The question fits two specialists, so the router has to choose, and the choice changes the answer.\n\n**What it teaches**\n\nA router can choose wrongly when a question fits two specialists. The history specialist can call a tool: here a Wikipedia lookup, so its facts do not come from memory alone.\n\n**What to watch**\n\nThe reason the router gives, what the unchosen specialist would have said, and what the history specialist looks up.\n\nRead more: [Router](#/learn/router)"
   },
   "limits": {
     "maxSteps": 20,
@@ -409,13 +774,13 @@
   },
   "outcome": "finished",
   "usage": {
-    "input": 463,
-    "output": 521,
+    "input": 1821,
+    "output": 491,
     "searches": 0,
-    "steps": 2
+    "steps": 4
   },
   "source": "local",
-  "startedAt": "2026-11-24T10:44:38.471Z",
-  "endedAt": "2026-11-24T10:44:40.149Z",
-  "durationMs": 1678
+  "startedAt": "2026-11-25T14:19:39.234Z",
+  "endedAt": "2026-11-25T14:19:46.164Z",
+  "durationMs": 6930
 }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "router-simple",
-  "title": "How do I turn the fraction 3/4 into a percentage?",
+  "title": "How do I turn the fraction 3/4 into a percentage, and what i…",
   "language": "en",
   "pattern": "router",
   "recordedWith": {
@@ -9,11 +9,11 @@
     "model": "openai/gpt-oss-20b",
     "freeTier": true
   },
-  "appVersion": "1.16.10-dev.0",
+  "appVersion": "1.21.5-dev.1",
   "events": [
     {
       "type": "run_start",
-      "task": "How do I turn the fraction 3/4 into a percentage?",
+      "task": "How do I turn the fraction 3/4 into a percentage, and what is 17.5 percent of 240?",
       "pattern": "router",
       "design": {
         "pattern": "router",
@@ -32,7 +32,10 @@
             "search": false,
             "name": "Maths tutor",
             "instructions": "You are a patient maths tutor. Explain step by step with one worked example.",
-            "slot": "groq-free"
+            "slot": "groq-free",
+            "tools": [
+              "calculator"
+            ]
           },
           {
             "id": "free-2",
@@ -55,7 +58,7 @@
           }
         ]
       },
-      "t": 2
+      "t": 1
     },
     {
       "type": "agent_start",
@@ -70,22 +73,22 @@
       "type": "round",
       "agent": "router",
       "round": 1,
-      "ms": 293,
+      "ms": 279,
       "stop": "end_turn",
       "usage": {
-        "input": 286,
-        "output": 52
+        "input": 298,
+        "output": 67
       },
       "newMessages": [
         {
           "role": "user",
-          "content": "Task: How do I turn the fraction 3/4 into a percentage?\n\nYou may route to: free (Maths tutor: You are a patient maths tutor. Explain step by step with one worked example.), free-2 (Language tutor: You are a patient language tutor. Explain grammar and writing questions with one)"
+          "content": "Task: How do I turn the fraction 3/4 into a percentage, and what is 17.5 percent of 240?\n\nYou may route to: free (Maths tutor: You are a patient maths tutor. Explain step by step with one worked example.), free-2 (Language tutor: You are a patient language tutor. Explain grammar and writing questions with one)"
         }
       ],
       "content": [
         {
           "type": "text",
-          "text": "{\"route\":\"free\",\"reason\":\"The task is a mathematical question asking how to convert a fraction into a percentage. The appropriate specialist is the Maths tutor.\"}"
+          "text": "{\"route\":\"free\",\"reason\":\"The user requests a step‑by‑step explanation for converting a fraction to a percentage and calculating a percent of a number, which is a mathematical operation best handled by a maths tutor specialist.\"}"
         }
       ],
       "raw": {
@@ -104,67 +107,193 @@
           "stop_reason": "end_turn",
           "stop_sequence": null,
           "usage": {
-            "input_tokens": 286,
-            "output_tokens": 52
+            "input_tokens": 298,
+            "output_tokens": 67
           }
         }
       },
-      "t": 298
+      "t": 283
     },
     {
       "type": "agent_output",
       "agent": "router",
-      "text": "{\"route\":\"free\",\"reason\":\"The task is a mathematical question asking how to convert a fraction into a percentage. The appropriate specialist is the Maths tutor.\"}",
+      "text": "{\"route\":\"free\",\"reason\":\"The user requests a step‑by‑step explanation for converting a fraction to a percentage and calculating a percent of a number, which is a mathematical operation best handled by a maths tutor specialist.\"}",
       "tokens": {
-        "input": 286,
-        "output": 52
+        "input": 298,
+        "output": 67
       },
-      "t": 298
+      "t": 283
     },
     {
       "type": "handoff",
       "from": "router",
       "to": "free",
-      "note": "The task is a mathematical question asking how to convert a fraction into a percentage. The appropriate specialist is the Maths tutor.",
-      "t": 298
+      "note": "The user requests a step‑by‑step explanation for converting a fraction to a percentage and calculating a percent of a number, which is a mathematical operation best handled by a maths tutor specialist.",
+      "t": 284
     },
     {
       "type": "agent_start",
       "agent": "free",
       "role": "Maths tutor",
       "model": "openai/gpt-oss-20b",
-      "tools": [],
+      "tools": [
+        "calculator"
+      ],
       "system": "Role: free\nYou are Maths tutor. You are a patient maths tutor. Explain step by step with one worked example.\nKeep every reply under 300 words. Answer in English.",
-      "t": 298
+      "t": 284
     },
     {
       "type": "round",
       "agent": "free",
       "round": 1,
-      "ms": 2677,
-      "stop": "end_turn",
+      "ms": 2265,
+      "stop": "tool_use",
       "usage": {
-        "input": 127,
-        "output": 261
+        "input": 268,
+        "output": 46
       },
       "newMessages": [
         {
           "role": "user",
-          "content": "Task: How do I turn the fraction 3/4 into a percentage?"
+          "content": "Task: How do I turn the fraction 3/4 into a percentage, and what is 17.5 percent of 240?"
         }
       ],
       "content": [
         {
-          "type": "text",
-          "text": "To convert a fraction to a percentage, you follow two simple steps:  \n\n1. **Divide the numerator by the denominator** to get a decimal.  \n2. **Multiply the decimal by 100** and add the percent sign.\n\n### Worked Example: \\(\\displaystyle \\frac{3}{4}\\)\n\n**Step 1 – Divide**\n\n\\[\n\\frac{3}{4} = 0.75\n\\]\n\n(You can do this on a calculator, or note that 4 goes into 3 a total of 0.75 times.)\n\n**Step 2 – Multiply by 100**\n\n\\[\n0.75 \\times 100 = 75\n\\]\n\nSo, \\(\\frac{3}{4}\\) expressed as a percentage is **75 %**.\n\n---\n\n### Quick Check\n\nIf you want to double‑check, remember that “percent” means “per 100.”  \nIf 4 parts equal 100 %, then 3 parts equal:\n\n\\[\n3 \\times \\frac{100}{4} = 3 \\times 25 = 75\n\\]\n\nSame result!  \n\nThat’s it—3/4 = 75 %."
+          "type": "tool_use",
+          "id": "fc_9f23182b-6dff-413d-998a-bfad5d5c00b6",
+          "name": "calculator",
+          "input": {
+            "expression": "3/4"
+          }
         }
       ],
       "raw": {
         "request": {
           "model": "openai/gpt-oss-20b",
           "max_tokens": 4000,
-          "tools": [],
+          "tools": [
+            {
+              "name": "calculator",
+              "description": "Calculates an arithmetic expression exactly. Use it for any calculation instead of working it out yourself. Supports + - * / ^ %, brackets, sqrt, abs, round(x, digits), floor, ceil, min, max, sin, cos, tan, ln, log10, exp, and the constants pi and e. Write decimals with a point.",
+              "input_schema": {
+                "type": "object",
+                "properties": {
+                  "expression": {
+                    "type": "string",
+                    "description": "The expression, for example (1250 * 0.21) + 99"
+                  }
+                },
+                "required": [
+                  "expression"
+                ]
+              }
+            }
+          ],
           "messageCount": 1
+        },
+        "response": {
+          "id": null,
+          "type": "message",
+          "role": "assistant",
+          "model": "openai/gpt-oss-20b",
+          "stop_reason": "tool_use",
+          "stop_sequence": null,
+          "usage": {
+            "input_tokens": 268,
+            "output_tokens": 46
+          }
+        }
+      },
+      "t": 2549
+    },
+    {
+      "type": "tool_call",
+      "agent": "free",
+      "tool": "calculator",
+      "own": true,
+      "id": "fc_9f23182b-6dff-413d-998a-bfad5d5c00b6",
+      "args": {
+        "expression": "3/4"
+      },
+      "input": "{\"expression\":\"3/4\"}",
+      "t": 2550
+    },
+    {
+      "type": "tool_result",
+      "agent": "free",
+      "tool": "calculator",
+      "own": true,
+      "id": "fc_9f23182b-6dff-413d-998a-bfad5d5c00b6",
+      "output": "0.75",
+      "error": false,
+      "ms": 0,
+      "t": 2550
+    },
+    {
+      "type": "round",
+      "agent": "free",
+      "round": 2,
+      "ms": 2529,
+      "stop": "end_turn",
+      "usage": {
+        "input": 297,
+        "output": 216
+      },
+      "newMessages": [
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "tool_use",
+              "id": "fc_9f23182b-6dff-413d-998a-bfad5d5c00b6",
+              "name": "calculator",
+              "input": {
+                "expression": "3/4"
+              }
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "tool_use_id": "fc_9f23182b-6dff-413d-998a-bfad5d5c00b6",
+              "content": "0.75"
+            }
+          ]
+        }
+      ],
+      "content": [
+        {
+          "type": "text",
+          "text": "**Turning a fraction into a percentage**\n\n1. Divide the numerator by the denominator.  \n   \\[\n   \\frac{3}{4}=0.75\n   \\]\n2. Multiply the result by 100.  \n   \\[\n   0.75 \\times 100 = 75\n   \\]\n3. Add the percent sign.  \n   \\[\n   75\\%\n   \\]\n\nSo, \\(\\frac{3}{4}\\) is **75 %**.\n\n---\n\n**Finding 17.5 % of 240**\n\n1. Convert the percent to a decimal:  \n   \\[\n   17.5\\% = \\frac{17.5}{100} = 0.175\n   \\]\n2. Multiply this decimal by the number.  \n   \\[\n   0.175 \\times 240 = 42\n   \\]\n\nHence **17.5 % of 240 is 42**."
+        }
+      ],
+      "raw": {
+        "request": {
+          "model": "openai/gpt-oss-20b",
+          "max_tokens": 4000,
+          "tools": [
+            {
+              "name": "calculator",
+              "description": "Calculates an arithmetic expression exactly. Use it for any calculation instead of working it out yourself. Supports + - * / ^ %, brackets, sqrt, abs, round(x, digits), floor, ceil, min, max, sin, cos, tan, ln, log10, exp, and the constants pi and e. Write decimals with a point.",
+              "input_schema": {
+                "type": "object",
+                "properties": {
+                  "expression": {
+                    "type": "string",
+                    "description": "The expression, for example (1250 * 0.21) + 99"
+                  }
+                },
+                "required": [
+                  "expression"
+                ]
+              }
+            }
+          ],
+          "messageCount": 3
         },
         "response": {
           "id": null,
@@ -174,34 +303,34 @@
           "stop_reason": "end_turn",
           "stop_sequence": null,
           "usage": {
-            "input_tokens": 127,
-            "output_tokens": 261
+            "input_tokens": 297,
+            "output_tokens": 216
           }
         }
       },
-      "t": 2976
+      "t": 5079
     },
     {
       "type": "agent_output",
       "agent": "free",
-      "text": "To convert a fraction to a percentage, you follow two simple steps:  \n\n1. **Divide the numerator by the denominator** to get a decimal.  \n2. **Multiply the decimal by 100** and add the percent sign.\n\n### Worked Example: \\(\\displaystyle \\frac{3}{4}\\)\n\n**Step 1 – Divide**\n\n\\[\n\\frac{3}{4} = 0.75\n\\]\n\n(You can do this on a calculator, or note that 4 goes into 3 a total of 0.75 times.)\n\n**Step 2 – Multiply by 100**\n\n\\[\n0.75 \\times 100 = 75\n\\]\n\nSo, \\(\\frac{3}{4}\\) expressed as a percentage is **75 %**.\n\n---\n\n### Quick Check\n\nIf you want to double‑check, remember that “percent” means “per 100.”  \nIf 4 parts equal 100 %, then 3 parts equal:\n\n\\[\n3 \\times \\frac{100}{4} = 3 \\times 25 = 75\n\\]\n\nSame result!  \n\nThat’s it—3/4 = 75 %.",
+      "text": "**Turning a fraction into a percentage**\n\n1. Divide the numerator by the denominator.  \n   \\[\n   \\frac{3}{4}=0.75\n   \\]\n2. Multiply the result by 100.  \n   \\[\n   0.75 \\times 100 = 75\n   \\]\n3. Add the percent sign.  \n   \\[\n   75\\%\n   \\]\n\nSo, \\(\\frac{3}{4}\\) is **75 %**.\n\n---\n\n**Finding 17.5 % of 240**\n\n1. Convert the percent to a decimal:  \n   \\[\n   17.5\\% = \\frac{17.5}{100} = 0.175\n   \\]\n2. Multiply this decimal by the number.  \n   \\[\n   0.175 \\times 240 = 42\n   \\]\n\nHence **17.5 % of 240 is 42**.",
       "tokens": {
-        "input": 127,
-        "output": 261
+        "input": 565,
+        "output": 262
       },
-      "t": 2976
+      "t": 5079
     },
     {
       "type": "done",
       "outcome": "finished",
       "usage": {
-        "input": 413,
-        "output": 313,
+        "input": 863,
+        "output": 329,
         "searches": 0,
-        "steps": 2
+        "steps": 3
       },
-      "finalText": "To convert a fraction to a percentage, you follow two simple steps:  \n\n1. **Divide the numerator by the denominator** to get a decimal.  \n2. **Multiply the decimal by 100** and add the percent sign.\n\n### Worked Example: \\(\\displaystyle \\frac{3}{4}\\)\n\n**Step 1 – Divide**\n\n\\[\n\\frac{3}{4} = 0.75\n\\]\n\n(You can do this on a calculator, or note that 4 goes into 3 a total of 0.75 times.)\n\n**Step 2 – Multiply by 100**\n\n\\[\n0.75 \\times 100 = 75\n\\]\n\nSo, \\(\\frac{3}{4}\\) expressed as a percentage is **75 %**.\n\n---\n\n### Quick Check\n\nIf you want to double‑check, remember that “percent” means “per 100.”  \nIf 4 parts equal 100 %, then 3 parts equal:\n\n\\[\n3 \\times \\frac{100}{4} = 3 \\times 25 = 75\n\\]\n\nSame result!  \n\nThat’s it—3/4 = 75 %.",
-      "t": 2978
+      "finalText": "**Turning a fraction into a percentage**\n\n1. Divide the numerator by the denominator.  \n   \\[\n   \\frac{3}{4}=0.75\n   \\]\n2. Multiply the result by 100.  \n   \\[\n   0.75 \\times 100 = 75\n   \\]\n3. Add the percent sign.  \n   \\[\n   75\\%\n   \\]\n\nSo, \\(\\frac{3}{4}\\) is **75 %**.\n\n---\n\n**Finding 17.5 % of 240**\n\n1. Convert the percent to a decimal:  \n   \\[\n   17.5\\% = \\frac{17.5}{100} = 0.175\n   \\]\n2. Multiply this decimal by the number.  \n   \\[\n   0.175 \\times 240 = 42\n   \\]\n\nHence **17.5 % of 240 is 42**.",
+      "t": 5080
     }
   ],
   "apiCalls": [
@@ -217,7 +346,7 @@
           "content-type": "application/json",
           "authorization": "(hidden)"
         },
-        "body": "{\"model\":\"openai/gpt-oss-20b\",\"max_completion_tokens\":4000,\"reasoning_effort\":\"low\",\"messages\":[{\"role\":\"system\",\"content\":\"Role: router\\nYou are the Router. You read the task and choose exactly one specialist to answer it. The first message lists the specialist ids and what each one is for. You do not answer the task yourself, and you will not see the specialist's answer. Choose the specialist whose role fits the task best.\\nReply with JSON only, in this form:\\n{\\\"route\\\":\\\"<specialist id>\\\",\\\"reason\\\":\\\"<why this specialist fits the task>\\\"}\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: How do I turn the fraction 3/4 into a percentage?\\n\\nYou may route to: free (Maths tutor: You are a patient maths tutor. Explain step by step with one worked example.), free-2 (Language tutor: You are a patient language tutor. Explain grammar and writing questions with one)\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"reply\",\"strict\":false,\"schema\":{\"type\":\"object\",\"properties\":{\"route\":{\"type\":\"string\"},\"reason\":{\"type\":\"string\"}},\"required\":[\"route\",\"reason\"]}}}}"
+        "body": "{\"model\":\"openai/gpt-oss-20b\",\"max_completion_tokens\":4000,\"reasoning_effort\":\"low\",\"messages\":[{\"role\":\"system\",\"content\":\"Role: router\\nYou are the Router. You read the task and choose exactly one specialist to answer it. The first message lists the specialist ids and what each one is for. You do not answer the task yourself, and you will not see the specialist's answer. Choose the specialist whose role fits the task best.\\nReply with JSON only, in this form:\\n{\\\"route\\\":\\\"<specialist id>\\\",\\\"reason\\\":\\\"<why this specialist fits the task>\\\"}\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: How do I turn the fraction 3/4 into a percentage, and what is 17.5 percent of 240?\\n\\nYou may route to: free (Maths tutor: You are a patient maths tutor. Explain step by step with one worked example.), free-2 (Language tutor: You are a patient language tutor. Explain grammar and writing questions with one)\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"reply\",\"strict\":false,\"schema\":{\"type\":\"object\",\"properties\":{\"route\":{\"type\":\"string\"},\"reason\":{\"type\":\"string\"}},\"required\":[\"route\",\"reason\"]}}}}"
       },
       "response": {
         "status": 200,
@@ -229,7 +358,7 @@
           "cf-ray": "(hidden)",
           "content-encoding": "(hidden)",
           "content-type": "application/json",
-          "date": "Tue, 24 Nov 2026 11:18:56 GMT",
+          "date": "Wed, 25 Nov 2026 14:14:23 GMT",
           "server": "(hidden)",
           "set-cookie": "(hidden)",
           "strict-transport-security": "(hidden)",
@@ -237,21 +366,21 @@
           "x-groq-region": "(hidden)",
           "x-ratelimit-limit-requests": "1000",
           "x-ratelimit-limit-tokens": "8000",
-          "x-ratelimit-remaining-requests": "999",
-          "x-ratelimit-remaining-tokens": "7308",
-          "x-ratelimit-reset-requests": "1m26.4s",
-          "x-ratelimit-reset-tokens": "5.189s",
+          "x-ratelimit-remaining-requests": "997",
+          "x-ratelimit-remaining-tokens": "7305",
+          "x-ratelimit-reset-requests": "4m19.2s",
+          "x-ratelimit-reset-tokens": "5.212s",
           "x-request-id": "(hidden)"
         },
-        "body": "{\"id\":\"chatcmpl-88957a92-80c3-4a51-bb9a-cec0b83ddecf\",\"object\":\"chat.completion\",\"created\":1795519136,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"route\\\":\\\"free\\\",\\\"reason\\\":\\\"The task is a mathematical question asking how to convert a fraction into a percentage. The appropriate specialist is the Maths tutor.\\\"}\",\"reasoning\":\"Need to route to maths tutor.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.083546341,\"prompt_tokens\":286,\"prompt_time\":0.019677282,\"completion_tokens\":52,\"completion_time\":0.07825881,\"total_tokens\":338,\"total_time\":0.097936092,\"completion_tokens_details\":{\"reasoning_tokens\":8}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_e11c8bbf69\",\"x_groq\":{\"id\":\"req_01m86mfg4fem89j6ecv98btf6h\",\"seed\":1757989246},\"service_tier\":\"on_demand\"}\n"
+        "body": "{\"id\":\"chatcmpl-c8433302-73f2-4a0f-a1a4-8f3e8dda9f5a\",\"object\":\"chat.completion\",\"created\":1795616063,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"route\\\":\\\"free\\\",\\\"reason\\\":\\\"The user requests a step‑by‑step explanation for converting a fraction to a percentage and calculating a percent of a number, which is a mathematical operation best handled by a maths tutor specialist.\\\"}\",\"reasoning\":\"Need math. So route to free.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.074995522,\"prompt_tokens\":298,\"prompt_time\":0.017093085,\"completion_tokens\":67,\"completion_time\":0.072578416,\"total_tokens\":365,\"total_time\":0.089671501,\"completion_tokens_details\":{\"reasoning_tokens\":9}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_8b41efc9a3\",\"x_groq\":{\"id\":\"req_01m89gxfvcen5ve2et41j5q9se\",\"seed\":189938277},\"service_tier\":\"on_demand\"}\n"
       },
       "error": null,
-      "ms": 290,
+      "ms": 274,
       "truncated": {
         "request": null,
         "response": null
       },
-      "t": 297
+      "t": 282
     },
     {
       "type": "api_call",
@@ -265,7 +394,7 @@
           "content-type": "application/json",
           "authorization": "(hidden)"
         },
-        "body": "{\"model\":\"openai/gpt-oss-20b\",\"max_completion_tokens\":4000,\"reasoning_effort\":\"low\",\"messages\":[{\"role\":\"system\",\"content\":\"Role: free\\nYou are Maths tutor. You are a patient maths tutor. Explain step by step with one worked example.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: How do I turn the fraction 3/4 into a percentage?\"}]}"
+        "body": "{\"model\":\"openai/gpt-oss-20b\",\"max_completion_tokens\":4000,\"reasoning_effort\":\"low\",\"messages\":[{\"role\":\"system\",\"content\":\"Role: free\\nYou are Maths tutor. You are a patient maths tutor. Explain step by step with one worked example.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: How do I turn the fraction 3/4 into a percentage, and what is 17.5 percent of 240?\"}],\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"calculator\",\"description\":\"Calculates an arithmetic expression exactly. Use it for any calculation instead of working it out yourself. Supports + - * / ^ %, brackets, sqrt, abs, round(x, digits), floor, ceil, min, max, sin, cos, tan, ln, log10, exp, and the constants pi and e. Write decimals with a point.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"expression\":{\"type\":\"string\",\"description\":\"The expression, for example (1250 * 0.21) + 99\"}},\"required\":[\"expression\"]}}}]}"
       },
       "response": {
         "status": 200,
@@ -277,7 +406,7 @@
           "cf-ray": "(hidden)",
           "content-encoding": "(hidden)",
           "content-type": "application/json",
-          "date": "Tue, 24 Nov 2026 11:18:58 GMT",
+          "date": "Wed, 25 Nov 2026 14:14:25 GMT",
           "server": "(hidden)",
           "set-cookie": "(hidden)",
           "strict-transport-security": "(hidden)",
@@ -285,21 +414,69 @@
           "x-groq-region": "(hidden)",
           "x-ratelimit-limit-requests": "1000",
           "x-ratelimit-limit-tokens": "8000",
-          "x-ratelimit-remaining-requests": "998",
-          "x-ratelimit-remaining-tokens": "7408",
-          "x-ratelimit-reset-requests": "2m52.8s",
-          "x-ratelimit-reset-tokens": "4.439s",
+          "x-ratelimit-remaining-requests": "996",
+          "x-ratelimit-remaining-tokens": "7365",
+          "x-ratelimit-reset-requests": "5m45.6s",
+          "x-ratelimit-reset-tokens": "4.762s",
           "x-request-id": "(hidden)"
         },
-        "body": "{\"id\":\"chatcmpl-ba41a7eb-6a5e-4b75-9000-a3b9bc5c0ddf\",\"object\":\"chat.completion\",\"created\":1795519138,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"To convert a fraction to a percentage, you follow two simple steps:  \\n\\n1. **Divide the numerator by the denominator** to get a decimal.  \\n2. **Multiply the decimal by 100** and add the percent sign.\\n\\n### Worked Example: \\\\(\\\\displaystyle \\\\frac{3}{4}\\\\)\\n\\n**Step 1 – Divide**\\n\\n\\\\[\\n\\\\frac{3}{4} = 0.75\\n\\\\]\\n\\n(You can do this on a calculator, or note that 4 goes into 3 a total of 0.75 times.)\\n\\n**Step 2 – Multiply by 100**\\n\\n\\\\[\\n0.75 \\\\times 100 = 75\\n\\\\]\\n\\nSo, \\\\(\\\\frac{3}{4}\\\\) expressed as a percentage is **75 %**.\\n\\n---\\n\\n### Quick Check\\n\\nIf you want to double‑check, remember that “percent” means “per 100.”  \\nIf 4 parts equal 100 %, then 3 parts equal:\\n\\n\\\\[\\n3 \\\\times \\\\frac{100}{4} = 3 \\\\times 25 = 75\\n\\\\]\\n\\nSame result!  \\n\\nThat’s it—3/4 = 75 %.\",\"reasoning\":\"Need step-by-step explanation under 300 words.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.203023551,\"prompt_tokens\":127,\"prompt_time\":0.007179213,\"completion_tokens\":261,\"completion_time\":0.28146111,\"total_tokens\":388,\"total_time\":0.288640323,\"completion_tokens_details\":{\"reasoning_tokens\":11}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_e99e93f2ac\",\"x_groq\":{\"id\":\"req_01m86mfjakeq2vq4nd7d5j3gdp\",\"seed\":988270739},\"service_tier\":\"on_demand\"}\n"
+        "body": "{\"id\":\"chatcmpl-3bd7715e-c8cb-47d5-99a6-f6d95a571f09\",\"object\":\"chat.completion\",\"created\":1795616065,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"reasoning\":\"Need to explain step by step, one worked example, under 300 words. Use calculator tool.\",\"tool_calls\":[{\"id\":\"fc_9f23182b-6dff-413d-998a-bfad5d5c00b6\",\"type\":\"function\",\"function\":{\"name\":\"calculator\",\"arguments\":\"{\\\"expression\\\":\\\"3/4\\\"}\"}}]},\"logprobs\":null,\"finish_reason\":\"tool_calls\"}],\"usage\":{\"queue_time\":0.082408361,\"prompt_tokens\":268,\"prompt_time\":0.082945589,\"completion_tokens\":46,\"completion_time\":0.050483483,\"total_tokens\":314,\"total_time\":0.133429072,\"completion_tokens_details\":{\"reasoning_tokens\":21}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_8b41efc9a3\",\"x_groq\":{\"id\":\"req_01m89gxj0ve6g83yq9gnkrj2d2\",\"seed\":320946986},\"service_tier\":\"on_demand\"}\n"
       },
       "error": null,
-      "ms": 675,
+      "ms": 265,
       "truncated": {
         "request": null,
         "response": null
       },
-      "t": 2975
+      "t": 2549
+    },
+    {
+      "type": "api_call",
+      "agent": "free",
+      "provider": "groq",
+      "n": 2,
+      "method": "POST",
+      "url": "https://api.groq.com/openai/v1/chat/completions",
+      "request": {
+        "headers": {
+          "content-type": "application/json",
+          "authorization": "(hidden)"
+        },
+        "body": "{\"model\":\"openai/gpt-oss-20b\",\"max_completion_tokens\":4000,\"reasoning_effort\":\"low\",\"messages\":[{\"role\":\"system\",\"content\":\"Role: free\\nYou are Maths tutor. You are a patient maths tutor. Explain step by step with one worked example.\\nKeep every reply under 300 words. Answer in English.\"},{\"role\":\"user\",\"content\":\"Task: How do I turn the fraction 3/4 into a percentage, and what is 17.5 percent of 240?\"},{\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":[{\"id\":\"fc_9f23182b-6dff-413d-998a-bfad5d5c00b6\",\"type\":\"function\",\"function\":{\"name\":\"calculator\",\"arguments\":\"{\\\"expression\\\":\\\"3/4\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_9f23182b-6dff-413d-998a-bfad5d5c00b6\",\"content\":\"0.75\"}],\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"calculator\",\"description\":\"Calculates an arithmetic expression exactly. Use it for any calculation instead of working it out yourself. Supports + - * / ^ %, brackets, sqrt, abs, round(x, digits), floor, ceil, min, max, sin, cos, tan, ln, log10, exp, and the constants pi and e. Write decimals with a point.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"expression\":{\"type\":\"string\",\"description\":\"The expression, for example (1250 * 0.21) + 99\"}},\"required\":[\"expression\"]}}}]}"
+      },
+      "response": {
+        "status": 200,
+        "statusText": "",
+        "headers": {
+          "alt-svc": "(hidden)",
+          "cache-control": "(hidden)",
+          "cf-cache-status": "(hidden)",
+          "cf-ray": "(hidden)",
+          "content-encoding": "(hidden)",
+          "content-type": "application/json",
+          "date": "Wed, 25 Nov 2026 14:14:28 GMT",
+          "server": "(hidden)",
+          "set-cookie": "(hidden)",
+          "strict-transport-security": "(hidden)",
+          "vary": "(hidden)",
+          "x-groq-region": "(hidden)",
+          "x-ratelimit-limit-requests": "1000",
+          "x-ratelimit-limit-tokens": "8000",
+          "x-ratelimit-remaining-requests": "995",
+          "x-ratelimit-remaining-tokens": "7574",
+          "x-ratelimit-reset-requests": "7m12s",
+          "x-ratelimit-reset-tokens": "3.195s",
+          "x-request-id": "(hidden)"
+        },
+        "body": "{\"id\":\"chatcmpl-845f8f1f-6101-424b-9c35-c593d7342c47\",\"object\":\"chat.completion\",\"created\":1795616068,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"**Turning a fraction into a percentage**\\n\\n1. Divide the numerator by the denominator.  \\n   \\\\[\\n   \\\\frac{3}{4}=0.75\\n   \\\\]\\n2. Multiply the result by 100.  \\n   \\\\[\\n   0.75 \\\\times 100 = 75\\n   \\\\]\\n3. Add the percent sign.  \\n   \\\\[\\n   75\\\\%\\n   \\\\]\\n\\nSo, \\\\(\\\\frac{3}{4}\\\\) is **75 %**.\\n\\n---\\n\\n**Finding 17.5 % of 240**\\n\\n1. Convert the percent to a decimal:  \\n   \\\\[\\n   17.5\\\\% = \\\\frac{17.5}{100} = 0.175\\n   \\\\]\\n2. Multiply this decimal by the number.  \\n   \\\\[\\n   0.175 \\\\times 240 = 42\\n   \\\\]\\n\\nHence **17.5 % of 240 is 42**.\",\"reasoning\":\"We need to explain step by step.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.232465388,\"prompt_tokens\":297,\"prompt_time\":0.019030665,\"completion_tokens\":216,\"completion_time\":0.229165813,\"total_tokens\":513,\"total_time\":0.248196478,\"completion_tokens_details\":{\"reasoning_tokens\":9}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_a8c584dda7\",\"x_groq\":{\"id\":\"req_01m89gxm7pexcrbgef3tmya9rt\",\"seed\":1906099506},\"service_tier\":\"on_demand\"}\n"
+      },
+      "error": null,
+      "ms": 527,
+      "truncated": {
+        "request": null,
+        "response": null
+      },
+      "t": 5078
     }
   ],
   "design": {
@@ -319,7 +496,10 @@
         "search": false,
         "name": "Maths tutor",
         "instructions": "You are a patient maths tutor. Explain step by step with one worked example.",
-        "slot": "groq-free"
+        "slot": "groq-free",
+        "tools": [
+          "calculator"
+        ]
       },
       {
         "id": "free-2",
@@ -342,11 +522,11 @@
       }
     ]
   },
-  "task": "How do I turn the fraction 3/4 into a percentage?",
+  "task": "How do I turn the fraction 3/4 into a percentage, and what is 17.5 percent of 240?",
   "about": {
-    "title": "Router: choose the right specialist",
+    "title": "Router: choose the right specialist, who can use a calculator",
     "author": "Agent Atlas Academy",
-    "description": "A router reads the question and sends it to one of two specialists.\n\n**What it teaches**\n\nA router chooses one path and the others are never started, so it saves work.\n\n**What to watch**\n\nWhich specialist is chosen and why, and which one stays idle.\n\nRead more: [Router](#/learn/router)"
+    "description": "A router reads the question and sends it to one of two specialists.\n\n**What it teaches**\n\nA router chooses one path and the others never start. The chosen specialist can call a tool: here a calculator, so it does not work the sum out itself.\n\n**What to watch**\n\nWhich specialist is chosen and why, which one stays idle, and what the maths specialist asks the calculator.\n\nRead more: [Router](#/learn/router)"
   },
   "limits": {
     "maxSteps": 20,
@@ -355,13 +535,13 @@
   },
   "outcome": "finished",
   "usage": {
-    "input": 413,
-    "output": 313,
+    "input": 863,
+    "output": 329,
     "searches": 0,
-    "steps": 2
+    "steps": 3
   },
   "source": "local",
-  "startedAt": "2026-11-24T11:18:55.377Z",
-  "endedAt": "2026-11-24T11:18:59.013Z",
-  "durationMs": 3636
+  "startedAt": "2026-11-25T14:14:22.771Z",
+  "endedAt": "2026-11-25T14:14:28.313Z",
+  "durationMs": 5542
 }

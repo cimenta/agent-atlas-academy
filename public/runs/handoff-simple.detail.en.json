@@ -1,6 +1,6 @@
 {
-  "about": "A help desk agent receives a Wi-Fi problem and hands it to a network expert, who finishes it. Both run on Anthropic.",
-  "how": "Each agent answers with JSON: finish with an answer, or hand over to another agent with a note. Here there is one handover.",
-  "learns": "A handoff passes control with a note; the agent who gets it decides what to do next.",
-  "watch": "The note of the help desk, and what the network expert does with it."
+  "about": "A help desk agent hands a Wi-Fi problem to the network expert. The expert searches the school IT help sheet (part of the run) and answers with the steps. Both agents run on Anthropic (paid).",
+  "how": "An agent answers with an action: hand off to another agent with a note, or finish. The expert never sees the whole help sheet: it calls the search tool, and the tool returns only the passages that fit the query.",
+  "learns": "In a handoff control moves forward and the note is all the next agent knows. The expert reads the help sheet only through a search tool, never whole.",
+  "watch": "The note of the handoff (all the next agent knows), the two search rows (what was asked, which passages came back) and how the answer follows the sheet."
 }

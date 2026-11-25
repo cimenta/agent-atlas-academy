@@ -1,6 +1,6 @@
 {
-  "about": "Plánovač naplánuje desetiminutovou prezentaci o obnovitelné energii a vykonavatel ji napíše ve dvou krocích: osnova a pak text. Oba běží na Groq, bezplatný tarif.",
-  "how": "Plánovač odpověděl dvakrát; vykonavatel následoval druhý plán krok za krokem a text posledního kroku je odpověď.",
-  "learns": "Plán s velkými kroky nechá vykonavateli málo prostoru pro opravu: je tak dobrý, jak dobrý je plán.",
-  "watch": "Dva plány plánovače a jak druhý krok využívá osnovu z prvního."
+  "about": "Silnější plánovač (Groq, Balanced) napíše plán o pěti krocích pro krátkou třídní prezentaci a vykonavatel na rychlém modelu je provede. V prvním kroku se vykonavatel zeptá hodin na skutečné datum a určí příští pátek. Groq, bezplatná vrstva.",
+  "how": "Plánovač odpoví jednou seznamem kroků. Vykonavatel dostane každý krok s dosavadními výsledky. V kroku 1 zavolá hodiny (datum a den v týdnu); další kroky toto datum použijí pro plán zkoušek.",
+  "learns": "Kvalita celého běhu závisí na plánu. Vykonavatel může zavolat nástroj: tady hodiny, protože model neví, jaký je den.",
+  "watch": "Pět kroků plánu, řádek hodin v prvním kroku a jak z data dne vyplyne pátek 27. listopadu."
 }

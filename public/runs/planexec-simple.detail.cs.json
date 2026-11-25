@@ -1,6 +1,6 @@
 {
-  "about": "Plánovač udělá čtyřkrokový plán seznamu věcí na víkendové kempování a vykonavatel provede kroky jeden po druhém. Oba běží na Groq, bezplatný tarif.",
-  "how": "Plánovač napíše celý plán jednou. Vykonavatel dělá každý krok s odpověďmi dřívějších kroků před sebou; poslední krok je odpověď.",
-  "learns": "Plánuj a proveď odděluje přemýšlení od práce: plán se udělá jednou a pak se následuje.",
-  "watch": "Kroky plánu a jak každý krok navazuje na předchozí."
+  "about": "Plánovač napíše plán o třech krocích a vykonavatel je provádí jeden po druhém. V prvním kroku si vykonavatel vyžádá skutečnou předpověď počasí pro Brno. Oba běží na Groq, bezplatná vrstva. Předpověď je ta z dne natáčení.",
+  "how": "Plánovač odpoví jednou seznamem kroků. Vykonavatel dostane každý krok s dosavadními výsledky. V kroku 1 zavolá nástroj počasí (místo Brno); aplikace se zeptá služby počasí a předpověď pošle zpět.",
+  "learns": "Plán vytvořený předem dává běhu tvar. Vykonavatel může zavolat nástroj: tady předpověď počasí, fakt, který žádný model nezná.",
+  "watch": "Kroky plánu, řádek počasí v prvním kroku a jak další kroky a seznam věcí s sebou předpověď používají."
 }

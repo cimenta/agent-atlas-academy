@@ -1,9 +1,11 @@
 {
-  "0": "Každý běh začíná zadáním. Otázka sedí dějepisu i přírodovědě.",
-  "1": "Začíná směrovač. Vidí zadání a seznam specialistů.",
-  "3": "Směrovač vybere jednoho specialistu a uvede důvod. Nikdo volbu nekontroluje.",
-  "4": "Předání spustí jen vybraného specialistu; ostatní se nezavolají vůbec.",
-  "5": "Vybraný specialista začíná a vidí zadání.",
-  "7": "Odpověď specialisty. Zamyslete se, co by doplnil jiný učitel.",
-  "8": "Běh končí. Konečná odpověď je text specialisty."
+  "0": "Každý běh začíná zadáním. Otázka sedí dějepisu i přírodním vědám, volba tedy není jasná.",
+  "3": "Směrovač zvolí učitele dějepisu a uvede důvod.",
+  "4": "Předání spustí jen vybraného specialistu; ostatní se nezavolají.",
+  "7": "Učitel se zeptá Wikipedie na knihtisk.",
+  "8": "Aplikace dostala shrnutí stránky a posílá ho zpět modelu.",
+  "10": "Druhé volání: učitel hledá dalekohled.",
+  "11": "Shrnutí druhé stránky se vrací.",
+  "13": "Učitel odpoví: knihtisk byl první. Data a fakta vycházejí z obou stránek.",
+  "14": "Běh končí. Konečná odpověď je text specialisty."
 }

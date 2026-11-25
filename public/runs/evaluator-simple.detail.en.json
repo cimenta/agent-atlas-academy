@@ -1,6 +1,6 @@
 {
-  "about": "A writer drafts a note on what a password manager is, an evaluator asks for a revision, and the second draft is accepted. Both agents run on Gemini, free tier.",
-  "how": "The evaluator answers with a verdict (accept or revise) and feedback. A revise sends the draft back to the writer, up to two rounds.",
-  "learns": "An evaluator loop improves a draft: the feedback of one round is the input of the next.",
-  "watch": "The feedback of the first round, and what the writer changed in the second draft."
+  "about": "A writer drafts a note on what a password manager is. The evaluator counts the words with a tool, asks for a revision, and accepts the second draft. Both agents run on Gemini, free tier.",
+  "how": "The evaluator answers with a verdict (accept or revise) and feedback. Before it judges, it calls the word counter (characters, words, sentences). A revise sends the draft back to the writer, up to two rounds.",
+  "learns": "A loop with a clear check makes the answer better, as far as the criteria say. The evaluator counts words with a tool, because a model counts badly.",
+  "watch": "The counter row before each verdict, the feedback of the first round, and what the writer changed in the second draft."
 }

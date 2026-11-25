@@ -1,6 +1,6 @@
 {
-  "about": "Pracovník podpory dostane problém s Wi-Fi a předá ho síťovému expertovi, který ho dokončí. Oba běží na Anthropicu.",
-  "how": "Každý agent odpovídá JSON: dokončí s odpovědí, nebo předá jinému agentovi s poznámkou. Tady je jedno předání.",
-  "learns": "Předání předá řízení s poznámkou; agent, který ho dostane, rozhodne, co dál.",
-  "watch": "Poznámku podpory a co s ní síťový expert udělá."
+  "about": "Agent podpory předá problém s Wi-Fi síťovému expertovi. Expert prohledá školní příručku IT (je součástí běhu) a odpoví kroky. Oba agenti běží na Anthropicu (placeno).",
+  "how": "Agent odpoví akcí: předat jinému agentovi s poznámkou, nebo skončit. Expert celou příručku nikdy nevidí: zavolá nástroj hledání a ten vrátí jen úseky, které sedí k dotazu.",
+  "learns": "U předání řízení postupuje dopředu a poznámka je vše, co další agent ví. Expert čte příručku jen přes nástroj hledání, nikdy celou.",
+  "watch": "Poznámku předání (je to vše, co další agent ví), dva řádky hledání (na co se ptal, které úseky se vrátily) a jak odpověď vychází z příručky."
 }

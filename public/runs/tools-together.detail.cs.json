@@ -1,0 +1,6 @@
+{
+  "about": "Dva agenti plánují školní výlet do Prahy. Výzkumník používá pět nástrojů (hodiny, Wikipedii, počasí, hledání v ceníku, poznámky) a pisatel dva (kalkulačku a počítadlo slov). Jeden běh, všech sedm nástrojů. Anthropic (placeno).",
+  "how": "Každý agent dostane jen nástroje, které potřebuje. Výzkumník zjistí fakta pěti voláními nástrojů a předá je dál; pisatel spočítá celkovou cenu kalkulačkou, ověří délku počítadlem a napíše konečný text.",
+  "learns": "Model vybírá správný nástroj pro každou část úkolu: hodiny, vyhledání, hledání v dokumentech, kalkulačku a počítadlo, v jednom běhu.",
+  "watch": "Který nástroj odpovídá na kterou část úkolu, jak z hodin vyplyne příští pátek a celková cena z kalkulačky."
+}

@@ -1,6 +1,6 @@
 {
-  "about": "The router reads one maths question and sends it to the maths tutor; the language tutor is never called. Both run on Groq, free tier.",
-  "how": "The router answers with JSON: the chosen specialist and a reason. Only that specialist is started.",
-  "learns": "A router chooses one path and the others are never started, so it saves work.",
-  "watch": "Which specialist is chosen and why, and which one stays idle."
+  "about": "The router reads a maths question and sends it to the maths tutor, which asks the calculator for 3/4 instead of working it out itself. Both run on Groq, free tier.",
+  "how": "The router answers with JSON: the chosen specialist and a reason. Only that specialist is started. The specialist can ask for the calculator; the app runs it and sends the result back.",
+  "learns": "A router chooses one path and the others never start. The chosen specialist can call a tool: here a calculator, so it does not work the sum out itself.",
+  "watch": "Which specialist is chosen, the calculator row in the steps (the expression and the result 0.75) and how the answer uses it."
 }

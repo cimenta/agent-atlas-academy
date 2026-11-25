@@ -1,12 +1,13 @@
 {
-  "0": "Every run starts with a task. The Supervisor also gets the list of its five workers.",
-  "3": "The Supervisor calls the Researcher first and says what to find.",
-  "7": "The Researcher's notes go back to the Supervisor.",
-  "11": "The Supervisor calls the Writer and pastes the research into the instruction.",
-  "15": "The Writer's plan goes back to the Supervisor, not to the next worker.",
-  "19": "The Supervisor calls the Critic and pastes the plan in again. Its context is now much longer than at the start.",
-  "23": "The Critic's review goes back to the Supervisor.",
-  "25": "The Supervisor starts for the fifth time. The Treasurer was never needed.",
-  "27": "The Supervisor finishes with the final plan. Count how many times it was called.",
-  "28": "The run ends."
+  "0": "Every run starts with a task. It asks the helpers to save their main point with the notes tool.",
+  "3": "The supervisor calls the researcher first and gives it an instruction.",
+  "7": "The researcher saves its main point with the notes tool (action write).",
+  "8": "The note goes into the shared notebook of the run.",
+  "9": "The tool answers: Note 1 saved.",
+  "11": "The researcher answers with the facts: the budget as estimates.",
+  "15": "The supervisor calls the writer with the facts.",
+  "19": "The writer writes the plan.",
+  "20": "The writer has no notes tool, so its note is taken from a tag in its text.",
+  "24": "The supervisor finishes with the plan. The critic and the treasurer were not needed.",
+  "25": "The run ends."
 }

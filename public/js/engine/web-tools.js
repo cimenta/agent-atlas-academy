@@ -2,17 +2,22 @@
 // a call has a time limit and a size limit, and every failure becomes a ToolError with a text the model can read.
 import { ToolError } from "./own-tools.js";
 
-export const WEB_TOOL_LIMITS = { timeoutMs: 8000, bodyMax: 300000, queryMax: 200, summaryChars: 1200 };
+export const WEB_TOOL_LIMITS = { timeoutMs: 8000, bodyMax: 300000, queryMax: 200, summaryChars: 1200, retryDelayMs: 1500 };
 const WIKI_LANGUAGES = ["en", "cs"];
 const WEATHER_CODES = { 0: "clear", 1: "mostly clear", 2: "partly cloudy", 3: "overcast", 45: "fog", 48: "fog", 51: "light drizzle", 53: "drizzle", 55: "heavy drizzle", 61: "light rain", 63: "rain", 65: "heavy rain", 71: "light snow", 73: "snow", 75: "heavy snow", 80: "rain showers", 81: "rain showers", 82: "heavy rain showers", 95: "thunderstorm", 96: "thunderstorm with hail", 99: "thunderstorm with hail" };
 
 // Gets one JSON document from a fixed host. fetchImpl and timeoutMs are replaced in tests.
-async function getJson(url, { fetchImpl = globalThis.fetch, timeoutMs = WEB_TOOL_LIMITS.timeoutMs, service } = {}) {
+// An answer 429 (too many requests, common on shared server addresses) or 503 is tried once more after a short wait.
+async function getJson(url, { fetchImpl = globalThis.fetch, timeoutMs = WEB_TOOL_LIMITS.timeoutMs, retryDelayMs = WEB_TOOL_LIMITS.retryDelayMs, service } = {}) {
   if (typeof fetchImpl !== "function") throw new ToolError(`${service} cannot be reached from here.`);
   const control = new AbortController();
   const timer = setTimeout(() => control.abort(), timeoutMs);
   try {
-    const response = await fetchImpl(url, { signal: control.signal, headers: { accept: "application/json", "user-agent": "AgentAtlasAcademy/1.0 (teaching tool)" } });
+    let response = await fetchImpl(url, { signal: control.signal, headers: { accept: "application/json", "user-agent": "AgentAtlasAcademy/1.0 (teaching tool)" } });
+    if (response.status === 429 || response.status === 503) {
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+      response = await fetchImpl(url, { signal: control.signal, headers: { accept: "application/json", "user-agent": "AgentAtlasAcademy/1.0 (teaching tool)" } });
+    }
     if (!response.ok) throw new ToolError(`${service} answered with the error ${response.status}.`);
     const body = await response.text();
     if (body.length > WEB_TOOL_LIMITS.bodyMax) throw new ToolError(`${service} sent too much data.`);

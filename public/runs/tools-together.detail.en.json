@@ -1,0 +1,6 @@
+{
+  "about": "Two agents plan a school trip to Prague. The researcher uses five tools (the clock, Wikipedia, the weather, a search in a price list, the notes) and the writer two (the calculator and the word counter). One run, all seven tools. Anthropic (paid).",
+  "how": "Each agent is given only the tools it needs. The researcher gathers the facts with five tool calls and passes them on; the writer works out the total cost with the calculator, checks the length with the counter and writes the final text.",
+  "learns": "A model chooses the right tool for each part of a task: a clock, a lookup, a search in documents, a calculator and a counter, in one run.",
+  "watch": "Which tool answers which part of the task, how the next Friday follows from the clock, and the total cost from the calculator."
+}

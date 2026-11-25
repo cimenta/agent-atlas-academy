@@ -1,7 +1,7 @@
 {
   "format": "agent-atlas-run-definition",
   "version": 1,
-  "task": "Make a packing list for a weekend camping trip near Brno: first plan the groups of things, then fill each group. Check the weather forecast for Brno first.",
+  "task": "Make a packing list for a weekend camping trip near Brno. Plan exactly three steps: one to check the weather forecast for Brno, one to list the things to pack for that weather, and a last step that puts the final short list together.",
   "about": {
     "en": {
       "title": "Plan and execute: a plan first, then the steps, with a weather forecast",

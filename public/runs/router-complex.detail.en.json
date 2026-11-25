@@ -1,6 +1,6 @@
 {
-  "about": "The question about the printing press and the telescope fits two tutors. The router, on Groq, picks one and only that tutor answers.",
-  "how": "The router answers with JSON: the chosen specialist and the reason. Only that specialist is started.",
-  "learns": "A router can choose wrongly when a question fits more than one specialist; one choice, no second opinion.",
-  "watch": "The reason the router gives, and what the unchosen specialist would have said."
+  "about": "The router sends a history question to the history tutor, who looks up two things on Wikipedia (the printing press and the telescope) before answering. Both run on Groq, free tier.",
+  "how": "The router answers with JSON: the chosen specialist and a reason. The history tutor asks for Wikipedia twice; each call returns the title, a summary and the address of the page, and the model answers from them.",
+  "learns": "A router can choose wrongly when a question fits two specialists. The history specialist can call a tool: here a Wikipedia lookup, so its facts do not come from memory alone.",
+  "watch": "Whether the router picks the history tutor, the two Wikipedia rows (what was searched, what came back) and how the answer follows the pages."
 }

@@ -1,6 +1,6 @@
 {
-  "about": "Supervizor plánuje školní charitativní koláčový bazar s výzkumníkem, pisatelem a kritikem; pokladník je k dispozici, ale nikdy se nezavolá. Všichni běží na Anthropicu.",
-  "how": "Supervizor odpovídá jen JSON a volá vždy jednoho pracovníka; každý výsledek se k němu vrací, takže jeho kontext s každým tahem roste.",
-  "learns": "Supervizor vidí všechno, což je užitečné a drahé: každý tah se k němu vrací a jeho kontext roste.",
-  "watch": "Jak supervizor vkládá každý výsledek do dalšího pokynu a že je zavolán pětkrát na čtyři kroky práce."
+  "about": "Supervizor rozdělí plán školního koláčového prodeje mezi pracovníky. Výzkumník uloží hlavní bod do sdíleného zápisníku nástrojem poznámek, poznámku pisatele doplní aplikace a supervizor skončí. Všechno běží na Anthropicu (placeno).",
+  "how": "Supervizor odpoví akcí: zavolat pracovníka s pokynem, nebo skončit. Pracovník s nástrojem poznámek napíše poznámku jeho zavoláním; poznámka jde do zápisníku běhu a další agenti ji vidí. Pisatel bez nástroje nechá poznámku ve značce.",
+  "learns": "Supervizor vidí všechno, což je užitečné a drahé. Pracovníci mohou nástrojem nechat poznámky ve sdíleném zápisníku, takže další vědí, co zjistili předchozí.",
+  "watch": "Řádek poznámky výzkumníka (nástroj) a poznámku pisatele (značka), co s nimi supervizor udělá a že kritik a pokladník se nezavolají vůbec."
 }

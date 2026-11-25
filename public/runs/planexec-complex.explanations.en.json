@@ -1,8 +1,13 @@
 {
-  "3": "The Planner's first plan.",
-  "6": "The Planner's second plan, with two steps. This is the plan the Executor follows.",
-  "7": "The first step goes to the Executor.",
-  "10": "Step 1: the outline of the presentation.",
-  "14": "Step 2: the script of every part, written from the outline. This is the answer.",
-  "15": "The run ends."
+  "0": "Every run starts with a task: a presentation in three parts, a rehearsal schedule with real dates.",
+  "3": "The Planner writes the whole plan once. The first step finds the date of the next Friday.",
+  "4": "The plan goes to the executor, which carries out the steps one after another.",
+  "7": "The executor asks the clock for the date. A model does not know what day it is.",
+  "8": "The clock answers: Wednesday 25 November 2026, week 48.",
+  "10": "Step 1 gives the date of the presentation, Friday 27 November, and the rehearsal days.",
+  "14": "Step 2 builds the three-part structure of the presentation.",
+  "18": "Step 3 writes the introduction.",
+  "22": "Step 4 writes the main part.",
+  "26": "Step 5 writes the conclusion.",
+  "27": "The run ends. The result is the text of the last step."
 }

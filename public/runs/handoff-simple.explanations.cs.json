@@ -1,6 +1,10 @@
 {
-  "3": "Podpora předá problém síťovému expertovi a napíše poznámku.",
-  "4": "Předání předá řízení. Síťový expert vidí zadání a poznámku.",
-  "7": "Síťový expert dokončí: jeho odpověď je výsledek.",
-  "8": "Běh končí. Výsledek je text agenta, který skončil."
+  "0": "Každý běh začíná zadáním. Agentům říká, aby se podívali do školní příručky IT.",
+  "3": "Podpora se rozhodne předat problém síťovému expertovi a napíše poznámku.",
+  "4": "Předání: poznámka je vše, co expert o úkolu ví.",
+  "7": "Expert hledá v příručce vlastními slovy. Celou příručku nevidí.",
+  "8": "Nástroj vrátí nejlepší úsek se jménem souboru a místem v textu.",
+  "10": "Druhé hledání jinými slovy, pro část, kterou první minulo.",
+  "12": "Expert skončí kroky z příručky.",
+  "13": "Běh končí. Konečná odpověď je text experta."
 }

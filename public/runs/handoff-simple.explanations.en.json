@@ -1,6 +1,10 @@
 {
-  "3": "The Help desk hands the problem to the Network expert and writes a note.",
-  "4": "The handoff passes control. The Network expert sees the task and the note.",
-  "7": "The Network expert finishes: its reply is the answer.",
-  "8": "The run ends. The answer is the text of the agent that finished."
+  "0": "Every run starts with a task. It tells the agents to look in the school IT help sheet.",
+  "3": "The help desk decides to hand the problem to the network expert and writes a note.",
+  "4": "The handoff: the note is all the expert knows about the task.",
+  "7": "The expert searches the help sheet with its own words. It does not see the whole sheet.",
+  "8": "The tool returns the best passage with the file name and the place in the text.",
+  "10": "A second search with other words, for a part the first one missed.",
+  "12": "The expert finishes with the steps from the help sheet.",
+  "13": "The run ends. The final answer is the expert's text."
 }

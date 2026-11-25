@@ -72,18 +72,18 @@
       "tags": [
         "tool-choice",
         "decision-making",
-        "risk-analysis"
+        "risk-analysis",
+        "tool-use",
+        "tool-wikipedia"
       ],
       "level": 2,
       "paths": {
         "patterns": 10
       },
       "teaches": {
-        "en": "A router can choose wrongly when a question fits more than one specialist; one choice, no second opinion.",
-        "cs": "Směrovač se může splést, když otázka sedí víc specialistům; jedna volba a žádný druhý názor."
-      },
-      "studyMinutes": 12,
-      "runSeconds": 1
+        "en": "A router can choose wrongly when a question fits two specialists. The history specialist can call a tool: here a Wikipedia lookup, so its facts do not come from memory alone.",
+        "cs": "Směrovač se může splést, když otázka sedí dvěma specialistům. Specialista na historii může zavolat nástroj: tady hledání na Wikipedii, takže fakta nebere jen z paměti."
+      }
     },
     {
       "id": "mix-router-specialists",
@@ -141,7 +141,7 @@
     },
     {
       "id": "router-simple",
-      "title": "How do I turn the fraction 3/4 into a percentage?",
+      "title": "How do I turn the fraction 3/4 into a percentage, and what i…",
       "pattern": "router",
       "language": "en",
       "timeScale": 3,
@@ -154,18 +154,18 @@
       "tags": [
         "basics",
         "tool-choice",
-        "cost"
+        "cost",
+        "tool-use",
+        "tool-calculator"
       ],
       "level": 1,
       "paths": {
         "patterns": 5
       },
       "teaches": {
-        "en": "A router chooses one path and the others are never started, so it saves work.",
-        "cs": "Směrovač zvolí jednu cestu a ostatní se vůbec nespustí, takže šetří práci."
-      },
-      "studyMinutes": 9,
-      "runSeconds": 3
+        "en": "A router chooses one path and the others never start. The chosen specialist can call a tool: here a calculator, so it does not work the sum out itself.",
+        "cs": "Směrovač zvolí jednu cestu a ostatní se nespustí. Zvolený specialista může zavolat nástroj: tady kalkulačku, takže příklad nepočítá sám."
+      }
     },
     {
       "id": "evaluator-simple",
@@ -182,18 +182,18 @@
       "tags": [
         "basics",
         "explaining",
-        "prompt-chaining"
+        "prompt-chaining",
+        "tool-use",
+        "tool-text-counting"
       ],
       "level": 1,
       "paths": {
         "patterns": 6
       },
       "teaches": {
-        "en": "A loop with a clear check makes the answer better, but only as far as the criteria say.",
-        "cs": "Smyčka s jasnou kontrolou zlepší odpověď, ale jen tak, jak říkají kritéria."
-      },
-      "studyMinutes": 10,
-      "runSeconds": 4
+        "en": "A loop with a clear check makes the answer better, as far as the criteria say. The evaluator counts words with a tool, because a model counts badly.",
+        "cs": "Smyčka s jasnou kontrolou zlepší odpověď, jak říkají kritéria. Hodnotitel počítá slova nástrojem, protože model počítá špatně."
+      }
     },
     {
       "id": "sequential-complex",
@@ -253,7 +253,7 @@
     },
     {
       "id": "planexec-simple",
-      "title": "Make a packing list for a weekend camping trip: first plan t…",
+      "title": "Make a packing list for a weekend camping trip near Brno. Pl…",
       "pattern": "planexec",
       "language": "en",
       "timeScale": 3,
@@ -266,22 +266,22 @@
       "tags": [
         "planning",
         "prompt-chaining",
-        "handoff"
+        "handoff",
+        "tool-use",
+        "tool-weather"
       ],
       "level": 2,
       "paths": {
         "patterns": 14
       },
       "teaches": {
-        "en": "A plan made first gives the run a shape, and the executor follows it even when a step turns out to be needless.",
-        "cs": "Plán vytvořený předem dává běhu tvar a vykonavatel ho následuje, i když se krok ukáže jako zbytečný."
-      },
-      "studyMinutes": 13,
-      "runSeconds": 12
+        "en": "A plan made first gives the run a shape. The executor can call a tool: here the weather forecast, a fact no model can know.",
+        "cs": "Plán vytvořený předem dává běhu tvar. Vykonavatel může zavolat nástroj: tady předpověď počasí, fakt, který žádný model nezná."
+      }
     },
     {
       "id": "planexec-complex",
-      "title": "Plan a ten-minute class presentation about renewable energy …",
+      "title": "Plan a five-minute class presentation about renewable energy…",
       "pattern": "planexec",
       "language": "en",
       "timeScale": 3,
@@ -294,18 +294,18 @@
       "tags": [
         "planning",
         "decision-making",
-        "cost"
+        "cost",
+        "tool-use",
+        "tool-datetime"
       ],
       "level": 3,
       "paths": {
         "patterns": 20
       },
       "teaches": {
-        "en": "The quality of the whole run depends on the plan, and a step that was not needed is still done.",
-        "cs": "Kvalita celého běhu závisí na plánu a krok, který nebyl potřeba, se přesto provede."
-      },
-      "studyMinutes": 12,
-      "runSeconds": 7
+        "en": "The quality of the whole run depends on the plan. The executor can call a tool: here the clock, because a model does not know what day it is.",
+        "cs": "Kvalita celého běhu závisí na plánu. Vykonavatel může zavolat nástroj: tady hodiny, protože model neví, jaký je den."
+      }
     },
     {
       "id": "mapreduce-complex",
@@ -350,18 +350,18 @@
       "tags": [
         "handoff",
         "tool-choice",
-        "prompt-chaining"
+        "prompt-chaining",
+        "tool-use",
+        "tool-documents"
       ],
       "level": 2,
       "paths": {
         "patterns": 11
       },
       "teaches": {
-        "en": "In a handoff control moves forward and nothing stands above it; the note is all the next agent knows.",
-        "cs": "U předání řízení postupuje dopředu a nic nad ním nestojí; poznámka je vše, co další agent ví."
-      },
-      "studyMinutes": 10,
-      "runSeconds": 6
+        "en": "In a handoff control moves forward and the note is all the next agent knows. The expert reads the help sheet only through a search tool, never whole.",
+        "cs": "U předání řízení postupuje dopředu a poznámka je vše, co další agent ví. Expert čte příručku jen přes nástroj hledání, nikdy celou."
+      }
     },
     {
       "id": "handoff-complex",
@@ -393,10 +393,10 @@
     },
     {
       "id": "supervisor-complex",
-      "title": "Prepare a one-page plan for a school charity bake sale: a bu…",
+      "title": "Prepare a short plan for a school charity bake sale: a budge…",
       "pattern": "supervisor",
       "language": "en",
-      "timeScale": 2,
+      "timeScale": 3,
       "provider": "anthropic",
       "outcome": "finished",
       "detail": [
@@ -406,18 +406,18 @@
       "tags": [
         "supervisor",
         "planning",
-        "risk-analysis"
+        "risk-analysis",
+        "tool-use",
+        "tool-notes"
       ],
       "level": 3,
       "paths": {
         "patterns": 15
       },
       "teaches": {
-        "en": "A supervisor sees everything, which is useful and expensive: every turn returns to it, and its context grows.",
-        "cs": "Supervizor vidí všechno, což je užitečné a drahé: každý tah se k němu vrací a jeho kontext roste."
-      },
-      "studyMinutes": 18,
-      "runSeconds": 44
+        "en": "A supervisor sees everything, which is useful and expensive. The workers can leave notes in a shared notebook with a tool, so later workers know what earlier ones found.",
+        "cs": "Supervizor vidí všechno, což je užitečné a drahé. Pracovníci mohou nástrojem nechat poznámky ve sdíleném zápisníku, takže další vědí, co zjistili předchozí."
+      }
     },
     {
       "id": "save-models-strong",
@@ -1478,6 +1478,34 @@
       },
       "studyMinutes": 11,
       "runSeconds": 63
+    },
+    {
+      "id": "tools-together",
+      "title": "Plan a one-day school trip to Prague for 24 students and 2 t…",
+      "pattern": "sequential",
+      "language": "en",
+      "timeScale": 3,
+      "provider": "anthropic",
+      "outcome": "finished",
+      "tags": [
+        "tool-use",
+        "tool-choice",
+        "planning",
+        "decision-making",
+        "tool-calculator",
+        "tool-datetime",
+        "tool-wikipedia",
+        "tool-weather",
+        "tool-text-counting",
+        "tool-documents",
+        "tool-notes"
+      ],
+      "level": 3,
+      "paths": {},
+      "teaches": {
+        "en": "A model chooses the right tool for each part of a task: a clock, a lookup, a search in documents, a calculator and a counter, in one run.",
+        "cs": "Model vybírá správný nástroj pro každou část úkolu: hodiny, vyhledání, hledání v dokumentech, kalkulačku a počítadlo, v jednom běhu."
+      }
     }
   ]
 }

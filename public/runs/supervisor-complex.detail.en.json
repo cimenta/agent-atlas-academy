@@ -1,6 +1,6 @@
 {
-  "about": "A supervisor plans a school charity bake sale with a researcher, a writer and a critic; a treasurer is available but never called. All run on Anthropic.",
-  "how": "The supervisor answers with JSON only and calls one worker at a time; every result returns to it, so its context grows with each turn.",
-  "learns": "A supervisor sees everything, which is useful and expensive: every turn returns to it, and its context grows.",
-  "watch": "How the supervisor passes each result into the next instruction, and that it is called five times for four steps of work."
+  "about": "A supervisor splits a school bake sale plan between workers. The researcher saves its main point in the shared notebook with the notes tool, the writer's note is added by the app, and the supervisor finishes. Everything runs on Anthropic (paid).",
+  "how": "The supervisor answers with an action: call a worker with an instruction, or finish. A worker with the notes tool writes a note by calling it; the note goes to the notebook of the run and later agents see it. A writer without the tool leaves its note in a tag.",
+  "learns": "A supervisor sees everything, which is useful and expensive. The workers can leave notes in a shared notebook with a tool, so later workers know what earlier ones found.",
+  "watch": "The note row of the researcher (the tool) and the note of the writer (a tag), what the supervisor does with them, and that the critic and the treasurer are never called."
 }

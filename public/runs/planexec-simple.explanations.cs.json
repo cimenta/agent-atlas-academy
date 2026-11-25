@@ -1,9 +1,11 @@
 {
-  "3": "Plán, který plánovač udělal jednou: čtyři kroky.",
-  "4": "První krok jde vykonavateli.",
-  "7": "Výsledek kroku 1 od vykonavatele.",
-  "11": "Krok 2 navazuje na výsledek kroku 1.",
-  "15": "Krok 3.",
-  "19": "Poslední krok dá konečný seznam.",
-  "20": "Běh končí. Odpověď posledního kroku je odpověď běhu."
+  "0": "Každý běh začíná zadáním: seznam věcí na víkendový výlet, ve třech krocích.",
+  "3": "Plánovač napíše celý plán najednou: tři kroky, první je předpověď počasí.",
+  "4": "Plán jde vykonavateli, který kroky provádí jeden po druhém.",
+  "7": "V kroku 1 vykonavatel žádá počasí v Brně. Model ho znát nemůže.",
+  "8": "Služba počasí odpověděla: teplota, déšť a vítr na další dny.",
+  "10": "Výsledek kroku 1: předpověď v tabulce.",
+  "14": "Krok 2 vyjmenuje, co s sebou při takovém počasí. Nástroj už není potřeba, výsledek kroku 1 se předává dál.",
+  "18": "Krok 3 složí konečný krátký seznam věcí s sebou.",
+  "19": "Běh končí. Výsledkem je text posledního kroku."
 }

@@ -1,9 +1,11 @@
 {
-  "3": "The plan, made once by the Planner: four steps.",
-  "4": "The first step goes to the Executor.",
-  "7": "The Executor's result of step 1.",
-  "11": "Step 2 builds on the result of step 1.",
-  "15": "Step 3.",
-  "19": "The last step gives the final list.",
-  "20": "The run ends. The answer of the last step is the answer of the run."
+  "0": "Every run starts with a task: a packing list for a weekend trip, in three steps.",
+  "3": "The Planner writes the whole plan once: three steps, the first one is the weather forecast.",
+  "4": "The plan goes to the executor, which carries out the steps one after another.",
+  "7": "In step 1 the executor asks for the weather in Brno. A model cannot know it.",
+  "8": "The weather service answered: the temperature, the rain and the wind for the next days.",
+  "10": "The result of step 1: the forecast in a table.",
+  "14": "Step 2 lists what to pack for that weather. The tool is not needed again, the result of step 1 is passed on.",
+  "18": "Step 3 puts the final short packing list together.",
+  "19": "The run ends. The result is the text of the last step."
 }

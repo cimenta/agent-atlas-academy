@@ -1,6 +1,6 @@
 {
-  "about": "Směrovač přečte jednu otázku z matematiky a pošle ji učiteli matematiky; učitel jazyka se vůbec nezavolá. Oba běží na Groq, bezplatný tarif.",
-  "how": "Směrovač odpoví JSON: vybraný specialista a důvod. Spustí se jen tento specialista.",
-  "learns": "Směrovač zvolí jednu cestu a ostatní se vůbec nespustí, takže šetří práci.",
-  "watch": "Kdo je vybrán a proč, a který specialista zůstane nečinný."
+  "about": "Směrovač přečte matematickou otázku a pošle ji učiteli matematiky, který si 3/4 nechá spočítat kalkulačkou místo toho, aby ji počítal sám. Oba běží na Groq, bezplatná vrstva.",
+  "how": "Směrovač odpoví JSON: zvolený specialista a důvod. Spustí se jen on. Specialista může požádat o kalkulačku; aplikace ji spustí a výsledek pošle zpět.",
+  "learns": "Směrovač zvolí jednu cestu a ostatní se nespustí. Zvolený specialista může zavolat nástroj: tady kalkulačku, takže příklad nepočítá sám.",
+  "watch": "Kterého specialistu směrovač zvolí, řádek kalkulačky v krocích (výraz a výsledek 0,75) a jak odpověď výsledek používá."
 }

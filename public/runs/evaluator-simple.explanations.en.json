@@ -1,10 +1,13 @@
 {
-  "3": "The Writer's first draft.",
-  "4": "A handoff sends the draft to the Evaluator.",
-  "7": "The Evaluator says revise: the text is too complex for a ten-year-old and has no everyday example. This feedback goes back to the Writer.",
-  "8": "The loop sends the draft back with the feedback.",
-  "11": "The Writer's second draft, written with the feedback in view.",
-  "15": "The Evaluator accepts the second draft.",
-  "16": "The loop ends: accepted in round 2 of 2.",
-  "17": "The run ends. The final answer is the accepted draft."
+  "0": "Every run starts with a task and criteria: the length is checked by counting.",
+  "3": "The writer's first draft.",
+  "7": "The evaluator does not guess the length: it sends the draft to the word counter.",
+  "8": "The app counted: 72 words, 3 sentences.",
+  "10": "The verdict is revise, with feedback on what is missing.",
+  "13": "The provider was busy for a moment and the app tried again. The run is not harmed.",
+  "15": "The writer changes the draft following the feedback.",
+  "19": "The evaluator counts the second draft again.",
+  "20": "The second draft: 63 words, 4 sentences.",
+  "22": "The verdict is accept. The loop ends.",
+  "24": "The run ends. The result is the accepted draft."
 }

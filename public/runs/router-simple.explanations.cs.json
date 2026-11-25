@@ -1,7 +1,9 @@
 {
   "0": "Každý běh začíná zadáním. Otázka je jasně z matematiky.",
-  "3": "Směrovač zvolí učitele matematiky a uvede důvod.",
-  "4": "Předání spustí jen vybraného specialistu; učitel jazyka se nezavolá.",
-  "7": "Učitel matematiky odpoví. Nikdo nekontroluje, jestli byla volba správná.",
-  "8": "Běh končí. Konečná odpověď je text specialisty."
+  "3": "Směrovač zvolí volného agenta (učitele matematiky) a uvede důvod.",
+  "4": "Předání spustí jen vybraného specialistu; ostatní se nezavolají.",
+  "7": "Učitel požádá o kalkulačku s výrazem 3/4. Model to nepočítá sám.",
+  "8": "Aplikace výraz přesně spočítala a výsledek 0,75 se vrací modelu.",
+  "10": "Učitel odpoví s postupem a použije číslo z kalkulačky. Nikdo nekontroluje, jestli byla volba správná.",
+  "11": "Běh končí. Konečná odpověď je text specialisty."
 }

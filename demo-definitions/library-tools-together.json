@@ -1,7 +1,7 @@
 {
   "format": "agent-atlas-run-definition",
   "version": 1,
-  "task": "Plan a one-day school trip to Prague for 24 students and 2 teachers, on the next Friday. Give the date, a short note about Charles Bridge, the weather forecast for Prague, and the total cost from the price list for the entry, the guided walk and the tram tickets. Keep the final text under 120 words.",
+  "task": "Plan a one-day school trip to Prague for 24 students and 2 teachers, on the next Friday. Give the date, a short note about Charles Bridge, the weather forecast for Prague, and the total cost from the price list for the entry, the guided walk and the tram tickets. The writer must work out the total cost with the calculator and check the length of the final text with the word counter. Keep the final text under 120 words.",
   "about": {
     "en": {
       "title": "Many tools in one run: a clock, Wikipedia, the weather, a price list, a calculator and a word counter",

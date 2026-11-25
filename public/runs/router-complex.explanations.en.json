@@ -1,9 +1,11 @@
 {
-  "0": "Every run starts with a task. The question fits both the history and the science tutor.",
-  "1": "The Router starts. It sees the task and the list of specialists.",
-  "3": "The Router chooses one specialist and gives a reason. Nobody checks the choice.",
-  "4": "The handoff starts only the chosen specialist; the others are never called.",
-  "5": "The chosen specialist starts and sees the task.",
-  "7": "The specialist's answer. Ask yourself what another tutor would have added.",
-  "8": "The run ends. The final answer is the specialist's text."
+  "0": "Every run starts with a task. The question fits history and also science, so the choice is not obvious.",
+  "3": "The Router chooses the history tutor and gives the reason.",
+  "4": "The handoff starts only the chosen specialist; the others are not called.",
+  "7": "The tutor asks Wikipedia about the printing press.",
+  "8": "The app got the summary of the page and sends it back to the model.",
+  "10": "A second call: the tutor looks up the telescope.",
+  "11": "The summary of the second page comes back.",
+  "13": "The tutor answers: the printing press came first. The dates and facts follow the two pages.",
+  "14": "The run ends. The final answer is the specialist's text."
 }

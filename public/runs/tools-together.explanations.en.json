@@ -1,0 +1,16 @@
+{
+  "0": "Every run starts with a task that needs a date, a fact, a forecast, a price and a total.",
+  "3": "The researcher asks the clock for the date: a model does not know what day it is.",
+  "5": "It looks up Charles Bridge on Wikipedia.",
+  "7": "It asks for the weather in Prague.",
+  "8": "The forecast comes back from the weather service.",
+  "9": "It searches the price list, a document that is part of the run, and sees only the passage that fits.",
+  "11": "It reads the notebook: it is empty at this point.",
+  "14": "The researcher passes the facts on: Friday 27 November, the bridge, the forecast and the prices.",
+  "18": "The writer works out the total cost with the calculator instead of adding in its head.",
+  "19": "The calculator answers 6480.",
+  "21": "The writer sends the draft to the word counter to check the limit.",
+  "22": "The counter answers: 109 words, under 120.",
+  "24": "The final text.",
+  "26": "The run ends."
+}

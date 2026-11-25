@@ -1,8 +1,13 @@
 {
-  "3": "První plán plánovače.",
-  "6": "Druhý plán plánovače se dvěma kroky. Tento plán vykonavatel následuje.",
-  "7": "První krok jde vykonavateli.",
-  "10": "Krok 1: osnova prezentace.",
-  "14": "Krok 2: text každé části napsaný podle osnovy. To je odpověď.",
-  "15": "Běh končí."
+  "0": "Každý běh začíná zadáním: prezentace ve třech částech, plán zkoušek se skutečnými daty.",
+  "3": "Plánovač napíše celý plán najednou. První krok zjistí datum příštího pátku.",
+  "4": "Plán jde vykonavateli, který kroky provádí jeden po druhém.",
+  "7": "Vykonavatel se zeptá hodin na datum. Model neví, jaký je den.",
+  "8": "Hodiny odpoví: středa 25. listopadu 2026, týden 48.",
+  "10": "Krok 1 dá datum prezentace, pátek 27. listopadu, a dny zkoušek.",
+  "14": "Krok 2 sestaví tři části prezentace.",
+  "18": "Krok 3 napíše úvod.",
+  "22": "Krok 4 napíše hlavní část.",
+  "26": "Krok 5 napíše závěr.",
+  "27": "Běh končí. Výsledkem je text posledního kroku."
 }

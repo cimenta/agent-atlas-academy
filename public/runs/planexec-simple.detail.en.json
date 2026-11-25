@@ -1,6 +1,6 @@
 {
-  "about": "A planner makes a four-step plan for a weekend camping packing list and an executor carries out the steps one after another. Both run on Groq, free tier.",
-  "how": "The planner writes the whole plan once. The executor does each step with the answers of the earlier steps in front of it; the last step is the answer.",
-  "learns": "Plan-and-execute separates thinking from doing: the plan is made once and then followed.",
-  "watch": "The steps of the plan, and how each step builds on the one before."
+  "about": "A planner writes a plan of three steps and an executor does them one by one. In the first step the executor asks for the real weather forecast for Brno. Both run on Groq, free tier. The forecast is the one of the day of the recording.",
+  "how": "The planner answers once with a list of steps. The executor gets each step with the results so far. In step 1 it calls the weather tool (place Brno); the app asks a weather service and sends the forecast back.",
+  "learns": "A plan made first gives the run a shape. The executor can call a tool: here the weather forecast, a fact no model can know.",
+  "watch": "The steps of the plan, the weather row in the first step, and how the next steps and the packing list use the forecast."
 }

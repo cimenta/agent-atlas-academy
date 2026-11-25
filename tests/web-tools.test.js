@@ -38,6 +38,20 @@ test("Wikipedia says so when there is no page, and a service error is a text for
   await assert.rejects(() => wikipediaText({ query: "a" }, { fetchImpl: async () => ({ ok: true, status: 200, text: async () => "x".repeat(300001) }) }), /too much data/);
 });
 
+test("a 429 or 503 answer is tried once more after a short wait, then reported", async () => {
+  let calls = 0;
+  const flaky = async () => { calls += 1; return calls === 1 ? json({}, 429) : json(wikiPage); };
+  const out = await wikipediaText({ query: "Alan Turing" }, { fetchImpl: flaky, retryDelayMs: 1 });
+  assert.match(out, /Alan Turing/);
+  assert.equal(calls, 2);
+  let always = 0;
+  await assert.rejects(() => wikipediaText({ query: "a" }, { fetchImpl: async () => { always += 1; return json({}, 429); }, retryDelayMs: 1 }), /error 429/);
+  assert.equal(always, 2);
+  let notFound = 0;
+  await assert.rejects(() => wikipediaText({ query: "a" }, { fetchImpl: async () => { notFound += 1; return json({}, 404); }, retryDelayMs: 1 }), /error 404/);
+  assert.equal(notFound, 1);
+});
+
 test("a call that does not answer in time stops with a text, it does not hang", async () => {
   const fetchImpl = (url, { signal }) => new Promise((_, reject) => signal.addEventListener("abort", () => reject(Object.assign(new Error("aborted"), { name: "AbortError" }))));
   const started = Date.now();

@@ -1,10 +1,13 @@
 {
-  "3": "První verze pisatele.",
-  "4": "Předání pošle koncept hodnotiteli.",
-  "7": "Hodnotitel říká upravit: text je příliš složitý pro desetiletého a chybí běžný příklad. Tato zpětná vazba se vrací pisateli.",
-  "8": "Smyčka pošle koncept zpět se zpětnou vazbou.",
-  "11": "Druhá verze pisatele, napsaná s ohledem na zpětnou vazbu.",
-  "15": "Hodnotitel přijme druhou verzi.",
-  "16": "Smyčka končí: přijato ve 2. kole ze 2.",
-  "17": "Běh končí. Konečná odpověď je přijatá verze."
+  "0": "Každý běh začíná zadáním a kritérii: délka se ověřuje počítáním.",
+  "3": "První návrh pisatele.",
+  "7": "Hodnotitel délku neodhaduje: pošle návrh počítadlu slov.",
+  "8": "Aplikace spočítala: 72 slov, 3 věty.",
+  "10": "Verdikt je upravit, se zpětnou vazbou, co chybí.",
+  "13": "Poskytovatel byl na chvíli vytížený a aplikace to zkusila znovu. Běhu to neublíží.",
+  "15": "Pisatel návrh podle zpětné vazby změní.",
+  "19": "Hodnotitel druhý návrh znovu spočítá.",
+  "20": "Druhý návrh: 63 slov, 4 věty.",
+  "22": "Verdikt je přijmout. Smyčka končí.",
+  "24": "Běh končí. Výsledkem je přijatý návrh."
 }

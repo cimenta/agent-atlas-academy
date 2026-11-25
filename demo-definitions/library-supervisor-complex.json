@@ -1,7 +1,7 @@
 {
   "format": "agent-atlas-run-definition",
   "version": 1,
-  "task": "Prepare a one-page plan for a school charity bake sale: a budget, who does what, and the main risks.",
+  "task": "Prepare a short plan for a school charity bake sale: a budget, who does what, and the main risks. Every helper must save the main point of its work with the notes tool before it answers, and keeps its answer under 100 words.",
   "about": {
     "en": {
       "title": "Supervisor: four workers, many turns, and a shared notebook",

@@ -1,6 +1,6 @@
 {
-  "about": "A planner plans a ten-minute class presentation on renewable energy and an executor writes it in two steps: an outline, then the script. Both run on Groq, free tier.",
-  "how": "The planner answered twice; the executor followed the second plan, step by step, and the script of the last step is the answer.",
-  "learns": "A plan with large steps gives the executor little to correct: it is only as good as the plan.",
-  "watch": "The two plans of the planner, and how the second step uses the outline of the first."
+  "about": "A stronger planner (Groq, Balanced) writes a plan of five steps for a short class presentation and an executor on the fast model does them. In the first step the executor asks the clock for the real date and works out the next Friday. Groq, free tier.",
+  "how": "The planner answers once with the list of steps. The executor gets each step with the results so far. In step 1 it calls the clock (the date and the weekday); the later steps use that date for the rehearsal schedule.",
+  "learns": "The quality of the whole run depends on the plan. The executor can call a tool: here the clock, because a model does not know what day it is.",
+  "watch": "The five steps of the plan, the clock row in the first step, and how Friday 27 November follows from the date of the day."
 }

@@ -1,0 +1,16 @@
+{
+  "0": "Každý běh začíná zadáním, které potřebuje datum, fakt, předpověď, cenu a součet.",
+  "3": "Výzkumník se zeptá hodin na datum: model neví, jaký je den.",
+  "5": "Vyhledá Karlův most na Wikipedii.",
+  "7": "Zeptá se na počasí v Praze.",
+  "8": "Předpověď se vrací ze služby počasí.",
+  "9": "Prohledá ceník, dokument, který je součástí běhu, a uvidí jen úsek, který sedí.",
+  "11": "Přečte zápisník: v tuto chvíli je prázdný.",
+  "14": "Výzkumník předá fakta: pátek 27. listopadu, most, předpověď a ceny.",
+  "18": "Pisatel spočítá celkovou cenu kalkulačkou místo sčítání z hlavy.",
+  "19": "Kalkulačka odpoví 6480.",
+  "21": "Pisatel pošle návrh počítadlu slov, aby ověřil limit.",
+  "22": "Počítadlo odpoví: 109 slov, pod 120.",
+  "24": "Konečný text.",
+  "26": "Běh končí."
+}

@@ -1,6 +1,6 @@
 {
-  "about": "Pisatel napíše poznámku o tom, co je správce hesel, hodnotitel požádá o úpravu a druhá verze je přijata. Oba agenti běží na Gemini, bezplatný tarif.",
-  "how": "Hodnotitel odpoví verdiktem (přijmout nebo upravit) a zpětnou vazbou. Verdikt upravit vrátí text pisateli, nejvýš dvě kola.",
-  "learns": "Smyčka s hodnotitelem zlepší koncept: zpětná vazba jednoho kola je vstupem dalšího.",
-  "watch": "Zpětnou vazbu prvního kola a co pisatel změnil ve druhé verzi."
+  "about": "Pisatel napíše krátký text o tom, co je správce hesel. Hodnotitel spočítá slova nástrojem, požádá o úpravu a druhý návrh přijme. Oba agenti běží na Gemini, bezplatná vrstva.",
+  "how": "Hodnotitel odpoví verdiktem (přijmout nebo upravit) a zpětnou vazbou. Než rozhodne, zavolá počítadlo slov (znaky, slova, věty). Úprava pošle návrh zpět pisateli, nejvýše dvě kola.",
+  "learns": "Smyčka s jasnou kontrolou zlepší odpověď, jak říkají kritéria. Hodnotitel počítá slova nástrojem, protože model počítá špatně.",
+  "watch": "Řádek počítadla před každým verdiktem, zpětnou vazbu prvního kola a co pisatel ve druhém návrhu změnil."
 }
