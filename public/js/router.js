@@ -22,6 +22,7 @@ export function parseRoute(hash) {
   if (first === "settings" && second === "key" && third !== undefined && SLUG.test(third)) return { name: "settings", params: { slot: third } };
   if (third !== undefined) return NOT_FOUND;
   if (first === "settings" && second === "shortcuts") return { name: "settings", params: { tab: "shortcuts" } };
+  if (first === "settings" && second === "skills") return { name: "settings", params: { tab: "skills" } };
   if (second === undefined) {
     if (["help", "about", "learn", "settings"].includes(first)) return { name: first, params: {} };
     return NOT_FOUND;

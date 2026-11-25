@@ -144,6 +144,8 @@ export function loadDefinition(text) {
     if (isObject(node.creates)) overrides.creates = node.creates;
     if (isObject(node.format)) overrides.format = node.format;
     if (Array.isArray(node.guardrails)) overrides.guardrails = node.guardrails;
+    // A definition says what skills each agent has, even none, so the defaults of this student do not apply to it.
+    overrides.skills = Array.isArray(node.skills) ? node.skills : undefined;
     if (design.memory?.notebook === true && typeof node.notebook === "string") overrides.notebook = node.notebook;
     for (const key of ["name", "instructions", "stance"]) if (typeof node[key] === "string") overrides[key] = node[key];
     const added = editor.addNode(node.agent, overrides);

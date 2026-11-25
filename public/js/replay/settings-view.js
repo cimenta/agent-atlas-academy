@@ -32,6 +32,10 @@ export function settingsRows({ node, design, agent, t, num = (n) => String(n) })
   if (node.addToPrevious === true) rows.push({ key: "insp.set.addToPrevious", text: yes(true) });
   if (isObject(node.format)) rows.push({ key: "insp.set.format", pre: cut(JSON.stringify(node.format, null, 2)) });
   if (Array.isArray(node.guardrails) && node.guardrails.length > 0) rows.push({ key: "insp.set.guardrails", pre: cut(JSON.stringify(node.guardrails, null, 2)) });
+  if (Array.isArray(node.skills) && node.skills.length > 0) {
+    rows.push({ key: "insp.set.skills", text: node.skills.map((e) => `${t(`skills.kind.${e.kind}`)}: ${e.name}${e.param ? ` (${t(`skills.culture.${e.param}`)})` : ""}`).join(" · ") });
+    rows.push({ key: "insp.set.skillsText", pre: cut(node.skills.map((e) => e.text).join("\n\n"), 1200) });
+  }
   if (isObject(node.creates)) rows.push({ key: "insp.set.creates", pre: cut(JSON.stringify(node.creates, null, 2)) });
   return rows;
 }

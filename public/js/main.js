@@ -6,6 +6,9 @@ import { markUnlockAlert } from "./unlock-alert.js";
 import { createKeyHandler } from "./shortcuts.js";
 import { createShortcutsPopup } from "./shortcuts-popup.js";
 import { createSettingsStore } from "./storage/settings.js";
+import { createSkillsStore } from "./storage/skills-store.js";
+import { defaultEntries } from "./skill-library.js";
+import { setDefaultSkills } from "./create/editor-model.js";
 import { migrateGeminiKey } from "./storage/gemini-slots.js";
 import { createIndexedDbBackend, createMemoryBackend, createRunStore } from "./storage/runs-store.js";
 import { renderSettings } from "./settings-page.js";
@@ -56,6 +59,9 @@ const store = createLanguageStore(safeStorage());
 const vault = createVault({ storage });
 const settings = createSettingsStore(storage);
 migrateGeminiKey({ storage, settings });
+const skills = createSkillsStore(storage);
+// A new agent starts with the default skills its student set for its type (Settings, Skills).
+setDefaultSkills((agent) => defaultEntries(skills.library(), skills.defaults(), agent));
 // The ? help buttons are hidden by a rule in the style sheet when this says off.
 document.documentElement.setAttribute("data-help", settings.get().helpButtons ? "on" : "off");
 const runStore = createRunStore(typeof indexedDB === "undefined" ? createMemoryBackend() : createIndexedDbBackend());
@@ -174,6 +180,7 @@ async function renderRoute(isNavigation) {
     fetchFn,
     vault,
     settings,
+    skills,
     runStore,
     tab: route.params?.tab,
     slot: route.params?.slot,

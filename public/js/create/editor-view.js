@@ -13,13 +13,14 @@ import { mayGuard, cleanGuardrails, GUARDRAIL_MAX, WORDS_MAX, LENGTH_MIN, LENGTH
 import { mayFormat, validFormat, formatPromptText, FORMAT_TYPES, FORMAT_MAX_FIELDS, FIELD_NAME_MAX } from "../engine/format.js";
 import { innerTabs } from "./steps-view.js";
 import { agentTabIds, currentAgentTab } from "./agent-tabs.js";
+import { skillsPane } from "./skills-pane.js";
 import { MULTI_RUN } from "../engine/spawn.js";
 import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, extentOf, isTwoWay, maxColsFor, orientationFor, flippedOf, linkBetween, linkPath, portPointAt, portSideOf, PORT_R, turnArrows, TWO_WAY_GAP } from "./diagram-geometry.js";
 
 const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, getModels = (node) => MODELS, modelUi = null, webSearchAllowed = () => true, searchAvailable = () => true, runLimits = () => ({ ...LIMIT_DEFAULTS, maxOutputTokens: OUTPUT_TOKENS.default }) }) {
+export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, skillsUi = null, getModels = (node) => MODELS, modelUi = null, webSearchAllowed = () => true, searchAvailable = () => true, runLimits = () => ({ ...LIMIT_DEFAULTS, maxOutputTokens: OUTPUT_TOKENS.default }) }) {
   let selectedId = null;
   let settingsTab = "tools"; // the tab of the agent settings that is open, kept while the visitor works on agents
   let connectFrom = null;
@@ -919,12 +920,18 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       }
       guardrailsPane.push(h(doc, "p", { class: "hint" }, t("editor.guardrailsEstimate")));
     }
+    // Skills: a role, a procedure and styles from the library of the student, on an agent whose reply is free text (see engine/skills.js).
+    const skillsOk = skillsUi !== null && mayFormat(node.agent, design.pattern);
+    const skillsTab = skillsOk ? skillsPane({ doc, t, node, lib: skillsUi.library(), startEntries: skillsUi.startEntries(node.agent), onSet: (list) => {
+      editor.setNode(node.id, { skills: list ?? undefined });
+      changed();
+    } }) : [];
     // The settings that are not about the model sit in tabs, so the panel stays short.
-    const panes = { tools: toolsPane, condense: condensePane, approval: approvalPane, notebook: notebookPane, limits: limitsPane, format: formatPane, guardrails: guardrailsPane, creates: createsPane };
-    const tabIds = agentTabIds({ notebookOn: editor.notebookOn(), creator, formatOk: mayFormat(node.agent, design.pattern), guardrailsOk: mayGuard(node.agent, design.pattern) });
+    const panes = { skills: skillsTab, tools: toolsPane, condense: condensePane, approval: approvalPane, notebook: notebookPane, limits: limitsPane, format: formatPane, guardrails: guardrailsPane, creates: createsPane };
+    const tabIds = agentTabIds({ notebookOn: editor.notebookOn(), creator, formatOk: mayFormat(node.agent, design.pattern), guardrailsOk: mayGuard(node.agent, design.pattern), skillsOk });
     settingsTab = currentAgentTab(settingsTab, tabIds);
     const limitCount = Object.keys(node.limits ?? {}).length;
-    const tabLabel = { tools: t("editor.toolsHeading"), condense: t("editor.condenseHeading"), approval: t("editor.approvalHeading"), notebook: t("editor.notebookHeading"), limits: `${t("editor.tab.limits")}${limitCount > 0 ? ` (${limitCount})` : ""}`, format: `${t("editor.tab.format")} · ${node.format ? t("editor.formatOn", { n: node.format.fields.length }) : t("editor.formatOff")}`, guardrails: `${t("editor.tab.guardrails")} · ${node.guardrails ? t("editor.guardrailsOn", { n: node.guardrails.length }) : t("editor.guardrailsOff")}`, creates: `${t("editor.tab.creates")} · ${node.creates ? t("editor.createsOn", { n: node.creates.max }) : t("editor.createsOff")}` };
+    const tabLabel = { skills: `${t("editor.tab.skills")}${(node.skills ?? []).length > 0 ? ` (${node.skills.length})` : ""}`, tools: t("editor.toolsHeading"), condense: t("editor.condenseHeading"), approval: t("editor.approvalHeading"), notebook: t("editor.notebookHeading"), limits: `${t("editor.tab.limits")}${limitCount > 0 ? ` (${limitCount})` : ""}`, format: `${t("editor.tab.format")} · ${node.format ? t("editor.formatOn", { n: node.format.fields.length }) : t("editor.formatOff")}`, guardrails: `${t("editor.tab.guardrails")} · ${node.guardrails ? t("editor.guardrailsOn", { n: node.guardrails.length }) : t("editor.guardrailsOff")}`, creates: `${t("editor.tab.creates")} · ${node.creates ? t("editor.createsOn", { n: node.creates.max }) : t("editor.createsOff")}` };
     const paneHost = h(doc, "div", { class: "agent-tab-panes" });
     const paneEls = new Map(tabIds.map((id) => [id, h(doc, "div", { class: "agent-tab-pane", role: "tabpanel", "data-ui": `agent-pane-${id}`, hidden: id !== settingsTab }, ...panes[id])]));
     paneHost.append(...paneEls.values());

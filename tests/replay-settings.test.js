@@ -31,3 +31,13 @@ test("an agent that is not in the recorded design still gets a row", () => {
   const rows = settingsRows({ node: null, design: null, agent: { label: "Ghost" }, t });
   assert.equal(rows.length, 1);
 });
+
+test("the skills of an agent are shown by kind and name, with the culture, and their text; an agent without skills has no such rows", () => {
+  const skills = [{ id: "critic", kind: "role", name: "Critic", text: "You are a critic." }, { id: "business", kind: "styl", name: "Business writing", param: "th", text: "Style: business." }];
+  const node = { id: "a", agent: "writer", model: "fast", slot: "groq-free", search: false, skills };
+  const rows = settingsRows({ node, design: { nodes: [node] }, agent: { label: "Writer", model: "m" }, t });
+  assert.equal(rowOf(rows, "insp.set.skills").text, "skills.kind.role: Critic · skills.kind.styl: Business writing (skills.culture.th)");
+  assert.match(rowOf(rows, "insp.set.skillsText").pre, /You are a critic\.\n\nStyle: business\./);
+  const plain = settingsRows({ node: { ...node, skills: undefined }, design: { nodes: [node] }, agent: { label: "Writer", model: "m" }, t });
+  assert.equal(rowOf(plain, "insp.set.skills"), undefined);
+});

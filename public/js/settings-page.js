@@ -1,4 +1,5 @@
 // The settings page: API key handling, the harness (limits and fixed rules) and local data.
+import { renderSkillsSettings } from "./skills-settings.js";
 import { h } from "./dom.js";
 import { helpIcon } from "./help-popup.js";
 import { SLOW_PROVIDER_TIMEOUT_FACTOR, LIMIT_MAX, LIMIT_DEFAULTS, OUTPUT_TOKENS, TIMEOUT_SEC, RETRIES, RETRY_DELAY_SEC, COST_CAP_USD, REPEAT_STOP, HANDOFF_CHARS, PROFILES, matchProfile, PROVIDER_IDS, providerCatalog, FALLBACK_MODES, FALLBACK_DEFAULT } from "./engine/catalog.js";
@@ -983,12 +984,14 @@ export function renderSettings(ctx) {
     ),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.securityHeading"), help("settings-security", t("settings.securityHeading"))), h(doc, "div", { class: "sec-switch", "data-ui": "sec-switch", role: "group", "aria-label": t("settings.secProvider") }, ...secSwitch), securityNone, secLead, secSteps, unlockForm, secActions),
   ];
+  const skillsSection = ctx.skills ? h(doc, "section", { class: "settings-section", "data-ui": "skills-section" }, h(doc, "h2", {}, t("skills.heading")), renderSkillsSettings({ doc, t, store: ctx.skills })) : null;
   const [keySection, harnessSection, tooltipsSection, playerSection, shortcutsSection, dataSection, securitySection] = written;
   // Tabs down the left (a row on a phone); one section is shown at a time.
   const keyTag = h(doc, "span", { class: "key-dot key-dot-inline", "data-ui": "key-saved-tag", role: "img", hidden: true });
   const panels = [
     ["key", "settings.tabKeys", keySection],
     ["harness", "harness.title", harnessSection],
+    ...(skillsSection ? [["skills", "skills.heading", skillsSection]] : []),
     ["player", "settings.playerHeading", playerSection],
     ["general", "settings.tabGeneral", tooltipsSection],
     ["data", "settings.dataHeading", dataSection],
@@ -1003,7 +1006,7 @@ export function renderSettings(ctx) {
     tabButtons.forEach((button) => button.setAttribute("aria-selected", String(button.getAttribute("data-tab") === id)));
   };
   tabButtons.forEach((button) => button.addEventListener("click", () => showTab(button.getAttribute("data-tab"))));
-  showTab(ctx.tab === "shortcuts" ? "shortcuts" : "key");
+  showTab(ctx.tab === "shortcuts" ? "shortcuts" : ctx.tab === "skills" && skillsSection ? "skills" : "key");
   const tabList = h(doc, "div", { class: "settings-tabs", role: "tablist", "data-ui": "settings-tabs" }, ...tabButtons);
   ctx.main.replaceChildren(h(doc, "h1", {}, t("settings.title")), message, h(doc, "div", { class: "settings-layout", "data-ui": "settings-layout" }, tabList, h(doc, "div", { class: "settings-body" }, ...panels.map(([, , node]) => node))));
   refreshStatus();

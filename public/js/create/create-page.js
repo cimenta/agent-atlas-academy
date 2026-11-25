@@ -1,4 +1,5 @@
 // The Create tab: task, pattern, diagram, review, then a live run in the player.
+import { defaultEntries, refreshEntries } from "../skill-library.js";
 import { h } from "../dom.js";
 import { helpIcon } from "../help-popup.js";
 import { markUnlockAlert } from "../unlock-alert.js";
@@ -851,7 +852,7 @@ export function renderCreate(ctx) {
         draft.editor.setNodeModel(id, choice);
       },
     };
-    editorHandle = mountEditor(editorHost, { editor: draft.editor, t, doc, onChange: drawReview, webSearchAllowed: () => ctx.settings.get().webSearch, searchAvailable: (node) => (isSlot(node.slot) ? providerSpec(slotProvider(node.slot)).capabilities.search : true), modelUi, runLimits: () => ({ ...clampLimits(draft.limits), maxOutputTokens: ctx.settings.get().maxOutputTokens }) });
+    editorHandle = mountEditor(editorHost, { editor: draft.editor, t, doc, onChange: drawReview, webSearchAllowed: () => ctx.settings.get().webSearch, searchAvailable: (node) => (isSlot(node.slot) ? providerSpec(slotProvider(node.slot)).capabilities.search : true), modelUi, skillsUi: ctx.skills ? { library: () => ctx.skills.library(), startEntries: (agent) => defaultEntries(ctx.skills.library(), ctx.skills.defaults(), agent) } : null, runLimits: () => ({ ...clampLimits(draft.limits), maxOutputTokens: ctx.settings.get().maxOutputTokens }) });
     ctx.onLeave(() => editorHandle.destroy());
     drawPatterns();
     drawReview();
@@ -885,9 +886,21 @@ export function renderCreate(ctx) {
     return limitFindings({ design, limits, ...runSettings() }).some((f) => f.kind === "call-too-big");
   }
 
+  // A new run reads the skills of its agents again from the library, so a skill edited since it was chosen counts with its new text.
+  function withFreshSkills(design) {
+    if (!ctx.skills) return design;
+    const lib = ctx.skills.library();
+    return { ...design, nodes: design.nodes.map((n) => {
+      if (!n.skills) return n;
+      const fresh = refreshEntries(lib, n.skills);
+      const { skills, ...rest } = n;
+      return fresh.length > 0 ? { ...rest, skills: fresh } : rest;
+    }) };
+  }
+
   function beginRun({ resume = null, approve = false } = {}) {
     // A new run carries the models the student chose for gone free models (a carried-on run keeps its own design).
-    const design = resume ? structuredClone(resume.design) : applyOverrides(draft.editor.design(), ctx.settings.get().modelOverrides);
+    const design = resume ? structuredClone(resume.design) : withFreshSkills(applyOverrides(draft.editor.design(), ctx.settings.get().modelOverrides));
     const limits = clampLimits(resume ? resume.limits : (draft.limits ?? ctx.settings.get().limits));
     // Every agent names its key slot; the run gets the key of each slot in use.
     const used = resume ? [] : usedSlots(design);

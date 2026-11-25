@@ -8,9 +8,10 @@ import { NOTEBOOK_CHOICES, mayWrite } from "../engine/notebook.js";
 import { mayCondense } from "../engine/condense.js";
 import { cleanFormat, mayFormat } from "../engine/format.js";
 import { cleanGuardrails, mayGuard } from "../engine/guardrails.js";
+import { cleanSkills } from "../engine/skills.js";
 
 const ONCE_ONLY = new Set(["supervisor", "combiner", "judge", "evaluator", "router", "tally", "splitter", "worker", "reducer", "executor"]);
-const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve", "notebook", "condense", "creates", "format", "guardrails"];
+const EDITABLE = ["model", "slot", "custom", "search", "name", "instructions", "stance", "addToPrevious", "limits", "onLimit", "approve", "notebook", "condense", "creates", "format", "guardrails", "skills"];
 const DEFAULT_ROUNDS = 2;
 const EVALUATOR_ROUNDS = 3;
 const roundsFor = (pattern) => (pattern === "evaluator" ? EVALUATOR_ROUNDS : DEFAULT_ROUNDS);
@@ -53,6 +54,23 @@ function tidyCreates(node, count) {
   }
   const max = Math.trunc(Number(c.max));
   node.creates = { max: Math.max(1, Math.min(room, Number.isFinite(max) ? max : 1)), guidance: typeof c.guidance === "string" ? c.guidance.slice(0, INSTRUCTIONS_MAX) : "", search: c.search === true };
+}
+
+// The skills a new agent of an agent type starts with (the defaults of the student, set once by the page). Nothing until it is set.
+let defaultSkillsFor = () => [];
+export function setDefaultSkills(fn) {
+  defaultSkillsFor = typeof fn === "function" ? fn : () => [];
+}
+
+// The skills of an agent: kept cleaned (see engine/skills.js). Nothing left removes them.
+function tidySkills(node) {
+  if (node.skills === undefined) {
+    delete node.skills;
+    return;
+  }
+  const clean = cleanSkills(node.skills);
+  if (clean) node.skills = clean;
+  else delete node.skills;
 }
 
 export function createEditor(initialPattern) {
@@ -143,11 +161,17 @@ export function createEditor(initialPattern) {
         node.name = "";
         node.instructions = "";
       }
+      // A new agent starts with the default skills of its type, unless the caller says what it has (a loaded definition says it, even with none).
+      if (!("skills" in overrides)) {
+        const starting = defaultSkillsFor(agent);
+        if (Array.isArray(starting) && starting.length > 0) node.skills = starting;
+      }
       for (const key of EDITABLE) if (key in overrides) node[key] = overrides[key];
       if (notebook && !choicesFor(node).includes(node.notebook)) node.notebook = defaultChoice(node);
       tidyLimits(node, pattern);
       tidyFormat(node, pattern);
       tidyGuardrails(node, pattern);
+      tidySkills(node);
       nodes.push(node);
       for (const n of nodes) tidyCreates(n, nodes.length);
       if (pattern === "handoff" && start === undefined) start = node.id;
@@ -178,6 +202,7 @@ export function createEditor(initialPattern) {
       tidyLimits(node, pattern);
       tidyFormat(node, pattern);
       tidyGuardrails(node, pattern);
+      tidySkills(node);
       tidyCreates(node, nodes.length);
     },
 
