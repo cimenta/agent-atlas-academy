@@ -17,7 +17,7 @@ export const PLAIN_EXTENSION = ".json.gz";
 export const ENCRYPTED_EXTENSION = ".json";
 const MINUTE = 60000;
 
-export const DEFAULTS = { mode: "off", remindAfter: 5, trigger: "time", interval: 60, quiet: 2, gap: 10, autoKeys: false, lastBackup: 0, lastChange: 0, failedAt: 0, changes: 0, sig: "" };
+export const DEFAULTS = { mode: "off", remindAfter: 5, trigger: "time", interval: 60, quiet: 2, gap: 10, autoKeys: true, lastBackup: 0, lastChange: 0, failedAt: 0, changes: 0, sig: "" };
 
 const pick = (value, list, fallback) => (list.includes(value) ? value : fallback);
 const time = (value) => (Number.isFinite(value) && value > 0 ? value : 0);
@@ -32,7 +32,7 @@ export function normalize(raw) {
     interval: pick(r.interval, OPTIONS.interval, DEFAULTS.interval),
     quiet: pick(r.quiet, OPTIONS.quiet, DEFAULTS.quiet),
     gap: pick(r.gap, OPTIONS.gap, DEFAULTS.gap),
-    autoKeys: r.autoKeys === true,
+    autoKeys: typeof r.autoKeys === "boolean" ? r.autoKeys : DEFAULTS.autoKeys,
     lastBackup: time(r.lastBackup),
     lastChange: time(r.lastChange),
     failedAt: time(r.failedAt),
@@ -198,7 +198,6 @@ export function createBackupService({ storage, runStore, settings, skills, vault
     if (busy) return { ok: false, reason: "busy" };
     const handle = await folderStore.get();
     if (!handle) return { ok: false, reason: "no-folder" };
-    if (state.autoKeys && password === "") return { ok: false, reason: "need-password" };
     busy = true;
     try {
       if (!(await permission(handle, interactive))) {

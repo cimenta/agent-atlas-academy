@@ -1990,7 +1990,7 @@
   "data.exportIntro": "Uloží kopii toho, co zvolíte, do souboru, pro sebe nebo pro přesun do jiného prohlížeče. Nic se nikam neposílá.",
   "data.noneChosen": "Zvolte aspoň jednu část k exportu.",
   "data.keysNeedPass": "Klíče se exportují jen s heslem k souboru. Napište heslo, nebo klíče odškrtněte.",
-  "data.keysWarning": "Klíč v souboru chrání jen heslo, které napíšete níže. Kdo soubor získá a heslo uhodne, získá klíč, proto zvolte silné heslo a soubor dobře uschovejte.",
+  "data.keysWarning": "Klíče v souboru zůstávají zašifrované heslem vašeho trezoru klíčů, tím, které je v aplikaci odemyká. Kdo soubor získá a to heslo uhodne, získá klíče, proto použijte silné heslo a soubor dobře uschovejte. Heslo zálohy (výše) přidá druhou vrstvu.",
   "data.passLabel": "Heslo k souboru (nepovinné)",
   "data.passPlaceholder": "bez hesla se soubor nešifruje",
   "data.export": "Exportovat do souboru",
@@ -2064,7 +2064,6 @@
   "data.backupDone": "Záloha byla zapsána do složky.",
   "data.backupFail.busy": "Záloha se právě dělá.",
   "data.backupFail.no-folder": "Nejdřív vyberte složku.",
-  "data.backupFail.need-password": "Klíče se zálohují jen s heslem. Napište výše heslo, nebo klíče odškrtněte.",
   "data.backupFail.permission": "Prohlížeč teď nepovoluje zápis do složky. Stiskněte Zálohovat teď a povolte ho.",
   "data.backupFail.write": "Zálohu se nepodařilo zapsat. Zkontrolujte, že složka stále existuje.",
   "data.cloudLater": "Přímé propojení s účtem Google, Dropbox nebo OneDrive zatím není hotové; synchronizovaná složka dělá totéž.",
@@ -2089,5 +2088,5 @@
   "data.filesProblem.permission": "Prohlížeč teď nepovoluje číst složku. Stiskněte Zálohovat teď a povolte to.",
   "data.filesProblem.read": "Složku se nepodařilo přečíst. Zkontrolujte, že stále existuje.",
   "data.passHelp": "Heslo zašifruje soubor zálohy. Aplikace si ho pamatuje, jen dokud je otevřená: po zavření ho zapomene, po novém otevření ho napište znovu.",
-  "data.keysHelp": "Klíče API jsou ve výchozím stavu vypnuté a zálohují se jen s heslem."
+  "data.keysHelp": "Uložené klíče API se zálohují ve výchozím stavu, stále zašifrované heslem vašeho trezoru klíčů. Odškrtněte, pokud je v záloze nechcete."
 }

@@ -172,10 +172,12 @@ test("without a folder, or without permission, nothing is written and the reason
   assert.equal(w.svc.error(), "");
 });
 
-test("keys go into a backup only when chosen, and then only with a password, and the file is encrypted", async () => {
+test("keys are included by default and need no password, and a password encrypts the whole file", async () => {
   const w = service();
-  w.svc.update({ autoKeys: true });
-  assert.deepEqual(await w.svc.backupNow(), { ok: false, reason: "need-password" });
+  assert.equal(w.svc.state().autoKeys, true);
+  assert.deepEqual(await w.svc.backupNow(), { ok: true });
+  assert.equal(isEncryptedText([...w.folder.files.values()][0]), false, "no password, no encryption of the file");
+  w.folder.files.clear();
   w.svc.setPassword("a long password");
   assert.deepEqual(await w.svc.backupNow(), { ok: true });
   const text = [...w.folder.files.values()][0];
@@ -184,8 +186,9 @@ test("keys go into a backup only when chosen, and then only with a password, and
   const plain = JSON.parse(await decryptText(text, "a long password"));
   assert.ok(plain.categories.includes("keys"));
   const other = service();
+  other.svc.update({ autoKeys: false });
   assert.deepEqual(await other.svc.backupNow(), { ok: true });
-  assert.equal(JSON.parse(await gunzip([...other.folder.files.values()][0])).categories.includes("keys"), false, "keys are off by default");
+  assert.equal(JSON.parse(await gunzip([...other.folder.files.values()][0])).categories.includes("keys"), false, "unticked, the keys stay out of the backup");
   assert.ok([...other.folder.files.keys()][0].endsWith(".json.gz"));
   assert.ok([...w.folder.files.keys()][0].endsWith(".json"), "an encrypted backup is a .json wrapper");
 });

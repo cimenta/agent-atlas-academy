@@ -325,9 +325,11 @@ test("the Backup tab is off by default, and its settings have three tabs: Genera
   await ui(s.root, "data-stab-general").click();
   assert.ok(ui(s.root, "data-pass-auto"));
   const keys = ui(s.root, "data-auto-keys");
-  keys.checked = true;
-  await keys.fire("change");
+  assert.equal(keys.checked, true, "keys are included by default");
   assert.ok(ui(s.root, "data-auto-keys-warning"));
+  keys.checked = false;
+  await keys.fire("change");
+  assert.equal(ui(s.root, "data-auto-keys-warning"), undefined);
   delete globalThis.showDirectoryPicker;
 });
 

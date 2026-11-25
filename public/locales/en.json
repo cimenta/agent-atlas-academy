@@ -1990,7 +1990,7 @@
   "data.exportIntro": "Save a copy of what you choose to a file, for yourself or to move to another browser. Nothing is sent anywhere.",
   "data.noneChosen": "Choose at least one part to export.",
   "data.keysNeedPass": "Keys are exported only with a password for the file. Type a password, or untick the keys.",
-  "data.keysWarning": "A key in the file is protected only by the password you type below. Whoever gets the file and guesses the password gets the key, so choose a strong one and keep the file safe.",
+  "data.keysWarning": "The keys in the file stay encrypted with the password of your key vault, the one that unlocks them in the app. Whoever gets the file and guesses that password gets the keys, so use a strong one and keep the file safe. A password for the backup (above) adds a second layer.",
   "data.passLabel": "Password for the file (optional)",
   "data.passPlaceholder": "without a password the file is not encrypted",
   "data.export": "Export to a file",
@@ -2064,7 +2064,6 @@
   "data.backupDone": "The backup was written to the folder.",
   "data.backupFail.busy": "A backup is just being made.",
   "data.backupFail.no-folder": "Choose a folder first.",
-  "data.backupFail.need-password": "Keys are backed up only with a password. Type a password above, or untick the keys.",
   "data.backupFail.permission": "The browser does not allow writing to the folder now. Press Back up now and allow it.",
   "data.backupFail.write": "The backup could not be written. Check that the folder still exists.",
   "data.cloudLater": "A direct link to a Google, Dropbox or OneDrive account is not built yet; a synced folder does the same.",
@@ -2089,5 +2088,5 @@
   "data.filesProblem.permission": "The browser does not allow reading the folder now. Press Back up now and allow it.",
   "data.filesProblem.read": "The folder could not be read. Check that it still exists.",
   "data.passHelp": "The password encrypts the backup file. The app keeps it only while it is open: it is forgotten when you close the app, so type it again after opening it.",
-  "data.keysHelp": "API keys are off by default, and they are backed up only with a password."
+  "data.keysHelp": "The saved API keys are included by default, still encrypted with the password of your key vault. Untick to leave them out of the backup."
 }
