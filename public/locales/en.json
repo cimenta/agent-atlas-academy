@@ -2059,7 +2059,7 @@
   "data.folderChoose": "Choose a folder",
   "data.folderChange": "Change the folder",
   "data.noFolder": "no folder",
-  "data.folderUnsupported": "This browser cannot write to a folder. Use a Chromium based browser (Chrome, Edge), or the mode Remind me and Export and import.",
+  "data.folderUnsupported": "This browser cannot write to a folder, so the automatic backup is not available here. Use Remind me and Export and import, or open the app in Chrome or Edge for the automatic backup.",
   "data.needTarget": "Choose a folder first, so that there is a place to back up to.",
   "data.backupNow": "Back up now",
   "data.backupDone": "The backup was written to the folder.",

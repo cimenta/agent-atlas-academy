@@ -84,6 +84,9 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
   // ---- backup: an export that runs by itself (off by default)
   const duration = (minutes) => (minutes < 60 ? t("data.dur.min", { n: minutes }) : minutes === 1440 ? t("data.dur.day") : t("data.dur.hour", { n: minutes / 60 }));
   function backupView() {
+    // A browser that cannot write to a folder (Firefox, Safari) has no automatic backup: only the reminder and the export by hand.
+    const supported = typeof globalThis.showDirectoryPicker === "function";
+    if (!supported && service.state().mode === "auto") service.update({ mode: "remind" });
     const state = service.state();
     const field = (label, control) => h(doc, "div", { class: "field" }, h(doc, "label", { for: control.attrs?.id ?? control.id }, label), control);
     const choice = (id, key, values, current, text) => {
@@ -96,7 +99,7 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
       return sel;
     };
     const modes = ["off", "remind", "auto"].map((m) => {
-      const radio = h(doc, "input", { type: "radio", name: "data-mode", id: `data-mode-${m}`, value: m, checked: state.mode === m, "data-ui": `data-mode-${m}` });
+      const radio = h(doc, "input", { type: "radio", name: "data-mode", id: `data-mode-${m}`, value: m, checked: state.mode === m, disabled: m === "auto" && !supported, "data-ui": `data-mode-${m}` });
       radio.addEventListener("change", () => {
         service.update({ mode: m });
         draw();
@@ -132,7 +135,6 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
     }
 
     const folderName = service.folderName();
-    const supported = typeof globalThis.showDirectoryPicker === "function";
     const choose = h(doc, "button", { type: "button", "data-ui": "data-folder-choose", disabled: !supported }, t(folderName ? "data.folderChange" : "data.folderChoose"));
     const message = h(doc, "div", { "data-ui": "data-backup-message", "aria-live": "polite" });
     choose.addEventListener("click", async () => {
@@ -156,14 +158,17 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
         h(doc, "p", {}, t("data.backupIntro")),
         h(doc, "div", { class: "field" }, h(doc, "b", {}, t("data.whenHeading")), ...modes),
         ...more,
-        h(doc, "div", { class: "field" }, h(doc, "b", {}, t("data.whereHeading")), h(doc, "p", { class: "hint" }, t("data.whereHint")),
-          h(doc, "div", { class: "data-actions" }, choose, h(doc, "span", { class: "hint", "data-ui": "data-folder-name" }, folderName || t("data.noFolder")))),
-        ...(supported ? [] : [h(doc, "p", { class: "notice", "data-ui": "data-folder-unsupported" }, t("data.folderUnsupported"))]),
-        ...(state.mode === "auto" && folderName === "" ? [h(doc, "p", { class: "notice", "data-ui": "data-need-target" }, t("data.needTarget"))] : []),
-        ...problem,
-        h(doc, "div", { class: "data-actions" }, now),
-        message,
-        h(doc, "p", { class: "hint" }, t("data.cloudLater"))),
+        ...(supported
+          ? [
+              h(doc, "div", { class: "field" }, h(doc, "b", {}, t("data.whereHeading")), h(doc, "p", { class: "hint" }, t("data.whereHint")),
+                h(doc, "div", { class: "data-actions" }, choose, h(doc, "span", { class: "hint", "data-ui": "data-folder-name" }, folderName || t("data.noFolder")))),
+              ...(state.mode === "auto" && folderName === "" ? [h(doc, "p", { class: "notice", "data-ui": "data-need-target" }, t("data.needTarget"))] : []),
+              ...problem,
+              h(doc, "div", { class: "data-actions" }, now),
+              message,
+              h(doc, "p", { class: "hint" }, t("data.cloudLater")),
+            ]
+          : [h(doc, "p", { class: "notice", "data-ui": "data-folder-unsupported" }, t("data.folderUnsupported"))])),
     ];
   }
 

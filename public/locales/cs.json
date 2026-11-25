@@ -2059,7 +2059,7 @@
   "data.folderChoose": "Vybrat složku",
   "data.folderChange": "Změnit složku",
   "data.noFolder": "žádná složka",
-  "data.folderUnsupported": "Tento prohlížeč neumí zapisovat do složky. Použijte prohlížeč na základě Chromia (Chrome, Edge), nebo režim Připomínat a Export a import.",
+  "data.folderUnsupported": "Tento prohlížeč neumí zapisovat do složky, proto tu automatická záloha není. Použijte Připomínat a Export a import, nebo otevřete aplikaci v Chrome či Edge, kde automatická záloha funguje.",
   "data.needTarget": "Nejdřív vyberte složku, ať je kam zálohovat.",
   "data.backupNow": "Zálohovat teď",
   "data.backupDone": "Záloha byla zapsána do složky.",

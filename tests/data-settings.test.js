@@ -276,6 +276,7 @@ test("cleanup asks twice, then deletes only that part, and Delete all clears eve
 });
 
 test("the Backup tab is off by default, and choosing the automatic mode shows its options and asks for a folder", async () => {
+  globalThis.showDirectoryPicker = () => {};
   const w = world();
   const s = screen(w);
   await later();
@@ -298,6 +299,21 @@ test("the Backup tab is off by default, and choosing the automatic mode shows it
   keys.checked = true;
   await keys.fire("change");
   assert.ok(ui(s.root, "data-auto-keys-warning"));
+  delete globalThis.showDirectoryPicker;
+});
+
+test("a browser that cannot write to a folder has no automatic mode, only the reminder", async () => {
+  delete globalThis.showDirectoryPicker;
+  const w = world();
+  w.storage.setItem("aa.data.backup", JSON.stringify({ mode: "auto" }));
+  const s = screen(w);
+  await later();
+  await ui(s.root, "data-tab-backup").click();
+  assert.notEqual(ui(s.root, "data-mode-auto").attrs.disabled, undefined, "the automatic mode is switched off");
+  assert.equal(ui(s.root, "data-mode-remind").checked, true, "a stored automatic mode falls back to the reminder");
+  assert.ok(ui(s.root, "data-folder-unsupported"));
+  assert.equal(ui(s.root, "data-folder-choose"), undefined);
+  assert.equal(ui(s.root, "data-backup-now"), undefined);
 });
 
 test("the reminder shows above the tabs after enough changes and goes to Export", async () => {
