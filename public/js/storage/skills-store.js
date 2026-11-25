@@ -72,6 +72,33 @@ export function createSkillsStore(storage) {
       write(next.users(), cleanDefaults(Object.fromEntries(Object.entries(defaults).map(([type, d]) => [type, { ...d, role: d.role === id ? "" : d.role, postup: d.postup === id ? "" : d.postup, styles: d.styles.filter((s) => s !== id) }])), Object.keys(AGENT_TYPES)));
       return true;
     },
+    // For an export: the skills of the student and the defaults of the agent types, and the way back.
+    // A merge adds the skills whose id is not here yet and the defaults of the agent types that have none; a replace takes both as they are.
+    exportData() {
+      const { lib, defaults } = state();
+      return { skills: lib.users(), defaults };
+    },
+    importData(data, mode) {
+      const incoming = createLibrary(Array.isArray(data?.skills) ? data.skills : []).users();
+      const incomingDefaults = cleanDefaults(data?.defaults, Object.keys(AGENT_TYPES));
+      const { lib, defaults } = state();
+      let users;
+      let nextDefaults;
+      if (mode === "replace") {
+        users = incoming;
+        nextDefaults = incomingDefaults;
+      } else {
+        const have = new Set(lib.users().map((u) => u.id));
+        users = [...lib.users(), ...incoming.filter((u) => !have.has(u.id))].slice(0, USER_SKILLS_MAX);
+        nextDefaults = { ...incomingDefaults, ...defaults };
+      }
+      const next = createLibrary(users);
+      write(next.users(), cleanDefaults(nextDefaults, Object.keys(AGENT_TYPES)));
+      return next.users().length;
+    },
+    clearAll() {
+      write([], {});
+    },
     setDefaults(agentType, value) {
       if (!(agentType in AGENT_TYPES)) return;
       const { lib, defaults } = state();

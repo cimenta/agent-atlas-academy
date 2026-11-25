@@ -42,6 +42,23 @@ export function createVerdictStore(storage) {
       for (const old of keys.slice(0, Math.max(0, keys.length - ENTRIES_MAX))) delete all[old];
       return write(all);
     },
+    // For an export: every verdict as it is kept, and the way back. A merge keeps the verdicts already here and adds the others; a replace takes the list.
+    exportAll: read,
+    importAll(data, mode) {
+      const incoming = isObject(data) ? Object.fromEntries(Object.entries(data).filter(([, e]) => isObject(e) && typeof e.pick === "string").map(([k, e]) => [k, { pick: e.pick, note: typeof e.note === "string" ? e.note.slice(0, NOTE_MAX) : "" }])) : {};
+      const all = mode === "replace" ? incoming : { ...incoming, ...read() };
+      const keys = Object.keys(all);
+      for (const old of keys.slice(0, Math.max(0, keys.length - ENTRIES_MAX))) delete all[old];
+      write(all);
+      return Object.keys(all).length;
+    },
+    clearAll() {
+      try {
+        storage.removeItem(KEY);
+      } catch {
+        // nothing more can be done
+      }
+    },
     clear(ids) {
       const all = read();
       delete all[verdictKey(ids)];

@@ -1906,3 +1906,11 @@ table.libstats th[data-hover-title]::after { content: " ⓘ"; font-size: 0.8em; 
 :root[data-theme="dark"] .skill-seg.seg-app { background: #1c2f3b; }
 :root[data-theme="dark"] .skill-seg.seg-culture { background: #3a3220; }
 :root[data-theme="dark"] .skill-seg.seg-user { background: #2a2340; }
+.data-cells { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 6px; }
+.data-cell { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); padding: 8px 12px; min-width: 100px; }
+.data-cell b { display: block; font-size: 1.25rem; }
+.data-cell span { font-size: 0.8rem; color: var(--muted); }
+.data-card.wide { margin: 0 0 12px; max-width: 860px; }
+.data-cat { margin: 2px 0; }
+.data-delete-cell { text-align: right; white-space: nowrap; vertical-align: middle; }
+button.danger.sure { background: var(--err); border-color: var(--err); color: #fff; }

@@ -46,3 +46,23 @@ export function doneMarkFor(storage, item) {
   if (goals.length === 0) return null;
   return { isDone: () => isRunDone(loadProgress(storage()), item), toggle: (on) => goals.forEach((g) => setDone(storage(), g, item.id, on)) };
 }
+
+// For an export: the keys of the done steps, and the way back. A merge adds the keys that are not there; a replace takes the list as it is.
+export const exportProgress = (storage) => [...loadProgress(storage)].sort();
+export function importProgress(storage, list, mode) {
+  const next = new Set(Array.isArray(list) ? list.filter((x) => typeof x === "string" && x.length <= 200) : []);
+  const set = mode === "replace" ? next : new Set([...loadProgress(storage), ...next]);
+  try {
+    storage?.setItem(KEY, JSON.stringify([...set]));
+  } catch {
+    // the marks last until the page is closed
+  }
+  return set.size;
+}
+export function clearProgress(storage) {
+  try {
+    storage?.removeItem(KEY);
+  } catch {
+    // nothing more can be done
+  }
+}

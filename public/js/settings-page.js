@@ -16,9 +16,8 @@ import { DEFAULT_GO_KEYS } from "./shortcuts.js";
 import { buildShortcutList } from "./shortcut-list.js";
 import { fixedRules } from "./engine/harness.js";
 import { VaultError } from "./storage/key-vault.js";
-import { exportBackup, parseBackup, applyBackup, backupVaultRecords } from "./storage/backup.js";
-
-const formatSize = (bytes) => (bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1048576).toFixed(1)} MB`);
+import { renderDataSettings } from "./data-settings.js";
+import { createVerdictStore } from "./compare-verdict.js";
 
 export function renderSettings(ctx) {
   const { doc, t, vault, settings, runStore } = ctx;
@@ -723,109 +722,9 @@ export function renderSettings(ctx) {
     drawShortcuts();
   });
 
-  // Local data: how many runs and roughly how much space they take.
-  const dataStat = h(doc, "p", { class: "data-stat", "data-ui": "data-stat" });
-  const refreshStat = async () => {
-    try {
-      const items = await runStore.list();
-      let bytes = 0;
-      for (const item of items) bytes += JSON.stringify((await runStore.get(item.id)) ?? "").length;
-      dataStat.textContent = t("settings.dataStat", { n: items.length, size: formatSize(bytes) });
-    } catch {
-      dataStat.textContent = "";
-    }
-  };
-  refreshStat();
-  const deleteButton = h(doc, "button", { type: "button", class: "danger" }, t("settings.deleteRuns"));
-  const confirmBox = h(doc, "div", { class: "confirm", hidden: true });
-  const confirmYes = h(doc, "button", { type: "button", class: "danger" }, t("settings.deleteConfirmYes"));
-  const confirmNo = h(doc, "button", { type: "button" }, t("settings.deleteConfirmNo"));
-  confirmBox.append(h(doc, "p", {}, t("settings.deleteConfirm")), confirmYes, confirmNo);
-  deleteButton.addEventListener("click", () => {
-    confirmBox.hidden = false;
-  });
-  confirmNo.addEventListener("click", () => {
-    confirmBox.hidden = true;
-  });
-  confirmYes.addEventListener("click", async () => {
-    try {
-      await runStore.clear();
-      say(t("settings.runsDeleted"));
-      refreshStat();
-    } catch {
-      say(t("settings.error.storage"), true);
-    }
-    confirmBox.hidden = true;
-  });
-
-  // Backup: export and import.
-  const includeKey = h(doc, "input", { id: "set-include-key", type: "checkbox" });
-  const exportButton = h(doc, "button", { type: "button" }, t("settings.export"));
-  exportButton.addEventListener("click", async () => {
-    try {
-      const items = await runStore.list();
-      const runs = [];
-      for (const item of items) runs.push(await runStore.get(item.id));
-      const backup = exportBackup({
-        runs: runs.filter(Boolean),
-        settings: settings.get(),
-        vaultRecord: vault.exportRecord(),
-        ...backupVaultRecords(vaultOf),
-        includeKey: includeKey.checked,
-        appVersion: ctx.version,
-      });
-      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = h(doc, "a", { href: url, download: "agent-atlas-backup.json" });
-      doc.body.append(link);
-      link.click();
-      link.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      say(t("settings.exported", { n: runs.length }));
-    } catch {
-      say(t("settings.error.storage"), true);
-    }
-  });
-  const importFile = h(doc, "input", { id: "set-import", type: "file", accept: "application/json,.json", hidden: true });
-  const chooseFileButton = h(doc, "button", { type: "button", "data-ui": "import-choose" }, t("settings.chooseFile"));
-  chooseFileButton.addEventListener("click", () => importFile.click());
-  const importChoice = h(doc, "div", { class: "confirm", hidden: true });
-  const importProblems = h(doc, "ul", { class: "reasons", hidden: true });
-  let pending = null;
-  importFile.addEventListener("change", async () => {
-    importChoice.hidden = true;
-    importProblems.hidden = true;
-    pending = null;
-    const file = importFile.files?.[0];
-    if (!file) return;
-    const parsed = parseBackup(await file.text());
-    if (!parsed.ok) {
-      importProblems.replaceChildren(h(doc, "li", {}, t("settings.importRejected")), ...parsed.errors.slice(0, 20).map((e) => h(doc, "li", {}, e)));
-      importProblems.hidden = false;
-      return;
-    }
-    pending = parsed.backup;
-    importChoice.hidden = false;
-  });
-  const runImport = async (mode) => {
-    if (!pending) return;
-    try {
-      const result = await applyBackup(pending, { runStore, settingsStore: settings, vault, mode });
-      say(t("settings.imported", result));
-      refreshStat();
-    } catch {
-      say(t("settings.error.storage"), true);
-    }
-    pending = null;
-    importChoice.hidden = true;
-    importFile.value = "";
-    refreshStatus();
-  };
-  const mergeButton = h(doc, "button", { type: "button", class: "primary" }, t("settings.importMerge"));
-  const replaceButton = h(doc, "button", { type: "button", class: "danger" }, t("settings.importReplace"));
-  mergeButton.addEventListener("click", () => runImport("merge"));
-  replaceButton.addEventListener("click", () => runImport("replace"));
-  importChoice.append(h(doc, "p", {}, t("settings.importChoose")), mergeButton, replaceButton);
+  // Local data: overview, export and import, and cleanup (see data-settings.js).
+  const storage = doc.defaultView?.localStorage ?? null;
+  const dataBody = renderDataSettings({ doc, t, say, runStore, settings, vault, vaultOf, skills: ctx.skills ?? null, storage, verdictStore: createVerdictStore(storage), version: ctx.version, onChanged: () => refreshStatus() });
 
   // Check all models: every key that is loaded, one after the other, one line for each. Shown only, never stored.
   let checkingAll = false;
@@ -971,16 +870,7 @@ export function renderSettings(ctx) {
       { class: "settings-section" },
       h(doc, "h2", {}, t("settings.dataHeading"), help("settings-data", t("settings.dataHeading"))),
       h(doc, "p", {}, t("settings.dataIntro")),
-      dataStat,
-      h(
-        doc,
-        "div",
-        { class: "data-cards", "data-ui": "data-cards" },
-        h(doc, "div", { class: "data-card", "data-ui": "data-backup" }, h(doc, "h3", {}, t("settings.backupTitle")), h(doc, "p", {}, t("settings.backupText")), h(doc, "div", { class: "field checkbox" }, includeKey, h(doc, "label", { for: "set-include-key" }, t("settings.includeKey"))), h(doc, "div", { class: "data-actions" }, exportButton)),
-        h(doc, "div", { class: "data-card", "data-ui": "data-restore" }, h(doc, "h3", {}, t("settings.restoreTitle")), h(doc, "p", {}, t("settings.restoreText")), importProblems, importChoice, h(doc, "div", { class: "data-actions" }, chooseFileButton, importFile)),
-      ),
-      h(doc, "div", { class: "danger-row", "data-ui": "data-danger" }, h(doc, "div", {}, h(doc, "h3", {}, t("settings.deleteRuns")), h(doc, "p", {}, t("settings.deleteText"))), deleteButton),
-      confirmBox,
+      dataBody,
     ),
     h(doc, "section", { class: "settings-section" }, h(doc, "h2", {}, t("settings.securityHeading"), help("settings-security", t("settings.securityHeading"))), h(doc, "div", { class: "sec-switch", "data-ui": "sec-switch", role: "group", "aria-label": t("settings.secProvider") }, ...secSwitch), securityNone, secLead, secSteps, unlockForm, secActions),
   ];
