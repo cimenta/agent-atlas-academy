@@ -21,6 +21,21 @@ test("Wikipedia gives the title, the summary and the address, from the fixed hos
   assert.ok(urls[0].includes("Alan%20Turing"));
 });
 
+test("Wikipedia prefers the page named like the query, and otherwise names the other pages it found", async () => {
+  const pages = { query: { pages: {
+    1: { index: 1, title: "Rotačka", extract: "A rotary press.", fullurl: "https://cs.wikipedia.org/wiki/Rota%C4%8Dka" },
+    2: { index: 2, title: "Tiskový stroj", extract: "A printing press.", fullurl: "https://cs.wikipedia.org/wiki/Tiskov%C3%BD_stroj" },
+    3: { index: 3, title: "Knihtisk", extract: "Letterpress.", fullurl: "https://cs.wikipedia.org/wiki/Knihtisk" },
+  } } };
+  const named = await wikipediaText({ query: "tiskový stroj", language: "cs" }, { fetchImpl: async () => json(pages) });
+  assert.match(named, /^Tiskový stroj \(Wikipedia, cs\)/);
+  assert.doesNotMatch(named, /Other pages found/);
+  const loose = await wikipediaText({ query: "printing machine", language: "cs" }, { fetchImpl: async () => json(pages) });
+  assert.match(loose, /^Rotačka \(Wikipedia, cs\)/);
+  assert.match(loose, /Other pages found: Tiskový stroj; Knihtisk\. If this is not the page you meant/);
+  assert.doesNotMatch((await wikipediaText({ query: "Alan Turing" }, { fetchImpl: async () => json(wikiPage) })), /Other pages/);
+});
+
 test("Wikipedia refuses an empty query, a long one and a language it does not offer, without any call", async () => {
   let calls = 0;
   const fetchImpl = async () => { calls += 1; return json(wikiPage); };

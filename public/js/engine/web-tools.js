@@ -47,11 +47,17 @@ export async function wikipediaText({ query, language } = {}, options = {}) {
   const q = cleanQuery(query, "A search text (query)");
   const lang = language === undefined || language === "" ? "en" : String(language).toLowerCase();
   if (!WIKI_LANGUAGES.includes(lang)) throw new ToolError(`The language must be one of: ${WIKI_LANGUAGES.join(", ")}.`);
-  const url = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&redirects=1&generator=search&gsrsearch=${encodeURIComponent(q)}&gsrlimit=1&prop=extracts|info&exintro=1&explaintext=1&exchars=${WEB_TOOL_LIMITS.summaryChars}&inprop=url`;
+  const url = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&redirects=1&generator=search&gsrsearch=${encodeURIComponent(q)}&gsrlimit=3&prop=extracts|info&exintro=1&explaintext=1&exchars=${WEB_TOOL_LIMITS.summaryChars}&inprop=url`;
   const data = await getJson(url, { ...options, service: "Wikipedia" });
-  const page = Object.values(data?.query?.pages ?? {})[0];
-  if (!page || typeof page.extract !== "string" || page.extract.trim() === "") throw new ToolError(`Wikipedia has no page for "${q}" in ${lang}.`);
-  return `${page.title} (Wikipedia, ${lang})\n${page.extract.trim()}\n${page.fullurl ?? ""}`.trim();
+  // The search ranks pages by words in their text, so the first hit is not always the page named like the query ("tiskový stroj" found
+  // "Rotačka"). A page with the title of the query wins; otherwise the first hit is used and the other titles are named, so the model can ask again.
+  const found = Object.values(data?.query?.pages ?? {}).filter((p) => typeof p?.extract === "string" && p.extract.trim() !== "").sort((a, b) => (a.index ?? 1) - (b.index ?? 1));
+  const same = (p) => String(p.title ?? "").trim().toLowerCase() === q.toLowerCase();
+  const page = found.find(same) ?? found[0];
+  if (!page) throw new ToolError(`Wikipedia has no page for "${q}" in ${lang}.`);
+  const others = found.filter((p) => p !== page).map((p) => p.title).filter(Boolean);
+  const more = !same(page) && others.length > 0 ? `\nOther pages found: ${others.join("; ")}. If this is not the page you meant, ask again with one of these titles.` : "";
+  return `${page.title} (Wikipedia, ${lang})\n${page.extract.trim()}\n${page.fullurl ?? ""}${more}`.trim();
 }
 
 const rounded = (n) => (typeof n === "number" ? Math.round(n * 10) / 10 : "?");
