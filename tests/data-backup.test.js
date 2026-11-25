@@ -6,7 +6,7 @@ import { createVault } from "../public/js/storage/key-vault.js";
 import { createSkillsStore } from "../public/js/storage/skills-store.js";
 import { createVerdictStore } from "../public/js/compare-verdict.js";
 import { decryptText, isEncryptedText, gunzip, isGzip } from "../public/js/storage/file-crypto.js";
-import { DEFAULTS, normalize, observe, backupDue, reminderDue, backupFileName, writeToFolder, createBackupService, readState, writeState, fingerprint } from "../public/js/data-backup.js";
+import { DEFAULTS, normalize, observe, backupDue, reminderDue, backupFileName, writeToFolder, createBackupService, dateOfName, isBackupFile, readState, writeState, fingerprint } from "../public/js/data-backup.js";
 
 const MIN = 60000;
 const memory = () => {
@@ -80,7 +80,7 @@ function fakeFolder(existing = []) {
     getFileHandle: async (name) => ({ createWritable: async () => ({ write: async (text) => files.set(name, text), close: async () => {} }) }),
     removeEntry: async (name) => void files.delete(name),
     async *entries() {
-      for (const name of files.keys()) yield [name, { kind: "file" }];
+      for (const name of files.keys()) yield [name, { kind: "file", getFile: async () => ({ size: String(files.get(name)).length, lastModified: 5 }) }];
     },
   };
 }
@@ -199,4 +199,58 @@ test("an export by hand starts the reminder again", async () => {
   assert.equal(w.svc.state().changes, 1);
   w.svc.markExported();
   assert.equal(w.svc.state().changes, 0);
+});
+
+test("the files in the folder are listed newest first, only ours, and one of ours can be deleted", async () => {
+  const w = service();
+  await w.svc.backupNow();
+  w.advance(90);
+  w.svc.update({ autoKeys: true });
+  w.svc.setPassword("a long password");
+  await w.svc.backupNow();
+  w.folder.files.set("holiday.json", "not ours");
+  const listing = await w.svc.listFiles();
+  assert.equal(listing.ok, true);
+  assert.equal(listing.files.length, 2, "a file of another name is not listed");
+  assert.ok(listing.files[0].name > listing.files[1].name, "the newest first");
+  assert.equal(listing.files[0].encrypted, true);
+  assert.equal(listing.files[1].encrypted, false);
+  assert.ok(listing.files[0].size > 0 && listing.files[0].date > 0);
+  assert.equal(await w.svc.deleteFile("holiday.json"), false, "a file that is not ours is never deleted");
+  assert.equal(w.folder.files.has("holiday.json"), true);
+  assert.equal(await w.svc.deleteFile(listing.files[1].name), true);
+  assert.equal((await w.svc.listFiles()).files.length, 1);
+});
+
+test("the list says why it is empty: no folder, or no permission to read it", async () => {
+  const w = service();
+  w.setHandle(null);
+  assert.deepEqual(await w.svc.listFiles(), { ok: false, reason: "no-folder", files: [] });
+  const denied = fakeFolder();
+  denied.queryPermission = async () => "prompt";
+  w.setHandle(denied);
+  assert.deepEqual(await w.svc.listFiles(), { ok: false, reason: "permission", files: [] });
+});
+
+test("a failed backup is remembered with its time, and a good one clears it", async () => {
+  const w = service();
+  const denied = fakeFolder();
+  denied.queryPermission = async () => "prompt";
+  denied.requestPermission = async () => "denied";
+  w.setHandle(denied);
+  await w.svc.backupNow();
+  assert.ok(w.svc.state().failedAt > 0);
+  w.setHandle(fakeFolder());
+  await w.svc.backupNow();
+  assert.equal(w.svc.state().failedAt, 0);
+  assert.ok(w.svc.state().lastBackup > 0);
+});
+
+test("the time in a file name is read back, and only our names count", () => {
+  assert.equal(dateOfName("agent-atlas-backup-2026-11-25-1432.json.gz"), new Date(2026, 10, 25, 14, 32).getTime());
+  assert.equal(dateOfName("agent-atlas-backup-2026-11-25-1432.json"), new Date(2026, 10, 25, 14, 32).getTime());
+  assert.equal(dateOfName("holiday.json"), 0);
+  assert.equal(isBackupFile("agent-atlas-backup-x.json"), true);
+  assert.equal(isBackupFile("agent-atlas-backup-x.txt"), false);
+  assert.equal(isBackupFile("other.json"), false);
 });

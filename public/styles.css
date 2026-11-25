@@ -1911,6 +1911,18 @@ table.libstats th[data-hover-title]::after { content: " ⓘ"; font-size: 0.8em; 
 .data-size { font-size: 1.3rem; font-weight: 700; line-height: 1.2; cursor: help; flex: none; }
 .data-intro { margin: 2px 0 4px; }
 .data-cell { cursor: help; }
+.data-btitle { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.data-btitle h3 { margin: 0; }
+.data-lastinfo { font-size: 0.76rem; }
+.data-lastinfo.bad { color: #c0392b; }
+.data-btabsrow { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--border); margin: 0 0 12px; }
+.data-btabsrow .ptabs { border-bottom: 0; margin: 0; }
+.data-btabsrow > button { margin-bottom: 6px; }
+.ptabs.sub { font-size: 0.9rem; border-bottom: 1px dashed var(--border); }
+.data-tag { margin-left: 6px; font-size: 0.7rem; border: 1px solid var(--border); border-radius: 999px; padding: 1px 7px; color: var(--muted); }
+.data-tag.enc { border-color: var(--accent); color: var(--accent); }
+.data-filename { word-break: break-all; }
+@media (max-width: 520px) { .data-filename { display: none; } }
 .data-cells { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 6px; }
 .data-cell { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); padding: 8px 12px; min-width: 100px; }
 .data-cell b { display: block; font-size: 1.25rem; }

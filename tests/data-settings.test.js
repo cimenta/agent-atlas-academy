@@ -11,6 +11,7 @@ import { createSkillsStore } from "../public/js/storage/skills-store.js";
 import { createVerdictStore } from "../public/js/compare-verdict.js";
 import { exportProgress, importProgress, setDone, loadProgress } from "../public/js/library-progress.js";
 import { renderDataSettings, dataStats } from "../public/js/data-settings.js";
+import { createBackupService } from "../public/js/data-backup.js";
 import { buildRunRecord } from "../public/js/engine/run-record.js";
 import { LIMIT_DEFAULTS } from "../public/js/engine/catalog.js";
 
@@ -277,66 +278,6 @@ test("cleanup asks twice, then deletes only that part, and Delete all clears eve
   assert.equal(exportProgress(w.storage).length, 0);
 });
 
-test("the Backup tab is off by default, and choosing the automatic mode shows its options and asks for a folder", async () => {
-  globalThis.showDirectoryPicker = () => {};
-  const w = world();
-  const s = screen(w);
-  await later();
-  await ui(s.root, "data-tab-backup").click();
-  assert.equal(ui(s.root, "data-mode-off").checked, true);
-  assert.equal(ui(s.root, "data-trigger"), undefined, "no options while it is off");
-  const auto = ui(s.root, "data-mode-auto");
-  auto.checked = true;
-  await auto.fire("change");
-  assert.ok(ui(s.root, "data-trigger"));
-  assert.ok(ui(s.root, "data-interval"), "by time shows the interval");
-  assert.ok(ui(s.root, "data-need-target"), "no folder chosen yet");
-  assert.notEqual(ui(s.root, "data-backup-now").attrs.disabled, undefined, "nothing to back up to yet");
-  const trigger = ui(s.root, "data-trigger");
-  trigger.value = "change";
-  await trigger.fire("change");
-  assert.ok(ui(s.root, "data-quiet") && ui(s.root, "data-gap"));
-  assert.equal(ui(s.root, "data-interval"), undefined);
-  const keys = ui(s.root, "data-auto-keys");
-  keys.checked = true;
-  await keys.fire("change");
-  assert.ok(ui(s.root, "data-auto-keys-warning"));
-  delete globalThis.showDirectoryPicker;
-});
-
-test("a browser that cannot write to a folder has no automatic mode, only the reminder", async () => {
-  delete globalThis.showDirectoryPicker;
-  const w = world();
-  w.storage.setItem("aa.data.backup", JSON.stringify({ mode: "auto" }));
-  const s = screen(w);
-  await later();
-  await ui(s.root, "data-tab-backup").click();
-  assert.notEqual(ui(s.root, "data-mode-auto").attrs.disabled, undefined, "the automatic mode is switched off");
-  assert.equal(ui(s.root, "data-mode-remind").checked, true, "a stored automatic mode falls back to the reminder");
-  assert.ok(ui(s.root, "data-folder-unsupported"));
-  assert.equal(ui(s.root, "data-folder-choose"), undefined);
-  assert.equal(ui(s.root, "data-backup-now"), undefined);
-});
-
-test("the reminder shows above the tabs after enough changes and goes to Export", async () => {
-  const w = world();
-  const s = screen(w);
-  await later();
-  await ui(s.root, "data-tab-backup").click();
-  const remind = ui(s.root, "data-mode-remind");
-  remind.checked = true;
-  await remind.fire("change");
-  assert.ok(ui(s.root, "data-remind-after") === undefined && ui(s.root, "data-remindAfter"));
-  assert.equal(ui(s.root, "data-remind"), undefined);
-  const raw = JSON.parse(w.storage.getItem("aa.data.backup"));
-  w.storage.setItem("aa.data.backup", JSON.stringify({ ...raw, changes: 9 }));
-  const again = screen(w);
-  await later();
-  assert.ok(ui(again.root, "data-remind"));
-  await ui(again.root, "data-remind-go").click();
-  assert.ok(ui(again.root, "data-export"), "the button opens Export and import");
-});
-
 test("a text is compressed with gzip and read back, in a file and inside an encrypted one", async () => {
   const text = JSON.stringify({ runs: Array.from({ length: 200 }, (_, i) => ({ id: "run-" + i, text: "the same words again and again" })) });
   const packed = await gzip(text);
@@ -352,4 +293,110 @@ test("a text is compressed with gzip and read back, in a file and inside an encr
   assert.equal(await decryptText(sealed, "pass phrase"), text);
   assert.equal(JSON.parse(await encryptText(text, "pass phrase", { iterations: 1000 })).compression, undefined, "an old style file has no compression field");
   await assert.rejects(() => decryptText(JSON.stringify({ ...JSON.parse(sealed), compression: "zip" }), "pass phrase"), (e) => e.code === "shape");
+});
+
+test("the Backup tab is off by default, and its settings have three tabs: General, When to back up, Where to back up", async () => {
+  globalThis.showDirectoryPicker = () => {};
+  const w = world();
+  const s = screen(w);
+  await later();
+  await ui(s.root, "data-tab-backup").click();
+  await later();
+  assert.match(ui(s.root, "data-lastinfo").text, /no backup yet/);
+  assert.ok(ui(s.root, "data-files-problem"), "the Backups tab says to choose a folder first");
+  assert.notEqual(ui(s.root, "data-backup-now").attrs.disabled, undefined, "nothing to back up to yet");
+  await ui(s.root, "data-btab-set").click();
+  assert.ok(ui(s.root, "data-stab-general") && ui(s.root, "data-stab-when") && ui(s.root, "data-stab-where"));
+  assert.equal(ui(s.root, "data-mode-off").checked, true);
+  assert.equal(ui(s.root, "data-trigger"), undefined, "no options while it is off");
+  const auto = ui(s.root, "data-mode-auto");
+  auto.checked = true;
+  await auto.fire("change");
+  assert.ok(ui(s.root, "data-trigger"));
+  assert.ok(ui(s.root, "data-interval"), "by time shows the interval");
+  const trigger = ui(s.root, "data-trigger");
+  trigger.value = "change";
+  await trigger.fire("change");
+  assert.ok(ui(s.root, "data-quiet") && ui(s.root, "data-gap"));
+  assert.equal(ui(s.root, "data-interval"), undefined);
+  await ui(s.root, "data-stab-where").click();
+  assert.ok(ui(s.root, "data-folder-choose"));
+  assert.ok(ui(s.root, "data-need-target"), "no folder chosen yet");
+  await ui(s.root, "data-stab-general").click();
+  assert.ok(ui(s.root, "data-pass-auto"));
+  const keys = ui(s.root, "data-auto-keys");
+  keys.checked = true;
+  await keys.fire("change");
+  assert.ok(ui(s.root, "data-auto-keys-warning"));
+  delete globalThis.showDirectoryPicker;
+});
+
+test("a browser that cannot write to a folder has no automatic mode, no folder and no General tab, only the reminder", async () => {
+  delete globalThis.showDirectoryPicker;
+  const w = world();
+  w.storage.setItem("aa.data.backup", JSON.stringify({ mode: "auto" }));
+  const s = screen(w);
+  await later();
+  await ui(s.root, "data-tab-backup").click();
+  assert.ok(ui(s.root, "data-folder-unsupported"), "the Backups tab explains it");
+  assert.equal(ui(s.root, "data-backup-now"), undefined);
+  await ui(s.root, "data-btab-set").click();
+  assert.equal(ui(s.root, "data-stab-general"), undefined);
+  assert.notEqual(ui(s.root, "data-mode-auto").attrs.disabled, undefined, "the automatic mode is switched off");
+  assert.equal(ui(s.root, "data-mode-remind").checked, true, "a stored automatic mode falls back to the reminder");
+  await ui(s.root, "data-stab-where").click();
+  assert.ok(ui(s.root, "data-folder-unsupported"));
+  assert.equal(ui(s.root, "data-folder-choose"), undefined);
+});
+
+test("the reminder shows above the tabs after enough changes and goes to Export", async () => {
+  const w = world();
+  const s = screen(w);
+  await later();
+  await ui(s.root, "data-tab-backup").click();
+  await ui(s.root, "data-btab-set").click();
+  const remind = ui(s.root, "data-mode-remind");
+  remind.checked = true;
+  await remind.fire("change");
+  assert.ok(ui(s.root, "data-remindAfter"));
+  assert.equal(ui(s.root, "data-remind"), undefined);
+  const raw = JSON.parse(w.storage.getItem("aa.data.backup"));
+  w.storage.setItem("aa.data.backup", JSON.stringify({ ...raw, changes: 9 }));
+  const again = screen(w);
+  await later();
+  assert.ok(ui(again.root, "data-remind"));
+  await ui(again.root, "data-remind-go").click();
+  assert.ok(ui(again.root, "data-export"), "the button opens Export and import");
+});
+
+test("the Backups tab lists the files of the folder, and a file is deleted after a second click", async () => {
+  globalThis.showDirectoryPicker = () => {};
+  const files = new Map([["agent-atlas-backup-2026-11-25-1300.json.gz", "aaa"], ["agent-atlas-backup-2026-11-25-1400.json", "bbbb"], ["holiday.json", "x"]]);
+  const folder = {
+    name: "Backups",
+    queryPermission: async () => "granted",
+    requestPermission: async () => "granted",
+    removeEntry: async (n) => void files.delete(n),
+    async *entries() {
+      for (const n of files.keys()) yield [n, { kind: "file", getFile: async () => ({ size: files.get(n).length, lastModified: 1 }) }];
+    },
+  };
+  const w = world();
+  w.storage.setItem("aa.data.backup", JSON.stringify({ lastBackup: Date.UTC(2026, 10, 25, 14, 0) }));
+  const s = screen(w, { backup: createBackupService({ ...w, getVersion: () => "1", folderStore: { supported: () => true, get: async () => folder, set: async () => {}, clear: async () => {} } }) });
+  await later();
+  await ui(s.root, "data-tab-backup").click();
+  await later();
+  assert.ok(ui(s.root, "data-files-table"));
+  assert.ok(ui(s.root, "data-file-agent-atlas-backup-2026-11-25-1400.json").text.includes("password"), "an encrypted file is marked");
+  assert.equal(ui(s.root, "data-file-holiday.json"), undefined, "a file of another name is not listed");
+  const del = () => ui(s.root, "data-file-delete-agent-atlas-backup-2026-11-25-1300.json.gz");
+  await del().click();
+  assert.equal(files.has("agent-atlas-backup-2026-11-25-1300.json.gz"), true, "one click only arms the button");
+  await later();
+  await del().click();
+  await later();
+  assert.equal(files.has("agent-atlas-backup-2026-11-25-1300.json.gz"), false);
+  assert.equal(files.has("holiday.json"), true);
+  delete globalThis.showDirectoryPicker;
 });

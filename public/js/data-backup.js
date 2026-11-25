@@ -17,7 +17,7 @@ export const PLAIN_EXTENSION = ".json.gz";
 export const ENCRYPTED_EXTENSION = ".json";
 const MINUTE = 60000;
 
-export const DEFAULTS = { mode: "off", remindAfter: 5, trigger: "time", interval: 60, quiet: 2, gap: 10, autoKeys: false, lastBackup: 0, lastChange: 0, changes: 0, sig: "" };
+export const DEFAULTS = { mode: "off", remindAfter: 5, trigger: "time", interval: 60, quiet: 2, gap: 10, autoKeys: false, lastBackup: 0, lastChange: 0, failedAt: 0, changes: 0, sig: "" };
 
 const pick = (value, list, fallback) => (list.includes(value) ? value : fallback);
 const time = (value) => (Number.isFinite(value) && value > 0 ? value : 0);
@@ -35,6 +35,7 @@ export function normalize(raw) {
     autoKeys: r.autoKeys === true,
     lastBackup: time(r.lastBackup),
     lastChange: time(r.lastChange),
+    failedAt: time(r.failedAt),
     changes: Number.isInteger(r.changes) && r.changes > 0 ? r.changes : 0,
     sig: typeof r.sig === "string" ? r.sig : "",
   };
@@ -88,6 +89,15 @@ export function backupFileName(date, extension = PLAIN_EXTENSION) {
   return `${FILE_PREFIX}${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}-${p(date.getHours())}${p(date.getMinutes())}${extension}`;
 }
 
+// Is this a file of ours? (agent-atlas-backup-...json or .json.gz) A file of another name in the folder is never listed, changed or removed.
+export const isBackupFile = (name) => name.startsWith(FILE_PREFIX) && (name.endsWith(".json") || name.endsWith(".json.gz"));
+
+// The time in the name of a backup file (agent-atlas-backup-2026-11-25-1432.json.gz) as milliseconds, or 0 when the name has none.
+export function dateOfName(name) {
+  const m = /^agent-atlas-backup-(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})\.json(?:\.gz)?$/.exec(name);
+  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]), Number(m[5])).getTime() : 0;
+}
+
 // Writes the file into a folder handle (File System Access API) and removes the oldest of our own files beyond the newest KEEP_FILES.
 export async function writeToFolder(handle, name, data, keep = KEEP_FILES) {
   const file = await handle.getFileHandle(name, { create: true });
@@ -95,7 +105,7 @@ export async function writeToFolder(handle, name, data, keep = KEEP_FILES) {
   await out.write(data);
   await out.close();
   const ours = [];
-  for await (const [entryName, entry] of handle.entries()) if (entry.kind === "file" && entryName.startsWith(FILE_PREFIX) && (entryName.endsWith(".json") || entryName.endsWith(".json.gz"))) ours.push(entryName);
+  for await (const [entryName, entry] of handle.entries()) if (entry.kind === "file" && isBackupFile(entryName)) ours.push(entryName);
   ours.sort();
   for (const old of ours.slice(0, Math.max(0, ours.length - keep))) {
     try {
@@ -193,17 +203,17 @@ export function createBackupService({ storage, runStore, settings, skills, vault
     try {
       if (!(await permission(handle, interactive))) {
         error = "permission";
-        onChange();
+        save({ ...state, failedAt: now() });
         return { ok: false, reason: "permission" };
       }
       const file = await buildFile(categories(), password);
       await writeToFolder(handle, backupFileName(new Date(now()), file.extension), file.data);
       error = "";
-      save({ ...state, lastBackup: now(), changes: 0, sig: await snapshot() });
+      save({ ...state, lastBackup: now(), failedAt: 0, changes: 0, sig: await snapshot() });
       return { ok: true };
     } catch {
       error = "write";
-      onChange();
+      save({ ...state, failedAt: now() });
       return { ok: false, reason: "write" };
     } finally {
       busy = false;
@@ -221,7 +231,42 @@ export function createBackupService({ storage, runStore, settings, skills, vault
     }
   }
 
+  // The backup files that are in the folder now, the newest first: { ok, reason, files: [{ name, size, date, encrypted }] }.
+  // It only reads (no permission is asked): when the browser has not given the permission, the reason is permission.
+  async function listFiles() {
+    const handle = await folderStore.get();
+    if (!handle) return { ok: false, reason: "no-folder", files: [] };
+    try {
+      if (!(await permission(handle, false))) return { ok: false, reason: "permission", files: [] };
+      const files = [];
+      for await (const [name, entry] of handle.entries()) {
+        if (entry.kind !== "file" || !isBackupFile(name)) continue;
+        const file = await entry.getFile();
+        files.push({ name, size: file.size, date: dateOfName(name) || file.lastModified || 0, encrypted: !name.endsWith(".gz") });
+      }
+      files.sort((a, b) => (a.name < b.name ? 1 : a.name > b.name ? -1 : 0));
+      return { ok: true, files };
+    } catch {
+      return { ok: false, reason: "read", files: [] };
+    }
+  }
+
+  // Removes one backup file of ours from the folder (never a file of another name).
+  async function deleteFile(name) {
+    if (!isBackupFile(name)) return false;
+    const handle = await folderStore.get();
+    if (!handle || !(await permission(handle, true))) return false;
+    try {
+      await handle.removeEntry(name);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   return {
+    listFiles,
+    deleteFile,
     state: () => state,
     update(patch) {
       save(normalize({ ...state, ...patch }));

@@ -4,7 +4,8 @@ import { h } from "./dom.js";
 import { SLOT_IDS } from "./key-slots.js";
 import { parseBackup, applyBackup, backupCategories, BACKUP_CATEGORIES } from "./storage/backup.js";
 import { decryptText, isEncryptedText, fileToText, FileCryptoError } from "./storage/file-crypto.js";
-import { createBackupService, createFolderStore, reminderDue, OPTIONS } from "./data-backup.js";
+import { createBackupService, createFolderStore, reminderDue } from "./data-backup.js";
+import { createBackupView } from "./data-backup-view.js";
 import { exportProgress, clearProgress } from "./library-progress.js";
 
 const META_KEY = "aa.data.meta";
@@ -81,96 +82,7 @@ export function renderDataSettings({ doc, t, say, runStore, settings, vault, vau
     ];
   }
 
-  // ---- backup: an export that runs by itself (off by default)
-  const duration = (minutes) => (minutes < 60 ? t("data.dur.min", { n: minutes }) : minutes === 1440 ? t("data.dur.day") : t("data.dur.hour", { n: minutes / 60 }));
-  function backupView() {
-    // A browser that cannot write to a folder (Firefox, Safari) has no automatic backup: only the reminder and the export by hand.
-    const supported = typeof globalThis.showDirectoryPicker === "function";
-    if (!supported && service.state().mode === "auto") service.update({ mode: "remind" });
-    const state = service.state();
-    const field = (label, control) => h(doc, "div", { class: "field" }, h(doc, "label", { for: control.attrs?.id ?? control.id }, label), control);
-    const choice = (id, key, values, current, text) => {
-      const sel = h(doc, "select", { id, "data-ui": key }, ...values.map((v) => h(doc, "option", { value: String(v), selected: v === current }, text(v))));
-      sel.addEventListener("change", () => {
-        const raw = sel.value;
-        service.update({ [key.replace("data-", "")]: Number.isNaN(Number(raw)) ? raw : Number(raw) });
-        draw();
-      });
-      return sel;
-    };
-    const modes = ["off", "remind", "auto"].map((m) => {
-      const radio = h(doc, "input", { type: "radio", name: "data-mode", id: `data-mode-${m}`, value: m, checked: state.mode === m, disabled: m === "auto" && !supported, "data-ui": `data-mode-${m}` });
-      radio.addEventListener("change", () => {
-        service.update({ mode: m });
-        draw();
-      });
-      return h(doc, "div", { class: "field checkbox" }, radio, h(doc, "label", { for: `data-mode-${m}` }, t(`data.mode.${m}`)));
-    });
-
-    let more = [];
-    if (state.mode === "remind") {
-      const sel = choice("data-remindAfter", "data-remindAfter", OPTIONS.remindAfter, state.remindAfter, (n) => t("data.remindOpt", { n }));
-      more = [h(doc, "div", { class: "field" }, h(doc, "label", { for: "data-remindAfter" }, t("data.remindAfter")), sel), h(doc, "p", { class: "hint" }, t("data.remindHint"))];
-    }
-    if (state.mode === "auto") {
-      const trigger = choice("data-trigger", "data-trigger", ["time", "change"], state.trigger, (v) => t(`data.trigger.${v}`));
-      const when = state.trigger === "time"
-        ? [field(t("data.every"), choice("data-interval", "data-interval", OPTIONS.interval, state.interval, duration))]
-        : [field(t("data.quiet"), choice("data-quiet", "data-quiet", OPTIONS.quiet, state.quiet, duration)), field(t("data.gap"), choice("data-gap", "data-gap", OPTIONS.gap, state.gap, duration))];
-      const pass = h(doc, "input", { id: "data-pass-auto", type: "password", autocomplete: "new-password", placeholder: service.hasPassword() ? t("data.autoPassSet") : t("data.passPlaceholder"), "data-ui": "data-pass-auto" });
-      pass.addEventListener("input", () => service.setPassword(pass.value));
-      const keys = h(doc, "input", { type: "checkbox", id: "data-auto-keys", checked: state.autoKeys, "data-ui": "data-auto-keys" });
-      keys.addEventListener("change", () => {
-        service.update({ autoKeys: keys.checked });
-        draw();
-      });
-      more = [
-        h(doc, "div", { class: "field" }, h(doc, "label", { for: "data-trigger" }, t("data.when")), trigger),
-        ...when,
-        field(t("data.autoPass"), pass),
-        h(doc, "p", { class: "hint" }, t(state.trigger === "change" ? "data.autoHintChange" : "data.autoHintTime"), " ", t("data.autoHintOpen")),
-        h(doc, "div", { class: "field checkbox" }, keys, h(doc, "label", { for: "data-auto-keys" }, t("data.autoKeys"))),
-        ...(state.autoKeys ? [h(doc, "p", { class: "notice", "data-ui": "data-auto-keys-warning" }, t("data.keysWarning"))] : []),
-      ];
-    }
-
-    const folderName = service.folderName();
-    const choose = h(doc, "button", { type: "button", "data-ui": "data-folder-choose", disabled: !supported }, t(folderName ? "data.folderChange" : "data.folderChoose"));
-    const message = h(doc, "div", { "data-ui": "data-backup-message", "aria-live": "polite" });
-    choose.addEventListener("click", async () => {
-      try {
-        await service.chooseFolder();
-        draw();
-      } catch {
-        // the student closed the folder window
-      }
-    });
-    const now = h(doc, "button", { type: "button", class: "primary", "data-ui": "data-backup-now", disabled: folderName === "" }, t("data.backupNow"));
-    now.addEventListener("click", async () => {
-      const outcome = await service.backupNow({ interactive: true });
-      message.replaceChildren(h(doc, "p", { class: outcome.ok ? "hint" : "notice error", "data-ui": "data-backup-result" }, t(outcome.ok ? "data.backupDone" : `data.backupFail.${outcome.reason}`)));
-      if (outcome.ok) drawOverview();
-    });
-    const problem = service.error() ? [h(doc, "p", { class: "notice error", "data-ui": "data-backup-error" }, t(`data.backupFail.${service.error()}`))] : [];
-    return [
-      h(doc, "div", { class: "data-card wide", "data-ui": "data-backup-card" },
-        h(doc, "h3", {}, t("data.backupHeading")),
-        h(doc, "p", {}, t("data.backupIntro")),
-        h(doc, "div", { class: "field" }, h(doc, "b", {}, t("data.whenHeading")), ...modes),
-        ...more,
-        ...(supported
-          ? [
-              h(doc, "div", { class: "field" }, h(doc, "b", {}, t("data.whereHeading")), h(doc, "p", { class: "hint" }, t("data.whereHint")),
-                h(doc, "div", { class: "data-actions" }, choose, h(doc, "span", { class: "hint", "data-ui": "data-folder-name" }, folderName || t("data.noFolder")))),
-              ...(state.mode === "auto" && folderName === "" ? [h(doc, "p", { class: "notice", "data-ui": "data-need-target" }, t("data.needTarget"))] : []),
-              ...problem,
-              h(doc, "div", { class: "data-actions" }, now),
-              message,
-              h(doc, "p", { class: "hint" }, t("data.cloudLater")),
-            ]
-          : [h(doc, "p", { class: "notice", "data-ui": "data-folder-unsupported" }, t("data.folderUnsupported"))])),
-    ];
-  }
+  const backupView = createBackupView({ doc, t, service, redraw: () => draw(), refreshOverview: () => drawOverview() });
 
   // The reminder of the mode remind, above the tabs.
   const reminder = () => {
