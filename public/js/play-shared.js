@@ -86,10 +86,10 @@ export function providerRow({ doc, settings, t }, item) {
   return out;
 }
 
-// A card of the library: the tick box and the title on top, the number of the step of the path in the top right corner, below the chips
-// (pattern, providers, before and after or bad on purpose) and the level as dots in the bottom right corner. The colour of the card is how
-// the run ended (the words are there for a screen reader). The whole card selects its run (show the detail); a click that starts in the
-// tick box only ticks. The title is a link to the run in the Library.
+// A card of the library: the title, below it the chips (pattern and providers). A column in the top right corner holds, from the top, the tick box,
+// the kind of the run as an icon (before and after, bad on purpose), the number of the step of the path and, at the bottom, the level as dots.
+// The colour of the card is how the run ended (the words are there for a screen reader). The whole card selects its run (show the detail); a click
+// that starts in the tick box only ticks. The title is a link to the run in the Library.
 // pick: { checked, base, selected, onToggle(on), onSelect(id), step?: { n, done }, goal? }
 export function runRow(ctx, item, pick) {
   const { doc, t } = ctx;
@@ -111,12 +111,14 @@ export function runRow(ctx, item, pick) {
   const dots = level
     ? h(doc, "span", { class: `lv-dots l${level}`, "data-ui": "run-level", role: "img", "aria-label": t("path.level.label", { level: t(`path.level.${level}`) }), title: t(`path.level.${level}`) }, ...[1, 2, 3].map((n) => h(doc, "i", { class: n <= level ? "on" : undefined })))
     : "";
+  // The kind of the run (before and after, bad on purpose) is an icon in the side column; its words are the label and the tip.
+  const kindIcon = kind ? h(doc, "span", { class: `chip-kind ${kind}`, "data-ui": "run-kind", role: "img", "aria-label": t(`path.kind.${kind}`), title: `${t(`path.kind.${kind}`)}: ${t(`path.kindTip.${kind}`)}` }, kind === "pair" ? "⇄" : "⚠") : "";
   const li = h(
     doc,
     "li",
     { class: `run-row${outcome ? ` out-${outcome}` : ""}`, "data-ui": "run-row", "data-run": item.id, "aria-current": pick.selected ? "true" : undefined },
-    h(doc, "div", { class: "run-top" }, tick, title, pick.base ? h(doc, "span", { class: "badge", "data-ui": "compare-base", title: t("library.tip.base") }, t("compare.baseLib")) : ""),
-    step,
+    h(doc, "div", { class: "run-side" }, tick, kindIcon, step, dots),
+    h(doc, "div", { class: "run-top" }, title, pick.base ? h(doc, "span", { class: "badge", "data-ui": "compare-base", title: t("library.tip.base") }, t("compare.baseLib")) : ""),
     runMeta(ctx, item),
     h(
       doc,
@@ -128,9 +130,7 @@ export function runRow(ctx, item, pick) {
         { class: "run-chips" },
         h(doc, "span", { class: `type-chip type-${item.pattern}`, "data-ui": "run-type", title: patternTip(t, item.pattern) }, t(`pattern.${item.pattern}`)),
         providerRow(ctx, item),
-        kind ? h(doc, "span", { class: `chip-kind ${kind}`, "data-ui": "run-kind", title: t(`path.kindTip.${kind}`) }, t(`path.kind.${kind}`)) : "",
       ),
-      dots,
     ),
     outcome ? h(doc, "span", { class: "visually-hidden", "data-ui": "run-outcome", "data-outcome": item.outcome }, t(`result.status.${item.outcome}`)) : "",
   );

@@ -22,8 +22,8 @@ const build = (over = {}) => {
 test("the card has no cog and no menu, and the tick box sits in the top row before the title", () => {
   const { li } = build();
   assert.equal(li.find((e) => e.attrs["data-ui"] === "run-cog").length, 0);
-  const top = li.find((e) => String(e.attrs.class) === "run-top")[0];
-  assert.equal(top.find((e) => e.attrs["data-ui"] === "compare-select").length, 1);
+  const side = li.find((e) => String(e.attrs.class) === "run-side")[0];
+  assert.equal(side.find((e) => e.attrs["data-ui"] === "compare-select").length, 1);
 });
 
 test("a click anywhere on the card selects the run once, but a click that starts in the tick box does not", () => {

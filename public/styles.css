@@ -469,12 +469,15 @@ body[data-show-ui] [data-ui]::after { content: attr(data-ui); position: absolute
 .library-pane { max-height: 640px; overflow: auto; }
 .library-pane .run-list { margin-bottom: 12px; padding: 0; }
 .library-pane .run-list { display: grid; gap: 6px; border: 0; background: none; padding: 0; }
-.library-pane .run-row { position: relative; display: block; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); cursor: pointer; }
+.library-pane .run-row { position: relative; display: block; min-height: 96px; padding: 8px 56px 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); cursor: pointer; }
 .library-pane .run-row:last-child { border-bottom: 1px solid var(--border); }
 .library-pane .run-row:hover { border-color: var(--accent-line); }
-.library-pane .run-row .run-top { display: flex; gap: 8px; align-items: flex-start; padding-right: 36px; }
+.library-pane .run-row .run-top { display: flex; gap: 8px; align-items: flex-start; }
 .library-pane .run-row .run-top .run-title { flex: 1; }
-.library-pane .run-row .step-icon { position: absolute; top: 7px; right: 8px; }
+.library-pane .run-row .run-side { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.library-pane .run-row .run-side .run-compare { margin: 0; }
+.library-pane .run-row .run-side .lv-dots { padding: 3px 5px; }
+.library-pane .run-row .run-side .chip-kind { padding: 0 6px; }
 .library-pane .run-row .run-meta { display: block; font-size: 0.8rem; margin-top: 2px; }
 .library-pane .run-row .run-bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; margin-top: 6px; }
 .library-pane .run-row .run-chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }

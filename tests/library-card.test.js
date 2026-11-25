@@ -33,11 +33,13 @@ test("the card has no outcome icon, but says the outcome in words for a screen r
   assert.match(said.text, /result\.status\.failed/);
 });
 
-test("the tick box comes before the title in the first row", () => {
-  const li = build();
+test("the side column in the top right corner holds, from the top, the tick box, the kind, the step and the level, and the title row holds the link", () => {
+  const li = build({ kind: "pair", level: 2 }, { step: { n: 3, done: false }, goal: "patterns" });
+  const side = li.find((e) => String(e.attrs.class) === "run-side")[0];
+  assert.deepEqual(side.children.map((c) => c.attrs["data-ui"]), ["compare-select", "run-kind", "run-step", "run-level"]);
   const top = li.find((e) => String(e.attrs.class) === "run-top")[0];
-  assert.equal(top.children[0].attrs["data-ui"], "compare-select");
-  assert.equal(top.children[1].tag, "a");
+  assert.equal(top.children[0].tag, "a");
+  assert.equal(top.find((e) => e.attrs["data-ui"] === "compare-select").length, 0);
 });
 
 test("a step of the path shows its number, and a done step is marked", () => {
@@ -60,8 +62,13 @@ test("the level is dots, as many filled as the level, and a run without a level 
   assert.equal(ui(build({ level: 9 }), "run-level").length, 0);
 });
 
-test("a before and after run and a bad on purpose run say so in a chip", () => {
-  assert.match(ui(build({ kind: "pair" }), "run-kind")[0].text, /path\.kind\.pair/);
-  assert.match(ui(build({ kind: "bad" }), "run-kind")[0].text, /path\.kind\.bad/);
+test("a before and after run and a bad on purpose run say so with an icon whose label and tip hold the words", () => {
+  const pair = ui(build({ kind: "pair" }), "run-kind")[0];
+  assert.equal(pair.text, "⇄");
+  assert.match(pair.attrs["aria-label"], /path\.kind\.pair/);
+  assert.match(pair.attrs.title, /path\.kindTip\.pair/);
+  const bad = ui(build({ kind: "bad" }), "run-kind")[0];
+  assert.equal(bad.text, "⚠");
+  assert.match(bad.attrs["aria-label"], /path\.kind\.bad/);
   assert.equal(ui(build(), "run-kind").length, 0);
 });
