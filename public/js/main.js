@@ -77,6 +77,8 @@ const main = doc.getElementById("main");
 const footer = doc.getElementById("footer");
 const versionLabel = doc.getElementById("version");
 const tagline = doc.getElementById("tagline");
+// One of the two headlines, chosen by chance once per page load (so a change of language keeps the same one).
+const taglineKey = Math.random() < 0.5 ? "site.tagline" : "site.tagline.2";
 
 // Opening the site with ?ui in the address shows the data-ui name of every labelled element.
 if (new URLSearchParams(globalThis.location?.search ?? "").has("ui")) doc.body.setAttribute("data-show-ui", "");
@@ -157,7 +159,7 @@ function renderChrome(route) {
     h(doc, "p", {}, t("footer.license")),
   );
   versionLabel.textContent = version !== "unknown" ? `v${version}` : "";
-  tagline.textContent = t("site.tagline");
+  tagline.textContent = t(taglineKey);
   doc.querySelector(".skip-link").textContent = t("a11y.skip");
   doc.documentElement.lang = lang;
 }

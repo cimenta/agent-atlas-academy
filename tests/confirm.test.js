@@ -3,6 +3,11 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { isYes } from "../scripts/confirm.js";
 
+test("with the default set to no, Enter means no and only y or yes is yes", () => {
+  for (const a of ["", "  ", "n", "x"]) assert.equal(isYes(a, { defaultYes: false }), false, JSON.stringify(a));
+  for (const a of ["y", "Y", " yes "]) assert.equal(isYes(a, { defaultYes: false }), true, a);
+});
+
 test("Enter, y and yes mean yes, and anything else means no", () => {
   for (const a of ["", "  ", "y", "Y", "yes", " Yes "]) assert.equal(isYes(a), true, JSON.stringify(a));
   for (const a of ["n", "no", "x", "nope", "1"]) assert.equal(isYes(a), false, a);

@@ -2,7 +2,7 @@
 
 Learn how AI agents work, communicate and are orchestrated. Watch real recorded runs replayed step by step, and read short articles on each concept.
 
-Agent Atlas is an educational project. It is not meant for real work.
+Agent Atlas is an educational project that helps you understand how AI agents work. Use it to try ideas, make mistakes and see how agents behave, with nothing at stake.
 
 Site: https://agentatlas.academy
 

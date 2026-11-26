@@ -39,8 +39,9 @@ test("the Czech imprint has the same details", () => {
 
 test("the About text uses the agreed wording in both languages", () => {
   const en = JSON.parse(read("locales/en.json"))["about.body"];
-  assert.ok(en.startsWith("Agent Atlas is an educational project that helps to understand how AI agents work, communicate and are orchestrated."));
-  assert.equal(JSON.parse(read("locales/en.json"))["site.tagline"], "Agents Educational Sandbox: not for real work.");
+  assert.ok(en.startsWith("Agent Atlas is an educational project that helps you understand how AI agents work, communicate and are orchestrated."));
+  const taglines = ["site.tagline", "site.tagline.2"].map((key) => JSON.parse(read("locales/en.json"))[key]);
+  assert.deepEqual(taglines, ["Agents Educational Sandbox: try, break, learn.", "Watch AI agents work, step by step."]);
 });
 
 const WORDS = {
