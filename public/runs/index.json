@@ -83,7 +83,9 @@
       "teaches": {
         "en": "A router can choose wrongly when a question fits two specialists. The history specialist can call a tool: here a Wikipedia lookup, so its facts do not come from memory alone.",
         "cs": "Směrovač se může splést, když otázka sedí dvěma specialistům. Specialista na historii může zavolat nástroj: tady hledání na Wikipedii, takže fakta nebere jen z paměti."
-      }
+      },
+      "studyMinutes": 12,
+      "runSeconds": 6
     },
     {
       "id": "mix-router-specialists",
@@ -165,7 +167,9 @@
       "teaches": {
         "en": "A router chooses one path and the others never start. The chosen specialist can call a tool: here a calculator, so it does not work the sum out itself.",
         "cs": "Směrovač zvolí jednu cestu a ostatní se nespustí. Zvolený specialista může zavolat nástroj: tady kalkulačku, takže příklad nepočítá sám."
-      }
+      },
+      "studyMinutes": 10,
+      "runSeconds": 5
     },
     {
       "id": "evaluator-simple",
@@ -193,7 +197,9 @@
       "teaches": {
         "en": "A loop with a clear check makes the answer better, as far as the criteria say. The evaluator counts words with a tool, because a model counts badly.",
         "cs": "Smyčka s jasnou kontrolou zlepší odpověď, jak říkají kritéria. Hodnotitel počítá slova nástrojem, protože model počítá špatně."
-      }
+      },
+      "studyMinutes": 11,
+      "runSeconds": 9
     },
     {
       "id": "sequential-complex",
@@ -277,7 +283,9 @@
       "teaches": {
         "en": "A plan made first gives the run a shape. The executor can call a tool: here the weather forecast, a fact no model can know.",
         "cs": "Plán vytvořený předem dává běhu tvar. Vykonavatel může zavolat nástroj: tady předpověď počasí, fakt, který žádný model nezná."
-      }
+      },
+      "studyMinutes": 14,
+      "runSeconds": 11
     },
     {
       "id": "planexec-complex",
@@ -305,7 +313,9 @@
       "teaches": {
         "en": "The quality of the whole run depends on the plan. The executor can call a tool: here the clock, because a model does not know what day it is.",
         "cs": "Kvalita celého běhu závisí na plánu. Vykonavatel může zavolat nástroj: tady hodiny, protože model neví, jaký je den."
-      }
+      },
+      "studyMinutes": 17,
+      "runSeconds": 15
     },
     {
       "id": "mapreduce-complex",
@@ -361,7 +371,9 @@
       "teaches": {
         "en": "In a handoff control moves forward and the note is all the next agent knows. The expert reads the help sheet only through a search tool, never whole.",
         "cs": "U předání řízení postupuje dopředu a poznámka je vše, co další agent ví. Expert čte příručku jen přes nástroj hledání, nikdy celou."
-      }
+      },
+      "studyMinutes": 11,
+      "runSeconds": 4
     },
     {
       "id": "handoff-complex",
@@ -417,7 +429,9 @@
       "teaches": {
         "en": "A supervisor sees everything, which is useful and expensive. The workers can leave notes in a shared notebook with a tool, so later workers know what earlier ones found.",
         "cs": "Supervizor vidí všechno, což je užitečné a drahé. Pracovníci mohou nástrojem nechat poznámky ve sdíleném zápisníku, takže další vědí, co zjistili předchozí."
-      }
+      },
+      "studyMinutes": 14,
+      "runSeconds": 16
     },
     {
       "id": "save-models-strong",
@@ -1516,7 +1530,9 @@
       "teaches": {
         "en": "A model chooses the right tool for each part of a task: a clock, a lookup, a search in documents, a calculator and a counter, in one run.",
         "cs": "Model vybírá správný nástroj pro každou část úkolu: hodiny, vyhledání, hledání v dokumentech, kalkulačku a počítadlo, v jednom běhu."
-      }
+      },
+      "studyMinutes": 14,
+      "runSeconds": 26
     },
     {
       "id": "parallel-tools-split",
@@ -1538,7 +1554,9 @@
       "teaches": {
         "en": "Parallel workers all get the same task, so different tools do not divide the work: each worker needs its part named, and the combiner needs to know whether to join or to compare.",
         "cs": "Paralelní pracovníci dostanou všichni stejné zadání, takže jiné nástroje práci nerozdělí: každý pracovník potřebuje pojmenovanou svou část a slučovač musí vědět, zda má spojovat, nebo porovnávat."
-      }
+      },
+      "studyMinutes": 13,
+      "runSeconds": 15
     }
   ]
 }
