@@ -2186,3 +2186,9 @@ button.step.ho-row { background-color: var(--working-bg); border-style: dashed; 
 .step-tab .tag.ok { background: var(--done); }
 .step-tab .tag.off { background: #5b6470; }
 @media (max-width: 719px) { .step-tab { padding: 6px 6px; font-size: 0.85rem; gap: 4px; } .step-tab .tag { padding: 1px 6px; font-size: 0.68rem; } }
+
+/* Team preview (Simple, step 1): the ? sits in the top right corner of the diagram; without a chosen pattern the section is not shown. */
+.preview-wrap { position: relative; }
+.preview-help { position: absolute; top: 6px; right: 6px; z-index: 2; }
+.simple-cols.no-preview { grid-template-columns: minmax(0, 1fr); }
+.simple-preview[hidden] { display: none; }

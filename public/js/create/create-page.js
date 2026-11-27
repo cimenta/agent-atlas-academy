@@ -563,7 +563,10 @@ export function renderCreate(ctx) {
     };
     // The team preview next to the choice of the way to cooperate (Simple view, step 1): names and arrows, drawn again only when they change.
     const previewHost = h(doc, "div", { class: "team-preview-host", "data-ui": "team-preview" });
-    const routeNote = h(doc, "p", { class: "route-note", "data-ui": "route-note" });
+    // The ? in the top right corner of the diagram: the route of the chosen pattern in one sentence and what the diagram shows.
+    const previewHelp = h(doc, "button", { type: "button", class: "help-icon preview-help", "data-ui": "route-note", "aria-label": t("create.simple.previewHelp") }, "?");
+    const previewWrap = h(doc, "div", { class: "preview-wrap" }, previewHost, previewHelp);
+    const previewBox = h(doc, "aside", { class: "part simple-preview", "data-ui": "team-preview-box", hidden: true }, h(doc, "h3", {}, t("create.simple.preview")), previewWrap, h(doc, "p", { class: "hint" }, toTeamLink));
     let previewDiagram = null;
     let previewSignature = "";
     // The preview names the agents in the language of the page (designLabel uses the English names of the catalog).
@@ -584,6 +587,8 @@ export function renderCreate(ctx) {
       el.style.height = `${Math.ceil(natural.h * scale)}px`;
       el.style.width = `${Math.ceil(natural.w * scale)}px`;
       el.style.overflow = "hidden";
+      // The boxes are scaled down, the names are not: they get the size of the text of the page.
+      for (const name of el.querySelectorAll("strong")) name.style.fontSize = `${14 / scale}px`;
     }
     function drawPreview() {
       if (!simple) return;
@@ -593,18 +598,17 @@ export function renderCreate(ctx) {
       previewSignature = signature;
       previewDiagram?.destroy();
       previewDiagram = null;
-      // No way to cooperate chosen yet: nothing to say about the route and no team to draw.
+      // The whole section stays hidden until a way to cooperate is chosen (a template or a pattern button).
+      previewBox.hidden = !draft.decisions.pattern;
+      previewBox.parentElement?.classList.toggle("no-preview", previewBox.hidden);
       if (!draft.decisions.pattern) {
-        routeNote.className = "route-note";
-        routeNote.textContent = "";
-        routeNote.hidden = true;
-        previewHost.replaceChildren(h(doc, "p", { class: "hint" }, t("create.simple.previewEmpty")));
+        previewHost.replaceChildren();
         return;
       }
-      routeNote.hidden = false;
       const kind = routeKind(draft.pattern);
-      routeNote.className = `route-note ${kind}`;
-      routeNote.textContent = t(SIMPLE_PATTERNS.includes(draft.pattern) ? `create.simple.route.${draft.pattern}` : `create.simple.route.${kind}`);
+      previewHelp.setAttribute("data-hover-title", t(`pattern.${draft.pattern}`));
+      previewHelp.setAttribute("data-hover-text", t(SIMPLE_PATTERNS.includes(draft.pattern) ? `create.simple.route.${draft.pattern}` : `create.simple.route.${kind}`));
+      previewHelp.setAttribute("data-hover-rows", JSON.stringify([[t("create.simple.previewHowTitle"), t("create.simple.previewHow")]]));
       if (design.nodes.length === 0) {
         previewHost.replaceChildren(h(doc, "p", { class: "hint" }, t("create.simple.previewNone")));
         return;
@@ -964,7 +968,7 @@ export function renderCreate(ctx) {
       h(doc, "div", { class: "part" }, heads.providerModel.element, providerField),
       ...(simple ? [] : [h(doc, "div", { class: "part" }, heads.memory.element, memoryGroup)]),
     ];
-    panels.setup.replaceChildren(...(simple ? [h(doc, "div", { class: "simple-cols" }, h(doc, "div", { class: "simple-main" }, ...setupParts), h(doc, "aside", { class: "part simple-preview", "data-ui": "team-preview-box" }, h(doc, "h3", {}, t("create.simple.preview")), routeNote, previewHost, h(doc, "p", { class: "hint" }, toTeamLink)))] : setupParts));
+    panels.setup.replaceChildren(...(simple ? [h(doc, "div", { class: "simple-cols" }, h(doc, "div", { class: "simple-main" }, ...setupParts), previewBox)] : setupParts));
     panels.diagram.replaceChildren(...(workspace ? [] : [h(doc, "h3", {}, t("create.step.diagram"))]), editorHost);
     if (workspace) {
       // Settings on the left; diagram and checks on the right, locked until the four parts are decided.
