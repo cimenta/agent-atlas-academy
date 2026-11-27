@@ -131,7 +131,8 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
     });
     const wrap = h(doc, "div", { class: "tl-envs", style: `left:${left}px;width:${width}px` }, ...envs, ...marks);
     const holder = h(doc, "div", { class: "tl-svg-holder" });
-    holder.innerHTML = `<svg class="tl-svg" style="left:${left}px" width="${width}" height="${order.length * LANE}" aria-hidden="true">${svg}</svg>`;
+    holder.innerHTML = `<svg class="tl-svg" width="${width}" height="${order.length * LANE}" aria-hidden="true">${svg}</svg>`;
+    holder.firstChild.style.left = `${left}px`; // not a style attribute: the Content Security Policy drops those
     rowsBox.append(holder.firstChild, wrap);
     paint(currentTime, new Set());
   }

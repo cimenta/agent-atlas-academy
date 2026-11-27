@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { dirname, extname, join, normalize, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRunHandler } from "../lib/run-handler.js";
@@ -64,6 +65,17 @@ const modelsHandler = useMock
 
 // Mock mode: the free requests left are made up, and OpenRouter is not asked.
 const quotaHandler = useMock ? createQuotaHandler({ readKey: async () => mockOpenrouterKey(), rateLimitImpl: () => true }) : createQuotaHandler();
+
+// The Content Security Policy of the site (vercel.json), sent by this server too.
+const CSP = (() => {
+  try {
+    const config = JSON.parse(readFileSync(new URL("../vercel.json", import.meta.url), "utf8"));
+    return config.headers?.flatMap((rule) => rule.headers).find((header) => header.key === "Content-Security-Policy")?.value ?? null;
+  } catch {
+    return null;
+  }
+})();
+
 
 const server = createServer(async (req, res) => {
   try {
@@ -142,6 +154,8 @@ const server = createServer(async (req, res) => {
     res.writeHead(200, {
       "Content-Type": TYPES[extname(file)] || "application/octet-stream",
       "Cache-Control": "no-store",
+      // The same policy as on Vercel, so a style attribute or inline script that the real site would block fails here too.
+      ...(CSP ? { "Content-Security-Policy": CSP } : {}),
     });
     res.end(body);
   } catch {
