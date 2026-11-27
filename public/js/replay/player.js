@@ -65,6 +65,11 @@ export function createPlayer({ events, clock, maxGapMs = 2000, speeds = SPEEDS, 
     get speed() {
       return currentSpeed;
     },
+    // How long the player waits before it shows the next event (0 when it is not playing): the timeline glides over this time.
+    get stepDelay() {
+      if (!playing || cursor >= events.length) return 0;
+      return Math.min(gapBefore(cursor), maxGapMs) / (currentSpeed * scale);
+    },
     get finished() {
       return isFinished();
     },

@@ -631,8 +631,38 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
   let tlFlash = new Set();
   let tlFlashTimer = null;
   const hoverTl = createHoverCard({ doc });
-  const timeNow = () => (tlPlaying ? tlTime : timeAtCursor(events, player.cursor));
+  const nowMs = () => (typeof performance !== "undefined" ? performance.now() : Date.now());
+  // While the diagram plays, the player shows one event after another; the timeline does not jump with it but glides from the time
+  // of the event on show to the time of the next one, over the time the player waits.
+  let glideStart = 0;
+  let glideDelay = 0;
+  let glideOn = false;
+  const timeNow = () => {
+    if (tlPlaying) return tlTime;
+    const c = player.cursor;
+    if (glideDelay > 0 && player.playing && c >= 1 && c < events.length) {
+      const t0 = events[c - 1].t ?? 0;
+      const t1 = events[c].t ?? t0;
+      return t0 + (t1 - t0) * Math.min(1, Math.max(0, (nowMs() - glideStart) / glideDelay));
+    }
+    return timeAtCursor(events, c);
+  };
   const frame = (fn) => (doc.defaultView?.requestAnimationFrame ? doc.defaultView.requestAnimationFrame(fn) : clock.setTimeout(() => fn(Date.now()), 16));
+  function glide() {
+    glideOn = false;
+    if (!tl || tlPlaying || !player.playing) return;
+    tl.paint(timeNow(), tlFlash, true);
+    glideOn = true;
+    frame(glide);
+  }
+  player.subscribe(() => {
+    glideStart = nowMs();
+    glideDelay = player.stepDelay;
+    if (!glideOn && player.playing) {
+      glideOn = true;
+      frame(glide);
+    }
+  });
   function stopTimeline() {
     if (!tlPlaying) return;
     tlPlaying = false;
@@ -1142,6 +1172,7 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
     destroy() {
       clearActivePlayer(keyApi);
       tlPlaying = false;
+      tl = null;
       hoverTl.hide();
       if (tickTimer !== null) clock.clearTimeout(tickTimer);
       player.pause();
