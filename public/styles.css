@@ -2146,7 +2146,7 @@ button.step.ho-row { background-color: var(--working-bg); border-style: dashed; 
 
 /* Create, Simple view: the same three steps with fewer things in them. */
 .create-simple .default-model, .create-simple .pv-legend { display: none; }
-.simple-cols { display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; align-items: start; }
+.simple-cols { display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 14px; align-items: start; }
 .simple-preview { position: sticky; top: 8px; min-width: 0; }
 .simple-preview h3 { margin: 0 0 6px; }
 .team-preview-host { max-width: 100%; overflow: auto; }

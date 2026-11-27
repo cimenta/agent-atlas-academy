@@ -33,6 +33,7 @@ import { createEditor, isUntouched } from "./editor-model.js";
 import { fillSimpleTeam, teamSignature, QUICK_STARTS } from "./simple-team.js";
 import { draft, useDefinition, resetDecisions, decideLoaded, resetForLoad, showKeyStep } from "./draft.js";
 import { deriveInspector, designLabel } from "../replay/inspect-model.js";
+import { agentLabel } from "../engine/labels.js";
 import { createReplayDiagram } from "../replay/diagram.js";
 import { mountEditor } from "./editor-view.js";
 import { canRun, reviewSummary, handoffSkipper, createSkipper, resumeAnswers, agentRows, blockedByGoneModel } from "./create-model.js";
@@ -497,11 +498,13 @@ export function renderCreate(ctx) {
       hintUnlock ??= makeUnlock(() => { refreshSteps(); drawReview(); });
       return hintUnlock;
     };
+    const toTeamLink = h(doc, "button", { type: "button", class: "linklike", "data-ui": "preview-to-team" }, t("create.simple.previewEmpty2"));
     const panels = { setup: h(doc, "div", { class: "step-panel", "data-ui": "step-setup" }), diagram: h(doc, "div", { class: "step-panel", "data-ui": "step-diagram" }), check: h(doc, "div", { class: "step-panel", "data-ui": "step-check" }) };
     const goStep = (step) => {
       draft.step = step;
       refreshSteps();
     };
+    toTeamLink.addEventListener("click", () => goStep("diagram"));
     const move = (by) => goStep(STEPS[STEPS.indexOf(draft.step) + by] ?? draft.step);
     const bar = workspace ? null : stepBar({ doc, t, status: stepsStatus(), current: draft.step, onGo: goStep, help: { setup: "create-setup", diagram: "create-diagram", check: "create-run" } });
     const foot = workspace ? null : footer({ doc, t, onBack: () => move(-1), onNext: () => move(1), onRun: () => beginRun() });
@@ -563,6 +566,11 @@ export function renderCreate(ctx) {
     const routeNote = h(doc, "p", { class: "route-note", "data-ui": "route-note" });
     let previewDiagram = null;
     let previewSignature = "";
+    // The preview names the agents in the language of the page (designLabel uses the English names of the catalog).
+    const previewLabel = (design, id) => {
+      const node = design.nodes.find((n) => n.id === id);
+      return node ? agentLabel(node, design, t(`agent.${node.agent}.label`)) : id;
+    };
     function drawPreview() {
       if (!simple) return;
       const design = draft.editor.design();
@@ -571,6 +579,15 @@ export function renderCreate(ctx) {
       previewSignature = signature;
       previewDiagram?.destroy();
       previewDiagram = null;
+      // No way to cooperate chosen yet: nothing to say about the route and no team to draw.
+      if (!draft.decisions.pattern) {
+        routeNote.className = "route-note";
+        routeNote.textContent = "";
+        routeNote.hidden = true;
+        previewHost.replaceChildren(h(doc, "p", { class: "hint" }, t("create.simple.previewEmpty")));
+        return;
+      }
+      routeNote.hidden = false;
       const kind = routeKind(draft.pattern);
       routeNote.className = `route-note ${kind}`;
       routeNote.textContent = t(SIMPLE_PATTERNS.includes(draft.pattern) ? `create.simple.route.${draft.pattern}` : `create.simple.route.${kind}`);
@@ -578,7 +595,7 @@ export function renderCreate(ctx) {
         previewHost.replaceChildren(h(doc, "p", { class: "hint" }, t("create.simple.previewEmpty")));
         return;
       }
-      previewDiagram = createReplayDiagram({ doc, design, wide: false, boxLabel: (id) => designLabel(design, id), statusText: () => "", startLabel: "" });
+      previewDiagram = createReplayDiagram({ doc, design, wide: false, boxLabel: (id) => previewLabel(design, id), statusText: () => "", startLabel: "" });
       previewHost.replaceChildren(previewDiagram.element);
       // The diagram draws its boxes (names, arrows) in update(); a team that is not running is drawn idle, with no events.
       previewDiagram.update({ events: [], cursor: 0, state: { agents: {} }, selectedId: null });
@@ -931,7 +948,7 @@ export function renderCreate(ctx) {
       h(doc, "div", { class: "part" }, heads.providerModel.element, providerField),
       ...(simple ? [] : [h(doc, "div", { class: "part" }, heads.memory.element, memoryGroup)]),
     ];
-    panels.setup.replaceChildren(...(simple ? [h(doc, "div", { class: "simple-cols" }, h(doc, "div", { class: "simple-main" }, ...setupParts), h(doc, "aside", { class: "part simple-preview", "data-ui": "team-preview-box" }, h(doc, "h3", {}, t("create.simple.preview")), routeNote, previewHost, h(doc, "p", { class: "hint" }, t("create.simple.previewEmpty2"))))] : setupParts));
+    panels.setup.replaceChildren(...(simple ? [h(doc, "div", { class: "simple-cols" }, h(doc, "div", { class: "simple-main" }, ...setupParts), h(doc, "aside", { class: "part simple-preview", "data-ui": "team-preview-box" }, h(doc, "h3", {}, t("create.simple.preview")), routeNote, previewHost, h(doc, "p", { class: "hint" }, toTeamLink)))] : setupParts));
     panels.diagram.replaceChildren(...(workspace ? [] : [h(doc, "h3", {}, t("create.step.diagram"))]), editorHost);
     if (workspace) {
       // Settings on the left; diagram and checks on the right, locked until the four parts are decided.

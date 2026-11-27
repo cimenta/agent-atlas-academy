@@ -87,10 +87,14 @@ export function installHover({ doc, clock, delayMs }) {
   doc.addEventListener("click", () => {
     const el = active;
     if (!el) return;
+    // A button that is drawn again by its click (the corner buttons of the diagram) is found again by its data-ui or data-focus-key.
+    const key = ["data-ui", "data-focus-key"].map((n) => [n, el.getAttribute?.(n)]).find(([, v]) => v);
     setTimeout(() => {
-      if (active !== el) return;
+      if (active !== el && active !== null) return; // another element took over meanwhile
       if (!el.isConnected) {
+        const again = key ? doc.querySelector(`[${key[0]}="${key[1]}"]`) : null;
         close();
+        if (again) open(again);
         return;
       }
       active = null;
