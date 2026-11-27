@@ -157,14 +157,15 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
     rowsBox.querySelectorAll(".tl-dn").forEach((el) => {
       const id = el.dataset.agent;
       const reached = now >= Number(el.dataset.t);
-      if (reached && !doneSeen.has(id)) doneSeen.set(id, nowMs);
+      // The mark of an agent always blinks last: when arrows are blinking just now, it waits until they are done.
+      if (reached && !doneSeen.has(id)) doneSeen.set(id, nowMs + (flash.size ? 900 : 0));
       if (!reached) doneSeen.delete(id);
       const elapsed = reached ? nowMs - doneSeen.get(id) : Infinity;
-      const length = el.dataset.level === "bad" ? 2700 : el.dataset.level === "warn" ? 1800 : 900; // 0.45 s a blink: a finish blinks twice, a stop four times, a failure six times, a finish twice (0.45 s a blink)
+      const length = el.dataset.level === "bad" ? 2700 : el.dataset.level === "warn" ? 1800 : 900; // 0.45 s a blink: a finish blinks twice, a stop four times, a failure six times
       const blinking = elapsed < length;
       el.className = `tl-dn${el.dataset.level ? ` ${el.dataset.level}` : ""} ${reached ? "past" : "fut"}${blinking ? " blink" : ""}`;
       if (blinking) {
-        el.style.animationDelay = `${-Math.max(0, elapsed)}ms`;
+        el.style.animationDelay = `${-elapsed}ms`;
         globalThis.setTimeout(() => el.classList.remove("blink"), length - elapsed);
       }
     });
