@@ -6,6 +6,9 @@ import { h } from "../dom.js";
 const LANE = 56; // the height of a lane and the middle of it: the arrows are routed with these numbers
 const MID = 28;
 
+const MIN_TRACK = 160; // narrower than this the timeline scrolls sideways instead of being squeezed
+const TRACK_GAP = 12; // the space to the right of a track
+
 const percent = (value, total) => `${((value / total) * 100).toFixed(3)}%`;
 
 export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf, fmt, selectedKey, filter, time, playing, onSelect, onFilter, onPlay, onRestart }) {
@@ -80,8 +83,15 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
     rowsBox.querySelectorAll(".tl-svg,.tl-envs").forEach((e) => e.remove());
     const track = rowsBox.querySelector(".tl-track");
     if (!track) return;
-    const width = track.clientWidth;
-    const left = track.offsetLeft; // the names column is narrower on a small screen, so the arrows start where the track starts
+    // Every position is worked out from one number: the width of the tracks. It is set on the tracks and the axis themselves, so the
+    // bars (in per cent of the track), the labels and the arrows (in pixels) always agree, whatever the page does around them.
+    rowsBox.style.minWidth = "";
+    const nameWidth = rowsBox.querySelector(".tl-name")?.offsetWidth ?? 0;
+    const width = Math.max(MIN_TRACK, Math.round(rowsBox.clientWidth - nameWidth - TRACK_GAP));
+    rowsBox.style.minWidth = `${nameWidth + width + TRACK_GAP}px`;
+    rowsBox.querySelectorAll(".tl-track").forEach((el) => (el.style.width = `${width}px`));
+    axisBox.style.width = `${width}px`;
+    const left = track.offsetLeft;
     drawAxis(width);
     const X = (value) => (value / total) * width;
     const fromCount = new Map();
@@ -157,7 +167,7 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
   let lastWidth = 0;
   if (typeof globalThis.ResizeObserver === "function") {
     new globalThis.ResizeObserver(() => {
-      const width = rowsBox.querySelector(".tl-track")?.clientWidth ?? 0;
+      const width = rowsBox.clientWidth;
       if (width > 0 && width !== lastWidth) {
         lastWidth = width;
         draw();
