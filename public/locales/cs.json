@@ -1794,7 +1794,6 @@
   "create.legendLoaded": "klíč načtený",
   "create.legendLocked": "klíč uložený, ale není načtený (zamčený)",
   "create.legendMissing": "klíč chybí",
-  "create.legendChosen": "tmavší odstín stejné barvy: vybraný, agenti používají tohoto poskytovatele",
   "player.titleLive": "Běh: {title}",
   "replay.repeatedTimes": "{n}×",
   "replay.repeatedTitle": "Stejná zpráva přišla {n}krát po sobě",

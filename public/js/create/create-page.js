@@ -391,7 +391,7 @@ export function renderCreate(ctx) {
       for (const id of chosen) if (slotProvider(id) === "openrouter" && !quotaStore.get(id) && !quotaStore.busy(id)) askQuota(id);
     };
     const legendItem = (mark, text) => h(doc, "span", {}, mark, text);
-    const providerLegend = h(doc, "div", { class: "pv-legend", "data-ui": "provider-legend" }, legendItem(h(doc, "i", { class: "pv-lg loaded" }), t("create.legendLoaded")), legendItem(h(doc, "i", { class: "pv-lg warn" }), t("create.legendLocked")), legendItem(h(doc, "i", { class: "pv-lg missing" }), t("create.legendMissing")), legendItem(h(doc, "i", { class: "pv-lg chosen" }), t("create.legendChosen")), legendItem(h(doc, "span", { class: "pv-paid pv-paid-legend", "aria-hidden": "true" }, "$"), t("create.legendPaid")));
+    const providerLegend = h(doc, "div", { class: "pv-legend", "data-ui": "provider-legend" }, legendItem(h(doc, "i", { class: "pv-lg loaded" }), t("create.legendLoaded")), legendItem(h(doc, "i", { class: "pv-lg warn" }), t("create.legendLocked")), legendItem(h(doc, "i", { class: "pv-lg missing" }), t("create.legendMissing")), legendItem(h(doc, "span", { class: "pv-paid pv-paid-legend", "aria-hidden": "true" }, "$"), t("create.legendPaid")));
     const providerField = h(doc, "div", { class: "field provider-field", "data-ui": "provider-field" }, h(doc, "div", { class: "provider-row" }, providerTiles, defaultHost), providerLegend, ...(simple ? [h(doc, "p", { class: "hint", "data-ui": "model-auto" }, t("create.simple.modelAuto"))] : []));
 
     // The model of an agent: its level (Fast, Balanced, Strong), and the provider when more than one is chosen.

@@ -1729,7 +1729,6 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .provider-tile.missing.on { background: #b84242; border-color: #b84242; color: #fff; }
 .pv-lg.missing { width: 16px; height: 12px; border-radius: 4px; background: #f4c2c2; border: 1px solid #d36a6a; }
 .pv-lg.loaded { width: 16px; height: 12px; border-radius: 4px; background: var(--card); border: 1px solid var(--border); }
-.pv-lg.chosen { width: 24px; height: 12px; border-radius: 4px; background: linear-gradient(90deg, #12427a 33%, #e3a33a 33% 66%, #b84242 66%); }
 @media (prefers-color-scheme: dark) { .provider-tile.warn { background: #3a2d10; border-color: #a8741a; color: #f0c870; } .provider-tile.warn.on { background: #a8741a; color: #fff; } .provider-tile.missing { background: #5a232a; border-color: #a8474f; color: #ffc4ca; } .provider-tile.on { background: #2f6db5; border-color: #2f6db5; } .provider-tile.missing.on { background: #b84242; } }
 .provider-field { max-width: none; }
 .banner-lead { flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 30px; }

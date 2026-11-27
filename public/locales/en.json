@@ -1794,7 +1794,6 @@
   "create.legendLoaded": "key loaded",
   "create.legendLocked": "key saved, not loaded (locked)",
   "create.legendMissing": "key missing",
-  "create.legendChosen": "darker version of the same colour: selected, the agents use this provider",
   "player.titleLive": "Run: {title}",
   "replay.repeatedTimes": "{n}×",
   "replay.repeatedTitle": "The same message came {n} times in a row",
