@@ -580,6 +580,8 @@ export function renderCreate(ctx) {
       }
       previewDiagram = createReplayDiagram({ doc, design, wide: false, boxLabel: (id) => designLabel(design, id), statusText: () => "", startLabel: "" });
       previewHost.replaceChildren(previewDiagram.element);
+      // The diagram draws its boxes (names, arrows) in update(); a team that is not running is drawn idle, with no events.
+      previewDiagram.update({ events: [], cursor: 0, state: { agents: {} }, selectedId: null });
     }
     ctx.onLeave(() => previewDiagram?.destroy());
 
@@ -820,7 +822,7 @@ export function renderCreate(ctx) {
       return svg;
     };
     // One button for each pattern: an icon and a word or two for the task it fills in. A click fills in all that a run needs (task, pattern, team, the
-    // first provider that has a key, memory, limits) and opens the last step.
+    // first provider that has a key, memory, limits) and stays on step 1, so the student sees what was filled in.
     const quickBox = h(doc, "div", { class: "quick-starts", role: "group", "aria-label": t("create.quick.label"), "data-ui": "quick-starts" });
     quickBox.append(h(doc, "span", { class: "quick-title", "data-ui": "quick-title", tabindex: "0", "data-hover-title": t("create.quick.title").replace(/:$/, ""), "data-hover-text": t("create.quick.about"), "data-hover-hint": t("create.quick.aboutHint") }, t("create.quick.title")));
     for (const q of QUICK_STARTS) {
@@ -834,7 +836,7 @@ export function renderCreate(ctx) {
         const first = SLOT_IDS.find(hasKey);
         draft.slots = first ? [first] : null;
         Object.assign(draft.decisions, { pattern: true, providers: Boolean(first), model: Boolean(first), memory: true });
-        draft.step = "check";
+        draft.step = "setup";
         showForm();
       });
       quickBox.append(b);
