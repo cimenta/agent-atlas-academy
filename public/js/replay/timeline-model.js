@@ -55,7 +55,7 @@ export function timelineOf(events, pattern = null) {
     const t = agent.status === "error" ? (errorT ?? doneT) : doneT;
     if (typeof t !== "number") continue;
     const start = Math.max(agent.startT, ...bars.filter((b) => b.agent === id && !b.point).map((b) => b.end));
-    if (t > start) bars.push({ key: `${id}:failed`, agent: id, origin: "model", kind: "failed", start, end: t, point: false, eventIndex: events.length, failed: true });
+    if (t > start) bars.push({ key: `${id}:failed`, agent: id, origin: "model", kind: "failed", start, end: t, point: false, eventIndex: events.length, failed: true, stopped: agent.status === "stopped" });
     failed.push({ agent: id, t, stopped: agent.status === "stopped" });
   }
   // Where an agent was waiting: before its first work and between its pieces of work.

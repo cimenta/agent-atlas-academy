@@ -38,10 +38,10 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
   }
 
   const barEls = bars.map((b) => {
-    const el = h(doc, "button", { type: "button", class: `tl-mk o-${b.origin}${b.failed ? " failed" : ""}${b.point ? " pt" : ""}${selectedKey === b.key ? " sel" : ""}`, "data-key": b.key, style: `left:${percent(b.start, total)};${b.point ? "" : `width:${Math.max((b.end - b.start) / total * 100, 0.3).toFixed(3)}%;`}`, "aria-label": `${b.failed ? t("tl.failed") : titleOf(b.key)}, ${nameOf(b.agent)}` });
+    const el = h(doc, "button", { type: "button", class: `tl-mk o-${b.origin}${b.failed ? (b.stopped ? " failed warn" : " failed") : ""}${b.point ? " pt" : ""}${selectedKey === b.key ? " sel" : ""}`, "data-key": b.key, style: `left:${percent(b.start, total)};${b.point ? "" : `width:${Math.max((b.end - b.start) / total * 100, 0.3).toFixed(3)}%;`}`, "aria-label": `${b.failed ? t(b.stopped ? "tl.stopped" : "tl.failed") : titleOf(b.key)}, ${nameOf(b.agent)}` });
     hover.attach(el, () => {
       const future = b.start > currentTime;
-      if (b.failed && !future) return { title: t("tl.failed"), text: nameOf(b.agent), extra: t("tl.failedWhy"), rows: [[t("tl.time"), `${fmt(b.start)} → ${fmt(b.end)}`]] };
+      if (b.failed && !future) return { title: t(b.stopped ? "tl.stopped" : "tl.failed"), text: nameOf(b.agent), extra: t(b.stopped ? "tl.stoppedWhy" : "tl.failedWhy"), rows: [[t("tl.time"), `${fmt(b.start)} → ${fmt(b.end)}`]] };
       return future
         ? { title: t("tl.notYet"), text: t("tl.startsAbout", { name: nameOf(b.agent), time: fmt(b.start) }) }
         : { title: titleOf(b.key), text: nameOf(b.agent), extra: t(`sc.origin.${b.origin}`), rows: [[t("tl.time"), `${fmt(b.start)} → ${fmt(b.end)}`]] };
@@ -122,8 +122,9 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
       envs.push(env);
       drawn.push({ a, env });
     }
-    const marks = [...done.map((d) => ({ ...d, bad: false })), ...failed.map((d) => ({ ...d, bad: true }))].map((d) => {
-      const el = h(doc, "span", { class: `tl-dn${d.bad ? " bad" : ""}`, "data-t": String(d.t), "data-agent": d.agent, "data-bad": d.bad ? "1" : "", style: `left:${X(d.t).toFixed(1)}px;top:${lane(d.agent) * LANE + MID - 17}px`, title: t(d.bad ? (d.stopped ? "tl.stoppedAt" : "tl.failedAt") : "tl.doneAt", { time: fmt(d.t) }) }, d.bad ? "✕" : "✓");
+    // Red cross: the agent failed. Orange !: it was stopped (a limit, you). Green check: it finished.
+    const marks = [...done.map((d) => ({ ...d, level: "" })), ...failed.map((d) => ({ ...d, level: d.stopped ? "warn" : "bad" }))].map((d) => {
+      const el = h(doc, "span", { class: `tl-dn${d.level ? ` ${d.level}` : ""}`, "data-t": String(d.t), "data-agent": d.agent, "data-level": d.level, style: `left:${X(d.t).toFixed(1)}px;top:${lane(d.agent) * LANE + MID - 17}px`, title: t(d.level === "bad" ? "tl.failedAt" : d.level === "warn" ? "tl.stoppedAt" : "tl.doneAt", { time: fmt(d.t) }) }, d.level === "bad" ? "✕" : d.level === "warn" ? "!" : "✓");
       return el;
     });
     const wrap = h(doc, "div", { class: "tl-envs", style: `left:${left}px;width:${width}px` }, ...envs, ...marks);
@@ -139,7 +140,7 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
     currentTime = now;
     for (const { b, el } of barEls) {
       const state = stateOf(b);
-      el.className = `tl-mk o-${b.origin}${b.failed ? " failed" : ""}${b.point ? " pt" : ""} ${state}${selectedKey === b.key ? " sel" : ""}`;
+      el.className = `tl-mk o-${b.origin}${b.failed ? (b.stopped ? " failed warn" : " failed") : ""}${b.point ? " pt" : ""} ${state}${selectedKey === b.key ? " sel" : ""}`;
       el.style.setProperty("--p", `${progressOf(b, state)}%`);
     }
     for (const { a, env } of drawn) {
@@ -157,11 +158,12 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
       if (reached && !doneSeen.has(id)) doneSeen.set(id, nowMs);
       if (!reached) doneSeen.delete(id);
       const elapsed = reached ? nowMs - doneSeen.get(id) : Infinity;
-      const blinking = elapsed < 900;
-      el.className = `tl-dn${el.dataset.bad ? " bad" : ""} ${reached ? "past" : "fut"}${blinking ? " blink" : ""}`;
+      const length = el.dataset.level ? 2250 : 900; // a failure or a stop blinks five times, a finish twice (0.45 s a blink)
+      const blinking = elapsed < length;
+      el.className = `tl-dn${el.dataset.level ? ` ${el.dataset.level}` : ""} ${reached ? "past" : "fut"}${blinking ? " blink" : ""}`;
       if (blinking) {
         el.style.animationDelay = `${-Math.max(0, elapsed)}ms`;
-        globalThis.setTimeout(() => el.classList.remove("blink"), 900 - elapsed);
+        globalThis.setTimeout(() => el.classList.remove("blink"), length - elapsed);
       }
     });
     // The playhead is full on the lane of an agent that is working and fainter on the others.

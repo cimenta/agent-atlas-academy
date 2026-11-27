@@ -2298,6 +2298,8 @@
   "tl.doneAt": "Finished at {time}",
   "tl.failed": "Call that failed",
   "tl.failedWhy": "The model did not answer and the run stopped here",
+  "tl.stopped": "Call that was stopped",
+  "tl.stoppedWhy": "The run was stopped here (a limit, or you)",
   "tl.failedAt": "Failed at {time}",
   "tl.stoppedAt": "Stopped at {time}",
   "tl.clock": "{now} of {total}",

@@ -2298,6 +2298,8 @@
   "tl.doneAt": "Hotovo v {time}",
   "tl.failed": "Volání, které selhalo",
   "tl.failedWhy": "Model neodpověděl a běh se tady zastavil",
+  "tl.stopped": "Volání, které bylo zastaveno",
+  "tl.stoppedWhy": "Běh se tady zastavil (limit, nebo ty)",
   "tl.failedAt": "Selhalo v {time}",
   "tl.stoppedAt": "Zastaveno v {time}",
   "tl.clock": "{now} z {total}",
