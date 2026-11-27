@@ -27,9 +27,16 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
     h(doc, "span", {}, h(doc, "b", { class: "lgd" }, "✓"), ` ${t("tl.legend.done")}`),
   );
 
-  const step = total > 30000 ? 10000 : 5000;
-  const ticks = [];
-  for (let x = 0; x <= total; x += step) ticks.push(h(doc, "span", { style: `left:${percent(x, total)}` }, `${x / 1000} s`));
+  // The axis labels are drawn in draw(), when the width of the track is known: no more of them than fit.
+  const axisBox = h(doc, "div", { class: "tl-ax" });
+  const STEPS_S = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600];
+  function drawAxis(width) {
+    const fit = Math.max(2, Math.floor(width / 56));
+    const stepS = STEPS_S.find((n) => total / 1000 / n <= fit) ?? STEPS_S.at(-1);
+    const ticks = [];
+    for (let x = 0; x <= total; x += stepS * 1000) ticks.push(h(doc, "span", { style: `left:${percent(x, total)}` }, `${x / 1000} s`));
+    axisBox.replaceChildren(...ticks);
+  }
 
   const barEls = bars.map((b) => {
     const el = h(doc, "button", { type: "button", class: `tl-mk o-${b.origin}${b.point ? " pt" : ""}${selectedKey === b.key ? " sel" : ""}`, "data-key": b.key, style: `left:${percent(b.start, total)};${b.point ? "" : `width:${Math.max((b.end - b.start) / total * 100, 0.3).toFixed(3)}%;`}`, "aria-label": `${titleOf(b.key)}, ${nameOf(b.agent)}` });
@@ -59,7 +66,7 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
     return h(doc, "div", { class: `tl-row${filter && filter !== id ? " dim" : ""}`, "data-lane": String(index) }, name, track);
   });
   const rowsBox = h(doc, "div", { class: "tl-rows", "data-ui": "timeline-rows" }, ...rows);
-  const axis = h(doc, "div", { class: "tl-axis" }, h(doc, "span", {}), h(doc, "div", { class: "tl-ax" }, ...ticks));
+  const axis = h(doc, "div", { class: "tl-axis" }, h(doc, "span", {}), axisBox);
   const element = h(doc, "div", { class: "tl", "data-ui": "timeline" }, h(doc, "div", { class: "tl-top" }, play, restart, clock, legend), rowsBox, axis);
 
   let currentTime = time;
@@ -74,6 +81,8 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
     const track = rowsBox.querySelector(".tl-track");
     if (!track) return;
     const width = track.clientWidth;
+    const left = track.offsetLeft; // the names column is narrower on a small screen, so the arrows start where the track starts
+    drawAxis(width);
     const X = (value) => (value / total) * width;
     const fromCount = new Map();
     for (const a of arrows) fromCount.set(`${a.from}@${a.at}`, (fromCount.get(`${a.from}@${a.at}`) ?? 0) + 1);
@@ -110,9 +119,9 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
       const el = h(doc, "span", { class: "tl-dn", "data-t": String(d.t), style: `left:${X(d.t).toFixed(1)}px;top:${lane(d.agent) * LANE + MID - 17}px`, title: t("tl.doneAt", { time: fmt(d.t) }) }, "✓");
       return el;
     });
-    const wrap = h(doc, "div", { class: "tl-envs" }, ...envs, ...marks);
+    const wrap = h(doc, "div", { class: "tl-envs", style: `left:${left}px;width:${width}px` }, ...envs, ...marks);
     const holder = h(doc, "div", { class: "tl-svg-holder" });
-    holder.innerHTML = `<svg class="tl-svg" width="${width}" height="${order.length * LANE}" aria-hidden="true">${svg}</svg>`;
+    holder.innerHTML = `<svg class="tl-svg" style="left:${left}px" width="${width}" height="${order.length * LANE}" aria-hidden="true">${svg}</svg>`;
     rowsBox.append(holder.firstChild, wrap);
     paint(currentTime, new Set());
   }
@@ -142,6 +151,18 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
     rowsBox.querySelectorAll(".tl-ph").forEach((el) => (el.style.left = `${Math.min(100, (now / total) * 100).toFixed(3)}%`));
     clock.textContent = t("tl.clock", { now: fmt(now), total: fmt(total) });
     play.replaceChildren(doc.createTextNode(`${playing ? "❚❚" : "▶"} ${t("tl.play")}`));
+  }
+
+  // The pane or the window can change its width after the first drawing: the arrows are in pixels, so they are drawn again.
+  let lastWidth = 0;
+  if (typeof globalThis.ResizeObserver === "function") {
+    new globalThis.ResizeObserver(() => {
+      const width = rowsBox.querySelector(".tl-track")?.clientWidth ?? 0;
+      if (width > 0 && width !== lastWidth) {
+        lastWidth = width;
+        draw();
+      }
+    }).observe(rowsBox);
   }
 
   return {
