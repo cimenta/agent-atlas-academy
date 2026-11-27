@@ -132,18 +132,11 @@ function renderChrome(route) {
   menuToggle.textContent = "\u2630";
   menuToggle.setAttribute("aria-label", t("menu.toggle"));
 
-  switcher.replaceChildren(
-    ...SUPPORTED_LANGUAGES.map((code) => {
-      const button = h(
-        doc,
-        "button",
-        { type: "button", lang: code, "aria-pressed": String(code === lang), "aria-label": `${t("lang.label")}: ${t(`lang.${code}`)}` },
-        code.toUpperCase(),
-      );
-      button.addEventListener("click", () => switchLanguage(code));
-      return button;
-    }),
-  );
+  // One button: it shows the language in use and a click moves to the next one.
+  const nextLang = SUPPORTED_LANGUAGES[(SUPPORTED_LANGUAGES.indexOf(lang) + 1) % SUPPORTED_LANGUAGES.length];
+  const langButton = h(doc, "button", { type: "button", lang, "data-ui": "lang-button", title: `${t("lang.label")}: ${t(`lang.${nextLang}`)}`, "aria-label": `${t("lang.label")}: ${t(`lang.${lang}`)}. ${t(`lang.${nextLang}`)}` }, lang.toUpperCase());
+  langButton.addEventListener("click", () => switchLanguage(nextLang));
+  switcher.replaceChildren(langButton);
 
   // Simple or full view of the screens; the choice is kept in the settings and the page is drawn again.
   viewSwitcher.setAttribute("aria-label", t("view.label"));

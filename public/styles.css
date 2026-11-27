@@ -2165,3 +2165,13 @@ button.step.ho-row { background-color: var(--working-bg); border-style: dashed; 
 .simple-check .linklike { margin-left: auto; font-size: 0.84rem; }
 .simple-defaults { margin-top: 10px; }
 @media (max-width: 760px) { .simple-cols { grid-template-columns: 1fr; } .simple-preview { position: static; } }
+
+/* One language button; the view switch has a clearer frame. */
+.language-switcher button { border-radius: 8px; margin-left: 0; }
+.view-switcher { border: 2px solid var(--accent); border-radius: 10px; padding: 1px; }
+.view-switcher button { border-radius: 8px; margin-left: 0; border-color: transparent; }
+.view-switcher button[aria-pressed="true"] { background: var(--accent); color: #fff; font-weight: 600; }
+
+.quick-starts { display: flex; flex-wrap: wrap; gap: 6px; }
+.create-head .quick-start { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 2px 12px; }
+.quick-start svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }

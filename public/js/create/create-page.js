@@ -30,7 +30,7 @@ import { justFinished } from "../play-shared.js";
 import { createBatchedSaver } from "../storage/runs-store.js";
 import { keepFocus } from "./keep-focus.js";
 import { createEditor, isUntouched } from "./editor-model.js";
-import { fillSimpleTeam, teamSignature } from "./simple-team.js";
+import { fillSimpleTeam, teamSignature, QUICK_STARTS } from "./simple-team.js";
 import { draft, useDefinition, resetDecisions, decideLoaded, resetForLoad, showKeyStep } from "./draft.js";
 import { deriveInspector, designLabel } from "../replay/inspect-model.js";
 import { createReplayDiagram } from "../replay/diagram.js";
@@ -215,24 +215,7 @@ export function renderCreate(ctx) {
       draft.simpleTeam = teamSignature(draft.editor.design());
     };
     const teamIsUntouched = () => isUntouched(draft.editor.design()) || (simple && draft.simpleTeam === teamSignature(draft.editor.design()));
-    // What the Simple view decides for the student: the way to cooperate (sequential, while nothing is chosen and the diagram is empty), the first provider
-    // that has a key, memory off. The model of that provider follows in keepModels. They are the same decisions the Full view makes, so switching keeps them.
-    if (simple) {
-      draft.decisions.memory = true;
-      if (!draft.decisions.pattern && isUntouched(draft.editor.design())) {
-        draft.pattern = "sequential";
-        draft.decisions.pattern = true;
-        draft.editor.reset("sequential", { criteria: t("editor.criteriaExample") });
-        fillTeam("sequential");
-      }
-      if (chosenSlots().length === 0) {
-        const first = SLOT_IDS.find(hasKey);
-        if (first) {
-          draft.slots = [first];
-          draft.decisions.providers = true;
-        }
-      }
-    }
+    // Nothing is chosen for the student: the way to cooperate, the provider and the model start empty in both views. The Simple view does not show memory, so it counts it as decided only when it works out the status (the draft is left alone). (The example buttons next to the title fill everything in one click.)
     // Task.
     const taskInput = h(doc, "textarea", { id: "cr-task", rows: 4, maxlength: TASK_MAX_CHARS });
     taskInput.value = draft.task;
@@ -435,7 +418,7 @@ export function renderCreate(ctx) {
     let headings = {};
     const stepsStatus = () => {
       const design = draft.editor.design();
-      return stepStatus({ task: draft.task, decisions: draft.decisions, nodeCount: design.nodes.length, editorOk: draft.editor.errors().length === 0, keysReady: usedSlots(design).every((s) => vaultFor(s).getSessionKey() !== null), soft: simple });
+      return stepStatus({ task: draft.task, decisions: simple ? { ...draft.decisions, memory: true } : draft.decisions, nodeCount: design.nodes.length, editorOk: draft.editor.errors().length === 0, keysReady: usedSlots(design).every((s) => vaultFor(s).getSessionKey() !== null), soft: simple });
     };
     // "Almost there: ..., add your key": the words about the key are a link to the API key box. The node is kept while the text stays the same.
     let keyHintNode = null;
@@ -829,6 +812,25 @@ export function renderCreate(ctx) {
       }
       return svg;
     };
+    // One button for each pattern: an icon and a word or two for the task it fills in. A click fills in all that a run needs (task, pattern, team, the
+    // first provider that has a key, memory, limits) and opens the last step.
+    const quickBox = h(doc, "div", { class: "quick-starts", role: "group", "aria-label": t("create.quick.label"), "data-ui": "quick-starts" });
+    for (const q of QUICK_STARTS) {
+      const b = h(doc, "button", { type: "button", class: "quick-start", "data-ui": `quick-${q.pattern}`, title: t(`create.quick.${q.pattern}.hint`) }, iconOf(q.icon), h(doc, "span", {}, t(`create.quick.${q.pattern}.label`)));
+      b.addEventListener("click", () => {
+        if (!teamIsUntouched() && !doc.defaultView.confirm(t("create.quick.confirm"))) return;
+        draft.task = t(`create.quick.${q.pattern}.task`);
+        draft.pattern = q.pattern;
+        draft.editor.reset(q.pattern, { criteria: t("editor.criteriaExample") });
+        fillTeam(q.pattern);
+        const first = SLOT_IDS.find(hasKey);
+        draft.slots = first ? [first] : null;
+        Object.assign(draft.decisions, { pattern: true, providers: Boolean(first), model: Boolean(first), memory: true });
+        draft.step = "check";
+        showForm();
+      });
+      quickBox.append(b);
+    }
     const loadButton = h(doc, "button", { type: "button", class: "head-icon", "data-ui": "load-definition", title: `${t("create.loadDefinition")}: ${t("create.loadDefinitionHint")}`, "aria-label": t("create.loadDefinition") }, iconOf(["M2 13h12", "M8 11V2.5M4.5 6 8 2.5 11.5 6"]));
     loadButton.addEventListener("click", () => definitionFile.click());
     const clearButton = h(doc, "button", { type: "button", class: "head-icon", "data-ui": "clear-definition", title: `${t("create.clearDefinition")}: ${t("create.clearDefinitionHint")}`, "aria-label": t("create.clearDefinition") }, iconOf(["M3 4h10M6 4V2h4v2M5 4l.7 9h4.6L11 4"]));
@@ -928,7 +930,7 @@ export function renderCreate(ctx) {
     }
     if (!workspace) panels.check.replaceChildren(reviewHost);
     root.replaceChildren(
-      h(doc, "div", { class: "create-head" }, h(doc, "h2", {}, t("create.title")), loadButton, clearButton, definitionFile),
+      h(doc, "div", { class: "create-head" }, h(doc, "h2", {}, t("create.title")), quickBox, loadButton, clearButton, definitionFile),
       startNotice ? h(doc, "p", { class: "notice", role: noticeRole }, startNotice) : "",
       carryLimits ? carryLimits.element : "",
       draft.retry ? carryOnButton : "",
