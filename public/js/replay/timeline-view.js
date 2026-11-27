@@ -122,9 +122,11 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
       envs.push(env);
       drawn.push({ a, env });
     }
+    // The mark sits in the top right corner of the bar of its agent (a short bar is at least 10 px wide, and the mark must not be left of its end).
+    const markX = (d) => (d.level ? Math.max(X(d.t), X(bars.find((b) => b.key === `${d.agent}:failed`)?.start ?? d.t) + 10) : X(d.t));
     // Red cross: the agent failed. Orange !: it was stopped (a limit, you). Green check: it finished.
     const marks = [...done.map((d) => ({ ...d, level: "" })), ...failed.map((d) => ({ ...d, level: d.stopped ? "warn" : "bad" }))].map((d) => {
-      const el = h(doc, "span", { class: `tl-dn${d.level ? ` ${d.level}` : ""}`, "data-t": String(d.t), "data-agent": d.agent, "data-level": d.level, style: `left:${X(d.t).toFixed(1)}px;top:${lane(d.agent) * LANE + MID - 17}px`, title: t(d.level === "bad" ? "tl.failedAt" : d.level === "warn" ? "tl.stoppedAt" : "tl.doneAt", { time: fmt(d.t) }) }, d.level === "bad" ? "✕" : d.level === "warn" ? "!" : "✓");
+      const el = h(doc, "span", { class: `tl-dn${d.level ? ` ${d.level}` : ""}`, "data-t": String(d.t), "data-agent": d.agent, "data-level": d.level, style: `left:${markX(d).toFixed(1)}px;top:${lane(d.agent) * LANE + MID - 17}px`, title: t(d.level === "bad" ? "tl.failedAt" : d.level === "warn" ? "tl.stoppedAt" : "tl.doneAt", { time: fmt(d.t) }) }, d.level === "bad" ? "✕" : d.level === "warn" ? "!" : "✓");
       return el;
     });
     const wrap = h(doc, "div", { class: "tl-envs", style: `left:${left}px;width:${width}px` }, ...envs, ...marks);
@@ -158,7 +160,7 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
       if (reached && !doneSeen.has(id)) doneSeen.set(id, nowMs);
       if (!reached) doneSeen.delete(id);
       const elapsed = reached ? nowMs - doneSeen.get(id) : Infinity;
-      const length = el.dataset.level ? 2250 : 900; // a failure or a stop blinks five times, a finish twice (0.45 s a blink)
+      const length = el.dataset.level === "bad" ? 2700 : el.dataset.level === "warn" ? 1800 : 900; // 0.45 s a blink: a finish blinks twice, a stop four times, a failure six times, a finish twice (0.45 s a blink)
       const blinking = elapsed < length;
       el.className = `tl-dn${el.dataset.level ? ` ${el.dataset.level}` : ""} ${reached ? "past" : "fut"}${blinking ? " blink" : ""}`;
       if (blinking) {

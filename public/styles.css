@@ -2131,7 +2131,8 @@ button.step.ho-row { background-color: var(--working-bg); border-style: dashed; 
 .tl-dn { position: absolute; width: 15px; height: 15px; border-radius: 50%; background: var(--done-bg); border: 1.5px solid var(--c5); color: var(--c5); font-size: 0.6rem; font-weight: 700; line-height: 12px; text-align: center; transform: translate(-50%, -50%); cursor: default; }
 .tl-dn.bad { border-color: #c0392b; background: #c0392b; color: #fff; }
 .tl-dn.warn { border-color: #b26a00; background: #e08a00; color: #fff; }
-.tl-dn.bad.blink, .tl-dn.warn.blink { animation-iteration-count: 5; }
+.tl-dn.bad.blink { animation-iteration-count: 6; }
+.tl-dn.warn.blink { animation-iteration-count: 4; }
 .tl-mk.failed { border-color: var(--err); background: repeating-linear-gradient(45deg, var(--err-bg, rgba(192, 57, 43, 0.18)) 0 6px, transparent 6px 12px); }
 .tl-mk.failed.warn { border-color: #b26a00; background: repeating-linear-gradient(45deg, rgba(224, 138, 0, 0.22) 0 6px, transparent 6px 12px); }
 .tl-dn.fut { opacity: 0.3; }
