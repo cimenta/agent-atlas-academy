@@ -32,11 +32,11 @@ export function teamSignature(design) {
   return JSON.stringify([design.nodes.map((n) => [n.id, n.agent, n.name ?? "", n.instructions ?? ""]), design.edges.map((e) => `${e.from}>${e.to}`)]);
 }
 
-// The example buttons next to the title of Create: one for each pattern of the Simple view. The icon is a few strokes (16 x 16); the label, the hint
+// The example buttons next to the title of Create: one for each pattern of the Simple view. The icon is the pattern's own icon; the label, the hint
 // and the task are create.quick.<pattern>.label, .hint and .task.
 export const QUICK_STARTS = [
-  { pattern: "sequential", icon: ["M2 8h12", "M10 4l4 4-4 4"] },
-  { pattern: "parallel", icon: ["M2 4h12", "M2 8h12", "M2 12h12"] },
-  { pattern: "router", icon: ["M2 8h4", "M6 8l8-4", "M6 8l8 4"] },
-  { pattern: "evaluator", icon: ["M3 8a5 5 0 0 1 9-3", "M12 2v3H9", "M13 8a5 5 0 0 1-9 3", "M4 14v-3h3"] },
+  { pattern: "sequential" },
+  { pattern: "parallel" },
+  { pattern: "router" },
+  { pattern: "evaluator" },
 ];

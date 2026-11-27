@@ -2175,3 +2175,8 @@ button.step.ho-row { background-color: var(--working-bg); border-style: dashed; 
 .quick-starts { display: flex; flex-wrap: wrap; gap: 6px; }
 .create-head .quick-start { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 2px 12px; }
 .quick-start svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+.quick-starts { align-items: center; padding: 3px 6px 3px 10px; border: 1px dashed var(--accent); border-radius: 999px; }
+.quick-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent); }
+.create-head .quick-start { border-style: dashed; padding: 1px 10px 1px 6px; }
+.create-head .quick-start .pattern-icon { width: 32px; height: 20px; }

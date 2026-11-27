@@ -815,8 +815,9 @@ export function renderCreate(ctx) {
     // One button for each pattern: an icon and a word or two for the task it fills in. A click fills in all that a run needs (task, pattern, team, the
     // first provider that has a key, memory, limits) and opens the last step.
     const quickBox = h(doc, "div", { class: "quick-starts", role: "group", "aria-label": t("create.quick.label"), "data-ui": "quick-starts" });
+    quickBox.append(h(doc, "span", { class: "quick-title", "data-ui": "quick-title" }, t("create.quick.title")));
     for (const q of QUICK_STARTS) {
-      const b = h(doc, "button", { type: "button", class: "quick-start", "data-ui": `quick-${q.pattern}`, title: t(`create.quick.${q.pattern}.hint`) }, iconOf(q.icon), h(doc, "span", {}, t(`create.quick.${q.pattern}.label`)));
+      const b = h(doc, "button", { type: "button", class: "quick-start", "data-ui": `quick-${q.pattern}`, title: t(`create.quick.${q.pattern}.hint`) }, patternIcon(doc, q.pattern), h(doc, "span", {}, t(`create.quick.${q.pattern}.label`)));
       b.addEventListener("click", () => {
         if (!teamIsUntouched() && !doc.defaultView.confirm(t("create.quick.confirm"))) return;
         draft.task = t(`create.quick.${q.pattern}.task`);
