@@ -78,7 +78,26 @@ export function installHover({ doc, clock, delayMs }) {
   doc.addEventListener("keydown", (e) => {
     if (e.key === "Escape") close();
   });
-  doc.addEventListener("pointerdown", close);
+  // A press on the element the card describes keeps the card (it is re-read after the click, because the button may have changed, e.g. Play to Pause);
+  // a press anywhere else closes it. A card of an element that the click took away from the page closes.
+  doc.addEventListener("pointerdown", (e) => {
+    if (active && active.contains?.(e.target)) return;
+    close();
+  });
+  doc.addEventListener("click", () => {
+    const el = active;
+    if (!el) return;
+    setTimeout(() => {
+      if (active !== el) return;
+      if (!el.isConnected) {
+        close();
+        return;
+      }
+      active = null;
+      card.hide();
+      open(el);
+    }, 0);
+  });
   doc.addEventListener("scroll", close, true);
   return { card, close };
 }

@@ -12,20 +12,22 @@ export function statusIcon(doc, state, t) {
 }
 
 // The three step tabs. A step that is not open yet is disabled and shows the lock.
-// help: { step: help section id }; the active step with an entry shows a ? in its tab. It is a span, not a button, because it sits in a button.
+// help: { step: help section id }; every open step with an entry shows a ? in its tab. It is a span, not a button, because it sits in a button.
 export function stepBar({ doc, t, status, current, onGo, help = {} }) {
   const element = h(doc, "div", { class: "step-bar", role: "tablist", "data-ui": "step-bar" });
-  // extra.names: another name for a step (the Simple view calls step 2 Team); extra.notes: a short line under the name of a step.
+  // extra.names: another name for a step (the Simple view calls step 2 Team); extra.tags: { step: { kind: "miss" | "ok" | "off", text } }, the coloured label at the right end of its tab.
   function update(next, now, extra = {}) {
     element.replaceChildren(
       ...STEPS.map((step, i) => {
         const locked = next.locked[step] === true;
-        const button = h(doc, "button", { type: "button", class: "step-tab", role: "tab", "data-step": step, "aria-selected": String(now === step), title: locked ? t("create.step.locked") : undefined }, statusIcon(doc, locked ? "lock" : next[step], t), `${i + 1}. ${extra.names?.[step] ?? t(`create.step.${step}`)}`, ...(extra.notes?.[step] ? [h(doc, "small", { class: "step-note", "data-ui": `step-note-${step}` }, extra.notes[step])] : []));
+        const tag = extra.tags?.[step];
+        const label = h(doc, "span", { class: "nm" }, `${i + 1}. ${extra.names?.[step] ?? t(`create.step.${step}`)}`);
+        const button = h(doc, "button", { type: "button", class: "step-tab", role: "tab", "data-step": step, "aria-selected": String(now === step), title: locked ? t("create.step.locked") : undefined }, statusIcon(doc, locked ? "lock" : next[step], t), label, ...(tag ? [h(doc, "span", { class: `tag ${tag.kind}`, "data-ui": `step-tag-${step}` }, tag.text)] : []));
         button.disabled = locked;
         button.addEventListener("click", () => {
           if (!locked) onGo(step);
         });
-        if (help[step] && now === step && !locked) {
+        if (help[step] && !locked) {
           const name = t(`create.step.${step}`);
           const open = () => openHelpPopup({ doc, t, id: help[step] });
           const icon = h(doc, "span", { class: "help-icon step-help", role: "button", tabindex: "0", "data-ui": `help-${help[step]}`, "aria-label": t("help.popup.open", { name }), ...helpTip(t, help[step], name) }, "?");
@@ -39,7 +41,7 @@ export function stepBar({ doc, t, status, current, onGo, help = {} }) {
             event.stopPropagation();
             open();
           });
-          button.append(icon);
+          label.append(icon);
         }
         return button;
       }),

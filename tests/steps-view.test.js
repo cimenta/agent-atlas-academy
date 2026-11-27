@@ -148,14 +148,13 @@ test("updating the workspace bar twice keeps one Run button", () => {
   assert.equal(find(bar.element, (n) => n.attrs?.["data-ui"] === "run-button").length, 1);
 });
 
-test("the help mark is in the tab of the active step only, and only for a step that has help", () => {
+test("every open step that has help shows its help mark, a locked step does not", () => {
   const help = { diagram: "create-diagram", check: "create-run" };
   const bar = stepBar({ doc, t, status: open(), current: "setup", onGo: () => {}, help });
-  assert.equal(find(bar.element, (n) => n.attrs?.class?.includes("step-help")).length, 0);
+  const ids = () => find(bar.element, (n) => n.attrs?.class?.includes("step-help")).map((n) => n.getAttribute("data-ui"));
+  assert.deepEqual(ids(), ["help-create-diagram", "help-create-run"]);
   bar.update(open(), "diagram");
-  const marks = find(bar.element, (n) => n.attrs?.class?.includes("step-help"));
-  assert.equal(marks.length, 1);
-  assert.equal(marks[0].getAttribute("data-ui"), "help-create-diagram");
-  bar.update(open(), "check");
-  assert.equal(find(bar.element, (n) => n.attrs?.class?.includes("step-help"))[0].getAttribute("data-ui"), "help-create-run");
+  assert.deepEqual(ids(), ["help-create-diagram", "help-create-run"]);
+  bar.update({ ...open(), locked: { diagram: false, check: true } }, "setup");
+  assert.deepEqual(ids(), ["help-create-diagram"]);
 });

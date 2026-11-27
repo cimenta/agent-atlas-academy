@@ -503,7 +503,7 @@ export function renderCreate(ctx) {
       refreshSteps();
     };
     const move = (by) => goStep(STEPS[STEPS.indexOf(draft.step) + by] ?? draft.step);
-    const bar = workspace ? null : stepBar({ doc, t, status: stepsStatus(), current: draft.step, onGo: goStep, help: { diagram: "create-diagram", check: "create-run" } });
+    const bar = workspace ? null : stepBar({ doc, t, status: stepsStatus(), current: draft.step, onGo: goStep, help: { setup: "create-setup", diagram: "create-diagram", check: "create-run" } });
     const foot = workspace ? null : footer({ doc, t, onBack: () => move(-1), onNext: () => move(1), onRun: () => beginRun() });
     function refreshSteps() {
       const status = stepsStatus();
@@ -519,7 +519,14 @@ export function renderCreate(ctx) {
       }
       draft.step = stepAfterChange(draft.step, status);
       const nodes = draft.editor.design().nodes.length;
-      bar.update(status, draft.step, simple ? { names: { diagram: t("create.simple.stepTeam") }, notes: { setup: status.setup === "done" ? t("create.simple.note.done") : simpleMissingSetup(status).map((k) => t(`create.simple.noteMissing.${k}`)).join(", "), diagram: t("create.ws.agentMany", { n: nodes }), check: status.ready ? t("create.simple.note.ready") : t("create.simple.note.notReady") } } : {});
+      // The same tabs in both views: the name, a ? and, at the right end, a coloured label (orange: something is missing, green: done, grey: not yet).
+      const open = [status.parts.task, status.parts.pattern, status.parts.providerModel, status.parts.memory].filter((v) => !v).length;
+      const tags = {
+        setup: status.setup === "done" ? { kind: "ok", text: t("create.tab.done") } : { kind: "miss", text: t("create.tab.missing", { n: open }) },
+        diagram: status.locked.diagram ? { kind: "off", text: t("create.tab.waiting") } : nodes === 0 ? { kind: "miss", text: t("create.tab.noAgents") } : status.diagram === "done" ? { kind: "ok", text: t("create.ws.agentMany", { n: nodes }) } : { kind: "miss", text: t("create.tab.fix") },
+        check: status.ready ? { kind: "ok", text: t("create.simple.note.ready") } : { kind: "off", text: t("create.tab.notYet") },
+      };
+      bar.update(status, draft.step, { names: { diagram: t("create.simple.stepTeam") }, tags });
       const nav = navState({ step: draft.step, status });
       foot.update({ nav: { ...nav, run: nav.run && runAllowed({ status, verdict: lastVerdict, retryPending: draft.retry !== null }) }, hint: hintText(status), hintExtra: hintExtra(status) });
       for (const [part, heading] of Object.entries(headings)) heading.setState(status.parts[part] ? "done" : "none");

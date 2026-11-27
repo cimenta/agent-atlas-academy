@@ -1729,7 +1729,7 @@ button.small { min-height: 32px; min-width: 0; padding: 2px 10px; font-size: 0.8
 .provider-tile.missing.on { background: #b84242; border-color: #b84242; color: #fff; }
 .pv-lg.missing { width: 16px; height: 12px; border-radius: 4px; background: #f4c2c2; border: 1px solid #d36a6a; }
 .pv-lg.loaded { width: 16px; height: 12px; border-radius: 4px; background: var(--card); border: 1px solid var(--border); }
-.pv-lg.chosen { width: 16px; height: 12px; border-radius: 4px; background: #12427a; }
+.pv-lg.chosen { width: 24px; height: 12px; border-radius: 4px; background: linear-gradient(90deg, #12427a 33%, #e3a33a 33% 66%, #b84242 66%); }
 @media (prefers-color-scheme: dark) { .provider-tile.warn { background: #3a2d10; border-color: #a8741a; color: #f0c870; } .provider-tile.warn.on { background: #a8741a; color: #fff; } .provider-tile.missing { background: #5a232a; border-color: #a8474f; color: #ffc4ca; } .provider-tile.on { background: #2f6db5; border-color: #2f6db5; } .provider-tile.missing.on { background: #b84242; } }
 .provider-field { max-width: none; }
 .banner-lead { flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 30px; }
@@ -2147,10 +2147,7 @@ button.step.ho-row { background-color: var(--working-bg); border-style: dashed; 
 
 /* Create, Simple view: the same three steps with fewer things in them. */
 .create-simple .default-model, .create-simple .pv-legend { display: none; }
-.create-simple .step-tab { flex-wrap: wrap; }
-.step-note { display: block; width: 100%; font-size: 0.76rem; font-weight: 400; color: var(--muted); text-align: left; }
-.step-tab[aria-selected="false"] .step-note { color: var(--muted); }
-.simple-cols { display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; align-items: start; }
+.step-tab[aria-selected="false"] .simple-cols { display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; align-items: start; }
 .simple-preview { position: sticky; top: 8px; min-width: 0; }
 .simple-preview h3 { margin: 0 0 6px; }
 .team-preview-host { max-width: 100%; overflow: auto; }
@@ -2180,3 +2177,13 @@ button.step.ho-row { background-color: var(--working-bg); border-style: dashed; 
 .quick-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent); }
 .create-head .quick-start { border-style: dashed; padding: 1px 10px 1px 6px; }
 .create-head .quick-start .pattern-icon { width: 32px; height: 20px; }
+
+/* Step tabs (both views): a larger name, a ? on every tab and a coloured label at the right end. */
+.step-tab { flex-wrap: nowrap; justify-content: flex-start; gap: 8px; padding: 8px 12px; font-size: 1.05rem; font-weight: 600; white-space: nowrap; }
+.step-tab .nm { display: inline-flex; align-items: center; gap: 6px; }
+.step-tab .nm .step-help { margin: 0; }
+.step-tab .tag { margin-left: auto; font-size: 0.76rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; color: #fff; }
+.step-tab .tag.miss { background: #8a4b0a; }
+.step-tab .tag.ok { background: var(--done); }
+.step-tab .tag.off { background: #5b6470; }
+@media (max-width: 719px) { .step-tab { padding: 6px 6px; font-size: 0.85rem; gap: 4px; } .step-tab .tag { padding: 1px 6px; font-size: 0.68rem; } }
