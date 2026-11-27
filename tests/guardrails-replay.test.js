@@ -94,7 +94,7 @@ test("the texts exist in both languages and the replay marks a noted guardrail",
     assert.ok(cs[k], `cs ${k}`);
     assert.notEqual(cs[k], en[k], `cs ${k} is not translated`);
   }
-  assert.match(read("../public/js/replay/view.js"), /check-note/);
+  assert.match(read("../public/js/replay/run-steps-view.js"), /check-note/);
 });
 
 test("two repair guardrails that fail on one answer show one repair step", async () => {

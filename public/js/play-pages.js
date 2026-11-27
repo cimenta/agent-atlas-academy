@@ -118,7 +118,7 @@ export async function renderReplayTab(ctx, requestedId) {
   }
   const playerHost = h(doc, "div", { class: "player-mount" });
   host.append(playerHost);
-  handle = mountReplay(playerHost, { doneMark, run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors, onRetry, suggestFallback: ctx.settings?.get().fallback !== "off", limitsInfo: () => ({ current: ctx.settings.get().limits, original: found.run.limits, record: found.run, repeatStop: ctx.settings.get().repeatStop }) });
+  handle = mountReplay(playerHost, { doneMark, run: found.run, explanations, t, doc, autoStart: false, onAboutSave, onDelete, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors, simple: ctx.settings?.get().viewMode === "simple", onFullView: () => ctx.setViewMode?.("full"), onRetry, suggestFallback: ctx.settings?.get().fallback !== "off", limitsInfo: () => ({ current: ctx.settings.get().limits, original: found.run.limits, record: found.run, repeatStop: ctx.settings.get().repeatStop }) });
   // A run Create has just finished opens at its end, so its warnings and the message about how it ended are on the screen.
   if (justFinished.id === currentId) {
     justFinished.id = null;

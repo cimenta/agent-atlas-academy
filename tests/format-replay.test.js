@@ -56,6 +56,5 @@ test("the texts exist in both languages and the replay marks a check step", () =
     assert.ok(cs[k], `cs ${k}`);
     assert.notEqual(cs[k], en[k], `cs ${k} is not translated`);
   }
-  assert.match(read("../public/js/replay/view.js"), /check-ok/);
-  assert.match(read("../public/js/replay/view.js"), /check: "kind\.check"/);
+  assert.match(read("../public/js/replay/run-steps-view.js"), /check-ok/);
 });

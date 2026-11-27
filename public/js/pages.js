@@ -127,7 +127,7 @@ export async function renderLanding(ctx) {
     const run = await getJson(ctx, `/runs/${first.id}.json`);
     const explanations = await loadExplanations(ctx, first.id);
     if (ctx.isStale()) return;
-    const handle = mountReplay(host, { run, explanations, t, doc, autoStart: ctx.autoStart, timeScale: first.timeScale, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors });
+    const handle = mountReplay(host, { run, explanations, t, doc, autoStart: ctx.autoStart, timeScale: first.timeScale, layout: ctx.settings?.get().playerLayout, providerColors: ctx.settings?.get().providerColors, simple: ctx.settings?.get().viewMode === "simple", onFullView: () => ctx.setViewMode?.("full") });
     ctx.onLeave(handle.destroy);
     // The demo plays again by itself, a few seconds after it has finished.
     // Any click in the player (pause, restart, step, a box) means the visitor takes over: no more repeats.

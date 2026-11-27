@@ -73,6 +73,7 @@ backup.start();
 const menu = doc.getElementById("menu");
 const menuToggle = doc.getElementById("menu-toggle");
 const switcher = doc.getElementById("language-switcher");
+const viewSwitcher = doc.getElementById("view-switcher");
 const main = doc.getElementById("main");
 const footer = doc.getElementById("footer");
 const versionLabel = doc.getElementById("version");
@@ -144,6 +145,16 @@ function renderChrome(route) {
     }),
   );
 
+  // Simple or full view of the screens; the choice is kept in the settings and the page is drawn again.
+  viewSwitcher.setAttribute("aria-label", t("view.label"));
+  viewSwitcher.replaceChildren(
+    ...["simple", "full"].map((mode) => {
+      const button = h(doc, "button", { type: "button", "data-view": mode, "aria-pressed": String(settings.get().viewMode === mode), title: t(`view.${mode}Hint`) }, t(`view.${mode}`));
+      button.addEventListener("click", () => switchView(mode));
+      return button;
+    }),
+  );
+
   const links = h(
     doc,
     "ul",
@@ -196,6 +207,7 @@ async function renderRoute(isNavigation) {
     isStale: () => mine !== token,
     onLeave: (fn) => cleanups.push(fn),
     setLanguage: switchLanguage,
+    setViewMode: switchView,
   };
   try {
     switch (route.name) {
@@ -239,6 +251,12 @@ async function renderRoute(isNavigation) {
     window.scrollTo(0, 0);
     main.focus();
   }
+}
+
+async function switchView(mode) {
+  if (settings.get().viewMode === mode) return;
+  settings.setViewMode(mode);
+  await renderRoute(false);
 }
 
 async function switchLanguage(code) {

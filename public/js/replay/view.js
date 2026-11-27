@@ -18,6 +18,10 @@ import { definitionFromRun } from "../create/definition.js";
 import { openInCreate } from "../create/draft.js";
 import { downloadFile, safeFileName } from "../download.js";
 import { stepDetail } from "./step-detail.js";
+import { runSteps, involved } from "./step-model.js";
+import { stepRow, stepCard, agentColor } from "./run-steps-view.js";
+import { timelineOf, timeAtCursor, cursorAtTime, runTotal } from "./timeline-model.js";
+import { createTimeline } from "./timeline-view.js";
 import { contextOf } from "./context-model.js";
 import { notebookOf } from "./notebook-model.js";
 import { notebookPanel } from "./notebook-view.js";
@@ -50,7 +54,6 @@ const STATUS_KEY = {
   done: "player.statusDone",
   error: "player.statusError",
 };
-const KIND_KEY = { model: "kind.model", tool: "kind.tool", handoff: "kind.handoff", title: "kind.title", check: "kind.check" };
 
 // Glyphs of the small player buttons (plain text, so no icon font is needed).
 const GLYPH = { play: "▶", pause: "❚❚", stop: "■", restart: "↺", previous: "‹", next: "›" };
@@ -98,15 +101,15 @@ export function headingOf(run) {
   return line.length > 120 ? `${line.slice(0, 117)}…` : line;
 }
 
-export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null, doneMark = null }) {
+export function mountReplay(container, { run, explanations = {}, t, doc = document, clock = defaultClock, autoStart = true, timeScale = 1, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null, doneMark = null, simple = false, onFullView = null }) {
   const validation = validateRun(run);
   if (!validation.ok) return mountError(container, doc, t, validation.errors);
-  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, apiCalls: Array.isArray(run.apiCalls) ? run.apiCalls : [], apiCallsDropped: run.apiCallsDropped === true, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout, providerColors, onRetry, suggestFallback, limitsInfo, doneMark });
+  return mountView(container, { exportRun: run, pattern: run.pattern, events: run.events, apiCalls: Array.isArray(run.apiCalls) ? run.apiCalls : [], apiCallsDropped: run.apiCallsDropped === true, title: headingOf(run), recordedWith: run.recordedWith, explanations, t, doc, clock, autoStart, timeScale, live: false, onAboutSave, onDelete, layout, providerColors, onRetry, suggestFallback, limitsInfo, doneMark, simple, onFullView });
 }
 
 // A player that shows a run while it is still arriving. Events are added with append(), end() closes it.
-export function mountLiveReplay(container, { title, pattern, recordedWith, apiCalls = [], t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null, clockStartMs = 0 }) {
-  const view = mountView(container, { clockStartMs, events: [], apiCalls, pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout, providerColors, onRetry, suggestFallback, limitsInfo });
+export function mountLiveReplay(container, { title, pattern, recordedWith, apiCalls = [], t, doc = document, clock = defaultClock, onStop = () => {}, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null, clockStartMs = 0, simple = false, onFullView = null }) {
+  const view = mountView(container, { clockStartMs, events: [], apiCalls, pattern, title, recordedWith, explanations: {}, t, doc, clock, autoStart: false, timeScale: 1, live: true, onStop, layout, providerColors, onRetry, suggestFallback, limitsInfo, simple, onFullView });
   return {
     append: (event) => view.player.append(event),
     end: () => view.player.endLive(),
@@ -114,9 +117,9 @@ export function mountLiveReplay(container, { title, pattern, recordedWith, apiCa
   };
 }
 
-function mountView(container, { clockStartMs = 0, exportRun, pattern, events, apiCalls = [], apiCallsDropped = false, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null, doneMark = null }) {
+function mountView(container, { clockStartMs = 0, exportRun, pattern, events, apiCalls = [], apiCallsDropped = false, title, recordedWith, explanations, t, doc, clock, autoStart, timeScale, live, onStop, onAboutSave = null, onDelete = null, layout = "bar", providerColors, onRetry = null, suggestFallback = false, limitsInfo = null, doneMark = null, simple = false, onFullView = null }) {
   const player = createPlayer({ events, clock, timeScale, live });
-  const ui = { agent: null, tab: "steps", step: null, round: null, follow: true };
+  const ui = { agent: null, tab: "steps", step: null, round: null, follow: true, filter: null, sv: "list" };
   const viewer = createViewer({ doc, t });
   let state = deriveInspector(events, 0);
 
@@ -206,7 +209,9 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
   // have nothing to do until the run is over.
   const liveCorner = h(doc, "div", { class: "live-corner", "data-ui": "live-corner", hidden: !live }, elapsed, stopButton);
   const chipsBox = h(doc, "div", { class: "chips-box" }, chips, liveCorner);
-  const tabButtons = ["steps", "messages", "output", "context", "api", "settings"].map((name) => {
+  // The simple view has two tabs: the steps and what the agent handed in. The full view has all six.
+  const TAB_NAMES = simple ? ["steps", "output"] : ["steps", "messages", "output", "context", "api", "settings"];
+  const tabButtons = TAB_NAMES.map((name) => {
     const button = h(doc, "button", { type: "button", class: "tab", role: "tab", "data-tab": name, "data-ui": `tab-${name}` }, name === "api" ? t("player.tabApi", { n: 0 }) : t({ steps: "player.tabSteps", messages: "player.tabMessages", output: "player.tabOutput", context: "player.tabContext", settings: "player.tabSettings" }[name]));
     button.addEventListener("click", () => {
       ui.tab = name;
@@ -267,6 +272,8 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
     const about = t(`create.pattern.${pattern}`);
     chipCard.attach(patternChip, () => ({ title: t(`pattern.${pattern}`), text: about === `create.pattern.${pattern}` ? t("diagram.hover.typeChip") : about }));
   }
+  // Steps tab only: switch between the list and the timeline (right end of the line under the title).
+  const svBox = h(doc, "span", { class: "svbox", "data-ui": "steps-view-switch" });
   const recordedText = h(doc, "span", { class: "recorded", "data-ui": "recorded-with", tabindex: "0" }, t("player.recordedWith", { provider: providerName(recordedWith.provider) }));
   chipCard.attach(recordedText, () => ({ title: t("player.recordedWith", { provider: providerName(recordedWith.provider) }), text: t("diagram.hover.recorded"), rows: [recordedWith.model ? [t("diagram.hover.model"), String(recordedWith.model)] : null] }));
   const root = h(
@@ -278,7 +285,7 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
       doc,
       "div",
       { class: "player-head", "data-ui": "player-head" },
-      h(doc, "div", { class: "player-title" }, h(doc, "h2", {}, ...headingParts()), h(doc, "div", { class: "player-chips" }, liveBadge, patternChip, recordedText)),
+      h(doc, "div", { class: "player-title" }, h(doc, "h2", {}, ...headingParts()), h(doc, "div", { class: "player-chips" }, liveBadge, patternChip, recordedText, svBox)),
       exportButton,
     ),
     aboutPanel ? aboutPanel.element : "",
@@ -417,7 +424,10 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
           onSelect: (id) => {
             // The box of a node that runs once for every part or step shows its first run.
             const first = state.order.find((x) => x.startsWith(`${id}#`));
-            Object.assign(ui, { agent: first ?? id, follow: false, step: null, round: null });
+            {
+              const pick = first ?? id;
+              Object.assign(ui, { agent: pick, filter: ui.filter === pick ? null : pick, follow: ui.filter === pick, step: null, round: null });
+            }
             render();
           },
         });
@@ -524,7 +534,7 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
       plan: planOf(events, player.cursor),
       label,
       select: (id) => {
-        Object.assign(ui, { agent: id, follow: false, step: null, round: null });
+        Object.assign(ui, { agent: id, filter: ui.filter === id ? null : id, follow: ui.filter === id, step: null, round: null });
         render();
       },
     });
@@ -533,7 +543,7 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
     const refusals = refusalsOf(events, player.cursor);
     const cap = Math.max(0, ...(design?.nodes ?? []).map((n) => n.creates?.max ?? 0));
     const created = createdPanel({ doc, t, items: made, refusals, max: cap, label, select: (id) => {
-      Object.assign(ui, { agent: id, follow: false, step: null, round: null });
+      Object.assign(ui, { agent: id, filter: ui.filter === id ? null : id, follow: ui.filter === id, step: null, round: null });
       render();
     } });
     dynamicHost.replaceChildren(...(panel ? [panel] : []));
@@ -578,7 +588,7 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
         h(doc, "span", { class: `st ${a.status}` }, a.status === "stopped" ? stoppedText(a) : `${t(STATUS_KEY[a.status])}${a.ms ? ` · ${fmt(a.ms)}` : ""}`),
       );
       chip.addEventListener("click", () => {
-        Object.assign(ui, { agent: id, follow: false, step: null, round: null });
+        Object.assign(ui, { agent: id, filter: ui.filter === id ? null : id, follow: ui.filter === id, step: null, round: null });
         render();
       });
       nodes.push(chip);
@@ -586,57 +596,169 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
     chips.replaceChildren(...nodes);
   }
 
-  function renderSteps(agent) {
-    const total = agent.steps.length;
-    const selected = total ? (ui.step === null ? total - 1 : Math.min(ui.step, total - 1)) : -1;
-    const list = agent.steps.map((step, i) => {
-      const button = h(
-        doc,
-        "button",
-        { type: "button", class: `step${i === selected ? " sel" : ""}${step.refused ? " refused" : ""}${step.kind === "check" ? (step.action === "noted" ? " check-note" : step.ok ? " check-ok" : " check-bad") : ""}`, "data-kind": step.kind, "aria-current": i === selected ? "step" : undefined },
-        h(doc, "span", { class: "tg", "data-kind": step.kind }, t(KIND_KEY[step.kind] ?? "kind.model")),
-        h(doc, "span", { class: "ti" }, label(step.title)),
-        h(doc, "span", { class: "ms", title: step.ms == null && step.server ? t("insp.inModelHint") : undefined }, step.ms != null ? fmt(step.ms) : step.server ? t("insp.inModel") : ""),
-      );
-      button.addEventListener("click", () => {
-        ui.step = i;
+  // The card of the step that is chosen (the same in the list and on the timeline).
+  function cardOf(item, nameOf) {
+    if (!item) return h(doc, "div", { class: "step-card", "data-ui": "step-detail" }, h(doc, "p", { class: "lb" }, t("insp.whatHappens")), h(doc, "p", { class: "doc" }, t("insp.noSteps")));
+    const owner = state.agents[item.agent];
+    const detail = stepDetail({
+      doc,
+      t,
+      step: item.step,
+      why: null,
+      compact: true,
+      viewer,
+      viewerId: `s-${item.id}`,
+      fmt,
+      waiting: owner.status === "working" ? t("insp.waitingRes") : "—",
+      onShowMessages:
+        item.step.kind === "model" && !simple
+          ? () => {
+              Object.assign(ui, { agent: item.agent, filter: item.agent, tab: "messages", round: Math.max(0, (item.step.title.params?.n ?? 1) - 1), follow: false });
+              render();
+            }
+          : undefined,
+    });
+    return stepCard({ doc, t, events, state, item, cursor: player.cursor, nameOf, title: label(item.step.title), why: explanations[String(item.step.eventIndex)], tip: null, detail, fmt, simple, onFullView });
+  }
+
+  // ----- the timeline: its own clock can play the run in about twelve seconds, and moves the player along
+  let tl = null;
+  let tlModel = { length: -1, model: null };
+  let tlPlaying = false;
+  let tlTime = 0;
+  let tlLast = 0;
+  let tlHandle = null;
+  let tlFlash = new Set();
+  let tlFlashTimer = null;
+  const hoverTl = createHoverCard({ doc });
+  const timeNow = () => (tlPlaying ? tlTime : timeAtCursor(events, player.cursor));
+  const frame = (fn) => (doc.defaultView?.requestAnimationFrame ? doc.defaultView.requestAnimationFrame(fn) : clock.setTimeout(() => fn(Date.now()), 16));
+  function stopTimeline() {
+    if (!tlPlaying) return;
+    tlPlaying = false;
+    tl?.setPlaying(false);
+  }
+  function timelineStep(now) {
+    if (!tlPlaying) return;
+    const total = runTotal(events);
+    tlTime = Math.min(total, tlTime + (now - tlLast) * (total / 12000) * player.speed);
+    tlLast = now;
+    const before = player.cursor;
+    const next = tlTime >= total ? events.length : cursorAtTime(events, tlTime);
+    if (next !== before) {
+      for (const a of tlModel.model?.arrows ?? []) if (a.eventIndex >= before && a.eventIndex < next) tlFlash.add(a.key);
+      if (tlFlash.size) {
+        if (tlFlashTimer !== null) clock.clearTimeout(tlFlashTimer);
+        tlFlashTimer = clock.setTimeout(() => {
+          tlFlash = new Set();
+          tl?.paint(timeNow(), tlFlash);
+        }, 1500);
+      }
+      if (tlTime >= total) tlPlaying = false;
+      player.seek(next);
+    } else tl?.paint(tlTime, tlFlash, true);
+    if (tlPlaying) frame(timelineStep);
+  }
+  function toggleTimeline() {
+    if (tlPlaying) {
+      stopTimeline();
+      tl?.paint(timeNow(), tlFlash);
+      return;
+    }
+    player.pause();
+    if (player.cursor >= events.length) player.seek(0);
+    tlTime = timeAtCursor(events, player.cursor);
+    tlPlaying = true;
+    tlLast = typeof performance !== "undefined" ? performance.now() : Date.now();
+    ui.follow = true;
+    ui.filter = null;
+    frame(timelineStep);
+    tl?.setPlaying(true);
+    tl?.paint(tlTime, tlFlash);
+  }
+  function renderTimelineSteps(all, pattern, nameOf) {
+    if (tlModel.length !== events.length) tlModel = { length: events.length, model: timelineOf(events, pattern) };
+    const model = tlModel.model;
+    const revealed = all.filter((item) => item.step.eventIndex < player.cursor);
+    const chosen = revealed.length ? (ui.step === null ? revealed.length - 1 : Math.min(ui.step, revealed.length - 1)) : -1;
+    const item = chosen >= 0 ? all.find((x) => x.id === revealed[chosen].id) : null;
+    const picked = ui.filter && state.agents[ui.filter] ? ui.filter : null;
+    tl = createTimeline({
+      doc,
+      t,
+      hover: hoverTl,
+      model,
+      colorOf: (id) => agentColor(state, id),
+      nameOf,
+      titleOf: (key) => {
+        const found = all.find((x) => x.id === key);
+        return found ? label(found.step.title) : key;
+      },
+      fmt,
+      selectedKey: item?.id ?? null,
+      filter: picked,
+      time: timeNow(),
+      playing: tlPlaying,
+      onSelect: (key) => {
+        stopTimeline();
+        ui.step = revealed.findIndex((x) => x.id === key);
         ui.follow = false;
         render();
-      });
-      return button;
+      },
+      onFilter: (id) => {
+        Object.assign(ui, { agent: id, filter: ui.filter === id ? null : id, follow: ui.filter === id, step: null, round: null });
+        render();
+      },
+      onPlay: toggleTimeline,
+      onRestart: () => {
+        stopTimeline();
+        ui.follow = true;
+        ui.filter = null;
+        player.seek(0);
+      },
     });
-    const modelTag = agent.model ? h(doc, "span", { class: "badge agent-model" }, agent.model) : "";
-    if (modelTag) paintModelTag(modelTag, agent.model, providerColors);
-    const head = h(doc, "p", { class: "agenthead" }, `${t("insp.stepsOf")} `, h(doc, "b", {}, agent.label), modelTag);
-    const left = h(doc, "div", { "data-ui": "step-list" }, head, ...list);
-    if (agent.status === "working") left.append(h(doc, "div", { class: "working" }, t("insp.working")));
+    return h(doc, "div", { class: "run-timeline" }, tl.element, cardOf(item, nameOf));
+  }
 
-    const step = agent.steps[selected];
-    const right = h(doc, "div", { class: "box", "data-ui": "step-detail" }, h(doc, "p", { class: "lb" }, t("insp.whatHappens")));
-    if (!step) {
-      right.append(h(doc, "p", { class: "doc" }, t("insp.noSteps")));
-    } else {
-      right.append(
-        stepDetail({
-          doc,
-          t,
-          step,
-          why: explanations[String(step.eventIndex)],
-          viewer,
-          viewerId: `s-${agent.id}-${selected}`,
-          fmt,
-          waiting: agent.status === "working" ? t("insp.waitingRes") : "—",
-          onShowMessages:
-            step.kind === "model"
-              ? () => {
-                  Object.assign(ui, { tab: "messages", round: Math.max(0, (step.title.params?.n ?? 1) - 1), follow: false });
-                  render();
-                }
-              : undefined,
-        }),
-      );
-    }
-    return h(doc, "div", { class: "cols" }, left, right);
+  function renderSteps() {
+    const pattern = designOfRun()?.pattern ?? null;
+    const all = runSteps(state, pattern);
+    const picked = ui.filter && state.agents[ui.filter] ? ui.filter : null;
+    const items = picked ? all.filter((item) => involved(item).includes(picked)) : all;
+    const selected = items.length ? (ui.step === null ? items.length - 1 : Math.min(ui.step, items.length - 1)) : -1;
+    const nameOf = (id) => state.agents[id]?.label ?? id;
+    if (ui.sv === "tl" && !player.live) return renderTimelineSteps(all, pattern, nameOf);
+    tl = null;
+    const lastEvent = player.cursor - 1;
+    const rows = items.map((item, i) =>
+      stepRow({
+        doc,
+        t,
+        state,
+        item,
+        selected: i === selected,
+        current: item.step.eventIndex === lastEvent,
+        nameOf,
+        title: label(item.step.title),
+        fmt,
+        onClick: () => {
+          ui.step = i;
+          ui.follow = false;
+          render();
+        },
+      }),
+    );
+    const cancel = h(doc, "button", { type: "button", class: "link-cancel", "data-ui": "cancel-filter" }, t("sc.cancelFilter"));
+    cancel.addEventListener("click", () => {
+      Object.assign(ui, { filter: null, follow: true, step: null, round: null });
+      render();
+    });
+    const head = picked ? h(doc, "h4", {}, `${t("sc.listAgent")} `, h(doc, "b", {}, nameOf(picked)), cancel) : h(doc, "h4", {}, h(doc, "b", {}, t("sc.listAll")));
+    const left = h(doc, "div", { class: "run-steps-list", "data-ui": "step-list" }, head, ...(picked ? [] : [h(doc, "p", { class: "sm", style: "margin:0" }, t("sc.listHint"))]), ...rows);
+    if (!picked && Object.values(state.agents).some((a) => a.status === "working")) left.append(h(doc, "div", { class: "working" }, t("insp.working")));
+
+    const right = cardOf(items[selected], nameOf);
+    return h(doc, "div", { class: "run-steps" }, left, right);
   }
 
   const blockText = (b) => {
@@ -787,6 +909,25 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
     banners.replaceChildren(...items);
   }
 
+  // The List | Timeline switch sits at the right of the line under the title, and only on the Steps tab of a recording.
+  function renderSwitch() {
+    if (ui.tab !== "steps" || player.live) {
+      svBox.replaceChildren();
+      return;
+    }
+    const choose = (value, name) => {
+      const button = h(doc, "button", { type: "button", "data-sv": value, "aria-pressed": String(ui.sv === value) }, name);
+      button.addEventListener("click", () => {
+        stopTimeline();
+        hoverTl.hide();
+        Object.assign(ui, { sv: value, step: null });
+        render();
+      });
+      return button;
+    };
+    svBox.replaceChildren(h(doc, "span", { class: "mk-seg sm", role: "group", "aria-label": t("sc.viewSwitch") }, choose("list", t("sc.viewList")), choose("tl", t("sc.viewTimeline"))));
+  }
+
   function render() {
     state = deriveInspector(events, player.cursor);
     followPlayer();
@@ -820,7 +961,8 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
     // The count of the calls of the chosen agent is part of the name of its tab.
     const apiTab = tabButtons.find((b) => b.getAttribute("data-tab") === "api");
     const shownCalls = apiCallsOf(apiCalls, currentAgent()?.id, playedAt()).length;
-    apiTab.replaceChildren(doc.createTextNode(shownCalls > 0 ? t("player.tabApi", { n: shownCalls }) : t("player.tabApiName")));
+    apiTab?.replaceChildren(doc.createTextNode(shownCalls > 0 ? t("player.tabApi", { n: shownCalls }) : t("player.tabApiName")));
+    renderSwitch();
     renderBanners();
     renderNotebook();
     renderCondense();
@@ -838,14 +980,18 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
         body.replaceChildren(h(doc, "p", { class: "doc" }, t("insp.waiting")));
         return;
       }
-      body.replaceChildren(ui.tab === "steps" ? renderSteps(agent) : ui.tab === "messages" ? renderMessages(agent) : ui.tab === "context" ? renderContext(agent) : ui.tab === "api" ? renderApi(agent) : ui.tab === "settings" ? renderSettings(agent) : renderOutput(agent));
+      if (ui.tab !== "steps") tl = null;
+      body.replaceChildren(ui.tab === "steps" ? renderSteps() : ui.tab === "messages" ? renderMessages(agent) : ui.tab === "context" ? renderContext(agent) : ui.tab === "api" ? renderApi(agent) : ui.tab === "settings" ? renderSettings(agent) : renderOutput(agent));
+      if (tl && ui.tab === "steps") tl.draw();
     };
     if (search.query()) search.run();
     else drawBody();
   }
 
   const follow = (fn) => () => {
+    stopTimeline();
     ui.follow = true;
+    ui.filter = null;
     fn();
   };
   playButton.addEventListener("click", follow(() => (player.playing ? player.pause() : player.play())));
@@ -873,6 +1019,7 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
     slower: () => player.setSpeed(player.speeds[Math.max(0, player.speeds.indexOf(player.speed) - 1)]),
     faster: () => player.setSpeed(player.speeds[Math.min(player.speeds.length - 1, player.speeds.indexOf(player.speed) + 1)]),
     tab: (name) => {
+      if (!TAB_NAMES.includes(name)) return;
       ui.tab = name;
       ui.follow = false;
       render();
@@ -883,7 +1030,7 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
   // Keyboard zones. Tab goes player, Steps, Messages, Output, Context and round again (Shift+Tab goes back, and
   // leaves from the player). In the player the arrows or W A S D move between the agents and Enter inspects
   // the one that has the focus. In Steps and Messages the same keys move between steps or rounds.
-  const ZONES = ["player", "steps", "messages", "output", "context", "api", "settings"];
+  const ZONES = ["player", ...TAB_NAMES];
   const MOVES = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", w: "up", s: "down", a: "left", d: "right" };
   const isLetter = (key) => key.length === 1;
   let lastG = 0;
@@ -994,6 +1141,8 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
     openAbout: () => aboutPanel?.open(),
     destroy() {
       clearActivePlayer(keyApi);
+      tlPlaying = false;
+      hoverTl.hide();
       if (tickTimer !== null) clock.clearTimeout(tickTimer);
       player.pause();
       unsubscribe();

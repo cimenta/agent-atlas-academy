@@ -15,7 +15,8 @@ function parseResults(output) {
   return rows.map((m) => ({ title: m[1] || m[2], url: m[2] }));
 }
 
-export function stepDetail({ doc, t, step, why, viewer, viewerId, fmt, onShowMessages, waiting }) {
+// compact: the step card above already says what the step is and why it happened, so only the exact input and output are drawn.
+export function stepDetail({ doc, t, step, why, viewer, viewerId, fmt, onShowMessages, waiting, compact = false }) {
   const root = h(doc, "div", { class: "step-detail-body" });
   const hostOf = (url) => {
     try {
@@ -32,10 +33,10 @@ export function stepDetail({ doc, t, step, why, viewer, viewerId, fmt, onShowMes
     h(doc, "section", { class: `io io-${kind}`, "data-ui": `step-${kind}` }, h(doc, "h4", {}, h(doc, "span", { class: "io-mark", "aria-hidden": "true" }, kind === "in" ? "↓" : "↑"), heading), ...children);
 
   const title = text(step.title);
-  root.append(h(doc, "h3", {}, title));
+  if (!compact) root.append(h(doc, "h3", {}, title));
   const explained = t(step.kind === "tool" ? `insp.doc.${step.tool}` : step.kind === "check" && step.tool === "guardrail" ? "insp.doc.guardrail" : `insp.doc.${step.kind}`);
-  if (!explained.startsWith("insp.doc.")) root.append(h(doc, "p", { class: "doc" }, explained));
-  if (why) root.append(h(doc, "p", { class: "why" }, h(doc, "strong", {}, `${t("player.explanation")}: `), why));
+  if (!compact && !explained.startsWith("insp.doc.")) root.append(h(doc, "p", { class: "doc" }, explained));
+  if (!compact && why) root.append(h(doc, "p", { class: "why" }, h(doc, "strong", {}, `${t("player.explanation")}: `), why));
 
   const facts = [];
   if (typeof step.ms === "number") facts.push(t("insp.tookTime", { time: fmt(step.ms) }));
@@ -43,7 +44,7 @@ export function stepDetail({ doc, t, step, why, viewer, viewerId, fmt, onShowMes
   if (typeof step.at === "number") facts.push(t("insp.at", { time: fmt(step.at) }));
   if (step.error === true) facts.push(t("insp.toolError"));
   if (step.reviewer) facts.push(t("insp.guardrailReviewer", { model: step.reviewer.model, input: step.reviewer.tokens?.input ?? 0, output: step.reviewer.tokens?.output ?? 0, cost: Number(step.reviewer.cost ?? 0).toFixed(4) }));
-  if (facts.length) root.append(h(doc, "p", { class: "facts" }, facts.join(" · ")));
+  if (!compact && facts.length) root.append(h(doc, "p", { class: "facts" }, facts.join(" · ")));
 
   // ----- input
   if (step.kind === "tool") {
