@@ -11,14 +11,10 @@ const TRACK_GAP = 12; // the space to the right of a track
 
 const percent = (value, total) => `${((value / total) * 100).toFixed(3)}%`;
 
-export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf, fmt, selectedKey, filter, time, playing, onSelect, onFilter, onPlay, onRestart }) {
+export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf, fmt, selectedKey, filter, time, flashKeys = new Set(), doneSeen = new Map(), onSelect, onFilter }) {
   const { order, total, bars, arrows, waits, done } = model;
   const lane = (id) => order.indexOf(id);
   const clock = h(doc, "span", { class: "tl-clock", "data-ui": "timeline-clock" });
-  const play = h(doc, "button", { type: "button", class: "tl-play", "data-ui": "timeline-play", "aria-label": t("tl.play") }, `${playing ? "❚❚" : "▶"} ${t("tl.play")}`);
-  const restart = h(doc, "button", { type: "button", "data-ui": "timeline-restart", "aria-label": t("tl.restart") }, "↺");
-  play.addEventListener("click", onPlay);
-  restart.addEventListener("click", onRestart);
   const legend = h(
     doc,
     "span",
@@ -70,7 +66,7 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
   });
   const rowsBox = h(doc, "div", { class: "tl-rows", "data-ui": "timeline-rows" }, ...rows);
   const axis = h(doc, "div", { class: "tl-axis" }, h(doc, "span", {}), axisBox);
-  const element = h(doc, "div", { class: "tl", "data-ui": "timeline" }, h(doc, "div", { class: "tl-top" }, play, restart, clock, legend), rowsBox, axis);
+  const element = h(doc, "div", { class: "tl", "data-ui": "timeline" }, h(doc, "div", { class: "tl-top" }, clock, legend), rowsBox, axis);
 
   let currentTime = time;
   let drawn = [];
@@ -126,7 +122,7 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
       drawn.push({ a, env });
     }
     const marks = done.map((d) => {
-      const el = h(doc, "span", { class: "tl-dn", "data-t": String(d.t), style: `left:${X(d.t).toFixed(1)}px;top:${lane(d.agent) * LANE + MID - 17}px`, title: t("tl.doneAt", { time: fmt(d.t) }) }, "✓");
+      const el = h(doc, "span", { class: "tl-dn", "data-t": String(d.t), "data-agent": d.agent, style: `left:${X(d.t).toFixed(1)}px;top:${lane(d.agent) * LANE + MID - 17}px`, title: t("tl.doneAt", { time: fmt(d.t) }) }, "✓");
       return el;
     });
     const wrap = h(doc, "div", { class: "tl-envs", style: `left:${left}px;width:${width}px` }, ...envs, ...marks);
@@ -134,7 +130,7 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
     holder.innerHTML = `<svg class="tl-svg" width="${width}" height="${order.length * LANE}" aria-hidden="true">${svg}</svg>`;
     holder.firstChild.style.left = `${left}px`; // not a style attribute: the Content Security Policy drops those
     rowsBox.append(holder.firstChild, wrap);
-    paint(currentTime, new Set());
+    paint(currentTime, flashKeys);
   }
 
   // Moves everything that depends on the time: the playhead, the bars and arrows that have happened, the clock.
@@ -151,17 +147,31 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
       env.className = `tl-env ${state}${blink}${selectedKey === a.key ? " sel" : ""}`;
       rowsBox.querySelector(`.tl-hog[data-key="${a.key}"]`)?.setAttribute("class", `tl-hog ${state}${blink}`);
     }
+    // A check mark blinks twice when its agent finishes. Which marks have been shown is kept outside this element (doneSeen), because the
+    // timeline is built again whenever the player moves; a blink that is under way goes on in the new element where the old one left it.
+    const nowMs = typeof performance !== "undefined" ? performance.now() : Date.now();
     rowsBox.querySelectorAll(".tl-dn").forEach((el) => {
+      const id = el.dataset.agent;
       const reached = now >= Number(el.dataset.t);
-      const wasFuture = el.classList.contains("fut");
-      const keep = reached && el.classList.contains("blink");
-      const start = reached && wasFuture && flashDone;
-      el.className = `tl-dn ${reached ? "past" : "fut"}${start || keep ? " blink" : ""}`;
-      if (start) globalThis.setTimeout(() => el.classList.remove("blink"), 1000);
+      if (reached && !doneSeen.has(id)) doneSeen.set(id, nowMs);
+      if (!reached) doneSeen.delete(id);
+      const elapsed = reached ? nowMs - doneSeen.get(id) : Infinity;
+      const blinking = elapsed < 900;
+      el.className = `tl-dn ${reached ? "past" : "fut"}${blinking ? " blink" : ""}`;
+      if (blinking) {
+        el.style.animationDelay = `${-Math.max(0, elapsed)}ms`;
+        globalThis.setTimeout(() => el.classList.remove("blink"), 900 - elapsed);
+      }
     });
-    rowsBox.querySelectorAll(".tl-ph").forEach((el) => (el.style.left = `${Math.min(100, (now / total) * 100).toFixed(3)}%`));
+    // The playhead is full on the lane of an agent that is working and fainter on the others.
+    const working = new Set(barEls.filter((x) => !x.b.point && stateOf(x.b) === "run").map((x) => x.b.agent));
+    rowsBox.querySelectorAll(".tl-row").forEach((row, i) => {
+      const ph = row.querySelector(".tl-ph");
+      if (!ph) return;
+      ph.style.left = `${Math.min(100, (now / total) * 100).toFixed(3)}%`;
+      ph.classList.toggle("idle", !working.has(order[i]));
+    });
     clock.textContent = t("tl.clock", { now: fmt(now), total: fmt(total) });
-    play.replaceChildren(doc.createTextNode(`${playing ? "❚❚" : "▶"} ${t("tl.play")}`));
   }
 
   // The pane or the window can change its width after the first drawing: the arrows are in pixels, so they are drawn again.
@@ -180,8 +190,5 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
     element,
     draw,
     paint,
-    setPlaying(value) {
-      playing = value;
-    },
   };
 }

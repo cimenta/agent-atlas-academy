@@ -20,7 +20,7 @@ import { downloadFile, safeFileName } from "../download.js";
 import { stepDetail } from "./step-detail.js";
 import { runSteps, involved } from "./step-model.js";
 import { stepRow, stepCard, agentColor } from "./run-steps-view.js";
-import { timelineOf, timeAtCursor, cursorAtTime, runTotal } from "./timeline-model.js";
+import { timelineOf, timeAtCursor } from "./timeline-model.js";
 import { createTimeline } from "./timeline-view.js";
 import { contextOf } from "./context-model.js";
 import { notebookOf } from "./notebook-model.js";
@@ -272,7 +272,7 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
     const about = t(`create.pattern.${pattern}`);
     chipCard.attach(patternChip, () => ({ title: t(`pattern.${pattern}`), text: about === `create.pattern.${pattern}` ? t("diagram.hover.typeChip") : about }));
   }
-  // Steps tab only: switch between the list and the timeline (right end of the line under the title).
+  // Steps tab only: switch between the list and the timeline (under the run menu, top right).
   const svBox = h(doc, "span", { class: "svbox", "data-ui": "steps-view-switch" });
   const recordedText = h(doc, "span", { class: "recorded", "data-ui": "recorded-with", tabindex: "0" }, t("player.recordedWith", { provider: providerName(recordedWith.provider) }));
   chipCard.attach(recordedText, () => ({ title: t("player.recordedWith", { provider: providerName(recordedWith.provider) }), text: t("diagram.hover.recorded"), rows: [recordedWith.model ? [t("diagram.hover.model"), String(recordedWith.model)] : null] }));
@@ -285,8 +285,8 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
       doc,
       "div",
       { class: "player-head", "data-ui": "player-head" },
-      h(doc, "div", { class: "player-title" }, h(doc, "h2", {}, ...headingParts()), h(doc, "div", { class: "player-chips" }, liveBadge, patternChip, recordedText, svBox)),
-      exportButton,
+      h(doc, "div", { class: "player-title" }, h(doc, "h2", {}, ...headingParts()), h(doc, "div", { class: "player-chips" }, liveBadge, patternChip, recordedText)),
+      h(doc, "div", { class: "player-side" }, exportButton, svBox),
     ),
     aboutPanel ? aboutPanel.element : "",
     banners,
@@ -624,12 +624,9 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
   // ----- the timeline: its own clock can play the run in about twelve seconds, and moves the player along
   let tl = null;
   let tlModel = { length: -1, model: null };
-  let tlPlaying = false;
-  let tlTime = 0;
-  let tlLast = 0;
-  let tlHandle = null;
   let tlFlash = new Set();
   let tlFlashTimer = null;
+  let tlDone = null; // which done marks have been shown (kept across the rebuilds of the timeline, so each blinks once)
   const hoverTl = createHoverCard({ doc });
   const nowMs = () => (typeof performance !== "undefined" ? performance.now() : Date.now());
   // While the diagram plays, the player shows one event after another; the timeline does not jump with it but glides from the time
@@ -638,7 +635,6 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
   let glideDelay = 0;
   let glideOn = false;
   const timeNow = () => {
-    if (tlPlaying) return tlTime;
     const c = player.cursor;
     if (glideDelay > 0 && player.playing && c >= 1 && c < events.length) {
       const t0 = events[c - 1].t ?? 0;
@@ -650,33 +646,17 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
   const frame = (fn) => (doc.defaultView?.requestAnimationFrame ? doc.defaultView.requestAnimationFrame(fn) : clock.setTimeout(() => fn(Date.now()), 16));
   function glide() {
     glideOn = false;
-    if (!tl || tlPlaying || !player.playing) return;
+    if (!tl || !player.playing) return;
     tl.paint(timeNow(), tlFlash, true);
     glideOn = true;
     frame(glide);
   }
+  let lastCursor = 0;
   player.subscribe(() => {
-    glideStart = nowMs();
-    glideDelay = player.stepDelay;
-    if (!glideOn && player.playing) {
-      glideOn = true;
-      frame(glide);
-    }
-  });
-  function stopTimeline() {
-    if (!tlPlaying) return;
-    tlPlaying = false;
-    tl?.setPlaying(false);
-  }
-  function timelineStep(now) {
-    if (!tlPlaying) return;
-    const total = runTotal(events);
-    tlTime = Math.min(total, tlTime + (now - tlLast) * (total / 12000) * player.speed);
-    tlLast = now;
-    const before = player.cursor;
-    const next = tlTime >= total ? events.length : cursorAtTime(events, tlTime);
-    if (next !== before) {
-      for (const a of tlModel.model?.arrows ?? []) if (a.eventIndex >= before && a.eventIndex < next) tlFlash.add(a.key);
+    // An arrow blinks when the player passes the handoff.
+    const cursor = player.cursor;
+    if (cursor > lastCursor) {
+      for (const a of tlModel.model?.arrows ?? []) if (a.eventIndex >= lastCursor && a.eventIndex < cursor) tlFlash.add(a.key);
       if (tlFlash.size) {
         if (tlFlashTimer !== null) clock.clearTimeout(tlFlashTimer);
         tlFlashTimer = clock.setTimeout(() => {
@@ -684,28 +664,15 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
           tl?.paint(timeNow(), tlFlash);
         }, 1500);
       }
-      if (tlTime >= total) tlPlaying = false;
-      player.seek(next);
-    } else tl?.paint(tlTime, tlFlash, true);
-    if (tlPlaying) frame(timelineStep);
-  }
-  function toggleTimeline() {
-    if (tlPlaying) {
-      stopTimeline();
-      tl?.paint(timeNow(), tlFlash);
-      return;
     }
-    player.pause();
-    if (player.cursor >= events.length) player.seek(0);
-    tlTime = timeAtCursor(events, player.cursor);
-    tlPlaying = true;
-    tlLast = typeof performance !== "undefined" ? performance.now() : Date.now();
-    ui.follow = true;
-    ui.filter = null;
-    frame(timelineStep);
-    tl?.setPlaying(true);
-    tl?.paint(tlTime, tlFlash);
-  }
+    lastCursor = cursor;
+    glideStart = nowMs();
+    glideDelay = player.stepDelay;
+    if (!glideOn && player.playing) {
+      glideOn = true;
+      frame(glide);
+    }
+  });
   function renderTimelineSteps(all, pattern, nameOf) {
     if (tlModel.length !== events.length) tlModel = { length: events.length, model: timelineOf(events, pattern) };
     const model = tlModel.model;
@@ -713,6 +680,10 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
     const chosen = revealed.length ? (ui.step === null ? revealed.length - 1 : Math.min(ui.step, revealed.length - 1)) : -1;
     const item = chosen >= 0 ? all.find((x) => x.id === revealed[chosen].id) : null;
     const picked = ui.filter && state.agents[ui.filter] ? ui.filter : null;
+    if (!tlDone) {
+      tlDone = new Map();
+      for (const d of model.done) if (d.t <= timeNow()) tlDone.set(d.agent, 0);
+    }
     tl = createTimeline({
       doc,
       t,
@@ -728,9 +699,9 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
       selectedKey: item?.id ?? null,
       filter: picked,
       time: timeNow(),
-      playing: tlPlaying,
+      flashKeys: tlFlash,
+      doneSeen: tlDone,
       onSelect: (key) => {
-        stopTimeline();
         ui.step = revealed.findIndex((x) => x.id === key);
         ui.follow = false;
         render();
@@ -738,13 +709,6 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
       onFilter: (id) => {
         Object.assign(ui, { agent: id, filter: ui.filter === id ? null : id, follow: ui.filter === id, step: null, round: null });
         render();
-      },
-      onPlay: toggleTimeline,
-      onRestart: () => {
-        stopTimeline();
-        ui.follow = true;
-        ui.filter = null;
-        player.seek(0);
       },
     });
     return h(doc, "div", { class: "run-timeline" }, tl.element, cardOf(item, nameOf));
@@ -759,6 +723,7 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
     const nameOf = (id) => state.agents[id]?.label ?? id;
     if (ui.sv === "tl" && !player.live) return renderTimelineSteps(all, pattern, nameOf);
     tl = null;
+    tlDone = null;
     const lastEvent = player.cursor - 1;
     const rows = items.map((item, i) =>
       stepRow({
@@ -948,7 +913,6 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
     const choose = (value, name) => {
       const button = h(doc, "button", { type: "button", "data-sv": value, "aria-pressed": String(ui.sv === value) }, name);
       button.addEventListener("click", () => {
-        stopTimeline();
         hoverTl.hide();
         Object.assign(ui, { sv: value, step: null });
         render();
@@ -1019,7 +983,6 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
   }
 
   const follow = (fn) => () => {
-    stopTimeline();
     ui.follow = true;
     ui.filter = null;
     fn();
@@ -1171,7 +1134,6 @@ function mountView(container, { clockStartMs = 0, exportRun, pattern, events, ap
     openAbout: () => aboutPanel?.open(),
     destroy() {
       clearActivePlayer(keyApi);
-      tlPlaying = false;
       tl = null;
       hoverTl.hide();
       if (tickTimer !== null) clock.clearTimeout(tickTimer);
