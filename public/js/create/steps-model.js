@@ -20,7 +20,8 @@ const stateOf = (done, total) => (done === total ? "done" : done === 0 ? "none" 
 
 // nodeCount, editorOk: how many agents the diagram has and whether the editor reports no problems.
 // keysReady: every key slot the agents use has its key.
-export function stepStatus({ task, decisions, nodeCount, editorOk, keysReady }) {
+// soft: the Simple view. Every step may be opened at any time; what is missing is only said (see simpleNotes).
+export function stepStatus({ task, decisions, nodeCount, editorOk, keysReady, soft = false }) {
   const parts = {
     task: taskDecided(task),
     pattern: decisions.pattern === true,
@@ -35,7 +36,7 @@ export function stepStatus({ task, decisions, nodeCount, editorOk, keysReady }) 
   const key = keysReady ? "done" : "none";
   const check = limits === "done" && key === "done" ? "done" : limits === "none" && key === "none" ? "none" : "part";
   const open = setup === "done";
-  return { parts, setup, diagram, limits, key, check, locked: { diagram: !open, check: !open }, ready: setup === "done" && diagram === "done" && check === "done" };
+  return { parts, setup, diagram, limits, key, check, locked: soft ? { diagram: false, check: false } : { diagram: !open, check: !open }, ready: setup === "done" && diagram === "done" && check === "done" };
 }
 
 // Which buttons work. Back needs an earlier step, Next an open later one, Run needs everything decided.
@@ -94,4 +95,21 @@ export function workspaceEstimateUsd(est) {
 // Run needs everything decided, a diagram without problems, and no failed run waiting to be carried on.
 export function runAllowed({ status, verdict, retryPending }) {
   return status.ready && verdict?.ok === true && !retryPending;
+}
+
+// The patterns the Simple view shows at first; the others are behind "More patterns".
+export const SIMPLE_PATTERNS = ["sequential", "parallel", "router", "evaluator"];
+
+// Whether the route of a pattern is fixed (the agents always go the same way) or the model chooses it.
+export const DYNAMIC_PATTERNS = ["router", "supervisor", "handoff", "planexec", "evaluator"];
+export const routeKind = (pattern) => (DYNAMIC_PATTERNS.includes(pattern) ? "dynamic" : "fixed");
+
+// What is missing in step 1, for the words under the step name and for the hint: the keys of "create.simple.missing.*".
+export function simpleMissingSetup(status) {
+  return [!status.parts.task && "task", !status.parts.pattern && "pattern", !status.parts.providerModel && "provider"].filter(Boolean);
+}
+
+// Everything that stops Run in the Simple view, in the order the student meets it ("key" last).
+export function simpleMissingAll(status) {
+  return [...simpleMissingSetup(status), ...(status.diagram !== "done" ? ["team"] : []), ...(status.key !== "done" ? ["key"] : [])];
 }

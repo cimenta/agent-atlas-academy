@@ -2144,3 +2144,24 @@ button.step.ho-row { background-color: var(--working-bg); border-style: dashed; 
 @media (max-width: 719px) { .view-switcher { display: flex; order: 2; } .view-switcher button { min-height: 32px; font-size: 0.8rem; } }
 .sc-default { margin: 10px 0 0; font-size: 0.82rem; color: var(--muted); }
 .sc-default .link-cancel { margin-left: 0; min-height: 0; padding: 0; border: 0; background: none; color: var(--accent); text-decoration: underline; font-size: inherit; }
+
+/* Create, Simple view: the same three steps with fewer things in them. */
+.create-simple .default-model, .create-simple .pv-legend { display: none; }
+.create-simple .step-tab { flex-wrap: wrap; }
+.step-note { display: block; width: 100%; font-size: 0.76rem; font-weight: 400; color: var(--muted); text-align: left; }
+.step-tab[aria-selected="false"] .step-note { color: var(--muted); }
+.simple-cols { display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; align-items: start; }
+.simple-preview { position: sticky; top: 8px; min-width: 0; }
+.simple-preview h3 { margin: 0 0 6px; }
+.team-preview-host { max-width: 100%; overflow: auto; }
+.route-note { font-size: 0.86rem; margin: 0 0 8px; padding: 6px 10px; border-radius: 8px; background: var(--accent-bg); color: var(--accent); }
+.route-note.dynamic { background: var(--warn-bg, #faeeda); color: var(--warn-text, #8a4b0a); }
+.pattern-more-row { margin: 6px 0 0; font-size: 0.85rem; }
+.simple-sentence { font-size: 1.05rem; margin: 4px 0 8px; }
+.simple-check { list-style: none; padding: 0; margin: 8px 0; }
+.simple-check li { display: flex; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--border); }
+.simple-check .m { display: inline-grid; place-items: center; flex: none; width: 20px; height: 20px; border-radius: 50%; font-size: 0.75rem; font-weight: 700; background: var(--done-bg); color: var(--done); border: 1.5px solid var(--done); }
+.simple-check li.miss .m { background: var(--warn-bg, #faeeda); color: var(--warn-text, #8a4b0a); border-color: var(--warn-text, #8a4b0a); }
+.simple-check .linklike { margin-left: auto; font-size: 0.84rem; }
+.simple-defaults { margin-top: 10px; }
+@media (max-width: 760px) { .simple-cols { grid-template-columns: 1fr; } .simple-preview { position: static; } }

@@ -15,11 +15,12 @@ export function statusIcon(doc, state, t) {
 // help: { step: help section id }; the active step with an entry shows a ? in its tab. It is a span, not a button, because it sits in a button.
 export function stepBar({ doc, t, status, current, onGo, help = {} }) {
   const element = h(doc, "div", { class: "step-bar", role: "tablist", "data-ui": "step-bar" });
-  function update(next, now) {
+  // extra.names: another name for a step (the Simple view calls step 2 Team); extra.notes: a short line under the name of a step.
+  function update(next, now, extra = {}) {
     element.replaceChildren(
       ...STEPS.map((step, i) => {
         const locked = next.locked[step] === true;
-        const button = h(doc, "button", { type: "button", class: "step-tab", role: "tab", "data-step": step, "aria-selected": String(now === step), title: locked ? t("create.step.locked") : undefined }, statusIcon(doc, locked ? "lock" : next[step], t), `${i + 1}. ${t(`create.step.${step}`)}`);
+        const button = h(doc, "button", { type: "button", class: "step-tab", role: "tab", "data-step": step, "aria-selected": String(now === step), title: locked ? t("create.step.locked") : undefined }, statusIcon(doc, locked ? "lock" : next[step], t), `${i + 1}. ${extra.names?.[step] ?? t(`create.step.${step}`)}`, ...(extra.notes?.[step] ? [h(doc, "small", { class: "step-note", "data-ui": `step-note-${step}` }, extra.notes[step])] : []));
         button.disabled = locked;
         button.addEventListener("click", () => {
           if (!locked) onGo(step);

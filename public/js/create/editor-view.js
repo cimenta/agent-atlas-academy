@@ -20,7 +20,7 @@ import { BOX_H, BOX_W, autoPositions, centerOf as geometryCenter, clipToBox, ext
 const MOVE_THRESHOLD = 5;
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, skillsUi = null, getModels = (node) => MODELS, modelUi = null, webSearchAllowed = () => true, ownToolsAllowed = () => true, toolsAvailable = () => true, searchAvailable = () => true, runLimits = () => ({ ...LIMIT_DEFAULTS, maxOutputTokens: OUTPUT_TOKENS.default }) }) {
+export function mountEditor(container, { editor, t, doc = document, onChange = () => {}, skillsUi = null, getModels = (node) => MODELS, modelUi = null, webSearchAllowed = () => true, ownToolsAllowed = () => true, simple = false, toolsAvailable = () => true, searchAvailable = () => true, runLimits = () => ({ ...LIMIT_DEFAULTS, maxOutputTokens: OUTPUT_TOKENS.default }) }) {
   let selectedId = null;
   let settingsTab = "tools"; // the tab of the agent settings that is open, kept while the visitor works on agents
   let connectFrom = null;
@@ -670,7 +670,8 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
     const searchUnavailable = searchAvailable(node) === false;
     const remove = h(doc, "button", { type: "button", class: "danger small", "data-focus-key": "remove-node" }, t("editor.remove"));
     remove.addEventListener("click", () => removeSelected());
-    const parts = [h(doc, "div", { class: "editor-settings-head" }, h(doc, "h4", {}, t("editor.settings", { name: nodeLabel(node) })), remove), field("ed-model", t("editor.model"), model)];
+    // The Simple view leaves the model (the default one is used) and the settings in tabs to the Full view.
+    const parts = [h(doc, "div", { class: "editor-settings-head" }, h(doc, "h4", {}, t("editor.settings", { name: nodeLabel(node) })), remove), ...(simple ? [] : [field("ed-model", t("editor.model"), model)])];
     if (node.agent === "evaluator" || (design.selfCritique === true && node.agent === "writer")) {
       // What the evaluator judges by, and how many rounds the loop may take.
       const criteria = h(doc, "textarea", { id: "ed-criteria", rows: 5, maxlength: CRITERIA_MAX, "data-ui": "evaluator-criteria" });
@@ -931,7 +932,7 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
       tabs.update(id);
     } });
     tabs.element.setAttribute("data-ui", "agent-tabs");
-    parts.push(tabs.element, paneHost);
+    if (!simple) parts.push(tabs.element, paneHost);
     if (type.free) {
       const name = h(doc, "input", { id: "ed-name", type: "text", maxlength: 40, value: node.name ?? "" });
       name.addEventListener("input", () => {
