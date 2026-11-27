@@ -977,7 +977,7 @@ export function renderCreate(ctx) {
     }
     if (!workspace) panels.check.replaceChildren(reviewHost);
     root.replaceChildren(
-      h(doc, "div", { class: "create-head" }, h(doc, "h2", {}, t("create.title")), quickBox, loadButton, clearButton, definitionFile),
+      h(doc, "div", { class: "create-head" }, h(doc, "h2", {}, t("create.title")), ...(simple ? [quickBox] : []), loadButton, clearButton, definitionFile),
       startNotice ? h(doc, "p", { class: "notice", role: noticeRole }, startNotice) : "",
       carryLimits ? carryLimits.element : "",
       draft.retry ? carryOnButton : "",
