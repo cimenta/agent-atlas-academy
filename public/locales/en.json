@@ -1176,6 +1176,7 @@
   "create.simple.modelAuto": "The model is chosen for you: the one the provider recommends.",
   "create.simple.preview": "Team preview",
   "create.simple.previewEmpty": "Choose how the agents cooperate and the team appears here.",
+  "create.simple.previewNone": "This way of cooperating has no ready team. Add the agents in step 2.",
   "create.simple.previewEmpty2": "You change the names and roles in step 2.",
   "create.simple.route.sequential": "Fixed route: the agents always go the same way, one after another.",
   "create.simple.route.parallel": "Fixed route: everyone works at the same time and the answers are put together at the end.",

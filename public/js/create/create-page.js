@@ -571,6 +571,20 @@ export function renderCreate(ctx) {
       const node = design.nodes.find((n) => n.id === id);
       return node ? agentLabel(node, design, t(`agent.${node.agent}.label`)) : id;
     };
+    // The whole team is always visible: the diagram is scaled down to the width of its column (never up), like the diagram of step 2 but smaller.
+    function fitPreview() {
+      const el = previewDiagram?.element;
+      const inner = el?.querySelector?.(".replay-diagram");
+      if (!el || !inner) return;
+      const natural = { w: parseFloat(inner.style.width) || inner.offsetWidth, h: parseFloat(inner.style.height) || inner.offsetHeight };
+      const room = (previewHost.clientWidth || 200) - 4;
+      const scale = natural.w > 0 ? Math.min(1, room / natural.w) : 1;
+      inner.style.transformOrigin = "top left";
+      inner.style.transform = scale < 1 ? `scale(${scale})` : "";
+      el.style.height = `${Math.ceil(natural.h * scale)}px`;
+      el.style.width = `${Math.ceil(natural.w * scale)}px`;
+      el.style.overflow = "hidden";
+    }
     function drawPreview() {
       if (!simple) return;
       const design = draft.editor.design();
@@ -592,11 +606,13 @@ export function renderCreate(ctx) {
       routeNote.className = `route-note ${kind}`;
       routeNote.textContent = t(SIMPLE_PATTERNS.includes(draft.pattern) ? `create.simple.route.${draft.pattern}` : `create.simple.route.${kind}`);
       if (design.nodes.length === 0) {
-        previewHost.replaceChildren(h(doc, "p", { class: "hint" }, t("create.simple.previewEmpty")));
+        previewHost.replaceChildren(h(doc, "p", { class: "hint" }, t("create.simple.previewNone")));
         return;
       }
-      previewDiagram = createReplayDiagram({ doc, design, wide: false, boxLabel: (id) => previewLabel(design, id), statusText: () => "", startLabel: "" });
+      // A click on an agent opens step 2 with that agent selected.
+      previewDiagram = createReplayDiagram({ doc, design, wide: false, boxLabel: (id) => previewLabel(design, id), statusText: () => "", startLabel: "", onSelect: (id) => { editorHandle.select(id); goStep("diagram"); } });
       previewHost.replaceChildren(previewDiagram.element);
+      fitPreview();
       // The diagram draws its boxes (names, arrows) in update(); a team that is not running is drawn idle, with no events.
       previewDiagram.update({ events: [], cursor: 0, state: { agents: {} }, selectedId: null });
     }

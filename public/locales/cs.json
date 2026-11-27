@@ -1176,6 +1176,7 @@
   "create.simple.modelAuto": "Model vybereme za vás: ten, který poskytovatel doporučuje.",
   "create.simple.preview": "Náhled týmu",
   "create.simple.previewEmpty": "Vyberte, jak mají agenti spolupracovat, a tady se objeví tým.",
+  "create.simple.previewNone": "Pro tento způsob spolupráce není hotový tým. Agenty přidáte v kroku 2.",
   "create.simple.previewEmpty2": "Jména a role změníte v kroku 2.",
   "create.simple.route.sequential": "Pevná cesta: agenti jdou vždy stejně, jeden za druhým.",
   "create.simple.route.parallel": "Pevná cesta: všichni pracují současně a odpovědi se na konci spojí.",

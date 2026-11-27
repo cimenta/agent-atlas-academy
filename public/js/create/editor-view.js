@@ -1035,6 +1035,13 @@ export function mountEditor(container, { editor, t, doc = document, onChange = (
   draw();
 
   return {
+    // Selects an agent from outside (the team preview of step 1) and draws it.
+    select(id) {
+      if (!editor.design().nodes.some((n) => n.id === id)) return;
+      selectedId = id;
+      connectFrom = null;
+      draw();
+    },
     refresh() {
       if (!editor.design().nodes.some((n) => n.id === selectedId)) selectedId = null;
       connectFrom = null;
