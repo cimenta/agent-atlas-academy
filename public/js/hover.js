@@ -46,6 +46,8 @@ export function hoverInfoOf(el) {
 export function installHover({ doc, clock, delayMs }) {
   const card = createHoverCard({ doc, clock, delayMs });
   let active = null;
+  let muted = null; // data-ui of an element whose card a click closed: it stays shut until the pointer has been elsewhere (the button may be drawn again under the pointer)
+  const keyOf = (el) => el?.getAttribute?.("data-ui") ?? null;
   const find = (target) => target?.closest?.("[data-hover-title], [data-hover-text], [title]") ?? null;
   const close = () => {
     active = null;
@@ -53,6 +55,7 @@ export function installHover({ doc, clock, delayMs }) {
   };
   const open = (el) => {
     if (el === active) return;
+    if (muted && keyOf(el) === muted) return;
     adoptTitle(el);
     if (!hoverInfoOf(el)) return;
     active = el;
@@ -66,6 +69,11 @@ export function installHover({ doc, clock, delayMs }) {
     }
     open(el);
   };
+  // The card of a clicked template button stays shut until the pointer really moves away from it. A mouseover that the browser sends after the page was
+  // drawn again (with no movement) does not count, so only a pointer move clears the mute.
+  doc.addEventListener("pointermove", (e) => {
+    if (muted && keyOf(e.target?.closest?.(`[data-ui="${muted}"]`)) !== muted) muted = null;
+  });
   doc.addEventListener("mouseover", onOver);
   doc.addEventListener("mouseout", (e) => {
     if (active && !active.contains?.(e.relatedTarget)) close();
@@ -84,6 +92,19 @@ export function installHover({ doc, clock, delayMs }) {
     if (active && active.contains?.(e.target)) return;
     close();
   });
+  // An element with data-hover-close-on-click (the template buttons) takes its card away with the click. This runs before the click handler of the
+  // button itself (capture), because that handler may draw the button again and the card would be lost track of.
+  doc.addEventListener(
+    "click",
+    (e) => {
+      const el = e.target?.closest?.("[data-hover-close-on-click]");
+      if (el) {
+        muted = keyOf(el);
+        close();
+      }
+    },
+    true,
+  );
   doc.addEventListener("click", () => {
     const el = active;
     if (!el) return;
