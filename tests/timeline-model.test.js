@@ -42,3 +42,31 @@ test("time and cursor convert both ways", () => {
   assert.equal(cursorAtTime(events, 4000), 5);
   assert.equal(cursorAtTime(events, 0), 1);
 });
+
+test("an agent that was working when the run failed gets a bar up to the error and a failed mark, not an empty lane", () => {
+  const failedRun = [
+    ...events.slice(0, 8),
+    { t: 9001, type: "handoff", from: "b", to: "c", note: "B" },
+    { t: 9001, type: "agent_start", agent: "c", role: "C", model: "m", tools: [], system: "s" },
+    { t: 129001, type: "error", message: "Timeout" },
+    { t: 129001, type: "done", outcome: "failed" },
+  ];
+  const { bars, failed, waits } = timelineOf(failedRun, "sequential");
+  const bar = bars.find((b) => b.agent === "c");
+  assert.deepEqual([bar.start, bar.end, bar.failed], [9001, 129001, true]);
+  assert.deepEqual(failed, [{ agent: "c", t: 129001, stopped: false }]);
+  assert.ok(waits.some((w) => w.agent === "c" && w.end === 9001));
+});
+
+test("an agent that was stopped by a limit before its call has no point at 0: it waits, then gets a stopped mark", () => {
+  const stopped = [
+    ...events.slice(0, 8),
+    { t: 9001, type: "handoff", from: "b", to: "c", note: "B" },
+    { t: 9001, type: "agent_start", agent: "c", role: "C", model: "m", tools: [], system: "s" },
+    { t: 9001, type: "done", outcome: "stopped_limit", reason: "steps" },
+  ];
+  const { bars, failed, waits } = timelineOf(stopped, "sequential");
+  assert.ok(!bars.some((b) => b.agent === "c"));
+  assert.deepEqual(failed, [{ agent: "c", t: 9001, stopped: true }]);
+  assert.ok(waits.some((w) => w.agent === "c" && w.start === 0 && w.end === 9001));
+});

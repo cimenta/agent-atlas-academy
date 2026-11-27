@@ -12,7 +12,7 @@ const TRACK_GAP = 12; // the space to the right of a track
 const percent = (value, total) => `${((value / total) * 100).toFixed(3)}%`;
 
 export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf, fmt, selectedKey, filter, time, flashKeys = new Set(), doneSeen = new Map(), onSelect, onFilter }) {
-  const { order, total, bars, arrows, waits, done } = model;
+  const { order, total, bars, arrows, waits, done, failed = [] } = model;
   const lane = (id) => order.indexOf(id);
   const clock = h(doc, "span", { class: "tl-clock", "data-ui": "timeline-clock" });
   const legend = h(
@@ -38,15 +38,16 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
   }
 
   const barEls = bars.map((b) => {
-    const el = h(doc, "button", { type: "button", class: `tl-mk o-${b.origin}${b.point ? " pt" : ""}${selectedKey === b.key ? " sel" : ""}`, "data-key": b.key, style: `left:${percent(b.start, total)};${b.point ? "" : `width:${Math.max((b.end - b.start) / total * 100, 0.3).toFixed(3)}%;`}`, "aria-label": `${titleOf(b.key)}, ${nameOf(b.agent)}` });
+    const el = h(doc, "button", { type: "button", class: `tl-mk o-${b.origin}${b.failed ? " failed" : ""}${b.point ? " pt" : ""}${selectedKey === b.key ? " sel" : ""}`, "data-key": b.key, style: `left:${percent(b.start, total)};${b.point ? "" : `width:${Math.max((b.end - b.start) / total * 100, 0.3).toFixed(3)}%;`}`, "aria-label": `${b.failed ? t("tl.failed") : titleOf(b.key)}, ${nameOf(b.agent)}` });
     hover.attach(el, () => {
       const future = b.start > currentTime;
+      if (b.failed && !future) return { title: t("tl.failed"), text: nameOf(b.agent), extra: t("tl.failedWhy"), rows: [[t("tl.time"), `${fmt(b.start)} → ${fmt(b.end)}`]] };
       return future
         ? { title: t("tl.notYet"), text: t("tl.startsAbout", { name: nameOf(b.agent), time: fmt(b.start) }) }
         : { title: titleOf(b.key), text: nameOf(b.agent), extra: t(`sc.origin.${b.origin}`), rows: [[t("tl.time"), `${fmt(b.start)} → ${fmt(b.end)}`]] };
     });
     el.addEventListener("click", () => {
-      if (b.start <= currentTime) onSelect(b.key);
+      if (b.start <= currentTime && !b.failed) onSelect(b.key);
     });
     return { b, el };
   });
@@ -121,8 +122,8 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
       envs.push(env);
       drawn.push({ a, env });
     }
-    const marks = done.map((d) => {
-      const el = h(doc, "span", { class: "tl-dn", "data-t": String(d.t), "data-agent": d.agent, style: `left:${X(d.t).toFixed(1)}px;top:${lane(d.agent) * LANE + MID - 17}px`, title: t("tl.doneAt", { time: fmt(d.t) }) }, "✓");
+    const marks = [...done.map((d) => ({ ...d, bad: false })), ...failed.map((d) => ({ ...d, bad: true }))].map((d) => {
+      const el = h(doc, "span", { class: `tl-dn${d.bad ? " bad" : ""}`, "data-t": String(d.t), "data-agent": d.agent, "data-bad": d.bad ? "1" : "", style: `left:${X(d.t).toFixed(1)}px;top:${lane(d.agent) * LANE + MID - 17}px`, title: t(d.bad ? (d.stopped ? "tl.stoppedAt" : "tl.failedAt") : "tl.doneAt", { time: fmt(d.t) }) }, d.bad ? "✕" : "✓");
       return el;
     });
     const wrap = h(doc, "div", { class: "tl-envs", style: `left:${left}px;width:${width}px` }, ...envs, ...marks);
@@ -138,7 +139,7 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
     currentTime = now;
     for (const { b, el } of barEls) {
       const state = stateOf(b);
-      el.className = `tl-mk o-${b.origin}${b.point ? " pt" : ""} ${state}${selectedKey === b.key ? " sel" : ""}`;
+      el.className = `tl-mk o-${b.origin}${b.failed ? " failed" : ""}${b.point ? " pt" : ""} ${state}${selectedKey === b.key ? " sel" : ""}`;
       el.style.setProperty("--p", `${progressOf(b, state)}%`);
     }
     for (const { a, env } of drawn) {
@@ -157,7 +158,7 @@ export function createTimeline({ doc, t, hover, model, colorOf, nameOf, titleOf,
       if (!reached) doneSeen.delete(id);
       const elapsed = reached ? nowMs - doneSeen.get(id) : Infinity;
       const blinking = elapsed < 900;
-      el.className = `tl-dn ${reached ? "past" : "fut"}${blinking ? " blink" : ""}`;
+      el.className = `tl-dn${el.dataset.bad ? " bad" : ""} ${reached ? "past" : "fut"}${blinking ? " blink" : ""}`;
       if (blinking) {
         el.style.animationDelay = `${-Math.max(0, elapsed)}ms`;
         globalThis.setTimeout(() => el.classList.remove("blink"), 900 - elapsed);
