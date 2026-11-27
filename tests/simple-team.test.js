@@ -74,3 +74,15 @@ test("the Simple view has a name and a role for every agent it fills, in both la
     }
   }
 });
+
+test("every help button of Create has a short plain tip, and every template says what its run is about, in both languages", () => {
+  const ids = ["create-task", "create-pattern", "create-provider", "create-memory", "create-tools", "create-approval", "guardrails", "answer-format", "create-creating", "create-skills", "create-documents", "create-diagram", "create-run", "create-estimate", "create-limits", "create-selfcritique"];
+  for (const file of ["en", "cs"]) {
+    const dict = JSON.parse(readFileSync(new URL(`../public/locales/${file}.json`, import.meta.url), "utf8"));
+    for (const id of ids) assert.ok((dict[`help.tip.${id}`] ?? "").length > 40, `${file} ${id}`);
+    for (const pattern of ["sequential", "parallel", "router", "evaluator"]) {
+      for (const part of ["label", "hint", "task", "team"]) assert.ok(dict[`create.quick.${pattern}.${part}`], `${file} ${pattern} ${part}`);
+    }
+    for (const key of ["create.quick.about", "create.quick.aboutHint", "help.tip.hint"]) assert.ok(dict[key], `${file} ${key}`);
+  }
+});

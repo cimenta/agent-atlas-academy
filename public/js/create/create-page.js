@@ -246,7 +246,7 @@ export function renderCreate(ctx) {
           const button = h(
             doc,
             "button",
-            { type: "button", class: "pattern-button", "data-ui": `pattern-${p}`, "aria-pressed": String(draft.decisions.pattern && draft.pattern === p), "data-pattern": p },
+            { type: "button", class: "pattern-button", "data-ui": `pattern-${p}`, "aria-pressed": String(draft.decisions.pattern && draft.pattern === p), "data-pattern": p, "data-hover-title": t(`pattern.${p}`), "data-hover-text": t(`create.pattern.${p}`), "data-hover-hint": t(SIMPLE_PATTERNS.includes(p) ? `create.simple.route.${p}` : `create.simple.route.${routeKind(p)}`) },
             patternIcon(doc, p),
             h(doc, "strong", {}, t(`pattern.${p}`)),
             h(doc, "span", { class: "palette-help" }, t(`create.pattern.${p}`)),
@@ -815,9 +815,9 @@ export function renderCreate(ctx) {
     // One button for each pattern: an icon and a word or two for the task it fills in. A click fills in all that a run needs (task, pattern, team, the
     // first provider that has a key, memory, limits) and opens the last step.
     const quickBox = h(doc, "div", { class: "quick-starts", role: "group", "aria-label": t("create.quick.label"), "data-ui": "quick-starts" });
-    quickBox.append(h(doc, "span", { class: "quick-title", "data-ui": "quick-title" }, t("create.quick.title")));
+    quickBox.append(h(doc, "span", { class: "quick-title", "data-ui": "quick-title", tabindex: "0", "data-hover-title": t("create.quick.title").replace(/:$/, ""), "data-hover-text": t("create.quick.about"), "data-hover-hint": t("create.quick.aboutHint") }, t("create.quick.title")));
     for (const q of QUICK_STARTS) {
-      const b = h(doc, "button", { type: "button", class: "quick-start", "data-ui": `quick-${q.pattern}`, title: t(`create.quick.${q.pattern}.hint`) }, patternIcon(doc, q.pattern), h(doc, "span", {}, t(`create.quick.${q.pattern}.label`)));
+      const b = h(doc, "button", { type: "button", class: "quick-start", "data-ui": `quick-${q.pattern}`, "data-hover-title": t(`create.quick.${q.pattern}.label`), "data-hover-badge": t(`pattern.${q.pattern}`), "data-hover-text": t(`create.quick.${q.pattern}.hint`), "data-hover-rows": JSON.stringify([[t("create.quick.rowTask"), t(`create.quick.${q.pattern}.task`)], [t("create.quick.rowTeam"), t(`create.quick.${q.pattern}.team`)]]), "data-hover-hint": t("create.quick.clickHint") }, patternIcon(doc, q.pattern), h(doc, "span", {}, t(`create.quick.${q.pattern}.label`)));
       b.addEventListener("click", () => {
         if (!teamIsUntouched() && !doc.defaultView.confirm(t("create.quick.confirm"))) return;
         draft.task = t(`create.quick.${q.pattern}.task`);

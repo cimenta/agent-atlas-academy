@@ -62,9 +62,23 @@ export function openHelpPopup({ doc, t, id }) {
   return { close };
 }
 
+// What the hover card of a ? button says: the name of the section, one or two plain sentences about it and a hint that a click opens the whole text.
+// The sentences are help.tip.<id>; a section without one shows the start of its first paragraph.
+export function helpTip(t, id, name) {
+  const found = findSection(t("help.body"), id);
+  const own = t(`help.tip.${id}`);
+  let text = own !== `help.tip.${id}` ? own : "";
+  if (!text && found) {
+    const first = found.section.text.split(/\n\s*\n/)[0].replace(/[*_`]/g, "").replace(/\s+/g, " ").trim();
+    const cut = first.length <= 230 ? first : first.slice(0, 230).replace(/[^.!?]*$/, "").trim() || `${first.slice(0, 227)}...`;
+    text = cut;
+  }
+  return { "data-hover-title": found?.section.title ?? name, ...(text ? { "data-hover-text": text } : {}), "data-hover-hint": t("help.tip.hint") };
+}
+
 // The round ? button that opens the section of Help with this id. name is what it is about, for the screen reader.
 export function helpIcon({ doc, t, id, name }) {
-  const button = h(doc, "button", { type: "button", class: "help-icon", "data-ui": `help-${id}`, "aria-label": t("help.popup.open", { name }), title: t("help.popup.open", { name }) }, "?");
+  const button = h(doc, "button", { type: "button", class: "help-icon", "data-ui": `help-${id}`, "aria-label": t("help.popup.open", { name }), ...helpTip(t, id, name) }, "?");
   button.addEventListener("click", () => openHelpPopup({ doc, t, id }));
   return button;
 }

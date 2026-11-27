@@ -2,7 +2,7 @@
 // comes from steps-model.js and the page decides what a click does.
 import { h } from "../dom.js";
 import { STEPS } from "./steps-model.js";
-import { openHelpPopup } from "../help-popup.js";
+import { openHelpPopup, helpTip } from "../help-popup.js";
 
 const LABEL = { none: "create.status.none", part: "create.status.part", done: "create.status.done", lock: "create.status.locked" };
 
@@ -28,7 +28,7 @@ export function stepBar({ doc, t, status, current, onGo, help = {} }) {
         if (help[step] && now === step && !locked) {
           const name = t(`create.step.${step}`);
           const open = () => openHelpPopup({ doc, t, id: help[step] });
-          const icon = h(doc, "span", { class: "help-icon step-help", role: "button", tabindex: "0", "data-ui": `help-${help[step]}`, "aria-label": t("help.popup.open", { name }), title: t("help.popup.open", { name }) }, "?");
+          const icon = h(doc, "span", { class: "help-icon step-help", role: "button", tabindex: "0", "data-ui": `help-${help[step]}`, "aria-label": t("help.popup.open", { name }), ...helpTip(t, help[step], name) }, "?");
           icon.addEventListener("click", (event) => {
             event.stopPropagation();
             open();
